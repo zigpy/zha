@@ -443,7 +443,127 @@ class Gateway(AsyncUtilMixin, EventBase):
             name=f"device_initialized_task_{str(device.ieee)}:0x{device.nwk:04x}",
             eager_start=True,
         )
-        init_task.add_done_callback(lambda _: self._device_init_tasks.pop(device.ieee))
+
+        def _remove_init_task(task: asyncio.Task) -> None:
+            # Only remove the entry if it still points at this task; a cancelled
+            # task's done-callback must not pop the replacement task's entry.
+            if self._device_init_tasks.get(device.ieee) is task:
+                del self._device_init_tasks[device.ieee]
+
+        init_task.add_done_callback(_remove_init_task)
+
+    def device_reinterviewed(self, device: zigpy.device.Device) -> None:
+        """Handle zigpy device_reinterviewed event (e.g. after OTA or reconfigure)."""
+        if device.ieee in self._device_init_tasks:
+            _LOGGER.debug(
+                "Cancelling previous initialization task for reinterviewed device %s",
+                str(device.ieee),
+            )
+            self._device_init_tasks[device.ieee].cancel()
+        self._device_init_tasks[device.ieee] = init_task = self.async_create_task(
+            self._async_device_reinterviewed(device),
+            name=f"device_reinterviewed_task_{str(device.ieee)}:0x{device.nwk:04x}",
+            eager_start=True,
+        )
+
+        def _remove_init_task(task: asyncio.Task) -> None:
+            # Only remove the entry if it still points at this task; a cancelled
+            # task's done-callback must not pop the replacement task's entry.
+            if self._device_init_tasks.get(device.ieee) is task:
+                del self._device_init_tasks[device.ieee]
+
+        init_task.add_done_callback(_remove_init_task)
+
+    async def _async_device_reinterviewed(
+        self, new_zigpy_device: zigpy.device.Device
+    ) -> None:
+        """Rebuild a ZHA device after zigpy swapped the underlying device."""
+        zha_device = self._devices.get(new_zigpy_device.ieee)
+        if zha_device is None:
+            _LOGGER.warning(
+                "Reinterviewed device %s not found in ZHA",
+                new_zigpy_device.ieee,
+            )
+            return
+
+        _LOGGER.debug(
+            "Rebuilding device %s:%s after reinterview",
+            new_zigpy_device.nwk,
+            new_zigpy_device.ieee,
+        )
+
+        await zha_device.async_rebuild_from_zigpy_device(new_zigpy_device)
+
+        configure_succeeded = False
+        all_succeeded = False
+        try:
+            await zha_device.async_configure()
+            # `async_configure()` reached its own `emit_reconfigure_done()`.
+            configure_succeeded = True
+            await zha_device.async_initialize()
+            all_succeeded = True
+        except Exception:  # noqa: BLE001
+            _LOGGER.warning(
+                "Failed to configure/initialize device %s after reinterview",
+                new_zigpy_device.ieee,
+                exc_info=True,
+            )
+
+        # Refresh group subscriptions so groups drop stale references to
+        # torn-down entities and re-subscribe to whatever new entities exist.
+        # Run this even on partial rebuild — old subscriptions are always dead.
+        for group in self._groups.values():
+            group.update_entity_subscriptions()
+
+        if not configure_succeeded:
+            # `async_configure()` didn't reach its own emit; emit explicitly so
+            # the HA reconfigure dialog unsticks.  Skipped when configure
+            # already emitted (avoids a duplicate signal even if `initialize`
+            # raised afterwards).
+            zha_device.emit_reconfigure_done()
+
+        if not all_succeeded:
+            # Don't emit `DeviceFullInitEvent(CONFIGURED)` — entities are
+            # partial after a failed rebuild.
+            return
+
+        self.emit(
+            ZHA_GW_MSG_DEVICE_FULL_INIT,
+            DeviceFullInitEvent(
+                device_info=ExtendedDeviceInfoWithPairingStatus(
+                    pairing_status=DevicePairingStatus.CONFIGURED,
+                    **zha_device.extended_device_info.__dict__,
+                ),
+            ),
+        )
+
+    async def async_reinterview_device(self, ieee: EUI64) -> None:
+        """Re-interview a device.
+
+        Called by HA when the user triggers a device reconfigure.  If the
+        re-interview succeeds, the ``device_reinterviewed`` listener handles
+        the full rebuild.  If it fails, zigpy preserves the old device.
+        """
+        zha_device = self._devices.get(ieee)
+        if zha_device is None:
+            _LOGGER.warning("Device %s not found for reinterview", ieee)
+            return
+
+        if zha_device.is_active_coordinator:
+            _LOGGER.debug("Skipping reinterview for active coordinator %s", ieee)
+            return
+
+        old_zigpy_device = zha_device.device
+        try:
+            await old_zigpy_device.reinterview()
+        finally:
+            # On swap success, zigpy fires `device_reinterviewed` and the
+            # resulting rebuild calls `async_configure()` which emits its own
+            # reconfigure-done signal.  Only emit here when no swap occurred
+            # (no-op, internal failure, or `reinterview()` raising) so the HA
+            # frontend unsticks without a duplicate signal.
+            if self.application_controller.devices.get(ieee) is old_zigpy_device:
+                zha_device.emit_reconfigure_done()
 
     def device_left(self, device: zigpy.device.Device) -> None:
         """Handle device leaving the network."""

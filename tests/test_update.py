@@ -162,6 +162,9 @@ async def setup_test_data(
         )
     )
 
+    # Prevent post-OTA reinterview side effects in OTA-focused tests
+    zigpy_device.reinterview = AsyncMock()
+
     zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
 
     return zha_device, ota_cluster, fw_image, installed_fw_version
@@ -203,11 +206,36 @@ async def test_firmware_update_notification_from_zigpy(zha_gateway: Gateway) -> 
 
 @patch("zigpy.device.AFTER_OTA_ATTR_READ_DELAY", 0.01)
 async def test_firmware_update_success(zha_gateway: Gateway) -> None:
-    """Test ZHA update platform - firmware update success."""
+    """Test ZHA update platform - firmware update success and post-OTA reinterview."""
     zigpy_device = zigpy_device_mock(zha_gateway)
     zha_device, ota_cluster, fw_image, installed_fw_version = await setup_test_data(
         zha_gateway, zigpy_device
     )
+
+    # Replace the reinterview mock from setup_test_data with one that
+    # simulates a successful device swap via the gateway listener.
+    new_zigpy_device = create_mock_zigpy_device(
+        zha_gateway,
+        endpoints={
+            1: {
+                SIG_EP_INPUT: [general.Basic.cluster_id, general.OnOff.cluster_id],
+                SIG_EP_OUTPUT: [general.Ota.cluster_id],
+                SIG_EP_TYPE: zha.DeviceType.ON_OFF_SWITCH,
+                SIG_EP_PROFILE: zha.PROFILE_ID,
+            }
+        },
+        ieee=str(zigpy_device.ieee),
+        manufacturer="FakeManufacturer",
+        model="FakeModel",
+    )
+
+    async def fake_reinterview():
+        zha_gateway.application_controller.devices[zigpy_device.ieee] = new_zigpy_device
+        zha_gateway.device_reinterviewed(new_zigpy_device)
+
+    zigpy_device.reinterview = fake_reinterview
+
+    old_zigpy_device = zha_device.device
 
     assert installed_fw_version < fw_image.firmware.header.file_version
 
@@ -392,6 +420,11 @@ async def test_firmware_update_success(zha_gateway: Gateway) -> None:
 
     assert not entity.state[ATTR_IN_PROGRESS]
 
+    # Post-OTA reinterview should have swapped the zigpy device and rebuilt ZHA
+    assert zha_device.device is not old_zigpy_device
+    assert zha_device.status.name == "INITIALIZED"
+    assert len(zha_device.platform_entities) > 0
+
 
 async def test_firmware_update_raises(zha_gateway: Gateway) -> None:
     """Test ZHA update platform - firmware update raises."""
@@ -471,6 +504,49 @@ async def test_firmware_update_raises(zha_gateway: Gateway) -> None:
             version=f"0x{fw_image.firmware.header.file_version:08x}"
         )
         await zha_gateway.async_block_till_done()
+
+
+async def test_firmware_update_empty_exception_message(zha_gateway: Gateway) -> None:
+    """Bare ``TimeoutError()`` from zigpy must still produce an identifiable message."""
+    zigpy_device = zigpy_device_mock(zha_gateway)
+    zha_device, ota_cluster, fw_image, installed_fw_version = await setup_test_data(
+        zha_gateway, zigpy_device
+    )
+
+    entity = get_entity(zha_device, platform=Platform.UPDATE)
+
+    await ota_cluster._handle_query_next_image(
+        foundation.ZCLHeader.cluster(
+            tsn=0x12, command_id=general.Ota.ServerCommandDefs.query_next_image.id
+        ),
+        general.QueryNextImageCommand(
+            field_control=fw_image.firmware.header.field_control,
+            manufacturer_code=zha_device.manufacturer_code,
+            image_type=fw_image.firmware.header.image_type,
+            current_file_version=installed_fw_version,
+            hardware_version=1,
+        ),
+    )
+    await zha_gateway.async_block_till_done()
+
+    raised = TimeoutError()
+    assert str(raised) == ""
+
+    with (
+        patch(
+            "zigpy.device.Device.update_firmware",
+            AsyncMock(side_effect=raised),
+        ),
+        pytest.raises(ZHAException) as exc_info,
+    ):
+        await entity.async_install(
+            version=f"0x{fw_image.firmware.header.file_version:08x}"
+        )
+        await zha_gateway.async_block_till_done()
+
+    assert str(exc_info.value) == "Update was not successful: TimeoutError()"
+    assert exc_info.value.__cause__ is raised
+    assert not entity.state[ATTR_IN_PROGRESS]
 
 
 async def test_firmware_update_downgrade(zha_gateway: Gateway) -> None:

@@ -5,7 +5,7 @@
 import asyncio
 import logging
 from typing import Any
-from unittest.mock import AsyncMock, MagicMock, call, patch
+from unittest.mock import AsyncMock, MagicMock, PropertyMock, call, patch
 import zoneinfo
 
 from freezegun import freeze_time
@@ -1312,10 +1312,19 @@ async def test_set_fan_mode_no_zcl_mapping(
         device_climate_fan, platform=Platform.CLIMATE, entity_type=ThermostatEntity
     )
 
-    entity.__dict__["fan_modes"] = ["bogus"]
+    # Patch `fan_modes` to include a string that is intentionally absent from
+    # `FAN_MODE_TO_ZCL` so the defensive `.get(...) is None` branch in
+    # `async_set_fan_mode` is exercised (the earlier "mode not in fan_modes"
+    # rejection would otherwise short-circuit it).
+    with patch.object(
+        ThermostatEntity,
+        "fan_modes",
+        new_callable=PropertyMock,
+        return_value=["bogus"],
+    ):
+        await entity.async_set_fan_mode("bogus")
+        await zha_gateway.async_block_till_done()
 
-    await entity.async_set_fan_mode("bogus")
-    await zha_gateway.async_block_till_done()
     assert fan_cluster.write_attributes.await_count == 0
 
 

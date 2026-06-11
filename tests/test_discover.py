@@ -3,6 +3,7 @@
 import asyncio
 from collections import defaultdict
 from collections.abc import Callable
+import contextlib
 import enum
 import json
 import pathlib
@@ -59,9 +60,9 @@ from zha.application.discovery import discover_device_entities
 from zha.application.gateway import Gateway
 from zha.application.helpers import DeviceOverridesConfiguration
 from zha.application.platforms import PlatformEntity, binary_sensor, sensor
+from zha.application.platforms.const import PHILIPS_REMOTE_CLUSTER
 from zha.application.platforms.light import HueLight
 from zha.application.platforms.number import BaseNumber, NumberMode
-from zha.zigbee.cluster_handlers.const import PHILLIPS_REMOTE_CLUSTER
 
 
 def _get_identify_cluster(zigpy_device):
@@ -87,33 +88,19 @@ async def test_device_override(
 
     zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
 
-    # The overridden entity exists
-    entity = get_entity(
-        zha_device,
-        platform=override_platform,
-        qualifier_func=(
-            lambda entity: (
-                entity.cluster_handlers["on_off"].cluster
-                == zigpy_device.endpoints[1].on_off
-            )
-        ),
+    # The overridden entity exists at the endpoint-level unique_id
+    entity = zha_device.get_platform_entity(
+        override_platform, unique_id=f"{zigpy_device.ieee}-1"
     )
     assert entity is not None
-    assert entity.unique_id == f"{zigpy_device.ieee}-1"
 
-    # The original one does not
+    # The non-overridden platform has no such entity
+    other_platform = (
+        Platform.LIGHT if override_platform == Platform.SWITCH else Platform.SWITCH
+    )
     with pytest.raises(KeyError):
-        get_entity(
-            zha_device,
-            platform=(
-                Platform.LIGHT
-                if override_platform == Platform.SWITCH
-                else Platform.SWITCH
-            ),
-            qualifier_func=lambda entity: (
-                entity.cluster_handlers["on_off"].cluster
-                == zigpy_device.endpoints[1].on_off
-            ),
+        zha_device.get_platform_entity(
+            other_platform, unique_id=f"{zigpy_device.ieee}-1"
         )
 
 
@@ -783,6 +770,45 @@ async def test_devices_from_files(
         await zha_device.on_remove()
 
 
+async def test_skip_configuration_skips_bind_and_reporting(
+    zha_gateway: Gateway,
+) -> None:
+    """A device marked skip_configuration must not have binds or reporting set up."""
+    zigpy_device = await zigpy_device_from_json(
+        zha_gateway.application_controller,
+        "tests/data/devices/lumi-lumi-weather.json",
+    )
+    assert zigpy_device.skip_configuration is True
+
+    bind_mocks = []
+    reporting_mocks = []
+    with contextlib.ExitStack() as stack:
+        for ep in zigpy_device.non_zdo_endpoints:
+            for cluster in list(ep.in_clusters.values()) + list(
+                ep.out_clusters.values()
+            ):
+                bind_mocks.append(
+                    stack.enter_context(
+                        mock.patch.object(cluster, "bind", wraps=cluster.bind)
+                    )
+                )
+                reporting_mocks.append(
+                    stack.enter_context(
+                        mock.patch.object(
+                            cluster,
+                            "configure_reporting_multiple",
+                            wraps=cluster.configure_reporting_multiple,
+                        )
+                    )
+                )
+
+        zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
+        await zha_device.async_configure()
+
+    assert all(m.mock_calls == [] for m in bind_mocks)
+    assert all(m.mock_calls == [] for m in reporting_mocks)
+
+
 async def test_get_diagnostics_json_repeated_calls(zha_gateway: Gateway) -> None:
     """Test that calling get_diagnostics_json twice produces the same result."""
     zigpy_device = await zigpy_device_from_json(
@@ -849,16 +875,18 @@ async def test_diagnostics_omits_ota_last_query_cmd_when_none(
     assert "last_query_cmd" not in ota_diag
 
 
-async def test_cluster_handler_only_clusters_are_bound(zha_gateway: Gateway) -> None:
-    """Test CLUSTER_HANDLER_ONLY_CLUSTERS causes binds even without entities."""
+async def test_entityless_cluster_binds_via_virtual_entity(
+    zha_gateway: Gateway,
+) -> None:
+    """Manufacturer clusters that don't produce entities are still bound."""
     zigpy_device = await zigpy_device_from_json(
         zha_gateway.application_controller,
         "tests/data/devices/signify-netherlands-b-v-rwl022.json",
     )
 
-    # The Philips remote cluster (0xFC00) is in CLUSTER_HANDLER_ONLY_CLUSTERS: it
-    # doesn't produce any entities but must still be bound
-    philips_cluster = zigpy_device.endpoints[1].in_clusters[PHILLIPS_REMOTE_CLUSTER]
+    # The Philips remote cluster (0xFC00) has no HA entity but `PhilipsRemoteBind`
+    # virtual entity binds it so the device can send commands to the coordinator.
+    philips_cluster = zigpy_device.endpoints[1].in_clusters[PHILIPS_REMOTE_CLUSTER]
 
     await join_zigpy_device(zha_gateway, zigpy_device)
     await zha_gateway.async_block_till_done(wait_background_tasks=True)

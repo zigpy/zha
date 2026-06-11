@@ -1577,18 +1577,18 @@ async def test_transitions(
     await entity.async_turn_on(transition=1, brightness=25, color_temp=235)
     await zha_gateway.async_block_till_done()
 
-    group_on_off_cluster_handler = zha_group.endpoint[general.OnOff.cluster_id]
-    group_level_cluster_handler = zha_group.endpoint[general.LevelControl.cluster_id]
-    group_color_cluster_handler = zha_group.endpoint[lighting.Color.cluster_id]
-    assert group_on_off_cluster_handler.request.call_count == 0
-    assert group_on_off_cluster_handler.request.await_count == 0
-    assert group_color_cluster_handler.request.call_count == 1
-    assert group_color_cluster_handler.request.await_count == 1
-    assert group_level_cluster_handler.request.call_count == 1
-    assert group_level_cluster_handler.request.await_count == 1
+    group_on_off_cluster = zha_group.endpoint[general.OnOff.cluster_id]
+    group_level_cluster = zha_group.endpoint[general.LevelControl.cluster_id]
+    group_color_cluster = zha_group.endpoint[lighting.Color.cluster_id]
+    assert group_on_off_cluster.request.call_count == 0
+    assert group_on_off_cluster.request.await_count == 0
+    assert group_color_cluster.request.call_count == 1
+    assert group_color_cluster.request.await_count == 1
+    assert group_level_cluster.request.call_count == 1
+    assert group_level_cluster.request.await_count == 1
 
     # groups are omitted from the 3 call dance for new_color_provided_while_off
-    assert group_color_cluster_handler.request.call_args == call(
+    assert group_color_cluster.request.call_args == call(
         False,
         dev2_cluster_color.commands_by_name["move_to_color_temp"].id,
         dev2_cluster_color.commands_by_name["move_to_color_temp"].schema,
@@ -1597,7 +1597,7 @@ async def test_transitions(
         expect_reply=True,
         manufacturer=None,
     )
-    assert group_level_cluster_handler.request.call_args == call(
+    assert group_level_cluster.request.call_args == call(
         False,
         dev2_cluster_level.commands_by_name["move_to_level_with_on_off"].id,
         dev2_cluster_level.commands_by_name["move_to_level_with_on_off"].schema,
@@ -1612,9 +1612,9 @@ async def test_transitions(
     assert entity.state["color_temp"] == 235
     assert entity.state["color_mode"] == ColorMode.COLOR_TEMP
 
-    group_on_off_cluster_handler.request.reset_mock()
-    group_color_cluster_handler.request.reset_mock()
-    group_level_cluster_handler.request.reset_mock()
+    group_on_off_cluster.request.reset_mock()
+    group_color_cluster.request.reset_mock()
+    group_level_cluster.request.reset_mock()
 
     # turn the sengled light back on
     await device_2_light_entity.async_turn_on()

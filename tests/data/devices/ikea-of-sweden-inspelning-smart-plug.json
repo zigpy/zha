@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "ieee": "d4:48:67:ff:fe:13:d6:f8",
   "nwk": "0x80A8",
   "manufacturer": "IKEA of Sweden",
@@ -530,22 +530,6 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "IdentifyClusterHandler",
-              "generic_id": "cluster_handler_0x0003",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 3,
-                "name": "Identify",
-                "type": "server"
-              },
-              "id": "1:0x0003",
-              "unique_id": "d4:48:67:ff:fe:13:d6:f8:1:0x0003",
-              "status": "INITIALIZED",
-              "value_attribute": null
-            }
-          ],
           "device_ieee": "d4:48:67:ff:fe:13:d6:f8",
           "endpoint_id": 1,
           "available": true,
@@ -578,22 +562,6 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "OnOffClusterHandler",
-              "generic_id": "cluster_handler_0x0006",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 6,
-                "name": "On/Off",
-                "type": "server"
-              },
-              "id": "1:0x0006",
-              "unique_id": "d4:48:67:ff:fe:13:d6:f8:1:0x0006",
-              "status": "INITIALIZED",
-              "value_attribute": "on_off"
-            }
-          ],
           "device_ieee": "d4:48:67:ff:fe:13:d6:f8",
           "endpoint_id": 1,
           "available": true,
@@ -629,22 +597,6 @@
           "entity_registry_enabled_default": false,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "BasicClusterHandler",
-              "generic_id": "cluster_handler_0x0000",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 0,
-                "name": "Basic",
-                "type": "server"
-              },
-              "id": "1:0x0000",
-              "unique_id": "d4:48:67:ff:fe:13:d6:f8:1:0x0000",
-              "status": "INITIALIZED",
-              "value_attribute": null
-            }
-          ],
           "device_ieee": "d4:48:67:ff:fe:13:d6:f8",
           "endpoint_id": 1,
           "available": true,
@@ -673,22 +625,6 @@
           "entity_registry_enabled_default": false,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "BasicClusterHandler",
-              "generic_id": "cluster_handler_0x0000",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 0,
-                "name": "Basic",
-                "type": "server"
-              },
-              "id": "1:0x0000",
-              "unique_id": "d4:48:67:ff:fe:13:d6:f8:1:0x0000",
-              "status": "INITIALIZED",
-              "value_attribute": null
-            }
-          ],
           "device_ieee": "d4:48:67:ff:fe:13:d6:f8",
           "endpoint_id": 1,
           "available": true,
@@ -717,22 +653,6 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "MeteringClusterHandler",
-              "generic_id": "cluster_handler_0x0702",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 1794,
-                "name": "Metering",
-                "type": "server"
-              },
-              "id": "1:0x0702",
-              "unique_id": "d4:48:67:ff:fe:13:d6:f8:1:0x0702",
-              "status": "INITIALIZED",
-              "value_attribute": "instantaneous_demand"
-            }
-          ],
           "device_ieee": "d4:48:67:ff:fe:13:d6:f8",
           "endpoint_id": 1,
           "available": true,
@@ -760,7 +680,7 @@
           "unique_id": "d4:48:67:ff:fe:13:d6:f8-1-2820",
           "migrate_unique_ids": [],
           "platform": "sensor",
-          "class_name": "ReportingElectricalMeasurement",
+          "class_name": "ElectricalMeasurementActivePower",
           "translation_key": null,
           "translation_placeholders": null,
           "device_class": "power",
@@ -769,22 +689,6 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "ElectricalMeasurementClusterHandler",
-              "generic_id": "cluster_handler_0x0b04",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 2820,
-                "name": "Electrical Measurement",
-                "type": "server"
-              },
-              "id": "1:0x0b04",
-              "unique_id": "d4:48:67:ff:fe:13:d6:f8:1:0x0b04",
-              "status": "INITIALIZED",
-              "value_attribute": "ac_voltage_multiplier"
-            }
-          ],
           "device_ieee": "d4:48:67:ff:fe:13:d6:f8",
           "endpoint_id": 1,
           "available": true,
@@ -793,7 +697,7 @@
           "unit": "W"
         },
         "state": {
-          "class_name": "ReportingElectricalMeasurement",
+          "class_name": "ElectricalMeasurementActivePower",
           "available": true,
           "state": 0.0,
           "measurement_type": "ACTIVE_MEASUREMENT, PHASE_A_MEASUREMENT"
@@ -818,22 +722,6 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "ElectricalMeasurementClusterHandler",
-              "generic_id": "cluster_handler_0x0b04",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 2820,
-                "name": "Electrical Measurement",
-                "type": "server"
-              },
-              "id": "1:0x0b04",
-              "unique_id": "d4:48:67:ff:fe:13:d6:f8:1:0x0b04",
-              "status": "INITIALIZED",
-              "value_attribute": "ac_voltage_multiplier"
-            }
-          ],
           "device_ieee": "d4:48:67:ff:fe:13:d6:f8",
           "endpoint_id": 1,
           "available": true,
@@ -867,22 +755,6 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "ElectricalMeasurementClusterHandler",
-              "generic_id": "cluster_handler_0x0b04",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 2820,
-                "name": "Electrical Measurement",
-                "type": "server"
-              },
-              "id": "1:0x0b04",
-              "unique_id": "d4:48:67:ff:fe:13:d6:f8:1:0x0b04",
-              "status": "INITIALIZED",
-              "value_attribute": "ac_voltage_multiplier"
-            }
-          ],
           "device_ieee": "d4:48:67:ff:fe:13:d6:f8",
           "endpoint_id": 1,
           "available": true,
@@ -918,22 +790,6 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": true,
-          "cluster_handlers": [
-            {
-              "class_name": "OnOffClusterHandler",
-              "generic_id": "cluster_handler_0x0006",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 6,
-                "name": "On/Off",
-                "type": "server"
-              },
-              "id": "1:0x0006",
-              "unique_id": "d4:48:67:ff:fe:13:d6:f8:1:0x0006",
-              "status": "INITIALIZED",
-              "value_attribute": "on_off"
-            }
-          ],
           "device_ieee": "d4:48:67:ff:fe:13:d6:f8",
           "endpoint_id": 1,
           "available": true,
@@ -960,22 +816,6 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "ClusterHandler",
-              "generic_id": "cluster_handler_0xfc85",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 64645,
-                "name": "IkeaSmartPlugCluster",
-                "type": "server"
-              },
-              "id": "1:0xfc85",
-              "unique_id": "d4:48:67:ff:fe:13:d6:f8:1:0xfc85",
-              "status": "INITIALIZED",
-              "value_attribute": null
-            }
-          ],
           "device_ieee": "d4:48:67:ff:fe:13:d6:f8",
           "endpoint_id": 1,
           "available": true,
@@ -1008,22 +848,6 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "ClusterHandler",
-              "generic_id": "cluster_handler_0xfc85",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 64645,
-                "name": "IkeaSmartPlugCluster",
-                "type": "server"
-              },
-              "id": "1:0xfc85",
-              "unique_id": "d4:48:67:ff:fe:13:d6:f8:1:0xfc85",
-              "status": "INITIALIZED",
-              "value_attribute": null
-            }
-          ],
           "device_ieee": "d4:48:67:ff:fe:13:d6:f8",
           "endpoint_id": 1,
           "available": true,
@@ -1058,22 +882,6 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "OtaClientClusterHandler",
-              "generic_id": "cluster_handler_0x0019_client",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 25,
-                "name": "Ota",
-                "type": "client"
-              },
-              "id": "1:0x0019_client",
-              "unique_id": "d4:48:67:ff:fe:13:d6:f8:1:0x0019_CLIENT",
-              "status": "INITIALIZED",
-              "value_attribute": null
-            }
-          ],
           "device_ieee": "d4:48:67:ff:fe:13:d6:f8",
           "endpoint_id": 1,
           "available": true,

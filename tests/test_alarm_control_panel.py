@@ -215,7 +215,7 @@ async def test_alarm_control_panel(
     await reset_alarm_panel(zha_gateway, cluster, alarm_entity)
     assert alarm_entity.state["state"] == AlarmState.DISARMED
 
-    alarm_entity._cluster_handler.code_required_arm_actions = True
+    alarm_entity.code_required_arm_actions = True
     await alarm_entity.async_alarm_arm_away()
     await zha_gateway.async_block_till_done()
     assert alarm_entity.state["state"] == AlarmState.DISARMED

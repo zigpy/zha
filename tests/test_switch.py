@@ -450,13 +450,11 @@ async def test_switch_configurable(
     cluster.write_attributes.reset_mock()
     cluster.write_attributes.side_effect = ZigbeeException
 
-    with pytest.raises(ZHAException):
+    with pytest.raises(ZigbeeException):
         await entity.async_turn_off()
         await zha_gateway.async_block_till_done()
 
     assert cluster.write_attributes.mock_calls == [
-        call({"window_detection_function": False}, manufacturer=UNDEFINED),
-        call({"window_detection_function": False}, manufacturer=UNDEFINED),
         call({"window_detection_function": False}, manufacturer=UNDEFINED),
     ]
 
@@ -744,12 +742,9 @@ async def test_cover_inversion_switch(zha_gateway: Gateway) -> None:
     }
     update_attribute_cache(cluster)
     zha_device = await join_zigpy_device(zha_gateway, zigpy_cover_device)
-    assert (
-        not zha_device.endpoints[1]
-        .all_cluster_handlers[f"1:0x{cluster.cluster_id:04x}"]
-        .inverted
-    )
-    assert cluster.read_attributes.call_count == 3
+    entity = get_entity(zha_device, platform=Platform.SWITCH)
+    assert not entity.is_on
+    assert cluster.read_attributes.call_count == 2
     assert (
         WCAttrs.current_position_lift_percentage.name
         in cluster.read_attributes.call_args[0][0]
@@ -758,8 +753,6 @@ async def test_cover_inversion_switch(zha_gateway: Gateway) -> None:
         WCAttrs.current_position_tilt_percentage.name
         in cluster.read_attributes.call_args[0][0]
     )
-
-    entity = get_entity(zha_device, platform=Platform.SWITCH)
 
     # test update
     prev_call_count = cluster.read_attributes.call_count
@@ -835,7 +828,7 @@ async def test_cover_inversion_switch_not_created(zha_gateway: Gateway) -> None:
     update_attribute_cache(cluster)
     zha_device = await join_zigpy_device(zha_gateway, zigpy_cover_device)
 
-    assert cluster.read_attributes.call_count == 3
+    assert cluster.read_attributes.call_count == 2
     assert (
         WCAttrs.current_position_lift_percentage.name
         in cluster.read_attributes.call_args[0][0]

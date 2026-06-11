@@ -1,0 +1,18 @@
+"""Manufacturer-specific ZCL cluster IDs used across the platform layer."""
+
+from typing import Final
+
+AQARA_OPPLE_CLUSTER: Final[int] = 0xFCC0
+IKEA_AIR_PURIFIER_CLUSTER: Final[int] = 0xFC7D
+IKEA_REMOTE_CLUSTER: Final[int] = 0xFC80
+IKEA_SHORTCUT_V1_CLUSTER: Final[int] = 0xFC7F
+INOVELLI_CLUSTER: Final[int] = 0xFC31
+OSRAM_CLUSTER: Final[int] = 0xFD00
+OSRAM_BUTTON_CLUSTER: Final[int] = 0xFD51
+PHILIPS_REMOTE_CLUSTER: Final[int] = 0xFC00
+SINOPE_MANUFACTURER_CLUSTER: Final[int] = 0xFF01
+SMARTTHINGS_ACCELERATION_CLUSTER: Final[int] = 0xFC02
+SMARTTHINGS_HUMIDITY_CLUSTER: Final[int] = 0xFC45
+SONOFF_CLUSTER: Final[int] = 0xFC11
+TUYA_MANUFACTURER_CLUSTER: Final[int] = 0xEF00
+VOC_LEVEL_CLUSTER: Final[int] = 0x042E

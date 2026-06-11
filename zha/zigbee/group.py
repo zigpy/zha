@@ -263,37 +263,30 @@ class Group(LogMixin):
     def update_entity_subscriptions(self) -> None:
         """Update the entity event subscriptions.
 
-        Loop over all the entities in the group and update the event subscriptions. Get all of the unique ids
-        for both the group entities and the entities that they are compositions of. As we loop through the member
-        entities we establish subscriptions for their events if they do not exist. We also add the entity unique id
-        to a list for future processing. Once we have processed all group entities we combine the list of unique ids
-        for group entities and the platrom entities that we processed. Then we loop over all of the unsub ids and we
-        execute the unsubscribe method for each one that isn't in the combined list.
+        Unsubscribes all existing member entity subscriptions and
+        re-subscribes to the current member entities.  This ensures that
+        after a device reinterview (where entities are destroyed and
+        recreated with the same unique_id) the group tracks the new
+        entity objects.  Group entity subscriptions are preserved.
         """
         self.clear_caches()
 
-        group_entity_ids = list(self._group_entities.keys())
-        processed_platform_entity_ids = []
+        # Unsubscribe all existing member entity subscriptions (but keep
+        # group entity subscriptions).
+        group_entity_ids = set(self._group_entities.keys())
+        for unsub_id in list(self._entity_unsubs.keys()):
+            if unsub_id not in group_entity_ids:
+                self._entity_unsubs.pop(unsub_id)()
+
+        # Re-subscribe to all current member entities.
         for group_entity in self._group_entities.values():
             for platform_entity in self.get_platform_entities(group_entity.PLATFORM):
-                processed_platform_entity_ids.append(platform_entity.unique_id)
-                if platform_entity.unique_id not in self._entity_unsubs:
-                    self._entity_unsubs[platform_entity.unique_id] = (
-                        platform_entity.on_event(
-                            STATE_CHANGED,
-                            group_entity.debounced_update,
-                        )
+                self._entity_unsubs[platform_entity.unique_id] = (
+                    platform_entity.on_event(
+                        STATE_CHANGED,
+                        group_entity.debounced_update,
                     )
-        all_ids = group_entity_ids + processed_platform_entity_ids
-        existing_unsub_ids = self._entity_unsubs.keys()
-        processed_unsubs = []
-        for unsub_id in existing_unsub_ids:
-            if unsub_id not in all_ids:
-                self._entity_unsubs[unsub_id]()
-                processed_unsubs.append(unsub_id)
-
-        for unsub_id in processed_unsubs:
-            self._entity_unsubs.pop(unsub_id)
+                )
 
     async def async_add_members(self, members: list[GroupMemberReference]) -> None:
         """Add members to this group."""

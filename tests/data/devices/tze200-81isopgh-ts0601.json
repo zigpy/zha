@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "ieee": "ab:cd:ef:12:df:e1:f9:56",
   "nwk": "0xBE36",
   "manufacturer": "_TZE200_81isopgh",
@@ -308,22 +308,6 @@
           "entity_registry_enabled_default": false,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "TuyaClusterHandler",
-              "generic_id": "cluster_handler_0xef00",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 61184,
-                "name": "Tuya Manufacturer Specific",
-                "type": "server"
-              },
-              "id": "1:0xef00",
-              "unique_id": "ab:cd:ef:12:df:e1:f9:56:1:0xef00",
-              "status": "INITIALIZED",
-              "value_attribute": null
-            }
-          ],
           "device_ieee": "ab:cd:ef:12:df:e1:f9:56",
           "endpoint_id": 1,
           "available": true,
@@ -359,22 +343,6 @@
           "entity_registry_enabled_default": false,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "BasicClusterHandler",
-              "generic_id": "cluster_handler_0x0000",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 0,
-                "name": "Basic",
-                "type": "server"
-              },
-              "id": "1:0x0000",
-              "unique_id": "ab:cd:ef:12:df:e1:f9:56:1:0x0000",
-              "status": "INITIALIZED",
-              "value_attribute": null
-            }
-          ],
           "device_ieee": "ab:cd:ef:12:df:e1:f9:56",
           "endpoint_id": 1,
           "available": true,
@@ -403,22 +371,6 @@
           "entity_registry_enabled_default": false,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "BasicClusterHandler",
-              "generic_id": "cluster_handler_0x0000",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 0,
-                "name": "Basic",
-                "type": "server"
-              },
-              "id": "1:0x0000",
-              "unique_id": "ab:cd:ef:12:df:e1:f9:56:1:0x0000",
-              "status": "INITIALIZED",
-              "value_attribute": null
-            }
-          ],
           "device_ieee": "ab:cd:ef:12:df:e1:f9:56",
           "endpoint_id": 1,
           "available": true,
@@ -447,22 +399,6 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "PowerConfigurationClusterHandler",
-              "generic_id": "cluster_handler_0x0001",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 1,
-                "name": "Power Configuration",
-                "type": "server"
-              },
-              "id": "1:0x0001",
-              "unique_id": "ab:cd:ef:12:df:e1:f9:56:1:0x0001",
-              "status": "INITIALIZED",
-              "value_attribute": "battery_voltage"
-            }
-          ],
           "device_ieee": "ab:cd:ef:12:df:e1:f9:56",
           "endpoint_id": 1,
           "available": true,
@@ -498,22 +434,6 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "MeteringClusterHandler",
-              "generic_id": "cluster_handler_0x0702",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 1794,
-                "name": "TuyaValveWaterConsumedNoInstDemand",
-                "type": "server"
-              },
-              "id": "1:0x0702",
-              "unique_id": "ab:cd:ef:12:df:e1:f9:56:1:0x0702",
-              "status": "INITIALIZED",
-              "value_attribute": "instantaneous_demand"
-            }
-          ],
           "device_ieee": "ab:cd:ef:12:df:e1:f9:56",
           "endpoint_id": 1,
           "available": true,
@@ -549,22 +469,6 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "TuyaClusterHandler",
-              "generic_id": "cluster_handler_0xef00",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 61184,
-                "name": "Tuya Manufacturer Specific",
-                "type": "server"
-              },
-              "id": "1:0xef00",
-              "unique_id": "ab:cd:ef:12:df:e1:f9:56:1:0xef00",
-              "status": "INITIALIZED",
-              "value_attribute": null
-            }
-          ],
           "device_ieee": "ab:cd:ef:12:df:e1:f9:56",
           "endpoint_id": 1,
           "available": true,
@@ -593,22 +497,6 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "TuyaClusterHandler",
-              "generic_id": "cluster_handler_0xef00",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 61184,
-                "name": "Tuya Manufacturer Specific",
-                "type": "server"
-              },
-              "id": "1:0xef00",
-              "unique_id": "ab:cd:ef:12:df:e1:f9:56:1:0xef00",
-              "status": "INITIALIZED",
-              "value_attribute": null
-            }
-          ],
           "device_ieee": "ab:cd:ef:12:df:e1:f9:56",
           "endpoint_id": 1,
           "available": true,
@@ -637,22 +525,6 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "TuyaClusterHandler",
-              "generic_id": "cluster_handler_0xef00",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 61184,
-                "name": "Tuya Manufacturer Specific",
-                "type": "server"
-              },
-              "id": "1:0xef00",
-              "unique_id": "ab:cd:ef:12:df:e1:f9:56:1:0xef00",
-              "status": "INITIALIZED",
-              "value_attribute": null
-            }
-          ],
           "device_ieee": "ab:cd:ef:12:df:e1:f9:56",
           "endpoint_id": 1,
           "available": true,
@@ -683,22 +555,6 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": true,
-          "cluster_handlers": [
-            {
-              "class_name": "OnOffClusterHandler",
-              "generic_id": "cluster_handler_0x0006",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 6,
-                "name": "On/Off",
-                "type": "server"
-              },
-              "id": "1:0x0006",
-              "unique_id": "ab:cd:ef:12:df:e1:f9:56:1:0x0006",
-              "status": "INITIALIZED",
-              "value_attribute": "on_off"
-            }
-          ],
           "device_ieee": "ab:cd:ef:12:df:e1:f9:56",
           "endpoint_id": 1,
           "available": true,
@@ -727,22 +583,6 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "OtaClientClusterHandler",
-              "generic_id": "cluster_handler_0x0019_client",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 25,
-                "name": "Ota",
-                "type": "client"
-              },
-              "id": "1:0x0019_client",
-              "unique_id": "ab:cd:ef:12:df:e1:f9:56:1:0x0019_CLIENT",
-              "status": "INITIALIZED",
-              "value_attribute": null
-            }
-          ],
           "device_ieee": "ab:cd:ef:12:df:e1:f9:56",
           "endpoint_id": 1,
           "available": true,

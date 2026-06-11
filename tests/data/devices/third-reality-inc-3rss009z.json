@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "ieee": "28:2c:02:bf:ff:e9:77:95",
   "nwk": "0x6FD0",
   "manufacturer": "Third Reality, Inc",
@@ -198,22 +198,6 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "ClusterHandler",
-              "generic_id": "cluster_handler_0xff02",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 65282,
-                "name": "ThirdRealitySwitchCluster",
-                "type": "server"
-              },
-              "id": "1:0xff02",
-              "unique_id": "28:2c:02:bf:ff:e9:77:95:1:0xff02",
-              "status": "INITIALIZED",
-              "value_attribute": null
-            }
-          ],
           "device_ieee": "28:2c:02:bf:ff:e9:77:95",
           "endpoint_id": 1,
           "available": true,
@@ -245,22 +229,6 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "ClusterHandler",
-              "generic_id": "cluster_handler_0xff02",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 65282,
-                "name": "ThirdRealitySwitchCluster",
-                "type": "server"
-              },
-              "id": "1:0xff02",
-              "unique_id": "28:2c:02:bf:ff:e9:77:95:1:0xff02",
-              "status": "INITIALIZED",
-              "value_attribute": null
-            }
-          ],
           "device_ieee": "28:2c:02:bf:ff:e9:77:95",
           "endpoint_id": 1,
           "available": true,
@@ -294,22 +262,6 @@
           "entity_registry_enabled_default": false,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "BasicClusterHandler",
-              "generic_id": "cluster_handler_0x0000",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 0,
-                "name": "Basic",
-                "type": "server"
-              },
-              "id": "1:0x0000",
-              "unique_id": "28:2c:02:bf:ff:e9:77:95:1:0x0000",
-              "status": "INITIALIZED",
-              "value_attribute": null
-            }
-          ],
           "device_ieee": "28:2c:02:bf:ff:e9:77:95",
           "endpoint_id": 1,
           "available": true,
@@ -338,22 +290,6 @@
           "entity_registry_enabled_default": false,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "BasicClusterHandler",
-              "generic_id": "cluster_handler_0x0000",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 0,
-                "name": "Basic",
-                "type": "server"
-              },
-              "id": "1:0x0000",
-              "unique_id": "28:2c:02:bf:ff:e9:77:95:1:0x0000",
-              "status": "INITIALIZED",
-              "value_attribute": null
-            }
-          ],
           "device_ieee": "28:2c:02:bf:ff:e9:77:95",
           "endpoint_id": 1,
           "available": true,
@@ -382,22 +318,6 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "PowerConfigurationClusterHandler",
-              "generic_id": "cluster_handler_0x0001",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 1,
-                "name": "Power Configuration",
-                "type": "server"
-              },
-              "id": "1:0x0001",
-              "unique_id": "28:2c:02:bf:ff:e9:77:95:1:0x0001",
-              "status": "INITIALIZED",
-              "value_attribute": "battery_voltage"
-            }
-          ],
           "device_ieee": "28:2c:02:bf:ff:e9:77:95",
           "endpoint_id": 1,
           "available": true,
@@ -434,22 +354,6 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": true,
-          "cluster_handlers": [
-            {
-              "class_name": "OnOffClusterHandler",
-              "generic_id": "cluster_handler_0x0006",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 6,
-                "name": "On/Off",
-                "type": "server"
-              },
-              "id": "1:0x0006",
-              "unique_id": "28:2c:02:bf:ff:e9:77:95:1:0x0006",
-              "status": "INITIALIZED",
-              "value_attribute": "on_off"
-            }
-          ],
           "device_ieee": "28:2c:02:bf:ff:e9:77:95",
           "endpoint_id": 1,
           "available": true,
@@ -478,22 +382,6 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "OtaClientClusterHandler",
-              "generic_id": "cluster_handler_0x0019_client",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 25,
-                "name": "Ota",
-                "type": "client"
-              },
-              "id": "1:0x0019_client",
-              "unique_id": "28:2c:02:bf:ff:e9:77:95:1:0x0019_CLIENT",
-              "status": "INITIALIZED",
-              "value_attribute": null
-            }
-          ],
           "device_ieee": "28:2c:02:bf:ff:e9:77:95",
           "endpoint_id": 1,
           "available": true,

@@ -5,18 +5,24 @@ from __future__ import annotations
 from abc import abstractmethod
 import asyncio
 from collections import defaultdict
-from collections.abc import Callable
+from collections.abc import Callable, Mapping
 from contextlib import suppress
 import dataclasses
+from dataclasses import dataclass, field
 from enum import StrEnum
 from functools import cached_property
 import logging
-from typing import TYPE_CHECKING, Any, Final, Literal, final
+from types import MappingProxyType
+from typing import TYPE_CHECKING, Any, Final, final
 
-from zigpy.profiles import zha, zll
+from zigpy.profiles.zha import PROFILE_ID as ZHA_PROFILE_ID
+from zigpy.profiles.zll import PROFILE_ID as ZLL_PROFILE_ID
 from zigpy.quirks.v2 import EntityMetadata, EntityType
 from zigpy.types import ClusterId
 from zigpy.types.named import EUI64
+import zigpy.zcl
+from zigpy.zcl import ReportingConfig
+from zigpy.zcl.foundation import ZCLAttributeDef
 
 from zha.application import Platform
 from zha.application.const import UniqueIdMigration
@@ -24,10 +30,8 @@ from zha.const import STATE_CHANGED
 from zha.debounce import Debouncer
 from zha.event import EventBase
 from zha.mixins import LogMixin
-from zha.zigbee.cluster_handlers import ClusterHandlerInfo
 
 if TYPE_CHECKING:
-    from zha.zigbee.cluster_handlers import ClusterHandler
     from zha.zigbee.device import Device
     from zha.zigbee.endpoint import Endpoint
     from zha.zigbee.group import Group
@@ -63,11 +67,8 @@ class PlatformFeatureGroup(StrEnum):
     # Manufacturer-specific overrides for EM active power polling
     EM_ACTIVE_POWER = "em_active_power"
 
-    # Model-specific overrides for Smart Energy Summation
-    SMART_ENERGY_SUMMATION = "smart_energy_summation"
-
-    # Overrides for Smart Energy Summation Received
-    SMART_ENERGY_SUMMATION_RECEIVED = "smart_energy_summation_received"
+    # Suppress EM cluster polling for devices known to report reliably
+    EM_POLLING = "em_polling"
 
     # Model-specific overrides for local temperature calibration
     LOCAL_TEMPERATURE_CALIBRATION = "local_temperature_calibration"
@@ -79,13 +80,33 @@ class PlatformFeatureGroup(StrEnum):
     SIREN = "siren"
 
 
-@dataclasses.dataclass(frozen=True)
-class ClusterHandlerMatch:
-    """Declares cluster handler requirements for an entity class."""
+@dataclass(frozen=True)
+class AttrConfig:
+    """Per-attribute configuration for cluster setup."""
 
-    cluster_handlers: frozenset[str] = frozenset()
-    client_cluster_handlers: frozenset[str] = frozenset()
-    optional_cluster_handlers: frozenset[str] = frozenset()
+    read_on_startup: bool
+    reporting: ReportingConfig | None = None
+
+
+@dataclass(frozen=True)
+class ClusterConfig:
+    """Per-cluster configuration."""
+
+    # Whether to bind this cluster to the coordinator.
+    bind: bool = False
+
+    # Per-attribute configuration keyed by ZCL attribute definition or name.
+    attributes: dict[ZCLAttributeDef | str, AttrConfig] = field(default_factory=dict)
+
+
+@dataclass(frozen=True)
+class ClusterMatch:
+    """Declares which clusters an entity requires for discovery."""
+
+    server_clusters: frozenset[int] = frozenset()
+    client_clusters: frozenset[int] = frozenset()
+    optional_server_clusters: frozenset[int] = frozenset()
+    optional_client_clusters: frozenset[int] = frozenset()
 
     # Strict filters: if present, device info must match
     manufacturers: frozenset[str] | None = None
@@ -93,27 +114,33 @@ class ClusterHandlerMatch:
     exposed_features: frozenset[str] | None = None
     not_exposed_features: frozenset[str] | None = None
 
-    # If present, device must match one of the given profile and device type combinations.
-    # This will be ignored if `platform_override` is used.
-    profile_device_types: (  # type:ignore[valid-type]
-        frozenset[
-            tuple[Literal[zha.PROFILE_ID], zha.DeviceType]
-            | tuple[Literal[zll.PROFILE_ID], zll.DeviceType]
-            | tuple[int, int]
-        ]
-        | None
-    ) = None
-    not_profile_device_types: (  # type:ignore[valid-type]
-        frozenset[
-            tuple[Literal[zha.PROFILE_ID], zha.DeviceType]
-            | tuple[Literal[zll.PROFILE_ID], zll.DeviceType]
-            | tuple[int, int]
-        ]
-        | None
-    ) = None
+    # `None` matches any profile.
+    profile_ids: frozenset[int] | None = frozenset({ZHA_PROFILE_ID, ZLL_PROFILE_ID})
+
+    # Profile and device type filters
+    profile_device_types: frozenset[tuple[int, int]] | None = None
+    not_profile_device_types: frozenset[tuple[int, int]] | None = None
 
     # For a given feature, only entities with the highest priority will be considered
     feature_priority: tuple[PlatformFeatureGroup, int] | None = None
+
+    # By default ClusterMatch skips clusters whose ep_attribute was renamed by
+    # a quirk (so a Switch entity doesn't auto-attach to a Tuya-renamed OnOff
+    # cluster). Bind-only virtual entities can opt back in via this flag, since
+    # they don't care about cluster semantics — only that the cluster_id is
+    # what they target.
+    match_renamed_clusters: bool = False
+
+    def __post_init__(self) -> None:
+        """Validate the ClusterMatch."""
+        if self.profile_device_types is not None and self.profile_ids is not None:
+            profile_device_type_profiles = {p for p, _ in self.profile_device_types}
+
+            if not profile_device_type_profiles <= self.profile_ids:
+                raise ValueError(
+                    "profile_device_types contain profiles not in profile_ids: "
+                    f"{profile_device_type_profiles - self.profile_ids}"
+                )
 
 
 def register_entity[T: type[PlatformEntity]](cluster_id: ClusterId) -> Callable[[T], T]:
@@ -162,7 +189,6 @@ class BaseEntityInfo:
     primary: bool
 
     # For platform entities
-    cluster_handlers: list[ClusterHandlerInfo]
     device_ieee: EUI64 | None
     endpoint_id: int | None
     available: bool | None
@@ -210,7 +236,13 @@ class EntityStateChangedEvent:
 class BaseEntity(LogMixin, EventBase):
     """Base class for entities."""
 
-    PLATFORM: Platform = Platform.UNKNOWN
+    PLATFORM: Platform
+
+    async def async_configure_cluster(self, cluster: Any) -> None:
+        """Run post-bind cluster-level setup (override in subclasses)."""
+
+    async def async_initialize_cluster(self, cluster: Any) -> None:
+        """Run post-initialize cluster-level work (override in subclasses)."""
 
     _attr_fallback_name: str | None = None
     _attr_icon: str | None = None
@@ -370,7 +402,6 @@ class BaseEntity(LogMixin, EventBase):
             enabled=self.enabled,
             primary=self.primary,
             # Set by platform entities
-            cluster_handlers=[],
             device_ieee=None,
             endpoint_id=None,
             available=None,
@@ -451,15 +482,19 @@ class PlatformEntity(BaseEntity):
 
     _migrate_platform_unique_ids: tuple[tuple[UniqueIdMigration, str]] | None = None
 
-    # Auto-discovery for the entity
-    _cluster_handler_match: ClusterHandlerMatch | None
+    # Direct cluster matching for discovery
+    _cluster_match: ClusterMatch | None = None
+
+    # Per-cluster configuration (keyed by cluster ID)
+    _server_cluster_config: Mapping[int, ClusterConfig] = MappingProxyType({})
+    _client_cluster_config: Mapping[int, ClusterConfig] = MappingProxyType({})
 
     def __init__(
         self,
-        cluster_handlers: list[ClusterHandler],
         endpoint: Endpoint,
         device: Device,
         *,
+        cluster: zigpy.zcl.Cluster,
         entity_metadata: EntityMetadata | None = None,
         legacy_discovery_unique_id: str | None = None,
         **kwargs: Any,
@@ -469,9 +504,12 @@ class PlatformEntity(BaseEntity):
             self._init_from_quirks_metadata(entity_metadata)
 
         if legacy_discovery_unique_id is None:
-            legacy_discovery_unique_id = (
-                f"{device.ieee}-{endpoint.id}-{cluster_handlers[0].cluster.cluster_id}"
-            )
+            if entity_metadata is not None:
+                legacy_discovery_unique_id = f"{device.ieee}-{endpoint.id}"
+            else:
+                legacy_discovery_unique_id = (
+                    f"{device.ieee}-{endpoint.id}-{cluster.cluster_id}"
+                )
 
         if self._unique_id_suffix is not None:
             unique_id = f"{legacy_discovery_unique_id}-{self._unique_id_suffix}"
@@ -480,14 +518,9 @@ class PlatformEntity(BaseEntity):
 
         super().__init__(unique_id=unique_id, **kwargs)
 
-        self._cluster_handlers: list[ClusterHandler] = cluster_handlers
-        self.cluster_handlers: dict[str, ClusterHandler] = {}
-
-        for cluster_handler in cluster_handlers:
-            self.cluster_handlers[cluster_handler.name] = cluster_handler
-
         self._device: Device = device
         self._endpoint = endpoint
+        self._cluster: zigpy.zcl.Cluster = cluster
 
     def _init_from_quirks_metadata(self, entity_metadata: EntityMetadata) -> None:
         """Init this entity from the quirks metadata."""
@@ -544,7 +577,6 @@ class PlatformEntity(BaseEntity):
         """Return a representation of the platform entity."""
         return dataclasses.replace(
             super().info_object,
-            cluster_handlers=[ch.info_object for ch in self._cluster_handlers],
             device_ieee=self._device.ieee,
             endpoint_id=self._endpoint.id,
             available=self.available,
@@ -559,6 +591,11 @@ class PlatformEntity(BaseEntity):
     def endpoint(self) -> Endpoint:
         """Return the endpoint."""
         return self._endpoint
+
+    @property
+    def cluster(self) -> zigpy.zcl.Cluster:
+        """Return the ZCL cluster backing this entity."""
+        return self._cluster
 
     @property
     def should_poll(self) -> bool:
@@ -578,16 +615,11 @@ class PlatformEntity(BaseEntity):
         return state
 
     async def async_update(self) -> None:
-        """Retrieve latest state."""
-        self.debug("polling current state")
-        tasks = [
-            cluster_handler.async_update()
-            for cluster_handler in self.cluster_handlers.values()
-            if hasattr(cluster_handler, "async_update")
-        ]
-        if tasks:
-            await asyncio.gather(*tasks)
-            self.maybe_emit_state_changed_event()
+        """Retrieve latest state.
+
+        Default no-op: subclasses that need polling override this to read their
+        own attributes directly from the relevant cluster(s).
+        """
 
 
 class GroupEntity(BaseEntity):

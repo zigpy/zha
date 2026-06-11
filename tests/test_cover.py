@@ -136,12 +136,7 @@ async def test_cover_non_tilt_initial_state(  # pylint: disable=unused-argument
     )
 
     cluster = zigpy_cover_device.endpoints[1].window_covering
-    assert (
-        not zha_device.endpoints[1]
-        .all_cluster_handlers[f"1:0x{cluster.cluster_id:04x}"]
-        .inverted
-    )
-    assert cluster.read_attributes.call_count == 3
+    assert cluster.read_attributes.call_count == 2
     assert (
         WCAttrs.current_position_lift_percentage.name
         in cluster.read_attributes.call_args[0][0]
@@ -184,12 +179,7 @@ async def test_cover_non_lift_initial_state(  # pylint: disable=unused-argument
     )
 
     cluster = zigpy_cover_device.endpoints[1].window_covering
-    assert (
-        not zha_device.endpoints[1]
-        .all_cluster_handlers[f"1:0x{cluster.cluster_id:04x}"]
-        .inverted
-    )
-    assert cluster.read_attributes.call_count == 3
+    assert cluster.read_attributes.call_count == 2
     assert (
         WCAttrs.current_position_lift_percentage.name
         in cluster.read_attributes.call_args[0][0]
@@ -232,12 +222,7 @@ async def test_cover(
     )
 
     cluster = zigpy_cover_device.endpoints[1].window_covering
-    assert (
-        not zha_device.endpoints[1]
-        .all_cluster_handlers[f"1:0x{cluster.cluster_id:04x}"]
-        .inverted
-    )
-    assert cluster.read_attributes.call_count == 3
+    assert cluster.read_attributes.call_count == 2
     assert (
         WCAttrs.current_position_lift_percentage.name
         in cluster.read_attributes.call_args[0][0]
@@ -1084,9 +1069,7 @@ async def test_keen_vent(
     # open from client command fails
     p1 = patch.object(cluster_on_off, "request", side_effect=asyncio.TimeoutError)
     p2 = patch.object(cluster_level, "request", AsyncMock(return_value=[4, 0]))
-    p3 = pytest.raises(
-        ZHAException, match="Failed to send request: device did not respond"
-    )
+    p3 = pytest.raises(asyncio.TimeoutError)
 
     with p1, p2, p3:
         await entity.async_open_cover()

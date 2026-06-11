@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "ieee": "8c:6f:b9:ff:fe:26:3b:4a",
   "nwk": "0x9EB6",
   "manufacturer": "IKEA of Sweden",
@@ -384,22 +384,6 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "OnOffClientClusterHandler",
-              "generic_id": "cluster_handler_0x0006_client",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 6,
-                "name": "On/Off",
-                "type": "client"
-              },
-              "id": "1:0x0006_client",
-              "unique_id": "8c:6f:b9:ff:fe:26:3b:4a:1:0x0006_CLIENT",
-              "status": "INITIALIZED",
-              "value_attribute": null
-            }
-          ],
           "device_ieee": "8c:6f:b9:ff:fe:26:3b:4a",
           "endpoint_id": 1,
           "available": true,
@@ -427,22 +411,6 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": true,
-          "cluster_handlers": [
-            {
-              "class_name": "OccupancySensingClusterHandler",
-              "generic_id": "cluster_handler_0x0406",
-              "endpoint_id": 2,
-              "cluster": {
-                "id": 1030,
-                "name": "Occupancy Sensing",
-                "type": "server"
-              },
-              "id": "2:0x0406",
-              "unique_id": "8c:6f:b9:ff:fe:26:3b:4a:2:0x0406",
-              "status": "INITIALIZED",
-              "value_attribute": "occupancy"
-            }
-          ],
           "device_ieee": "8c:6f:b9:ff:fe:26:3b:4a",
           "endpoint_id": 2,
           "available": true,
@@ -472,22 +440,6 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "IdentifyClusterHandler",
-              "generic_id": "cluster_handler_0x0003",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 3,
-                "name": "Identify",
-                "type": "server"
-              },
-              "id": "1:0x0003",
-              "unique_id": "8c:6f:b9:ff:fe:26:3b:4a:1:0x0003",
-              "status": "INITIALIZED",
-              "value_attribute": null
-            }
-          ],
           "device_ieee": "8c:6f:b9:ff:fe:26:3b:4a",
           "endpoint_id": 1,
           "available": true,
@@ -520,22 +472,6 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "ClusterHandler",
-              "generic_id": "cluster_handler_0xfc81",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 64641,
-                "name": "IKEA manufacturer specific config",
-                "type": "server"
-              },
-              "id": "1:0xfc81",
-              "unique_id": "8c:6f:b9:ff:fe:26:3b:4a:1:0xfc81",
-              "status": "INITIALIZED",
-              "value_attribute": null
-            }
-          ],
           "device_ieee": "8c:6f:b9:ff:fe:26:3b:4a",
           "endpoint_id": 1,
           "available": true,
@@ -567,22 +503,6 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "OccupancySensingClusterHandler",
-              "generic_id": "cluster_handler_0x0406",
-              "endpoint_id": 2,
-              "cluster": {
-                "id": 1030,
-                "name": "Occupancy Sensing",
-                "type": "server"
-              },
-              "id": "2:0x0406",
-              "unique_id": "8c:6f:b9:ff:fe:26:3b:4a:2:0x0406",
-              "status": "INITIALIZED",
-              "value_attribute": "occupancy"
-            }
-          ],
           "device_ieee": "8c:6f:b9:ff:fe:26:3b:4a",
           "endpoint_id": 2,
           "available": true,
@@ -614,22 +534,6 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "OccupancySensingClusterHandler",
-              "generic_id": "cluster_handler_0x0406",
-              "endpoint_id": 2,
-              "cluster": {
-                "id": 1030,
-                "name": "Occupancy Sensing",
-                "type": "server"
-              },
-              "id": "2:0x0406",
-              "unique_id": "8c:6f:b9:ff:fe:26:3b:4a:2:0x0406",
-              "status": "INITIALIZED",
-              "value_attribute": "occupancy"
-            }
-          ],
           "device_ieee": "8c:6f:b9:ff:fe:26:3b:4a",
           "endpoint_id": 2,
           "available": true,
@@ -663,22 +567,6 @@
           "entity_registry_enabled_default": false,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "BasicClusterHandler",
-              "generic_id": "cluster_handler_0x0000",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 0,
-                "name": "Basic",
-                "type": "server"
-              },
-              "id": "1:0x0000",
-              "unique_id": "8c:6f:b9:ff:fe:26:3b:4a:1:0x0000",
-              "status": "INITIALIZED",
-              "value_attribute": null
-            }
-          ],
           "device_ieee": "8c:6f:b9:ff:fe:26:3b:4a",
           "endpoint_id": 1,
           "available": true,
@@ -707,22 +595,6 @@
           "entity_registry_enabled_default": false,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "BasicClusterHandler",
-              "generic_id": "cluster_handler_0x0000",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 0,
-                "name": "Basic",
-                "type": "server"
-              },
-              "id": "1:0x0000",
-              "unique_id": "8c:6f:b9:ff:fe:26:3b:4a:1:0x0000",
-              "status": "INITIALIZED",
-              "value_attribute": null
-            }
-          ],
           "device_ieee": "8c:6f:b9:ff:fe:26:3b:4a",
           "endpoint_id": 1,
           "available": true,
@@ -751,22 +623,6 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "PowerConfigurationClusterHandler",
-              "generic_id": "cluster_handler_0x0001",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 1,
-                "name": "Power Configuration",
-                "type": "server"
-              },
-              "id": "1:0x0001",
-              "unique_id": "8c:6f:b9:ff:fe:26:3b:4a:1:0x0001",
-              "status": "INITIALIZED",
-              "value_attribute": "battery_voltage"
-            }
-          ],
           "device_ieee": "8c:6f:b9:ff:fe:26:3b:4a",
           "endpoint_id": 1,
           "available": true,
@@ -803,22 +659,6 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "IlluminanceMeasurementClusterHandler",
-              "generic_id": "cluster_handler_0x0400",
-              "endpoint_id": 3,
-              "cluster": {
-                "id": 1024,
-                "name": "Illuminance Measurement",
-                "type": "server"
-              },
-              "id": "3:0x0400",
-              "unique_id": "8c:6f:b9:ff:fe:26:3b:4a:3:0x0400",
-              "status": "INITIALIZED",
-              "value_attribute": "measured_value"
-            }
-          ],
           "device_ieee": "8c:6f:b9:ff:fe:26:3b:4a",
           "endpoint_id": 3,
           "available": true,
@@ -849,22 +689,6 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "ClusterHandler",
-              "generic_id": "cluster_handler_0xfc81",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 64641,
-                "name": "IKEA manufacturer specific config",
-                "type": "server"
-              },
-              "id": "1:0xfc81",
-              "unique_id": "8c:6f:b9:ff:fe:26:3b:4a:1:0xfc81",
-              "status": "INITIALIZED",
-              "value_attribute": null
-            }
-          ],
           "device_ieee": "8c:6f:b9:ff:fe:26:3b:4a",
           "endpoint_id": 1,
           "available": true,
@@ -899,22 +723,6 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "OtaClientClusterHandler",
-              "generic_id": "cluster_handler_0x0019_client",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 25,
-                "name": "Ota",
-                "type": "client"
-              },
-              "id": "1:0x0019_client",
-              "unique_id": "8c:6f:b9:ff:fe:26:3b:4a:1:0x0019_CLIENT",
-              "status": "INITIALIZED",
-              "value_attribute": null
-            }
-          ],
           "device_ieee": "8c:6f:b9:ff:fe:26:3b:4a",
           "endpoint_id": 1,
           "available": true,

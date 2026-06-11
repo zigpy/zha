@@ -37,12 +37,18 @@ async def test_cancellable_zhajob(zha_gateway: Gateway, eager_start: bool) -> No
 
 async def test_async_add_zha_job_schedule_callback() -> None:
     """Test that we schedule callbacks and add jobs to the job pool."""
-    zha_gateway = MagicMock(loop=MagicMock(wraps=asyncio.get_running_loop()))
+    loop = asyncio.get_running_loop()
+    zha_gateway = MagicMock(loop=loop)
     job = MagicMock()
 
-    AsyncUtilMixin.async_add_zha_job(zha_gateway, ZHAJob(job))
-    assert len(zha_gateway.loop.call_soon.mock_calls) == 1
-    assert len(zha_gateway.loop.create_task.mock_calls) == 0
+    with (
+        patch.object(loop, "call_soon", wraps=loop.call_soon) as mock_call_soon,
+        patch.object(loop, "create_task", wraps=loop.create_task) as mock_create_task,
+    ):
+        AsyncUtilMixin.async_add_zha_job(zha_gateway, ZHAJob(job))
+
+    assert len(mock_call_soon.mock_calls) == 1
+    assert len(mock_create_task.mock_calls) == 0
     assert len(zha_gateway.add_job.mock_calls) == 0
 
 
@@ -177,32 +183,43 @@ async def test_async_add_zha_job_eager_start(zha_gateway: Gateway) -> None:
 
 async def test_async_add_zha_job_schedule_partial_callback() -> None:
     """Test that we schedule partial coros and add jobs to the job pool."""
-    zha_gateway = MagicMock(loop=MagicMock(wraps=asyncio.get_running_loop()))
+    loop = asyncio.get_running_loop()
+    zha_gateway = MagicMock(loop=loop)
     job = MagicMock()
     partial = functools.partial(job)
 
-    AsyncUtilMixin.async_add_zha_job(zha_gateway, ZHAJob(partial))
-    assert len(zha_gateway.loop.call_soon.mock_calls) == 1
-    assert len(zha_gateway.loop.create_task.mock_calls) == 0
+    with (
+        patch.object(loop, "call_soon", wraps=loop.call_soon) as mock_call_soon,
+        patch.object(loop, "create_task", wraps=loop.create_task) as mock_create_task,
+    ):
+        AsyncUtilMixin.async_add_zha_job(zha_gateway, ZHAJob(partial))
+
+    assert len(mock_call_soon.mock_calls) == 1
+    assert len(mock_create_task.mock_calls) == 0
     assert len(zha_gateway.add_job.mock_calls) == 0
 
 
 async def test_async_add_zha_job_schedule_coroutinefunction() -> None:
     """Test that we schedule coroutines and add jobs to the job pool."""
-    zha_gateway = MagicMock(loop=MagicMock(wraps=asyncio.get_running_loop()))
+    loop = asyncio.get_running_loop()
+    zha_gateway = MagicMock(loop=loop)
 
     async def job():
         pass
 
-    AsyncUtilMixin.async_add_zha_job(zha_gateway, ZHAJob(job))
-    assert len(zha_gateway.loop.call_soon.mock_calls) == 0
-    assert len(zha_gateway.loop.create_task.mock_calls) == 1
+    with (
+        patch.object(loop, "create_task", wraps=loop.create_task) as mock_create_task,
+    ):
+        AsyncUtilMixin.async_add_zha_job(zha_gateway, ZHAJob(job))
+
+    assert len(mock_create_task.mock_calls) == 1
     assert len(zha_gateway.add_job.mock_calls) == 0
 
 
 async def test_async_add_zha_job_schedule_corofunction_eager_start() -> None:
     """Test that we schedule coroutines and add jobs to the job pool."""
-    zha_gateway = MagicMock(loop=(loop := asyncio.get_running_loop()))
+    loop = asyncio.get_running_loop()
+    zha_gateway = MagicMock(loop=loop)
 
     async def job():
         pass
@@ -215,27 +232,32 @@ async def test_async_add_zha_job_schedule_corofunction_eager_start() -> None:
     ):
         zha_job = ZHAJob(job)
         task = AsyncUtilMixin.async_add_zha_job(zha_gateway, zha_job, eager_start=True)
-        assert task is not None
-        assert mock_loop_call_soon.call_count == 0
-        assert len(zha_gateway.add_job.mock_calls) == 0
-        assert mock_create_eager_task.mock_calls
-        await task
+
+    assert task is not None
+    assert mock_loop_call_soon.call_count == 0
+    assert len(zha_gateway.add_job.mock_calls) == 0
+    assert mock_create_eager_task.mock_calls
+    await task
 
 
 async def test_async_add_zha_job_schedule_partial_coroutinefunction(
     zha_gateway: Gateway,
 ) -> None:
     """Test that we schedule partial coros and add jobs to the job pool."""
-    zha_gateway = MagicMock(loop=MagicMock(wraps=asyncio.get_running_loop()))
+    loop = asyncio.get_running_loop()
+    zha_gateway = MagicMock(loop=loop)
 
     async def job():
         pass
 
     partial = functools.partial(job)
 
-    AsyncUtilMixin.async_add_zha_job(zha_gateway, ZHAJob(partial))
-    assert len(zha_gateway.loop.call_soon.mock_calls) == 0
-    assert len(zha_gateway.loop.create_task.mock_calls) == 1
+    with (
+        patch.object(loop, "create_task", wraps=loop.create_task) as mock_create_task,
+    ):
+        AsyncUtilMixin.async_add_zha_job(zha_gateway, ZHAJob(partial))
+
+    assert len(mock_create_task.mock_calls) == 1
     assert len(zha_gateway.add_job.mock_calls) == 0
 
 
@@ -254,20 +276,25 @@ async def test_async_add_job_add_zha_threaded_job_to_pool() -> None:
 
 async def test_async_create_task_schedule_coroutine() -> None:
     """Test that we schedule coroutines and add jobs to the job pool."""
-    zha_gateway = MagicMock(loop=MagicMock(wraps=asyncio.get_running_loop()))
+    loop = asyncio.get_running_loop()
+    zha_gateway = MagicMock(loop=loop)
 
     async def job():
         pass
 
-    AsyncUtilMixin.async_create_task(zha_gateway, job())
-    assert len(zha_gateway.loop.call_soon.mock_calls) == 0
-    assert len(zha_gateway.loop.create_task.mock_calls) == 1
+    with (
+        patch.object(loop, "create_task", wraps=loop.create_task) as mock_create_task,
+    ):
+        AsyncUtilMixin.async_create_task(zha_gateway, job())
+
+    assert len(mock_create_task.mock_calls) == 1
     assert len(zha_gateway.add_job.mock_calls) == 0
 
 
 async def test_async_create_task_eager_start_schedule_coroutine() -> None:
     """Test that we schedule coroutines and add jobs to the job pool."""
-    zha_gateway = MagicMock(loop=(loop := asyncio.get_running_loop()))
+    loop = asyncio.get_running_loop()
+    zha_gateway = MagicMock(loop=loop)
 
     async def job():
         pass
@@ -282,14 +309,18 @@ async def test_async_create_task_eager_start_schedule_coroutine() -> None:
 
 async def test_async_create_task_schedule_coroutine_with_name() -> None:
     """Test that we schedule coroutines and add jobs to the job pool with a name."""
-    zha_gateway = MagicMock(loop=MagicMock(wraps=asyncio.get_running_loop()))
+    loop = asyncio.get_running_loop()
+    zha_gateway = MagicMock(loop=loop)
 
     async def job():
         pass
 
-    task = AsyncUtilMixin.async_create_task(zha_gateway, job(), "named task")
-    assert len(zha_gateway.loop.call_soon.mock_calls) == 0
-    assert len(zha_gateway.loop.create_task.mock_calls) == 1
+    with (
+        patch.object(loop, "create_task", wraps=loop.create_task) as mock_create_task,
+    ):
+        task = AsyncUtilMixin.async_create_task(zha_gateway, job(), "named task")
+
+    assert len(mock_create_task.mock_calls) == 1
     assert len(zha_gateway.add_job.mock_calls) == 0
     assert "named task" in str(task)
 

@@ -1,6 +1,7 @@
 """Test ZHA Gateway."""
 
 import asyncio
+from contextlib import suppress
 from unittest.mock import AsyncMock, MagicMock, PropertyMock, call, patch
 
 import pytest
@@ -555,6 +556,93 @@ async def test_gateway_device_initialized(
         "Cancelling previous initialization task for device 00:0d:6f:00:0a:90:69:e7"
         in caplog.text
     )
+
+
+async def test_gateway_device_initialized_no_keyerror_on_rapid_rejoin(
+    zha_gateway: Gateway,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    """Regression test for #748.
+
+    When a device sends a second join announcement before the first
+    initialization task completes, the cancelled task's done-callback
+    must not pop the dict entry that now belongs to the replacement
+    task — otherwise the replacement's own done-callback raises KeyError.
+    """
+    zigpy_dev_basic = create_mock_zigpy_device(zha_gateway, ZIGPY_DEVICE_BASIC)
+
+    loop = asyncio.get_running_loop()
+    captured_exceptions: list[BaseException] = []
+    original_handler = loop.get_exception_handler()
+
+    def capture_exception(loop_, context):
+        if (exc := context.get("exception")) is not None:
+            captured_exceptions.append(exc)
+        if original_handler is not None:
+            original_handler(loop_, context)
+
+    loop.set_exception_handler(capture_exception)
+    try:
+        zha_gateway.device_initialized(zigpy_dev_basic)
+        zha_gateway.device_initialized(zigpy_dev_basic)
+        await zha_gateway.async_block_till_done()
+    finally:
+        loop.set_exception_handler(original_handler)
+
+    assert (
+        f"Cancelling previous initialization task for device {zigpy_dev_basic.ieee}"
+        in caplog.text
+    )
+    keyerrors = [e for e in captured_exceptions if isinstance(e, KeyError)]
+    assert not keyerrors, f"done-callback raised KeyError(s): {keyerrors}"
+    assert zigpy_dev_basic.ieee not in zha_gateway._device_init_tasks
+
+
+async def test_gateway_device_reinterviewed_no_bookkeeping_loss_on_rapid_event(
+    zha_gateway: Gateway,
+) -> None:
+    """Regression test for the `_device_init_tasks` bookkeeping race.
+
+    Cancelled task's done-callback must not clear the replacement task's
+    entry.  Same race as #748/#749 but in `device_reinterviewed`.  The
+    previous `pop(..., None)` pattern silently dropped the replacement
+    task's entry, which meant a third event would fail to cancel the
+    in-flight task.
+    """
+    zigpy_dev = create_mock_zigpy_device(zha_gateway, ZIGPY_DEVICE_BASIC)
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
+
+    # Keep the replacement task in-flight by stalling configure on an event
+    # we control. Without this, the reinterview task completes synchronously
+    # under eager_start and exits the dict before we get to assert.
+    proceed = asyncio.Event()
+    original_configure = zha_device.async_configure
+
+    async def stalled_configure() -> None:
+        await proceed.wait()
+        await original_configure()
+
+    with patch.object(zha_device, "async_configure", side_effect=stalled_configure):
+        zha_gateway.device_reinterviewed(zigpy_dev)
+        task_1 = zha_gateway._device_init_tasks[zigpy_dev.ieee]
+
+        zha_gateway.device_reinterviewed(zigpy_dev)
+        task_2 = zha_gateway._device_init_tasks[zigpy_dev.ieee]
+        assert task_2 is not task_1
+
+        # Let task_1's cancellation propagate and its done-callback run.
+        with suppress(asyncio.CancelledError):
+            await task_1
+        await asyncio.sleep(0)
+
+        # The cancelled task's done-callback must not have cleared the dict;
+        # the replacement task is still in flight.
+        assert zha_gateway._device_init_tasks.get(zigpy_dev.ieee) is task_2
+
+        proceed.set()
+
+    await zha_gateway.async_block_till_done()
+    assert zigpy_dev.ieee not in zha_gateway._device_init_tasks
 
 
 def test_gateway_raw_device_initialized(

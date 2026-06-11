@@ -22,5 +22,5 @@ class Platform(StrEnum):
     SIREN = "siren"
     SWITCH = "switch"
     VALVE = "valve"
-    UNKNOWN = "unknown"
+    VIRTUAL = "virtual"
     UPDATE = "update"

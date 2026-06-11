@@ -7,7 +7,6 @@ from typing import Final
 
 import bellows.zigbee.application
 import zigpy.application
-import zigpy.types as t
 import zigpy_deconz.zigbee.application
 import zigpy_xbee.zigbee.application
 import zigpy_zigate.zigbee.application
@@ -93,9 +92,6 @@ PRESET_NONE = "none"
 
 ENTITY_METADATA = "entity_metadata"
 
-ZCL_INIT_ATTRS = "ZCL_INIT_ATTRS"
-REPORT_CONFIG = "REPORT_CONFIG"
-
 _ControllerClsType = type[zigpy.application.ControllerApplication]
 
 
@@ -161,36 +157,9 @@ UNKNOWN = "unknown"
 UNKNOWN_MANUFACTURER = "unk_manufacturer"
 UNKNOWN_MODEL = "unk_model"
 
-WARNING_DEVICE_MODE_STOP = 0
-WARNING_DEVICE_MODE_BURGLAR = 1
-WARNING_DEVICE_MODE_FIRE = 2
-WARNING_DEVICE_MODE_EMERGENCY = 3
-WARNING_DEVICE_MODE_POLICE_PANIC = 4
-WARNING_DEVICE_MODE_FIRE_PANIC = 5
-WARNING_DEVICE_MODE_EMERGENCY_PANIC = 6
-
-WARNING_DEVICE_STROBE_NO = 0
-WARNING_DEVICE_STROBE_YES = 1
-
-WARNING_DEVICE_SOUND_LOW = 0
-WARNING_DEVICE_SOUND_MEDIUM = 1
-WARNING_DEVICE_SOUND_HIGH = 2
-WARNING_DEVICE_SOUND_VERY_HIGH = 3
-
-WARNING_DEVICE_STROBE_LOW = 0x00
-WARNING_DEVICE_STROBE_MEDIUM = 0x01
-WARNING_DEVICE_STROBE_HIGH = 0x02
-WARNING_DEVICE_STROBE_VERY_HIGH = 0x03
-
-WARNING_DEVICE_SQUAWK_MODE_ARMED = 0
-WARNING_DEVICE_SQUAWK_MODE_DISARMED = 1
-
-ZHA_CLUSTER_HANDLER_MSG = "zha_channel_message"
-ZHA_CLUSTER_HANDLER_MSG_BIND = "zha_channel_bind"
-ZHA_CLUSTER_HANDLER_MSG_CFG_RPT = "zha_channel_configure_reporting"
-ZHA_CLUSTER_HANDLER_MSG_DATA = "zha_channel_msg_data"
-ZHA_CLUSTER_HANDLER_CFG_DONE = "zha_channel_cfg_done"
-ZHA_CLUSTER_HANDLER_READS_PER_REQ = 5
+ZHA_CLUSTER_BIND_EVENT = "zha_cluster_bind"
+ZHA_CLUSTER_CONFIGURE_REPORTING_EVENT = "zha_cluster_configure_reporting"
+ZHA_DEVICE_CONFIGURED_EVENT = "zha_device_configured"
 ZHA_EVENT = "zha_event"
 ZHA_DEVICE_UPDATED_EVENT = "zha_device_updated_event"
 ZHA_DEVICE_ENTITY_ADDED_EVENT = "zha_device_entity_added_event"
@@ -210,13 +179,6 @@ ZHA_GW_MSG_LOG_ENTRY = "log_entry"
 ZHA_GW_MSG_LOG_OUTPUT = "log_output"
 ZHA_GW_MSG_RAW_INIT = "raw_device_initialized"
 ZHA_GW_MSG_CONNECTION_LOST = "connection_lost"
-
-
-class Strobe(t.enum8):
-    """Strobe enum."""
-
-    No_Strobe = 0x00
-    Strobe = 0x01
 
 
 class UniqueIdMigration(enum.Enum):

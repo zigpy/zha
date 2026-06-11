@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "ieee": "28:2c:02:bf:ff:ea:05:68",
   "nwk": "0x12D8",
   "manufacturer": "Third Reality, Inc",
@@ -326,22 +326,6 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "OnOffClientClusterHandler",
-              "generic_id": "cluster_handler_0x0006_client",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 6,
-                "name": "On/Off",
-                "type": "client"
-              },
-              "id": "1:0x0006_client",
-              "unique_id": "28:2c:02:bf:ff:ea:05:68:1:0x0006_CLIENT",
-              "status": "INITIALIZED",
-              "value_attribute": null
-            }
-          ],
           "device_ieee": "28:2c:02:bf:ff:ea:05:68",
           "endpoint_id": 1,
           "available": true,
@@ -371,22 +355,6 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "ClusterHandler",
-              "generic_id": "cluster_handler_0xfff1",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 65521,
-                "name": "ThirdRealityCurtainCluster",
-                "type": "server"
-              },
-              "id": "1:0xfff1",
-              "unique_id": "28:2c:02:bf:ff:ea:05:68:1:0xfff1",
-              "status": "INITIALIZED",
-              "value_attribute": null
-            }
-          ],
           "device_ieee": "28:2c:02:bf:ff:ea:05:68",
           "endpoint_id": 1,
           "available": true,
@@ -416,22 +384,6 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "WindowCoveringClusterHandler",
-              "generic_id": "cluster_handler_0x0102",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 258,
-                "name": "Window Covering",
-                "type": "server"
-              },
-              "id": "1:0x0102",
-              "unique_id": "28:2c:02:bf:ff:ea:05:68:1:0x0102",
-              "status": "INITIALIZED",
-              "value_attribute": "current_position_lift_percentage"
-            }
-          ],
           "device_ieee": "28:2c:02:bf:ff:ea:05:68",
           "endpoint_id": 1,
           "available": true,
@@ -466,22 +418,6 @@
           "entity_registry_enabled_default": false,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "BasicClusterHandler",
-              "generic_id": "cluster_handler_0x0000",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 0,
-                "name": "Basic",
-                "type": "server"
-              },
-              "id": "1:0x0000",
-              "unique_id": "28:2c:02:bf:ff:ea:05:68:1:0x0000",
-              "status": "INITIALIZED",
-              "value_attribute": null
-            }
-          ],
           "device_ieee": "28:2c:02:bf:ff:ea:05:68",
           "endpoint_id": 1,
           "available": true,
@@ -510,22 +446,6 @@
           "entity_registry_enabled_default": false,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "BasicClusterHandler",
-              "generic_id": "cluster_handler_0x0000",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 0,
-                "name": "Basic",
-                "type": "server"
-              },
-              "id": "1:0x0000",
-              "unique_id": "28:2c:02:bf:ff:ea:05:68:1:0x0000",
-              "status": "INITIALIZED",
-              "value_attribute": null
-            }
-          ],
           "device_ieee": "28:2c:02:bf:ff:ea:05:68",
           "endpoint_id": 1,
           "available": true,
@@ -554,22 +474,6 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "PowerConfigurationClusterHandler",
-              "generic_id": "cluster_handler_0x0001",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 1,
-                "name": "Power Configuration",
-                "type": "server"
-              },
-              "id": "1:0x0001",
-              "unique_id": "28:2c:02:bf:ff:ea:05:68:1:0x0001",
-              "status": "INITIALIZED",
-              "value_attribute": "battery_voltage"
-            }
-          ],
           "device_ieee": "28:2c:02:bf:ff:ea:05:68",
           "endpoint_id": 1,
           "available": true,
@@ -604,22 +508,6 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "WindowCoveringClusterHandler",
-              "generic_id": "cluster_handler_0x0102",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 258,
-                "name": "Window Covering",
-                "type": "server"
-              },
-              "id": "1:0x0102",
-              "unique_id": "28:2c:02:bf:ff:ea:05:68:1:0x0102",
-              "status": "INITIALIZED",
-              "value_attribute": "current_position_lift_percentage"
-            }
-          ],
           "device_ieee": "28:2c:02:bf:ff:ea:05:68",
           "endpoint_id": 1,
           "available": true,
@@ -650,22 +538,6 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "OnOffClusterHandler",
-              "generic_id": "cluster_handler_0x0006",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 6,
-                "name": "On/Off",
-                "type": "server"
-              },
-              "id": "1:0x0006",
-              "unique_id": "28:2c:02:bf:ff:ea:05:68:1:0x0006",
-              "status": "INITIALIZED",
-              "value_attribute": "on_off"
-            }
-          ],
           "device_ieee": "28:2c:02:bf:ff:ea:05:68",
           "endpoint_id": 1,
           "available": true,
@@ -692,22 +564,6 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "ClusterHandler",
-              "generic_id": "cluster_handler_0xfff1",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 65521,
-                "name": "ThirdRealityCurtainCluster",
-                "type": "server"
-              },
-              "id": "1:0xfff1",
-              "unique_id": "28:2c:02:bf:ff:ea:05:68:1:0xfff1",
-              "status": "INITIALIZED",
-              "value_attribute": null
-            }
-          ],
           "device_ieee": "28:2c:02:bf:ff:ea:05:68",
           "endpoint_id": 1,
           "available": true,
@@ -742,22 +598,6 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "OtaClientClusterHandler",
-              "generic_id": "cluster_handler_0x0019_client",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 25,
-                "name": "Ota",
-                "type": "client"
-              },
-              "id": "1:0x0019_client",
-              "unique_id": "28:2c:02:bf:ff:ea:05:68:1:0x0019_CLIENT",
-              "status": "INITIALIZED",
-              "value_attribute": null
-            }
-          ],
           "device_ieee": "28:2c:02:bf:ff:ea:05:68",
           "endpoint_id": 1,
           "available": true,

@@ -6,21 +6,32 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 import functools
 import math
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, Any
 
+from zigpy.zcl import (
+    AttributeReadEvent,
+    AttributeReportedEvent,
+    AttributeUpdatedEvent,
+    AttributeWrittenEvent,
+    ReportingConfig,
+)
 from zigpy.zcl.clusters import hvac
 
 from zha.application import Platform
+from zha.application.helpers import safe_read, write_attributes_safe
 from zha.application.platforms import (
+    AttrConfig,
     BaseEntity,
     BaseEntityInfo,
-    ClusterHandlerMatch,
+    ClusterConfig,
+    ClusterMatch,
     GroupEntity,
     PlatformEntity,
     PlatformFeatureGroup,
     register_entity,
     register_group_entity,
 )
+from zha.application.platforms.const import IKEA_AIR_PURIFIER_CLUSTER
 from zha.application.platforms.fan.const import (
     ATTR_PERCENTAGE,
     ATTR_PRESET_MODE,
@@ -42,23 +53,9 @@ from zha.application.platforms.fan.helpers import (
     percentage_to_ranged_value,
     ranged_value_to_percentage,
 )
-from zha.zigbee.cluster_handlers import (
-    ClusterAttributeUpdatedEvent,
-    wrap_zigpy_exceptions,
-)
-from zha.zigbee.cluster_handlers.const import (
-    CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
-    CLUSTER_HANDLER_FAN,
-    IKEA_AIR_PURIFIER_CLUSTER,
-)
-from zha.zigbee.cluster_handlers.hvac import FanClusterHandler
-from zha.zigbee.cluster_handlers.manufacturerspecific import (
-    IkeaAirPurifierClusterHandler,
-)
 from zha.zigbee.group import Group
 
 if TYPE_CHECKING:
-    from zha.zigbee.cluster_handlers import ClusterHandler
     from zha.zigbee.device import Device
     from zha.zigbee.endpoint import Endpoint
 
@@ -223,11 +220,14 @@ class BaseFan(BaseEntity, ABC):
     async def _async_set_fan_mode(self, fan_mode: int) -> None:
         """Set the fan mode for the fan."""
 
-    def handle_cluster_handler_attribute_updated(
+    def handle_attribute_updated(
         self,
-        event: ClusterAttributeUpdatedEvent,  # pylint: disable=unused-argument
+        event: AttributeReadEvent
+        | AttributeReportedEvent
+        | AttributeUpdatedEvent
+        | AttributeWrittenEvent,
     ) -> None:
-        """Handle state update from cluster handler."""
+        """Handle state update from cluster."""
         self.maybe_emit_state_changed_event()
 
     def speed_to_percentage(self, speed: str) -> int:
@@ -249,58 +249,90 @@ class BaseFan(BaseEntity, ABC):
 class Fan(BaseFan, PlatformEntity):
     """Representation of a ZHA fan."""
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_FAN}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({hvac.Fan.cluster_id}),
         # We prefer Thermostat entities if possible
         feature_priority=(PlatformFeatureGroup.THERMOSTAT_FAN, -1),
     )
 
+    _server_cluster_config = {
+        hvac.Fan.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                hvac.Fan.AttributeDefs.fan_mode: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=5, max_interval=900, reportable_change=1
+                    ),
+                ),
+                hvac.Fan.AttributeDefs.fan_mode_sequence: AttrConfig(
+                    read_on_startup=False,
+                ),
+            },
+        ),
+    }
+
     def __init__(
         self,
-        cluster_handlers: list[ClusterHandler],
         endpoint: Endpoint,
         device: Device,
         **kwargs,
     ) -> None:
         """Initialize the fan."""
-        super().__init__(cluster_handlers, endpoint, device, **kwargs)
-        self._fan_cluster_handler: FanClusterHandler = cast(
-            FanClusterHandler, self.cluster_handlers[CLUSTER_HANDLER_FAN]
-        )
+        super().__init__(endpoint=endpoint, device=device, **kwargs)
         self.recompute_capabilities()
 
     def on_add(self) -> None:
         """Run when entity is added."""
         super().on_add()
-        self._on_remove_callbacks.append(
-            self._fan_cluster_handler.on_event(
-                CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
-                self.handle_cluster_handler_attribute_updated,
+        for event_type in (
+            AttributeReadEvent,
+            AttributeReportedEvent,
+            AttributeUpdatedEvent,
+            AttributeWrittenEvent,
+        ):
+            self._on_remove_callbacks.append(
+                self._cluster.on_event(
+                    event_type.event_type, self.handle_attribute_updated
+                )
             )
-        )
+
+    @property
+    def _fan_mode(self) -> int | None:
+        """Return current fan mode."""
+        return self._cluster.get(hvac.Fan.AttributeDefs.fan_mode.name)
 
     @property
     def percentage(self) -> int | None:
         """Return the current speed percentage."""
-        if (
-            self._fan_cluster_handler.fan_mode is None
-            or self._fan_cluster_handler.fan_mode > self.speed_range[1]
-        ):
+        fan_mode = self._fan_mode
+        if fan_mode is None or fan_mode > self.speed_range[1]:
             return None
-        if self._fan_cluster_handler.fan_mode == 0:
+        if fan_mode == 0:
             return 0
-        return ranged_value_to_percentage(
-            self.speed_range, self._fan_cluster_handler.fan_mode
-        )
+        return ranged_value_to_percentage(self.speed_range, fan_mode)
 
     @property
     def preset_mode(self) -> str | None:
         """Return the current preset mode."""
-        return self.preset_modes_to_name.get(self._fan_cluster_handler.fan_mode)
+        return self.preset_modes_to_name.get(self._fan_mode)
 
     async def _async_set_fan_mode(self, fan_mode: int) -> None:
         """Set the fan mode for the fan."""
-        await self._fan_cluster_handler.async_set_speed(fan_mode)
+        await write_attributes_safe(
+            self._cluster, {hvac.Fan.AttributeDefs.fan_mode.name: fan_mode}
+        )
+        self.maybe_emit_state_changed_event()
+
+    async def async_update(self) -> None:
+        """Retrieve latest state."""
+        self.debug("polling current state")
+        await safe_read(
+            self._cluster,
+            [hvac.Fan.AttributeDefs.fan_mode.name],
+            allow_cache=False,
+            only_cache=False,
+        )
         self.maybe_emit_state_changed_event()
 
 
@@ -310,9 +342,7 @@ class FanGroup(BaseFan, GroupEntity):
 
     def __init__(self, group: Group):
         """Initialize a fan group."""
-        self._fan_cluster_handler: FanClusterHandler = cast(
-            FanClusterHandler, group.endpoint[hvac.Fan.cluster_id]
-        )
+        self._cluster = group.endpoint[hvac.Fan.cluster_id]
         super().__init__(group)
         self._percentage = None
         self._preset_mode = None
@@ -332,10 +362,7 @@ class FanGroup(BaseFan, GroupEntity):
 
     async def _async_set_fan_mode(self, fan_mode: int) -> None:
         """Set the fan mode for the group."""
-
-        with wrap_zigpy_exceptions():
-            await self._fan_cluster_handler.write_attributes({"fan_mode": fan_mode})
-
+        await write_attributes_safe(self._cluster, {"fan_mode": fan_mode})
         self.maybe_emit_state_changed_event()
 
     def update(self, _: Any = None) -> None:
@@ -378,38 +405,104 @@ class IkeaFan(BaseFan, PlatformEntity):
         | FanEntityFeature.TURN_ON
     )
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({"ikea_airpurifier"}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({IKEA_AIR_PURIFIER_CLUSTER}),
         models=frozenset({"STARKVIND Air purifier", "STARKVIND Air purifier table"}),
     )
 
-    def __init__(
-        self,
-        cluster_handlers: list[ClusterHandler],
-        endpoint: Endpoint,
-        device: Device,
-        **kwargs,
-    ):
-        """Initialize the fan."""
-        super().__init__(cluster_handlers, endpoint, device, **kwargs)
-        self._fan_cluster_handler: IkeaAirPurifierClusterHandler = cast(
-            IkeaAirPurifierClusterHandler, self.cluster_handlers["ikea_airpurifier"]
-        )
+    # Aggregated reporting/bind config for the whole STARKVIND manufacturer
+    # cluster; sibling ChildLock/DisableLed switches don't need their own.
+    _server_cluster_config = {
+        IKEA_AIR_PURIFIER_CLUSTER: ClusterConfig(
+            bind=True,
+            attributes={
+                "filter_run_time": AttrConfig(
+                    read_on_startup=False,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=1
+                    ),
+                ),
+                "replace_filter": AttrConfig(
+                    read_on_startup=False,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
+                ),
+                "filter_life_time": AttrConfig(
+                    read_on_startup=False,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=1
+                    ),
+                ),
+                "disable_led": AttrConfig(
+                    read_on_startup=False,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
+                ),
+                "air_quality_25pm": AttrConfig(
+                    read_on_startup=False,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
+                ),
+                "child_lock": AttrConfig(
+                    read_on_startup=False,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
+                ),
+                "fan_mode": AttrConfig(
+                    read_on_startup=False,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
+                ),
+                "fan_speed": AttrConfig(
+                    read_on_startup=False,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
+                ),
+                "device_run_time": AttrConfig(
+                    read_on_startup=False,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=1
+                    ),
+                ),
+            },
+        ),
+    }
 
     def on_add(self) -> None:
         """Run when entity is added."""
         super().on_add()
-        self._on_remove_callbacks.append(
-            self._fan_cluster_handler.on_event(
-                CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
-                self.handle_cluster_handler_attribute_updated,
+        for event_type in (
+            AttributeReadEvent,
+            AttributeReportedEvent,
+            AttributeUpdatedEvent,
+            AttributeWrittenEvent,
+        ):
+            self._on_remove_callbacks.append(
+                self._cluster.on_event(
+                    event_type.event_type, self.handle_attribute_updated
+                )
             )
-        )
+
+    @property
+    def _fan_mode(self) -> int | None:
+        """Return current fan mode."""
+        return self._cluster.get("fan_mode")
+
+    @property
+    def _fan_speed(self) -> int | None:
+        """Return current fan speed."""
+        return self._cluster.get("fan_speed")
 
     @property
     def preset_mode(self) -> str | None:
         """Return the current preset mode."""
-        return self.preset_modes_to_name.get(self._fan_cluster_handler.fan_mode)
+        return self.preset_modes_to_name.get(self._fan_mode)
 
     @functools.cached_property
     def preset_modes_to_name(self) -> dict[int, str]:
@@ -426,15 +519,16 @@ class IkeaFan(BaseFan, PlatformEntity):
     @property
     def percentage(self) -> int | None:
         """Return the current speed percentage."""
-        if self._fan_cluster_handler.fan_speed is None:
+        fan_speed = self._fan_speed
+        if fan_speed is None:
             return None
-        if self._fan_cluster_handler.fan_speed == 0:
+        if fan_speed == 0:
             return 0
         return ranged_value_to_percentage(
             # Starkvind has an additional fan_speed attribute that we can use to
             # get the speed even if fan_mode is set to auto.
             self.speed_range,
-            self._fan_cluster_handler.fan_speed,
+            fan_speed,
         )
 
     async def async_turn_on(
@@ -452,7 +546,7 @@ class IkeaFan(BaseFan, PlatformEntity):
 
     async def _async_set_fan_mode(self, fan_mode: int) -> None:
         """Set the fan mode for the fan."""
-        await self._fan_cluster_handler.async_set_speed(fan_mode)
+        await write_attributes_safe(self._cluster, {"fan_mode": fan_mode})
         self.maybe_emit_state_changed_event()
 
     async def async_set_percentage(self, percentage: int) -> None:
@@ -462,6 +556,17 @@ class IkeaFan(BaseFan, PlatformEntity):
         if fan_mode == 1:
             fan_mode = 2
         await self._async_set_fan_mode(fan_mode)
+
+    async def async_update(self) -> None:
+        """Retrieve latest state."""
+        self.debug("polling current state")
+        await safe_read(
+            self._cluster,
+            ["fan_mode", "fan_speed"],
+            allow_cache=False,
+            only_cache=False,
+        )
+        self.maybe_emit_state_changed_event()
 
 
 @register_entity(hvac.Fan.cluster_id)
@@ -475,8 +580,8 @@ class KofFan(Fan):
         | FanEntityFeature.TURN_ON
     )
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_FAN}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({hvac.Fan.cluster_id}),
         models=frozenset({"HBUniversalCFRemote", "HDC52EastwindFan"}),
         feature_priority=(PlatformFeatureGroup.THERMOSTAT_FAN, 1),
     )

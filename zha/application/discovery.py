@@ -4,11 +4,10 @@ from __future__ import annotations
 
 from collections import Counter, defaultdict
 from collections.abc import Callable, Iterator
-from dataclasses import astuple
 import functools
 import itertools
 import logging
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from zigpy.quirks.v2 import (
     BinarySensorMetadata,
@@ -21,14 +20,16 @@ from zigpy.quirks.v2 import (
     ZCLSensorMetadata,
 )
 from zigpy.state import State
-from zigpy.zcl import ClusterType
+from zigpy.zcl import Cluster, ClusterType, ReportingConfig
 
 from zha.application import Platform, const as zha_const
 from zha.application.platforms import (  # noqa: F401 pylint: disable=unused-import
     ENTITY_REGISTRY,
     GROUP_ENTITY_REGISTRY,
+    AttrConfig,
     BaseEntity,
-    ClusterHandlerMatch,
+    ClusterConfig,
+    ClusterMatch,
     PlatformEntity,
     PlatformFeatureGroup,
     alarm_control_panel,
@@ -46,26 +47,8 @@ from zha.application.platforms import (  # noqa: F401 pylint: disable=unused-imp
     siren,
     switch,
     update,
+    virtual,
 )
-
-# importing cluster handlers updates registries
-from zha.zigbee.cluster_handlers import (  # noqa: F401 pylint: disable=unused-import
-    AttrReportConfig,
-    ClientClusterHandler,
-    ClusterHandler,
-    closures,
-    general,
-    homeautomation,
-    hvac,
-    lighting,
-    lightlink,
-    manufacturerspecific,
-    measurement,
-    protocol,
-    security,
-    smartenergy,
-)
-from zha.zigbee.cluster_handlers.registries import CLUSTER_HANDLER_ONLY_CLUSTERS
 from zha.zigbee.group import Group
 
 if TYPE_CHECKING:
@@ -98,6 +81,24 @@ GROUP_PLATFORMS = (
     Platform.LIGHT,
     Platform.SWITCH,
 )
+
+
+def _pick_primary_cluster(endpoint: Endpoint, match: ClusterMatch) -> Cluster | None:
+    """Pick the primary cluster for an entity from a ClusterMatch."""
+    if match.server_clusters:
+        cluster_id = min(match.server_clusters)
+        return endpoint.zigpy_endpoint.in_clusters.get(cluster_id)
+    if match.client_clusters:
+        cluster_id = min(match.client_clusters)
+        return endpoint.zigpy_endpoint.out_clusters.get(cluster_id)
+    for cluster_id in sorted(match.optional_server_clusters):
+        if cluster_id in endpoint.zigpy_endpoint.in_clusters:
+            return endpoint.zigpy_endpoint.in_clusters[cluster_id]
+    for cluster_id in sorted(match.optional_client_clusters):
+        if cluster_id in endpoint.zigpy_endpoint.out_clusters:
+            return endpoint.zigpy_endpoint.out_clusters[cluster_id]
+    return None
+
 
 QUIRKS_ENTITY_META_TO_ENTITY_CLASS = {
     (Platform.BUTTON, WriteAttributeButtonMetadata): button.WriteAttributeButton,
@@ -291,21 +292,6 @@ def discover_quirks_v2_entities(device: Device) -> Iterator[PlatformEntity]:
             )
             continue
 
-        if cluster_type is ClusterType.Server:
-            cluster_handler = endpoint.all_cluster_handlers.get(
-                f"{endpoint.id}:0x{cluster.cluster_id:04x}"
-            )
-        else:
-            cluster_handler = endpoint.client_cluster_handlers.get(
-                f"{endpoint.id}:0x{cluster.cluster_id:04x}_client"
-            )
-
-        assert cluster_handler
-
-        # flags to determine if we need to claim/bind the cluster handler
-        attribute_initialization_found: bool = False
-        reporting_found: bool = False
-
         for entity_metadata in entity_metadata_list:
             platform = Platform(entity_metadata.entity_platform.value)
             metadata_type = type(entity_metadata)
@@ -326,68 +312,72 @@ def discover_quirks_v2_entities(device: Device) -> Iterator[PlatformEntity]:
                 )
                 continue
 
-            # process the entity metadata for ZCL_INIT_ATTRS and REPORT_CONFIG
-            if attr_name := getattr(entity_metadata, "attribute_name", None):
-                # TODO: ignore "attribute write buttons"? currently, we claim ch
-                # if the entity has a reporting config, add it to the cluster handler
-                if rep_conf := getattr(entity_metadata, "reporting_config", None):
-                    # if attr is already in REPORT_CONFIG, remove it first
-                    cluster_handler.REPORT_CONFIG = tuple(
-                        filter(
-                            lambda cfg: cfg["attr"] != attr_name,
-                            cluster_handler.REPORT_CONFIG,
-                        )
-                    )
-                    # tuples are immutable and we re-set the REPORT_CONFIG here,
-                    # so no need to check for an instance variable
-                    cluster_handler.REPORT_CONFIG += (
-                        AttrReportConfig(attr=attr_name, config=astuple(rep_conf)),
-                    )
-                    # mark cluster handler for claiming and binding later
-                    reporting_found = True
-
-                # not in REPORT_CONFIG, add to ZCL_INIT_ATTRS if it not already in
-                elif attr_name not in cluster_handler.ZCL_INIT_ATTRS:
-                    # copy existing ZCL_INIT_ATTRS into instance variable once,
-                    # so we don't modify other instances of the same cluster handler
-                    if zha_const.ZCL_INIT_ATTRS not in cluster_handler.__dict__:
-                        cluster_handler.ZCL_INIT_ATTRS = (
-                            cluster_handler.ZCL_INIT_ATTRS.copy()
-                        )
-                    # add the attribute to the guaranteed instance variable
-                    cluster_handler.ZCL_INIT_ATTRS[attr_name] = (
-                        entity_metadata.attribute_initialized_from_cache
-                    )
-                    # mark cluster handler for claiming later, but not binding
-                    attribute_initialization_found = True
-
-            yield entity_class(
-                cluster_handlers=[cluster_handler],
+            entity = entity_class(
                 endpoint=endpoint,
                 device=device,
+                cluster=cluster,
                 entity_metadata=entity_metadata,
-                legacy_discovery_unique_id=f"{device.ieee}-{endpoint.id}",
             )
+
+            # Translate quirks v2 reporting/attribute-init metadata into a
+            # per-instance cluster config that the cluster_config aggregator
+            # picks up alongside the entity's normal (class-level) declarations.
+            if attr_name := getattr(entity_metadata, "attribute_name", None):
+                rep_conf = getattr(entity_metadata, "reporting_config", None)
+                if rep_conf is not None:
+                    attr_config = AttrConfig(
+                        read_on_startup=False,
+                        reporting=ReportingConfig(
+                            min_interval=rep_conf.min_interval,
+                            max_interval=rep_conf.max_interval,
+                            reportable_change=rep_conf.reportable_change,
+                        ),
+                    )
+                    bind = True
+                else:
+                    attr_config = AttrConfig(
+                        read_on_startup=(
+                            not entity_metadata.attribute_initialized_from_cache
+                        ),
+                    )
+                    bind = False
+
+                # Keep attr_name as a string here - quirks v2 entities can reference
+                # attribute names that aren't part of the cluster's attribute schema
+                # (e.g. manufacturer-specific extensions); aggregation/configure handle
+                # both name and ZCLAttributeDef.
+                config = {
+                    cluster.cluster_id: ClusterConfig(
+                        bind=bind,
+                        attributes={attr_name: attr_config},
+                    ),
+                }
+
+                if cluster_type is ClusterType.Server:
+                    entity._server_cluster_config = config
+                else:
+                    entity._client_cluster_config = config
+
+            yield entity
 
             _LOGGER.debug(
-                "'%s' platform -> '%s' using %s",
+                "'%s' platform -> '%s' using cluster 0x%04x",
                 platform,
                 entity_class.__name__,
-                [cluster_handler.name],
+                cluster.cluster_id,
             )
 
-        # if the cluster handler is unclaimed, claim it and set BIND accordingly,
-        # so ZHA configures the cluster handler: reporting + reads attributes
-        if (attribute_initialization_found or reporting_found) and (
-            cluster_handler not in endpoint.claimed_cluster_handlers.values()
-        ):
-            endpoint.claim_cluster_handlers([cluster_handler])
-            # BIND is True by default, so only set to False if no reporting found.
-            # We can safely do this, since quirks v2 entities are initialized last,
-            # so if the cluster handler wasn't claimed by endpoint probing so far,
-            # only v2 entities need it.
-            if not reporting_found:
-                cluster_handler.BIND = False
+
+def _is_renamed_cluster(cluster: Cluster) -> bool:
+    """Return True if a quirk has renamed the cluster's ep_attribute."""
+    standard = Cluster._registry.get(cluster.cluster_id)
+    if standard is None:
+        return False
+
+    # Used to skip ClusterMatch entities for renamed clusters so the new cluster id
+    # based matching behaves the same as the legacy handler-name matching (which never
+    # found a handler under the standard name).
+    return cluster.ep_attribute != standard.ep_attribute
 
 
 def discover_entities_for_endpoint(endpoint: Endpoint) -> Iterator[PlatformEntity]:  # noqa: C901
@@ -409,9 +399,25 @@ def discover_entities_for_endpoint(endpoint: Endpoint) -> Iterator[PlatformEntit
         PlatformFeatureGroup | None,
         defaultdict[
             int,  # Weight
-            list[tuple[ClusterHandlerMatch, type[PlatformEntity]]],
+            list[tuple[ClusterMatch, type[PlatformEntity]]],
         ],
     ] = defaultdict(lambda: defaultdict(list))
+
+    # Cluster IDs available to ClusterMatch (renamed quirked clusters excluded to
+    # mirror the legacy handler-name based matching). Entities that opt into
+    # `match_renamed_clusters=True` get the inclusive sets instead.
+    in_cluster_ids = {
+        cid
+        for cid, cluster in endpoint.zigpy_endpoint.in_clusters.items()
+        if not _is_renamed_cluster(cluster)
+    }
+    out_cluster_ids = {
+        cid
+        for cid, cluster in endpoint.zigpy_endpoint.out_clusters.items()
+        if not _is_renamed_cluster(cluster)
+    }
+    in_cluster_ids_with_renamed = set(endpoint.zigpy_endpoint.in_clusters)
+    out_cluster_ids_with_renamed = set(endpoint.zigpy_endpoint.out_clusters)
 
     for cluster in itertools.chain(
         endpoint.zigpy_endpoint.in_clusters.values(),
@@ -420,17 +426,26 @@ def discover_entities_for_endpoint(endpoint: Endpoint) -> Iterator[PlatformEntit
         # To speed up lookups, we key ENTITY_REGISTRY by cluster ID. First, we find all
         # compatible entities and their matching criteria.
         for entity_class in ENTITY_REGISTRY.get(cluster.cluster_id, []):
-            match = entity_class._cluster_handler_match
-            if match is None:
+            if entity_class._cluster_match is None:
+                continue
+            match = entity_class._cluster_match
+
+            if match.match_renamed_clusters:
+                available_in = in_cluster_ids_with_renamed
+                available_out = out_cluster_ids_with_renamed
+            else:
+                available_in = in_cluster_ids
+                available_out = out_cluster_ids
+
+            if not match.server_clusters.issubset(available_in):
                 continue
 
-            if not match.cluster_handlers.issubset(
-                endpoint.cluster_handlers_by_name.keys()
-            ):
+            if not match.client_clusters.issubset(available_out):
                 continue
 
-            if not match.client_cluster_handlers.issubset(
-                endpoint.client_cluster_handlers_by_name.keys()
+            if (
+                match.profile_ids is not None
+                and endpoint.zigpy_endpoint.profile_id not in match.profile_ids
             ):
                 continue
 
@@ -459,23 +474,22 @@ def discover_entities_for_endpoint(endpoint: Endpoint) -> Iterator[PlatformEntit
                 endpoint.zigpy_endpoint.profile_id,
                 endpoint.zigpy_endpoint.device_type,
             )
+            override_bypass = (
+                platform_override is not None
+                and platform_override == entity_class.PLATFORM
+            )
+
             if (
                 match.profile_device_types is not None
                 and profile_device_type not in match.profile_device_types
-                and not (
-                    platform_override is not None
-                    and platform_override == entity_class.PLATFORM
-                )
+                and not override_bypass
             ):
                 continue
 
             if (
                 match.not_profile_device_types is not None
                 and profile_device_type in match.not_profile_device_types
-                and not (
-                    platform_override is not None
-                    and platform_override == entity_class.PLATFORM
-                )
+                and not override_bypass
             ):
                 continue
 
@@ -496,7 +510,8 @@ def discover_entities_for_endpoint(endpoint: Endpoint) -> Iterator[PlatformEntit
         # system when competing entities are part of the same feature group
         if platform_override is not None and feature is not None:
             override_by_priority: defaultdict[
-                int, list[tuple[ClusterHandlerMatch, type[PlatformEntity]]]
+                int,
+                list[tuple[ClusterMatch, type[PlatformEntity]]],
             ] = defaultdict(list)
 
             for priority, priority_matches in matches_by_priority.items():
@@ -528,54 +543,39 @@ def discover_entities_for_endpoint(endpoint: Endpoint) -> Iterator[PlatformEntit
                     ignored_matches,
                 )
 
-        matches = matches_by_priority[highest_priority]
+        selected_matches = matches_by_priority[highest_priority]
 
-        for match, entity_class in matches:
-            server_handlers = set(match.cluster_handlers)
-
-            for optional in match.optional_cluster_handlers:
-                if optional in endpoint.cluster_handlers_by_name:
-                    server_handlers.add(optional)
-
-            client_handlers = set(match.client_cluster_handlers)
-
-            server_cluster_handlers = [
-                endpoint.cluster_handlers_by_name[name] for name in server_handlers
+        # Use platform overrides to replace the results of the normal priority scoring
+        # system when competing entities are part of the same feature group
+        if platform_override is not None and feature is not None:
+            override_matches = [
+                (match, entity)
+                for priority_matches in matches_by_priority.values()
+                for match, entity in priority_matches
+                if platform_override == entity.PLATFORM
             ]
-            client_cluster_handlers = [
-                endpoint.client_cluster_handlers_by_name[name]
-                for name in client_handlers
-            ]
+            if override_matches:
+                selected_matches = override_matches
 
-            # Claim on endpoint
-            endpoint.claim_cluster_handlers(server_cluster_handlers)
-            endpoint.claim_cluster_handlers(client_cluster_handlers)
-
+        for match, entity_class in selected_matches:
             _LOGGER.debug(
-                "'%s' platform -> '%s' using %s + %s",
+                "'%s' platform -> '%s'",
                 entity_class.PLATFORM,
                 entity_class.__name__,
-                [ch.name for ch in server_cluster_handlers],
-                [ch.name for ch in client_cluster_handlers],
             )
 
-            # XXX: Combining server and client cluster handlers should not be done
-            cluster_handlers: list[ClusterHandler | ClientClusterHandler] = (
-                server_cluster_handlers + client_cluster_handlers  # type: ignore[operator]
-            )
+            kwargs: dict[str, Any] = {}
+            cluster = _pick_primary_cluster(endpoint, match)
+            if cluster is not None:
+                kwargs["cluster"] = cluster
 
-            yield entity_class(
-                cluster_handlers=cluster_handlers,
-                endpoint=endpoint,
-                device=device,
-            )
-
-    # Claim any remaining unclaimed cluster handlers that don't produce entities but
-    # still need to be configured for bare events (bound, reporting set up, etc.)
-    for cluster_handler in endpoint.all_cluster_handlers.values():
-        if (
-            cluster_handler.id not in endpoint.claimed_cluster_handlers
-            and cluster_handler.cluster.cluster_id in CLUSTER_HANDLER_ONLY_CLUSTERS
-        ):
-            _LOGGER.debug("Claiming entityless cluster handler %s", cluster_handler)
-            endpoint.claim_cluster_handlers([cluster_handler])
+            try:
+                entity = entity_class(
+                    endpoint=endpoint,
+                    device=device,
+                    **kwargs,
+                )
+            except Exception:  # pylint: disable=broad-except
+                _LOGGER.exception("Failed to create %s entity", entity_class.__name__)
+                continue
+            yield entity
