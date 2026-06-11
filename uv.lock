@@ -1701,7 +1701,7 @@ requires-dist = [
     { name = "pytest", marker = "extra == 'testing'" },
     { name = "python-slugify", marker = "extra == 'testing'" },
     { name = "zha-quirks", specifier = "==1.2.0" },
-    { name = "zigpy", specifier = "==1.5.1" },
+    { name = "zigpy", specifier = "==1.6.0" },
     { name = "zigpy-deconz", specifier = "==0.25.5" },
     { name = "zigpy-xbee", specifier = "==0.21.1" },
     { name = "zigpy-zigate", specifier = "==0.14.0" },
@@ -1763,7 +1763,7 @@ wheels = [
 
 [[package]]
 name = "zigpy"
-version = "1.5.1"
+version = "1.6.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "aiohttp" },
@@ -1777,9 +1777,9 @@ dependencies = [
     { name = "typing-extensions" },
     { name = "voluptuous" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/6f/b8/384fdea540dd5ad78b4f56e2c74667828156723a741b3dc1ca1e931f8fd8/zigpy-1.5.1.tar.gz", hash = "sha256:c0c7b342be963e174b06dd0df325c36e6fe096881030347313de3c51cfa69c5a", size = 351830, upload-time = "2026-05-27T03:10:06.687Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/23/c2/4eea42d20e1371a8c5f68c9f63ccbda2cca4e66b67d341e040ff2b12665f/zigpy-1.6.0.tar.gz", hash = "sha256:41d8035b138131adc7d5a4c93593cd3626f0457479738c7543e66cd4eadfc411", size = 353040, upload-time = "2026-06-11T15:56:07.378Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/88/1e/df306ef9b5c2ccb674206471fbe0037d213bf5d0c4b7d2ebefeec0620f8d/zigpy-1.5.1-py3-none-any.whl", hash = "sha256:51c7c5ea824d769b2d4409a42e2896bb6919126115fd1287f40463bcf4ab0d3a", size = 261541, upload-time = "2026-05-27T03:10:05.106Z" },
+    { url = "https://files.pythonhosted.org/packages/71/d9/339e9c942cdcc66e4bf5e01cfc4d080e565cac66aa5475c9ad3114e35b18/zigpy-1.6.0-py3-none-any.whl", hash = "sha256:24d7cd4a8cf91b7109d1e3dde3218759cdab0b05b8c418c22d696ede3b9e677d", size = 261958, upload-time = "2026-06-11T15:56:05.685Z" },
 ]
 
 [[package]]
