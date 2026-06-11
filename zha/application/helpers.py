@@ -19,6 +19,7 @@ import re
 from typing import TYPE_CHECKING, Any, ParamSpec, TypeVar
 
 import voluptuous as vol
+from zigpy.application import RADIO_ENTRY_POINT_GROUP
 import zigpy.exceptions
 import zigpy.types
 from zigpy.typing import UNDEFINED, UndefinedType
@@ -89,12 +90,8 @@ class RadioLibrary:
     # The actual controller class will be imported dynamically
     controller: type[ControllerApplication] = None  # type: ignore[assignment]
 
-    def load_controller(self) -> type[ControllerApplication]:
-        """Import the radio library and return its controller class.
-
-        This performs blocking imports and must be called from an executor thread,
-        not the event loop.
-        """
+    def import_controller(self) -> type[ControllerApplication]:
+        """Import the radio library and return its controller class."""
         import_path, cls_name = self.module_path.split(":", 1)
         module = importlib.import_module(import_path)
         controller: type[ControllerApplication] = getattr(module, cls_name)
@@ -135,19 +132,14 @@ RADIO_LIBRARIES = {
 }
 
 
-# Entry point group used by external radio libraries to advertise themselves
-RADIO_ENTRY_POINT_GROUP = "zigpy.radio"
-
-
 def get_radio_libraries() -> dict[str, RadioLibrary]:
-    """Return built-in and discovered external radio libraries, keyed by radio type.
+    """Return built-in and discovered external radio libraries, keyed by radio type."""
 
-    External radio libraries are discovered via the `zigpy.radio` entry point
-    group. This performs blocking imports and must be called from an executor
-    thread, not the event loop.
-    """
     radio_libraries: dict[str, RadioLibrary] = dict(RADIO_LIBRARIES)
 
+    # External radio libraries are discovered via the `zigpy.radio` entry point group.
+    # This performs blocking imports and must be called from an executor thread, not
+    # the event loop.
     for entry_point in importlib.metadata.entry_points(group=RADIO_ENTRY_POINT_GROUP):
         controller = entry_point.load()
         radio_libraries[entry_point.name] = RadioLibrary(

@@ -219,7 +219,7 @@ class Gateway(AsyncUtilMixin, EventBase):
         """Get all available radio libraries."""
         return {
             radio_type: dataclasses.replace(
-                library, controller=library.controller or library.load_controller()
+                library, controller=library.controller or library.import_controller()
             )
             for radio_type, library in get_radio_libraries().items()
         }
