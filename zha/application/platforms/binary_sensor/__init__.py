@@ -208,24 +208,6 @@ class Accelerometer(BinarySensor):
                         min_interval=1, max_interval=900, reportable_change=1
                     ),
                 ),
-                "x_axis": AttrConfig(
-                    read_on_startup=False,
-                    reporting=ReportingConfig(
-                        min_interval=1, max_interval=900, reportable_change=1
-                    ),
-                ),
-                "y_axis": AttrConfig(
-                    read_on_startup=False,
-                    reporting=ReportingConfig(
-                        min_interval=1, max_interval=900, reportable_change=1
-                    ),
-                ),
-                "z_axis": AttrConfig(
-                    read_on_startup=False,
-                    reporting=ReportingConfig(
-                        min_interval=1, max_interval=900, reportable_change=1
-                    ),
-                ),
             },
         ),
     }
@@ -253,12 +235,6 @@ class Occupancy(BinarySensor):
                     reporting=ReportingConfig(
                         min_interval=0, max_interval=900, reportable_change=1
                     ),
-                ),
-                OccupancySensing.AttributeDefs.pir_o_to_u_delay: AttrConfig(
-                    read_on_startup=False,
-                ),
-                OccupancySensing.AttributeDefs.pir_u_to_o_delay: AttrConfig(
-                    read_on_startup=False,
                 ),
             },
         ),
@@ -523,6 +499,20 @@ class ReplaceFilter(BinarySensor):
         server_clusters=frozenset({IKEA_AIR_PURIFIER_CLUSTER}),
     )
 
+    _server_cluster_config = {
+        IKEA_AIR_PURIFIER_CLUSTER: ClusterConfig(
+            bind=True,
+            attributes={
+                "replace_filter": AttrConfig(
+                    read_on_startup=False,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
+                ),
+            },
+        ),
+    }
+
 
 @register_entity(AQARA_OPPLE_CLUSTER)
 class AqaraPetFeederErrorDetected(BinarySensor):
@@ -537,6 +527,15 @@ class AqaraPetFeederErrorDetected(BinarySensor):
         server_clusters=frozenset({AQARA_OPPLE_CLUSTER}),
         models=frozenset({"aqara.feeder.acn001"}),
     )
+
+    _server_cluster_config = {
+        AQARA_OPPLE_CLUSTER: ClusterConfig(
+            bind=True,
+            attributes={
+                "error_detected": AttrConfig(read_on_startup=False),
+            },
+        ),
+    }
 
 
 @register_entity(AQARA_OPPLE_CLUSTER)
@@ -554,6 +553,15 @@ class XiaomiPlugConsumerConnected(BinarySensor):
         models=frozenset({"lumi.plug.mmeu01", "lumi.plug.maeu01"}),
     )
 
+    _server_cluster_config = {
+        AQARA_OPPLE_CLUSTER: ClusterConfig(
+            bind=True,
+            attributes={
+                "consumer_connected": AttrConfig(read_on_startup=False),
+            },
+        ),
+    }
+
 
 @register_entity(AQARA_OPPLE_CLUSTER)
 class AqaraThermostatWindowOpen(BinarySensor):
@@ -568,6 +576,15 @@ class AqaraThermostatWindowOpen(BinarySensor):
         server_clusters=frozenset({AQARA_OPPLE_CLUSTER}),
         models=frozenset({"lumi.airrtc.agl001"}),
     )
+
+    _server_cluster_config = {
+        AQARA_OPPLE_CLUSTER: ClusterConfig(
+            bind=True,
+            attributes={
+                "window_open": AttrConfig(read_on_startup=False),
+            },
+        ),
+    }
 
 
 @register_entity(AQARA_OPPLE_CLUSTER)
@@ -585,6 +602,15 @@ class AqaraThermostatValveAlarm(BinarySensor):
         models=frozenset({"lumi.airrtc.agl001"}),
     )
 
+    _server_cluster_config = {
+        AQARA_OPPLE_CLUSTER: ClusterConfig(
+            bind=True,
+            attributes={
+                "valve_alarm": AttrConfig(read_on_startup=False),
+            },
+        ),
+    }
+
 
 @register_entity(AQARA_OPPLE_CLUSTER)
 class AqaraThermostatCalibrated(BinarySensor):
@@ -601,6 +627,15 @@ class AqaraThermostatCalibrated(BinarySensor):
         models=frozenset({"lumi.airrtc.agl001"}),
     )
 
+    _server_cluster_config = {
+        AQARA_OPPLE_CLUSTER: ClusterConfig(
+            bind=True,
+            attributes={
+                "calibrated": AttrConfig(read_on_startup=False),
+            },
+        ),
+    }
+
 
 @register_entity(AQARA_OPPLE_CLUSTER)
 class AqaraThermostatExternalSensor(BinarySensor):
@@ -616,6 +651,15 @@ class AqaraThermostatExternalSensor(BinarySensor):
         server_clusters=frozenset({AQARA_OPPLE_CLUSTER}),
         models=frozenset({"lumi.airrtc.agl001"}),
     )
+
+    _server_cluster_config = {
+        AQARA_OPPLE_CLUSTER: ClusterConfig(
+            bind=True,
+            attributes={
+                "sensor": AttrConfig(read_on_startup=False),
+            },
+        ),
+    }
 
 
 @register_entity(AQARA_OPPLE_CLUSTER)
@@ -648,6 +692,15 @@ class AqaraE1CurtainMotorOpenedByHandBinarySensor(BinarySensor):
         server_clusters=frozenset({AQARA_OPPLE_CLUSTER}),
         models=frozenset({"lumi.curtain.agl001"}),
     )
+
+    _server_cluster_config = {
+        AQARA_OPPLE_CLUSTER: ClusterConfig(
+            bind=True,
+            attributes={
+                "hand_open": AttrConfig(read_on_startup=False),
+            },
+        ),
+    }
 
 
 @register_entity(Thermostat.cluster_id)

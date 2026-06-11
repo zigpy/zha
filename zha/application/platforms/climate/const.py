@@ -5,23 +5,6 @@ from typing import Final
 
 from zigpy.zcl.clusters.hvac import ControlSequenceOfOperation, RunningMode, SystemMode
 
-ATTR_SYS_MODE: Final[str] = "system_mode"
-ATTR_FAN_MODE: Final[str] = "fan_mode"
-ATTR_RUNNING_MODE: Final[str] = "running_mode"
-ATTR_SETPT_CHANGE_SRC: Final[str] = "setpoint_change_source"
-ATTR_SETPT_CHANGE_AMT: Final[str] = "setpoint_change_amount"
-ATTR_OCCUPANCY: Final[str] = "occupancy"
-ATTR_PI_COOLING_DEMAND: Final[str] = "pi_cooling_demand"
-ATTR_PI_HEATING_DEMAND: Final[str] = "pi_heating_demand"
-ATTR_OCCP_COOL_SETPT: Final[str] = "occupied_cooling_setpoint"
-ATTR_OCCP_HEAT_SETPT: Final[str] = "occupied_heating_setpoint"
-ATTR_UNOCCP_HEAT_SETPT: Final[str] = "unoccupied_heating_setpoint"
-ATTR_UNOCCP_COOL_SETPT: Final[str] = "unoccupied_cooling_setpoint"
-ATTR_HVAC_MODE: Final[str] = "hvac_mode"
-ATTR_TARGET_TEMP_HIGH: Final[str] = "target_temp_high"
-ATTR_TARGET_TEMP_LOW: Final[str] = "target_temp_low"
-ATTR_TEMPERATURE: Final[str] = "temperature"
-
 PRECISION_TENTHS: Final[float] = 0.1
 
 # Possible fan state

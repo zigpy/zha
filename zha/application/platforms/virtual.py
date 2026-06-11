@@ -12,7 +12,6 @@ from __future__ import annotations
 import asyncio
 from typing import TYPE_CHECKING, Any
 
-from zhaquirks.quirk_ids import TUYA_PLUG_MANUFACTURER
 import zigpy.exceptions
 import zigpy.types as t
 import zigpy.zcl
@@ -41,6 +40,7 @@ from zha.application.platforms import (
 )
 from zha.application.platforms.const import (
     AQARA_OPPLE_CLUSTER,
+    IKEA_AIR_PURIFIER_CLUSTER,
     IKEA_REMOTE_CLUSTER,
     IKEA_SHORTCUT_V1_CLUSTER,
     INOVELLI_CLUSTER,
@@ -528,7 +528,29 @@ class SmartThingsAccelerationEvent(VirtualEntity):
     )
 
     _server_cluster_config = {
-        SMARTTHINGS_ACCELERATION_CLUSTER: ClusterConfig(bind=False),
+        SMARTTHINGS_ACCELERATION_CLUSTER: ClusterConfig(
+            bind=True,
+            attributes={
+                "x_axis": AttrConfig(
+                    read_on_startup=False,
+                    reporting=ReportingConfig(
+                        min_interval=1, max_interval=900, reportable_change=1
+                    ),
+                ),
+                "y_axis": AttrConfig(
+                    read_on_startup=False,
+                    reporting=ReportingConfig(
+                        min_interval=1, max_interval=900, reportable_change=1
+                    ),
+                ),
+                "z_axis": AttrConfig(
+                    read_on_startup=False,
+                    reporting=ReportingConfig(
+                        min_interval=1, max_interval=900, reportable_change=1
+                    ),
+                ),
+            },
+        ),
     }
 
     def handle_attribute_updated(
@@ -547,6 +569,46 @@ class SmartThingsAccelerationEvent(VirtualEntity):
                 ATTRIBUTE_VALUE: event.value,
             },
         )
+
+
+@register_entity(IKEA_AIR_PURIFIER_CLUSTER)
+class StarkvindAirQualityReporting(VirtualEntity):
+    """Drives `air_quality_25pm` reporting on the STARKVIND manufacturer cluster.
+
+    The PM2.5 value is surfaced by a standard PM25 sensor on a separate, quirk-
+    added cluster; the quirk pushes `air_quality_25pm` updates from this cluster
+    into it via a bus. There is therefore no real entity on this cluster to own
+    the reporting, so this virtual entity binds and configures it.
+
+    TODO: This is reporting plumbing for the STARKVIND quirk
+    (`zhaquirks/ikea/starkvind.py`): the quirk's IKEA cluster only forwards
+    `air_quality_25pm` into the PM25 cluster bus when the device actually sends
+    a report, so the reporting must be configured here. It is unintuitive for
+    this to live in ZHA, decoupled from the quirk that depends on it — it should
+    be moved into the quirk itself (e.g. a v2 quirk `reporting_config`) so the
+    device that needs it owns it, and this virtual entity can then be removed.
+    """
+
+    _unique_id_suffix = "starkvind_air_quality_reporting"
+
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({IKEA_AIR_PURIFIER_CLUSTER}),
+        models=frozenset({"STARKVIND Air purifier", "STARKVIND Air purifier table"}),
+    )
+
+    _server_cluster_config = {
+        IKEA_AIR_PURIFIER_CLUSTER: ClusterConfig(
+            bind=True,
+            attributes={
+                "air_quality_25pm": AttrConfig(
+                    read_on_startup=False,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
+                ),
+            },
+        ),
+    }
 
 
 @register_entity(Identify.cluster_id)
@@ -605,43 +667,6 @@ class AqaraOppleBind(VirtualEntity):
 
 
 @register_entity(AQARA_OPPLE_CLUSTER)
-class AqaraMotionAc02Init(_AqaraOppleInitBase):
-    """Aqara P1 motion sensor attribute init."""
-
-    _cluster_match = ClusterMatch(
-        server_clusters=frozenset({AQARA_OPPLE_CLUSTER}),
-        models=frozenset({"lumi.motion.ac02"}),
-    )
-    _server_cluster_config = {
-        AQARA_OPPLE_CLUSTER: ClusterConfig(
-            attributes={
-                "detection_interval": AttrConfig(read_on_startup=False),
-                "motion_sensitivity": AttrConfig(read_on_startup=False),
-                "trigger_indicator": AttrConfig(read_on_startup=False),
-            },
-        ),
-    }
-
-
-@register_entity(AQARA_OPPLE_CLUSTER)
-class AqaraMotionAgl04Init(_AqaraOppleInitBase):
-    """Aqara high-precision motion sensor attribute init."""
-
-    _cluster_match = ClusterMatch(
-        server_clusters=frozenset({AQARA_OPPLE_CLUSTER}),
-        models=frozenset({"lumi.motion.agl04"}),
-    )
-    _server_cluster_config = {
-        AQARA_OPPLE_CLUSTER: ClusterConfig(
-            attributes={
-                "detection_interval": AttrConfig(read_on_startup=False),
-                "motion_sensitivity": AttrConfig(read_on_startup=False),
-            },
-        ),
-    }
-
-
-@register_entity(AQARA_OPPLE_CLUSTER)
 class AqaraMotionAc01Init(_AqaraOppleInitBase):
     """Aqara FP1 presence sensor attribute init."""
 
@@ -651,53 +676,9 @@ class AqaraMotionAc01Init(_AqaraOppleInitBase):
     )
     _server_cluster_config = {
         AQARA_OPPLE_CLUSTER: ClusterConfig(
+            bind=True,
             attributes={
                 "presence": AttrConfig(read_on_startup=False),
-                "monitoring_mode": AttrConfig(read_on_startup=False),
-                "motion_sensitivity": AttrConfig(read_on_startup=False),
-                "approach_distance": AttrConfig(read_on_startup=False),
-            },
-        ),
-    }
-
-
-@register_entity(AQARA_OPPLE_CLUSTER)
-class AqaraPlugInit(_AqaraOppleInitBase):
-    """Aqara EU plug attribute init."""
-
-    _cluster_match = ClusterMatch(
-        server_clusters=frozenset({AQARA_OPPLE_CLUSTER}),
-        models=frozenset({"lumi.plug.mmeu01", "lumi.plug.maeu01"}),
-    )
-    _server_cluster_config = {
-        AQARA_OPPLE_CLUSTER: ClusterConfig(
-            attributes={
-                "power_outage_memory": AttrConfig(read_on_startup=False),
-                "consumer_connected": AttrConfig(read_on_startup=False),
-            },
-        ),
-    }
-
-
-@register_entity(AQARA_OPPLE_CLUSTER)
-class AqaraFeederInit(_AqaraOppleInitBase):
-    """Aqara pet feeder attribute init."""
-
-    _cluster_match = ClusterMatch(
-        server_clusters=frozenset({AQARA_OPPLE_CLUSTER}),
-        models=frozenset({"aqara.feeder.acn001"}),
-    )
-    _server_cluster_config = {
-        AQARA_OPPLE_CLUSTER: ClusterConfig(
-            attributes={
-                "portions_dispensed": AttrConfig(read_on_startup=False),
-                "weight_dispensed": AttrConfig(read_on_startup=False),
-                "error_detected": AttrConfig(read_on_startup=False),
-                "disable_led_indicator": AttrConfig(read_on_startup=False),
-                "child_lock": AttrConfig(read_on_startup=False),
-                "feeding_mode": AttrConfig(read_on_startup=False),
-                "serving_size": AttrConfig(read_on_startup=False),
-                "portion_weight": AttrConfig(read_on_startup=False),
             },
         ),
     }
@@ -713,18 +694,10 @@ class AqaraThermostatAgl001Init(_AqaraOppleInitBase):
     )
     _server_cluster_config = {
         AQARA_OPPLE_CLUSTER: ClusterConfig(
+            bind=True,
             attributes={
                 "system_mode": AttrConfig(read_on_startup=False),
-                "preset": AttrConfig(read_on_startup=False),
-                "window_detection": AttrConfig(read_on_startup=False),
-                "valve_detection": AttrConfig(read_on_startup=False),
-                "valve_alarm": AttrConfig(read_on_startup=False),
-                "child_lock": AttrConfig(read_on_startup=False),
-                "away_preset_temperature": AttrConfig(read_on_startup=False),
-                "window_open": AttrConfig(read_on_startup=False),
-                "calibrated": AttrConfig(read_on_startup=False),
                 "schedule": AttrConfig(read_on_startup=False),
-                "sensor": AttrConfig(read_on_startup=False),
             },
         ),
     }
@@ -740,50 +713,10 @@ class AqaraSmokeAcn03Init(_AqaraOppleInitBase):
     )
     _server_cluster_config = {
         AQARA_OPPLE_CLUSTER: ClusterConfig(
+            bind=True,
             attributes={
-                "buzzer_manual_mute": AttrConfig(read_on_startup=False),
                 "smoke_density": AttrConfig(read_on_startup=False),
-                "heartbeat_indicator": AttrConfig(read_on_startup=False),
-                "buzzer_manual_alarm": AttrConfig(read_on_startup=False),
                 "buzzer": AttrConfig(read_on_startup=False),
-                "linkage_alarm": AttrConfig(read_on_startup=False),
-            },
-        ),
-    }
-
-
-@register_entity(AQARA_OPPLE_CLUSTER)
-class AqaraMagnetAc01Init(_AqaraOppleInitBase):
-    """Aqara P1 door sensor attribute init."""
-
-    _cluster_match = ClusterMatch(
-        server_clusters=frozenset({AQARA_OPPLE_CLUSTER}),
-        models=frozenset({"lumi.magnet.ac01"}),
-    )
-    _server_cluster_config = {
-        AQARA_OPPLE_CLUSTER: ClusterConfig(
-            attributes={
-                "detection_distance": AttrConfig(read_on_startup=False),
-            },
-        ),
-    }
-
-
-@register_entity(AQARA_OPPLE_CLUSTER)
-class AqaraSwitchAcn047Init(_AqaraOppleInitBase):
-    """Aqara H1M wall switch attribute init."""
-
-    _cluster_match = ClusterMatch(
-        server_clusters=frozenset({AQARA_OPPLE_CLUSTER}),
-        models=frozenset({"lumi.switch.acn047"}),
-    )
-    _server_cluster_config = {
-        AQARA_OPPLE_CLUSTER: ClusterConfig(
-            attributes={
-                "switch_mode": AttrConfig(read_on_startup=False),
-                "switch_type": AttrConfig(read_on_startup=False),
-                "startup_on_off": AttrConfig(read_on_startup=False),
-                "decoupled_mode": AttrConfig(read_on_startup=False),
             },
         ),
     }
@@ -799,49 +732,13 @@ class AqaraCurtainAgl001Init(_AqaraOppleInitBase):
     )
     _server_cluster_config = {
         AQARA_OPPLE_CLUSTER: ClusterConfig(
+            bind=True,
             attributes={
-                "hooks_state": AttrConfig(read_on_startup=False),
-                "hooks_lock": AttrConfig(read_on_startup=False),
                 "positions_stored": AttrConfig(read_on_startup=False),
                 "light_level": AttrConfig(read_on_startup=False),
-                "hand_open": AttrConfig(read_on_startup=False),
             },
         ),
     }
-
-
-@register_entity(AQARA_OPPLE_CLUSTER)
-class AqaraMotionDetectionIntervalSync(_AqaraOppleInitBase):
-    """Propagate the Aqara motion sensor's `detection_interval` to `ias_zone.reset_s`.
-
-    Runs after attribute init so `detection_interval` is in the cache.
-    """
-
-    _unique_id_suffix = "aqara_motion_detection_interval_sync"
-
-    _cluster_match = ClusterMatch(
-        server_clusters=frozenset({AQARA_OPPLE_CLUSTER}),
-        models=frozenset({"lumi.motion.ac02", "lumi.motion.agl04"}),
-    )
-
-    _server_cluster_config = {
-        AQARA_OPPLE_CLUSTER: ClusterConfig(
-            attributes={
-                "detection_interval": AttrConfig(read_on_startup=False),
-            },
-        ),
-    }
-
-    async def async_initialize_cluster(self, cluster: zigpy.zcl.Cluster) -> None:
-        """Mirror detection_interval into the sibling IAS Zone handler."""
-        interval = cluster.get("detection_interval", cluster.get(0x0102))
-        if interval is None:
-            return
-        ias_zone = getattr(cluster.endpoint, "ias_zone", None)
-        if ias_zone is None:
-            return
-        self.debug("Loaded detection interval at startup: %s", interval)
-        ias_zone.reset_s = int(interval)
 
 
 # === Other manufacturer-specific clusters ===
@@ -861,25 +758,6 @@ class SonoffManufacturerBind(VirtualEntity):
     }
 
 
-@register_entity(SONOFF_CLUSTER)
-class SonoffPresenceSensorInit(VirtualEntity):
-    """Sonoff SNZB-06P presence sensor attribute init."""
-
-    _unique_id_suffix = "sonoff_presence_sensor_init"
-
-    _cluster_match = ClusterMatch(
-        server_clusters=frozenset({SONOFF_CLUSTER}),
-        models=frozenset({"SNZB-06P"}),
-    )
-    _server_cluster_config = {
-        SONOFF_CLUSTER: ClusterConfig(
-            attributes={
-                "last_illumination_state": AttrConfig(read_on_startup=False),
-            },
-        ),
-    }
-
-
 @register_entity(TUYA_MANUFACTURER_CLUSTER)
 class TuyaManufacturerBind(VirtualEntity):
     """Bind the Tuya manufacturer cluster on every device that exposes it."""
@@ -891,26 +769,6 @@ class TuyaManufacturerBind(VirtualEntity):
     )
     _server_cluster_config = {
         TUYA_MANUFACTURER_CLUSTER: ClusterConfig(bind=True),
-    }
-
-
-@register_entity(TUYA_MANUFACTURER_CLUSTER)
-class TuyaPlugManufacturerInit(VirtualEntity):
-    """Tuya plug manufacturer-cluster attribute init."""
-
-    _unique_id_suffix = "tuya_plug_manufacturer_init"
-
-    _cluster_match = ClusterMatch(
-        server_clusters=frozenset({TUYA_MANUFACTURER_CLUSTER}),
-        exposed_features=frozenset({TUYA_PLUG_MANUFACTURER}),
-    )
-    _server_cluster_config = {
-        TUYA_MANUFACTURER_CLUSTER: ClusterConfig(
-            attributes={
-                "backlight_mode": AttrConfig(read_on_startup=False),
-                "power_on_state": AttrConfig(read_on_startup=False),
-            },
-        ),
     }
 
 
@@ -951,36 +809,12 @@ class SinopeSwitchInit(VirtualEntity):
         SINOPE_MANUFACTURER_CLUSTER: ClusterConfig(
             bind=True,
             attributes={
-                "double_up_full": AttrConfig(read_on_startup=False),
-                "on_led_color": AttrConfig(read_on_startup=False),
-                "off_led_color": AttrConfig(read_on_startup=False),
-                "off_led_intensity": AttrConfig(read_on_startup=False),
-                "on_led_intensity": AttrConfig(read_on_startup=False),
                 "action_report": AttrConfig(
                     read_on_startup=False,
                     reporting=ReportingConfig(
                         min_interval=0, max_interval=0, reportable_change=1
                     ),
                 ),
-            },
-        ),
-    }
-
-
-@register_entity(SINOPE_MANUFACTURER_CLUSTER)
-class SinopeDimmerInit(VirtualEntity):
-    """Extra Sinope dimmer attribute (DM2500/DM2550 only)."""
-
-    _unique_id_suffix = "sinope_dimmer_init"
-
-    _cluster_match = ClusterMatch(
-        server_clusters=frozenset({SINOPE_MANUFACTURER_CLUSTER}),
-        models=frozenset({"DM2500ZB", "DM2500ZB-G2", "DM2550ZB", "DM2550ZB-G2"}),
-    )
-    _server_cluster_config = {
-        SINOPE_MANUFACTURER_CLUSTER: ClusterConfig(
-            attributes={
-                "on_intensity": AttrConfig(read_on_startup=False),
             },
         ),
     }
@@ -1075,46 +909,12 @@ class InovelliVzm30Init(VirtualEntity):
     )
     _server_cluster_config = {
         INOVELLI_CLUSTER: ClusterConfig(
+            bind=True,
             attributes={
-                name: AttrConfig(read_on_startup=fresh)
-                for name, fresh in {
-                    "dimming_speed_up_remote": False,
-                    "dimming_speed_up_local": False,
-                    "ramp_rate_off_to_on_remote": False,
-                    "ramp_rate_off_to_on_local": False,
-                    "dimming_speed_down_remote": False,
-                    "dimming_speed_down_local": False,
-                    "ramp_rate_on_to_off_remote": False,
-                    "ramp_rate_on_to_off_local": False,
-                    "minimum_level": False,
-                    "maximum_level": False,
-                    "invert_switch": False,
-                    "auto_off_timer": False,
-                    "default_level_local": False,
-                    "default_level_remote": False,
-                    "state_after_power_restored": False,
-                    "load_level_indicator_timeout": False,
-                    "active_power_reports": False,
-                    "periodic_power_and_energy_reports": False,
-                    "active_energy_reports": False,
-                    "power_type": True,
-                    "switch_type": True,
-                    "internal_temp_monitor": False,
-                    "overheated": False,
-                    "button_delay": True,
-                    "smart_bulb_mode": True,
-                    "led_color_when_on": False,
-                    "led_color_when_off": False,
-                    "led_intensity_when_on": False,
-                    "led_intensity_when_off": False,
-                    "led_scaling_mode": False,
-                    "aux_switch_scenes": False,
-                    "binding_off_to_on_sync_level": False,
-                    "local_protection": True,
-                    "output_mode": True,
-                    "firmware_progress_led": False,
-                    "disable_clear_notifications_double_tap": False,
-                }.items()
+                "active_power_reports": AttrConfig(read_on_startup=False),
+                "periodic_power_and_energy_reports": AttrConfig(read_on_startup=False),
+                "active_energy_reports": AttrConfig(read_on_startup=False),
+                "power_type": AttrConfig(read_on_startup=True),
             },
         ),
     }
@@ -1132,56 +932,13 @@ class InovelliVzm31Init(VirtualEntity):
     )
     _server_cluster_config = {
         INOVELLI_CLUSTER: ClusterConfig(
+            bind=True,
             attributes={
-                name: AttrConfig(read_on_startup=fresh)
-                for name, fresh in {
-                    "dimming_speed_up_remote": False,
-                    "dimming_speed_up_local": False,
-                    "ramp_rate_off_to_on_remote": False,
-                    "ramp_rate_off_to_on_local": False,
-                    "dimming_speed_down_remote": False,
-                    "dimming_speed_down_local": False,
-                    "ramp_rate_on_to_off_remote": False,
-                    "ramp_rate_on_to_off_local": False,
-                    "minimum_level": False,
-                    "maximum_level": False,
-                    "invert_switch": False,
-                    "auto_off_timer": False,
-                    "default_level_local": False,
-                    "default_level_remote": False,
-                    "state_after_power_restored": False,
-                    "load_level_indicator_timeout": False,
-                    "active_power_reports": False,
-                    "periodic_power_and_energy_reports": False,
-                    "active_energy_reports": False,
-                    "power_type": True,
-                    "switch_type": True,
-                    "quick_start_time": False,
-                    "quick_start_level": False,
-                    "increased_non_neutral_output": False,
-                    "leading_or_trailing_edge": False,
-                    "internal_temp_monitor": False,
-                    "overheated": False,
-                    "button_delay": True,
-                    "smart_bulb_mode": True,
-                    "double_tap_up_enabled": False,
-                    "double_tap_down_enabled": False,
-                    "double_tap_up_level": False,
-                    "double_tap_down_level": False,
-                    "led_color_when_on": False,
-                    "led_color_when_off": False,
-                    "led_intensity_when_on": False,
-                    "led_intensity_when_off": False,
-                    "led_scaling_mode": False,
-                    "aux_switch_scenes": False,
-                    "binding_off_to_on_sync_level": False,
-                    "local_protection": True,
-                    "output_mode": True,
-                    "on_off_led_mode": False,
-                    "firmware_progress_led": False,
-                    "relay_click_in_on_off_mode": False,
-                    "disable_clear_notifications_double_tap": False,
-                }.items()
+                "active_power_reports": AttrConfig(read_on_startup=False),
+                "periodic_power_and_energy_reports": AttrConfig(read_on_startup=False),
+                "active_energy_reports": AttrConfig(read_on_startup=False),
+                "power_type": AttrConfig(read_on_startup=True),
+                "quick_start_level": AttrConfig(read_on_startup=False),
             },
         ),
     }
@@ -1199,47 +956,15 @@ class InovelliVzm35Init(VirtualEntity):
     )
     _server_cluster_config = {
         INOVELLI_CLUSTER: ClusterConfig(
+            bind=True,
             attributes={
-                name: AttrConfig(read_on_startup=fresh)
-                for name, fresh in {
-                    "dimming_speed_up_remote": False,
-                    "dimming_speed_up_local": False,
-                    "ramp_rate_off_to_on_local": False,
-                    "ramp_rate_off_to_on_remote": False,
-                    "dimming_speed_down_remote": False,
-                    "dimming_speed_down_local": False,
-                    "ramp_rate_on_to_off_local": False,
-                    "ramp_rate_on_to_off_remote": False,
-                    "minimum_level": False,
-                    "maximum_level": False,
-                    "invert_switch": False,
-                    "auto_off_timer": False,
-                    "default_level_local": False,
-                    "default_level_remote": False,
-                    "state_after_power_restored": False,
-                    "load_level_indicator_timeout": False,
-                    "power_type": True,
-                    "switch_type": True,
-                    "non_neutral_aux_med_gear_learn_value": False,
-                    "non_neutral_aux_low_gear_learn_value": False,
-                    "quick_start_time": True,
-                    "button_delay": True,
-                    "smart_fan_mode": True,
-                    "double_tap_up_enabled": False,
-                    "double_tap_down_enabled": False,
-                    "double_tap_up_level": False,
-                    "double_tap_down_level": False,
-                    "led_color_when_on": False,
-                    "led_color_when_off": False,
-                    "led_intensity_when_on": False,
-                    "led_intensity_when_off": False,
-                    "aux_switch_scenes": False,
-                    "local_protection": True,
-                    "output_mode": True,
-                    "on_off_led_mode": False,
-                    "firmware_progress_led": False,
-                    "smart_fan_led_display_levels": False,
-                }.items()
+                "power_type": AttrConfig(read_on_startup=True),
+                "non_neutral_aux_med_gear_learn_value": AttrConfig(
+                    read_on_startup=False
+                ),
+                "non_neutral_aux_low_gear_learn_value": AttrConfig(
+                    read_on_startup=False
+                ),
             },
         ),
     }

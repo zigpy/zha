@@ -100,12 +100,6 @@ class DeviceScannerEntity(BaseDeviceTracker):
         PowerConfiguration.cluster_id: ClusterConfig(
             bind=True,
             attributes={
-                PowerConfiguration.AttributeDefs.battery_voltage: AttrConfig(
-                    read_on_startup=False,
-                    reporting=ReportingConfig(
-                        min_interval=3600, max_interval=10800, reportable_change=1
-                    ),
-                ),
                 PowerConfiguration.AttributeDefs.battery_percentage_remaining: AttrConfig(
                     read_on_startup=False,
                     reporting=ReportingConfig(

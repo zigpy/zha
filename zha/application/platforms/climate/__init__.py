@@ -37,14 +37,6 @@ from zha.application.platforms import (
     register_entity,
 )
 from zha.application.platforms.climate.const import (
-    ATTR_OCCP_COOL_SETPT,
-    ATTR_OCCP_HEAT_SETPT,
-    ATTR_OCCUPANCY,
-    ATTR_PI_COOLING_DEMAND,
-    ATTR_PI_HEATING_DEMAND,
-    ATTR_SYS_MODE,
-    ATTR_UNOCCP_COOL_SETPT,
-    ATTR_UNOCCP_HEAT_SETPT,
     FAN_AUTO,
     FAN_ON,
     HVAC_MODE_2_SYSTEM,
@@ -208,14 +200,14 @@ class Thermostat(BaseThermostat):
     _attr_translation_key: str = "thermostat"
     _enable_turn_on_off_backwards_compatibility = False
     _attr_extra_state_attribute_names: set[str] = {
-        ATTR_SYS_MODE,
-        ATTR_OCCUPANCY,
-        ATTR_OCCP_COOL_SETPT,
-        ATTR_OCCP_HEAT_SETPT,
-        ATTR_PI_HEATING_DEMAND,
-        ATTR_PI_COOLING_DEMAND,
-        ATTR_UNOCCP_COOL_SETPT,
-        ATTR_UNOCCP_HEAT_SETPT,
+        ThermostatCluster.AttributeDefs.system_mode.name,
+        ThermostatCluster.AttributeDefs.occupancy.name,
+        ThermostatCluster.AttributeDefs.occupied_cooling_setpoint.name,
+        ThermostatCluster.AttributeDefs.occupied_heating_setpoint.name,
+        ThermostatCluster.AttributeDefs.pi_heating_demand.name,
+        ThermostatCluster.AttributeDefs.pi_cooling_demand.name,
+        ThermostatCluster.AttributeDefs.unoccupied_cooling_setpoint.name,
+        ThermostatCluster.AttributeDefs.unoccupied_heating_setpoint.name,
     }
 
     _cluster_match = ClusterMatch(
@@ -564,18 +556,30 @@ class Thermostat(BaseThermostat):
 
         response = super().state
 
-        response[ATTR_SYS_MODE] = (
+        response[ThermostatCluster.AttributeDefs.system_mode.name] = (
             f"[{self._system_mode}]/{system_mode}"
             if self.hvac_mode is not None
             else None
         )
-        response[ATTR_OCCUPANCY] = self._occupancy
-        response[ATTR_OCCP_COOL_SETPT] = self._occupied_cooling_setpoint
-        response[ATTR_OCCP_HEAT_SETPT] = self._occupied_heating_setpoint
-        response[ATTR_PI_HEATING_DEMAND] = self._pi_heating_demand
-        response[ATTR_PI_COOLING_DEMAND] = self._pi_cooling_demand
-        response[ATTR_UNOCCP_COOL_SETPT] = self._unoccupied_cooling_setpoint
-        response[ATTR_UNOCCP_HEAT_SETPT] = self._unoccupied_heating_setpoint
+        response[ThermostatCluster.AttributeDefs.occupancy.name] = self._occupancy
+        response[ThermostatCluster.AttributeDefs.occupied_cooling_setpoint.name] = (
+            self._occupied_cooling_setpoint
+        )
+        response[ThermostatCluster.AttributeDefs.occupied_heating_setpoint.name] = (
+            self._occupied_heating_setpoint
+        )
+        response[ThermostatCluster.AttributeDefs.pi_heating_demand.name] = (
+            self._pi_heating_demand
+        )
+        response[ThermostatCluster.AttributeDefs.pi_cooling_demand.name] = (
+            self._pi_cooling_demand
+        )
+        response[ThermostatCluster.AttributeDefs.unoccupied_cooling_setpoint.name] = (
+            self._unoccupied_cooling_setpoint
+        )
+        response[ThermostatCluster.AttributeDefs.unoccupied_heating_setpoint.name] = (
+            self._unoccupied_heating_setpoint
+        )
         return response
 
     @property
@@ -779,7 +783,11 @@ class Thermostat(BaseThermostat):
     ) -> None:
         """Handle attribute update from device."""
         if (
-            event.attribute_name in (ATTR_OCCP_COOL_SETPT, ATTR_OCCP_HEAT_SETPT)
+            event.attribute_name
+            in (
+                ThermostatCluster.AttributeDefs.occupied_cooling_setpoint.name,
+                ThermostatCluster.AttributeDefs.occupied_heating_setpoint.name,
+            )
             and self.preset_mode == Preset.AWAY
             and await self._async_get_occupancy() is True
         ):
@@ -1104,7 +1112,7 @@ class ZehnderThermostat(Thermostat):
 
         response = super().state
 
-        response[ATTR_SYS_MODE] = (
+        response[ThermostatCluster.AttributeDefs.system_mode.name] = (
             f"[{self._system_mode}]/{system_mode}"
             if self.hvac_mode is not None
             else None

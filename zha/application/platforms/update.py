@@ -300,6 +300,7 @@ class FirmwareUpdateEntity(BaseFirmwareUpdateEntity):
 
     _client_cluster_config = {
         Ota.cluster_id: ClusterConfig(
+            bind=False,
             attributes={
                 Ota.AttributeDefs.current_file_version: AttrConfig(
                     read_on_startup=False,
@@ -368,6 +369,7 @@ class FirmwareUpdateServerEntity(FirmwareUpdateEntity):
 
     _server_cluster_config = {
         Ota.cluster_id: ClusterConfig(
+            bind=False,
             attributes={
                 Ota.AttributeDefs.current_file_version: AttrConfig(
                     read_on_startup=False,
