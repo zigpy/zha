@@ -1012,6 +1012,10 @@ class FakeExternalController:
     DESCRIPTION = "A fake external radio"
 
 
+class FakeExternalControllerMissingMetadata(ControllerApplication):
+    """Fake external radio controller without metadata."""
+
+
 def _fake_entry_point() -> importlib.metadata.EntryPoint:
     return importlib.metadata.EntryPoint(
         name="fake", value=f"{__name__}:FakeExternalController", group="zigpy.radio"
@@ -1039,3 +1043,43 @@ async def test_external_radio_libraries(zha_data: ZHAData) -> None:
 
     assert radio_libraries["fake"].controller is FakeExternalController
     assert radio_libraries["ezsp"].controller is not None
+
+
+def test_get_radio_libraries_load_failure(caplog: pytest.LogCaptureFixture) -> None:
+    """Test that an external radio library failing to import is skipped."""
+    entry_point = importlib.metadata.EntryPoint(
+        name="broken", value="some_nonexistent_module:Controller", group="zigpy.radio"
+    )
+
+    with patch("importlib.metadata.entry_points", return_value=[entry_point]):
+        radio_libraries = get_radio_libraries()
+
+    assert "broken" not in radio_libraries
+    assert "Failed to load external radio library: 'broken'" in caplog.text
+
+
+def test_get_radio_libraries_missing_metadata(caplog: pytest.LogCaptureFixture) -> None:
+    """Test that an external radio library without metadata is skipped."""
+    entry_point = importlib.metadata.EntryPoint(
+        name="incomplete",
+        value=f"{__name__}:FakeExternalControllerMissingMetadata",
+        group="zigpy.radio",
+    )
+
+    with patch("importlib.metadata.entry_points", return_value=[entry_point]):
+        radio_libraries = get_radio_libraries()
+
+    assert "incomplete" not in radio_libraries
+    assert (
+        "Ignoring external radio library with missing metadata: 'incomplete'"
+        in caplog.text
+    )
+
+
+async def test_unknown_radio_type(zha_data: ZHAData) -> None:
+    """Test that an unknown radio type raises a ValueError."""
+    zha_data.config.coordinator_configuration.radio_type = "unknown"
+    gateway = Gateway(zha_data)
+
+    with pytest.raises(ValueError, match="Unknown radio type: 'unknown'"):
+        _ = gateway.radio_library
