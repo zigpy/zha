@@ -85,7 +85,6 @@ class RadioLibrary:
     display_name: str
     description: str
     module_path: str
-    deprecated: bool = False
 
     # The actual controller class will be imported dynamically
     controller: type[ControllerApplication] = None  # type: ignore[assignment]
@@ -126,14 +125,12 @@ RADIO_LIBRARIES = {
         display_name="ZiGate",
         description="ZiGate: PiZiGate, ZiGate USB-TTL, ZiGate WiFi",
         module_path="zigpy_zigate.zigbee.application:ControllerApplication",
-        deprecated=True,
     ),
     BuiltinRadioType.XBEE: RadioLibrary(
         radio_type=BuiltinRadioType.XBEE,
         display_name="XBee",
         description="Digi XBee: Series 2, 2C, 3",
         module_path="zigpy_xbee.zigbee.application:ControllerApplication",
-        deprecated=True,
     ),
 }
 
