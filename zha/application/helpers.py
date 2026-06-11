@@ -141,7 +141,23 @@ def get_radio_libraries() -> dict[str, RadioLibrary]:
     # This performs blocking imports and must be called from an executor thread, not
     # the event loop.
     for entry_point in importlib.metadata.entry_points(group=RADIO_ENTRY_POINT_GROUP):
-        controller = entry_point.load()
+        try:
+            controller = entry_point.load()
+        except Exception:  # pylint: disable=broad-except
+            _LOGGER.warning(
+                "Failed to load external radio library: %r",
+                entry_point.name,
+                exc_info=True,
+            )
+            continue
+
+        if controller.DISPLAY_NAME is None or controller.DESCRIPTION is None:
+            _LOGGER.warning(
+                "Ignoring external radio library with missing metadata: %r",
+                entry_point.name,
+            )
+            continue
+
         radio_libraries[entry_point.name] = RadioLibrary(
             radio_type=entry_point.name,
             display_name=controller.DISPLAY_NAME,
