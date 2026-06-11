@@ -1198,6 +1198,32 @@ async def test_join_binding_reporting(zha_gateway: Gateway) -> None:
     ]
 
 
+async def test_quirks_v2_prevent_entity_also_prevents_binding(
+    zha_gateway: Gateway,
+) -> None:
+    """A quirk-prevented entity must not drive cluster binding."""
+    zigpy_dev = await zigpy_device_from_json(
+        zha_gateway.application_controller,
+        "tests/data/devices/innr-sp-240.json",
+    )
+
+    level = zigpy_dev.endpoints[1].level
+    on_off = zigpy_dev.endpoints[1].on_off
+
+    with (
+        patch.object(level, "bind", wraps=level.bind) as mock_level_bind,
+        patch.object(on_off, "bind", wraps=on_off.bind) as mock_on_off_bind,
+    ):
+        zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
+
+    assert zha_device.quirk_applied
+
+    # The prevented LevelControl entity no longer binds its cluster, while the
+    # sibling OnOff entity (not prevented) still does.
+    assert mock_level_bind.mock_calls == []
+    assert mock_on_off_bind.mock_calls == [call()]
+
+
 async def test_endpoint_none_profile(
     zha_gateway: Gateway,
     caplog: pytest.LogCaptureFixture,
