@@ -513,28 +513,6 @@ class Device(LogMixin, EventBase):
         return getattr(self._zigpy_device, "quirk_metadata", None)
 
     @cached_property
-    def manufacturer(self) -> str:
-        """Return manufacturer for device."""
-        if self.is_active_coordinator:
-            manufacturer = (
-                self.gateway.application_controller.state.node_info.manufacturer
-            )
-            if manufacturer is None:
-                return ""
-            return manufacturer
-
-        if (
-            self.quirk_metadata is not None
-            and self.quirk_metadata.friendly_name is not None
-        ):
-            return self.quirk_metadata.friendly_name.manufacturer
-
-        if self._zigpy_device.manufacturer is None:
-            return UNKNOWN_MANUFACTURER
-
-        return self._zigpy_device.manufacturer
-
-    @cached_property
     def model(self) -> str:
         """Return model for device."""
         if self.is_active_coordinator:
@@ -543,15 +521,30 @@ class Device(LogMixin, EventBase):
                 return f"Generic Zigbee Coordinator ({self.gateway.radio_type.pretty_name})"
             return model
 
-        if (
-            self.quirk_metadata is not None
-            and self.quirk_metadata.friendly_name is not None
-        ):
+        if self.quirk_metadata is not None:
             return self.quirk_metadata.friendly_name.model
 
-        if self._zigpy_device.model is None:
-            return UNKNOWN_MODEL
+        return self.model_id or UNKNOWN_MODEL
 
+    @cached_property
+    def manufacturer(self) -> str:
+        """Return manufacturer for device."""
+        if self.quirk_metadata is not None:
+            return self.quirk_metadata.friendly_name.manufacturer
+
+        return self.manufacturer_id or UNKNOWN_MANUFACTURER
+
+    @cached_property
+    def manufacturer_id(self) -> str | None:
+        """Return manufacturer ID for device."""
+        if self.is_active_coordinator:
+            return self.gateway.application_controller.state.node_info.manufacturer
+
+        return self._zigpy_device.manufacturer
+
+    @cached_property
+    def model_id(self) -> str | None:
+        """Return model for device."""
         return self._zigpy_device.model
 
     @cached_property
