@@ -10,6 +10,7 @@ import zoneinfo
 
 from freezegun import freeze_time
 import pytest
+from zhaquirks.quirk_ids import THERMOSTAT_FAN_ONLY_HVAC
 import zhaquirks.sinope.thermostat
 from zhaquirks.sinope.thermostat import SinopeTechnologiesThermostatCluster
 import zhaquirks.tuya.ts0601_trv
@@ -45,11 +46,7 @@ from zha.application.platforms.climate import (
     Thermostat as ThermostatEntity,
     ZehnderThermostat,
 )
-from zha.application.platforms.climate.const import (
-    THERMOSTAT_FAN_ONLY_HVAC,
-    FanState,
-    HVACMode,
-)
+from zha.application.platforms.climate.const import FanState, HVACMode
 from zha.application.platforms.number import NumberConfigurationEntity
 from zha.application.platforms.sensor import (
     Sensor,

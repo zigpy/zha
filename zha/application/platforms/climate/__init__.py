@@ -9,6 +9,7 @@ import datetime as dt
 import functools
 from typing import TYPE_CHECKING, Any
 
+from zhaquirks.quirk_ids import THERMOSTAT_FAN_ONLY_HVAC
 from zigpy.profiles import zha
 from zigpy.zcl import (
     AttributeReadEvent,
@@ -19,7 +20,6 @@ from zigpy.zcl import (
 )
 from zigpy.zcl.clusters.hvac import (
     Fan as FanCluster,
-    FanMode,
     RunningState,
     SystemMode,
     Thermostat as ThermostatCluster,
@@ -53,7 +53,6 @@ from zha.application.platforms.climate.const import (
     SEQ_FAN_MODES,
     SEQ_OF_OPERATION,
     SYSTEM_MODE_2_HVAC,
-    THERMOSTAT_FAN_ONLY_HVAC,
     ZCL_TEMP,
     ZCL_TO_FAN_MODE,
     ClimateEntityFeature,
