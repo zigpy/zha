@@ -8,6 +8,7 @@ from typing import Final
 import bellows.zigbee.application
 import zigpy.application
 import zigpy_deconz.zigbee.application
+import zigpy_espzb.zigbee.application
 import zigpy_xbee.zigbee.application
 import zigpy_zigate.zigbee.application
 import zigpy_znp.zigbee.application
@@ -109,6 +110,10 @@ class RadioType(enum.Enum):
     deconz = (
         "deCONZ = dresden elektronik deCONZ protocol: ConBee I/II, RaspBee I/II",
         zigpy_deconz.zigbee.application.ControllerApplication,
+    )
+    znsp = (
+        "ZNSP = Espressif Zigbee NCP Serial Protocol: ESP32-H2, ESP32-H4, ESP32-C6",
+        zigpy_espzb.zigbee.application.ControllerApplication,
     )
     zigate = (
         "ZiGate = ZiGate Zigbee radios: PiZiGate, ZiGate USB-TTL, ZiGate WiFi",
