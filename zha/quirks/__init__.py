@@ -39,6 +39,7 @@ FilterType = Callable[[zigpy.device.Device], bool]
 
 DEVICE_REGISTRY: DeviceRegistry
 
+
 class ModelInfo(NamedTuple):
     """A (manufacturer, model) pair to match. `None` is a wildcard."""
 
@@ -104,24 +105,46 @@ class DeviceMatch:
 
 
 @dataclass(frozen=True)
+class QuirkSource:
+    """Where a quirk is defined: provenance for diagnostics and custom-quirk purging."""
+
+    module: str
+    file: str | None
+    line: int | None
+    label: str
+
+    @classmethod
+    def from_class(cls, target: type) -> QuirkSource:
+        """Derive provenance from a hand-written quirk class."""
+        return cls(
+            module=target.__module__,
+            file=inspect.getsourcefile(target),
+            line=inspect.getsourcelines(target)[1],
+            label=target.__qualname__,
+        )
+
+
+def make_zigpy_device_replacement(
+    device_cls: type[zigpy.device.Device],
+) -> Callable[[zigpy.device.Device], zigpy.device.Device]:
+    """Return a transform wrapping a device in `device_cls` (a `BaseCustomDevice`)."""
+
+    def _replace(device: zigpy.device.Device) -> zigpy.device.Device:
+        return device_cls(device.application, device.ieee, device.nwk, device)
+
+    return _replace
+
+
+@dataclass(frozen=True)
 class QuirkRegistryEntry:
-    """A registered device quirk: matching criteria plus how to build the device."""
+    """A registered quirk: how to match, mutate, build and locate a device."""
 
-    # Matcher for this device
     device_match: DeviceMatch
-
-    # Zigpy device class replacement
-    zigpy_device_cls: type[zigpy.device.Device] | None = None
-
-    # Transformations to apply to the zigpy device object. Used byzha-device-handlers to
-    # avoid creating unique subclasses at runtime.
-    zigpy_device_transforms: tuple[Callable[[zigpy.device.Device], zigpy.device.Device], ...] = ()
-
-    # ZHA device class replacement
-    zha_device_cls: type[Device] | None = None
-
-    # A somewhat human-readable way to find the quirk defining this device
-    quirk_file: str | None = None
+    zigpy_transforms: tuple[
+        Callable[[zigpy.device.Device], zigpy.device.Device], ...
+    ] = ()
+    zha_device_factory: Callable[..., Device] | None = None
+    source: QuirkSource | None = None
 
 
 class DeviceRegistry:
@@ -169,9 +192,9 @@ class DeviceRegistry:
         """Remove quirks loaded from the custom quirks directory."""
         for entries in self._registry.values():
             for entry in list(entries):
-                if entry.quirk_file is None:
+                if entry.source is None or entry.source.file is None:
                     continue
-                if Path(entry.quirk_file).is_relative_to(custom_quirks_root):
+                if Path(entry.source.file).is_relative_to(custom_quirks_root):
                     _LOGGER.debug("Removing stale custom quirk: %s", entry)
                     entries.remove(entry)
 
@@ -184,15 +207,17 @@ def register_device(cls: type[Device]) -> type[Device]:
     if cls._device_match is None:
         raise ValueError(f"{cls!r} does not define `_device_match`")
 
-    module = inspect.getmodule(cls)
+    transforms: list[Callable[[zigpy.device.Device], zigpy.device.Device]] = []
+    if cls._zigpy_device_cls is not None:
+        transforms.append(make_zigpy_device_replacement(cls._zigpy_device_cls))
+    transforms.extend(cls._zigpy_device_transforms)
 
     DEVICE_REGISTRY.register(
         QuirkRegistryEntry(
             device_match=cls._device_match,
-            zigpy_device_cls=cls._zigpy_device_cls,
-            zigpy_device_transforms=(),
-            zha_device_cls=cls,
-            quirk_file=module.__file__ if module is not None else None,
+            zigpy_transforms=tuple(transforms),
+            zha_device_factory=cls,
+            source=QuirkSource.from_class(cls),
         )
     )
 
@@ -221,10 +246,7 @@ def resolve_zigpy_device(zigpy_device: zigpy.device.Device) -> zigpy.device.Devi
 
     resolved_device = zigpy_device
 
-    if entry.zigpy_device_cls is not None:
-        resolved_device = entry.zigpy_device_cls.from_zigpy_device(zigpy_device)
-
-    for transform in entry.zigpy_device_transforms:
+    for transform in entry.zigpy_transforms:
         resolved_device = transform(resolved_device)
 
     # Sneak the registry entry in with the device so ZHA can use it

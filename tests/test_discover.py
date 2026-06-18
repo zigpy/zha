@@ -63,7 +63,7 @@ from zha.application.platforms.light import HueLight
 from zha.application.platforms.number import BaseNumber, NumberMode
 from zha.quirks import (
     DEVICE_REGISTRY as QUIRKS_DEVICE_REGISTRY,
-    ZHA_DEVICE_FACTORY_ATTRIBUTE,
+    QUIRK_REGISTRY_ENTRY_ATTR,
     resolve_zigpy_device,
 )
 from zha.units import UnitOfTime
@@ -495,9 +495,11 @@ async def test_quirks_v2_entity_no_metadata(
     zigpy_device = _get_test_device(
         zha_gateway, "Ikea of Sweden2", "TRADFRI remote control2"
     )
-    quirk_cls = getattr(zigpy_device, ZHA_DEVICE_FACTORY_ATTRIBUTE)
-    quirk_cls._quirk_definition = attrs.evolve(
-        quirk_cls._quirk_definition, entity_metadata=()
+    factory_kwargs = getattr(
+        zigpy_device, QUIRK_REGISTRY_ENTRY_ATTR
+    ).zha_device_factory.keywords
+    factory_kwargs["quirk_definition"] = attrs.evolve(
+        factory_kwargs["quirk_definition"], entity_metadata=()
     )
     zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
     assert (
@@ -523,11 +525,13 @@ async def test_quirks_v2_entity_discovery_errors(
         cluster_type = ClusterType.Server
         entity_platform = Platform.UPDATE
 
-    quirk_cls = getattr(zigpy_device, ZHA_DEVICE_FACTORY_ATTRIBUTE)
-    quirk_cls._quirk_definition = attrs.evolve(
-        quirk_cls._quirk_definition,
+    factory_kwargs = getattr(
+        zigpy_device, QUIRK_REGISTRY_ENTRY_ATTR
+    ).zha_device_factory.keywords
+    factory_kwargs["quirk_definition"] = attrs.evolve(
+        factory_kwargs["quirk_definition"],
         entity_metadata=(
-            *quirk_cls._quirk_definition.entity_metadata,
+            *factory_kwargs["quirk_definition"].entity_metadata,
             UnknownEntityMetadata(),
         ),
     )
@@ -646,7 +650,7 @@ async def test_quirks_v2_metadata_bad_device_classes(
     assert expected_exception_string in caplog.text
 
     # remove the quirk so we don't pollute the rest of the tests
-    QUIRKS_DEVICE_REGISTRY.remove(getattr(zigpy_device, ZHA_DEVICE_FACTORY_ATTRIBUTE))
+    QUIRKS_DEVICE_REGISTRY.remove(getattr(zigpy_device, QUIRK_REGISTRY_ENTRY_ATTR))
 
 
 async def test_quirks_v2_fallback_name(zha_gateway: Gateway) -> None:

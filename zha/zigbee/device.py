@@ -88,7 +88,7 @@ from zha.const import STATE_CHANGED
 from zha.event import EventBase
 from zha.exceptions import ZHAException
 from zha.mixins import LogMixin
-from zha.quirks import QUIRK_REGISTRY_ENTRY_ATTR, DeviceMatch, register_device
+from zha.quirks import QUIRK_REGISTRY_ENTRY_ATTR, DeviceMatch
 from zha.zigbee.cluster_config import (
     aggregate_cluster_configs,
     configure_cluster_configs,
@@ -364,18 +364,15 @@ class ExtendedDeviceInfo(DeviceInfo):
     endpoint_names: list[EndpointNameInfo]
 
 
-@register_device
 class Device(LogMixin, EventBase):
     """ZHA Zigbee device object."""
 
-    # The default ZHA device object matches any device
-    _device_match = DeviceMatch(
-        applies_to=(),
-        filters=(),
-    )
-
-    # The default ZHA device object does not need a custom zigpy device subclass
+    # Authoring surface for hand-written quirks; `None` marks the unquirked fallback.
+    _device_match: DeviceMatch | None = None
     _zigpy_device_cls: type[zigpy.device.Device] | None = None
+    _zigpy_device_transforms: tuple[
+        Callable[[zigpy.device.Device], zigpy.device.Device], ...
+    ] = ()
 
     # Cached properties that depend on the zigpy device and must be invalidated
     # when the underlying device is swapped (e.g. after a re-interview).
@@ -425,20 +422,6 @@ class Device(LogMixin, EventBase):
 
         self._init_from_zigpy_device(zigpy_device)
 
-    def _compute_quirk_class(self) -> str:
-        """Return the dotted path identifying the applied quirk.
-
-        Hand-written quirks report their own `Device` subclass; unquirked and
-        v1-quirked devices report the underlying zigpy device class.
-        `QuirkV2Device` overrides this to report the declarative quirk identity.
-        """
-        if type(self)._device_match is not None:
-            return f"{type(self).__module__}.{type(self).__name__}"
-        return (
-            f"{self._zigpy_device.__class__.__module__}."
-            f"{self._zigpy_device.__class__.__name__}"
-        )
-
     def _init_from_zigpy_device(self, zigpy_device: zigpy.device.Device) -> None:
         """(Re-)initialize device state from a zigpy device.
 
@@ -463,12 +446,18 @@ class Device(LogMixin, EventBase):
             with contextlib.suppress(AttributeError):
                 delattr(self, attr)
 
-        self.quirk_applied: bool = (
-            type(self)._device_match is not None
-            or self.quirk_metadata is not None
-            or isinstance(self._zigpy_device, zigpy.quirks.BaseCustomDevice)
+        # ZHA quirks stash their registry entry on the device; v1 produces a BaseCustomDevice.
+        entry = getattr(self._zigpy_device, QUIRK_REGISTRY_ENTRY_ATTR, None)
+        self.quirk_applied: bool = entry is not None or isinstance(
+            self._zigpy_device, zigpy.quirks.BaseCustomDevice
         )
-        self.quirk_class: str = self._compute_quirk_class()
+        if entry is not None and entry.source is not None:
+            self.quirk_class: str = f"{entry.source.module}.{entry.source.label}"
+        else:
+            self.quirk_class = (
+                f"{self._zigpy_device.__class__.__module__}."
+                f"{self._zigpy_device.__class__.__name__}"
+            )
 
         # add v1 quirk exposed features (legacy quirk id)
         qid: set[str] | str = getattr(self._zigpy_device, ATTR_QUIRK_ID, set())
@@ -831,8 +820,8 @@ class Device(LogMixin, EventBase):
             return CoordinatorDevice(zigpy_dev, gateway)
 
         entry = getattr(zigpy_dev, QUIRK_REGISTRY_ENTRY_ATTR, None)
-        if entry is not None:
-            return entry.zha_device_cls(zigpy_dev, gateway)
+        if entry is not None and entry.zha_device_factory is not None:
+            return entry.zha_device_factory(zigpy_dev, gateway)
 
         return cls(zigpy_dev, gateway)
 
