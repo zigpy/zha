@@ -9,7 +9,7 @@ import pytest
 from zigpy.profiles import zha
 import zigpy.profiles.zha
 from zigpy.quirks import DeviceRegistry
-from zigpy.quirks.v2 import CustomDeviceV2, QuirkBuilder
+from zigpy.quirks.v2 import CustomZigpyDevice, QuirkBuilder
 from zigpy.typing import UNDEFINED
 from zigpy.zcl.clusters import general, measurement, security
 from zigpy.zcl.clusters.general import OnOff
@@ -287,7 +287,7 @@ async def test_quirks_binary_sensor_attr_converter(zha_gateway: Gateway) -> None
 
     zigpy_device_ = registry.get_device(zigpy_dev)
 
-    assert isinstance(zigpy_device_, CustomDeviceV2)
+    assert isinstance(zigpy_device_, CustomZigpyDevice)
     cluster = zigpy_device_.endpoints[1].on_off
 
     zha_device = await join_zigpy_device(zha_gateway, zigpy_device_)

@@ -13,7 +13,7 @@ from zhaquirks import (
 from zigpy.const import SIG_EP_PROFILE
 from zigpy.profiles import zha
 from zigpy.quirks import CustomCluster, CustomDevice, get_device
-from zigpy.quirks.v2 import CustomDeviceV2, QuirkBuilder
+from zigpy.quirks.v2 import CustomZigpyDevice, QuirkBuilder
 import zigpy.types as t
 from zigpy.typing import UNDEFINED
 from zigpy.zcl import foundation
@@ -191,7 +191,7 @@ async def test_on_off_select_attribute_report_v2(
 
     zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
     cluster = zigpy_device.endpoints[1].opple_cluster
-    assert isinstance(zha_device.device, CustomDeviceV2)
+    assert isinstance(zha_device.device, CustomZigpyDevice)
 
     entity = get_entity(
         zha_device,

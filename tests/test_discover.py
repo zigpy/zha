@@ -14,13 +14,13 @@ import warnings
 
 import attrs
 import pytest
-from zhaquirks.ikea import PowerConfig1CRCluster, ScenesCluster
-from zhaquirks.v2 import QuirkBuilder
-from zhaquirks.v2.metadata import (
+from zhaquirks.builder import QuirkBuilder
+from zhaquirks.builder.metadata import (
     BinarySensorMetadata,
     NumberMetadata,
     ZCLSensorMetadata,
 )
+from zhaquirks.ikea import PowerConfig1CRCluster, ScenesCluster
 from zhaquirks.xiaomi import (
     BasicCluster,
     LocalIlluminanceMeasurementCluster,
@@ -762,7 +762,7 @@ async def test_devices_from_files(
         )
 
         # The quirk class path varies with the quirks implementation (v2 quirks
-        # used to all be `zigpy.quirks.v2.CustomDeviceV2`, compiled ZHA quirks
+        # used to all be `zigpy.quirks.v2.CustomZigpyDevice`, compiled ZHA quirks
         # name the defining module); `quirk_applied` still has to match.
         del loaded_device_data["quirk_class"]
         del device_data["quirk_class"]

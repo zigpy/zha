@@ -16,7 +16,7 @@ import zigpy
 from zigpy.exceptions import ZigbeeException
 from zigpy.profiles import zha
 from zigpy.quirks import CustomCluster, CustomDevice, DeviceRegistry
-from zigpy.quirks.v2 import CustomDeviceV2, QuirkBuilder
+from zigpy.quirks.v2 import CustomZigpyDevice, QuirkBuilder
 import zigpy.types as t
 from zigpy.typing import UNDEFINED
 from zigpy.zcl.clusters import general, security
@@ -232,7 +232,7 @@ async def custom_button_device(zha_gateway: Gateway):
 
     zigpy_device = registry.get_device(zigpy_device)
 
-    assert isinstance(zigpy_device, CustomDeviceV2)
+    assert isinstance(zigpy_device, CustomZigpyDevice)
     # XXX: this should be handled automatically, patch quirks added cluster
     patch_cluster_for_testing(zigpy_device.endpoints[1].mfg_identify)
 
@@ -336,7 +336,7 @@ async def test_quirks_write_attr_buttons_uid(zha_gateway: Gateway) -> None:
 
     zigpy_device_ = registry.get_device(zigpy_dev)
 
-    assert isinstance(zigpy_device_, CustomDeviceV2)
+    assert isinstance(zigpy_device_, CustomZigpyDevice)
     zha_device = await join_zigpy_device(zha_gateway, zigpy_device_)
 
     entity_btn_1 = get_entity(zha_device, platform=Platform.BUTTON, qualifier="btn_1")
@@ -417,7 +417,7 @@ async def test_quirks_v2_button_only_cluster_is_not_configured(
     with patch("zha.application.discovery.discover_entities_for_endpoint"):
         zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
 
-    assert isinstance(zha_device.device, CustomDeviceV2)
+    assert isinstance(zha_device.device, CustomZigpyDevice)
 
     # The quirks v2 button entity is created and usable
     entity = get_entity(zha_device, platform=Platform.BUTTON, entity_type=Button)
