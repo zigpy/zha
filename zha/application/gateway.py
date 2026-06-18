@@ -250,6 +250,9 @@ class Gateway(AsyncUtilMixin, EventBase):
             auto_form=False,
             start_radio=False,
             device_resolver=resolve_zigpy_device,
+            uninitialized_packet_handler=(
+                self.config.config.quirks_configuration.uninitialized_packet_handler
+            ),
         )
 
         await self.application_controller.startup(auto_form=True)

@@ -380,6 +380,11 @@ class QuirksConfiguration:
     setup_function: Callable[[str | None], None] | None = dataclasses.field(
         default=None
     )
+    # Injected by the consumer to short-circuit flaky joins (Xiaomi quick-init);
+    # forwarded to the controller as its uninitialized-packet handler.
+    uninitialized_packet_handler: Callable[..., None] | None = dataclasses.field(
+        default=None
+    )
 
 
 @dataclass(kw_only=True, slots=True)
