@@ -31,7 +31,6 @@ from zha.event import EventBase
 from zha.mixins import LogMixin
 
 if TYPE_CHECKING:
-    from zha.quirks.metadata import EntityMetadata
     from zha.zigbee.device import Device
     from zha.zigbee.endpoint import Endpoint
     from zha.zigbee.group import Group
@@ -495,16 +494,37 @@ class PlatformEntity(BaseEntity):
         device: Device,
         *,
         cluster: zigpy.zcl.Cluster,
-        entity_metadata: EntityMetadata | None = None,
+        from_quirk: bool = False,
+        fallback_name: str | None = None,
+        translation_key: str | None = None,
+        translation_placeholders: Mapping[str, str] | None = None,
+        unique_id_suffix: str | None = None,
+        entity_type: EntityType | None = None,
+        primary: bool | None = None,
+        initially_disabled: bool = False,
         legacy_discovery_unique_id: str | None = None,
         **kwargs: Any,
     ):
-        """Initialize the platform entity."""
-        if entity_metadata is not None:
-            self._init_from_quirks_metadata(entity_metadata)
+        """Initialize the platform entity.
+
+        Quirk entities are constructed with `from_quirk=True` and the generic
+        config keywords (`fallback_name`, `translation_key`, `entity_type`, etc.);
+        the platform subclasses add their own keywords. Default-discovery
+        entities pass none of these.
+        """
+        if from_quirk:
+            self._apply_quirk_entity_config(
+                fallback_name=fallback_name,
+                translation_key=translation_key,
+                translation_placeholders=translation_placeholders,
+                unique_id_suffix=unique_id_suffix,
+                entity_type=entity_type,
+                primary=primary,
+                initially_disabled=initially_disabled,
+            )
 
         if legacy_discovery_unique_id is None:
-            if entity_metadata is not None:
+            if from_quirk:
                 legacy_discovery_unique_id = f"{device.ieee}-{endpoint.id}"
             else:
                 legacy_discovery_unique_id = (
@@ -522,45 +542,45 @@ class PlatformEntity(BaseEntity):
         self._endpoint = endpoint
         self._cluster: zigpy.zcl.Cluster = cluster
 
-    def _init_from_quirks_metadata(self, entity_metadata: EntityMetadata) -> None:
-        """Init this entity from the quirks metadata."""
-        if entity_metadata.initially_disabled:
+    def _apply_quirk_entity_config(
+        self,
+        *,
+        fallback_name: str | None,
+        translation_key: str | None,
+        translation_placeholders: Mapping[str, str] | None,
+        unique_id_suffix: str | None,
+        entity_type: EntityType | None,
+        primary: bool | None,
+        initially_disabled: bool,
+    ) -> None:
+        """Apply the generic quirk entity configuration keywords."""
+        if initially_disabled:
             self._attr_entity_registry_enabled_default = False
 
-        # v2 quirks entities are assumed to always be supported
+        # quirk entities are assumed to always be supported
         self._attr_always_supported = True
 
-        has_attribute_name = hasattr(entity_metadata, "attribute_name")
-        has_command_name = hasattr(entity_metadata, "command_name")
-        has_fallback_name = hasattr(entity_metadata, "fallback_name")
+        if fallback_name:
+            self._attr_fallback_name = fallback_name
 
-        if has_fallback_name:
-            self._attr_fallback_name = entity_metadata.fallback_name
+        if translation_key:
+            self._attr_translation_key = translation_key
 
-        if entity_metadata.translation_key:
-            self._attr_translation_key = entity_metadata.translation_key
+        if translation_placeholders:
+            self._attr_translation_placeholders = translation_placeholders
 
-        if entity_metadata.translation_placeholders:
-            self._attr_translation_placeholders = (
-                entity_metadata.translation_placeholders
-            )
-
-        if unique_id_suffix := entity_metadata.unique_id_suffix:
+        if unique_id_suffix is not None:
             self._unique_id_suffix = unique_id_suffix
-        elif has_attribute_name:
-            self._unique_id_suffix = entity_metadata.attribute_name
-        elif has_command_name:
-            self._unique_id_suffix = entity_metadata.command_name
 
-        if entity_metadata.entity_type == EntityType.CONFIG:
+        if entity_type == EntityType.CONFIG:
             self._attr_entity_category = EntityCategory.CONFIG
-        elif entity_metadata.entity_type == EntityType.DIAGNOSTIC:
+        elif entity_type == EntityType.DIAGNOSTIC:
             self._attr_entity_category = EntityCategory.DIAGNOSTIC
         else:
             self._attr_entity_category = None
 
-        if entity_metadata.primary is not None:
-            self._attr_primary = entity_metadata.primary
+        if primary is not None:
+            self._attr_primary = primary
 
     @cached_property
     def identifiers(self) -> PlatformEntityIdentifiers:

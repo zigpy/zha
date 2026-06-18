@@ -39,7 +39,7 @@ from tests.common import (
 )
 from zha.application import Platform
 from zha.application.gateway import Gateway
-from zha.quirks import ZHA_DEVICE_CLASS_ATTRIBUTE, resolve_device
+from zha.quirks import ZHA_DEVICE_CLASS_ATTRIBUTE, resolve_zigpy_device
 from zha.application.platforms import GroupEntity, PlatformEntity
 from zha.exceptions import ZHAException
 from zha.zigbee.device import Device
@@ -510,7 +510,7 @@ async def test_switch_configurable_custom_on_off_values(zha_gateway: Gateway) ->
         .add_to_registry()
     )
 
-    zigpy_device_ = resolve_device(zigpy_dev)
+    zigpy_device_ = resolve_zigpy_device(zigpy_dev)
 
     assert getattr(zigpy_device_, ZHA_DEVICE_CLASS_ATTRIBUTE, None) is not None
     cluster = zigpy_device_.endpoints[1].tuya_manufacturer
@@ -591,7 +591,7 @@ async def test_switch_configurable_custom_on_off_values_force_inverted(
         .add_to_registry()
     )
 
-    zigpy_device_ = resolve_device(zigpy_dev)
+    zigpy_device_ = resolve_zigpy_device(zigpy_dev)
 
     assert getattr(zigpy_device_, ZHA_DEVICE_CLASS_ATTRIBUTE, None) is not None
     cluster = zigpy_device_.endpoints[1].tuya_manufacturer
@@ -672,7 +672,7 @@ async def test_switch_configurable_custom_on_off_values_inverter_attribute(
         .add_to_registry()
     )
 
-    zigpy_device_ = resolve_device(zigpy_dev)
+    zigpy_device_ = resolve_zigpy_device(zigpy_dev)
 
     assert getattr(zigpy_device_, ZHA_DEVICE_CLASS_ATTRIBUTE, None) is not None
     cluster = zigpy_device_.endpoints[1].tuya_manufacturer

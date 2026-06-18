@@ -48,7 +48,6 @@ from zha.application.platforms.const import (
 from zha.application.platforms.helpers import validate_device_class
 
 if TYPE_CHECKING:
-    from zha.quirks.metadata import BinarySensorMetadata
     from zha.zigbee.device import Device
     from zha.zigbee.endpoint import Endpoint
 
@@ -92,9 +91,25 @@ class BinarySensor(BaseBinarySensor):
         self,
         endpoint: Endpoint,
         device: Device,
+        *,
+        attribute_name: str | None = None,
+        attribute_converter: Callable[[Any], Any] | None = None,
+        device_class: BinarySensorDeviceClass | None = None,
         **kwargs,
     ) -> None:
         """Initialize the ZHA binary sensor."""
+        if attribute_name is not None:
+            self._attribute_name = attribute_name
+        if attribute_converter is not None:
+            self._attribute_converter = attribute_converter
+        if device_class is not None:
+            self._attr_device_class = validate_device_class(
+                BinarySensorDeviceClass,
+                device_class,
+                Platform.BINARY_SENSOR.value,
+                _LOGGER,
+            )
+
         super().__init__(endpoint=endpoint, device=device, **kwargs)
         self._state: bool = self.is_on
         self.recompute_capabilities()
@@ -117,20 +132,6 @@ class BinarySensor(BaseBinarySensor):
                 self._cluster.on_event(
                     event_type.event_type, self.handle_attribute_updated
                 )
-            )
-
-    def _init_from_quirks_metadata(self, entity_metadata: BinarySensorMetadata) -> None:
-        """Init this entity from the quirks metadata."""
-        super()._init_from_quirks_metadata(entity_metadata)
-        self._attribute_name = entity_metadata.attribute_name
-        if entity_metadata.attribute_converter is not None:
-            self._attribute_converter = entity_metadata.attribute_converter
-        if entity_metadata.device_class is not None:
-            self._attr_device_class = validate_device_class(
-                BinarySensorDeviceClass,
-                entity_metadata.device_class,
-                Platform.BINARY_SENSOR.value,
-                _LOGGER,
             )
 
     @functools.cached_property

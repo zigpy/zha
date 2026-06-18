@@ -9,11 +9,9 @@ from dataclasses import dataclass
 from datetime import timedelta
 from enum import Enum
 import logging
-from pathlib import Path
 import time
 from typing import Any, Final, Self, TypeVar, cast
 
-from zhaquirks import setup as setup_quirks
 from zigpy.application import ControllerApplication
 from zigpy.config import (
     CONF_DEVICE,
@@ -55,8 +53,7 @@ from zha.async_ import (
     gather_with_limited_concurrency,
 )
 from zha.event import EventBase
-from zha.quirks import DEVICE_REGISTRY, resolve_device
-from zha.quirks.v2 import UNBUILT_QUIRK_BUILDERS
+from zha.quirks import resolve_zigpy_device
 from zha.zigbee.device import Device, DeviceInfo, DeviceStatus, ExtendedDeviceInfo
 from zha.zigbee.group import Group, GroupInfo, GroupMemberReference
 
@@ -224,24 +221,22 @@ class Gateway(AsyncUtilMixin, EventBase):
         """Create an instance of a gateway from config objects."""
         instance = cls(config)
 
-        if config.config.quirks_configuration.enabled:
-            for quirk in UNBUILT_QUIRK_BUILDERS:
-                # v2 quirks with no manufacturer model metadata explicitly do not call
-                # add_to_registry. They are used to share code between v2 quirks.
-                if quirk.manufacturer_model_metadata:
-                    _LOGGER.warning(
-                        "Found a v2 quirk that was not added to the registry: %s",
-                        quirk,
-                    )
-                    quirk.add_to_registry()
-
-            UNBUILT_QUIRK_BUILDERS.clear()
-
-            custom_quirks_path = config.config.quirks_configuration.custom_quirks_path
-            if custom_quirks_path is not None:
-                DEVICE_REGISTRY.purge_custom_quirks(Path(custom_quirks_path))
-
-            await instance.async_add_executor_job(setup_quirks, custom_quirks_path)
+        # Load quirks via the injected provider (e.g. `zhaquirks.setup`). ZHA
+        # never imports a quirks package itself; the consumer supplies it. The
+        # provider owns registry population, the custom-quirks purge and the
+        # unbuilt-builder flush — see `zhaquirks.setup`.
+        quirks_config = config.config.quirks_configuration
+        if quirks_config.enabled:
+            if quirks_config.setup_function is None:
+                _LOGGER.warning(
+                    "Quirks are enabled but no setup function was provided; "
+                    "no quirks will be loaded"
+                )
+            else:
+                await instance.async_add_executor_job(
+                    quirks_config.setup_function,
+                    quirks_config.custom_quirks_path,
+                )
 
         return instance
 
@@ -254,7 +249,7 @@ class Gateway(AsyncUtilMixin, EventBase):
             config=app_config,
             auto_form=False,
             start_radio=False,
-            device_resolver=resolve_device,
+            device_resolver=resolve_zigpy_device,
         )
 
         await self.application_controller.startup(auto_form=True)

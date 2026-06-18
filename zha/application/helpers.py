@@ -374,6 +374,12 @@ class QuirksConfiguration:
 
     enabled: bool = dataclasses.field(default=True)
     custom_quirks_path: str | None = dataclasses.field(default=None)
+    # Injected by the consumer (e.g. the Home Assistant integration) to load the
+    # quirks provider, typically `zhaquirks.setup`. ZHA itself never imports a
+    # quirks package; when `enabled` is True this must be set or no quirks load.
+    setup_function: Callable[[str | None], None] | None = dataclasses.field(
+        default=None
+    )
 
 
 @dataclass(kw_only=True, slots=True)

@@ -59,7 +59,6 @@ from zha.application.platforms.const import (
 from zha.application.platforms.siren import AdvancedSiren
 
 if TYPE_CHECKING:
-    from zha.quirks.metadata import ZCLEnumMetadata
     from zha.zigbee.device import Device
     from zha.zigbee.endpoint import Endpoint
 
@@ -248,9 +247,17 @@ class ZCLEnumSelectEntity(BaseSelectEntity, PlatformEntity):
         self,
         endpoint: Endpoint,
         device: Device,
+        *,
+        attribute_name: str | None = None,
+        enum: type[Enum] | None = None,
         **kwargs: Any,
     ) -> None:
         """Init this select entity."""
+        if attribute_name is not None:
+            self._attribute_name = attribute_name
+        if enum is not None:
+            self._enum = enum
+
         super().__init__(endpoint=endpoint, device=device, **kwargs)
         self._attr_options = [entry.name.replace("_", " ") for entry in self._enum]
 
@@ -283,12 +290,6 @@ class ZCLEnumSelectEntity(BaseSelectEntity, PlatformEntity):
             return False
 
         return super()._is_supported()
-
-    def _init_from_quirks_metadata(self, entity_metadata: ZCLEnumMetadata) -> None:
-        """Init this entity from the quirks metadata."""
-        super()._init_from_quirks_metadata(entity_metadata)
-        self._attribute_name = entity_metadata.attribute_name
-        self._enum = entity_metadata.enum
 
     @functools.cached_property
     def info_object(self) -> EnumSelectInfo:

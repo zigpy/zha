@@ -131,7 +131,6 @@ from zha.units import (
 )
 
 if TYPE_CHECKING:
-    from zha.quirks.metadata import ZCLEnumMetadata, ZCLSensorMetadata
     from zha.zigbee.device import Device
     from zha.zigbee.endpoint import Endpoint
 
@@ -245,10 +244,38 @@ class Sensor(BaseSensor):
         self,
         endpoint: Endpoint,
         device: Device,
+        *,
+        attribute_name: str | None = None,
+        attribute_converter: typing.Callable[[typing.Any], typing.Any] | None = None,
+        divisor: int | None = None,
+        multiplier: int | None = None,
+        device_class: SensorDeviceClass | None = None,
+        state_class: SensorStateClass | None = None,
+        unit: str | None = None,
         **kwargs: Any,
     ) -> None:
         """Init this sensor."""
         self._attr_def: foundation.ZCLAttributeDef | None = None
+
+        if attribute_name is not None:
+            self._attribute_name = attribute_name
+        if attribute_converter is not None:
+            self._attribute_converter = attribute_converter
+        if divisor is not None and divisor != 1:
+            self._divisor = divisor
+        if multiplier is not None and multiplier != 1:
+            self._multiplier = multiplier
+        if device_class is not None:
+            self._attr_device_class = validate_device_class(
+                SensorDeviceClass,
+                device_class,
+                Platform.SENSOR.value,
+                _LOGGER,
+            )
+        if state_class is not None:
+            self._attr_state_class = self._validate_state_class(state_class)
+        if unit is not None:
+            self._attr_native_unit_of_measurement = unit
 
         super().__init__(endpoint=endpoint, device=device, **kwargs)
 
@@ -308,30 +335,6 @@ class Sensor(BaseSensor):
                 ex,
             )
             return None
-
-    def _init_from_quirks_metadata(self, entity_metadata: ZCLSensorMetadata) -> None:
-        """Init this entity from the quirks metadata."""
-        super()._init_from_quirks_metadata(entity_metadata)
-        self._attribute_name = entity_metadata.attribute_name
-        if entity_metadata.attribute_converter is not None:
-            self._attribute_converter = entity_metadata.attribute_converter
-        if entity_metadata.divisor is not None and entity_metadata.divisor != 1:
-            self._divisor = entity_metadata.divisor
-        if entity_metadata.multiplier is not None and entity_metadata.multiplier != 1:
-            self._multiplier = entity_metadata.multiplier
-        if entity_metadata.device_class is not None:
-            self._attr_device_class = validate_device_class(
-                SensorDeviceClass,
-                entity_metadata.device_class,
-                Platform.SENSOR.value,
-                _LOGGER,
-            )
-        if entity_metadata.state_class is not None:
-            self._attr_state_class = self._validate_state_class(
-                entity_metadata.state_class
-            )
-        if entity_metadata.unit is not None:
-            self._attr_native_unit_of_measurement = entity_metadata.unit
 
     @property
     def native_value(self) -> date | datetime | str | int | float | None:
@@ -531,21 +534,22 @@ class EnumSensor(Sensor):
         self,
         endpoint: Endpoint,
         device: Device,
+        *,
+        attribute_name: str | None = None,
+        enum: type[enum.Enum] | None = None,
         **kwargs: Any,
     ) -> None:
         """Init this sensor."""
+        if attribute_name is not None:
+            self._attribute_name = attribute_name
+        if enum is not None:
+            self._enum = enum
+
         super().__init__(endpoint=endpoint, device=device, **kwargs)
         self._attr_options = [e.name for e in self._enum]
 
         # XXX: This class is not meant to be initialized directly, as `unique_id`
         # depends on the value of `_attribute_name`
-
-    def _init_from_quirks_metadata(self, entity_metadata: ZCLEnumMetadata) -> None:
-        """Init this entity from the quirks metadata."""
-        self._attribute_name = entity_metadata.attribute_name
-        self._enum = entity_metadata.enum
-
-        PlatformEntity._init_from_quirks_metadata(self, entity_metadata)  # pylint: disable=protected-access
 
     def formatter(self, value: int) -> str | None:
         """Use name of enum."""

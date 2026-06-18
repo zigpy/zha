@@ -27,10 +27,6 @@ from zha.application.platforms.const import (
 )
 
 if TYPE_CHECKING:
-    from zha.quirks.metadata import (
-        WriteAttributeButtonMetadata,
-        ZCLCommandButtonMetadata,
-    )
     from zha.zigbee.device import Device
     from zha.zigbee.endpoint import Endpoint
 
@@ -81,14 +77,25 @@ class Button(BaseButton):
     _args: list[Any]
     _kwargs: dict[str, Any]
 
-    def _init_from_quirks_metadata(
-        self, entity_metadata: ZCLCommandButtonMetadata
+    def __init__(
+        self,
+        endpoint: Endpoint,
+        device: Device,
+        *,
+        command_name: str | None = None,
+        command_args: tuple | None = None,
+        command_kwargs: dict[str, Any] | None = None,
+        **kwargs: Any,
     ) -> None:
-        """Init this entity from the quirks metadata."""
-        super()._init_from_quirks_metadata(entity_metadata)
-        self._command_name = entity_metadata.command_name
-        self._args = entity_metadata.args
-        self._kwargs = entity_metadata.kwargs
+        """Init this button."""
+        if command_name is not None:
+            self._command_name = command_name
+        if command_args is not None:
+            self._args = command_args
+        if command_kwargs is not None:
+            self._kwargs = command_kwargs
+
+        super().__init__(endpoint=endpoint, device=device, **kwargs)
 
     @functools.cached_property
     def info_object(self) -> CommandButtonEntityInfo:
@@ -149,19 +156,19 @@ class WriteAttributeButton(BaseButton):
         self,
         endpoint: Endpoint,
         device: Device,
+        *,
+        attribute_name: str | None = None,
+        attribute_value: Any = None,
         **kwargs: Any,
     ) -> None:
         """Init this button."""
+        if attribute_name is not None:
+            self._attribute_name = attribute_name
+        if attribute_value is not None:
+            self._attribute_value = attribute_value
+
         super().__init__(endpoint=endpoint, device=device, **kwargs)
         self.recompute_capabilities()
-
-    def _init_from_quirks_metadata(
-        self, entity_metadata: WriteAttributeButtonMetadata
-    ) -> None:
-        """Init this entity from the quirks metadata."""
-        super()._init_from_quirks_metadata(entity_metadata)
-        self._attribute_name = entity_metadata.attribute_name
-        self._attribute_value = entity_metadata.attribute_value
 
     @functools.cached_property
     def info_object(self) -> WriteAttributeButtonEntityInfo:

@@ -353,9 +353,7 @@ def globally_load_quirks():
 
     zhaquirks.setup()
 
-    # Disable gateway built in quirks loading
-    with patch("zha.application.gateway.setup_quirks"):
-        yield
+    yield
 
 
 def pytest_collection_modifyitems(config, items):

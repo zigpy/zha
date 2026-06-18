@@ -19,7 +19,7 @@ import zigpy.zcl.foundation as zcl_f
 import zigpy.zdo.types as zdo_t
 
 from zha.application import Platform
-from zha.quirks import resolve_device
+from zha.quirks import resolve_zigpy_device
 from zha.application.gateway import Gateway
 from zha.application.platforms import BaseEntity, GroupEntity, PlatformEntity
 from zha.zigbee.device import Device
@@ -423,7 +423,7 @@ def zigpy_device_from_device_data(
     if quirk:
         device = quirk(app, device.ieee, device.nwk, device)
     else:
-        device = resolve_device(device)
+        device = resolve_zigpy_device(device)
 
     for epid, ep in device_data["endpoints"].items():
         try:
@@ -601,7 +601,7 @@ def create_mock_zigpy_device(
     if quirk:
         device = quirk(zigpy_app_controller, device.ieee, device.nwk, device)
     else:
-        device = resolve_device(device)
+        device = resolve_zigpy_device(device)
 
     if patch_cluster:
         for endpoint in (ep for epid, ep in device.endpoints.items() if epid):
