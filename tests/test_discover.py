@@ -64,6 +64,8 @@ from zha.application.platforms.number import BaseNumber, NumberMode
 from zha.quirks import (
     DEVICE_REGISTRY as QUIRKS_DEVICE_REGISTRY,
     QUIRK_REGISTRY_ENTRY_ATTR,
+    DeviceMatch,
+    ModelInfo,
     resolve_zigpy_device,
 )
 from zha.units import UnitOfTime
@@ -553,7 +555,7 @@ async def test_quirks_v2_entity_discovery_errors(
 
     device_info = f"{zigpy_device.ieee}-{zha_device.name}"
     device_regex = (
-        rf"Device: {re.escape(device_info)} has an entity with details: (.*?) that"
+        rf"Device: {re.escape(device_info)} has an entity with metadata: (.*?) that"
         rf" does not have an entity class mapping - unable to create entity"
     )
     assert re.search(device_regex, caplog.text)
@@ -675,6 +677,74 @@ async def test_quirks_v2_fallback_name(zha_gateway: Gateway) -> None:
         qualifier_func=lambda e: e.fallback_name == "Fallback name",
     )
     assert entity.fallback_name == "Fallback name"
+
+
+async def test_device_match_firmware_version(zha_gateway: Gateway) -> None:
+    """Test DeviceMatch firmware-version filtering against the OTA file version."""
+    zigpy_device = create_mock_zigpy_device(
+        zha_gateway,
+        {
+            1: {
+                SIG_EP_INPUT: [zigpy.zcl.clusters.general.Basic.cluster_id],
+                SIG_EP_OUTPUT: [zigpy.zcl.clusters.general.Ota.cluster_id],
+                SIG_EP_TYPE: zigpy.profiles.zha.DeviceType.PUMP,
+                SIG_EP_PROFILE: zigpy.profiles.zha.PROFILE_ID,
+            }
+        },
+        manufacturer="Some Manufacturer",
+        model="Some Model",
+    )
+    ota = zigpy_device.endpoints[1].out_clusters[
+        zigpy.zcl.clusters.general.Ota.cluster_id
+    ]
+    ota.update_attribute(
+        zigpy.zcl.clusters.general.Ota.AttributeDefs.current_file_version.id, 0x12345678
+    )
+
+    applies_to = (ModelInfo("Some Manufacturer", "Some Model"),)
+
+    # In range [min, max)
+    assert DeviceMatch(
+        applies_to=applies_to,
+        firmware_version_min=0x12345678,
+        firmware_version_max=0x12345679,
+    ).matches(zigpy_device)
+
+    # Below min
+    assert not DeviceMatch(
+        applies_to=applies_to, firmware_version_min=0x12345679
+    ).matches(zigpy_device)
+
+    # max is exclusive
+    assert not DeviceMatch(
+        applies_to=applies_to, firmware_version_max=0x12345678
+    ).matches(zigpy_device)
+
+    # Missing firmware version honors `allow_missing`
+    no_ota_device = create_mock_zigpy_device(
+        zha_gateway,
+        {
+            1: {
+                SIG_EP_INPUT: [zigpy.zcl.clusters.general.Basic.cluster_id],
+                SIG_EP_OUTPUT: [],
+                SIG_EP_TYPE: zigpy.profiles.zha.DeviceType.PUMP,
+                SIG_EP_PROFILE: zigpy.profiles.zha.PROFILE_ID,
+            }
+        },
+        manufacturer="Some Manufacturer",
+        model="Some Model",
+        ieee="01:2d:6f:00:0a:90:69:e9",
+    )
+    assert DeviceMatch(
+        applies_to=applies_to,
+        firmware_version_min=0x12345678,
+        firmware_version_allow_missing=True,
+    ).matches(no_ota_device)
+    assert not DeviceMatch(
+        applies_to=applies_to,
+        firmware_version_min=0x12345678,
+        firmware_version_allow_missing=False,
+    ).matches(no_ota_device)
 
 
 def pytest_generate_tests(metafunc):
