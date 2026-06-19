@@ -411,7 +411,7 @@ class Device(LogMixin, EventBase):
         entry = getattr(self._zigpy_device, QUIRK_REGISTRY_ENTRY_ATTR, None)
         self.quirk_applied: bool = entry is not None
         if entry is not None and entry.source is not None:
-            self.quirk_class: str = f"{entry.source.module}.{entry.source.label}"
+            self.quirk_class: str = f"{entry.source.module}:{entry.source.label}"
         else:
             self.quirk_class = (
                 f"{self._zigpy_device.__class__.__module__}."
