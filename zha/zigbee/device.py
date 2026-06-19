@@ -20,7 +20,6 @@ from typing import TYPE_CHECKING, Any, Final
 from zigpy.device import Device as ZigpyDevice
 import zigpy.exceptions
 from zigpy.profiles import PROFILES
-import zigpy.quirks
 from zigpy.types import uint1_t, uint8_t, uint16_t
 from zigpy.types.named import EUI64, NWK, ExtendedPanId
 from zigpy.typing import UNDEFINED, UndefinedType
@@ -408,11 +407,9 @@ class Device(LogMixin, EventBase):
             with contextlib.suppress(AttributeError):
                 delattr(self, attr)
 
-        # ZHA quirks stash their registry entry on the device; v1 produces a BaseCustomDevice.
+        # Both v1 and v2 quirks stash their registry entry on the resolved device.
         entry = getattr(self._zigpy_device, QUIRK_REGISTRY_ENTRY_ATTR, None)
-        self.quirk_applied: bool = entry is not None or isinstance(
-            self._zigpy_device, zigpy.quirks.BaseCustomDevice
-        )
+        self.quirk_applied: bool = entry is not None
         if entry is not None and entry.source is not None:
             self.quirk_class: str = f"{entry.source.module}.{entry.source.label}"
         else:
@@ -997,7 +994,7 @@ class Device(LogMixin, EventBase):
         """Configure the device."""
         self.debug("started configuration")
 
-        if isinstance(self._zigpy_device, zigpy.quirks.BaseCustomDevice):
+        if hasattr(self._zigpy_device, "apply_custom_configuration"):
             self.debug("applying quirks custom device configuration")
             await self._zigpy_device.apply_custom_configuration()
 

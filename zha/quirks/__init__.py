@@ -1,17 +1,4 @@
-"""Quirks support for ZHA.
-
-This package owns the matching, registration and dispatch of quirked `Device`
-subclasses. A quirk is a `zha.zigbee.device.Device` subclass decorated with
-`@register_device`: its `_device_match` decides which zigpy devices it wraps,
-its `_zigpy_ops` describe the modifications applied to the zigpy device during
-resolution, and everything else (entities, triggers, alerts, configuration) is
-expressed by overriding the `Device` class itself.
-
-`resolve_device` is registered with zigpy as the application's device resolver.
-It is handed a freshly-constructed zigpy device exactly once (on join and on
-database load), applies the matching quirk's zigpy-level modifications, and
-falls back to zigpy's legacy v1/v2 quirks registry when no ZHA quirk matches.
-"""
+"""Quirks support for ZHA, allowing custom `Device` objects to be swapped at runtime."""
 
 from __future__ import annotations
 
@@ -25,7 +12,6 @@ from typing import TYPE_CHECKING, NamedTuple
 
 import zigpy.device
 import zigpy.profiles.zha
-import zigpy.quirks
 from zigpy.zcl import ClusterType
 from zigpy.zcl.clusters.general import Ota
 
@@ -152,20 +138,27 @@ class DeviceRegistry:
 
     def __init__(self) -> None:
         """Initialize the registry."""
+
+        # Normal registry that matches based on at least a model or manufacturer.
         self._registry: defaultdict[ModelInfo, list[QuirkRegistryEntry]] = defaultdict(
             list
         )
+        # Matched against every device by their filters alone, used mostly for legacy v1
+        # quirks without model/manufacturer filters.
+        self._wildcard_registry: list[QuirkRegistryEntry] = []
 
     def register(self, entry: QuirkRegistryEntry) -> QuirkRegistryEntry:
         """Add a quirk entry to the registry."""
+        if not entry.device_match.applies_to:
+            self._wildcard_registry.insert(0, entry)
+            return entry
+
         for manufacturer, model in entry.device_match.applies_to:
             if manufacturer is None and model is None:
                 raise ValueError(
                     f"{entry!r} must specify a manufacturer and/or model to match"
                 )
 
-            # Most recently registered quirks take precedence, so quirks loaded
-            # from the custom quirks directory override built-in ones.
             self._registry[ModelInfo(manufacturer, model)].insert(0, entry)
 
         return entry
@@ -181,16 +174,26 @@ class DeviceRegistry:
                 if entry.device_match.matches(zigpy_device):
                     return entry
 
+        for entry in self._wildcard_registry:
+            if entry.device_match.matches(zigpy_device):
+                return entry
+
         return None
 
     def remove(self, entry: QuirkRegistryEntry) -> None:
         """Remove a quirk entry from the registry."""
+        if not entry.device_match.applies_to:
+            self._wildcard_registry.remove(entry)
+            return
+
         for manufacturer, model in entry.device_match.applies_to:
             self._registry[ModelInfo(manufacturer, model)].remove(entry)
 
     def purge_custom_quirks(self, custom_quirks_root: Path) -> None:
         """Remove quirks loaded from the custom quirks directory."""
-        for entries in self._registry.values():
+
+        # Prefer the explicit registry to the wildcard registry
+        for entries in (*self._registry.values(), self._wildcard_registry):
             for entry in list(entries):
                 if entry.source is None or entry.source.file is None:
                     continue
@@ -231,10 +234,9 @@ def resolve_zigpy_device(zigpy_device: zigpy.device.Device) -> zigpy.device.Devi
     if hasattr(zigpy_device, QUIRK_REGISTRY_ENTRY_ATTR):
         return zigpy_device
 
-    # Fall back to legacy zigpy v1 quirks
     entry = DEVICE_REGISTRY.get(zigpy_device)
     if entry is None:
-        return zigpy.quirks.get_device(zigpy_device)
+        return zigpy_device
 
     _LOGGER.debug(
         "Resolved %s/%s (%s) to quirk %s",
