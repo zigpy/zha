@@ -191,6 +191,15 @@ class DeviceRegistry:
 
         return None
 
+    def __iter__(self) -> Iterator[QuirkRegistryEntry]:
+        """Yield every registered entry once (deduplicated across model keys)."""
+        seen: set[int] = set()
+        for entries in (*self._registry.values(), self._wildcard_registry):
+            for entry in entries:
+                if id(entry) not in seen:
+                    seen.add(id(entry))
+                    yield entry
+
     def remove(self, entry: QuirkRegistryEntry) -> None:
         """Remove a quirk entry from the registry."""
         if not entry.device_match.applies_to:
