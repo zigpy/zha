@@ -8,7 +8,6 @@ import functools
 import logging
 from typing import TYPE_CHECKING, Any
 
-from zhaquirks.quirk_ids import DANFOSS_ALLY_THERMOSTAT, TUYA_PLUG_ONOFF
 from zigpy import types as t
 from zigpy.profiles import zha, zll
 import zigpy.zcl
@@ -48,6 +47,7 @@ from zha.application.platforms.const import (
 )
 from zha.application.platforms.light.const import LIGHT_PROFILE_DEVICE_TYPES
 from zha.exceptions import ZHAException
+from zha.quirks import DANFOSS_ALLY_THERMOSTAT, TUYA_PLUG_ONOFF
 from zha.zigbee.group import Group
 
 if TYPE_CHECKING:

@@ -26,6 +26,16 @@ FilterType = Callable[[zigpy.device.Device], bool]
 
 DEVICE_REGISTRY: DeviceRegistry
 
+# Quirk IDs
+KONKE_BUTTON = "konke.button_remote"
+TUYA_PLUG_ONOFF = "tuya.plug_on_off_attributes"
+TUYA_PLUG_MANUFACTURER = "tuya.plug_manufacturer_attributes"
+XIAOMI_AQARA_VIBRATION_AQ1 = "xiaomi.aqara_vibration_aq1"
+DANFOSS_ALLY_THERMOSTAT = "danfoss.ally_thermostat"
+BEGA_LIGHT_SWITCHABLE_WHITE = "bega.light_switchable_white"
+SE_POLL_SUMMATION = "se_poll_summation"
+SIREN_BASIC = "siren_basic"
+
 
 class ModelInfo(NamedTuple):
     """A (manufacturer, model) pair to match. `None` is a wildcard."""

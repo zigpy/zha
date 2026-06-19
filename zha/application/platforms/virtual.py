@@ -12,7 +12,6 @@ from __future__ import annotations
 import asyncio
 from typing import TYPE_CHECKING, Any
 
-from zhaquirks.quirk_ids import TUYA_PLUG_MANUFACTURER
 import zigpy.exceptions
 import zigpy.types as t
 import zigpy.zcl
@@ -52,6 +51,7 @@ from zha.application.platforms.const import (
     TUYA_MANUFACTURER_CLUSTER,
 )
 from zha.exceptions import ZHAException
+from zha.quirks import TUYA_PLUG_MANUFACTURER
 from zha.zigbee.endpoint import cluster_event_unique_id, split_event_arg
 
 ATTRIBUTE_ID = "attribute_id"

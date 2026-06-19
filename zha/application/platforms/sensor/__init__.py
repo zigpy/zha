@@ -15,7 +15,6 @@ import typing
 from typing import TYPE_CHECKING, Any, cast
 
 from zhaquirks.danfoss import thermostat as danfoss_thermostat
-from zhaquirks.quirk_ids import DANFOSS_ALLY_THERMOSTAT, SE_POLL_SUMMATION
 from zigpy import types
 from zigpy.state import Counter, State
 from zigpy.zcl import (
@@ -107,6 +106,7 @@ from zha.application.platforms.sensor.helpers import (
 )
 from zha.application.platforms.virtual import VirtualEntity
 from zha.decorators import periodic
+from zha.quirks import DANFOSS_ALLY_THERMOSTAT, SE_POLL_SUMMATION
 from zha.units import (
     CONCENTRATION_MICROGRAMS_PER_CUBIC_METER,
     CONCENTRATION_PARTS_PER_BILLION,

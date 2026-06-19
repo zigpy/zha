@@ -8,7 +8,6 @@ import functools
 import logging
 from typing import TYPE_CHECKING, Any
 
-from zhaquirks.quirk_ids import DANFOSS_ALLY_THERMOSTAT
 from zigpy.zcl import (
     AttributeReadEvent,
     AttributeReportedEvent,
@@ -43,6 +42,7 @@ from zha.application.platforms.const import (
 from zha.application.platforms.helpers import validate_device_class
 from zha.application.platforms.number.bacnet import BACNET_UNITS_TO_HA_UNITS
 from zha.application.platforms.number.const import ICONS, NumberDeviceClass, NumberMode
+from zha.quirks import DANFOSS_ALLY_THERMOSTAT
 from zha.units import UnitOfMass, UnitOfTemperature, UnitOfTime
 
 if TYPE_CHECKING:

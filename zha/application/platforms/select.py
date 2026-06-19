@@ -10,13 +10,6 @@ import logging
 from typing import TYPE_CHECKING, Any, cast
 
 from zhaquirks.danfoss import thermostat as danfoss_thermostat
-from zhaquirks.quirk_ids import (
-    BEGA_LIGHT_SWITCHABLE_WHITE,
-    DANFOSS_ALLY_THERMOSTAT,
-    SIREN_BASIC,
-    TUYA_PLUG_MANUFACTURER,
-    TUYA_PLUG_ONOFF,
-)
 from zhaquirks.xiaomi.aqara.magnet_ac01 import OppleCluster as MagnetAC01OppleCluster
 from zhaquirks.xiaomi.aqara.switch_acn047 import OppleCluster as T2RelayOppleCluster
 from zigpy import types
@@ -57,6 +50,13 @@ from zha.application.platforms.const import (
     TUYA_MANUFACTURER_CLUSTER,
 )
 from zha.application.platforms.siren import AdvancedSiren
+from zha.quirks import (
+    BEGA_LIGHT_SWITCHABLE_WHITE,
+    DANFOSS_ALLY_THERMOSTAT,
+    SIREN_BASIC,
+    TUYA_PLUG_MANUFACTURER,
+    TUYA_PLUG_ONOFF,
+)
 
 if TYPE_CHECKING:
     from zha.zigbee.device import Device

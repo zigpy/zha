@@ -9,7 +9,6 @@ import functools
 import logging
 from typing import TYPE_CHECKING, Any
 
-from zhaquirks.quirk_ids import DANFOSS_ALLY_THERMOSTAT
 from zigpy.profiles import zha, zll
 from zigpy.zcl import (
     AttributeReadEvent,
@@ -46,6 +45,7 @@ from zha.application.platforms.const import (
     TUYA_MANUFACTURER_CLUSTER,
 )
 from zha.application.platforms.helpers import validate_device_class
+from zha.quirks import DANFOSS_ALLY_THERMOSTAT
 
 if TYPE_CHECKING:
     from zha.zigbee.device import Device
