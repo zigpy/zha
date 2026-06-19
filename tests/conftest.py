@@ -12,6 +12,8 @@ from unittest.mock import patch
 
 import looptime
 import pytest
+import zhaquirks
+import zhaquirks.legacy
 import zigpy
 from zigpy.application import ControllerApplication
 import zigpy.config
@@ -30,6 +32,7 @@ from zha.application.helpers import (
     AlarmControlPanelOptions,
     CoordinatorConfiguration,
     LightOptions,
+    QuirksConfiguration,
     ZHAConfiguration,
     ZHAData,
 )
@@ -277,6 +280,13 @@ def make_zha_data() -> ZHAData:
                 arm_requires_code=False,
                 master_code="4321",
                 failed_tries=2,
+            ),
+            quirks_configuration=QuirksConfiguration(
+                enabled=True,
+                setup_function=zhaquirks.setup,
+                uninitialized_packet_handler=(
+                    zhaquirks.legacy.handle_message_from_uninitialized_sender
+                ),
             ),
         )
     )
