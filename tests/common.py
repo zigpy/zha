@@ -19,9 +19,9 @@ import zigpy.zcl.foundation as zcl_f
 import zigpy.zdo.types as zdo_t
 
 from zha.application import Platform
-from zha.quirks import resolve_zigpy_device
 from zha.application.gateway import Gateway
 from zha.application.platforms import BaseEntity, GroupEntity, PlatformEntity
+from zha.quirks import resolve_zigpy_device
 from zha.zigbee.device import Device
 from zha.zigbee.group import Group
 
