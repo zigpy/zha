@@ -10,10 +10,12 @@ from zhaquirks import (
     OUTPUT_CLUSTERS,
     PROFILE_ID,
 )
+from zhaquirks.builder import QuirkBuilder
+from zhaquirks.clusters import CustomCluster
+from zhaquirks.device import CustomZigpyDevice
+from zhaquirks.legacy import CustomDevice, get_device
 from zigpy.const import SIG_EP_PROFILE
 from zigpy.profiles import zha
-from zigpy.quirks import CustomCluster, CustomDevice, get_device
-from zigpy.quirks.v2 import CustomZigpyDevice, QuirkBuilder
 import zigpy.types as t
 from zigpy.typing import UNDEFINED
 from zigpy.zcl import foundation

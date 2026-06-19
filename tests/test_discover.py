@@ -32,7 +32,6 @@ from zhaquirks.xiaomi.aqara.driver_curtain_e1 import (
 )
 import zigpy.device
 import zigpy.profiles.zha
-import zigpy.quirks
 import zigpy.types
 from zigpy.zcl import ClusterType
 import zigpy.zcl.clusters.closures

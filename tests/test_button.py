@@ -4,6 +4,8 @@ from typing import Final
 from unittest.mock import call, patch
 
 import pytest
+from zhaquirks.builder import QuirkBuilder
+from zhaquirks.clusters import CustomCluster
 from zhaquirks.const import (
     DEVICE_TYPE,
     ENDPOINTS,
@@ -11,12 +13,12 @@ from zhaquirks.const import (
     OUTPUT_CLUSTERS,
     PROFILE_ID,
 )
+from zhaquirks.device import CustomZigpyDevice
+from zhaquirks.legacy import CustomDevice, DeviceRegistry
 from zhaquirks.tuya.tuya_valve import ParksideTuyaValveManufCluster
 import zigpy
 from zigpy.exceptions import ZigbeeException
 from zigpy.profiles import zha
-from zigpy.quirks import CustomCluster, CustomDevice, DeviceRegistry
-from zigpy.quirks.v2 import CustomZigpyDevice, QuirkBuilder
 import zigpy.types as t
 from zigpy.typing import UNDEFINED
 from zigpy.zcl.clusters import general, security

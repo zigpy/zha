@@ -7,17 +7,15 @@ from unittest import mock
 from unittest.mock import AsyncMock, call, patch
 
 import pytest
-from zigpy.exceptions import ZigbeeException
-import zigpy.profiles.zha
-from zigpy.quirks.registry import DeviceRegistry
-from zigpy.quirks.v2 import (
+from zhaquirks.builder import QuirkBuilder
+from zhaquirks.builder.metadata import (
     DeviceAlertLevel,
     DeviceAlertMetadata,
     ExposesFeatureMetadata,
-    QuirkBuilder,
 )
-from zigpy.quirks.v2.homeassistant import EntityType
-from zigpy.quirks.v2.homeassistant.sensor import SensorDeviceClass, SensorStateClass
+from zhaquirks.legacy import DeviceRegistry
+from zigpy.exceptions import ZigbeeException
+import zigpy.profiles.zha
 import zigpy.types
 from zigpy.typing import UNDEFINED
 from zigpy.zcl import ClusterType
@@ -39,7 +37,7 @@ from tests.common import (
     join_zigpy_device,
     zigpy_device_from_json,
 )
-from zha.application import Platform
+from zha.application import EntityType, Platform
 from zha.application.const import (
     CLUSTER_COMMAND_SERVER,
     CLUSTER_COMMANDS_CLIENT,
@@ -53,6 +51,10 @@ from zha.application.platforms import PlatformEntity
 from zha.application.platforms.binary_sensor import IASZone
 from zha.application.platforms.light import Light
 from zha.application.platforms.sensor import LQISensor, RSSISensor
+from zha.application.platforms.sensor.device_class import (
+    SensorDeviceClass,
+    SensorStateClass,
+)
 from zha.application.platforms.switch import Switch
 from zha.exceptions import ZHAException
 from zha.zigbee.device import (

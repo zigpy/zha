@@ -8,20 +8,15 @@ from typing import Any
 from unittest.mock import MagicMock, call, patch
 
 import pytest
+from zhaquirks.builder import QuirkBuilder
+from zhaquirks.builder.metadata import ReportingConfig as QuirksReportingConfig
+from zhaquirks.clusters import CustomCluster
 from zhaquirks.danfoss import thermostat as danfoss_thermostat
+from zhaquirks.device import CustomZigpyDevice
+from zhaquirks.legacy import DeviceRegistry, get_device
 from zigpy.device import Device as ZigpyDevice
 from zigpy.profiles import zha
 import zigpy.profiles.zha
-from zigpy.quirks import CustomCluster, DeviceRegistry, get_device
-from zigpy.quirks.v2 import (
-    CustomZigpyDevice,
-    QuirkBuilder,
-    ReportingConfig as QuirksReportingConfig,
-)
-from zigpy.quirks.v2.homeassistant import EntityPlatform, EntityType, UnitOfMass
-from zigpy.quirks.v2.homeassistant.sensor import (
-    SensorDeviceClass as SensorDeviceClassV2,
-)
 import zigpy.types as t
 from zigpy.zcl import Cluster, ReportingConfig
 from zigpy.zcl.clusters import general, homeautomation, hvac, measurement, smartenergy
@@ -41,7 +36,7 @@ from tests.common import (
     send_attributes_report,
     zigpy_device_from_json,
 )
-from zha.application import Platform
+from zha.application import EntityPlatform, EntityType, Platform
 from zha.application.gateway import Gateway
 from zha.application.platforms import PlatformEntity, sensor
 from zha.application.platforms.sensor import (
@@ -50,11 +45,15 @@ from zha.application.platforms.sensor import (
     Temperature,
 )
 from zha.application.platforms.sensor.const import SensorDeviceClass, SensorStateClass
+from zha.application.platforms.sensor.device_class import (
+    SensorDeviceClass as SensorDeviceClassV2,
+)
 from zha.application.platforms.sensor.helpers import resolution_to_decimal_precision
 from zha.units import (
     PERCENTAGE,
     UnitOfElectricPotential,
     UnitOfEnergy,
+    UnitOfMass,
     UnitOfPressure,
     UnitOfVolume,
 )

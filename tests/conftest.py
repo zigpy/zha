@@ -37,6 +37,7 @@ from zha.application.helpers import (
     ZHAData,
 )
 from zha.async_ import ZHAJob
+from zha.quirks import DEVICE_REGISTRY
 
 FIXTURE_GRP_ID = 0x1001
 FIXTURE_GRP_NAME = "fixture group"
@@ -120,6 +121,13 @@ def long_repr_strings() -> Generator[None, None, None]:
     finally:
         arepr.maxstring = original_maxstring
         arepr.maxother = original_maxother
+
+
+@pytest.fixture(autouse=True)
+def preserve_quirk_registry() -> Generator[None, None, None]:
+    """Roll back any quirks a test registers so they don't leak into later tests."""
+    with DEVICE_REGISTRY.preserve_state():
+        yield
 
 
 @pytest.fixture(autouse=True)

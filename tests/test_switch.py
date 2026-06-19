@@ -5,6 +5,8 @@ import logging
 from unittest.mock import call, patch
 
 import pytest
+from zhaquirks.builder import QuirkBuilder
+from zhaquirks.clusters import CustomCluster
 from zhaquirks.const import (
     DEVICE_TYPE,
     ENDPOINTS,
@@ -12,10 +14,9 @@ from zhaquirks.const import (
     OUTPUT_CLUSTERS,
     PROFILE_ID,
 )
+from zhaquirks.legacy import CustomDevice
 from zigpy.exceptions import ZigbeeException
 from zigpy.profiles import zha
-from zigpy.quirks import CustomCluster, CustomDevice
-from zigpy.quirks.v2 import QuirkBuilder
 import zigpy.types as t
 from zigpy.typing import UNDEFINED
 from zigpy.zcl.clusters import closures, general
@@ -39,9 +40,9 @@ from tests.common import (
 )
 from zha.application import Platform
 from zha.application.gateway import Gateway
-from zha.quirks import ZHA_DEVICE_CLASS_ATTRIBUTE, resolve_zigpy_device
 from zha.application.platforms import GroupEntity, PlatformEntity
 from zha.exceptions import ZHAException
+from zha.quirks import ZHA_DEVICE_CLASS_ATTRIBUTE, resolve_zigpy_device
 from zha.zigbee.device import Device
 from zha.zigbee.group import Group, GroupMemberReference
 

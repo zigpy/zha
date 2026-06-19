@@ -3,7 +3,8 @@
 from __future__ import annotations
 
 from collections import defaultdict
-from collections.abc import Callable
+from collections.abc import Callable, Iterator
+import contextlib
 from dataclasses import dataclass
 import inspect
 import logging
@@ -200,6 +201,18 @@ class DeviceRegistry:
                 if Path(entry.source.file).is_relative_to(custom_quirks_root):
                     _LOGGER.debug("Removing stale custom quirk: %s", entry)
                     entries.remove(entry)
+
+    @contextlib.contextmanager
+    def preserve_state(self) -> Iterator[None]:
+        """Snapshot the registry and restore it on exit."""
+        saved = {key: list(entries) for key, entries in self._registry.items()}
+        saved_wildcard = list(self._wildcard_registry)
+        try:
+            yield
+        finally:
+            self._registry.clear()
+            self._registry.update(saved)
+            self._wildcard_registry[:] = saved_wildcard
 
 
 DEVICE_REGISTRY = DeviceRegistry()

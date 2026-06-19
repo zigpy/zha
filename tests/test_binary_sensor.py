@@ -6,10 +6,11 @@ from typing import Any
 from unittest.mock import call
 
 import pytest
+from zhaquirks.builder import QuirkBuilder
+from zhaquirks.device import CustomZigpyDevice
+from zhaquirks.legacy import DeviceRegistry
 from zigpy.profiles import zha
 import zigpy.profiles.zha
-from zigpy.quirks import DeviceRegistry
-from zigpy.quirks.v2 import CustomZigpyDevice, QuirkBuilder
 from zigpy.typing import UNDEFINED
 from zigpy.zcl.clusters import general, measurement, security
 from zigpy.zcl.clusters.general import OnOff
