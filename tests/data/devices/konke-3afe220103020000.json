@@ -8,7 +8,7 @@
   "friendly_model": "3AFE220103020000",
   "name": "Konke 3AFE220103020000",
   "quirk_applied": true,
-  "quirk_class": "zhaquirks.konke.temp.KonkeTempHumidity",
+  "quirk_class": "zhaquirks.konke.temp:KonkeTempHumidity",
   "exposes_features": [],
   "manufacturer_code": 4712,
   "power_source": "Battery or Unknown",

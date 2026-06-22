@@ -8,7 +8,7 @@
   "friendly_model": "URC4460BC0-X-R",
   "name": "Universal Electronics Inc URC4460BC0-X-R",
   "quirk_applied": true,
-  "quirk_class": "zhaquirks.universalelectronics.contact_sensor.ContactSensor",
+  "quirk_class": "zhaquirks.universalelectronics.contact_sensor:ContactSensor",
   "exposes_features": [],
   "manufacturer_code": 4335,
   "power_source": "Battery or Unknown",

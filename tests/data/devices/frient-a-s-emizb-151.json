@@ -8,7 +8,7 @@
   "friendly_model": "EMIZB-151",
   "name": "frient A/S EMIZB-151",
   "quirk_applied": true,
-  "quirk_class": "zigpy.quirks.v2.CustomDeviceV2",
+  "quirk_class": "zhaquirks.develco.emi_p1:(frient A/S / EMIZB-151)",
   "exposes_features": [],
   "manufacturer_code": 4117,
   "power_source": "Battery or Unknown",
@@ -1258,39 +1258,6 @@
           "available": true,
           "state": null
         }
-      },
-      {
-        "info_object": {
-          "fallback_name": null,
-          "unique_id": "ab:cd:ef:12:74:0f:89:c3-2-1",
-          "migrate_unique_ids": [],
-          "platform": "sensor",
-          "class_name": "Battery",
-          "translation_key": null,
-          "translation_placeholders": null,
-          "device_class": "battery",
-          "state_class": "measurement",
-          "entity_category": "diagnostic",
-          "entity_registry_enabled_default": true,
-          "enabled": true,
-          "primary": false,
-          "device_ieee": "ab:cd:ef:12:74:0f:89:c3",
-          "endpoint_id": 2,
-          "available": true,
-          "group_id": null,
-          "suggested_display_precision": 0,
-          "unit": "%"
-        },
-        "state": {
-          "class_name": "Battery",
-          "available": true,
-          "state": null
-        },
-        "extra_state_attributes": [
-          "battery_quantity",
-          "battery_size",
-          "battery_voltage"
-        ]
       },
       {
         "info_object": {

@@ -8,7 +8,7 @@
   "friendly_model": "Smart Dimmable Light",
   "name": "BEGA Gantenbrink-Leuchten KG Smart Dimmable Light",
   "quirk_applied": true,
-  "quirk_class": "zigpy.quirks.v2.CustomDeviceV2",
+  "quirk_class": "zhaquirks.bega.light:(BEGA Gantenbrink-Leuchten KG / Smart Dimmable Light)",
   "exposes_features": [
     "bega.light_switchable_white"
   ],

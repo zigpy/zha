@@ -8,7 +8,7 @@
   "friendly_model": "TS0012",
   "name": "_TZ3000_llfaquvp TS0012",
   "quirk_applied": true,
-  "quirk_class": "zhaquirks.tuya.ts001x.Tuya_Double_No_N_Plus",
+  "quirk_class": "zhaquirks.tuya.ts001x:Tuya_Double_No_N_Plus",
   "exposes_features": [],
   "manufacturer_code": 4417,
   "power_source": "Battery or Unknown",

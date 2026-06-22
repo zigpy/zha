@@ -8,7 +8,7 @@
   "friendly_model": "Dimmer-Switch-ZB3.0",
   "name": "Shyugj Dimmer-Switch-ZB3.0",
   "quirk_applied": true,
-  "quirk_class": "zhaquirks.hzc.dimmerswitch.DimmerSwitch",
+  "quirk_class": "zhaquirks.hzc.dimmerswitch:DimmerSwitch",
   "exposes_features": [],
   "manufacturer_code": 4714,
   "power_source": "Mains",

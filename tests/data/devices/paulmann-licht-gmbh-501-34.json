@@ -8,7 +8,7 @@
   "friendly_model": "501.34",
   "name": "Paulmann Licht GmbH 501.34",
   "quirk_applied": true,
-  "quirk_class": "zhaquirks.paulmann.fourbtnremote.PaulmannRemote4Btn",
+  "quirk_class": "zhaquirks.paulmann.fourbtnremote:PaulmannRemote4Btn",
   "exposes_features": [],
   "manufacturer_code": 4644,
   "power_source": "Battery or Unknown",

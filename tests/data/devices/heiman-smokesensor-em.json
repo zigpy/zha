@@ -8,7 +8,7 @@
   "friendly_model": "SmokeSensor-EM",
   "name": "HEIMAN SmokeSensor-EM",
   "quirk_applied": true,
-  "quirk_class": "zhaquirks.heiman.smoke.HeimanSmokeEM",
+  "quirk_class": "zhaquirks.heiman.smoke:HeimanSmokeEM",
   "exposes_features": [],
   "manufacturer_code": 4619,
   "power_source": "Battery or Unknown",

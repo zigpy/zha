@@ -8,7 +8,7 @@
   "friendly_model": "SIN-4-FP-21_EQU",
   "name": "Adeo SIN-4-FP-21_EQU",
   "quirk_applied": true,
-  "quirk_class": "zigpy.quirks.v2.CustomDeviceV2",
+  "quirk_class": "zhaquirks.nodon.pilot_wire:(Adeo / SIN-4-FP-21_EQU)",
   "exposes_features": [],
   "manufacturer_code": 4727,
   "power_source": "Mains",

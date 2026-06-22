@@ -8,7 +8,7 @@
   "friendly_model": "3RSP02028BZ",
   "name": "Third Reality, Inc 3RSP02028BZ",
   "quirk_applied": true,
-  "quirk_class": "zigpy.quirks.v2.CustomDeviceV2",
+  "quirk_class": "zhaquirks.thirdreality.plug:(Third Reality, Inc / 3RSP02028BZ)",
   "exposes_features": [],
   "manufacturer_code": 4659,
   "power_source": "Mains",

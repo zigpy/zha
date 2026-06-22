@@ -8,7 +8,7 @@
   "friendly_model": "SML001",
   "name": "Philips SML001",
   "quirk_applied": true,
-  "quirk_class": "zhaquirks.philips.motion.PhilipsMotion",
+  "quirk_class": "zhaquirks.philips.motion:PhilipsMotion",
   "exposes_features": [],
   "manufacturer_code": 4107,
   "power_source": "Battery or Unknown",

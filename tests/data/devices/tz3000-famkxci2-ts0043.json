@@ -8,7 +8,7 @@
   "friendly_model": "TS0043",
   "name": "_TZ3000_famkxci2 TS0043",
   "quirk_applied": true,
-  "quirk_class": "zhaquirks.tuya.ts0043.TuyaSmartRemote0043TOPlusA",
+  "quirk_class": "zhaquirks.tuya.ts0043:TuyaSmartRemote0043TOPlusA",
   "exposes_features": [],
   "manufacturer_code": 4417,
   "power_source": "Battery or Unknown",

@@ -7,9 +7,11 @@
   "friendly_manufacturer": "ubisys",
   "friendly_model": "J1 (5502)",
   "name": "ubisys J1 (5502)",
-  "quirk_applied": false,
-  "quirk_class": "zigpy.device.Device",
-  "exposes_features": [],
+  "quirk_applied": true,
+  "quirk_class": "zhaquirks.ubisys.cover_j1:(ubisys / J1 (5502))",
+  "exposes_features": [
+    "se_poll_summation"
+  ],
   "manufacturer_code": 4660,
   "power_source": "Mains",
   "lqi": null,
@@ -69,12 +71,6 @@
           "endpoint_attribute": "window_covering",
           "attributes": [
             {
-              "id": "0x0007",
-              "name": "config_status",
-              "zcl_type": "map8",
-              "value": 3
-            },
-            {
               "id": "0x0008",
               "name": "current_position_lift_percentage",
               "zcl_type": "uint8",
@@ -87,40 +83,64 @@
               "unsupported": true
             },
             {
-              "id": "0x0011",
-              "name": "installed_closed_limit_lift",
-              "zcl_type": "uint16",
-              "unsupported": true
-            },
-            {
-              "id": "0x0013",
-              "name": "installed_closed_limit_tilt",
-              "zcl_type": "uint16",
-              "unsupported": true
-            },
-            {
-              "id": "0x0010",
-              "name": "installed_open_limit_lift",
-              "zcl_type": "uint16",
-              "unsupported": true
-            },
-            {
-              "id": "0x0012",
-              "name": "installed_open_limit_tilt",
-              "zcl_type": "uint16",
-              "unsupported": true
-            },
-            {
               "id": "0x0017",
               "name": "window_covering_mode",
               "zcl_type": "map8",
               "value": 0
+            }
+          ]
+        },
+        {
+          "cluster_id": "0xfbfe",
+          "endpoint_attribute": "ubisys_j1_calibration",
+          "attributes": [
+            {
+              "id": "0x0004",
+              "name": "calibration_state",
+              "zcl_type": "enum8",
+              "value": 0
+            },
+            {
+              "id": "0x0002",
+              "name": "enter_calibration_mode",
+              "zcl_type": "bool",
+              "unsupported": true
+            },
+            {
+              "id": "0x0003",
+              "name": "exit_calibration_mode",
+              "zcl_type": "bool",
+              "unsupported": true
             },
             {
               "id": "0x0000",
-              "name": "window_covering_type",
+              "name": "prepare_calibration",
+              "zcl_type": "bool",
+              "unsupported": true
+            },
+            {
+              "id": "0x0001",
+              "name": "run_calibration",
+              "zcl_type": "bool",
+              "unsupported": true
+            }
+          ]
+        },
+        {
+          "cluster_id": "0xfbff",
+          "endpoint_attribute": "ubisys_input_config",
+          "attributes": [
+            {
+              "id": "0x0001",
+              "name": "detached",
+              "zcl_type": "bool",
+              "value": 0
+            },
+            {
+              "id": "0x0000",
+              "name": "input_mode",
               "zcl_type": "enum8",
-              "value": 5
+              "value": 0
             }
           ]
         }
@@ -198,6 +218,114 @@
           "class_name": "IdentifyButton",
           "available": true
         }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Enter calibration mode",
+          "unique_id": "ab:cd:ef:12:d1:f5:5f:ec-1-enter_calibration_mode",
+          "migrate_unique_ids": [],
+          "platform": "button",
+          "class_name": "WriteAttributeButton",
+          "translation_key": "enter_calibration_mode",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "device_ieee": "ab:cd:ef:12:d1:f5:5f:ec",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "attribute_name": "enter_calibration_mode",
+          "attribute_value": true
+        },
+        "state": {
+          "class_name": "WriteAttributeButton",
+          "available": true
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Exit calibration mode",
+          "unique_id": "ab:cd:ef:12:d1:f5:5f:ec-1-exit_calibration_mode",
+          "migrate_unique_ids": [],
+          "platform": "button",
+          "class_name": "WriteAttributeButton",
+          "translation_key": "exit_calibration_mode",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "device_ieee": "ab:cd:ef:12:d1:f5:5f:ec",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "attribute_name": "exit_calibration_mode",
+          "attribute_value": true
+        },
+        "state": {
+          "class_name": "WriteAttributeButton",
+          "available": true
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Prepare manual calibration",
+          "unique_id": "ab:cd:ef:12:d1:f5:5f:ec-1-prepare_calibration",
+          "migrate_unique_ids": [],
+          "platform": "button",
+          "class_name": "WriteAttributeButton",
+          "translation_key": "prepare_manual_calibration",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "device_ieee": "ab:cd:ef:12:d1:f5:5f:ec",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "attribute_name": "prepare_calibration",
+          "attribute_value": true
+        },
+        "state": {
+          "class_name": "WriteAttributeButton",
+          "available": true
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Run auto-calibration",
+          "unique_id": "ab:cd:ef:12:d1:f5:5f:ec-1-run_calibration",
+          "migrate_unique_ids": [],
+          "platform": "button",
+          "class_name": "WriteAttributeButton",
+          "translation_key": "run_auto_calibration",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "device_ieee": "ab:cd:ef:12:d1:f5:5f:ec",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "attribute_name": "run_calibration",
+          "attribute_value": true
+        },
+        "state": {
+          "class_name": "WriteAttributeButton",
+          "available": true
+        }
       }
     ],
     "cover": [
@@ -231,6 +359,421 @@
           "is_closing": null,
           "is_closed": null,
           "supported_features": 15
+        }
+      }
+    ],
+    "number": [
+      {
+        "info_object": {
+          "fallback_name": "Additional steps",
+          "unique_id": "ab:cd:ef:12:d1:f5:5f:ec-1-additional_steps",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "NumberConfigurationEntity",
+          "translation_key": "additional_steps",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "device_ieee": "ab:cd:ef:12:d1:f5:5f:ec",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "mode": "box",
+          "native_max_value": 100,
+          "native_min_value": 0,
+          "native_step": 1,
+          "native_unit_of_measurement": "%"
+        },
+        "state": {
+          "class_name": "NumberConfigurationEntity",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Inactive power threshold",
+          "unique_id": "ab:cd:ef:12:d1:f5:5f:ec-1-inactive_power_threshold",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "NumberConfigurationEntity",
+          "translation_key": "inactive_power_threshold",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "device_ieee": "ab:cd:ef:12:d1:f5:5f:ec",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "mode": "box",
+          "native_max_value": 65.535,
+          "native_min_value": 0,
+          "native_step": 0.001,
+          "native_unit_of_measurement": "W"
+        },
+        "state": {
+          "class_name": "NumberConfigurationEntity",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Closed limit lift",
+          "unique_id": "ab:cd:ef:12:d1:f5:5f:ec-1-installed_closed_limit_lift_config",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "NumberConfigurationEntity",
+          "translation_key": "closed_limit_lift",
+          "translation_placeholders": null,
+          "device_class": "distance",
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "device_ieee": "ab:cd:ef:12:d1:f5:5f:ec",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "mode": "box",
+          "native_max_value": 65535,
+          "native_min_value": 0,
+          "native_step": 1,
+          "native_unit_of_measurement": "cm"
+        },
+        "state": {
+          "class_name": "NumberConfigurationEntity",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Closed limit tilt",
+          "unique_id": "ab:cd:ef:12:d1:f5:5f:ec-1-installed_closed_limit_tilt_config",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "NumberConfigurationEntity",
+          "translation_key": "closed_limit_tilt",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "device_ieee": "ab:cd:ef:12:d1:f5:5f:ec",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "mode": "box",
+          "native_max_value": 6553.5,
+          "native_min_value": 0,
+          "native_step": 0.1,
+          "native_unit_of_measurement": "\u00b0"
+        },
+        "state": {
+          "class_name": "NumberConfigurationEntity",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Open limit lift",
+          "unique_id": "ab:cd:ef:12:d1:f5:5f:ec-1-installed_open_limit_lift_config",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "NumberConfigurationEntity",
+          "translation_key": "open_limit_lift",
+          "translation_placeholders": null,
+          "device_class": "distance",
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "device_ieee": "ab:cd:ef:12:d1:f5:5f:ec",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "mode": "box",
+          "native_max_value": 65535,
+          "native_min_value": 0,
+          "native_step": 1,
+          "native_unit_of_measurement": "cm"
+        },
+        "state": {
+          "class_name": "NumberConfigurationEntity",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Open limit tilt",
+          "unique_id": "ab:cd:ef:12:d1:f5:5f:ec-1-installed_open_limit_tilt_config",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "NumberConfigurationEntity",
+          "translation_key": "open_limit_tilt",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "device_ieee": "ab:cd:ef:12:d1:f5:5f:ec",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "mode": "box",
+          "native_max_value": 6553.5,
+          "native_min_value": 0,
+          "native_step": 0.1,
+          "native_unit_of_measurement": "\u00b0"
+        },
+        "state": {
+          "class_name": "NumberConfigurationEntity",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Tilt turn time (open to close)",
+          "unique_id": "ab:cd:ef:12:d1:f5:5f:ec-1-lift_to_tilt_transition_steps",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "NumberConfigurationEntity",
+          "translation_key": "tilt_turn_time_open_to_close",
+          "translation_placeholders": null,
+          "device_class": "duration",
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "device_ieee": "ab:cd:ef:12:d1:f5:5f:ec",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "mode": "box",
+          "native_max_value": 1310.7,
+          "native_min_value": 0,
+          "native_step": 0.02,
+          "native_unit_of_measurement": "s"
+        },
+        "state": {
+          "class_name": "NumberConfigurationEntity",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Tilt turn time (close to open)",
+          "unique_id": "ab:cd:ef:12:d1:f5:5f:ec-1-lift_to_tilt_transition_steps_2",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "NumberConfigurationEntity",
+          "translation_key": "tilt_turn_time_close_to_open",
+          "translation_placeholders": null,
+          "device_class": "duration",
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "device_ieee": "ab:cd:ef:12:d1:f5:5f:ec",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "mode": "box",
+          "native_max_value": 1310.7,
+          "native_min_value": 0,
+          "native_step": 0.02,
+          "native_unit_of_measurement": "s"
+        },
+        "state": {
+          "class_name": "NumberConfigurationEntity",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Startup time",
+          "unique_id": "ab:cd:ef:12:d1:f5:5f:ec-1-startup_steps",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "NumberConfigurationEntity",
+          "translation_key": "startup_time",
+          "translation_placeholders": null,
+          "device_class": "duration",
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "device_ieee": "ab:cd:ef:12:d1:f5:5f:ec",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "mode": "box",
+          "native_max_value": 1310.7,
+          "native_min_value": 0,
+          "native_step": 0.02,
+          "native_unit_of_measurement": "s"
+        },
+        "state": {
+          "class_name": "NumberConfigurationEntity",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Travel time (open to close)",
+          "unique_id": "ab:cd:ef:12:d1:f5:5f:ec-1-total_steps",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "NumberConfigurationEntity",
+          "translation_key": "travel_time_open_to_close",
+          "translation_placeholders": null,
+          "device_class": "duration",
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "device_ieee": "ab:cd:ef:12:d1:f5:5f:ec",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "mode": "box",
+          "native_max_value": 1310.7,
+          "native_min_value": 0,
+          "native_step": 0.02,
+          "native_unit_of_measurement": "s"
+        },
+        "state": {
+          "class_name": "NumberConfigurationEntity",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Travel time (close to open)",
+          "unique_id": "ab:cd:ef:12:d1:f5:5f:ec-1-total_steps_2",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "NumberConfigurationEntity",
+          "translation_key": "travel_time_close_to_open",
+          "translation_placeholders": null,
+          "device_class": "duration",
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "device_ieee": "ab:cd:ef:12:d1:f5:5f:ec",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "mode": "box",
+          "native_max_value": 1310.7,
+          "native_min_value": 0,
+          "native_step": 0.02,
+          "native_unit_of_measurement": "s"
+        },
+        "state": {
+          "class_name": "NumberConfigurationEntity",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Turnaround guard time",
+          "unique_id": "ab:cd:ef:12:d1:f5:5f:ec-1-turnaround_guard_time",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "NumberConfigurationEntity",
+          "translation_key": "turnaround_guard_time",
+          "translation_placeholders": null,
+          "device_class": "duration",
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "device_ieee": "ab:cd:ef:12:d1:f5:5f:ec",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "mode": "box",
+          "native_max_value": 12.7,
+          "native_min_value": 0.5,
+          "native_step": 0.05,
+          "native_unit_of_measurement": "s"
+        },
+        "state": {
+          "class_name": "NumberConfigurationEntity",
+          "available": true,
+          "state": null
+        }
+      }
+    ],
+    "select": [
+      {
+        "info_object": {
+          "fallback_name": "Window covering type",
+          "unique_id": "ab:cd:ef:12:d1:f5:5f:ec-1-window_covering_type_config",
+          "migrate_unique_ids": [],
+          "platform": "select",
+          "class_name": "ZCLEnumSelectEntity",
+          "translation_key": "window_covering_type",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "device_ieee": "ab:cd:ef:12:d1:f5:5f:ec",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "enum": "WindowCoveringType",
+          "options": [
+            "Rollershade",
+            "Rollershade two motors",
+            "Rollershade exterior",
+            "Rollershade exterior two motors",
+            "Drapery",
+            "Awning",
+            "Shutter",
+            "Tilt blind tilt only",
+            "Tilt blind tilt and lift",
+            "Projector screen"
+          ]
+        },
+        "state": {
+          "class_name": "ZCLEnumSelectEntity",
+          "available": true,
+          "state": null
         }
       }
     ],
@@ -318,6 +861,34 @@
           "available": true,
           "state": "Awning"
         }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Auto-calibration state",
+          "unique_id": "ab:cd:ef:12:d1:f5:5f:ec-1-calibration_state",
+          "migrate_unique_ids": [],
+          "platform": "sensor",
+          "class_name": "EnumSensor",
+          "translation_key": "auto_calibration_state",
+          "translation_placeholders": null,
+          "device_class": "enum",
+          "state_class": null,
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "device_ieee": "ab:cd:ef:12:d1:f5:5f:ec",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "suggested_display_precision": null,
+          "unit": null
+        },
+        "state": {
+          "class_name": "EnumSensor",
+          "available": true,
+          "state": "Idle"
+        }
       }
     ],
     "switch": [
@@ -348,6 +919,38 @@
         },
         "state": {
           "class_name": "WindowCoveringInversionSwitch",
+          "available": true,
+          "state": false,
+          "inverted": false
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Detached mode",
+          "unique_id": "ab:cd:ef:12:d1:f5:5f:ec-1-detached",
+          "migrate_unique_ids": [],
+          "platform": "switch",
+          "class_name": "ConfigurableAttributeSwitch",
+          "translation_key": "detached",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "device_ieee": "ab:cd:ef:12:d1:f5:5f:ec",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "attribute_name": "detached",
+          "invert_attribute_name": null,
+          "force_inverted": false,
+          "off_value": 0,
+          "on_value": 1
+        },
+        "state": {
+          "class_name": "ConfigurableAttributeSwitch",
           "available": true,
           "state": false,
           "inverted": false

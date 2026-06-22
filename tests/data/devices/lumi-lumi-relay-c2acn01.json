@@ -8,7 +8,7 @@
   "friendly_model": "lumi.relay.c2acn01",
   "name": "LUMI lumi.relay.c2acn01",
   "quirk_applied": true,
-  "quirk_class": "zhaquirks.xiaomi.aqara.relay_c2acn01.Relay",
+  "quirk_class": "zhaquirks.xiaomi.aqara.relay_c2acn01:Relay",
   "exposes_features": [],
   "manufacturer_code": 4151,
   "power_source": "Mains",

@@ -8,7 +8,7 @@
   "friendly_model": "3RDS17BZ",
   "name": "Third Reality, Inc 3RDS17BZ",
   "quirk_applied": true,
-  "quirk_class": "zigpy.quirks.v2.CustomDeviceV2",
+  "quirk_class": "zhaquirks.thirdreality.door_sensor_v2:(Third Reality, Inc / 3RDS17BZ)",
   "exposes_features": [],
   "manufacturer_code": 4659,
   "power_source": "Battery or Unknown",

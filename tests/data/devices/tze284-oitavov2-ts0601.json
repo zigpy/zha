@@ -7,8 +7,8 @@
   "friendly_manufacturer": "_TZE284_oitavov2",
   "friendly_model": "TS0601",
   "name": "_TZE284_oitavov2 TS0601",
-  "quirk_applied": false,
-  "quirk_class": "zigpy.device.Device",
+  "quirk_applied": true,
+  "quirk_class": "zhaquirks.tuya.builder:(_TZE200_myd45weu / TS0601)",
   "exposes_features": [],
   "manufacturer_code": 4417,
   "power_source": "Battery or Unknown",
@@ -173,7 +173,7 @@
         },
         {
           "cluster_id": "0xef00",
-          "endpoint_attribute": null,
+          "endpoint_attribute": "tuya_manufacturer",
           "attributes": []
         }
       ],

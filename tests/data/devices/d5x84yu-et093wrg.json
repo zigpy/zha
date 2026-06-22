@@ -8,7 +8,7 @@
   "friendly_model": "eT093WRG",
   "name": "D5X84YU eT093WRG",
   "quirk_applied": true,
-  "quirk_class": "zhaquirks.danfoss.thermostat.DanfossThermostat",
+  "quirk_class": "zhaquirks.danfoss.thermostat:DanfossThermostat",
   "exposes_features": [
     "danfoss.ally_thermostat"
   ],

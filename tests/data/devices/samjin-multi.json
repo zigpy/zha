@@ -8,7 +8,7 @@
   "friendly_model": "multi",
   "name": "Samjin multi",
   "quirk_applied": true,
-  "quirk_class": "zhaquirks.smartthings.multi.SmartthingsMultiPurposeSensor",
+  "quirk_class": "zhaquirks.smartthings.multi:SmartthingsMultiPurposeSensor",
   "exposes_features": [],
   "manufacturer_code": 4673,
   "power_source": "Battery or Unknown",

@@ -8,7 +8,7 @@
   "friendly_model": "LYWSD03MMC",
   "name": "Xiaomi LYWSD03MMC",
   "quirk_applied": true,
-  "quirk_class": "zigpy.quirks.v2.CustomDeviceV2",
+  "quirk_class": "zhaquirks.xiaomi.custom.z03mmc:(Xiaomi / LYWSD03MMC)",
   "exposes_features": [],
   "manufacturer_code": 4417,
   "power_source": "Battery or Unknown",

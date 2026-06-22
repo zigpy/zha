@@ -8,7 +8,7 @@
   "friendly_model": "3320-L",
   "name": "CentraLite 3320-L",
   "quirk_applied": true,
-  "quirk_class": "zhaquirks.centralite.ias.CentraLiteIASSensor",
+  "quirk_class": "zhaquirks.centralite.ias:CentraLiteIASSensor",
   "exposes_features": [],
   "manufacturer_code": 49887,
   "power_source": "Battery or Unknown",

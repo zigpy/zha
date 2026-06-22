@@ -8,7 +8,7 @@
   "friendly_model": "XBee3",
   "name": "Digi XBee3",
   "quirk_applied": true,
-  "quirk_class": "zhaquirks.xbee.xbee3_io.XBee3Sensor",
+  "quirk_class": "zhaquirks.xbee.xbee3_io:XBee3Sensor",
   "exposes_features": [],
   "manufacturer_code": 4126,
   "power_source": "Mains",

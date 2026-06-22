@@ -8,7 +8,7 @@
   "friendly_model": "GL-C-009P",
   "name": "GLEDOPTO GL-C-009P",
   "quirk_applied": true,
-  "quirk_class": "zigpy.quirks.v2.CustomDeviceV2",
+  "quirk_class": "zhaquirks.gledopto.glc009p:(GLEDOPTO / GL-C-009P)",
   "exposes_features": [],
   "manufacturer_code": 4687,
   "power_source": "Mains",

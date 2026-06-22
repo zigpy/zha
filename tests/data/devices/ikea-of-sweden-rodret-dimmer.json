@@ -8,7 +8,7 @@
   "friendly_model": "RODRET Dimmer",
   "name": "IKEA of Sweden RODRET Dimmer",
   "quirk_applied": true,
-  "quirk_class": "zhaquirks.ikea.twobtnremote.IkeaRodretRemote2Btn",
+  "quirk_class": "zhaquirks.ikea.twobtnremote:IkeaRodretRemote2Btn",
   "exposes_features": [],
   "manufacturer_code": 4476,
   "power_source": "Battery or Unknown",

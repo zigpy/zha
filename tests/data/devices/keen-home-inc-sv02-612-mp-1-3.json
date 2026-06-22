@@ -8,7 +8,7 @@
   "friendly_model": "SV02-612-MP-1.3",
   "name": "Keen Home Inc SV02-612-MP-1.3",
   "quirk_applied": true,
-  "quirk_class": "zhaquirks.keenhome.sv02612mp13.KeenHomeSmartVent",
+  "quirk_class": "zhaquirks.keenhome.sv02612mp13:KeenHomeSmartVent",
   "exposes_features": [],
   "manufacturer_code": 4443,
   "power_source": "Battery or Unknown",
