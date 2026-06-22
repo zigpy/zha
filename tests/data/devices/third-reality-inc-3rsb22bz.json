@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "ieee": "28:2c:02:bf:ff:e3:74:f8",
   "nwk": "0x2711",
   "manufacturer": "Third Reality, Inc",
@@ -8,7 +8,7 @@
   "friendly_model": "3RSB22BZ",
   "name": "Third Reality, Inc 3RSB22BZ",
   "quirk_applied": true,
-  "quirk_class": "zhaquirks.thirdreality.button.Button",
+  "quirk_class": "zigpy.quirks.v2.CustomDeviceV2",
   "exposes_features": [],
   "manufacturer_code": 4659,
   "power_source": "Battery or Unknown",
@@ -94,6 +94,11 @@
               "value": 1.0
             }
           ]
+        },
+        {
+          "cluster_id": "0xff01",
+          "endpoint_attribute": null,
+          "attributes": []
         }
       ],
       "out_clusters": [
@@ -167,22 +172,6 @@
           "entity_registry_enabled_default": false,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "BasicClusterHandler",
-              "generic_id": "cluster_handler_0x0000",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 0,
-                "name": "Basic",
-                "type": "server"
-              },
-              "id": "1:0x0000",
-              "unique_id": "28:2c:02:bf:ff:e3:74:f8:1:0x0000",
-              "status": "INITIALIZED",
-              "value_attribute": null
-            }
-          ],
           "device_ieee": "28:2c:02:bf:ff:e3:74:f8",
           "endpoint_id": 1,
           "available": true,
@@ -211,22 +200,6 @@
           "entity_registry_enabled_default": false,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "BasicClusterHandler",
-              "generic_id": "cluster_handler_0x0000",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 0,
-                "name": "Basic",
-                "type": "server"
-              },
-              "id": "1:0x0000",
-              "unique_id": "28:2c:02:bf:ff:e3:74:f8:1:0x0000",
-              "status": "INITIALIZED",
-              "value_attribute": null
-            }
-          ],
           "device_ieee": "28:2c:02:bf:ff:e3:74:f8",
           "endpoint_id": 1,
           "available": true,
@@ -255,22 +228,6 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "PowerConfigurationClusterHandler",
-              "generic_id": "cluster_handler_0x0001",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 1,
-                "name": "Power Configuration",
-                "type": "server"
-              },
-              "id": "1:0x0001",
-              "unique_id": "28:2c:02:bf:ff:e3:74:f8:1:0x0001",
-              "status": "INITIALIZED",
-              "value_attribute": "battery_voltage"
-            }
-          ],
           "device_ieee": "28:2c:02:bf:ff:e3:74:f8",
           "endpoint_id": 1,
           "available": true,
@@ -291,6 +248,40 @@
         ]
       }
     ],
+    "switch": [
+      {
+        "info_object": {
+          "fallback_name": "Disable double click",
+          "unique_id": "28:2c:02:bf:ff:e3:74:f8-1-disable_double_click",
+          "migrate_unique_ids": [],
+          "platform": "switch",
+          "class_name": "ConfigurableAttributeSwitch",
+          "translation_key": "disable_double_click",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "device_ieee": "28:2c:02:bf:ff:e3:74:f8",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "attribute_name": "disable_double_click",
+          "invert_attribute_name": null,
+          "force_inverted": false,
+          "off_value": 0,
+          "on_value": 1
+        },
+        "state": {
+          "class_name": "ConfigurableAttributeSwitch",
+          "available": true,
+          "state": false,
+          "inverted": false
+        }
+      }
+    ],
     "update": [
       {
         "info_object": {
@@ -307,22 +298,6 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "OtaClientClusterHandler",
-              "generic_id": "cluster_handler_0x0019_client",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 25,
-                "name": "Ota",
-                "type": "client"
-              },
-              "id": "1:0x0019_client",
-              "unique_id": "28:2c:02:bf:ff:e3:74:f8:1:0x0019_CLIENT",
-              "status": "INITIALIZED",
-              "value_attribute": null
-            }
-          ],
           "device_ieee": "28:2c:02:bf:ff:e3:74:f8",
           "endpoint_id": 1,
           "available": true,

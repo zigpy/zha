@@ -5,6 +5,7 @@
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import logging
 from typing import Any
 from unittest.mock import AsyncMock, call, patch, sentinel
@@ -1576,18 +1577,18 @@ async def test_transitions(
     await entity.async_turn_on(transition=1, brightness=25, color_temp=235)
     await zha_gateway.async_block_till_done()
 
-    group_on_off_cluster_handler = zha_group.endpoint[general.OnOff.cluster_id]
-    group_level_cluster_handler = zha_group.endpoint[general.LevelControl.cluster_id]
-    group_color_cluster_handler = zha_group.endpoint[lighting.Color.cluster_id]
-    assert group_on_off_cluster_handler.request.call_count == 0
-    assert group_on_off_cluster_handler.request.await_count == 0
-    assert group_color_cluster_handler.request.call_count == 1
-    assert group_color_cluster_handler.request.await_count == 1
-    assert group_level_cluster_handler.request.call_count == 1
-    assert group_level_cluster_handler.request.await_count == 1
+    group_on_off_cluster = zha_group.endpoint[general.OnOff.cluster_id]
+    group_level_cluster = zha_group.endpoint[general.LevelControl.cluster_id]
+    group_color_cluster = zha_group.endpoint[lighting.Color.cluster_id]
+    assert group_on_off_cluster.request.call_count == 0
+    assert group_on_off_cluster.request.await_count == 0
+    assert group_color_cluster.request.call_count == 1
+    assert group_color_cluster.request.await_count == 1
+    assert group_level_cluster.request.call_count == 1
+    assert group_level_cluster.request.await_count == 1
 
     # groups are omitted from the 3 call dance for new_color_provided_while_off
-    assert group_color_cluster_handler.request.call_args == call(
+    assert group_color_cluster.request.call_args == call(
         False,
         dev2_cluster_color.commands_by_name["move_to_color_temp"].id,
         dev2_cluster_color.commands_by_name["move_to_color_temp"].schema,
@@ -1596,7 +1597,7 @@ async def test_transitions(
         expect_reply=True,
         manufacturer=None,
     )
-    assert group_level_cluster_handler.request.call_args == call(
+    assert group_level_cluster.request.call_args == call(
         False,
         dev2_cluster_level.commands_by_name["move_to_level_with_on_off"].id,
         dev2_cluster_level.commands_by_name["move_to_level_with_on_off"].schema,
@@ -1611,9 +1612,9 @@ async def test_transitions(
     assert entity.state["color_temp"] == 235
     assert entity.state["color_mode"] == ColorMode.COLOR_TEMP
 
-    group_on_off_cluster_handler.request.reset_mock()
-    group_color_cluster_handler.request.reset_mock()
-    group_level_cluster_handler.request.reset_mock()
+    group_on_off_cluster.request.reset_mock()
+    group_color_cluster.request.reset_mock()
+    group_level_cluster.request.reset_mock()
 
     # turn the sengled light back on
     await device_2_light_entity.async_turn_on()
@@ -1937,6 +1938,137 @@ async def test_group_member_assume_state(zha_gateway: Gateway) -> None:
     assert device_2_light_entity.state["brightness"] == 100
 
 
+@patch(
+    "zigpy.zcl.clusters.general.LevelControl.request",
+    new=AsyncMock(return_value=[sentinel.data, zcl_f.Status.SUCCESS]),
+)
+@patch(
+    "zigpy.zcl.clusters.general.OnOff.request",
+    new=AsyncMock(return_value=[sentinel.data, zcl_f.Status.SUCCESS]),
+)
+async def test_transition_brightness_buffering(zha_gateway: Gateway) -> None:
+    """Test that brightness reports during a transition are buffered.
+
+    The last received report is applied when the transition completes, which
+    handles lights that claim SUCCESS but fail to reach the target brightness.
+    """
+    device_light_1 = await device_light_1_mock(zha_gateway)
+    dev1_cluster_level = device_light_1.device.endpoints[1].level
+    entity = get_entity(device_light_1, platform=Platform.LIGHT)
+
+    assert bool(entity.state["on"]) is False
+
+    # Turn on with a short transition and a target brightness of 200.
+    await entity.async_turn_on(transition=0.1, brightness=200)
+    await zha_gateway.async_block_till_done()
+
+    # The state is optimistically set to the target brightness immediately.
+    assert bool(entity.state["on"]) is True
+    assert entity.state["brightness"] == 200
+    assert entity.is_transitioning
+
+    # Simulate intermediate brightness reports during the transition (light slowly ramping up).
+    # These should be buffered, not immediately applied to HA state.
+    await send_attributes_report(
+        zha_gateway,
+        dev1_cluster_level,
+        {general.LevelControl.AttributeDefs.current_level.id: 50},
+    )
+    await zha_gateway.async_block_till_done()
+    assert entity.state["brightness"] == 200  # still the optimistic value
+
+    # The light only goes to brightness 120 (for some reason), not the requested 200.
+    await send_attributes_report(
+        zha_gateway,
+        dev1_cluster_level,
+        {general.LevelControl.AttributeDefs.current_level.id: 120},
+    )
+    await zha_gateway.async_block_till_done()
+    assert entity.state["brightness"] == 200  # still buffered, not yet applied
+
+    # Wait for the transition timer to fire (0.1 + 0.5s delay = 0.6s).
+    await asyncio.sleep(0.8)
+    await zha_gateway.async_block_till_done()
+
+    # After the transition, the last buffered report (120) is applied instead of the target (200).
+    assert not entity.is_transitioning
+    assert entity.state["brightness"] == 120
+
+    # Now verify that if no brightness reports arrive during a transition, the
+    # optimistically set target brightness is preserved unchanged.
+    await entity.async_turn_on(transition=0.1, brightness=150)
+    await zha_gateway.async_block_till_done()
+
+    assert entity.state["brightness"] == 150
+    assert entity.is_transitioning
+
+    # No level reports during this transition.
+    await asyncio.sleep(0.8)
+    await zha_gateway.async_block_till_done()
+
+    assert not entity.is_transitioning
+    assert entity.state["brightness"] == 150  # target preserved
+
+
+@patch(
+    "zigpy.zcl.clusters.general.LevelControl.request",
+    new=AsyncMock(return_value=[sentinel.data, zcl_f.Status.SUCCESS]),
+)
+@patch(
+    "zigpy.zcl.clusters.general.OnOff.request",
+    new=AsyncMock(return_value=[sentinel.data, zcl_f.Status.SUCCESS]),
+)
+async def test_turn_on_during_off_transition(zha_gateway: Gateway) -> None:
+    """Test turning a light on while it is mid-way through an off transition.
+
+    Some devices refuse to turn on while a transition to off is still running,
+    even though they return Status.SUCCESS for the on command. The device then
+    correctly reports on_off=false. That report must be buffered and applied
+    when the transition window ends, so HA reflects the actual off state.
+    """
+    device_light_1 = await device_light_1_mock(zha_gateway)
+    dev1_cluster_on_off = device_light_1.device.endpoints[1].on_off
+    entity = get_entity(device_light_1, platform=Platform.LIGHT)
+
+    # Start with the light on.
+    await entity.async_turn_on(brightness=200)
+    await zha_gateway.async_block_till_done()
+    assert bool(entity.state["on"]) is True
+
+    # Turn it off with a transition (timer runs for 1 + 0.5s = 1.5s).
+    await entity.async_turn_off(transition=1)
+    await zha_gateway.async_block_till_done()
+    assert bool(entity.state["on"]) is False
+    assert entity.is_transitioning
+
+    # Before the off-transition timer fires, turn the light back on.
+    # The device accepts the command (returns SUCCESS) but refuses to execute it.
+    await entity.async_turn_on(brightness=150)
+    await zha_gateway.async_block_till_done()
+    # Optimistically, HA now thinks it's on.
+    assert bool(entity.state["on"]) is True
+    assert entity.state["brightness"] == 150
+    assert entity.is_transitioning
+
+    # The device correctly reports it is still off (it refused the on command).
+    # This must be buffered, not ignored.
+    await send_attributes_report(
+        zha_gateway,
+        dev1_cluster_on_off,
+        {general.OnOff.AttributeDefs.on_off.id: 0},
+    )
+    await zha_gateway.async_block_till_done()
+
+    # During the transition window the state is still optimistically on.
+    assert bool(entity.state["on"]) is True
+
+    # Once the transition timer fires, the buffered off report is applied.
+    await asyncio.sleep(0.8)
+    await zha_gateway.async_block_till_done()
+    assert not entity.is_transitioning
+    assert bool(entity.state["on"]) is False
+
+
 async def test_light_state_restoration(zha_gateway: Gateway) -> None:
     """Test the light state restoration function."""
     device_light_3 = await device_light_3_mock(zha_gateway)
@@ -1976,3 +2108,219 @@ async def test_light_state_restoration(zha_gateway: Gateway) -> None:
     assert entity.state["xy_color"] == (1, 2)
     assert entity.state["color_mode"] == ColorMode.XY
     assert entity.state["effect"] == "colorloop"
+
+
+async def test_light_state_restoration_unsupported_color_mode(
+    zha_gateway: Gateway,
+) -> None:
+    """Test that restoring an unsupported color_mode is ignored."""
+    zigpy_device = create_mock_zigpy_device(zha_gateway, LIGHT_COLOR)
+    color_cluster = zigpy_device.endpoints[1].light_color
+    color_cluster.PLUGGED_ATTR_READS = {
+        "color_capabilities": lighting.Color.ColorCapabilities.Color_temperature,
+        "color_temperature": 250,
+        "color_temp_physical_min": 153,
+        "color_temp_physical_max": 500,
+    }
+    update_attribute_cache(color_cluster)
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
+    entity = get_entity(zha_device, platform=Platform.LIGHT)
+
+    assert entity.supported_color_modes == {ColorMode.COLOR_TEMP}
+    assert entity.state["color_mode"] == ColorMode.COLOR_TEMP
+
+    # Attempt to restore XY color_mode on a color_temp-only light
+    entity.restore_external_state_attributes(
+        state=True,
+        off_with_transition=False,
+        off_brightness=None,
+        brightness=100,
+        color_temp=300,
+        xy_color=None,
+        color_mode=ColorMode.XY,
+        effect=None,
+    )
+
+    # color_mode should remain COLOR_TEMP since XY is not supported
+    assert entity.state["color_mode"] == ColorMode.COLOR_TEMP
+    assert entity.state["color_temp"] == 300
+
+
+async def test_color_temp_only_light_ignores_incorrect_color_mode(
+    zha_gateway: Gateway,
+) -> None:
+    """Test color_temp-only light ignores incorrect color_mode reads when polling."""
+    zigpy_device = create_mock_zigpy_device(zha_gateway, LIGHT_COLOR)
+    color_cluster = zigpy_device.endpoints[1].light_color
+    color_cluster.PLUGGED_ATTR_READS = {
+        "color_capabilities": lighting.Color.ColorCapabilities.Color_temperature,
+        "color_temperature": 250,
+        "color_temp_physical_min": 153,
+        "color_temp_physical_max": 500,
+    }
+    update_attribute_cache(color_cluster)
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
+    entity = get_entity(zha_device, platform=Platform.LIGHT)
+
+    assert entity.supported_color_modes == {ColorMode.COLOR_TEMP}
+    assert entity.state["color_mode"] == ColorMode.COLOR_TEMP
+    assert entity.state["color_temp"] == 250
+
+    # Simulate the device incorrectly reporting XY color mode during a poll
+    color_cluster.PLUGGED_ATTR_READS = {
+        "color_capabilities": lighting.Color.ColorCapabilities.Color_temperature,
+        "color_mode": lighting.Color.ColorMode.X_and_Y,
+        "color_temperature": 300,
+        "color_temp_physical_min": 153,
+        "color_temp_physical_max": 500,
+    }
+    update_attribute_cache(color_cluster)
+
+    # Trigger a poll
+    await entity.async_update()
+
+    # color_mode should remain COLOR_TEMP and color_temp should be updated
+    assert entity.state["color_mode"] == ColorMode.COLOR_TEMP
+    assert entity.state["color_temp"] == 300
+    assert entity.state["xy_color"] is None
+
+    # Same test with Hue_and_saturation mode
+    color_cluster.PLUGGED_ATTR_READS = {
+        "color_capabilities": lighting.Color.ColorCapabilities.Color_temperature,
+        "color_mode": lighting.Color.ColorMode.Hue_and_saturation,
+        "color_temperature": 400,
+        "color_temp_physical_min": 153,
+        "color_temp_physical_max": 500,
+    }
+    update_attribute_cache(color_cluster)
+
+    await entity.async_update()
+
+    assert entity.state["color_mode"] == ColorMode.COLOR_TEMP
+    assert entity.state["color_temp"] == 400
+    assert entity.state["xy_color"] is None
+
+
+async def test_poll_updates_color_mode_on_dual_mode_light(
+    zha_gateway: Gateway,
+) -> None:
+    """Test polling XY + COLOR_TEMP light updates color_mode and attribute values."""
+    device = await device_light_1_mock(zha_gateway)
+    entity = get_entity(device, platform=Platform.LIGHT)
+    color_cluster = device.device.endpoints[1].light_color
+
+    assert entity.supported_color_modes == {ColorMode.COLOR_TEMP, ColorMode.XY}
+
+    # Poll with color_temp mode
+    color_cluster.PLUGGED_ATTR_READS = {
+        "color_capabilities": (
+            lighting.Color.ColorCapabilities.Color_temperature
+            | lighting.Color.ColorCapabilities.XY_attributes
+        ),
+        "color_mode": lighting.Color.ColorMode.Color_temperature,
+        "color_temperature": 350,
+        "current_x": 20000,
+        "current_y": 20000,
+    }
+    update_attribute_cache(color_cluster)
+    await entity.async_update()
+
+    assert entity.state["color_mode"] == ColorMode.COLOR_TEMP
+    assert entity.state["color_temp"] == 350
+    assert entity.state["xy_color"] is None
+
+    # Poll with XY mode
+    color_cluster.PLUGGED_ATTR_READS = {
+        "color_capabilities": (
+            lighting.Color.ColorCapabilities.Color_temperature
+            | lighting.Color.ColorCapabilities.XY_attributes
+        ),
+        "color_mode": lighting.Color.ColorMode.X_and_Y,
+        "color_temperature": 350,
+        "current_x": 30000,
+        "current_y": 25000,
+    }
+    update_attribute_cache(color_cluster)
+    await entity.async_update()
+
+    assert entity.state["color_mode"] == ColorMode.XY
+    assert entity.state["xy_color"] == (30000 / 65535, 25000 / 65535)
+    assert entity.state["color_temp"] is None
+
+
+async def test_turn_on_cancellation_cleans_up_transition_flag(
+    zha_gateway: Gateway,
+) -> None:
+    """Test that task cancellation resets the transitioning flag.
+
+    When a mode:restart automation cancels the task, the light must not be
+    stuck ignoring attribute reports indefinitely.
+    """
+    device = await device_light_1_mock(zha_gateway)
+    entity = get_entity(device, platform=Platform.LIGHT)
+
+    cluster_level = device.device.endpoints[1].level
+
+    # Make the level cluster block indefinitely so we can cancel the task while
+    # it is suspended at the first await inside async_turn_on.
+    blocked: asyncio.Future[None] = asyncio.get_running_loop().create_future()
+    original_request = cluster_level.request
+
+    async def blocking_request(*args, **kwargs):
+        await blocked
+        return await original_request(*args, **kwargs)
+
+    cluster_level.request = AsyncMock(side_effect=blocking_request)
+
+    # Start turn_on as a separate task, mirroring what HA does for automations.
+    task = asyncio.ensure_future(entity.async_turn_on(brightness=200, transition=1))
+
+    # Yield control so the task can run until it suspends on the cluster call.
+    await asyncio.sleep(0)
+    await asyncio.sleep(0)
+
+    # The transitioning flag must be set now, with no timer running yet.
+    assert entity.is_transitioning is True
+    assert entity._transition_listener is None
+
+    # Cancel the task (what mode:restart does to the running automation task).
+    task.cancel()
+    with contextlib.suppress(asyncio.CancelledError):
+        await task
+
+    # The finally block must have cleared the flag.
+    assert entity.is_transitioning is False
+
+
+async def test_turn_off_cancellation_cleans_up_transition_flag(
+    zha_gateway: Gateway,
+) -> None:
+    """Test that task cancellation during async_turn_off resets the transitioning flag."""
+    device = await device_light_1_mock(zha_gateway)
+    entity = get_entity(device, platform=Platform.LIGHT)
+
+    cluster_on_off = device.device.endpoints[1].on_off
+
+    # Make the on/off cluster block indefinitely so we can cancel mid-turn-off.
+    blocked: asyncio.Future[None] = asyncio.get_running_loop().create_future()
+    original_request = cluster_on_off.request
+
+    async def blocking_request(*args, **kwargs):
+        await blocked
+        return await original_request(*args, **kwargs)
+
+    cluster_on_off.request = AsyncMock(side_effect=blocking_request)
+
+    task = asyncio.ensure_future(entity.async_turn_off())
+
+    await asyncio.sleep(0)
+    await asyncio.sleep(0)
+
+    assert entity.is_transitioning is True
+    assert entity._transition_listener is None
+
+    task.cancel()
+    with contextlib.suppress(asyncio.CancelledError):
+        await task
+
+    assert entity.is_transitioning is False

@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "ieee": "f4:ce:36:13:82:67:19:59",
   "nwk": "0xE268",
   "manufacturer": "Level Home",
@@ -367,22 +367,6 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "IdentifyClusterHandler",
-              "generic_id": "cluster_handler_0x0003",
-              "endpoint_id": 10,
-              "cluster": {
-                "id": 3,
-                "name": "Identify",
-                "type": "server"
-              },
-              "id": "10:0x0003",
-              "unique_id": "f4:ce:36:13:82:67:19:59:10:0x0003",
-              "status": "INITIALIZED",
-              "value_attribute": null
-            }
-          ],
           "device_ieee": "f4:ce:36:13:82:67:19:59",
           "endpoint_id": 10,
           "available": true,
@@ -415,22 +399,6 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": true,
-          "cluster_handlers": [
-            {
-              "class_name": "DoorLockClusterHandler",
-              "generic_id": "cluster_handler_0x0101",
-              "endpoint_id": 10,
-              "cluster": {
-                "id": 257,
-                "name": "Door Lock",
-                "type": "server"
-              },
-              "id": "10:0x0101",
-              "unique_id": "f4:ce:36:13:82:67:19:59:10:0x0101",
-              "status": "INITIALIZED",
-              "value_attribute": null
-            }
-          ],
           "device_ieee": "f4:ce:36:13:82:67:19:59",
           "endpoint_id": 10,
           "available": true,
@@ -459,22 +427,6 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "PowerConfigurationClusterHandler",
-              "generic_id": "cluster_handler_0x0001",
-              "endpoint_id": 10,
-              "cluster": {
-                "id": 1,
-                "name": "Power Configuration",
-                "type": "server"
-              },
-              "id": "10:0x0001",
-              "unique_id": "f4:ce:36:13:82:67:19:59:10:0x0001",
-              "status": "INITIALIZED",
-              "value_attribute": "battery_voltage"
-            }
-          ],
           "device_ieee": "f4:ce:36:13:82:67:19:59",
           "endpoint_id": 10,
           "available": true,
@@ -511,22 +463,6 @@
           "entity_registry_enabled_default": false,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "BasicClusterHandler",
-              "generic_id": "cluster_handler_0x0000",
-              "endpoint_id": 5,
-              "cluster": {
-                "id": 0,
-                "name": "Basic",
-                "type": "server"
-              },
-              "id": "5:0x0000",
-              "unique_id": "f4:ce:36:13:82:67:19:59:5:0x0000",
-              "status": "INITIALIZED",
-              "value_attribute": null
-            }
-          ],
           "device_ieee": "f4:ce:36:13:82:67:19:59",
           "endpoint_id": 5,
           "available": true,
@@ -555,22 +491,6 @@
           "entity_registry_enabled_default": false,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "BasicClusterHandler",
-              "generic_id": "cluster_handler_0x0000",
-              "endpoint_id": 5,
-              "cluster": {
-                "id": 0,
-                "name": "Basic",
-                "type": "server"
-              },
-              "id": "5:0x0000",
-              "unique_id": "f4:ce:36:13:82:67:19:59:5:0x0000",
-              "status": "INITIALIZED",
-              "value_attribute": null
-            }
-          ],
           "device_ieee": "f4:ce:36:13:82:67:19:59",
           "endpoint_id": 5,
           "available": true,
@@ -601,22 +521,6 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "OtaClientClusterHandler",
-              "generic_id": "cluster_handler_0x0019_client",
-              "endpoint_id": 5,
-              "cluster": {
-                "id": 25,
-                "name": "Ota",
-                "type": "client"
-              },
-              "id": "5:0x0019_client",
-              "unique_id": "f4:ce:36:13:82:67:19:59:5:0x0019_CLIENT",
-              "status": "INITIALIZED",
-              "value_attribute": null
-            }
-          ],
           "device_ieee": "f4:ce:36:13:82:67:19:59",
           "endpoint_id": 5,
           "available": true,

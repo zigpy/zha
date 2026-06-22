@@ -2,23 +2,31 @@
 
 from __future__ import annotations
 
-from asyncio import Task
+from abc import ABC, abstractmethod
 import contextlib
 from dataclasses import dataclass
 from datetime import date, datetime, timedelta
 import enum
 import functools
 import logging
+import math
 import numbers
 import typing
 from typing import TYPE_CHECKING, Any, cast
 
 from zhaquirks.danfoss import thermostat as danfoss_thermostat
-from zhaquirks.quirk_ids import DANFOSS_ALLY_THERMOSTAT
+from zhaquirks.quirk_ids import DANFOSS_ALLY_THERMOSTAT, SE_POLL_SUMMATION
 from zigpy import types
 from zigpy.quirks.v2 import ZCLEnumMetadata, ZCLSensorMetadata
 from zigpy.state import Counter, State
-from zigpy.zcl import foundation
+from zigpy.zcl import (
+    AttributeReadEvent,
+    AttributeReportedEvent,
+    AttributeUpdatedEvent,
+    AttributeWrittenEvent,
+    ReportingConfig,
+    foundation,
+)
 from zigpy.zcl.clusters.closures import WindowCovering
 from zigpy.zcl.clusters.general import (
     AnalogInput,
@@ -26,6 +34,7 @@ from zigpy.zcl.clusters.general import (
     DeviceTemperature as DeviceTemperatureCluster,
     PowerConfiguration,
 )
+from zigpy.zcl.clusters.general_const import ApplicationType
 from zigpy.zcl.clusters.homeautomation import Diagnostic, ElectricalMeasurement
 from zigpy.zcl.clusters.hvac import Thermostat
 from zigpy.zcl.clusters.measurement import (
@@ -50,30 +59,54 @@ from zigpy.zcl.clusters.smartenergy import (
 )
 
 from zha.application import Platform
+from zha.application.helpers import safe_read
 from zha.application.platforms import (
+    AttrConfig,
     BaseEntity,
     BaseEntityInfo,
     BaseIdentifiers,
-    ClusterHandlerMatch,
+    ClusterConfig,
+    ClusterMatch,
     EntityCategory,
     PlatformEntity,
     PlatformFeatureGroup,
     register_entity,
 )
 from zha.application.platforms.climate.const import HVACAction
+from zha.application.platforms.const import (
+    AQARA_OPPLE_CLUSTER,
+    IKEA_AIR_PURIFIER_CLUSTER,
+    INOVELLI_CLUSTER,
+    SMARTTHINGS_HUMIDITY_CLUSTER,
+    SONOFF_CLUSTER,
+    TUYA_MANUFACTURER_CLUSTER,
+    VOC_LEVEL_CLUSTER,
+)
 from zha.application.platforms.helpers import validate_device_class
 from zha.application.platforms.number.bacnet import BACNET_UNITS_TO_HA_UNITS
 from zha.application.platforms.sensor.const import (
     ANALOG_INPUT_APPTYPE_DEV_CLASS,
     ANALOG_INPUT_APPTYPE_UNITS,
+    LEGACY_MEASUREMENT_TYPE_REMAPPING,
+    METERING_DEVICE_TYPES_ELECTRIC,
+    METERING_DEVICE_TYPES_GAS,
+    METERING_DEVICE_TYPES_HEATING_COOLING,
+    METERING_DEVICE_TYPES_WATER,
     ZCL_EPOCH,
+    DeviceStatusDefault,
+    DeviceStatusElectric,
+    DeviceStatusGas,
+    DeviceStatusHeatingCooling,
+    DeviceStatusWater,
     SensorDeviceClass,
     SensorStateClass,
+    metering_device_type_name,
 )
 from zha.application.platforms.sensor.helpers import (
     create_number_formatter,
     resolution_to_decimal_precision,
 )
+from zha.application.platforms.virtual import VirtualEntity
 from zha.decorators import periodic
 from zha.units import (
     CONCENTRATION_MICROGRAMS_PER_CUBIC_METER,
@@ -97,38 +130,8 @@ from zha.units import (
     UnitOfVolume,
     UnitOfVolumeFlowRate,
 )
-from zha.zigbee.cluster_handlers import ClusterAttributeUpdatedEvent
-from zha.zigbee.cluster_handlers.const import (
-    AQARA_OPPLE_CLUSTER,
-    CLUSTER_HANDLER_ANALOG_INPUT,
-    CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
-    CLUSTER_HANDLER_BASIC,
-    CLUSTER_HANDLER_COVER,
-    CLUSTER_HANDLER_DEVICE_TEMPERATURE,
-    CLUSTER_HANDLER_DIAGNOSTIC,
-    CLUSTER_HANDLER_ELECTRICAL_CONDUCTIVITY,
-    CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT,
-    CLUSTER_HANDLER_FLOW,
-    CLUSTER_HANDLER_HUMIDITY,
-    CLUSTER_HANDLER_ILLUMINANCE,
-    CLUSTER_HANDLER_INOVELLI,
-    CLUSTER_HANDLER_LEAF_WETNESS,
-    CLUSTER_HANDLER_POWER_CONFIGURATION,
-    CLUSTER_HANDLER_PRESSURE,
-    CLUSTER_HANDLER_SMARTENERGY_METERING,
-    CLUSTER_HANDLER_SOIL_MOISTURE,
-    CLUSTER_HANDLER_TEMPERATURE,
-    CLUSTER_HANDLER_THERMOSTAT,
-    CLUSTER_HANDLER_WIND_SPEED,
-    IKEA_AIR_PURIFIER_CLUSTER,
-    INOVELLI_CLUSTER,
-    SMARTTHINGS_HUMIDITY_CLUSTER,
-    SONOFF_CLUSTER,
-    TUYA_MANUFACTURER_CLUSTER,
-)
 
 if TYPE_CHECKING:
-    from zha.zigbee.cluster_handlers import ClusterHandler
     from zha.zigbee.device import Device
     from zha.zigbee.endpoint import Endpoint
 
@@ -187,58 +190,95 @@ class DeviceCounterSensorIdentifiers(BaseIdentifiers):
     device_ieee: str
 
 
-class Sensor(PlatformEntity):
-    """Base ZHA sensor."""
+class BaseSensor(PlatformEntity, ABC):
+    """Abstract base class for ZHA sensor entities."""
 
     PLATFORM = Platform.SENSOR
-    _attribute_name: int | str | None = None
-    _attribute_converter: typing.Callable[[typing.Any], typing.Any] | None = None
-    _divisor: int | float | None = None
-    _multiplier: int | float | None = None
+
     _attr_suggested_display_precision: int | None = None
     _attr_native_unit_of_measurement: str | None = None
     _attr_device_class: SensorDeviceClass | None = None
     _attr_state_class: SensorStateClass | None = None
+
+    @property
+    def suggested_display_precision(self) -> int | None:
+        """Return the suggested display precision."""
+        return self._attr_suggested_display_precision
+
+    @property
+    def native_unit_of_measurement(self) -> str | None:
+        """Return the unit of measurement."""
+        return self._attr_native_unit_of_measurement
+
+    @functools.cached_property
+    def info_object(self) -> SensorEntityInfo:
+        """Return a representation of the sensor."""
+        return SensorEntityInfo(
+            **super().info_object.__dict__,
+            suggested_display_precision=self.suggested_display_precision,
+            unit=self.native_unit_of_measurement,
+        )
+
+    @property
+    def state(self) -> dict:
+        """Return the state for this sensor."""
+        response = super().state
+        response["state"] = self.native_value
+        return response
+
+    @property
+    @abstractmethod
+    def native_value(self) -> date | datetime | str | int | float | None:
+        """Return the current sensor value."""
+
+
+class Sensor(BaseSensor):
+    """Base ZHA sensor."""
+
+    _attribute_name: int | str | None = None
+    _attribute_converter: typing.Callable[[typing.Any], typing.Any] | None = None
+    _divisor: int | float | None = None
+    _multiplier: int | float | None = None
     _skip_creation_if_no_attr_cache: bool = False
 
     def __init__(
         self,
-        cluster_handlers: list[ClusterHandler],
         endpoint: Endpoint,
         device: Device,
         **kwargs: Any,
     ) -> None:
         """Init this sensor."""
-        self._cluster_handler: ClusterHandler = cluster_handlers[0]
         self._attr_def: foundation.ZCLAttributeDef | None = None
 
-        if self._attribute_name is not None:
-            # If the attribute definition does not exist, this entity will be filtered
-            # out via `is_supported`
-            with contextlib.suppress(KeyError):
-                self._attr_def = self._cluster_handler.cluster.find_attribute(
-                    self._attribute_name
-                )
+        super().__init__(endpoint=endpoint, device=device, **kwargs)
 
-        super().__init__(cluster_handlers, endpoint, device, **kwargs)
+        # After super() for quirks v2 entities
+        if self._attribute_name is not None:
+            # Invalid attribute names filtered by is_supported
+            with contextlib.suppress(KeyError):
+                self._attr_def = self._cluster.find_attribute(self._attribute_name)
+
         self.recompute_capabilities()
 
     def on_add(self) -> None:
         """Run when entity is added."""
         super().on_add()
-        self._on_remove_callbacks.append(
-            self._cluster_handler.on_event(
-                CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
-                self.handle_cluster_handler_attribute_updated,
+        for event_type in (
+            AttributeReadEvent,
+            AttributeReportedEvent,
+            AttributeUpdatedEvent,
+            AttributeWrittenEvent,
+        ):
+            self._on_remove_callbacks.append(
+                self._cluster.on_event(
+                    event_type.event_type, self.handle_attribute_updated
+                )
             )
-        )
 
     def _is_supported(self) -> bool:
         if (
-            self._attribute_name not in self._cluster_handler.cluster.attributes_by_name
-        ) or self._cluster_handler.cluster.is_attribute_unsupported(
-            self._attribute_name
-        ):
+            self._attribute_name not in self._cluster.attributes_by_name
+        ) or self._cluster.is_attribute_unsupported(self._attribute_name):
             _LOGGER.debug(
                 "%s is not supported - skipping %s entity creation",
                 self._attribute_name,
@@ -248,7 +288,7 @@ class Sensor(PlatformEntity):
 
         if (
             self._skip_creation_if_no_attr_cache
-            and self._cluster_handler.cluster.get(self._attribute_name) is None
+            and self._cluster.get(self._attribute_name) is None
         ):
             return False
 
@@ -260,7 +300,7 @@ class Sensor(PlatformEntity):
     ) -> SensorStateClass | None:
         """Validate and return a state class."""
         try:
-            return SensorStateClass(state_class_value.value)
+            return SensorStateClass(state_class_value)
         except ValueError as ex:
             _LOGGER.warning(
                 "Quirks provided an invalid state class: %s: %s",
@@ -293,32 +333,11 @@ class Sensor(PlatformEntity):
         if entity_metadata.unit is not None:
             self._attr_native_unit_of_measurement = entity_metadata.unit
 
-    @functools.cached_property
-    def info_object(self) -> SensorEntityInfo:
-        """Return a representation of the sensor."""
-        return SensorEntityInfo(
-            **super().info_object.__dict__,
-            suggested_display_precision=self._attr_suggested_display_precision,
-            unit=(
-                getattr(self, "entity_description").native_unit_of_measurement
-                if getattr(self, "entity_description", None) is not None
-                else self._attr_native_unit_of_measurement
-            ),
-        )
-
-    @property
-    def state(self) -> dict:
-        """Return the state for this sensor."""
-        response = super().state
-        native_value = self.native_value
-        response["state"] = native_value
-        return response
-
     @property
     def native_value(self) -> date | datetime | str | int | float | None:
         """Return the state of the entity."""
         assert self._attribute_name is not None
-        raw_state = self._cluster_handler.cluster.get(self._attribute_name)
+        raw_state = self._cluster.get(self._attribute_name)
         if raw_state is None:
             return None
         if self._is_non_value(raw_state):
@@ -327,11 +346,14 @@ class Sensor(PlatformEntity):
             return self._attribute_converter(raw_state)
         return self.formatter(raw_state)
 
-    def handle_cluster_handler_attribute_updated(
+    def handle_attribute_updated(
         self,
-        event: ClusterAttributeUpdatedEvent,  # pylint: disable=unused-argument
+        event: AttributeReadEvent
+        | AttributeReportedEvent
+        | AttributeUpdatedEvent
+        | AttributeWrittenEvent,
     ) -> None:
-        """Handle attribute updates from the cluster handler."""
+        """Handle attribute updates from the cluster."""
         if (
             event.attribute_name == self._attribute_name
             or (
@@ -347,11 +369,12 @@ class Sensor(PlatformEntity):
         self, value: int | float, *, attr_def: foundation.ZCLAttributeDef | None = None
     ) -> bool:
         """Ignore non-value numerical values."""
-        if attr_def is None:
-            attr_def = self._attr_def
+        if isinstance(value, float) and math.isnan(value):
+            return True
 
         if attr_def is None:
-            return False
+            attr_def = self._attr_def
+        assert attr_def is not None
 
         data_type = foundation.DataType.from_type_id(attr_def.zcl_type)
         return value == data_type.non_value
@@ -366,80 +389,22 @@ class Sensor(PlatformEntity):
 
         return value
 
+    async def async_update(self) -> None:
+        """Retrieve latest state."""
+        if self._attribute_name is None:
+            return
+        self.debug("polling current state")
+        await safe_read(
+            self._cluster,
+            [self._attribute_name],
+            allow_cache=False,
+            only_cache=False,
+        )
+        self.maybe_emit_state_changed_event()
+
 
 class TimestampSensor(Sensor):
     """Timestamp ZHA sensor."""
-
-
-class PollableSensor(Sensor):
-    """Base ZHA sensor that polls for state."""
-
-    _REFRESH_INTERVAL = (30, 45)
-    _use_custom_polling: bool = True
-    __polling_interval: int
-
-    def __init__(
-        self,
-        cluster_handlers: list[ClusterHandler],
-        endpoint: Endpoint,
-        device: Device,
-        **kwargs: Any,
-    ) -> None:
-        """Init this sensor."""
-        super().__init__(cluster_handlers, endpoint, device, **kwargs)
-        self._polling_task: Task | None = None
-
-    def on_add(self) -> None:
-        """Run when entity is added."""
-        super().on_add()
-        self.maybe_start_polling()
-
-    @property
-    def should_poll(self) -> bool:
-        """Return True if we need to poll for state changes."""
-        return self._use_custom_polling
-
-    def maybe_start_polling(self) -> None:
-        """Start polling if necessary."""
-        if self.should_poll:
-            self._polling_task = self.device.gateway.async_create_background_task(
-                self._refresh(),
-                name=f"sensor_state_poller_{self.unique_id}_{self.__class__.__name__}",
-                eager_start=True,
-                untracked=True,
-            )
-            self._tracked_tasks.append(self._polling_task)
-            self.debug(
-                "started polling with refresh interval of %s",
-                getattr(self, "__polling_interval"),
-            )
-
-    def enable(self) -> None:
-        """Enable the entity."""
-        super().enable()
-        self.maybe_start_polling()
-
-    def disable(self) -> None:
-        """Disable the entity."""
-        super().disable()
-        if self._polling_task:
-            self._tracked_tasks.remove(self._polling_task)
-            self._polling_task.cancel()
-            self._polling_task = None
-
-    @periodic(_REFRESH_INTERVAL)
-    async def _refresh(self):
-        """Call async_update at a constrained random interval."""
-        if self.device.available and self.device.gateway.config.allow_polling:
-            self.debug("polling for updated state")
-            await self.async_update()
-            self.maybe_emit_state_changed_event()
-        else:
-            self.debug(
-                "skipping polling for updated state, available: %s, allow polled requests: %s",
-                self.device.available,
-                self.device.gateway.config.allow_polling,
-            )
 
 
 class DeviceCounterSensor(BaseEntity):
@@ -564,13 +529,12 @@ class EnumSensor(Sensor):
 
     def __init__(
         self,
-        cluster_handlers: list[ClusterHandler],
         endpoint: Endpoint,
         device: Device,
         **kwargs: Any,
     ) -> None:
         """Init this sensor."""
-        super().__init__(cluster_handlers, endpoint, device, **kwargs)
+        super().__init__(endpoint=endpoint, device=device, **kwargs)
         self._attr_options = [e.name for e in self._enum]
 
         # XXX: This class is not meant to be initialized directly, as `unique_id`
@@ -595,11 +559,53 @@ class DigiAnalogInput(Sensor):
 
     _attribute_name = "present_value"
     _attr_translation_key: str = "analog_input"
+    _cluster_id = AnalogInput.cluster_id
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_ANALOG_INPUT}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({AnalogInput.cluster_id}),
         manufacturers=frozenset({"Digi"}),
     )
+
+    _server_cluster_config = {
+        AnalogInput.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                AnalogInput.AttributeDefs.present_value: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=1
+                    ),
+                ),
+                AnalogInput.AttributeDefs.description: AttrConfig(
+                    read_on_startup=False,
+                ),
+                AnalogInput.AttributeDefs.max_present_value: AttrConfig(
+                    read_on_startup=False,
+                ),
+                AnalogInput.AttributeDefs.min_present_value: AttrConfig(
+                    read_on_startup=False,
+                ),
+                AnalogInput.AttributeDefs.out_of_service: AttrConfig(
+                    read_on_startup=False,
+                ),
+                AnalogInput.AttributeDefs.reliability: AttrConfig(
+                    read_on_startup=False,
+                ),
+                AnalogInput.AttributeDefs.resolution: AttrConfig(
+                    read_on_startup=False,
+                ),
+                AnalogInput.AttributeDefs.status_flags: AttrConfig(
+                    read_on_startup=False,
+                ),
+                AnalogInput.AttributeDefs.engineering_units: AttrConfig(
+                    read_on_startup=False,
+                ),
+                AnalogInput.AttributeDefs.application_type: AttrConfig(
+                    read_on_startup=False,
+                ),
+            },
+        ),
+    }
 
 
 @register_entity(AnalogInput.cluster_id)
@@ -609,21 +615,71 @@ class AnalogInputSensor(Sensor):
     _attribute_name = "present_value"
     _unique_id_suffix = "analog_input"
     _attr_state_class = SensorStateClass.MEASUREMENT
+    _cluster_id = AnalogInput.cluster_id
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_ANALOG_INPUT}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({AnalogInput.cluster_id}),
     )
+
+    _server_cluster_config = {
+        AnalogInput.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                AnalogInput.AttributeDefs.present_value: AttrConfig(
+                    read_on_startup=False,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=1
+                    ),
+                ),
+                AnalogInput.AttributeDefs.description: AttrConfig(
+                    read_on_startup=False
+                ),
+                AnalogInput.AttributeDefs.max_present_value: AttrConfig(
+                    read_on_startup=False
+                ),
+                AnalogInput.AttributeDefs.min_present_value: AttrConfig(
+                    read_on_startup=False
+                ),
+                AnalogInput.AttributeDefs.out_of_service: AttrConfig(
+                    read_on_startup=False
+                ),
+                AnalogInput.AttributeDefs.reliability: AttrConfig(
+                    read_on_startup=False
+                ),
+                AnalogInput.AttributeDefs.resolution: AttrConfig(read_on_startup=False),
+                AnalogInput.AttributeDefs.status_flags: AttrConfig(
+                    read_on_startup=False
+                ),
+                AnalogInput.AttributeDefs.engineering_units: AttrConfig(
+                    read_on_startup=False
+                ),
+                AnalogInput.AttributeDefs.application_type: AttrConfig(
+                    read_on_startup=False
+                ),
+            },
+        ),
+    }
+
+    def _application_type(self):
+        """Return the AnalogInput application_type as an ApplicationType type."""
+        result = self._cluster.get(AnalogInput.AttributeDefs.application_type.name)
+        if result is None:
+            return None
+        return ApplicationType.deserialize(types.uint32_t(result).serialize())[0]
 
     def recompute_capabilities(self) -> None:
         """Recompute capabilities."""
         super().recompute_capabilities()
 
-        self._attr_fallback_name = self._cluster_handler.description
+        self._attr_fallback_name = self._cluster.get(
+            AnalogInput.AttributeDefs.description.name
+        )
 
-        if self._cluster_handler.application_type is not None:
+        application_type = self._application_type()
+        if application_type is not None:
             # The application type encodes a tiny bit more info but it's mostly
             # irrelevant, just use the `type` sub-field
-            app_type = self._cluster_handler.application_type.type
+            app_type = application_type.type
             self._attr_device_class = ANALOG_INPUT_APPTYPE_DEV_CLASS.get(app_type)
 
             # Application type units take precedence
@@ -632,24 +688,26 @@ class AnalogInputSensor(Sensor):
             )
         else:
             self._attr_native_unit_of_measurement = BACNET_UNITS_TO_HA_UNITS.get(
-                self._cluster_handler.engineering_units
+                self._cluster.get(AnalogInput.AttributeDefs.engineering_units.name)
             )
 
         # Resolution indicates the minimum change in value that can be detected
-        if self._cluster_handler.resolution is not None:
+        resolution = self._cluster.get(AnalogInput.AttributeDefs.resolution.name)
+        if resolution is not None:
             self._attr_suggested_display_precision = resolution_to_decimal_precision(
-                self._cluster_handler.resolution
+                resolution
             )
 
     def _is_supported(self) -> bool:
         """Return True if this sensor is supported."""
-        if self._cluster_handler.description is None:
+        if self._cluster.get(AnalogInput.AttributeDefs.description.name) is None:
             return False
 
         # The units are determined by one of these
         if (
-            self._cluster_handler.application_type is None
-            and self._cluster_handler.engineering_units is None
+            self._application_type() is None
+            and self._cluster.get(AnalogInput.AttributeDefs.engineering_units.name)
+            is None
         ):
             return False
 
@@ -671,10 +729,37 @@ class Battery(Sensor):
         "battery_quantity",
         "battery_voltage",
     }
+    _cluster_id = PowerConfiguration.cluster_id
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_POWER_CONFIGURATION}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({PowerConfiguration.cluster_id}),
     )
+
+    _server_cluster_config = {
+        PowerConfiguration.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                PowerConfiguration.AttributeDefs.battery_voltage: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=3600, max_interval=10800, reportable_change=1
+                    ),
+                ),
+                PowerConfiguration.AttributeDefs.battery_percentage_remaining: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=3600, max_interval=10800, reportable_change=1
+                    ),
+                ),
+                PowerConfiguration.AttributeDefs.battery_size: AttrConfig(
+                    read_on_startup=False,
+                ),
+                PowerConfiguration.AttributeDefs.battery_quantity: AttrConfig(
+                    read_on_startup=False,
+                ),
+            },
+        ),
+    }
 
     def _is_supported(self) -> bool:
         # XXX: We intentionally ignore the presence of this attribute
@@ -692,52 +777,69 @@ class Battery(Sensor):
     def state(self) -> dict[str, Any]:
         """Return the state for battery sensors."""
         response = super().state
-        battery_size = self._cluster_handler.cluster.get("battery_size")
+        battery_size = self._cluster.get("battery_size")
         if battery_size is not None:
             response["battery_size"] = BATTERY_SIZES.get(battery_size, "Unknown")
-        battery_quantity = self._cluster_handler.cluster.get("battery_quantity")
+        battery_quantity = self._cluster.get("battery_quantity")
         if battery_quantity is not None:
             response["battery_quantity"] = battery_quantity
-        battery_voltage = self._cluster_handler.cluster.get("battery_voltage")
+        battery_voltage = self._cluster.get("battery_voltage")
         if battery_voltage is not None:
             response["battery_voltage"] = round(battery_voltage / 10, 2)
         return response
 
 
-class BaseElectricalMeasurement(PollableSensor):
+class BaseElectricalMeasurement(Sensor):
     """Base class for electrical measurement."""
 
-    _use_custom_polling: bool = False
-    _attr_suggested_display_precision = 1
-    _attr_max_attribute_name: str | None = None
-    _divisor_attribute_name: str | None = None
-    _multiplier_attribute_name: str | None = None
-    _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
+    _attr_max_attribute_name: str | None
+    _multiplier_attribute_name: str | None
+    _multiplier_fallback_attribute_name: str | None
+    _divisor_attribute_name: str | None
+    _divisor_fallback_attribute_name: str | None
 
     def __init__(
         self,
-        cluster_handlers: list[ClusterHandler],
         endpoint: Endpoint,
         device: Device,
         **kwargs: Any,
     ) -> None:
         """Init this sensor."""
-        super().__init__(cluster_handlers, endpoint, device, **kwargs)
+        super().__init__(endpoint=endpoint, device=device, **kwargs)
         self._attr_extra_state_attribute_names: set[str] = {"measurement_type"}
         if self._attr_max_attribute_name is not None:
             self._attr_extra_state_attribute_names.add(self._attr_max_attribute_name)
 
     @property
+    def _measurement_type(self) -> str | None:
+        """Decode the measurement_type bitmap into a human-readable string."""
+        meas_type = self._cluster.get(
+            ElectricalMeasurement.AttributeDefs.measurement_type.name
+        )
+        if meas_type is None:
+            return None
+
+        # Iterating over the bits only yields named bits so the earlier version of this
+        # code omitted any measurement types that were not explicitly in the bitmap type.
+        # TODO: deprecate this
+        return ", ".join(
+            LEGACY_MEASUREMENT_TYPE_REMAPPING[m]
+            for m in ElectricalMeasurement.MeasurementType(meas_type)
+            if m in LEGACY_MEASUREMENT_TYPE_REMAPPING
+        )
+
+    @property
     def state(self) -> dict[str, Any]:
         """Return the state for this sensor."""
         response = super().state
-        if self._cluster_handler.measurement_type is not None:
-            response["measurement_type"] = self._cluster_handler.measurement_type
+        meas_type = self._measurement_type
+        if meas_type is not None:
+            response["measurement_type"] = meas_type
 
         if (max_attr_name := self._attr_max_attribute_name) is None:
             return response
 
-        if (max_v := self._cluster_handler.cluster.get(max_attr_name)) is not None:
+        if (max_v := self._cluster.get(max_attr_name)) is not None:
             response[max_attr_name] = self.formatter(max_v)
 
         return response
@@ -747,7 +849,10 @@ class BaseElectricalMeasurement(PollableSensor):
         if not self._multiplier_attribute_name:
             return super()._multiplier
 
-        return getattr(self._cluster_handler, self._multiplier_attribute_name)
+        value = self._cluster.get(self._multiplier_attribute_name)
+        if value is None and self._multiplier_fallback_attribute_name:
+            value = self._cluster.get(self._multiplier_fallback_attribute_name)
+        return value or 1
 
     @_multiplier.setter
     def _multiplier(self, value: int | float | None) -> None:
@@ -758,90 +863,374 @@ class BaseElectricalMeasurement(PollableSensor):
         if not self._divisor_attribute_name:
             return super()._divisor
 
-        return getattr(self._cluster_handler, self._divisor_attribute_name)
+        value = self._cluster.get(self._divisor_attribute_name)
+        if value is None and self._divisor_fallback_attribute_name:
+            value = self._cluster.get(self._divisor_fallback_attribute_name)
+        return value or 1
 
     @_divisor.setter
     def _divisor(self, value: int | float | None) -> None:
         raise AttributeError("Cannot set divisor directly")
 
 
-# this entity will be created by ReportingEM or PolledEM class below
+class AggregatedClusterPoller(VirtualEntity):
+    """Polls a cluster on behalf of sibling entities that need updates.
+
+    Builds the polling list dynamically from the cluster configs of enabled
+    sibling entities sharing this cluster — so disabling an entity in HA
+    drops its attributes from the poll on the next cycle.
+    """
+
+    _cluster_id: int
+    _REFRESH_INTERVAL = (30, 45)
+
+    def on_add(self) -> None:
+        """Start the periodic polling task."""
+        super().on_add()
+        task = self.device.gateway.async_create_background_task(
+            self._refresh(),
+            name=f"cluster_poller_{self.unique_id}",
+            eager_start=True,
+            untracked=True,
+        )
+        self._tracked_tasks.append(task)
+
+    @periodic(_REFRESH_INTERVAL)
+    async def _refresh(self) -> None:
+        if not (self.device.available and self.device.gateway.config.allow_polling):
+            return
+        await self.async_update()
+
+    async def async_update(self) -> None:
+        """Poll the union of attrs read by enabled sibling entities."""
+        attrs: set[str] = set()
+        for entity in self.device.platform_entities.values():
+            if entity is self or not isinstance(entity, Sensor):
+                continue
+            if entity._cluster is not self._cluster:
+                continue
+            if not entity.enabled:
+                continue
+            if entity._attribute_name and self._cluster.is_attribute_unsupported(
+                entity._attribute_name
+            ):
+                continue
+            cfg = entity._server_cluster_config.get(self._cluster_id)
+            if cfg is None:
+                continue
+            for attr_def, attr_cfg in cfg.attributes.items():
+                if attr_cfg.reporting is None:
+                    continue
+                if self._cluster.is_attribute_unsupported(attr_def):
+                    continue
+
+                attrs.add(attr_def if isinstance(attr_def, str) else attr_def.name)
+
+        if not attrs:
+            return
+
+        self.debug("polling %d attrs: %s", len(attrs), sorted(attrs))
+        await safe_read(
+            self._cluster, sorted(attrs), allow_cache=False, only_cache=False
+        )
+
+
+@register_entity(ElectricalMeasurement.cluster_id)
+class ElectricalMeasurementPoller(AggregatedClusterPoller):
+    """Polls the EM cluster on behalf of sibling entities that need updates."""
+
+    _unique_id_suffix = "em_poller"
+    _cluster_id = ElectricalMeasurement.cluster_id
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({ElectricalMeasurement.cluster_id}),
+        feature_priority=(PlatformFeatureGroup.EM_POLLING, 0),
+    )
+
+
+@register_entity(ElectricalMeasurement.cluster_id)
+class ElectricalMeasurementReportingDevice(VirtualEntity):
+    """Claims the EM polling slot for devices that support reporting.
+
+    Higher priority than the default `ElectricalMeasurementPoller`, so for
+    matching models the poller is not registered and no polling occurs.
+    """
+
+    _unique_id_suffix = "em_reporting_device"
+    _cluster_id = ElectricalMeasurement.cluster_id
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({ElectricalMeasurement.cluster_id}),
+        models=frozenset({"VZM31-SN", "SP 234", "outletv4", "INSPELNING Smart plug"}),
+        feature_priority=(PlatformFeatureGroup.EM_POLLING, 1),
+    )
+
+
+@register_entity(ElectricalMeasurement.cluster_id)
 class ElectricalMeasurementActivePower(BaseElectricalMeasurement):
-    """Active power phase measurement."""
+    """Active power measurement."""
 
     _attribute_name = "active_power"
-    # no unique id suffix for backwards compatibility
-    # no translation key due to device class
     _attr_max_attribute_name = "active_power_max"
     _divisor_attribute_name = "ac_power_divisor"
+    _divisor_fallback_attribute_name = "power_divisor"
     _multiplier_attribute_name = "ac_power_multiplier"
+    _multiplier_fallback_attribute_name = "power_multiplier"
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.POWER
     _attr_native_unit_of_measurement: str = UnitOfPower.WATT
+    _attr_suggested_display_precision = 1
+    _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
+    _cluster_id = ElectricalMeasurement.cluster_id
 
-
-@register_entity(ElectricalMeasurement.cluster_id)
-class ReportingElectricalMeasurement(ElectricalMeasurementActivePower):
-    """Unpolled active power measurement."""
-
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT}),
-        models=frozenset({"VZM31-SN", "SP 234", "outletv4", "INSPELNING Smart plug"}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({ElectricalMeasurement.cluster_id}),
     )
 
+    _server_cluster_config = {
+        ElectricalMeasurement.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                ElectricalMeasurement.AttributeDefs.measurement_type: AttrConfig(
+                    read_on_startup=False,
+                ),
+                ElectricalMeasurement.AttributeDefs.ac_power_multiplier: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
+                ),
+                ElectricalMeasurement.AttributeDefs.ac_power_divisor: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
+                ),
+                ElectricalMeasurement.AttributeDefs.power_multiplier: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
+                ),
+                ElectricalMeasurement.AttributeDefs.power_divisor: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
+                ),
+                ElectricalMeasurement.AttributeDefs.active_power: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=5, max_interval=900, reportable_change=1
+                    ),
+                ),
+                ElectricalMeasurement.AttributeDefs.active_power_max: AttrConfig(
+                    read_on_startup=False,
+                ),
+            },
+        ),
+    }
+
 
 @register_entity(ElectricalMeasurement.cluster_id)
-class PolledElectricalMeasurement(ElectricalMeasurementActivePower):
-    """Polled active power measurement that polls all relevant EM attributes."""
-
-    _use_custom_polling: bool = True
-
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT}),
-    )
-
-
-@register_entity(ElectricalMeasurement.cluster_id)
-class ElectricalMeasurementActivePowerPhB(ElectricalMeasurementActivePower):
+class ElectricalMeasurementActivePowerPhB(BaseElectricalMeasurement):
     """Active power phase B measurement."""
 
     _attribute_name = "active_power_ph_b"
     _unique_id_suffix = "active_power_ph_b"
     _attr_translation_key: str = "active_power_ph_b"
     _attr_max_attribute_name = "active_power_max_ph_b"
+    _divisor_attribute_name = "ac_power_divisor"
+    _divisor_fallback_attribute_name = "power_divisor"
+    _multiplier_attribute_name = "ac_power_multiplier"
+    _multiplier_fallback_attribute_name = "power_multiplier"
+    _attr_device_class: SensorDeviceClass = SensorDeviceClass.POWER
+    _attr_native_unit_of_measurement: str = UnitOfPower.WATT
+    _attr_suggested_display_precision = 1
+    _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
+    _cluster_id = ElectricalMeasurement.cluster_id
     _skip_creation_if_no_attr_cache = True
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({ElectricalMeasurement.cluster_id}),
     )
+
+    _server_cluster_config = {
+        ElectricalMeasurement.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                ElectricalMeasurement.AttributeDefs.measurement_type: AttrConfig(
+                    read_on_startup=False,
+                ),
+                ElectricalMeasurement.AttributeDefs.ac_power_multiplier: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
+                ),
+                ElectricalMeasurement.AttributeDefs.ac_power_divisor: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
+                ),
+                ElectricalMeasurement.AttributeDefs.power_multiplier: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
+                ),
+                ElectricalMeasurement.AttributeDefs.power_divisor: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
+                ),
+                ElectricalMeasurement.AttributeDefs.active_power_ph_b: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=5, max_interval=900, reportable_change=1
+                    ),
+                ),
+                ElectricalMeasurement.AttributeDefs.active_power_max_ph_b: AttrConfig(
+                    read_on_startup=False,
+                ),
+            },
+        ),
+    }
 
 
 @register_entity(ElectricalMeasurement.cluster_id)
-class ElectricalMeasurementActivePowerPhC(ElectricalMeasurementActivePower):
+class ElectricalMeasurementActivePowerPhC(BaseElectricalMeasurement):
     """Active power phase C measurement."""
 
     _attribute_name = "active_power_ph_c"
     _unique_id_suffix = "active_power_ph_c"
     _attr_translation_key: str = "active_power_ph_c"
     _attr_max_attribute_name = "active_power_max_ph_c"
+    _divisor_attribute_name = "ac_power_divisor"
+    _divisor_fallback_attribute_name = "power_divisor"
+    _multiplier_attribute_name = "ac_power_multiplier"
+    _multiplier_fallback_attribute_name = "power_multiplier"
+    _attr_device_class: SensorDeviceClass = SensorDeviceClass.POWER
+    _attr_native_unit_of_measurement: str = UnitOfPower.WATT
+    _attr_suggested_display_precision = 1
+    _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
+    _cluster_id = ElectricalMeasurement.cluster_id
     _skip_creation_if_no_attr_cache = True
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({ElectricalMeasurement.cluster_id}),
     )
+
+    _server_cluster_config = {
+        ElectricalMeasurement.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                ElectricalMeasurement.AttributeDefs.measurement_type: AttrConfig(
+                    read_on_startup=False,
+                ),
+                ElectricalMeasurement.AttributeDefs.ac_power_multiplier: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
+                ),
+                ElectricalMeasurement.AttributeDefs.ac_power_divisor: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
+                ),
+                ElectricalMeasurement.AttributeDefs.power_multiplier: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
+                ),
+                ElectricalMeasurement.AttributeDefs.power_divisor: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
+                ),
+                ElectricalMeasurement.AttributeDefs.active_power_ph_c: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=5, max_interval=900, reportable_change=1
+                    ),
+                ),
+                ElectricalMeasurement.AttributeDefs.active_power_max_ph_c: AttrConfig(
+                    read_on_startup=False,
+                ),
+            },
+        ),
+    }
 
 
 @register_entity(ElectricalMeasurement.cluster_id)
-class ElectricalMeasurementTotalActivePower(ElectricalMeasurementActivePower):
+class ElectricalMeasurementTotalActivePower(BaseElectricalMeasurement):
     """Total active power measurement."""
 
     _attribute_name = "total_active_power"
     _unique_id_suffix = "total_active_power"
     _attr_translation_key: str = "total_active_power"
+    _attr_max_attribute_name = "active_power_max"
+    _divisor_attribute_name = "ac_power_divisor"
+    _divisor_fallback_attribute_name = "power_divisor"
+    _multiplier_attribute_name = "ac_power_multiplier"
+    _multiplier_fallback_attribute_name = "power_multiplier"
+    _attr_device_class: SensorDeviceClass = SensorDeviceClass.POWER
+    _attr_native_unit_of_measurement: str = UnitOfPower.WATT
+    _attr_suggested_display_precision = 1
+    _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
+    _cluster_id = ElectricalMeasurement.cluster_id
     _skip_creation_if_no_attr_cache = True
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({ElectricalMeasurement.cluster_id}),
     )
+
+    _server_cluster_config = {
+        ElectricalMeasurement.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                ElectricalMeasurement.AttributeDefs.measurement_type: AttrConfig(
+                    read_on_startup=False,
+                ),
+                ElectricalMeasurement.AttributeDefs.ac_power_multiplier: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
+                ),
+                ElectricalMeasurement.AttributeDefs.ac_power_divisor: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
+                ),
+                ElectricalMeasurement.AttributeDefs.power_multiplier: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
+                ),
+                ElectricalMeasurement.AttributeDefs.power_divisor: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
+                ),
+                ElectricalMeasurement.AttributeDefs.total_active_power: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=5, max_interval=900, reportable_change=1
+                    ),
+                ),
+                ElectricalMeasurement.AttributeDefs.active_power_max: AttrConfig(
+                    read_on_startup=False,
+                ),
+            },
+        ),
+    }
 
 
 @register_entity(ElectricalMeasurement.cluster_id)
@@ -850,31 +1239,115 @@ class ElectricalMeasurementApparentPower(BaseElectricalMeasurement):
 
     _attribute_name = "apparent_power"
     _unique_id_suffix = "apparent_power"
+    _attr_max_attribute_name = None
     _divisor_attribute_name = "ac_power_divisor"
+    _divisor_fallback_attribute_name = "power_divisor"
     _multiplier_attribute_name = "ac_power_multiplier"
+    _multiplier_fallback_attribute_name = "power_multiplier"
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.APPARENT_POWER
     _attr_native_unit_of_measurement = UnitOfApparentPower.VOLT_AMPERE
+    _attr_suggested_display_precision = 1
+    _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
+    _cluster_id = ElectricalMeasurement.cluster_id
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({ElectricalMeasurement.cluster_id}),
     )
+
+    _server_cluster_config = {
+        ElectricalMeasurement.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                ElectricalMeasurement.AttributeDefs.measurement_type: AttrConfig(
+                    read_on_startup=False,
+                ),
+                ElectricalMeasurement.AttributeDefs.ac_power_multiplier: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
+                ),
+                ElectricalMeasurement.AttributeDefs.ac_power_divisor: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
+                ),
+                ElectricalMeasurement.AttributeDefs.power_multiplier: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
+                ),
+                ElectricalMeasurement.AttributeDefs.power_divisor: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
+                ),
+                ElectricalMeasurement.AttributeDefs.apparent_power: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=5, max_interval=900, reportable_change=1
+                    ),
+                ),
+            },
+        ),
+    }
 
 
 @register_entity(ElectricalMeasurement.cluster_id)
 class ElectricalMeasurementRMSCurrent(BaseElectricalMeasurement):
     """RMS current measurement."""
 
+    _attr_suggested_display_precision = 2
     _attribute_name = "rms_current"
     _unique_id_suffix = "rms_current"
     _attr_max_attribute_name = "rms_current_max"
     _divisor_attribute_name = "ac_current_divisor"
+    _divisor_fallback_attribute_name = None
     _multiplier_attribute_name = "ac_current_multiplier"
+    _multiplier_fallback_attribute_name = None
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.CURRENT
     _attr_native_unit_of_measurement = UnitOfElectricCurrent.AMPERE
+    _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
+    _cluster_id = ElectricalMeasurement.cluster_id
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({ElectricalMeasurement.cluster_id}),
     )
+
+    _server_cluster_config = {
+        ElectricalMeasurement.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                ElectricalMeasurement.AttributeDefs.measurement_type: AttrConfig(
+                    read_on_startup=False,
+                ),
+                ElectricalMeasurement.AttributeDefs.ac_current_multiplier: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
+                ),
+                ElectricalMeasurement.AttributeDefs.ac_current_divisor: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
+                ),
+                ElectricalMeasurement.AttributeDefs.rms_current: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=5, max_interval=900, reportable_change=1
+                    ),
+                ),
+                ElectricalMeasurement.AttributeDefs.rms_current_max: AttrConfig(
+                    read_on_startup=False,
+                ),
+            },
+        ),
+    }
 
 
 @register_entity(ElectricalMeasurement.cluster_id)
@@ -887,9 +1360,41 @@ class ElectricalMeasurementRMSCurrentPhB(ElectricalMeasurementRMSCurrent):
     _attr_max_attribute_name: str = "rms_current_max_ph_b"
     _skip_creation_if_no_attr_cache = True
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({ElectricalMeasurement.cluster_id}),
     )
+
+    _server_cluster_config = {
+        ElectricalMeasurement.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                ElectricalMeasurement.AttributeDefs.measurement_type: AttrConfig(
+                    read_on_startup=False,
+                ),
+                ElectricalMeasurement.AttributeDefs.ac_current_multiplier: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
+                ),
+                ElectricalMeasurement.AttributeDefs.ac_current_divisor: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
+                ),
+                ElectricalMeasurement.AttributeDefs.rms_current_ph_b: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=5, max_interval=900, reportable_change=1
+                    ),
+                ),
+                ElectricalMeasurement.AttributeDefs.rms_current_max_ph_b: AttrConfig(
+                    read_on_startup=False,
+                ),
+            },
+        ),
+    }
 
 
 @register_entity(ElectricalMeasurement.cluster_id)
@@ -902,9 +1407,41 @@ class ElectricalMeasurementRMSCurrentPhC(ElectricalMeasurementRMSCurrent):
     _attr_max_attribute_name: str = "rms_current_max_ph_c"
     _skip_creation_if_no_attr_cache = True
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({ElectricalMeasurement.cluster_id}),
     )
+
+    _server_cluster_config = {
+        ElectricalMeasurement.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                ElectricalMeasurement.AttributeDefs.measurement_type: AttrConfig(
+                    read_on_startup=False,
+                ),
+                ElectricalMeasurement.AttributeDefs.ac_current_multiplier: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
+                ),
+                ElectricalMeasurement.AttributeDefs.ac_current_divisor: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
+                ),
+                ElectricalMeasurement.AttributeDefs.rms_current_ph_c: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=5, max_interval=900, reportable_change=1
+                    ),
+                ),
+                ElectricalMeasurement.AttributeDefs.rms_current_max_ph_c: AttrConfig(
+                    read_on_startup=False,
+                ),
+            },
+        ),
+    }
 
 
 @register_entity(ElectricalMeasurement.cluster_id)
@@ -915,13 +1452,50 @@ class ElectricalMeasurementRMSVoltage(BaseElectricalMeasurement):
     _unique_id_suffix = "rms_voltage"
     _attr_max_attribute_name = "rms_voltage_max"
     _divisor_attribute_name = "ac_voltage_divisor"
+    _divisor_fallback_attribute_name = None
     _multiplier_attribute_name = "ac_voltage_multiplier"
+    _multiplier_fallback_attribute_name = None
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.VOLTAGE
     _attr_native_unit_of_measurement = UnitOfElectricPotential.VOLT
+    _attr_suggested_display_precision = 1
+    _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
+    _cluster_id = ElectricalMeasurement.cluster_id
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({ElectricalMeasurement.cluster_id}),
     )
+
+    _server_cluster_config = {
+        ElectricalMeasurement.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                ElectricalMeasurement.AttributeDefs.measurement_type: AttrConfig(
+                    read_on_startup=False,
+                ),
+                ElectricalMeasurement.AttributeDefs.ac_voltage_multiplier: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
+                ),
+                ElectricalMeasurement.AttributeDefs.ac_voltage_divisor: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
+                ),
+                ElectricalMeasurement.AttributeDefs.rms_voltage: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=5, max_interval=900, reportable_change=1
+                    ),
+                ),
+                ElectricalMeasurement.AttributeDefs.rms_voltage_max: AttrConfig(
+                    read_on_startup=False,
+                ),
+            },
+        ),
+    }
 
 
 @register_entity(ElectricalMeasurement.cluster_id)
@@ -934,9 +1508,41 @@ class ElectricalMeasurementRMSVoltagePhB(ElectricalMeasurementRMSVoltage):
     _attr_max_attribute_name = "rms_voltage_max_ph_b"
     _skip_creation_if_no_attr_cache = True
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({ElectricalMeasurement.cluster_id}),
     )
+
+    _server_cluster_config = {
+        ElectricalMeasurement.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                ElectricalMeasurement.AttributeDefs.measurement_type: AttrConfig(
+                    read_on_startup=False,
+                ),
+                ElectricalMeasurement.AttributeDefs.ac_voltage_multiplier: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
+                ),
+                ElectricalMeasurement.AttributeDefs.ac_voltage_divisor: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
+                ),
+                ElectricalMeasurement.AttributeDefs.rms_voltage_ph_b: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=5, max_interval=900, reportable_change=1
+                    ),
+                ),
+                ElectricalMeasurement.AttributeDefs.rms_voltage_max_ph_b: AttrConfig(
+                    read_on_startup=False,
+                ),
+            },
+        ),
+    }
 
 
 @register_entity(ElectricalMeasurement.cluster_id)
@@ -949,9 +1555,41 @@ class ElectricalMeasurementRMSVoltagePhC(ElectricalMeasurementRMSVoltage):
     _attr_max_attribute_name = "rms_voltage_max_ph_c"
     _skip_creation_if_no_attr_cache = True
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({ElectricalMeasurement.cluster_id}),
     )
+
+    _server_cluster_config = {
+        ElectricalMeasurement.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                ElectricalMeasurement.AttributeDefs.measurement_type: AttrConfig(
+                    read_on_startup=False,
+                ),
+                ElectricalMeasurement.AttributeDefs.ac_voltage_multiplier: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
+                ),
+                ElectricalMeasurement.AttributeDefs.ac_voltage_divisor: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
+                ),
+                ElectricalMeasurement.AttributeDefs.rms_voltage_ph_c: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=5, max_interval=900, reportable_change=1
+                    ),
+                ),
+                ElectricalMeasurement.AttributeDefs.rms_voltage_max_ph_c: AttrConfig(
+                    read_on_startup=False,
+                ),
+            },
+        ),
+    }
 
 
 @register_entity(ElectricalMeasurement.cluster_id)
@@ -963,13 +1601,44 @@ class ElectricalMeasurementFrequency(BaseElectricalMeasurement):
     _attr_translation_key: str = "ac_frequency"
     _attr_max_attribute_name = "ac_frequency_max"
     _divisor_attribute_name = "ac_frequency_divisor"
+    _divisor_fallback_attribute_name = None
     _multiplier_attribute_name = "ac_frequency_multiplier"
+    _multiplier_fallback_attribute_name = None
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.FREQUENCY
     _attr_native_unit_of_measurement = UnitOfFrequency.HERTZ
+    _attr_suggested_display_precision = 1
+    _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
+    _cluster_id = ElectricalMeasurement.cluster_id
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({ElectricalMeasurement.cluster_id}),
     )
+
+    _server_cluster_config = {
+        ElectricalMeasurement.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                ElectricalMeasurement.AttributeDefs.measurement_type: AttrConfig(
+                    read_on_startup=False,
+                ),
+                ElectricalMeasurement.AttributeDefs.ac_frequency_multiplier: AttrConfig(
+                    read_on_startup=False,
+                ),
+                ElectricalMeasurement.AttributeDefs.ac_frequency_divisor: AttrConfig(
+                    read_on_startup=False,
+                ),
+                ElectricalMeasurement.AttributeDefs.ac_frequency: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=5, max_interval=900, reportable_change=1
+                    ),
+                ),
+                ElectricalMeasurement.AttributeDefs.ac_frequency_max: AttrConfig(
+                    read_on_startup=False,
+                ),
+            },
+        ),
+    }
 
 
 @register_entity(ElectricalMeasurement.cluster_id)
@@ -978,12 +1647,34 @@ class ElectricalMeasurementPowerFactor(BaseElectricalMeasurement):
 
     _attribute_name = "power_factor"
     _unique_id_suffix = "power_factor"
+    _attr_max_attribute_name = None
+    _divisor_attribute_name = None
+    _divisor_fallback_attribute_name = None
+    _multiplier_attribute_name = None
+    _multiplier_fallback_attribute_name = None
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.POWER_FACTOR
     _attr_native_unit_of_measurement = PERCENTAGE
+    _attr_suggested_display_precision = 1
+    _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
+    _cluster_id = ElectricalMeasurement.cluster_id
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({ElectricalMeasurement.cluster_id}),
     )
+
+    _server_cluster_config = {
+        ElectricalMeasurement.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                ElectricalMeasurement.AttributeDefs.measurement_type: AttrConfig(
+                    read_on_startup=False,
+                ),
+                ElectricalMeasurement.AttributeDefs.power_factor: AttrConfig(
+                    read_on_startup=False,
+                ),
+            },
+        ),
+    }
 
 
 @register_entity(ElectricalMeasurement.cluster_id)
@@ -995,9 +1686,23 @@ class ElectricalMeasurementPowerFactorPhB(ElectricalMeasurementPowerFactor):
     _attr_translation_key: str = "power_factor_ph_b"
     _skip_creation_if_no_attr_cache = True
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({ElectricalMeasurement.cluster_id}),
     )
+
+    _server_cluster_config = {
+        ElectricalMeasurement.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                ElectricalMeasurement.AttributeDefs.measurement_type: AttrConfig(
+                    read_on_startup=False,
+                ),
+                ElectricalMeasurement.AttributeDefs.power_factor_ph_b: AttrConfig(
+                    read_on_startup=False,
+                ),
+            },
+        ),
+    }
 
 
 @register_entity(ElectricalMeasurement.cluster_id)
@@ -1009,9 +1714,23 @@ class ElectricalMeasurementPowerFactorPhC(ElectricalMeasurementPowerFactor):
     _attr_translation_key: str = "power_factor_ph_c"
     _skip_creation_if_no_attr_cache = True
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({ElectricalMeasurement.cluster_id}),
     )
+
+    _server_cluster_config = {
+        ElectricalMeasurement.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                ElectricalMeasurement.AttributeDefs.measurement_type: AttrConfig(
+                    read_on_startup=False,
+                ),
+                ElectricalMeasurement.AttributeDefs.power_factor_ph_c: AttrConfig(
+                    read_on_startup=False,
+                ),
+            },
+        ),
+    }
 
 
 @register_entity(ElectricalMeasurement.cluster_id)
@@ -1023,13 +1742,48 @@ class ElectricalMeasurementDCVoltage(BaseElectricalMeasurement):
     _attr_translation_key: str = "dc_voltage"
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.VOLTAGE
     _attr_native_unit_of_measurement = UnitOfElectricPotential.VOLT
+    _attr_max_attribute_name = None
     _divisor_attribute_name = "dc_voltage_divisor"
+    _divisor_fallback_attribute_name = None
     _multiplier_attribute_name = "dc_voltage_multiplier"
+    _multiplier_fallback_attribute_name = None
+    _attr_suggested_display_precision = 1
+    _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
+    _cluster_id = ElectricalMeasurement.cluster_id
     _skip_creation_if_no_attr_cache = True
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({ElectricalMeasurement.cluster_id}),
     )
+
+    _server_cluster_config = {
+        ElectricalMeasurement.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                ElectricalMeasurement.AttributeDefs.measurement_type: AttrConfig(
+                    read_on_startup=False,
+                ),
+                ElectricalMeasurement.AttributeDefs.dc_voltage_multiplier: AttrConfig(
+                    read_on_startup=False,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
+                ),
+                ElectricalMeasurement.AttributeDefs.dc_voltage_divisor: AttrConfig(
+                    read_on_startup=False,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
+                ),
+                ElectricalMeasurement.AttributeDefs.dc_voltage: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=5, max_interval=900, reportable_change=1
+                    ),
+                ),
+            },
+        ),
+    }
 
 
 @register_entity(ElectricalMeasurement.cluster_id)
@@ -1041,13 +1795,48 @@ class ElectricalMeasurementDCCurrent(BaseElectricalMeasurement):
     _attr_translation_key: str = "dc_current"
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.CURRENT
     _attr_native_unit_of_measurement = UnitOfElectricCurrent.AMPERE
+    _attr_max_attribute_name = None
     _divisor_attribute_name = "dc_current_divisor"
+    _divisor_fallback_attribute_name = None
     _multiplier_attribute_name = "dc_current_multiplier"
+    _multiplier_fallback_attribute_name = None
+    _attr_suggested_display_precision = 1
+    _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
+    _cluster_id = ElectricalMeasurement.cluster_id
     _skip_creation_if_no_attr_cache = True
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({ElectricalMeasurement.cluster_id}),
     )
+
+    _server_cluster_config = {
+        ElectricalMeasurement.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                ElectricalMeasurement.AttributeDefs.measurement_type: AttrConfig(
+                    read_on_startup=False,
+                ),
+                ElectricalMeasurement.AttributeDefs.dc_current_multiplier: AttrConfig(
+                    read_on_startup=False,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
+                ),
+                ElectricalMeasurement.AttributeDefs.dc_current_divisor: AttrConfig(
+                    read_on_startup=False,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
+                ),
+                ElectricalMeasurement.AttributeDefs.dc_current: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=5, max_interval=900, reportable_change=1
+                    ),
+                ),
+            },
+        ),
+    }
 
 
 @register_entity(ElectricalMeasurement.cluster_id)
@@ -1059,13 +1848,60 @@ class ElectricalMeasurementDCPower(BaseElectricalMeasurement):
     _attr_translation_key: str = "dc_power"
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.POWER
     _attr_native_unit_of_measurement = UnitOfPower.WATT
+    _attr_max_attribute_name = None
     _divisor_attribute_name = "dc_power_divisor"
+    _divisor_fallback_attribute_name = "power_divisor"
     _multiplier_attribute_name = "dc_power_multiplier"
+    _multiplier_fallback_attribute_name = "power_multiplier"
+    _attr_suggested_display_precision = 1
+    _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
+    _cluster_id = ElectricalMeasurement.cluster_id
     _skip_creation_if_no_attr_cache = True
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({ElectricalMeasurement.cluster_id}),
     )
+
+    _server_cluster_config = {
+        ElectricalMeasurement.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                ElectricalMeasurement.AttributeDefs.measurement_type: AttrConfig(
+                    read_on_startup=False,
+                ),
+                ElectricalMeasurement.AttributeDefs.dc_power_multiplier: AttrConfig(
+                    read_on_startup=False,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
+                ),
+                ElectricalMeasurement.AttributeDefs.dc_power_divisor: AttrConfig(
+                    read_on_startup=False,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
+                ),
+                ElectricalMeasurement.AttributeDefs.power_multiplier: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
+                ),
+                ElectricalMeasurement.AttributeDefs.power_divisor: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
+                ),
+                ElectricalMeasurement.AttributeDefs.dc_power: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=5, max_interval=900, reportable_change=1
+                    ),
+                ),
+            },
+        ),
+    }
 
 
 @register_entity(RelativeHumidity.cluster_id)
@@ -1078,10 +1914,25 @@ class Humidity(Sensor):
     _divisor = 100
     _attr_native_unit_of_measurement = PERCENTAGE
     _attr_primary_weight = 1
+    _cluster_id = RelativeHumidity.cluster_id
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_HUMIDITY}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({RelativeHumidity.cluster_id}),
     )
+
+    _server_cluster_config = {
+        RelativeHumidity.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                RelativeHumidity.AttributeDefs.measured_value: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=100
+                    ),
+                ),
+            },
+        ),
+    }
 
 
 @register_entity(SMARTTHINGS_HUMIDITY_CLUSTER)
@@ -1094,12 +1945,25 @@ class SmartThingsHumidity(Sensor):
     _divisor = 100
     _attr_native_unit_of_measurement = PERCENTAGE
     _attr_primary_weight = 1
+    _cluster_id = SMARTTHINGS_HUMIDITY_CLUSTER
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset(
-            {f"cluster_handler_0x{SMARTTHINGS_HUMIDITY_CLUSTER:04x}"}
-        ),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({SMARTTHINGS_HUMIDITY_CLUSTER}),
     )
+
+    _server_cluster_config = {
+        SMARTTHINGS_HUMIDITY_CLUSTER: ClusterConfig(
+            bind=True,
+            attributes={
+                "measured_value": AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=50
+                    ),
+                ),
+            },
+        ),
+    }
 
 
 @register_entity(SoilMoistureCluster.cluster_id)
@@ -1107,16 +1971,31 @@ class SoilMoisture(Sensor):
     """Soil Moisture sensor."""
 
     _attribute_name = "measured_value"
-    _attr_device_class: SensorDeviceClass = SensorDeviceClass.HUMIDITY
+    _attr_device_class: SensorDeviceClass = SensorDeviceClass.MOISTURE
     _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
     _attr_translation_key: str = "soil_moisture"
     _divisor = 100
     _attr_native_unit_of_measurement = PERCENTAGE
     _attr_primary_weight = 1
+    _cluster_id = SoilMoistureCluster.cluster_id
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_SOIL_MOISTURE}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({SoilMoistureCluster.cluster_id}),
     )
+
+    _server_cluster_config = {
+        SoilMoistureCluster.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                SoilMoistureCluster.AttributeDefs.measured_value: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=100
+                    ),
+                ),
+            },
+        ),
+    }
 
 
 @register_entity(LeafWetnessCluster.cluster_id)
@@ -1130,10 +2009,25 @@ class LeafWetness(Sensor):
     _divisor = 100
     _attr_native_unit_of_measurement = PERCENTAGE
     _attr_primary_weight = 1
+    _cluster_id = LeafWetnessCluster.cluster_id
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_LEAF_WETNESS}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({LeafWetnessCluster.cluster_id}),
     )
+
+    _server_cluster_config = {
+        LeafWetnessCluster.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                LeafWetnessCluster.AttributeDefs.measured_value: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=100
+                    ),
+                ),
+            },
+        ),
+    }
 
 
 @register_entity(IlluminanceMeasurement.cluster_id)
@@ -1145,10 +2039,25 @@ class Illuminance(Sensor):
     _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
     _attr_native_unit_of_measurement = LIGHT_LUX
     _attr_primary_weight = 1
+    _cluster_id = IlluminanceMeasurement.cluster_id
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_ILLUMINANCE}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({IlluminanceMeasurement.cluster_id}),
     )
+
+    _server_cluster_config = {
+        IlluminanceMeasurement.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                IlluminanceMeasurement.AttributeDefs.measured_value: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=1
+                    ),
+                ),
+            },
+        ),
+    }
 
     def formatter(self, value: int) -> int | None:
         """Convert illumination data."""
@@ -1171,11 +2080,38 @@ class SmartEnergyMeteringEntityDescription:
 
 
 @register_entity(Metering.cluster_id)
-class SmartEnergyMetering(PollableSensor):
+class MeteringPoller(AggregatedClusterPoller):
+    """Polls the Metering cluster for models known to need polling.
+
+    Default Metering devices report reliably; only this short list of models
+    are known to require polling.
+    """
+
+    _unique_id_suffix = "metering_poller"
+    _cluster_id = Metering.cluster_id
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({Metering.cluster_id}),
+        models=frozenset({"TS011F", "ZLinky_TIC", "TICMeter"}),
+    )
+
+
+@register_entity(Metering.cluster_id)
+class ExposedFeatureMeteringPoller(MeteringPoller):
+    """Polls the Metering cluster for devices whose quirk exposes SE_POLL_SUMMATION."""
+
+    _unique_id_suffix = "metering_poller"
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({Metering.cluster_id}),
+        exposed_features=frozenset({SE_POLL_SUMMATION}),
+    )
+
+
+@register_entity(Metering.cluster_id)
+class SmartEnergyMetering(Sensor):
     """Metering sensor."""
 
     entity_description: SmartEnergyMeteringEntityDescription
-    _use_custom_polling: bool = False
+    _attr_suggested_display_precision = 1
     _attribute_name = "instantaneous_demand"
     _attr_translation_key: str = "instantaneous_demand"
     _attr_extra_state_attribute_names: set[str] = {
@@ -1184,10 +2120,97 @@ class SmartEnergyMetering(PollableSensor):
         "zcl_unit_of_measurement",
     }
     _attr_primary_weight = 1
+    _cluster_id = Metering.cluster_id
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_SMARTENERGY_METERING}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({Metering.cluster_id}),
     )
+
+    _server_cluster_config = {
+        Metering.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                Metering.AttributeDefs.instantaneous_demand: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=5, max_interval=900, reportable_change=1
+                    ),
+                ),
+                Metering.AttributeDefs.current_summ_delivered: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=1
+                    ),
+                ),
+                Metering.AttributeDefs.current_tier1_summ_delivered: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=1
+                    ),
+                ),
+                Metering.AttributeDefs.current_tier2_summ_delivered: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=1
+                    ),
+                ),
+                Metering.AttributeDefs.current_tier3_summ_delivered: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=1
+                    ),
+                ),
+                Metering.AttributeDefs.current_tier4_summ_delivered: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=1
+                    ),
+                ),
+                Metering.AttributeDefs.current_tier5_summ_delivered: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=1
+                    ),
+                ),
+                Metering.AttributeDefs.current_tier6_summ_delivered: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=1
+                    ),
+                ),
+                Metering.AttributeDefs.current_summ_received: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=1
+                    ),
+                ),
+                Metering.AttributeDefs.status: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=1, max_interval=900, reportable_change=1
+                    ),
+                ),
+                Metering.AttributeDefs.demand_formatting: AttrConfig(
+                    read_on_startup=False,
+                ),
+                Metering.AttributeDefs.divisor: AttrConfig(
+                    read_on_startup=False,
+                ),
+                Metering.AttributeDefs.metering_device_type: AttrConfig(
+                    read_on_startup=False,
+                ),
+                Metering.AttributeDefs.multiplier: AttrConfig(
+                    read_on_startup=False,
+                ),
+                Metering.AttributeDefs.summation_formatting: AttrConfig(
+                    read_on_startup=False,
+                ),
+                Metering.AttributeDefs.unit_of_measure: AttrConfig(
+                    read_on_startup=False,
+                ),
+            },
+        ),
+    }
 
     _ENTITY_DESCRIPTION_MAP = {
         0x00: SmartEnergyMeteringEntityDescription(
@@ -1246,8 +2269,34 @@ class SmartEnergyMetering(PollableSensor):
         ),
     }
 
+    @property
+    def _unit_of_measurement(self) -> int | None:
+        return self._cluster.get(Metering.AttributeDefs.unit_of_measure.name)
+
+    @property
+    def _device_type(self) -> str | int | None:
+        dev_type = self._cluster.get(Metering.AttributeDefs.metering_device_type.name)
+        if dev_type is None:
+            return None
+        return metering_device_type_name(dev_type)
+
+    @property
+    def _metering_status(self) -> int | None:
+        if (status := self._cluster.get(Metering.AttributeDefs.status.name)) is None:
+            return None
+        dev_type = self._cluster.get(Metering.AttributeDefs.metering_device_type.name)
+        if dev_type in METERING_DEVICE_TYPES_ELECTRIC:
+            return DeviceStatusElectric(status)
+        if dev_type in METERING_DEVICE_TYPES_GAS:
+            return DeviceStatusGas(status)
+        if dev_type in METERING_DEVICE_TYPES_WATER:
+            return DeviceStatusWater(status)
+        if dev_type in METERING_DEVICE_TYPES_HEATING_COOLING:
+            return DeviceStatusHeatingCooling(status)
+        return DeviceStatusDefault(status)
+
     def _is_supported(self) -> bool:
-        unit = self._cluster_handler.unit_of_measurement
+        unit = self._unit_of_measurement
         if self._is_non_value(unit, attr_def=Metering.AttributeDefs.unit_of_measure):
             return False
 
@@ -1256,33 +2305,34 @@ class SmartEnergyMetering(PollableSensor):
     def recompute_capabilities(self) -> None:
         """Recompute capabilities and feature flags."""
         super().recompute_capabilities()
-        entity_description = self._ENTITY_DESCRIPTION_MAP.get(
-            self._cluster_handler.unit_of_measurement
-        )
+        entity_description = self._ENTITY_DESCRIPTION_MAP.get(self._unit_of_measurement)
         if entity_description is not None:
             self.entity_description = entity_description
             self._attr_device_class = entity_description.device_class
             self._attr_state_class = entity_description.state_class
+            self._attr_native_unit_of_measurement = (
+                entity_description.native_unit_of_measurement
+            )
 
     @property
     def state(self) -> dict[str, Any]:
         """Return state for this sensor."""
         response = super().state
-        if self._cluster_handler.device_type is not None:
-            response["device_type"] = self._cluster_handler.device_type
-        if (status := self._cluster_handler.metering_status) is not None:
+        if self._device_type is not None:
+            response["device_type"] = self._device_type
+        if (status := self._metering_status) is not None:
             if isinstance(status, enum.IntFlag):
                 response["status"] = str(
                     status.name if status.name is not None else status.value
                 )
             else:
                 response["status"] = str(status)[len(status.__class__.__name__) + 1 :]
-        response["zcl_unit_of_measurement"] = self._cluster_handler.unit_of_measurement
+        response["zcl_unit_of_measurement"] = self._unit_of_measurement
         return response
 
     @property
     def _multiplier(self) -> int | float | None:
-        return self._cluster_handler.multiplier
+        return self._cluster.get(Metering.AttributeDefs.multiplier.name) or 1
 
     @_multiplier.setter
     def _multiplier(self, value: int | float | None) -> None:
@@ -1290,7 +2340,7 @@ class SmartEnergyMetering(PollableSensor):
 
     @property
     def _divisor(self) -> int | float | None:
-        return self._cluster_handler.divisor
+        return self._cluster.get(Metering.AttributeDefs.divisor.name) or 1
 
     @_divisor.setter
     def _divisor(self, value: int | float | None) -> None:
@@ -1301,20 +2351,18 @@ class SmartEnergyMetering(PollableSensor):
         # TODO: improve typing for base class
         scaled_value = cast(float, super().formatter(value))
 
-        if (
-            self._cluster_handler.unit_of_measurement
-            == MeteringUnitofMeasure.Kwh_and_Kwh_binary
-        ):
+        if self._unit_of_measurement == MeteringUnitofMeasure.Kwh_and_Kwh_binary:
             # Zigbee spec power unit is kW, but we show the value in W
             value_watt = scaled_value * 1000
             if value_watt < 100:
                 return round(value_watt, 1)
             return round(value_watt)
 
+        demand_formatting = self._cluster.get(
+            Metering.AttributeDefs.demand_formatting.name
+        )
         demand_formater = create_number_formatter(
-            self._cluster_handler.demand_formatting
-            if self._cluster_handler.demand_formatting is not None
-            else DEFAULT_FORMATTING
+            demand_formatting if demand_formatting is not None else DEFAULT_FORMATTING
         )
         return float(demand_formater.format(scaled_value))
 
@@ -1337,9 +2385,8 @@ class SmartEnergySummation(SmartEnergyMetering):
     _attr_translation_key: str = "summation_delivered"
     _attr_suggested_display_precision: int = 3
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_SMARTENERGY_METERING}),
-        feature_priority=(PlatformFeatureGroup.SMART_ENERGY_SUMMATION, 0),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({Metering.cluster_id}),
     )
 
     _ENTITY_DESCRIPTION_MAP = {
@@ -1404,149 +2451,121 @@ class SmartEnergySummation(SmartEnergyMetering):
         # TODO: improve typing for base class
         scaled_value = cast(float, Sensor.formatter(self, value))
 
-        if (
-            self._cluster_handler.unit_of_measurement
-            == MeteringUnitofMeasure.Kwh_and_Kwh_binary
-        ):
+        if self._unit_of_measurement == MeteringUnitofMeasure.Kwh_and_Kwh_binary:
             return scaled_value
 
+        summation_formatting = self._cluster.get(
+            Metering.AttributeDefs.summation_formatting.name
+        )
         summation_formater = create_number_formatter(
-            self._cluster_handler.summation_formatting
-            if self._cluster_handler.summation_formatting is not None
+            summation_formatting
+            if summation_formatting is not None
             else DEFAULT_FORMATTING
         )
         return float(summation_formater.format(scaled_value))
 
 
 @register_entity(Metering.cluster_id)
-class PolledSmartEnergySummation(SmartEnergySummation):
-    """Polled Smart Energy Metering summation sensor."""
-
-    _use_custom_polling: bool = True
-
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_SMARTENERGY_METERING}),
-        models=frozenset({"TS011F", "ZLinky_TIC", "TICMeter"}),
-        feature_priority=(PlatformFeatureGroup.SMART_ENERGY_SUMMATION, 1),
-    )
-
-
-@register_entity(Metering.cluster_id)
-class Tier1SmartEnergySummation(PolledSmartEnergySummation):
+class Tier1SmartEnergySummation(SmartEnergySummation):
     """Tier 1 Smart Energy Metering summation sensor."""
 
-    _use_custom_polling = False  # Poll indirectly by PolledSmartEnergySummation
     _attribute_name = "current_tier1_summ_delivered"
     _unique_id_suffix = "tier1_summation_delivered"
     _attr_translation_key: str = "tier1_summation_delivered"
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_SMARTENERGY_METERING}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({Metering.cluster_id}),
         models=frozenset({"ZLinky_TIC", "TICMeter"}),
-        feature_priority=(PlatformFeatureGroup.SMART_ENERGY_SUMMATION, 1),
     )
 
 
 @register_entity(Metering.cluster_id)
-class Tier2SmartEnergySummation(PolledSmartEnergySummation):
+class Tier2SmartEnergySummation(SmartEnergySummation):
     """Tier 2 Smart Energy Metering summation sensor."""
 
-    _use_custom_polling = False  # Poll indirectly by PolledSmartEnergySummation
     _attribute_name = "current_tier2_summ_delivered"
     _unique_id_suffix = "tier2_summation_delivered"
     _attr_translation_key: str = "tier2_summation_delivered"
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_SMARTENERGY_METERING}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({Metering.cluster_id}),
         models=frozenset({"ZLinky_TIC", "TICMeter"}),
-        feature_priority=(PlatformFeatureGroup.SMART_ENERGY_SUMMATION, 1),
     )
 
 
 @register_entity(Metering.cluster_id)
-class Tier3SmartEnergySummation(PolledSmartEnergySummation):
+class Tier3SmartEnergySummation(SmartEnergySummation):
     """Tier 3 Smart Energy Metering summation sensor."""
 
-    _use_custom_polling = False  # Poll indirectly by PolledSmartEnergySummation
     _attribute_name = "current_tier3_summ_delivered"
     _unique_id_suffix = "tier3_summation_delivered"
     _attr_translation_key: str = "tier3_summation_delivered"
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_SMARTENERGY_METERING}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({Metering.cluster_id}),
         models=frozenset({"ZLinky_TIC", "TICMeter"}),
-        feature_priority=(PlatformFeatureGroup.SMART_ENERGY_SUMMATION, 1),
     )
 
 
 @register_entity(Metering.cluster_id)
-class Tier4SmartEnergySummation(PolledSmartEnergySummation):
+class Tier4SmartEnergySummation(SmartEnergySummation):
     """Tier 4 Smart Energy Metering summation sensor."""
 
-    _use_custom_polling = False  # Poll indirectly by PolledSmartEnergySummation
     _attribute_name = "current_tier4_summ_delivered"
     _unique_id_suffix = "tier4_summation_delivered"
     _attr_translation_key: str = "tier4_summation_delivered"
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_SMARTENERGY_METERING}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({Metering.cluster_id}),
         models=frozenset({"ZLinky_TIC", "TICMeter"}),
-        feature_priority=(PlatformFeatureGroup.SMART_ENERGY_SUMMATION, 1),
     )
 
 
 @register_entity(Metering.cluster_id)
-class Tier5SmartEnergySummation(PolledSmartEnergySummation):
+class Tier5SmartEnergySummation(SmartEnergySummation):
     """Tier 5 Smart Energy Metering summation sensor."""
 
-    _use_custom_polling = False  # Poll indirectly by PolledSmartEnergySummation
     _attribute_name = "current_tier5_summ_delivered"
     _unique_id_suffix = "tier5_summation_delivered"
     _attr_translation_key: str = "tier5_summation_delivered"
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_SMARTENERGY_METERING}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({Metering.cluster_id}),
         models=frozenset({"ZLinky_TIC", "TICMeter"}),
-        feature_priority=(PlatformFeatureGroup.SMART_ENERGY_SUMMATION, 1),
     )
 
 
 @register_entity(Metering.cluster_id)
-class Tier6SmartEnergySummation(PolledSmartEnergySummation):
+class Tier6SmartEnergySummation(SmartEnergySummation):
     """Tier 6 Smart Energy Metering summation sensor."""
 
-    _use_custom_polling = False  # Poll indirectly by PolledSmartEnergySummation
     _attribute_name = "current_tier6_summ_delivered"
     _unique_id_suffix = "tier6_summation_delivered"
     _attr_translation_key: str = "tier6_summation_delivered"
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_SMARTENERGY_METERING}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({Metering.cluster_id}),
         models=frozenset({"ZLinky_TIC", "TICMeter"}),
-        feature_priority=(PlatformFeatureGroup.SMART_ENERGY_SUMMATION, 1),
     )
 
 
 @register_entity(Metering.cluster_id)
-class SmartEnergySummationReceived(PolledSmartEnergySummation):
+class SmartEnergySummationReceived(SmartEnergySummation):
     """Smart Energy Metering summation received sensor."""
 
-    _use_custom_polling = False  # Poll indirectly by PolledSmartEnergySummation
     _attribute_name = "current_summ_received"
     _unique_id_suffix = "summation_received"
     _attr_translation_key: str = "summation_received"
-    """
-    This attribute only started to be initialized in HA 2024.2.0,
-    so the entity would be created on the first HA start after the
-    upgrade for existing devices, as the initialization to see if
-    an attribute is unsupported happens later in the background.
-    To avoid creating unnecessary entities for existing devices,
-    wait until the attribute was properly initialized once for now.
-    """
+
+    # This attribute only started to be initialized in HA 2024.2.0, so the entity would
+    # be created on the first HA start after the upgrade for existing devices, as the
+    # initialization to see if an attribute is unsupported happens later in the
+    # background. To avoid creating unnecessary entities for existing devices, wait
+    # until the attribute was properly initialized once for now.
     _skip_creation_if_no_attr_cache = True
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_SMARTENERGY_METERING}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({Metering.cluster_id}),
     )
 
 
@@ -1560,10 +2579,25 @@ class Pressure(Sensor):
     _attr_suggested_display_precision: int = 0
     _attr_native_unit_of_measurement = UnitOfPressure.HPA
     _attr_primary_weight = 1
+    _cluster_id = PressureMeasurement.cluster_id
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_PRESSURE}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({PressureMeasurement.cluster_id}),
     )
+
+    _server_cluster_config = {
+        PressureMeasurement.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                PressureMeasurement.AttributeDefs.measured_value: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=1
+                    ),
+                ),
+            },
+        ),
+    }
 
 
 @register_entity(FlowMeasurement.cluster_id)
@@ -1576,10 +2610,25 @@ class Flow(Sensor):
     _divisor = 10
     _attr_native_unit_of_measurement = UnitOfVolumeFlowRate.CUBIC_METERS_PER_HOUR
     _attr_primary_weight = 1
+    _cluster_id = FlowMeasurement.cluster_id
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_FLOW}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({FlowMeasurement.cluster_id}),
     )
+
+    _server_cluster_config = {
+        FlowMeasurement.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                FlowMeasurement.AttributeDefs.measured_value: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=1
+                    ),
+                ),
+            },
+        ),
+    }
 
 
 @register_entity(TemperatureMeasurement.cluster_id)
@@ -1592,10 +2641,25 @@ class Temperature(Sensor):
     _divisor = 100
     _attr_native_unit_of_measurement = UnitOfTemperature.CELSIUS
     _attr_primary_weight = 1
+    _cluster_id = TemperatureMeasurement.cluster_id
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_TEMPERATURE}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({TemperatureMeasurement.cluster_id}),
     )
+
+    _server_cluster_config = {
+        TemperatureMeasurement.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                TemperatureMeasurement.AttributeDefs.measured_value: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=50
+                    ),
+                ),
+            },
+        ),
+    }
 
 
 @register_entity(DeviceTemperatureCluster.cluster_id)
@@ -1610,10 +2674,25 @@ class DeviceTemperature(Sensor):
     _attr_native_unit_of_measurement = UnitOfTemperature.CELSIUS
     _attr_entity_category = EntityCategory.DIAGNOSTIC
     _attr_primary_weight = 1
+    _cluster_id = DeviceTemperatureCluster.cluster_id
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_DEVICE_TEMPERATURE}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({DeviceTemperatureCluster.cluster_id}),
     )
+
+    _server_cluster_config = {
+        DeviceTemperatureCluster.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                DeviceTemperatureCluster.AttributeDefs.current_temperature: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=50
+                    ),
+                ),
+            },
+        ),
+    }
 
 
 @register_entity(INOVELLI_CLUSTER)
@@ -1626,9 +2705,10 @@ class InovelliInternalTemperature(Sensor):
     _attr_translation_key: str = "internal_temp_monitor"
     _attr_native_unit_of_measurement = UnitOfTemperature.CELSIUS
     _attr_entity_category = EntityCategory.DIAGNOSTIC
+    _cluster_id = INOVELLI_CLUSTER
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_INOVELLI}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({INOVELLI_CLUSTER}),
     )
 
 
@@ -1648,9 +2728,10 @@ class InovelliOverheated(EnumSensor):
     _attr_translation_key: str = "overheated"
     _enum = InovelliOverheatedState
     _attr_entity_category = EntityCategory.DIAGNOSTIC
+    _cluster_id = INOVELLI_CLUSTER
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_INOVELLI}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({INOVELLI_CLUSTER}),
     )
 
 
@@ -1665,10 +2746,25 @@ class CarbonDioxideConcentration(Sensor):
     _multiplier = 1e6
     _attr_native_unit_of_measurement = CONCENTRATION_PARTS_PER_MILLION
     _attr_primary_weight = 1
+    _cluster_id = CarbonDioxideConcentrationCluster.cluster_id
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({"carbon_dioxide_concentration"}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({CarbonDioxideConcentrationCluster.cluster_id}),
     )
+
+    _server_cluster_config = {
+        CarbonDioxideConcentrationCluster.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                CarbonDioxideConcentrationCluster.AttributeDefs.measured_value: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=0.000001
+                    ),
+                ),
+            },
+        ),
+    }
 
 
 @register_entity(CarbonMonoxideConcentrationCluster.cluster_id)
@@ -1682,13 +2778,28 @@ class CarbonMonoxideConcentration(Sensor):
     _multiplier = 1e6
     _attr_native_unit_of_measurement = CONCENTRATION_PARTS_PER_MILLION
     _attr_primary_weight = 1
+    _cluster_id = CarbonMonoxideConcentrationCluster.cluster_id
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({"carbon_monoxide_concentration"}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({CarbonMonoxideConcentrationCluster.cluster_id}),
     )
 
+    _server_cluster_config = {
+        CarbonMonoxideConcentrationCluster.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                CarbonMonoxideConcentrationCluster.AttributeDefs.measured_value: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=0.000001
+                    ),
+                ),
+            },
+        ),
+    }
 
-@register_entity(0x042E)
+
+@register_entity(VOC_LEVEL_CLUSTER)
 class VOCLevel(Sensor):
     """VOC Level sensor."""
 
@@ -1700,30 +2811,17 @@ class VOCLevel(Sensor):
     _attr_native_unit_of_measurement = CONCENTRATION_MICROGRAMS_PER_CUBIC_METER
     _attr_primary_weight = 1
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({"voc_level"}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({VOC_LEVEL_CLUSTER}),
         feature_priority=(PlatformFeatureGroup.VOC_LEVEL, 0),
     )
 
-
-@register_entity(0x042E)
-class GenericVOCLevel(Sensor):
-    """VOC Level sensor."""
-
-    _attribute_name = "measured_value"
-    _attr_device_class: SensorDeviceClass = SensorDeviceClass.VOLATILE_ORGANIC_COMPOUNDS
-    _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
-    _attr_suggested_display_precision = 0
-    _multiplier = 1e6
-    _attr_native_unit_of_measurement = CONCENTRATION_MICROGRAMS_PER_CUBIC_METER
-    _attr_primary_weight = 1
-
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({"cluster_handler_0x042e"}),
-    )
+    _server_cluster_config = {
+        VOC_LEVEL_CLUSTER: ClusterConfig(bind=True),
+    }
 
 
-@register_entity(0x042E)
+@register_entity(VOC_LEVEL_CLUSTER)
 class PPBVOCLevel(Sensor):
     """VOC Level sensor."""
 
@@ -1737,11 +2835,15 @@ class PPBVOCLevel(Sensor):
     _attr_native_unit_of_measurement = CONCENTRATION_PARTS_PER_BILLION
     _attr_primary_weight = 1
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({"voc_level"}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({VOC_LEVEL_CLUSTER}),
         models=frozenset({"lumi.airmonitor.acn01"}),
         feature_priority=(PlatformFeatureGroup.VOC_LEVEL, 1),
     )
+
+    _server_cluster_config = {
+        VOC_LEVEL_CLUSTER: ClusterConfig(bind=True),
+    }
 
 
 @register_entity(PM25Cluster.cluster_id)
@@ -1754,10 +2856,25 @@ class PM25(Sensor):
     _multiplier = 1
     _attr_native_unit_of_measurement = CONCENTRATION_MICROGRAMS_PER_CUBIC_METER
     _attr_primary_weight = 1
+    _cluster_id = PM25Cluster.cluster_id
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({"pm25"}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({PM25Cluster.cluster_id}),
     )
+
+    _server_cluster_config = {
+        PM25Cluster.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                PM25Cluster.AttributeDefs.measured_value: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=0.1
+                    ),
+                ),
+            },
+        ),
+    }
 
 
 @register_entity(ElectricalConductivityCluster.cluster_id)
@@ -1768,10 +2885,25 @@ class ElectricalConductivity(Sensor):
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.CONDUCTIVITY
     _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
     _attr_native_unit_of_measurement = UnitOfConductivity.MICROSIEMENS_PER_CM
+    _cluster_id = ElectricalConductivityCluster.cluster_id
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_ELECTRICAL_CONDUCTIVITY}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({ElectricalConductivityCluster.cluster_id}),
     )
+
+    _server_cluster_config = {
+        ElectricalConductivityCluster.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                ElectricalConductivityCluster.AttributeDefs.measured_value: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=1
+                    ),
+                ),
+            },
+        ),
+    }
 
 
 @register_entity(FormaldehydeConcentrationCluster.cluster_id)
@@ -1785,10 +2917,25 @@ class FormaldehydeConcentration(Sensor):
     _multiplier = 1e6
     _attr_native_unit_of_measurement = CONCENTRATION_PARTS_PER_MILLION
     _attr_primary_weight = 1
+    _cluster_id = FormaldehydeConcentrationCluster.cluster_id
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({"formaldehyde_concentration"}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({FormaldehydeConcentrationCluster.cluster_id}),
     )
+
+    _server_cluster_config = {
+        FormaldehydeConcentrationCluster.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                FormaldehydeConcentrationCluster.AttributeDefs.measured_value: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=0.000001
+                    ),
+                ),
+            },
+        ),
+    }
 
 
 @register_entity(Thermostat.cluster_id)
@@ -1797,23 +2944,151 @@ class ThermostatHVACAction(Sensor):
 
     _unique_id_suffix = "hvac_action"
     _attr_translation_key: str = "hvac_action"
+    _cluster_id = Thermostat.cluster_id
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({Thermostat.cluster_id}),
         feature_priority=(PlatformFeatureGroup.HVAC_ACTION, 0),
     )
+
+    _server_cluster_config = {
+        Thermostat.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                Thermostat.AttributeDefs.local_temperature: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=25
+                    ),
+                ),
+                Thermostat.AttributeDefs.occupied_cooling_setpoint: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=25
+                    ),
+                ),
+                Thermostat.AttributeDefs.occupied_heating_setpoint: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=25
+                    ),
+                ),
+                Thermostat.AttributeDefs.unoccupied_cooling_setpoint: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=25
+                    ),
+                ),
+                Thermostat.AttributeDefs.unoccupied_heating_setpoint: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=25
+                    ),
+                ),
+                Thermostat.AttributeDefs.running_mode: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=1
+                    ),
+                ),
+                Thermostat.AttributeDefs.running_state: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=1
+                    ),
+                ),
+                Thermostat.AttributeDefs.system_mode: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=1
+                    ),
+                ),
+                Thermostat.AttributeDefs.occupancy: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=1
+                    ),
+                ),
+                Thermostat.AttributeDefs.pi_cooling_demand: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=5
+                    ),
+                ),
+                Thermostat.AttributeDefs.pi_heating_demand: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=5
+                    ),
+                ),
+                Thermostat.AttributeDefs.abs_min_heat_setpoint_limit: AttrConfig(
+                    read_on_startup=False,
+                ),
+                Thermostat.AttributeDefs.abs_max_heat_setpoint_limit: AttrConfig(
+                    read_on_startup=False,
+                ),
+                Thermostat.AttributeDefs.abs_min_cool_setpoint_limit: AttrConfig(
+                    read_on_startup=False,
+                ),
+                Thermostat.AttributeDefs.abs_max_cool_setpoint_limit: AttrConfig(
+                    read_on_startup=False,
+                ),
+                Thermostat.AttributeDefs.ctrl_sequence_of_oper: AttrConfig(
+                    read_on_startup=True,
+                ),
+                Thermostat.AttributeDefs.max_cool_setpoint_limit: AttrConfig(
+                    read_on_startup=False,
+                ),
+                Thermostat.AttributeDefs.max_heat_setpoint_limit: AttrConfig(
+                    read_on_startup=False,
+                ),
+                Thermostat.AttributeDefs.min_cool_setpoint_limit: AttrConfig(
+                    read_on_startup=False,
+                ),
+                Thermostat.AttributeDefs.min_heat_setpoint_limit: AttrConfig(
+                    read_on_startup=False,
+                ),
+                Thermostat.AttributeDefs.local_temperature_calibration: AttrConfig(
+                    read_on_startup=False,
+                ),
+                Thermostat.AttributeDefs.setpoint_change_source: AttrConfig(
+                    read_on_startup=False,
+                ),
+                Thermostat.AttributeDefs.setpoint_change_source_timestamp: AttrConfig(
+                    read_on_startup=False,
+                ),
+            },
+        ),
+    }
 
     def _is_supported(self) -> bool:
         return PlatformEntity._is_supported(self)
 
     @property
+    def _pi_heating_demand(self) -> int | None:
+        return self._cluster.get(Thermostat.AttributeDefs.pi_heating_demand.name)
+
+    @property
+    def _pi_cooling_demand(self) -> int | None:
+        return self._cluster.get(Thermostat.AttributeDefs.pi_cooling_demand.name)
+
+    @property
+    def _running_state(self) -> int | None:
+        return self._cluster.get(Thermostat.AttributeDefs.running_state.name)
+
+    @property
+    def _running_mode(self) -> int | None:
+        return self._cluster.get(Thermostat.AttributeDefs.running_mode.name)
+
+    @property
+    def _system_mode(self) -> int | None:
+        return self._cluster.get(Thermostat.AttributeDefs.system_mode.name)
+
+    @property
     def state(self) -> dict:
         """Return the current HVAC action."""
         response = super().state
-        if (
-            self._cluster_handler.pi_heating_demand is None
-            and self._cluster_handler.pi_cooling_demand is None
-        ):
+        if self._pi_heating_demand is None and self._pi_cooling_demand is None:
             response["state"] = self._rm_rs_action
         else:
             response["state"] = self._pi_demand_action
@@ -1822,10 +3097,7 @@ class ThermostatHVACAction(Sensor):
     @property
     def native_value(self) -> str | None:
         """Return the current HVAC action."""
-        if (
-            self._cluster_handler.pi_heating_demand is None
-            and self._cluster_handler.pi_cooling_demand is None
-        ):
+        if self._pi_heating_demand is None and self._pi_cooling_demand is None:
             return self._rm_rs_action
         return self._pi_demand_action
 
@@ -1833,36 +3105,34 @@ class ThermostatHVACAction(Sensor):
     def _rm_rs_action(self) -> HVACAction | None:
         """Return the current HVAC action based on running mode and running state."""
 
-        if (running_state := self._cluster_handler.running_state) is None:
+        if (running_state := self._running_state) is None:
             return None
 
         rs_heat = (
-            self._cluster_handler.RunningState.Heat_State_On
-            | self._cluster_handler.RunningState.Heat_2nd_Stage_On
+            Thermostat.RunningState.Heat_State_On
+            | Thermostat.RunningState.Heat_2nd_Stage_On
         )
         if running_state & rs_heat:
             return HVACAction.HEATING
 
         rs_cool = (
-            self._cluster_handler.RunningState.Cool_State_On
-            | self._cluster_handler.RunningState.Cool_2nd_Stage_On
+            Thermostat.RunningState.Cool_State_On
+            | Thermostat.RunningState.Cool_2nd_Stage_On
         )
         if running_state & rs_cool:
             return HVACAction.COOLING
 
-        running_state = self._cluster_handler.running_state
         if running_state and running_state & (
-            self._cluster_handler.RunningState.Fan_State_On
-            | self._cluster_handler.RunningState.Fan_2nd_Stage_On
-            | self._cluster_handler.RunningState.Fan_3rd_Stage_On
+            Thermostat.RunningState.Fan_State_On
+            | Thermostat.RunningState.Fan_2nd_Stage_On
+            | Thermostat.RunningState.Fan_3rd_Stage_On
         ):
             return HVACAction.FAN
 
-        running_state = self._cluster_handler.running_state
-        if running_state and running_state & self._cluster_handler.RunningState.Idle:
+        if running_state and running_state & Thermostat.RunningState.Idle:
             return HVACAction.IDLE
 
-        if self._cluster_handler.system_mode != self._cluster_handler.SystemMode.Off:
+        if self._system_mode != Thermostat.SystemMode.Off:
             return HVACAction.IDLE
         return HVACAction.OFF
 
@@ -1870,14 +3140,14 @@ class ThermostatHVACAction(Sensor):
     def _pi_demand_action(self) -> HVACAction:
         """Return the current HVAC action based on pi_demands."""
 
-        heating_demand = self._cluster_handler.pi_heating_demand
+        heating_demand = self._pi_heating_demand
         if heating_demand is not None and heating_demand > 0:
             return HVACAction.HEATING
-        cooling_demand = self._cluster_handler.pi_cooling_demand
+        cooling_demand = self._pi_cooling_demand
         if cooling_demand is not None and cooling_demand > 0:
             return HVACAction.COOLING
 
-        if self._cluster_handler.system_mode != self._cluster_handler.SystemMode.Off:
+        if self._system_mode != Thermostat.SystemMode.Off:
             return HVACAction.IDLE
         return HVACAction.OFF
 
@@ -1886,8 +3156,8 @@ class ThermostatHVACAction(Sensor):
 class SinopeHVACAction(ThermostatHVACAction):
     """Sinope Thermostat HVAC action sensor."""
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({Thermostat.cluster_id}),
         manufacturers=frozenset({"Sinope Technologies"}),
         feature_priority=(PlatformFeatureGroup.HVAC_ACTION, 1),
     )
@@ -1896,22 +3166,22 @@ class SinopeHVACAction(ThermostatHVACAction):
     def _rm_rs_action(self) -> HVACAction:
         """Return the current HVAC action based on running mode and running state."""
 
-        running_mode = self._cluster_handler.running_mode
-        if running_mode == self._cluster_handler.RunningMode.Heat:
+        running_mode = self._running_mode
+        if running_mode == Thermostat.RunningMode.Heat:
             return HVACAction.HEATING
-        if running_mode == self._cluster_handler.RunningMode.Cool:
+        if running_mode == Thermostat.RunningMode.Cool:
             return HVACAction.COOLING
 
-        running_state = self._cluster_handler.running_state
+        running_state = self._running_state
         if running_state and running_state & (
-            self._cluster_handler.RunningState.Fan_State_On
-            | self._cluster_handler.RunningState.Fan_2nd_Stage_On
-            | self._cluster_handler.RunningState.Fan_3rd_Stage_On
+            Thermostat.RunningState.Fan_State_On
+            | Thermostat.RunningState.Fan_2nd_Stage_On
+            | Thermostat.RunningState.Fan_3rd_Stage_On
         ):
             return HVACAction.FAN
         if (
-            self._cluster_handler.system_mode != self._cluster_handler.SystemMode.Off
-            and running_mode == self._cluster_handler.SystemMode.Off
+            self._system_mode != Thermostat.SystemMode.Off
+            and running_mode == Thermostat.SystemMode.Off
         ):
             return HVACAction.IDLE
         return HVACAction.OFF
@@ -1929,20 +3199,20 @@ class RSSISensor(Sensor):
     _attr_entity_category = EntityCategory.DIAGNOSTIC
     _attr_entity_registry_enabled_default = False
     _attr_translation_key: str = "rssi"
+    _cluster_id = Basic.cluster_id
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_BASIC}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({Basic.cluster_id}),
     )
 
     def __init__(
         self,
-        cluster_handlers: list[ClusterHandler],
         endpoint: Endpoint,
         device: Device,
         **kwargs: Any,
     ) -> None:
         """Init."""
-        super().__init__(cluster_handlers, endpoint, device, **kwargs)
+        super().__init__(endpoint=endpoint, device=device, **kwargs)
 
     def on_add(self) -> None:
         """Run when entity is added."""
@@ -1962,7 +3232,7 @@ class RSSISensor(Sensor):
     def is_supported_in_list(self, entities: list[BaseEntity]) -> bool:
         """Check if the sensor is supported given the list of entities."""
         cls = type(self)
-        return not any(type(entity) is cls for entity in entities)
+        return not any(type(entity) is cls for entity in entities if entity is not self)
 
     @property
     def state(self) -> dict:
@@ -2008,9 +3278,10 @@ class LQISensor(RSSISensor):
     _attr_device_class = None
     _attr_native_unit_of_measurement = None
     _attr_translation_key = "lqi"
+    _cluster_id = Basic.cluster_id
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_BASIC}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({Basic.cluster_id}),
     )
 
     @property
@@ -2035,9 +3306,10 @@ class TimeLeft(Sensor):
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.DURATION
     _attr_translation_key: str = "timer_time_left"
     _attr_native_unit_of_measurement = UnitOfTime.MINUTES
+    _cluster_id = TUYA_MANUFACTURER_CLUSTER
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({"tuya_manufacturer"}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({TUYA_MANUFACTURER_CLUSTER}),
         manufacturers=frozenset({"_TZE200_htnnfasr"}),
     )
 
@@ -2052,9 +3324,10 @@ class IkeaDeviceRunTime(Sensor):
     _attr_translation_key: str = "device_run_time"
     _attr_native_unit_of_measurement = UnitOfTime.MINUTES
     _attr_entity_category: EntityCategory = EntityCategory.DIAGNOSTIC
+    _cluster_id = IKEA_AIR_PURIFIER_CLUSTER
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({"ikea_airpurifier"}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({IKEA_AIR_PURIFIER_CLUSTER}),
     )
 
 
@@ -2068,9 +3341,10 @@ class IkeaFilterRunTime(Sensor):
     _attr_translation_key: str = "filter_run_time"
     _attr_native_unit_of_measurement = UnitOfTime.MINUTES
     _attr_entity_category: EntityCategory = EntityCategory.DIAGNOSTIC
+    _cluster_id = IKEA_AIR_PURIFIER_CLUSTER
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({"ikea_airpurifier"}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({IKEA_AIR_PURIFIER_CLUSTER}),
     )
 
 
@@ -2089,9 +3363,10 @@ class AqaraPetFeederLastFeedingSource(EnumSensor):
     _unique_id_suffix = "last_feeding_source"
     _attr_translation_key: str = "last_feeding_source"
     _enum = AqaraFeedingSource
+    _cluster_id = AQARA_OPPLE_CLUSTER
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({"opple_cluster"}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({AQARA_OPPLE_CLUSTER}),
         models=frozenset({"aqara.feeder.acn001"}),
     )
 
@@ -2103,9 +3378,10 @@ class AqaraPetFeederLastFeedingSize(Sensor):
     _attribute_name = "last_feeding_size"
     _unique_id_suffix = "last_feeding_size"
     _attr_translation_key: str = "last_feeding_size"
+    _cluster_id = AQARA_OPPLE_CLUSTER
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({"opple_cluster"}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({AQARA_OPPLE_CLUSTER}),
         models=frozenset({"aqara.feeder.acn001"}),
     )
 
@@ -2118,9 +3394,10 @@ class AqaraPetFeederPortionsDispensed(Sensor):
     _unique_id_suffix = "portions_dispensed"
     _attr_translation_key: str = "portions_dispensed_today"
     _attr_state_class: SensorStateClass = SensorStateClass.TOTAL_INCREASING
+    _cluster_id = AQARA_OPPLE_CLUSTER
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({"opple_cluster"}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({AQARA_OPPLE_CLUSTER}),
         models=frozenset({"aqara.feeder.acn001"}),
     )
 
@@ -2134,9 +3411,10 @@ class AqaraPetFeederWeightDispensed(Sensor):
     _attr_translation_key: str = "weight_dispensed_today"
     _attr_native_unit_of_measurement = UnitOfMass.GRAMS
     _attr_state_class: SensorStateClass = SensorStateClass.TOTAL_INCREASING
+    _cluster_id = AQARA_OPPLE_CLUSTER
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({"opple_cluster"}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({AQARA_OPPLE_CLUSTER}),
         models=frozenset({"aqara.feeder.acn001"}),
     )
 
@@ -2151,9 +3429,10 @@ class AqaraSmokeDensityDbm(Sensor):
     _attr_native_unit_of_measurement = "dB/m"
     _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
     _attr_suggested_display_precision = 3
+    _cluster_id = AQARA_OPPLE_CLUSTER
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({"opple_cluster"}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({AQARA_OPPLE_CLUSTER}),
         models=frozenset({"lumi.sensor_smoke.acn03"}),
     )
 
@@ -2173,9 +3452,10 @@ class SonoffPresenceSenorIlluminationStatus(EnumSensor):
     _unique_id_suffix = "last_illumination"
     _attr_translation_key: str = "last_illumination_state"
     _enum = SonoffIlluminationStates
+    _cluster_id = SONOFF_CLUSTER
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({"sonoff_manufacturer"}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({SONOFF_CLUSTER}),
         models=frozenset({"SNZB-06P"}),
     )
 
@@ -2195,9 +3475,10 @@ class PiHeatingDemand(Sensor):
 
     _attr_suggested_display_precision = 0
     _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
+    _cluster_id = Thermostat.cluster_id
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({Thermostat.cluster_id}),
     )
 
 
@@ -2221,9 +3502,10 @@ class SetpointChangeSource(EnumSensor):
     _attr_translation_key: str = "setpoint_change_source"
     _attr_entity_category = EntityCategory.DIAGNOSTIC
     _enum = SetpointChangeSourceEnum
+    _cluster_id = Thermostat.cluster_id
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({Thermostat.cluster_id}),
     )
 
 
@@ -2239,9 +3521,10 @@ class SetpointChangeSourceTimestamp(TimestampSensor):
     _attr_translation_key: str = "setpoint_change_source_timestamp"
     _attr_entity_category = EntityCategory.DIAGNOSTIC
     _attr_device_class = SensorDeviceClass.TIMESTAMP
+    _cluster_id = Thermostat.cluster_id
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({Thermostat.cluster_id}),
     )
 
     def formatter(self, value: types.UTCTime) -> datetime:
@@ -2258,10 +3541,22 @@ class WindowCoveringTypeSensor(EnumSensor):
     _unique_id_suffix: str = "window_covering_type"
     _attr_translation_key: str = "window_covering_type"
     _attr_entity_category = EntityCategory.DIAGNOSTIC
+    _cluster_id = WindowCovering.cluster_id
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_COVER}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({WindowCovering.cluster_id}),
     )
+
+    _server_cluster_config = {
+        WindowCovering.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                WindowCovering.AttributeDefs.window_covering_type: AttrConfig(
+                    read_on_startup=False,
+                ),
+            },
+        ),
+    }
 
 
 @register_entity(Basic.cluster_id)
@@ -2273,11 +3568,22 @@ class AqaraCurtainMotorPowerSourceSensor(EnumSensor):
     _unique_id_suffix: str = "power_source"
     _attr_translation_key: str = "power_source"
     _attr_entity_category = EntityCategory.DIAGNOSTIC
+    _cluster_id = Basic.cluster_id
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_BASIC}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({Basic.cluster_id}),
         models=frozenset({"lumi.curtain.agl001"}),
     )
+
+    _server_cluster_config = {
+        Basic.cluster_id: ClusterConfig(
+            attributes={
+                Basic.AttributeDefs.power_source: AttrConfig(
+                    read_on_startup=False,
+                ),
+            },
+        ),
+    }
 
 
 class AqaraE1HookState(types.enum8):
@@ -2298,9 +3604,10 @@ class AqaraCurtainHookStateSensor(EnumSensor):
     _unique_id_suffix = "hooks_state"
     _attr_translation_key: str = "hooks_state"
     _attr_entity_category = EntityCategory.DIAGNOSTIC
+    _cluster_id = AQARA_OPPLE_CLUSTER
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({"opple_cluster"}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({AQARA_OPPLE_CLUSTER}),
         models=frozenset({"lumi.curtain.agl001"}),
     )
 
@@ -2315,13 +3622,12 @@ class BitMapSensor(Sensor):
 
     def __init__(
         self,
-        cluster_handlers: list[ClusterHandler],
         endpoint: Endpoint,
         device: Device,
         **kwargs: Any,
     ) -> None:
         """Init this sensor."""
-        super().__init__(cluster_handlers, endpoint, device, **kwargs)
+        super().__init__(endpoint=endpoint, device=device, **kwargs)
         self._attr_extra_state_attribute_names: set[str] = {
             bit.name for bit in list(self._bitmap)
         }
@@ -2331,7 +3637,7 @@ class BitMapSensor(Sensor):
         """Return the state for this sensor."""
         response = super().state
         response["state"] = self.native_value
-        value = self._cluster_handler.cluster.get(self._attribute_name)
+        value = self._cluster.get(self._attribute_name)
         for bit in list(self._bitmap):
             if value is None:
                 response[bit.name] = False
@@ -2342,7 +3648,7 @@ class BitMapSensor(Sensor):
     def formatter(self, _value: int) -> str:
         """Summary of all attributes."""
 
-        value = self._cluster_handler.cluster.get(self._attribute_name)
+        value = self._cluster.get(self._attribute_name)
         state_attr = {}
 
         for bit in list(self._bitmap):
@@ -2367,11 +3673,26 @@ class DanfossOpenWindowDetection(EnumSensor):
     _attribute_name = "open_window_detection"
     _attr_translation_key: str = "open_window_detected"
     _enum = danfoss_thermostat.DanfossOpenWindowDetectionEnum
+    _cluster_id = Thermostat.cluster_id
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({Thermostat.cluster_id}),
         exposed_features=frozenset({DANFOSS_ALLY_THERMOSTAT}),
     )
+
+    _server_cluster_config = {
+        Thermostat.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                "open_window_detection": AttrConfig(
+                    read_on_startup=False,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=1
+                    ),
+                ),
+            },
+        ),
+    }
 
 
 @register_entity(Thermostat.cluster_id)
@@ -2382,11 +3703,26 @@ class DanfossLoadEstimate(Sensor):
     _attribute_name = "load_estimate"
     _attr_translation_key: str = "load_estimate"
     _attr_entity_category = EntityCategory.DIAGNOSTIC
+    _cluster_id = Thermostat.cluster_id
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({Thermostat.cluster_id}),
         exposed_features=frozenset({DANFOSS_ALLY_THERMOSTAT}),
     )
+
+    _server_cluster_config = {
+        Thermostat.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                "load_estimate": AttrConfig(
+                    read_on_startup=False,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=1
+                    ),
+                ),
+            },
+        ),
+    }
 
 
 @register_entity(Thermostat.cluster_id)
@@ -2398,11 +3734,26 @@ class DanfossAdaptationRunStatus(BitMapSensor):
     _attr_translation_key: str = "adaptation_run_status"
     _attr_entity_category = EntityCategory.DIAGNOSTIC
     _bitmap = danfoss_thermostat.DanfossAdaptationRunStatusBitmap
+    _cluster_id = Thermostat.cluster_id
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({Thermostat.cluster_id}),
         exposed_features=frozenset({DANFOSS_ALLY_THERMOSTAT}),
     )
+
+    _server_cluster_config = {
+        Thermostat.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                "adaptation_run_status": AttrConfig(
+                    read_on_startup=False,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=1
+                    ),
+                ),
+            },
+        ),
+    }
 
 
 @register_entity(Thermostat.cluster_id)
@@ -2414,11 +3765,26 @@ class DanfossPreheatTime(Sensor):
     _attr_translation_key: str = "preheat_time"
     _attr_entity_registry_enabled_default = False
     _attr_entity_category = EntityCategory.DIAGNOSTIC
+    _cluster_id = Thermostat.cluster_id
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({Thermostat.cluster_id}),
         exposed_features=frozenset({DANFOSS_ALLY_THERMOSTAT}),
     )
+
+    _server_cluster_config = {
+        Thermostat.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                "preheat_time": AttrConfig(
+                    read_on_startup=False,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=1
+                    ),
+                ),
+            },
+        ),
+    }
 
 
 @register_entity(Diagnostic.cluster_id)
@@ -2430,11 +3796,26 @@ class DanfossSoftwareErrorCode(BitMapSensor):
     _attr_translation_key: str = "software_error"
     _attr_entity_category = EntityCategory.DIAGNOSTIC
     _bitmap = danfoss_thermostat.DanfossSoftwareErrorCodeBitmap
+    _cluster_id = Diagnostic.cluster_id
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_DIAGNOSTIC}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({Diagnostic.cluster_id}),
         exposed_features=frozenset({DANFOSS_ALLY_THERMOSTAT}),
     )
+
+    _server_cluster_config = {
+        Diagnostic.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                "sw_error_code": AttrConfig(
+                    read_on_startup=False,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=1
+                    ),
+                ),
+            },
+        ),
+    }
 
 
 @register_entity(Diagnostic.cluster_id)
@@ -2445,11 +3826,26 @@ class DanfossMotorStepCounter(Sensor):
     _attribute_name = "motor_step_counter"
     _attr_translation_key: str = "motor_stepcount"
     _attr_entity_category = EntityCategory.DIAGNOSTIC
+    _cluster_id = Diagnostic.cluster_id
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_DIAGNOSTIC}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({Diagnostic.cluster_id}),
         exposed_features=frozenset({DANFOSS_ALLY_THERMOSTAT}),
     )
+
+    _server_cluster_config = {
+        Diagnostic.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                "motor_step_counter": AttrConfig(
+                    read_on_startup=False,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=1
+                    ),
+                ),
+            },
+        ),
+    }
 
 
 @register_entity(WindSpeedCluster.cluster_id)
@@ -2462,7 +3858,22 @@ class WindSpeed(Sensor):
     _divisor = 100
     _attr_native_unit_of_measurement = UnitOfSpeed.METERS_PER_SECOND
     _attr_primary_weight = 2
+    _cluster_id = WindSpeedCluster.cluster_id
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_WIND_SPEED}),
+    _server_cluster_config = {
+        WindSpeedCluster.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                WindSpeedCluster.AttributeDefs.measured_value: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=0.01
+                    ),
+                ),
+            },
+        ),
+    }
+
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({WindSpeedCluster.cluster_id}),
     )

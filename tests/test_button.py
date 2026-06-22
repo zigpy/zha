@@ -36,7 +36,6 @@ from tests.common import (
     update_attribute_cache,
 )
 from zha.application import Platform
-from zha.application.const import ZCL_INIT_ATTRS
 from zha.application.gateway import Gateway
 from zha.application.platforms import EntityCategory, PlatformEntity
 from zha.application.platforms.button import (
@@ -45,8 +44,6 @@ from zha.application.platforms.button import (
     WriteAttributeButton,
 )
 from zha.application.platforms.button.const import ButtonDeviceClass
-from zha.exceptions import ZHAException
-from zha.zigbee.cluster_handlers.manufacturerspecific import OppleRemoteClusterHandler
 from zha.zigbee.device import Device
 
 ZIGPY_DEVICE = {
@@ -162,15 +159,12 @@ async def test_frost_unlock(
     cluster.write_attributes.reset_mock()
     cluster.write_attributes.side_effect = ZigbeeException
 
-    with pytest.raises(ZHAException):
+    with pytest.raises(ZigbeeException):
         await entity.async_press()
         await zha_gateway.async_block_till_done()
 
-    # There are three retries
     assert cluster.write_attributes.mock_calls == [
-        call({"frost_lock_reset": 0}, manufacturer=UNDEFINED),
-        call({"frost_lock_reset": 0}, manufacturer=UNDEFINED),
-        call({"frost_lock_reset": 0}, manufacturer=UNDEFINED),
+        call({"frost_lock_reset": 0}, manufacturer=UNDEFINED)
     ]
 
 
@@ -374,10 +368,10 @@ class OppleCluster(CustomCluster, ManufacturerSpecificCluster):
         )
 
 
-async def test_cluster_handler_quirks_unnecessary_claiming(
+async def test_quirks_v2_button_only_cluster_is_not_configured(
     zha_gateway: Gateway,
 ) -> None:
-    """Test quirks button doesn't claim cluster handlers unnecessarily."""
+    """A quirks v2 command button alone shouldn't trigger bind/reporting/reads."""
 
     registry = DeviceRegistry()
     (
@@ -412,36 +406,26 @@ async def test_cluster_handler_quirks_unnecessary_claiming(
         model="Fake_Model_sensor_2",
     )
     zigpy_device = registry.get_device(zigpy_device)
+    # `registry.get_device` swaps in the replaced OppleCluster instance; patch its
+    # network methods so we can assert bind/reporting/reading didn't happen.
+    opple_cluster = zigpy_device.endpoints[1].opple_cluster
+    patch_cluster_for_testing(opple_cluster)
 
-    # Suppress normal endpoint probing, as this will claim the Opple cluster handler
-    # already due to it being in the "CLUSTER_HANDLER_ONLY_CLUSTERS" registry.
-    # We want to test the handler also gets claimed via quirks v2 attributes init.
+    # Suppress normal endpoint probing, so virtual entities for the Opple cluster
+    # (e.g. AqaraOppleBind) don't trigger a bind themselves — we want to verify
+    # the quirks v2 button path alone does no cluster setup work.
     with patch("zha.application.discovery.discover_entities_for_endpoint"):
         zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
 
     assert isinstance(zha_device.device, CustomDeviceV2)
 
-    # get cluster handler of OppleCluster
-    opple_ch = zha_device.endpoints[1].all_cluster_handlers["1:0xfcc0"]
-    assert isinstance(opple_ch, OppleRemoteClusterHandler)
+    # The quirks v2 button entity is created and usable
+    entity = get_entity(zha_device, platform=Platform.BUTTON, entity_type=Button)
+    assert entity is not None
 
-    # make sure the cluster handler was not claimed,
-    # as no reporting is configured and no attributes are to be read
-    assert opple_ch not in zha_device.endpoints[1].claimed_cluster_handlers.values()
-
-    # check that BIND is left at default of True, though ZHA will ignore it
-    assert opple_ch.BIND is True
-
-    # check ZCL_INIT_ATTRS is empty
-    assert opple_ch.ZCL_INIT_ATTRS == {}
-
-    # check that no ZCL_INIT_ATTRS instance variable was created
-    assert opple_ch.__dict__.get(ZCL_INIT_ATTRS) is None
-    assert opple_ch.ZCL_INIT_ATTRS is OppleRemoteClusterHandler.ZCL_INIT_ATTRS
-
-    # double check we didn't modify the class variable
-    assert OppleRemoteClusterHandler.ZCL_INIT_ATTRS == {}
-
-    # check if REPORT_CONFIG is empty, both instance and class variable
-    assert opple_ch.REPORT_CONFIG == ()
-    assert OppleRemoteClusterHandler.REPORT_CONFIG == ()
+    # No bind / configure_reporting / read_attributes happened on the Opple cluster:
+    # the button declares neither reporting nor an attribute init, so there's
+    # nothing for ZHA to configure.
+    assert len(opple_cluster.bind.mock_calls) == 0
+    assert len(opple_cluster.configure_reporting_multiple.mock_calls) == 0
+    assert len(opple_cluster.read_attributes.mock_calls) == 0

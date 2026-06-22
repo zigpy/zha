@@ -216,7 +216,7 @@ async def test_alarm_control_panel(
     await reset_alarm_panel(zha_gateway, cluster, alarm_entity)
     assert alarm_entity.state["state"] == AlarmState.DISARMED
 
-    alarm_entity._cluster_handler.code_required_arm_actions = True
+    alarm_entity.code_required_arm_actions = True
     await alarm_entity.async_alarm_arm_away()
     await zha_gateway.async_block_till_done()
     assert alarm_entity.state["state"] == AlarmState.DISARMED
@@ -270,7 +270,7 @@ async def test_alarm_control_panel_exit_delays(
     )
     assert alarm_entity is not None
     assert isinstance(alarm_entity, AlarmControlPanel)
-    cluster_handler = alarm_entity._cluster_handler
+    cluster_handler = alarm_entity
 
     # Configure exit delays
     cluster_handler.exit_delay_away = 3
@@ -355,7 +355,7 @@ async def test_alarm_control_panel_exit_delay_cancellation(
         )
     )
     assert alarm_entity is not None
-    cluster_handler = alarm_entity._cluster_handler
+    cluster_handler = alarm_entity
 
     # Configure exit delay
     cluster_handler.exit_delay_away = 5
@@ -401,7 +401,7 @@ async def test_alarm_control_panel_entry_delay(
         )
     )
     assert alarm_entity is not None
-    cluster_handler = alarm_entity._cluster_handler
+    cluster_handler = alarm_entity
 
     # Arm the panel first (no exit delay for this test)
     cluster_handler.exit_delay_away = 0
@@ -453,7 +453,7 @@ async def test_alarm_control_panel_entry_delay_disarm(
         )
     )
     assert alarm_entity is not None
-    cluster_handler = alarm_entity._cluster_handler
+    cluster_handler = alarm_entity
 
     # Arm the panel
     cluster_handler.exit_delay_away = 0
@@ -502,7 +502,7 @@ async def test_alarm_control_panel_entry_delay_lockout_cancels_timer(
         )
     )
     assert alarm_entity is not None
-    cluster_handler = alarm_entity._cluster_handler
+    cluster_handler = alarm_entity
 
     cluster_handler.exit_delay_away = 0
     cluster_handler.max_invalid_tries = 3
@@ -550,7 +550,7 @@ async def test_alarm_control_panel_zero_exit_delay(
         )
     )
     assert alarm_entity is not None
-    cluster_handler = alarm_entity._cluster_handler
+    cluster_handler = alarm_entity
 
     # Configure zero exit delay
     cluster_handler.exit_delay_away = 0
@@ -615,7 +615,7 @@ async def test_alarm_control_panel_zero_entry_delay(
         )
     )
     assert alarm_entity is not None
-    cluster_handler = alarm_entity._cluster_handler
+    cluster_handler = alarm_entity
 
     # Arm the panel
     cluster_handler.exit_delay_away = 0

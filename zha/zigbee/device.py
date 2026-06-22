@@ -6,7 +6,9 @@ from __future__ import annotations
 
 import asyncio
 from collections import defaultdict
-from collections.abc import Callable, Iterable
+from collections.abc import Callable, Iterable, Sequence
+import contextlib
+import copy
 import dataclasses
 from dataclasses import dataclass
 from enum import Enum
@@ -23,8 +25,9 @@ from zigpy.quirks.v2 import DeviceAlertMetadata, QuirksV2RegistryEntry
 from zigpy.types import uint1_t, uint8_t, uint16_t
 from zigpy.types.named import EUI64, NWK, ExtendedPanId
 from zigpy.typing import UNDEFINED, UndefinedType
+import zigpy.zcl
 from zigpy.zcl.clusters import Cluster
-from zigpy.zcl.clusters.general import Groups, Identify
+from zigpy.zcl.clusters.general import Basic, Groups, Identify, Ota
 from zigpy.zcl.foundation import (
     Status as ZclStatus,
     WriteAttributesResponse,
@@ -65,12 +68,15 @@ from zha.application.const import (
     UNKNOWN,
     UNKNOWN_MANUFACTURER,
     UNKNOWN_MODEL,
-    ZHA_CLUSTER_HANDLER_CFG_DONE,
-    ZHA_CLUSTER_HANDLER_MSG,
+    ZHA_CLUSTER_BIND_EVENT,
+    ZHA_CLUSTER_CONFIGURE_REPORTING_EVENT,
+    ZHA_DEVICE_CONFIGURED_EVENT,
+    ZHA_DEVICE_ENTITY_ADDED_EVENT,
+    ZHA_DEVICE_ENTITY_REMOVED_EVENT,
     ZHA_DEVICE_UPDATED_EVENT,
     ZHA_EVENT,
 )
-from zha.application.helpers import convert_to_zcl_values, convert_zcl_value
+from zha.application.helpers import convert_to_zcl_values, convert_zcl_value, safe_read
 from zha.application.platforms import (
     BaseEntity,
     BaseEntityInfo,
@@ -82,7 +88,11 @@ from zha.const import STATE_CHANGED
 from zha.event import EventBase
 from zha.exceptions import ZHAException
 from zha.mixins import LogMixin
-from zha.zigbee.cluster_handlers import ClusterHandler, ZDOClusterHandler
+from zha.zigbee.cluster_config import (
+    aggregate_cluster_configs,
+    configure_cluster_configs,
+    initialize_cluster_configs,
+)
 from zha.zigbee.endpoint import Endpoint
 
 if TYPE_CHECKING:
@@ -90,7 +100,45 @@ if TYPE_CHECKING:
 
 _LOGGER = logging.getLogger(__name__)
 _CHECKIN_GRACE_PERIODS = 2
-DIAGNOSTICS_JSON_VERSION = 1
+DIAGNOSTICS_JSON_VERSION = 2
+
+
+def _entity_targets_cluster(
+    entity: PlatformEntity,
+    cluster_id: int,
+    cluster_type: zigpy.zcl.ClusterType | None = None,
+) -> bool:
+    """Return True if `entity` targets the given cluster (and direction)."""
+    match = entity._cluster_match
+    if match is None:
+        # Generated quirks-v2 entities have no class-level `_cluster_match` but
+        # do have a concrete backing cluster; match against it directly.
+        cluster = entity.cluster
+        if cluster.cluster_id != cluster_id:
+            return False
+        if cluster_type is None:
+            return True
+        actual_type = (
+            zigpy.zcl.ClusterType.Client
+            if cluster.is_client
+            else zigpy.zcl.ClusterType.Server
+        )
+        return cluster_type == actual_type
+
+    if cluster_type is None or cluster_type == zigpy.zcl.ClusterType.Server:
+        if (
+            cluster_id in match.server_clusters
+            or cluster_id in match.optional_server_clusters
+        ):
+            return True
+        if cluster_type is not None:
+            return False
+    if (cluster_type is None or cluster_type == zigpy.zcl.ClusterType.Client) and (
+        cluster_id in match.client_clusters
+        or cluster_id in match.optional_client_clusters
+    ):
+        return True
+    return False
 
 
 def get_cluster_attr_data(cluster: Cluster) -> list[dict]:
@@ -121,6 +169,15 @@ def get_cluster_attr_data(cluster: Cluster) -> list[dict]:
         attributes_info.append(info)
 
     return attributes_info
+
+
+def _cluster_entry(cluster_id: int, cluster: Cluster) -> dict[str, Any]:
+    """Build the per-cluster diagnostics entry."""
+    return {
+        "cluster_id": f"0x{cluster_id:04x}",
+        "endpoint_attribute": cluster.ep_attribute,
+        "attributes": get_cluster_attr_data(cluster),
+    }
 
 
 def get_device_automation_triggers(
@@ -173,13 +230,70 @@ class DeviceFirmwareInfoUpdatedEvent:
 
 
 @dataclass(kw_only=True, frozen=True)
-class ClusterHandlerConfigurationComplete:
-    """Event generated when all cluster handlers are configured."""
+class DeviceEntityAddedEvent:
+    """Event generated when a new entity is added to a device."""
+
+    event_type: Final[str] = ZHA_DEVICE_ENTITY_ADDED_EVENT
+    event: Final[str] = ZHA_DEVICE_ENTITY_ADDED_EVENT
+
+    # TODO: allow all entity information to be serialized and include it here
+    platform: Platform
+    unique_id: str
+
+
+@dataclass(kw_only=True, frozen=True)
+class DeviceEntityRemovedEvent:
+    """Event generated when an entity is removed from a device."""
+
+    event_type: Final[str] = ZHA_DEVICE_ENTITY_REMOVED_EVENT
+    event: Final[str] = ZHA_DEVICE_ENTITY_REMOVED_EVENT
+
+    platform: Platform
+    unique_id: str
+    remove: bool = False
+
+
+@dataclass(kw_only=True, frozen=True)
+class DeviceConfiguredEvent:
+    """Emitted when `device.async_configure()` completes."""
+
+    event_type: Final[str] = ZHA_DEVICE_CONFIGURED_EVENT
+    event: Final[str] = ZHA_DEVICE_CONFIGURED_EVENT
 
     device_ieee: EUI64
-    unique_id: str
-    event_type: Final[str] = ZHA_CLUSTER_HANDLER_MSG
-    event: Final[str] = ZHA_CLUSTER_HANDLER_CFG_DONE
+
+
+@dataclass(kw_only=True, frozen=True)
+class ClusterBindEvent:
+    """Emitted after attempting to bind a cluster to the coordinator."""
+
+    event_type: Final[str] = ZHA_CLUSTER_BIND_EVENT
+    event: Final[str] = ZHA_CLUSTER_BIND_EVENT
+
+    device_ieee: EUI64
+    endpoint_id: int
+    cluster_id: int
+    cluster_name: str
+    success: bool
+
+
+@dataclass(kw_only=True, frozen=True)
+class ClusterConfigureReportingEvent:
+    """Emitted after configuring attribute reporting on a cluster.
+
+    ``attributes`` is keyed by attribute name; each value is
+    ``{"id", "name", "min", "max", "change", "status"}`` where ``status`` is
+    the per-attribute ZCL status name or ``"FAILURE"`` on transport error.
+    """
+
+    event_type: Final[str] = ZHA_CLUSTER_CONFIGURE_REPORTING_EVENT
+    event: Final[str] = ZHA_CLUSTER_CONFIGURE_REPORTING_EVENT
+
+    device_ieee: EUI64
+    endpoint_id: int
+    cluster_id: int
+    cluster_name: str
+    attributes: dict[str, dict[str, Any]]
 
 
 @dataclass(kw_only=True, frozen=True)
@@ -254,6 +368,25 @@ class Device(LogMixin, EventBase):
 
     unique_id: str
 
+    # Cached properties that depend on the zigpy device and must be invalidated
+    # when the underlying device is swapped (e.g. after a re-interview).
+    _ZIGPY_CACHED_PROPERTIES: Final = (
+        "name",
+        "manufacturer",
+        "model",
+        "device_alerts",
+        "manufacturer_code",
+        "is_mains_powered",
+        "device_type",
+        "is_router",
+        "is_coordinator",
+        "is_end_device",
+        "skip_configuration",
+        "device_automation_commands",
+        "device_automation_triggers",
+        "zigbee_signature",
+    )
+
     def __init__(
         self,
         zigpy_device: zigpy.device.Device,
@@ -263,9 +396,50 @@ class Device(LogMixin, EventBase):
         super().__init__()
 
         self.unique_id = str(zigpy_device.ieee)
-
         self._gateway: Gateway = _gateway
+
+        self._platform_entities: dict[tuple[Platform, str], PlatformEntity] = {}
+        self._pending_entities: list[PlatformEntity] = []
+        # All entities discovered for this device, including ones removed by a quirk.
+        # Used for aggregating cluster configs so binding/reporting matches the
+        # legacy claim-during-discovery flow (which configured handlers even when
+        # the visible entity was filtered out later).
+        self._discovered_entities: list[PlatformEntity] = []
+        self._initialized: bool = False
+        self.semaphore: asyncio.Semaphore = asyncio.Semaphore(3)
+        self._on_remove_callbacks: list[Callable[[], None]] = []
+        self._endpoints: dict[int, Endpoint] = {}
+
+        self._available: bool = False
+        self._checkins_missed_count: int = 0
+        self._on_network: bool = True
+
+        self._init_from_zigpy_device(zigpy_device)
+
+    def _init_from_zigpy_device(self, zigpy_device: zigpy.device.Device) -> None:
+        """(Re-)initialize device state from a zigpy device.
+
+        Sets up the zigpy device reference, quirk metadata, cluster handlers,
+        and endpoints.  Called from ``__init__`` and after a successful
+        re-interview where zigpy swaps the underlying device object.
+        """
+        # Clear collections that will be rebuilt below.  During __init__ these
+        # are already empty; after a re-interview on_remove() has cleaned up
+        # the old handlers/entities but the lists themselves still hold stale
+        # references.
+        self._on_remove_callbacks.clear()
+        self._endpoints.clear()
+        self._pending_entities.clear()
+        self._discovered_entities.clear()
+
         self._zigpy_device: ZigpyDevice = zigpy_device
+
+        # Invalidate cached properties that depend on the zigpy device before
+        # they are read below (e.g. is_mains_powered, is_coordinator).
+        for attr in self._ZIGPY_CACHED_PROPERTIES:
+            with contextlib.suppress(AttributeError):
+                delattr(self, attr)
+
         self.quirk_applied: bool = isinstance(
             self._zigpy_device, zigpy.quirks.BaseCustomDevice
         )
@@ -284,38 +458,22 @@ class Device(LogMixin, EventBase):
                 f.feature for f in self.quirk_metadata.exposes_features
             )
 
-        self._power_config_ch: ClusterHandler | None = None
-        self._identify_ch: ClusterHandler | None = None
-        self._basic_ch: ClusterHandler | None = None
         self._firmware_version: str | None = None
 
-        device_options = _gateway.config.config.device_options
+        device_options = self._gateway.config.config.device_options
         if self.is_mains_powered:
             self.consider_unavailable_time: int = (
                 device_options.consider_unavailable_mains
             )
         else:
             self.consider_unavailable_time = device_options.consider_unavailable_battery
-        self._available: bool = self.is_active_coordinator or (
+        self._available = self.is_active_coordinator or (
             self.last_seen is not None
             and time.time() - self.last_seen < self.consider_unavailable_time
         )
-        self._checkins_missed_count: int = 0
-        self._on_network: bool = True
-
-        self._platform_entities: dict[tuple[Platform, str], PlatformEntity] = {}
-        self._pending_entities: list[PlatformEntity] = []
-        self.semaphore: asyncio.Semaphore = asyncio.Semaphore(3)
-
-        self._on_remove_callbacks: list[Callable[[], None]] = []
-
-        self._zdo_handler: ZDOClusterHandler = ZDOClusterHandler(self)
-        self._zdo_handler.on_add()
-        self._on_remove_callbacks.append(self._zdo_handler.on_remove)
 
         self.status: DeviceStatus = DeviceStatus.CREATED
 
-        self._endpoints: dict[int, Endpoint] = {}
         for ep_id, endpoint in zigpy_device.endpoints.items():
             if ep_id != 0:
                 ep = Endpoint.new(endpoint, self)
@@ -541,43 +699,25 @@ class Device(LogMixin, EventBase):
         if not new_on_network:
             self.debug("Device is not on the network, marking unavailable")
 
-    @property
-    def power_configuration_ch(self) -> ClusterHandler | None:
-        """Return power configuration cluster handler."""
-        return self._power_config_ch
-
-    @power_configuration_ch.setter
-    def power_configuration_ch(self, cluster_handler: ClusterHandler) -> None:
-        """Power configuration cluster handler setter."""
-        if self._power_config_ch is None:
-            self._power_config_ch = cluster_handler
-
-    @property
-    def basic_ch(self) -> ClusterHandler | None:
-        """Return basic cluster handler."""
-        return self._basic_ch
-
-    @basic_ch.setter
-    def basic_ch(self, cluster_handler: ClusterHandler) -> None:
-        """Set the basic cluster handler."""
-        if self._basic_ch is None:
-            self._basic_ch = cluster_handler
+    def _first_in_cluster(self, cluster_id: int) -> zigpy.zcl.Cluster | None:
+        """Return the first in_cluster with the given cluster_id across endpoints."""
+        for ep_id, ep in self._zigpy_device.endpoints.items():
+            if ep_id == 0:
+                continue
+            cluster = ep.in_clusters.get(cluster_id)
+            if cluster is not None:
+                return cluster
+        return None
 
     @property
-    def identify_ch(self) -> ClusterHandler | None:
-        """Return power configuration cluster handler."""
-        return self._identify_ch
-
-    @identify_ch.setter
-    def identify_ch(self, cluster_handler: ClusterHandler) -> None:
-        """Power configuration cluster handler setter."""
-        if self._identify_ch is None:
-            self._identify_ch = cluster_handler
+    def basic_cluster(self) -> zigpy.zcl.Cluster | None:
+        """Return the first Basic cluster across endpoints, if present."""
+        return self._first_in_cluster(Basic.cluster_id)
 
     @property
-    def zdo_cluster_handler(self) -> ZDOClusterHandler:
-        """Return ZDO cluster handler."""
-        return self._zdo_handler
+    def identify_cluster(self) -> zigpy.zcl.Cluster | None:
+        """Return the first Identify cluster across endpoints, if present."""
+        return self._first_in_cluster(Identify.cluster_id)
 
     @property
     def endpoints(self) -> dict[int, Endpoint]:
@@ -615,6 +755,36 @@ class Device(LogMixin, EventBase):
         if entity is None:
             raise KeyError(f"Entity {unique_id} not found")
         return entity
+
+    def get_entity(
+        self,
+        platform: Platform,
+        endpoint_id: int | None = None,
+        cluster_id: int | None = None,
+        *,
+        pick_first: bool = False,
+    ) -> PlatformEntity:
+        """Look up the unique entity matching platform/endpoint/cluster filters.
+
+        With pick_first=True, returns the first match instead of raising on multiple
+        matches. Always raises if there are zero matches.
+        """
+        matches = []
+        for entity in self._platform_entities.values():
+            if platform != entity.PLATFORM:
+                continue
+            if endpoint_id is not None and entity.endpoint.id != endpoint_id:
+                continue
+            if cluster_id is not None and entity.cluster.cluster_id != cluster_id:
+                continue
+            matches.append(entity)
+        if not matches or (not pick_first and len(matches) != 1):
+            raise LookupError(
+                f"Expected {'>=1' if pick_first else '1'} entity matching "
+                f"platform={platform!r}, endpoint_id={endpoint_id}, "
+                f"cluster_id={cluster_id}; found {len(matches)}"
+            )
+        return matches[0]
 
     @classmethod
     def new(
@@ -680,14 +850,15 @@ class Device(LogMixin, EventBase):
                 "Attempting to checkin with device - missed checkins: %s",
                 self._checkins_missed_count,
             )
-            if not self.basic_ch:
+            basic = self.basic_cluster
+            if basic is None:
                 self.debug("does not have a mandatory basic cluster")
                 self.update_available(False)
                 return
-            res = await self.basic_ch.get_attribute_value(
-                ATTR_MANUFACTURER, from_cache=False
+            res = await safe_read(
+                basic, [ATTR_MANUFACTURER], allow_cache=False, only_cache=False
             )
-            if res is not None:
+            if res.get(ATTR_MANUFACTURER) is not None:
                 self._checkins_missed_count = 0
 
     def update_available(self, available: bool) -> None:
@@ -827,37 +998,30 @@ class Device(LogMixin, EventBase):
     async def async_configure(self) -> None:
         """Configure the device."""
         self.debug("started configuration")
-        await self._zdo_handler.async_configure()
-        self._zdo_handler.debug("'async_configure' stage succeeded")
 
         if isinstance(self._zigpy_device, zigpy.quirks.BaseCustomDevice):
             self.debug("applying quirks custom device configuration")
             await self._zigpy_device.apply_custom_configuration()
 
-        # Try to add entities to claim the cluster handlers
         self._discover_new_entities()
 
-        await asyncio.gather(
-            *(endpoint.async_configure() for endpoint in self._endpoints.values())
-        )
+        # Configure binding and reporting from entity-level cluster configs
+        aggregated = aggregate_cluster_configs(self._discovered_entities)
+        if aggregated and not self.skip_configuration:
+            await configure_cluster_configs(self, aggregated)
 
-        self.emit(
-            ZHA_CLUSTER_HANDLER_CFG_DONE,
-            ClusterHandlerConfigurationComplete(
-                device_ieee=self.ieee,
-                unique_id=self.ieee,
-            ),
-        )
+        self.emit_reconfigure_done()
 
         self.debug("completed configuration")
 
+        identify_cluster = self.identify_cluster
         if (
             self.gateway.config.config.device_options.enable_identify_on_join
-            and self.identify_ch is not None
+            and identify_cluster is not None
             and not self.skip_configuration
         ):
             self._gateway.async_create_task(
-                self.identify_ch.trigger_effect(
+                identify_cluster.trigger_effect(
                     effect_id=Identify.EffectIdentifier.Okay,
                     effect_variant=Identify.EffectVariant.Default,
                 ),
@@ -865,8 +1029,34 @@ class Device(LogMixin, EventBase):
                 eager_start=True,
             )
 
+    async def async_rebuild_from_zigpy_device(
+        self, zigpy_device: zigpy.device.Device
+    ) -> None:
+        """Tear down and rebuild this device from a new zigpy device.
+
+        Called by the gateway after a successful re-interview swaps the
+        underlying zigpy device.  Emits entity removal events so listeners
+        (e.g. HA) can clean up stale entities.
+        """
+        await self._async_teardown(emit_entity_events=True)
+        self._init_from_zigpy_device(zigpy_device)
+
+    def emit_reconfigure_done(self) -> None:
+        """Emit `DeviceConfiguredEvent`.
+
+        Called by the gateway after a reconfigure (successful or not) so the
+        HA frontend's reconfigure dialog unsticks.
+        """
+        self.emit(
+            ZHA_DEVICE_CONFIGURED_EVENT,
+            DeviceConfiguredEvent(device_ieee=self.ieee),
+        )
+
     def _is_entity_removed_by_quirk(self, entity: PlatformEntity) -> bool:
         if self.quirk_metadata is None:
+            return False
+
+        if entity.PLATFORM == Platform.VIRTUAL:
             return False
 
         for meta in self.quirk_metadata.disabled_default_entities:
@@ -880,9 +1070,8 @@ class Device(LogMixin, EventBase):
             if meta.endpoint_id is not None and entity.endpoint.id != meta.endpoint_id:
                 continue
 
-            if meta.cluster_id is not None and not any(
-                cluster_handler.cluster.cluster_id == meta.cluster_id
-                for cluster_handler in entity.cluster_handlers.values()
+            if meta.cluster_id is not None and not _entity_targets_cluster(
+                entity, meta.cluster_id
             ):
                 continue
 
@@ -898,6 +1087,9 @@ class Device(LogMixin, EventBase):
         if self.quirk_metadata is None:
             return
 
+        if entity.PLATFORM == Platform.VIRTUAL:
+            return
+
         for meta in self.quirk_metadata.changed_entity_metadata:
             if meta.unique_id_suffix is not None and not entity.unique_id.endswith(
                 meta.unique_id_suffix
@@ -907,10 +1099,8 @@ class Device(LogMixin, EventBase):
             if meta.endpoint_id is not None and entity.endpoint.id != meta.endpoint_id:
                 continue
 
-            if meta.cluster_id is not None and not any(
-                cluster_handler.cluster.cluster_id == meta.cluster_id
-                and cluster_handler.cluster.cluster_type == meta.cluster_type
-                for cluster_handler in entity.cluster_handlers.values()
+            if meta.cluster_id is not None and not _entity_targets_cluster(
+                entity, meta.cluster_id, cluster_type=meta.cluster_type
             ):
                 continue
 
@@ -956,6 +1146,8 @@ class Device(LogMixin, EventBase):
     def _discover_new_entities(self) -> None:
         new_entities: Iterable[BaseEntity]
 
+        self._discovered_entities.clear()
+
         if self.is_active_coordinator:
             new_entities = discovery.discover_coordinator_device_entities(self)
         elif self.is_coordinator:
@@ -966,6 +1158,7 @@ class Device(LogMixin, EventBase):
 
         # Discover all applicable entities
         for entity in new_entities:
+            self._discovered_entities.append(entity)
             if self._is_entity_removed_by_quirk(entity):
                 continue
 
@@ -975,26 +1168,62 @@ class Device(LogMixin, EventBase):
             entity.on_add()
             self._pending_entities.append(entity)
 
-    async def async_initialize(self, from_cache: bool = False) -> None:
-        """Initialize cluster handlers."""
-        self.debug("started initialization")
+    def _add_entity(self, entity: PlatformEntity, *, emit_event: bool = True) -> None:
+        """Add an entity to the device."""
+        key = (entity.PLATFORM, entity.unique_id)
 
-        self._discover_new_entities()
+        if key in self._platform_entities:
+            raise ValueError(
+                f"Cannot add entity {entity!r}, unique ID already taken by {self._platform_entities[key]!r}"
+            )
 
-        await self._zdo_handler.async_initialize(from_cache)
-        self._zdo_handler.debug("'async_initialize' stage succeeded")
+        self.debug("Discovered new entity %s", entity)
 
-        # We intentionally do not use `gather` here! This is so that if, for example,
-        # three `device.async_initialize()`s are spawned, only three concurrent requests
-        # will ever be in flight at once. Startup concurrency is managed at the device
-        # level.
-        for endpoint in self._endpoints.values():
-            try:
-                await endpoint.async_initialize(from_cache)
-            except Exception:  # pylint: disable=broad-exception-caught
-                self.debug("Failed to initialize endpoint", exc_info=True)
+        # `entity.on_add()` is assumed to have been called already
+        self._platform_entities[key] = entity
 
-        # Compute the final entities
+        if emit_event:
+            self.emit(
+                DeviceEntityAddedEvent.event_type,
+                DeviceEntityAddedEvent(
+                    platform=entity.PLATFORM,
+                    unique_id=entity.unique_id,
+                ),
+            )
+
+    async def _remove_entity(
+        self,
+        entity: BaseEntity,
+        *,
+        emit_event: bool = True,
+        remove: bool = False,
+    ) -> None:
+        """Remove an entity from the device."""
+        key = (entity.PLATFORM, entity.unique_id)
+
+        if key not in self._platform_entities:
+            raise ValueError(f"Cannot remove entity {entity!r}, unique ID not found")
+
+        try:
+            await entity.on_remove()
+        finally:
+            # Always drop the mapping entry — otherwise a re-interview that
+            # rediscovers the same unique_id would skip the replacement and
+            # leave the stale entity shadowing it indefinitely.
+            del self._platform_entities[key]
+            if emit_event:
+                self.emit(
+                    DeviceEntityRemovedEvent.event_type,
+                    DeviceEntityRemovedEvent(
+                        platform=entity.PLATFORM,
+                        unique_id=entity.unique_id,
+                        remove=remove,
+                    ),
+                )
+
+    async def _add_pending_entities(self, *, emit_event: bool = True) -> None:
+        """Add pending entities to the device."""
+        all_entities = dict(self._platform_entities)
         new_entities: dict[tuple[Platform, str], PlatformEntity] = {}
 
         for entity in self._pending_entities:
@@ -1002,7 +1231,7 @@ class Device(LogMixin, EventBase):
 
             # Ignore unsupported entities
             if not entity.is_supported() or not entity.is_supported_in_list(
-                new_entities.values()
+                all_entities.values()
             ):
                 await entity.on_remove()
                 continue
@@ -1010,18 +1239,56 @@ class Device(LogMixin, EventBase):
             key = (entity.PLATFORM, entity.unique_id)
 
             # Ignore entities that already exist
-            if key in new_entities:
+            if key in all_entities:
                 await entity.on_remove()
                 continue
 
+            all_entities[key] = entity
             new_entities[key] = entity
 
-        if new_entities:
-            _LOGGER.debug("Discovered new entities %r", new_entities)
-            self._platform_entities.update(new_entities)
+        self._pending_entities.clear()
 
-        # At this point we can compute a primary entity
-        self._compute_primary_entity()
+        # Compute a new primary entity
+        self._compute_primary_entity(all_entities.values())
+
+        # Finally, add the new entities
+        for entity in new_entities.values():
+            self._add_entity(entity, emit_event=emit_event)
+
+    async def recompute_entities(self) -> None:
+        """Recompute all entities for this device."""
+        self.debug("Recomputing entities")
+
+        entities = list(self._platform_entities.values())
+
+        # Remove all entities that are no longer supported
+        for entity in entities[:]:
+            entity.recompute_capabilities()
+
+            if not entity.is_supported() or not entity.is_supported_in_list(entities):
+                self.debug("Removing unsupported entity %s", entity)
+                await self._remove_entity(entity, remove=True)
+                entities.remove(entity)
+
+        # Discover new entities
+        self._discover_new_entities()
+        await self._add_pending_entities()
+
+    async def async_initialize(self, from_cache: bool = False) -> None:
+        """Initialize cluster handlers."""
+        self.debug("started initialization")
+
+        # We discover prospective entities before initialization
+        self._discover_new_entities()
+
+        # Read initial attributes from entity-level cluster configs
+        aggregated = aggregate_cluster_configs(self._discovered_entities)
+        if aggregated and not self.skip_configuration:
+            await initialize_cluster_configs(aggregated, from_cache)
+
+        # And add them after. Emit events only on re-initialization, not the first.
+        await self._add_pending_entities(emit_event=self._initialized)
+        self._initialized = True
 
         # Sync the device's firmware version with the first platform entity
         for (platform, _unique_id), entity in self.platform_entities.items():
@@ -1047,8 +1314,15 @@ class Device(LogMixin, EventBase):
         self.status = DeviceStatus.INITIALIZED
         self.debug("completed initialization")
 
-    async def on_remove(self) -> None:
-        """Cancel tasks this device owns."""
+    async def _async_teardown(self, *, emit_entity_events: bool) -> None:
+        """Tear down handlers, entities, and endpoints.
+
+        Args:
+            emit_entity_events: When True, emit ``DeviceEntityRemovedEvent``
+                for each removed entity so that listeners (e.g. HA) can clean
+                up.  Shutdown paths pass False to avoid unnecessary traffic.
+
+        """
         for callback in self._on_remove_callbacks:
             try:
                 callback()
@@ -1060,9 +1334,11 @@ class Device(LogMixin, EventBase):
                     exc_info=True,
                 )
 
-        for platform_entity in self._platform_entities.values():
+        for platform_entity in list(self._platform_entities.values()):
             try:
-                await platform_entity.on_remove()
+                await self._remove_entity(
+                    platform_entity, emit_event=emit_entity_events
+                )
             except Exception:
                 _LOGGER.warning(
                     "Failed to remove platform entity %s for device %s",
@@ -1081,6 +1357,14 @@ class Device(LogMixin, EventBase):
                     self,
                     exc_info=True,
                 )
+
+        # Ensure stale pending entities aren't reprocessed if the device is
+        # re-initialized after removal (e.g. re-interview).
+        self._pending_entities.clear()
+
+    async def on_remove(self) -> None:
+        """Cancel tasks this device owns (shutdown path)."""
+        await self._async_teardown(emit_entity_events=False)
 
     def async_get_clusters(self) -> dict[int, dict[str, dict[int, Cluster]]]:
         """Get all clusters for this device."""
@@ -1382,13 +1666,11 @@ class Device(LogMixin, EventBase):
         args = (self.nwk, self.model) + args
         _LOGGER.log(level, msg, *args, **kwargs)
 
-    def _compute_primary_entity(self) -> None:
-        """Compute the primary entity for this device."""
+    def _compute_primary_entity(self, entities: Sequence[PlatformEntity]) -> None:
+        """Compute the primary entity from a given set of entities."""
 
         # First, check if any entity is explicitly primary
-        explicitly_primary = [
-            entity for entity in self._platform_entities.values() if entity.primary
-        ]
+        explicitly_primary = [entity for entity in entities if entity.primary]
 
         if len(explicitly_primary) == 1:
             self.debug(
@@ -1404,7 +1686,7 @@ class Device(LogMixin, EventBase):
         # not explicitly marked as not primary
         candidates = [
             e
-            for e in self._platform_entities.values()
+            for e in entities
             if e.enabled and hasattr(e, "info_object") and e._attr_primary is not False
         ]
         candidates.sort(reverse=True, key=lambda e: e.primary_weight)
@@ -1498,24 +1780,31 @@ class Device(LogMixin, EventBase):
                     "id": endpoint.device_type,
                 },
                 "in_clusters": [
-                    {
-                        "cluster_id": f"0x{cluster_id:04x}",
-                        "endpoint_attribute": cluster.ep_attribute,
-                        "attributes": get_cluster_attr_data(cluster),
-                    }
+                    _cluster_entry(cluster_id, cluster)
                     for cluster_id, cluster in sorted(endpoint.in_clusters.items())
                 ],
                 "out_clusters": [
                     {
-                        "cluster_id": f"0x{cluster_id:04x}",
-                        "endpoint_attribute": cluster.ep_attribute,
-                        "attributes": get_cluster_attr_data(cluster),
+                        **_cluster_entry(cluster_id, cluster),
+                        **(
+                            {
+                                "last_query_cmd": {
+                                    "manufacturer_code": cluster.last_query_cmd.manufacturer_code,
+                                    "image_type": cluster.last_query_cmd.image_type,
+                                    "current_file_version": cluster.last_query_cmd.current_file_version,
+                                    "hardware_version": cluster.last_query_cmd.hardware_version,
+                                }
+                            }
+                            if isinstance(cluster, Ota)
+                            and getattr(cluster, "last_query_cmd", None) is not None
+                            else {}
+                        ),
                     }
                     for cluster_id, cluster in sorted(endpoint.out_clusters.items())
                 ],
             }
 
-        original_signature = self.device.original_signature
+        original_signature = copy.deepcopy(self.device.original_signature)
 
         # if we have a quirked device we add the original signature to the output and
         # convert the profile_id, device_type, input_clusters and output_clusters to hex
@@ -1546,16 +1835,12 @@ class Device(LogMixin, EventBase):
         for (platform, _unique_id), platform_entity in sorted(
             self.platform_entities.items()
         ):
+            if platform is Platform.VIRTUAL:
+                continue
+
             info_object = dataclasses.asdict(platform_entity.info_object)
-            info_object["cluster_handlers"].sort(key=lambda i: i["unique_id"])
             info_object["migrate_unique_ids"] = list(info_object["migrate_unique_ids"])
             info_object["device_ieee"] = str(info_object["device_ieee"])
-
-            for cluster_handler_info in info_object["cluster_handlers"]:
-                cluster_info = cluster_handler_info["cluster"]
-
-                if cluster_info is not None:
-                    cluster_info.pop("commands", None)
 
             obj: dict[str, Any] = {
                 "info_object": info_object,

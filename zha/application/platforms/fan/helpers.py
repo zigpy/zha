@@ -1,11 +1,7 @@
 """Helper functions for the fan platform."""
 
-from typing import TypeVar
 
-T = TypeVar("T")
-
-
-def ordered_list_item_to_percentage(ordered_list: list[T], item: T) -> int:
+def ordered_list_item_to_percentage[T](ordered_list: list[T], item: T) -> int:
     """Determine the percentage of an item in an ordered list.
 
     When using this utility for fan speeds, do not include "off"

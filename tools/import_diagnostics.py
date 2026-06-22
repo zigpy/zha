@@ -324,6 +324,7 @@ async def create_zha_gateway():
             data=make_zha_data(),
             app=zigpy_app_controller,
         ) as zha_gateway:
+            await zha_gateway.async_block_till_done(wait_background_tasks=True)
             yield zha_gateway
 
 

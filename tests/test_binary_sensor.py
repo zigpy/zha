@@ -2,7 +2,8 @@
 
 import asyncio
 from collections.abc import Awaitable, Callable
-from unittest.mock import MagicMock, call
+from typing import Any
+from unittest.mock import call
 
 import pytest
 from zigpy.profiles import zha
@@ -36,7 +37,7 @@ from zha.application.platforms.binary_sensor import (
     IASZone,
     Occupancy,
 )
-from zha.zigbee.cluster_handlers.const import SMARTTHINGS_ACCELERATION_CLUSTER
+from zha.application.platforms.const import SMARTTHINGS_ACCELERATION_CLUSTER
 
 DEVICE_IAS = {
     1: {
@@ -108,7 +109,7 @@ async def async_test_binary_sensor_occupancy(
     await zha_gateway.async_block_till_done()
     assert cluster.read_attributes.await_count == 1
     assert cluster.read_attributes.await_args == call(
-        ["occupancy"], allow_cache=True, only_cache=True, manufacturer=UNDEFINED
+        ["occupancy"], allow_cache=False, only_cache=False, manufacturer=UNDEFINED
     )
     assert entity.is_on
 
@@ -230,20 +231,28 @@ async def test_smarttthings_multi(
     assert entity.PLATFORM == Platform.BINARY_SENSOR
     assert entity.is_on is False
 
-    st_ch = zha_device.endpoints[1].all_cluster_handlers["1:0xfc02"]
-    assert st_ch is not None
-
-    st_ch.emit_zha_event = MagicMock(wraps=st_ch.emit_zha_event)
-
-    await send_attributes_report(zha_gateway, st_ch.cluster, {"x_axis": 120})
-
-    assert st_ch.emit_zha_event.call_count == 1
-    assert st_ch.emit_zha_event.mock_calls == [
-        call(
-            "attribute_updated",
-            {"attribute_id": 18, "attribute_name": "x_axis", "attribute_value": 120},
-        )
+    # SmartThingsAccelerationEvent (virtual entity) re-emits attribute updates on
+    # the SmartThings acceleration cluster as zha_events on the device.
+    accel_cluster = zigpy_device.endpoints[1].in_clusters[
+        SMARTTHINGS_ACCELERATION_CLUSTER
     ]
+    events: list[Any] = []
+    zha_device.on_event("zha_event", events.append)
+
+    await send_attributes_report(zha_gateway, accel_cluster, {"x_axis": 120})
+
+    zha_events = [
+        e
+        for e in events
+        if e.data.get("command") == "attribute_updated"
+        and e.data.get("cluster_id") == SMARTTHINGS_ACCELERATION_CLUSTER
+    ]
+    assert len(zha_events) == 1
+    assert zha_events[0].data["args"] == {
+        "attribute_id": 18,
+        "attribute_name": "x_axis",
+        "attribute_value": 120,
+    }
 
 
 async def test_quirks_binary_sensor_attr_converter(zha_gateway: Gateway) -> None:

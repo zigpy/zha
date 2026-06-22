@@ -4,7 +4,7 @@
 
 from __future__ import annotations
 
-from abc import ABC
+from abc import ABC, abstractmethod
 import asyncio
 from collections import Counter
 import contextlib
@@ -13,18 +13,28 @@ from dataclasses import dataclass
 import functools
 import itertools
 import logging
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, Any
 
+from zigpy.zcl import (
+    AttributeReadEvent,
+    AttributeReportedEvent,
+    AttributeUpdatedEvent,
+    AttributeWrittenEvent,
+    ReportingConfig,
+)
 from zigpy.zcl.clusters.general import Identify, LevelControl, OnOff
-from zigpy.zcl.clusters.lighting import Color
+from zigpy.zcl.clusters.lighting import Color, ColorCapabilities, Options
 from zigpy.zcl.foundation import Status
 
 from zha.application import Platform
+from zha.application.helpers import safe_read
 from zha.application.platforms import (
     DEFAULT_UPDATE_GROUP_FROM_CHILD_DELAY,
+    AttrConfig,
     BaseEntity,
     BaseEntityInfo,
-    ClusterHandlerMatch,
+    ClusterConfig,
+    ClusterMatch,
     GroupEntity,
     PlatformEntity,
     PlatformFeatureGroup,
@@ -68,25 +78,9 @@ from zha.application.platforms.light.helpers import (
 )
 from zha.debounce import Debouncer
 from zha.decorators import periodic
-from zha.zigbee.cluster_handlers import ClusterAttributeUpdatedEvent
-from zha.zigbee.cluster_handlers.const import (
-    CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
-    CLUSTER_HANDLER_COLOR,
-    CLUSTER_HANDLER_LEVEL,
-    CLUSTER_HANDLER_LEVEL_CHANGED,
-    CLUSTER_HANDLER_ON_OFF,
-)
-from zha.zigbee.cluster_handlers.general import (
-    IdentifyClusterHandler,
-    LevelChangeEvent,
-    LevelControlClusterHandler,
-    OnOffClusterHandler,
-)
-from zha.zigbee.cluster_handlers.lighting import ColorClusterHandler
 
 if TYPE_CHECKING:
     from zha.application.gateway import Gateway
-    from zha.zigbee.cluster_handlers import ClusterHandler
     from zha.zigbee.device import Device
     from zha.zigbee.endpoint import Endpoint
     from zha.zigbee.group import Group
@@ -216,6 +210,7 @@ class BaseLight(BaseEntity, ABC):
         """Return the warmest color_temp that this light supports."""
         return self._max_mireds
 
+    @abstractmethod
     async def async_turn_on(
         self,
         *,
@@ -224,14 +219,13 @@ class BaseLight(BaseEntity, ABC):
         effect: str | None = None,
         flash: FlashMode | None = None,
         color_temp: int | None = None,
-        xy_color: tuple[int, int] | None = None,
+        xy_color: tuple[float, float] | None = None,
     ) -> None:
         """Turn the entity on."""
-        raise NotImplementedError
 
+    @abstractmethod
     async def async_turn_off(self, *, transition: float | None = None) -> None:
         """Turn the entity off."""
-        raise NotImplementedError
 
     def restore_external_state_attributes(
         self,
@@ -258,13 +252,14 @@ class BaseLight(BaseEntity, ABC):
             self._color_temp = color_temp
         if xy_color is not None:
             self._xy_color = xy_color
-        if color_mode is not None:
+        # Older persisted states may contain a color_mode not in supported modes
+        if color_mode is not None and color_mode in self._supported_color_modes:
             self._color_mode = color_mode
         if effect is not None:
             self._effect = effect
 
 
-class BaseClusterHandlerLight(BaseLight):
+class BaseSharedLight(BaseLight):
     """Operations common to all light entities."""
 
     _FORCE_ON = False
@@ -276,20 +271,90 @@ class BaseClusterHandlerLight(BaseLight):
         self._zha_config_transition: float = self._DEFAULT_MIN_TRANSITION_TIME
         self._zha_config_enhanced_light_transition: bool = False
         self._zha_config_enable_light_transitioning_flag: bool = True
-        self._on_off_cluster_handler: OnOffClusterHandler | None = None
-        self._level_cluster_handler: LevelControlClusterHandler | None = None
-        self._color_cluster_handler: ColorClusterHandler | None = None
-        self._identify_cluster_handler: IdentifyClusterHandler | None = None
+        self._on_off_cluster = None
+        self._level_cluster = None
+        self._color_cluster = None
+        self._identify_cluster = None
         self._transitioning_individual: bool = False
         self._transitioning_group: bool = False
         self._transition_listener: asyncio.TimerHandle | None = None
+        self._transition_brightness_buffer: int | None = None
 
         self._internal_supported_color_modes: set[ColorMode] = set()
 
     @property
+    def _color_capabilities(self) -> ColorCapabilities:
+        """Return ZCL color capabilities of the light."""
+        if self._color_cluster is None:
+            return Color.ColorCapabilities.XY_attributes
+        color_capabilities = self._color_cluster.get(
+            Color.AttributeDefs.color_capabilities.name
+        )
+        if color_capabilities is None:
+            return Color.ColorCapabilities.XY_attributes
+        return Color.ColorCapabilities(color_capabilities)
+
+    @property
+    def _color_temperature(self) -> int | None:
+        if self._color_cluster is None:
+            return None
+        return self._color_cluster.get(Color.AttributeDefs.color_temperature.name)
+
+    @property
+    def _color_xy_supported(self) -> bool:
+        return Color.ColorCapabilities.XY_attributes in self._color_capabilities
+
+    @property
+    def _color_temp_supported(self) -> bool:
+        return (
+            Color.ColorCapabilities.Color_temperature in self._color_capabilities
+        ) or self._color_temperature is not None
+
+    @property
+    def _color_loop_supported(self) -> bool:
+        return Color.ColorCapabilities.Color_loop in self._color_capabilities
+
+    @property
+    def _color_options(self) -> Options:
+        if self._color_cluster is None:
+            return Color.Options(0)
+        return Color.Options(
+            self._color_cluster.get(Color.AttributeDefs.options.name, 0)
+        )
+
+    @property
+    def _execute_if_off_supported(self) -> bool:
+        return Color.Options.Execute_if_off in self._color_options
+
+    _COLOR_MIN_MIREDS = 153
+    _COLOR_MAX_MIREDS = 500
+
+    @property
+    def _color_min_mireds(self) -> int:
+        if self._color_cluster is None:
+            return self._COLOR_MIN_MIREDS
+        min_mireds = self._color_cluster.get(
+            Color.AttributeDefs.color_temp_physical_min.name, self._COLOR_MIN_MIREDS
+        )
+        if min_mireds == 0:
+            min_mireds = self._COLOR_MIN_MIREDS
+        return min_mireds
+
+    @property
+    def _color_max_mireds(self) -> int:
+        if self._color_cluster is None:
+            return self._COLOR_MAX_MIREDS
+        max_mireds = self._color_cluster.get(
+            Color.AttributeDefs.color_temp_physical_max.name, self._COLOR_MAX_MIREDS
+        )
+        if max_mireds == 0:
+            max_mireds = self._COLOR_MAX_MIREDS
+        return max_mireds
+
+    @property
+    @abstractmethod
     def _gateway(self) -> Gateway:
         """Return the gateway."""
-        raise NotImplementedError
 
     @property
     def state(self) -> dict[str, Any]:
@@ -319,7 +384,7 @@ class BaseClusterHandlerLight(BaseLight):
         effect: str | None = None,
         flash: FlashMode | None = None,
         color_temp: int | None = None,
-        xy_color: tuple[int, int] | None = None,
+        xy_color: tuple[float, float] | None = None,
     ) -> None:
         """Turn the entity on."""
         duration = (
@@ -332,15 +397,14 @@ class BaseClusterHandlerLight(BaseLight):
         execute_if_off_supported = (
             self._GROUP_SUPPORTS_EXECUTE_IF_OFF
             if isinstance(self, LightGroup)
-            else self._color_cluster_handler
-            and self._color_cluster_handler.execute_if_off_supported
+            else (self._color_cluster is not None and self._execute_if_off_supported)
         )
 
         # A device theoretically could lie about having brightness support and omit the
         # actual LevelControl cluster needed to control it
         brightness_supported = (
             is_brightness_supported(self._internal_supported_color_modes)
-            and self._level_cluster_handler is not None
+            and self._level_cluster is not None
         )
 
         set_transition_flag = (
@@ -372,6 +436,42 @@ class BaseClusterHandlerLight(BaseLight):
         if set_transition_flag:
             self.async_transition_set_flag()
 
+        try:
+            await self._async_turn_on_impl(
+                transition=transition,
+                brightness=brightness,
+                effect=effect,
+                flash=flash,
+                color_temp=color_temp,
+                xy_color=xy_color,
+                duration=duration,
+                execute_if_off_supported=execute_if_off_supported,
+                brightness_supported=brightness_supported,
+                set_transition_flag=set_transition_flag,
+                transition_time=transition_time,
+            )
+        finally:
+            # If the task was cancelled (e.g. by a mode: restart automation) before
+            # the transition timer was started, clean up the transitioning flag so
+            # the light does not get stuck in a transitioning state indefinitely.
+            self._async_cleanup_transition_if_stuck(set_transition_flag)
+
+    async def _async_turn_on_impl(  # noqa: C901
+        self,
+        *,
+        transition: float | None,
+        brightness: int | None,
+        effect: str | None,
+        flash: FlashMode | None,
+        color_temp: int | None,
+        xy_color: tuple[float, float] | None,
+        duration: float,
+        execute_if_off_supported: bool,
+        brightness_supported: bool,
+        set_transition_flag: bool,
+        transition_time: float,
+    ) -> None:
+        """Implement the turn on logic."""
         # If the light is currently off but a turn_on call with a color/temperature is
         # sent, the light needs to be turned on first at a low brightness level where
         # the light is immediately transitioned to the correct color. Afterwards, the
@@ -419,12 +519,12 @@ class BaseClusterHandlerLight(BaseLight):
         t_log = {}
 
         if new_color_provided_while_off:
-            assert self._level_cluster_handler is not None
+            assert self._level_cluster is not None
 
             # If the light is currently off, we first need to turn it on at a low
             # brightness level with no transition.
             # After that, we set it to the desired color/temperature with no transition.
-            result = await self._level_cluster_handler.move_to_level_with_on_off(
+            result = await self._level_cluster.move_to_level_with_on_off(
                 level=DEFAULT_MIN_BRIGHTNESS,
                 transition_time=int(10 * self._DEFAULT_MIN_TRANSITION_TIME),
             )
@@ -463,9 +563,9 @@ class BaseClusterHandlerLight(BaseLight):
             and not new_color_provided_while_off
             and brightness_supported
         ):
-            assert self._level_cluster_handler is not None
+            assert self._level_cluster is not None
 
-            result = await self._level_cluster_handler.move_to_level_with_on_off(
+            result = await self._level_cluster.move_to_level_with_on_off(
                 level=level,
                 transition_time=int(10 * duration),
             )
@@ -486,12 +586,12 @@ class BaseClusterHandlerLight(BaseLight):
             and not new_color_provided_while_off
             or (self._FORCE_ON and brightness != 0)
         ):
-            assert self._on_off_cluster_handler is not None
+            assert self._on_off_cluster is not None
 
             # since FORCE_ON lights don't turn on with move_to_level_with_on_off,
             # we should call the on command on the on_off cluster
             # if brightness is not 0.
-            result = await self._on_off_cluster_handler.on()
+            result = await self._on_off_cluster.on()
             t_log["on_off"] = result
             if result[1] is not Status.SUCCESS:
                 # 'On' call failed, but as brightness may still transition
@@ -518,15 +618,20 @@ class BaseClusterHandlerLight(BaseLight):
                 return
 
         if new_color_provided_while_off:
-            assert self._level_cluster_handler is not None
+            assert self._level_cluster is not None
 
             # The light has the correct color, so we can now transition
             # it to the correct brightness level.
-            result = await self._level_cluster_handler.move_to_level(
+            result = await self._level_cluster.move_to_level(
                 level=level, transition_time=int(10 * duration)
             )
             t_log["move_to_level_if_color"] = result
             if result[1] is not Status.SUCCESS:
+                # Second 'move to level' call failed; the light is on but at the
+                # wrong brightness. If no previous timer is running, unset the flag
+                # immediately so attribute reports are not ignored indefinitely.
+                if set_transition_flag and not self._transition_listener:
+                    self.async_transition_complete()
                 self.debug("turned on: %s", t_log)
                 return
             self._state = bool(level)
@@ -538,9 +643,9 @@ class BaseClusterHandlerLight(BaseLight):
         # attribute reports after the completed transition).
         self.async_transition_start_timer(transition_time)
 
-        if self._color_cluster_handler is not None:
+        if self._color_cluster is not None:
             if effect == EFFECT_COLORLOOP:
-                result = await self._color_cluster_handler.color_loop_set(
+                result = await self._color_cluster.color_loop_set(
                     update_flags=(
                         Color.ColorLoopUpdateFlags.Action
                         | Color.ColorLoopUpdateFlags.Direction
@@ -554,7 +659,7 @@ class BaseClusterHandlerLight(BaseLight):
                 t_log["color_loop_set"] = result
                 self._effect = EFFECT_COLORLOOP
             elif self._effect == EFFECT_COLORLOOP and effect != EFFECT_COLORLOOP:
-                result = await self._color_cluster_handler.color_loop_set(
+                result = await self._color_cluster.color_loop_set(
                     update_flags=Color.ColorLoopUpdateFlags.Action,
                     action=Color.ColorLoopAction.Deactivate,
                     direction=Color.ColorLoopDirection.Decrement,
@@ -565,8 +670,8 @@ class BaseClusterHandlerLight(BaseLight):
                 self._effect = EFFECT_OFF
 
         if flash is not None:
-            assert self._identify_cluster_handler is not None
-            result = await self._identify_cluster_handler.trigger_effect(
+            assert self._identify_cluster is not None
+            result = await self._identify_cluster.trigger_effect(
                 effect_id=FLASH_EFFECTS[flash],
                 effect_variant=Identify.EffectVariant.Default,
             )
@@ -581,7 +686,7 @@ class BaseClusterHandlerLight(BaseLight):
         """Turn the entity off."""
         brightness_supported = (
             is_brightness_supported(self._internal_supported_color_modes)
-            and self._level_cluster_handler is not None
+            and self._level_cluster is not None
         )
 
         transition_time = (
@@ -594,41 +699,48 @@ class BaseClusterHandlerLight(BaseLight):
         if self._zha_config_enable_light_transitioning_flag:
             self.async_transition_set_flag()
 
-        # is not none looks odd here, but it will override built in bulb
-        # transition times if we pass 0 in here
-        if transition is not None and brightness_supported:
-            assert self._level_cluster_handler is not None
+        try:
+            # is not none looks odd here, but it will override built in bulb
+            # transition times if we pass 0 in here
+            if transition is not None and brightness_supported:
+                assert self._level_cluster is not None
 
-            result = await self._level_cluster_handler.move_to_level_with_on_off(
-                level=0,
-                transition_time=int(
-                    10 * (transition or self._DEFAULT_MIN_TRANSITION_TIME)
-                ),
+                result = await self._level_cluster.move_to_level_with_on_off(
+                    level=0,
+                    transition_time=int(
+                        10 * (transition or self._DEFAULT_MIN_TRANSITION_TIME)
+                    ),
+                )
+            else:
+                assert self._on_off_cluster is not None
+                result = await self._on_off_cluster.off()
+
+            # Pause parsing attribute reports until transition is complete
+            if self._zha_config_enable_light_transitioning_flag:
+                self.async_transition_start_timer(transition_time)
+            self.debug("turned off: %s", result)
+            if result[1] is not Status.SUCCESS:
+                return
+            self._state = False
+
+            if brightness_supported and not self._off_with_transition:
+                # store current brightness so that the next turn_on uses it:
+                # when using "enhanced turn on"
+                self._off_brightness = self._brightness
+                if transition is not None:
+                    # save for when calling turn_on without a brightness:
+                    # current_level is set to 1 after transitioning to level 0,
+                    # needed for correct state with light groups
+                    self._brightness = 1
+                    self._off_with_transition = transition is not None
+
+            self.maybe_emit_state_changed_event()
+        finally:
+            # If the task was cancelled before the transition timer was started,
+            # clean up the transitioning flag so the light does not get stuck.
+            self._async_cleanup_transition_if_stuck(
+                self._zha_config_enable_light_transitioning_flag
             )
-        else:
-            assert self._on_off_cluster_handler is not None
-            result = await self._on_off_cluster_handler.off()
-
-        # Pause parsing attribute reports until transition is complete
-        if self._zha_config_enable_light_transitioning_flag:
-            self.async_transition_start_timer(transition_time)
-        self.debug("turned off: %s", result)
-        if result[1] is not Status.SUCCESS:
-            return
-        self._state = False
-
-        if brightness_supported and not self._off_with_transition:
-            # store current brightness so that the next turn_on uses it:
-            # when using "enhanced turn on"
-            self._off_brightness = self._brightness
-            if transition is not None:
-                # save for when calling turn_on without a brightness:
-                # current_level is set to 1 after transitioning to level 0,
-                # needed for correct state with light groups
-                self._brightness = 1
-                self._off_with_transition = transition is not None
-
-        self.maybe_emit_state_changed_event()
 
     async def async_handle_color_commands(
         self,
@@ -646,9 +758,9 @@ class BaseClusterHandlerLight(BaseLight):
         )
 
         if color_temp is not None:
-            assert self._color_cluster_handler is not None
+            assert self._color_cluster is not None
 
-            result = await self._color_cluster_handler.move_to_color_temp(
+            result = await self._color_cluster.move_to_color_temp(
                 color_temp_mireds=color_temp,
                 transition_time=int(10 * transition_time),
             )
@@ -660,9 +772,9 @@ class BaseClusterHandlerLight(BaseLight):
             self._xy_color = None
 
         if xy_color is not None:
-            assert self._color_cluster_handler is not None
+            assert self._color_cluster is not None
 
-            result = await self._color_cluster_handler.move_to_color(
+            result = await self._color_cluster.move_to_color(
                 color_x=int(xy_color[0] * 65535),
                 color_y=int(xy_color[1] * 65535),
                 transition_time=int(10 * transition_time),
@@ -686,6 +798,7 @@ class BaseClusterHandlerLight(BaseLight):
         self.debug("setting transitioning flag to True")
         self._transitioning_individual = True
         self._transitioning_group = False
+        self._transition_brightness_buffer = None
         if isinstance(self, LightGroup):
             for platform_entity in self.group.get_platform_entities(Light.PLATFORM):
                 assert isinstance(platform_entity, Light)
@@ -719,11 +832,30 @@ class BaseClusterHandlerLight(BaseLight):
             with contextlib.suppress(ValueError):
                 self._tracked_handles.remove(self._transition_listener)
 
+    def _async_cleanup_transition_if_stuck(self, guarded: bool) -> None:
+        """Call async_transition_complete if the flag is set but no timer is running.
+
+        Used in finally blocks to handle task cancellation gracefully.
+        """
+        if guarded and self._transitioning_individual and not self._transition_listener:
+            self.async_transition_complete()
+
     def async_transition_complete(self, _=None) -> None:
         """Set _transitioning_individual to False and write HA state."""
         self.debug("transition complete - future attribute reports will write HA state")
         self._transitioning_individual = False
         self._async_unsub_transition_listener()
+        if self._transition_brightness_buffer is not None:
+            self.debug(
+                "applying buffered brightness %s from transition",
+                self._transition_brightness_buffer,
+            )
+            if self._transition_brightness_buffer == 0:
+                # The device is actually off; override the optimistic on-state.
+                self._state = False
+            else:
+                self._brightness = self._transition_brightness_buffer
+            self._transition_brightness_buffer = None
         self.maybe_emit_state_changed_event()
         if isinstance(self, LightGroup):
             for platform_entity in self.group.get_platform_entities(Light.PLATFORM):
@@ -745,51 +877,132 @@ class BaseClusterHandlerLight(BaseLight):
 
 
 @register_entity(OnOff.cluster_id)
-class Light(BaseClusterHandlerLight, PlatformEntity):
+class Light(BaseSharedLight, PlatformEntity):
     """Representation of a ZHA or ZLL light."""
 
     _attr_translation_key: str = "light"
     _REFRESH_INTERVAL = (2700, 4500)
     __polling_interval: int
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_ON_OFF}),
-        optional_cluster_handlers=frozenset(
-            {CLUSTER_HANDLER_COLOR, CLUSTER_HANDLER_LEVEL}
-        ),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({OnOff.cluster_id}),
+        optional_server_clusters=frozenset({Color.cluster_id, LevelControl.cluster_id}),
         profile_device_types=LIGHT_PROFILE_DEVICE_TYPES,
         feature_priority=(PlatformFeatureGroup.LIGHT_OR_SWITCH_OR_SHADE, 0),
     )
 
+    _server_cluster_config = {
+        OnOff.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                OnOff.AttributeDefs.on_off: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
+                ),
+                OnOff.AttributeDefs.start_up_on_off: AttrConfig(
+                    read_on_startup=False,
+                ),
+            },
+        ),
+        LevelControl.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                LevelControl.AttributeDefs.current_level: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=1, max_interval=900, reportable_change=1
+                    ),
+                ),
+                LevelControl.AttributeDefs.on_off_transition_time: AttrConfig(
+                    read_on_startup=False,
+                ),
+                LevelControl.AttributeDefs.on_level: AttrConfig(
+                    read_on_startup=False,
+                ),
+                LevelControl.AttributeDefs.on_transition_time: AttrConfig(
+                    read_on_startup=False,
+                ),
+                LevelControl.AttributeDefs.off_transition_time: AttrConfig(
+                    read_on_startup=False,
+                ),
+                LevelControl.AttributeDefs.default_move_rate: AttrConfig(
+                    read_on_startup=False,
+                ),
+                LevelControl.AttributeDefs.start_up_current_level: AttrConfig(
+                    read_on_startup=False,
+                ),
+            },
+        ),
+        Color.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                Color.AttributeDefs.current_x: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=1
+                    ),
+                ),
+                Color.AttributeDefs.current_y: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=1
+                    ),
+                ),
+                Color.AttributeDefs.color_temperature: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=1
+                    ),
+                ),
+                Color.AttributeDefs.color_mode: AttrConfig(
+                    read_on_startup=True,
+                ),
+                Color.AttributeDefs.color_temp_physical_min: AttrConfig(
+                    read_on_startup=False,
+                ),
+                Color.AttributeDefs.color_temp_physical_max: AttrConfig(
+                    read_on_startup=False,
+                ),
+                Color.AttributeDefs.color_capabilities: AttrConfig(
+                    read_on_startup=False,
+                ),
+                Color.AttributeDefs.color_loop_active: AttrConfig(
+                    read_on_startup=True,
+                ),
+                Color.AttributeDefs.start_up_color_temperature: AttrConfig(
+                    read_on_startup=False,
+                ),
+                Color.AttributeDefs.options: AttrConfig(
+                    read_on_startup=False,
+                ),
+            },
+        ),
+    }
+
     def __init__(
         self,
-        cluster_handlers: list[ClusterHandler],
         endpoint: Endpoint,
         device: Device,
         **kwargs,
     ) -> None:
         """Initialize the light."""
         super().__init__(
-            cluster_handlers,
-            endpoint,
-            device,
+            endpoint=endpoint,
+            device=device,
             **kwargs,
             legacy_discovery_unique_id=f"{endpoint.device.ieee}-{endpoint.id}",
         )
-        self._on_off_cluster_handler: OnOffClusterHandler = cast(
-            OnOffClusterHandler, self.cluster_handlers[CLUSTER_HANDLER_ON_OFF]
+        self._on_off_cluster = endpoint.zigpy_endpoint.in_clusters[OnOff.cluster_id]
+        self._state: bool = bool(
+            self._on_off_cluster.get(OnOff.AttributeDefs.on_off.name)
         )
-        self._state: bool = bool(self._on_off_cluster_handler.on_off)
-        self._level_cluster_handler: LevelControlClusterHandler | None = cast(
-            LevelControlClusterHandler | None,
-            self.cluster_handlers.get(CLUSTER_HANDLER_LEVEL),
+        self._level_cluster = endpoint.zigpy_endpoint.in_clusters.get(
+            LevelControl.cluster_id
         )
-        self._color_cluster_handler: ColorClusterHandler | None = cast(
-            ColorClusterHandler | None, self.cluster_handlers.get(CLUSTER_HANDLER_COLOR)
-        )
-        self._identify_cluster_handler: IdentifyClusterHandler | None = cast(
-            IdentifyClusterHandler | None, device.identify_ch
-        )
+        self._color_cluster = endpoint.zigpy_endpoint.in_clusters.get(Color.cluster_id)
+        self._identify_cluster = device.identify_cluster
 
         self._refresh_task: asyncio.Task | None = None
 
@@ -802,19 +1015,31 @@ class Light(BaseClusterHandlerLight, PlatformEntity):
     def on_add(self) -> None:
         """Run when entity is added."""
         super().on_add()
-        self._on_remove_callbacks.append(
-            self._on_off_cluster_handler.on_event(
-                CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
-                self.handle_cluster_handler_attribute_updated,
-            )
-        )
-
-        if self._level_cluster_handler:
+        assert self._on_off_cluster is not None
+        for event_type in (
+            AttributeReadEvent,
+            AttributeReportedEvent,
+            AttributeUpdatedEvent,
+            AttributeWrittenEvent,
+        ):
             self._on_remove_callbacks.append(
-                self._level_cluster_handler.on_event(
-                    CLUSTER_HANDLER_LEVEL_CHANGED, self.handle_cluster_handler_set_level
+                self._on_off_cluster.on_event(
+                    event_type.event_type, self.handle_attribute_updated
                 )
             )
+
+        if self._level_cluster is not None:
+            for event_type in (
+                AttributeReadEvent,
+                AttributeReportedEvent,
+                AttributeUpdatedEvent,
+                AttributeWrittenEvent,
+            ):
+                self._on_remove_callbacks.append(
+                    self._level_cluster.on_event(
+                        event_type.event_type, self.handle_level_attribute_updated
+                    )
+                )
 
         self.start_polling()
 
@@ -825,32 +1050,37 @@ class Light(BaseClusterHandlerLight, PlatformEntity):
         effect_list = [EFFECT_OFF]
 
         self._internal_supported_color_modes = {ColorMode.ONOFF}
-        if self._level_cluster_handler:
+        if self._level_cluster is not None:
             self._internal_supported_color_modes.add(ColorMode.BRIGHTNESS)
             self._supported_features |= LightEntityFeature.TRANSITION
-            self._brightness = self._level_cluster_handler.current_level
+            self._brightness = self._level_cluster.get(
+                LevelControl.AttributeDefs.current_level.name
+            )
 
-        if self._color_cluster_handler:
-            self._min_mireds: int = self._color_cluster_handler.min_mireds
-            self._max_mireds: int = self._color_cluster_handler.max_mireds
+        if self._color_cluster is not None:
+            self._min_mireds: int = self._color_min_mireds
+            self._max_mireds: int = self._color_max_mireds
 
-            if self._color_cluster_handler.color_temp_supported:
+            if self._color_temp_supported:
                 self._internal_supported_color_modes.add(ColorMode.COLOR_TEMP)
-                self._color_temp = self._color_cluster_handler.color_temperature
+                self._color_temp = self._color_temperature
 
-            if self._color_cluster_handler.xy_supported:
+            if self._color_xy_supported:
                 self._internal_supported_color_modes.add(ColorMode.XY)
-                curr_x = self._color_cluster_handler.current_x
-                curr_y = self._color_cluster_handler.current_y
+                curr_x = self._color_cluster.get(Color.AttributeDefs.current_x.name)
+                curr_y = self._color_cluster.get(Color.AttributeDefs.current_y.name)
                 if curr_x is not None and curr_y is not None:
                     self._xy_color = (curr_x / 65535, curr_y / 65535)
                 else:
                     self._xy_color = (0, 0)
 
-            if self._color_cluster_handler.color_loop_supported:
+            if self._color_loop_supported:
                 self._supported_features |= LightEntityFeature.EFFECT
                 effect_list.append(EFFECT_COLORLOOP)
-                if self._color_cluster_handler.color_loop_active == 1:
+                if (
+                    self._color_cluster.get(Color.AttributeDefs.color_loop_active.name)
+                    == 1
+                ):
                     self._effect = EFFECT_COLORLOOP
 
         self._supported_color_modes = supported_color_modes = (
@@ -859,34 +1089,43 @@ class Light(BaseClusterHandlerLight, PlatformEntity):
         if len(supported_color_modes) == 1:
             self._color_mode = next(iter(supported_color_modes))
         else:  # Light supports color_temp + xy, determine which mode the light is in
-            assert self._color_cluster_handler
+            assert self._color_cluster is not None
             if (
-                self._color_cluster_handler.color_mode
+                self._color_cluster.get(Color.AttributeDefs.color_mode.name)
                 == Color.ColorMode.Color_temperature
             ):
                 self._color_mode = ColorMode.COLOR_TEMP
             else:
                 self._color_mode = ColorMode.XY
 
-        if self._identify_cluster_handler:
+        if self._identify_cluster is not None:
             self._supported_features |= LightEntityFeature.FLASH
 
         self._effect_list = effect_list
 
-    def handle_cluster_handler_set_level(self, event: LevelChangeEvent) -> None:
+    def handle_level_attribute_updated(
+        self,
+        event: AttributeReadEvent
+        | AttributeReportedEvent
+        | AttributeUpdatedEvent
+        | AttributeWrittenEvent,
+    ) -> None:
         """Set the brightness of this light between 0..254.
 
         brightness level 255 is a special value instructing the device to come
         on at `on_level` Zigbee attribute value, regardless of the last set
         level
         """
+        if event.attribute_id != LevelControl.AttributeDefs.current_level.id:
+            return
+        value = max(0, min(254, event.value))
         if self.is_transitioning:
             self.debug(
-                "received level change event %s while transitioning - skipping update",
+                "received level change event %s while transitioning - buffering",
                 event,
             )
+            self._transition_brightness_buffer = value
             return
-        value = max(0, min(254, event.level))
         self._brightness = value
         self.maybe_emit_state_changed_event()
 
@@ -932,23 +1171,26 @@ class Light(BaseClusterHandlerLight, PlatformEntity):
         self.debug("group transition completed - unsetting member transitioning flag")
         self._transitioning_group = False
 
-    def handle_cluster_handler_attribute_updated(
-        self, event: ClusterAttributeUpdatedEvent
+    def handle_attribute_updated(
+        self,
+        event: AttributeReadEvent
+        | AttributeReportedEvent
+        | AttributeUpdatedEvent
+        | AttributeWrittenEvent,
     ) -> None:
         """Set the state."""
-        if (
-            event.cluster_id != self._on_off_cluster_handler.cluster.cluster_id
-            or event.attribute_id != OnOff.AttributeDefs.on_off.id
-        ):
+        if event.attribute_id != OnOff.AttributeDefs.on_off.id:
             return
         if self.is_transitioning:
             self.debug(
-                "received onoff %s while transitioning - skipping update",
-                event.attribute_value,
+                "received onoff %s while transitioning - buffering",
+                event.value,
             )
+            if not event.value:
+                self._transition_brightness_buffer = 0
             return
-        self._state = bool(event.attribute_value)
-        if event.attribute_value:
+        self._state = bool(event.value)
+        if event.value:
             self._off_with_transition = False
             self._off_brightness = None
         self.maybe_emit_state_changed_event()
@@ -967,10 +1209,14 @@ class Light(BaseClusterHandlerLight, PlatformEntity):
             return
         self.debug("polling current state")
 
-        if self._on_off_cluster_handler:
-            state = await self._on_off_cluster_handler.get_attribute_value(
-                "on_off", from_cache=False
+        if self._on_off_cluster is not None:
+            results = await safe_read(
+                self._on_off_cluster,
+                [OnOff.AttributeDefs.on_off.name],
+                allow_cache=False,
+                only_cache=False,
             )
+            state = results.get(OnOff.AttributeDefs.on_off.name)
             # check if transition started whilst waiting for polled state
             if self.is_transitioning:
                 return  # type: ignore[unreachable]
@@ -981,29 +1227,36 @@ class Light(BaseClusterHandlerLight, PlatformEntity):
                     self._off_with_transition = False
                     self._off_brightness = None
 
-        if self._level_cluster_handler:
-            level = await self._level_cluster_handler.get_attribute_value(
-                "current_level", from_cache=False
+        if self._level_cluster is not None:
+            results = await safe_read(
+                self._level_cluster,
+                [LevelControl.AttributeDefs.current_level.name],
+                allow_cache=False,
+                only_cache=False,
             )
+            level = results.get(LevelControl.AttributeDefs.current_level.name)
             # check if transition started whilst waiting for polled state
             if self.is_transitioning:
                 return  # type: ignore[unreachable]
             if level is not None:
                 self._brightness = level
 
-        if self._color_cluster_handler:
+        if self._color_cluster is not None:
             attributes = [
-                "color_mode",
-                "current_x",
-                "current_y",
+                Color.AttributeDefs.color_mode.name,
+                Color.AttributeDefs.current_x.name,
+                Color.AttributeDefs.current_y.name,
             ]
-            if self._color_cluster_handler.color_temp_supported:
-                attributes.append("color_temperature")
-            if self._color_cluster_handler.color_loop_supported:
-                attributes.append("color_loop_active")
+            if self._color_temp_supported:
+                attributes.append(Color.AttributeDefs.color_temperature.name)
+            if self._color_loop_supported:
+                attributes.append(Color.AttributeDefs.color_loop_active.name)
 
-            results = await self._color_cluster_handler.get_attributes(
-                attributes, from_cache=False, only_cache=False
+            results = await safe_read(
+                self._color_cluster,
+                attributes,
+                allow_cache=False,
+                only_cache=False,
             )
 
             # although rare, a transition might have been started while we were waiting
@@ -1013,14 +1266,22 @@ class Light(BaseClusterHandlerLight, PlatformEntity):
                 return  # type: ignore[unreachable]
 
             if (color_mode := results.get("color_mode")) is not None:
-                if color_mode == Color.ColorMode.Color_temperature:
-                    self._color_mode = ColorMode.COLOR_TEMP
+                # Determine the effective color mode: if only one mode is
+                # supported, use it regardless of what the device reports
+                if len(self._supported_color_modes) == 1:
+                    effective_mode = next(iter(self._supported_color_modes))
+                elif color_mode == Color.ColorMode.Color_temperature:
+                    effective_mode = ColorMode.COLOR_TEMP
+                else:
+                    effective_mode = ColorMode.XY
+                self._color_mode = effective_mode
+
+                if effective_mode == ColorMode.COLOR_TEMP:
                     color_temp = results.get("color_temperature")
-                    if color_temp is not None and color_mode:
+                    if color_temp is not None:
                         self._color_temp = color_temp
                         self._xy_color = None
-                else:
-                    self._color_mode = ColorMode.XY
+                elif effective_mode == ColorMode.XY:
                     color_x = results.get("current_x")
                     color_y = results.get("current_y")
                     if color_x is not None and color_y is not None:
@@ -1042,11 +1303,9 @@ class HueLight(Light):
 
     _REFRESH_INTERVAL = (180, 300)
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_ON_OFF}),
-        optional_cluster_handlers=frozenset(
-            {CLUSTER_HANDLER_COLOR, CLUSTER_HANDLER_LEVEL}
-        ),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({OnOff.cluster_id}),
+        optional_server_clusters=frozenset({Color.cluster_id, LevelControl.cluster_id}),
         manufacturers=frozenset({"Philips", "Signify Netherlands B.V."}),
         profile_device_types=LIGHT_PROFILE_DEVICE_TYPES,
         # We want this entity to be preferred over the base light
@@ -1060,11 +1319,9 @@ class ForceOnLight(Light):
 
     _FORCE_ON = True
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_ON_OFF}),
-        optional_cluster_handlers=frozenset(
-            {CLUSTER_HANDLER_COLOR, CLUSTER_HANDLER_LEVEL}
-        ),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({OnOff.cluster_id}),
+        optional_server_clusters=frozenset({Color.cluster_id, LevelControl.cluster_id}),
         manufacturers=frozenset(
             {
                 "Jasco",
@@ -1087,11 +1344,9 @@ class MinTransitionLight(Light):
     # Transitions are counted in 1/10th of a second increments, so this is the smallest
     _DEFAULT_MIN_TRANSITION_TIME = 0.1
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_ON_OFF}),
-        optional_cluster_handlers=frozenset(
-            {CLUSTER_HANDLER_COLOR, CLUSTER_HANDLER_LEVEL}
-        ),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({OnOff.cluster_id}),
+        optional_server_clusters=frozenset({Color.cluster_id, LevelControl.cluster_id}),
         manufacturers=DEFAULT_MIN_TRANSITION_MANUFACTURERS,
         profile_device_types=LIGHT_PROFILE_DEVICE_TYPES,
         # We want this entity to be preferred over the base light
@@ -1100,7 +1355,7 @@ class MinTransitionLight(Light):
 
 
 @register_group_entity
-class LightGroup(BaseClusterHandlerLight, GroupEntity):
+class LightGroup(BaseSharedLight, GroupEntity):
     """Representation of a light group."""
 
     _attr_always_supported = True
@@ -1109,22 +1364,10 @@ class LightGroup(BaseClusterHandlerLight, GroupEntity):
         """Initialize a light group."""
         super().__init__(group)
 
-        # TODO: these type annotations are not correct, these are not cluster handler
-        # objects but are instead cluster proxies!
-        self._on_off_cluster_handler: OnOffClusterHandler = cast(
-            OnOffClusterHandler, group.zigpy_group.endpoint[OnOff.cluster_id]
-        )
-        self._level_cluster_handler: LevelControlClusterHandler | None = cast(
-            LevelControlClusterHandler | None,
-            group.zigpy_group.endpoint[LevelControl.cluster_id],
-        )
-        self._color_cluster_handler: ColorClusterHandler | None = cast(
-            ColorClusterHandler | None, group.zigpy_group.endpoint[Color.cluster_id]
-        )
-        self._identify_cluster_handler: IdentifyClusterHandler | None = cast(
-            IdentifyClusterHandler | None,
-            group.zigpy_group.endpoint[Identify.cluster_id],
-        )
+        self._on_off_cluster = group.zigpy_group.endpoint[OnOff.cluster_id]
+        self._level_cluster = group.zigpy_group.endpoint[LevelControl.cluster_id]
+        self._color_cluster = group.zigpy_group.endpoint[Color.cluster_id]
+        self._identify_cluster = group.zigpy_group.endpoint[Identify.cluster_id]
 
         self._debounced_member_refresh: Debouncer | None = Debouncer(
             self.group.gateway,
@@ -1173,13 +1416,17 @@ class LightGroup(BaseClusterHandlerLight, GroupEntity):
             # If at least one member has a color cluster and doesn't support it,
             # it's not used.
             for endpoint in member.device._endpoints.values():
-                for cluster_handler in endpoint.all_cluster_handlers.values():
-                    if (
-                        cluster_handler.name == CLUSTER_HANDLER_COLOR
-                        and not cluster_handler.execute_if_off_supported
-                    ):
-                        self._GROUP_SUPPORTS_EXECUTE_IF_OFF = False
-                        break
+                color_cluster = endpoint.zigpy_endpoint.in_clusters.get(
+                    Color.cluster_id
+                )
+                if color_cluster is None:
+                    continue
+                options = Color.Options(
+                    color_cluster.get(Color.AttributeDefs.options.name, 0)
+                )
+                if Color.Options.Execute_if_off not in options:
+                    self._GROUP_SUPPORTS_EXECUTE_IF_OFF = False
+                    break
 
         self._color_mode = ColorMode.UNKNOWN
         self._internal_supported_color_modes = {ColorMode.ONOFF}
@@ -1323,7 +1570,7 @@ class LightGroup(BaseClusterHandlerLight, GroupEntity):
         effect: str | None = None,
         flash: FlashMode | None = None,
         color_temp: int | None = None,
-        xy_color: tuple[int, int] | None = None,
+        xy_color: tuple[float, float] | None = None,
     ) -> None:
         """Send an assume event to all members of the group."""
 
@@ -1365,7 +1612,7 @@ class LightGroup(BaseClusterHandlerLight, GroupEntity):
 
             brightness_supported = (
                 is_brightness_supported(supported_modes)
-                and platform_entity._level_cluster_handler is not None
+                and platform_entity._level_cluster is not None
             )
 
             # unset "off brightness" and "off with transition"

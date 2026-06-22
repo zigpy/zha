@@ -2,18 +2,28 @@
 
 from __future__ import annotations
 
+import asyncio
+from abc import ABC, abstractmethod
+from collections.abc import Callable
 from dataclasses import dataclass
 import functools
 import logging
-from typing import TYPE_CHECKING, Any, Final, Literal, cast
+import math
+from typing import TYPE_CHECKING, Any, Final, Literal
 
-from zigpy.profiles import zha
-from zigpy.zcl.clusters.security import IasAce
+from zigpy.zcl.clusters.security import (
+    AlarmStatus,
+    ArmMode,
+    ArmNotification,
+    IasAce as AceCluster,
+    PanelStatus,
+)
 
 from zha.application import Platform
 from zha.application.platforms import (
     BaseEntityInfo,
-    ClusterHandlerMatch,
+    ClusterConfig,
+    ClusterMatch,
     PlatformEntity,
     register_entity,
 )
@@ -26,26 +36,27 @@ from zha.application.platforms.alarm_control_panel.const import (
     AlarmState,
     CodeFormat,
 )
-from zha.zigbee.cluster_handlers.const import (
-    CLUSTER_HANDLER_IAS_ACE,
-    CLUSTER_HANDLER_STATE_CHANGED,
-)
-from zha.zigbee.cluster_handlers.security import (
-    ClusterHandlerStateChangedEvent,
-    IasAceClientClusterHandler,
-)
+from zha.zigbee.endpoint import cluster_event_unique_id
 
 if TYPE_CHECKING:
-    from zha.zigbee.cluster_handlers import ClusterHandler
     from zha.zigbee.device import Device
     from zha.zigbee.endpoint import Endpoint
 
 _LOGGER = logging.getLogger(__name__)
 
-_EXIT_DELAY_TARGET_PANEL_STATUS: Final[dict[str, IasAce.PanelStatus]] = {
-    "away": IasAce.PanelStatus.Armed_Away,
-    "home": IasAce.PanelStatus.Armed_Stay,
-    "night": IasAce.PanelStatus.Armed_Night,
+SIGNAL_ARMED_STATE_CHANGED = "zha_armed_state_changed"
+SIGNAL_ALARM_TRIGGERED = "zha_armed_triggered"
+
+_EXIT_DELAY_TARGET_PANEL_STATUS: Final[dict[str, PanelStatus]] = {
+    "away": AceCluster.PanelStatus.Armed_Away,
+    "home": AceCluster.PanelStatus.Armed_Stay,
+    "night": AceCluster.PanelStatus.Armed_Night,
+}
+
+_ARM_EXIT_DELAY_LOG_LABELS: Final[dict[PanelStatus, str]] = {
+    AceCluster.PanelStatus.Armed_Away: "all IAS ACE zones",
+    AceCluster.PanelStatus.Armed_Stay: "day/home IAS ACE zones",
+    AceCluster.PanelStatus.Armed_Night: "night/sleep IAS ACE zones",
 }
 
 
@@ -59,62 +70,40 @@ class AlarmControlPanelEntityInfo(BaseEntityInfo):
     translation_key: str
 
 
-@register_entity(IasAce.cluster_id)
-class AlarmControlPanel(PlatformEntity):
-    """Entity for ZHA alarm control devices."""
+class BaseAlarmControlPanel(PlatformEntity, ABC):
+    """Abstract base class for ZHA alarm control panel entities."""
 
-    _attr_translation_key: str = "alarm_control_panel"
     PLATFORM = Platform.ALARM_CONTROL_PANEL
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        client_cluster_handlers=frozenset({CLUSTER_HANDLER_IAS_ACE}),
-    )
+    @property
+    def state(self) -> dict[str, Any]:
+        """Get the state of the alarm control panel."""
+        response = super().state
+        response["state"] = self.alarm_state
+        return response
 
-    def __init__(
-        self,
-        cluster_handlers: list[ClusterHandler],
-        endpoint: Endpoint,
-        device: Device,
-        **kwargs,
-    ) -> None:
-        """Initialize the ZHA alarm control device."""
-        legacy_discovery_unique_id = (
-            f"{endpoint.device.ieee}-{endpoint.id}-{int(IasAce.cluster_id)}"
-            if (
-                endpoint.zigpy_endpoint.device_type
-                == zha.DeviceType.IAS_ANCILLARY_CONTROL
-            )
-            else f"{endpoint.device.ieee}-{endpoint.id}-{int(IasAce.cluster_id)}"
-        )
-        super().__init__(
-            cluster_handlers,
-            endpoint,
-            device,
-            **kwargs,
-            legacy_discovery_unique_id=legacy_discovery_unique_id,
-        )
+    @property
+    @abstractmethod
+    def alarm_state(self) -> AlarmState:
+        """Return the current alarm state."""
 
-        alarm_options = device.gateway.config.config.alarm_control_panel_options
-        self._cluster_handler: IasAceClientClusterHandler = cast(
-            IasAceClientClusterHandler, cluster_handlers[0]
-        )
-        self._cluster_handler.panel_code = alarm_options.master_code
-        self._cluster_handler.code_required_arm_actions = (
-            alarm_options.arm_requires_code
-        )
-        self._cluster_handler.max_invalid_tries = alarm_options.failed_tries
-        self._cluster_handler.exit_delay_away = alarm_options.exit_delay_away
-        self._cluster_handler.exit_delay_home = alarm_options.exit_delay_home
-        self._cluster_handler.exit_delay_night = alarm_options.exit_delay_night
+    @property
+    @abstractmethod
+    def code_arm_required(self) -> bool:
+        """Whether the code is required for arm actions."""
 
-    def on_add(self) -> None:
-        """Run when entity is added."""
-        super().on_add()
-        self._on_remove_callbacks.append(
-            self._cluster_handler.on_event(
-                CLUSTER_HANDLER_STATE_CHANGED, self._handle_event_protocol
-            )
-        )
+    _attr_code_format: CodeFormat
+    _attr_supported_features: int
+
+    @property
+    def code_format(self) -> CodeFormat:
+        """Code format or None if no code is required."""
+        return self._attr_code_format
+
+    @property
+    def supported_features(self) -> int:
+        """Return the list of supported features."""
+        return self._attr_supported_features
 
     @functools.cached_property
     def info_object(self) -> AlarmControlPanelEntityInfo:
@@ -126,70 +115,451 @@ class AlarmControlPanel(PlatformEntity):
             supported_features=self.supported_features,
         )
 
-    @property
-    def state(self) -> dict[str, Any]:
-        """Get the state of the alarm control panel."""
-        response = super().state
-        response["state"] = IAS_ACE_STATE_MAP.get(
-            self._cluster_handler.armed_state, AlarmState.UNKNOWN
+    @abstractmethod
+    async def async_alarm_disarm(self, code: str | None = None) -> None:
+        """Send disarm command."""
+
+    @abstractmethod
+    async def async_alarm_arm_home(self, code: str | None = None) -> None:
+        """Send arm home command."""
+
+    @abstractmethod
+    async def async_alarm_arm_away(self, code: str | None = None) -> None:
+        """Send arm away command."""
+
+    @abstractmethod
+    async def async_alarm_arm_night(self, code: str | None = None) -> None:
+        """Send arm night command."""
+
+    @abstractmethod
+    async def async_alarm_trigger(self, code: str | None = None) -> None:
+        """Send alarm trigger command."""
+
+
+@register_entity(AceCluster.cluster_id)
+class AlarmControlPanel(BaseAlarmControlPanel):
+    """Entity for ZHA alarm control devices."""
+
+    _attr_translation_key: str = "alarm_control_panel"
+    _attr_code_format = CodeFormat.NUMBER
+    _attr_supported_features = (
+        SUPPORT_ALARM_ARM_HOME
+        | SUPPORT_ALARM_ARM_AWAY
+        | SUPPORT_ALARM_ARM_NIGHT
+        | SUPPORT_ALARM_TRIGGER
+    )
+
+    _cluster_match = ClusterMatch(
+        client_clusters=frozenset({AceCluster.cluster_id}),
+    )
+
+    _client_cluster_config = {
+        AceCluster.cluster_id: ClusterConfig(
+            bind=True,
+        ),
+    }
+
+    def __init__(
+        self,
+        endpoint: Endpoint,
+        device: Device,
+        **kwargs,
+    ) -> None:
+        """Initialize the ZHA alarm control device."""
+        legacy_discovery_unique_id = (
+            f"{endpoint.device.ieee}-{endpoint.id}-{int(AceCluster.cluster_id)}"
         )
-        return response
+        super().__init__(
+            endpoint=endpoint,
+            device=device,
+            **kwargs,
+            legacy_discovery_unique_id=legacy_discovery_unique_id,
+        )
+
+        self._cluster = endpoint.zigpy_endpoint.out_clusters[AceCluster.cluster_id]
+        self._cluster_event_unique_id = cluster_event_unique_id(endpoint, self._cluster)
+
+        alarm_options = device.gateway.config.config.alarm_control_panel_options
+        self.panel_code: str = alarm_options.master_code
+        self.code_required_arm_actions: bool = alarm_options.arm_requires_code
+        self.max_invalid_tries: int = alarm_options.failed_tries
+        self.exit_delay_away: int = alarm_options.exit_delay_away
+        self.exit_delay_home: int = alarm_options.exit_delay_home
+        self.exit_delay_night: int = alarm_options.exit_delay_night
+
+        self.armed_state: PanelStatus = AceCluster.PanelStatus.Panel_Disarmed
+        self.alarm_status: AlarmStatus = AceCluster.AlarmStatus.No_Alarm
+        self.invalid_tries: int = 0
+
+        self._exit_delay_task: asyncio.Task | None = None
+        self._exit_delay_end_time: float | None = None
+        self._pending_arm_mode: PanelStatus | None = None
+        self._entry_delay_task: asyncio.Task | None = None
+        self._entry_delay_end_time: float | None = None
+
+        self._command_map: dict[int, Callable[..., Any]] = {
+            AceCluster.ServerCommandDefs.arm.id: self._cmd_arm,
+            AceCluster.ServerCommandDefs.bypass.id: self._bypass,
+            AceCluster.ServerCommandDefs.emergency.id: self._emergency,
+            AceCluster.ServerCommandDefs.fire.id: self._fire,
+            AceCluster.ServerCommandDefs.panic.id: self._panic_cmd,
+            AceCluster.ServerCommandDefs.get_zone_id_map.id: self._get_zone_id_map,
+            AceCluster.ServerCommandDefs.get_zone_info.id: self._get_zone_info,
+            AceCluster.ServerCommandDefs.get_panel_status.id: self._send_panel_status_response,
+            AceCluster.ServerCommandDefs.get_bypassed_zone_list.id: self._get_bypassed_zone_list,
+            AceCluster.ServerCommandDefs.get_zone_status.id: self._get_zone_status,
+        }
+        self._arm_map: dict[ArmMode, Callable[..., Any]] = {
+            AceCluster.ArmMode.Disarm: self._disarm,
+            AceCluster.ArmMode.Arm_All_Zones: self._arm_away,
+            AceCluster.ArmMode.Arm_Day_Home_Only: self._arm_day,
+            AceCluster.ArmMode.Arm_Night_Sleep_Only: self._arm_night,
+        }
+
+    def on_add(self) -> None:
+        """Run when entity is added."""
+        super().on_add()
+        self._cluster.add_listener(self)
+        self._on_remove_callbacks.append(lambda: self._cluster.remove_listener(self))
+
+    def cluster_command(self, tsn: int, command_id: int, args: list[Any]) -> None:
+        """Handle commands received on the IAS ACE cluster."""
+        self.debug(
+            "received command %s", self._cluster.server_commands[command_id].name
+        )
+        self._command_map[command_id](*args)
+
+    def _emit_zha_event(self, command: str, args: list | dict) -> None:
+        """Relay a cluster-level zha_event via the endpoint."""
+        self._endpoint.emit_zha_event(
+            {
+                "unique_id": self._cluster_event_unique_id,
+                "cluster_id": self._cluster.cluster_id,
+                "command": command,
+                "args": args if isinstance(args, list) else [],
+                "params": args if isinstance(args, dict) else {},
+            }
+        )
+
+    def _cmd_arm(self, arm_mode: int, code: str | None, zone_id: int) -> None:
+        """Handle the IAS ACE arm command."""
+        mode = AceCluster.ArmMode(arm_mode)
+
+        self._emit_zha_event(
+            AceCluster.ServerCommandDefs.arm.name,
+            {
+                "arm_mode": mode.value,
+                "arm_mode_description": mode.name,
+                "code": code,
+                "zone_id": zone_id,
+            },
+        )
+
+        zigbee_reply = self._arm_map[mode](code)
+        self._device.gateway.async_create_task(zigbee_reply)
+
+        if self.invalid_tries >= self.max_invalid_tries:
+            self._cancel_all_timers()
+            self.alarm_status = AceCluster.AlarmStatus.Emergency
+            self.armed_state = AceCluster.PanelStatus.In_Alarm
+            self._emit_zha_event(
+                f"{self._cluster_event_unique_id}_{SIGNAL_ALARM_TRIGGERED}", []
+            )
+        else:
+            self._emit_zha_event(
+                f"{self._cluster_event_unique_id}_{SIGNAL_ARMED_STATE_CHANGED}", []
+            )
+        self._emit_panel_status_changed()
+
+    def _disarm(self, code: str):
+        """Test the code and disarm the panel if the code is correct."""
+        if (
+            code != self.panel_code
+            and self.armed_state != AceCluster.PanelStatus.Panel_Disarmed
+        ):
+            self.debug("Invalid code supplied to IAS ACE")
+            self.invalid_tries += 1
+            zigbee_reply = self._cluster.arm_response(
+                AceCluster.ArmNotification.Invalid_Arm_Disarm_Code
+            )
+        else:
+            self._cancel_all_timers()
+            self.invalid_tries = 0
+            if (
+                self.armed_state == AceCluster.PanelStatus.Panel_Disarmed
+                and self.alarm_status == AceCluster.AlarmStatus.No_Alarm
+            ):
+                self.debug("IAS ACE already disarmed")
+                zigbee_reply = self._cluster.arm_response(
+                    AceCluster.ArmNotification.Already_Disarmed
+                )
+            else:
+                self.debug("Disarming all IAS ACE zones")
+                zigbee_reply = self._cluster.arm_response(
+                    AceCluster.ArmNotification.All_Zones_Disarmed
+                )
+
+            self.armed_state = AceCluster.PanelStatus.Panel_Disarmed
+            self.alarm_status = AceCluster.AlarmStatus.No_Alarm
+        return zigbee_reply
+
+    def _arm_day(self, code: str):
+        """Arm the panel for day / home zones."""
+        return self._handle_arm(
+            code,
+            self.exit_delay_home,
+            AceCluster.PanelStatus.Armed_Stay,
+            AceCluster.ArmNotification.Only_Day_Home_Zones_Armed,
+        )
+
+    def _arm_night(self, code: str):
+        """Arm the panel for night / sleep zones."""
+        return self._handle_arm(
+            code,
+            self.exit_delay_night,
+            AceCluster.PanelStatus.Armed_Night,
+            AceCluster.ArmNotification.Only_Night_Sleep_Zones_Armed,
+        )
+
+    def _arm_away(self, code: str):
+        """Arm the panel for away mode."""
+        return self._handle_arm(
+            code,
+            self.exit_delay_away,
+            AceCluster.PanelStatus.Armed_Away,
+            AceCluster.ArmNotification.All_Zones_Armed,
+        )
+
+    def _handle_arm(
+        self,
+        code: str,
+        exit_delay: int,
+        panel_status: PanelStatus,
+        armed_type: ArmNotification,
+    ):
+        """Arm the panel with the specified statuses."""
+        if self.code_required_arm_actions and code != self.panel_code:
+            self.debug("Invalid code supplied to IAS ACE")
+            zigbee_reply = self._cluster.arm_response(
+                AceCluster.ArmNotification.Invalid_Arm_Disarm_Code
+            )
+        else:
+            self.debug(
+                "Arming %s with %d second exit delay (configured in ZHA options)",
+                _ARM_EXIT_DELAY_LOG_LABELS[panel_status],
+                exit_delay,
+            )
+            self.start_exit_delay(exit_delay, panel_status, emit_panel_status=False)
+            zigbee_reply = self._cluster.arm_response(armed_type)
+        return zigbee_reply
+
+    def _bypass(self, zone_list, code) -> None:
+        """Handle the IAS ACE bypass command."""
+        self._emit_zha_event(
+            AceCluster.ServerCommandDefs.bypass.name,
+            {"zone_list": zone_list, "code": code},
+        )
+
+    def _emergency(self) -> None:
+        """Handle the IAS ACE emergency command."""
+        self._set_alarm(AceCluster.AlarmStatus.Emergency)
+
+    def _fire(self) -> None:
+        """Handle the IAS ACE fire command."""
+        self._set_alarm(AceCluster.AlarmStatus.Fire)
+
+    def _panic_cmd(self) -> None:
+        """Handle the IAS ACE panic command (received from device)."""
+        self._set_alarm(AceCluster.AlarmStatus.Emergency_Panic)
+
+    def _set_alarm(self, status: AlarmStatus) -> None:
+        """Set the specified alarm status."""
+        self.alarm_status = status
+        self.armed_state = AceCluster.PanelStatus.In_Alarm
+        self._emit_panel_status_changed()
+
+    def _cancel_all_timers(self) -> None:
+        """Cancel all active timers and clear timer state."""
+        if self._exit_delay_task and not self._exit_delay_task.done():
+            self._exit_delay_task.cancel()
+        self._exit_delay_task = None
+        self._exit_delay_end_time = None
+        self._pending_arm_mode = None
+
+        if self._entry_delay_task and not self._entry_delay_task.done():
+            self._entry_delay_task.cancel()
+        self._entry_delay_task = None
+        self._entry_delay_end_time = None
+
+    def _get_seconds_remaining(self) -> int:
+        """Get seconds remaining in exit or entry delay."""
+        loop = asyncio.get_running_loop()
+        current_time = loop.time()
+
+        if self._entry_delay_end_time is not None:
+            remaining = math.ceil(self._entry_delay_end_time - current_time)
+            return max(0, remaining)
+
+        if self._exit_delay_end_time is not None:
+            remaining = math.ceil(self._exit_delay_end_time - current_time)
+            return max(0, remaining)
+
+        return 0
+
+    async def _exit_delay_complete(self) -> None:
+        """Handle exit delay timer completion."""
+        if self._pending_arm_mode:
+            self.armed_state = self._pending_arm_mode
+            self._pending_arm_mode = None
+        self._exit_delay_end_time = None
+        self._emit_panel_status_changed()
+
+    def start_exit_delay(
+        self,
+        delay_seconds: int,
+        target_panel_status: PanelStatus,
+        *,
+        emit_panel_status: bool = True,
+    ) -> None:
+        """Start exit delay timer."""
+        self._cancel_all_timers()
+
+        if delay_seconds > 0:
+            self.armed_state = AceCluster.PanelStatus.Exit_Delay
+            loop = asyncio.get_running_loop()
+            self._exit_delay_end_time = loop.time() + delay_seconds
+            self._pending_arm_mode = target_panel_status
+
+            self._exit_delay_task = (
+                self._device.gateway.async_create_background_task(
+                    self._exit_delay_timer(delay_seconds),
+                    name=f"exit_delay_{self._cluster_event_unique_id}",
+                )
+            )
+
+            if emit_panel_status:
+                self._emit_panel_status_changed()
+        else:
+            self.armed_state = target_panel_status
+
+    async def _exit_delay_timer(self, delay_seconds: int) -> None:
+        """Timer that transitions from exit delay to armed state."""
+        try:
+            await asyncio.sleep(delay_seconds)
+            await self._exit_delay_complete()
+        except asyncio.CancelledError:
+            pass
+
+    def start_entry_delay(self, delay_seconds: int) -> None:
+        """Start entry delay timer."""
+        self._cancel_all_timers()
+
+        if delay_seconds > 0:
+            self.armed_state = AceCluster.PanelStatus.Entry_Delay
+            loop = asyncio.get_running_loop()
+            self._entry_delay_end_time = loop.time() + delay_seconds
+
+            self._entry_delay_task = (
+                self._device.gateway.async_create_background_task(
+                    self._entry_delay_timer(delay_seconds),
+                    name=f"entry_delay_{self._cluster_event_unique_id}",
+                )
+            )
+            self._emit_panel_status_changed()
+        else:
+            self.info("Entry delay called with 0 seconds, skipping")
+
+    async def _entry_delay_timer(self, delay_seconds: int) -> None:
+        """Timer for entry delay countdown."""
+        try:
+            await asyncio.sleep(delay_seconds)
+            await self._entry_delay_complete()
+        except asyncio.CancelledError:
+            pass
+
+    async def _entry_delay_complete(self) -> None:
+        """Handle entry delay timer completion - alarm should trigger."""
+        self.armed_state = AceCluster.PanelStatus.In_Alarm
+        self.alarm_status = AceCluster.AlarmStatus.Burglar
+        self._entry_delay_end_time = None
+        self._emit_panel_status_changed()
+        self.info("Entry delay expired - alarm triggered")
+
+    def _get_zone_id_map(self):
+        """Handle the IAS ACE zone id map command."""
+
+    def _get_zone_info(self, zone_id):
+        """Handle the IAS ACE zone info command."""
+
+    def _send_panel_status_response(self) -> None:
+        """Handle the IAS ACE panel status response command."""
+        seconds_remaining = self._get_seconds_remaining()
+        response = self._cluster.panel_status_response(
+            self.armed_state,
+            seconds_remaining,
+            AceCluster.AudibleNotification.Default_Sound,
+            self.alarm_status,
+        )
+        self._device.gateway.async_create_task(response)
+
+    def _emit_panel_status_changed(self) -> None:
+        """Handle the IAS ACE panel status changed command."""
+        seconds_remaining = self._get_seconds_remaining()
+        response = self._cluster.panel_status_changed(
+            self.armed_state,
+            seconds_remaining,
+            AceCluster.AudibleNotification.Default_Sound,
+            self.alarm_status,
+        )
+        self._device.gateway.async_create_task(response)
+        self.maybe_emit_state_changed_event()
+
+    def _get_bypassed_zone_list(self):
+        """Handle the IAS ACE bypassed zone list command."""
+
+    def _get_zone_status(
+        self, starting_zone_id, max_zone_ids, zone_status_mask_flag, zone_status_mask
+    ):
+        """Handle the IAS ACE zone status command."""
+
+    @property
+    def alarm_state(self) -> AlarmState:
+        """Return the current alarm state."""
+        return IAS_ACE_STATE_MAP.get(self.armed_state, AlarmState.UNKNOWN)
 
     @property
     def code_arm_required(self) -> bool:
         """Whether the code is required for arm actions."""
-        return self._cluster_handler.code_required_arm_actions
-
-    @functools.cached_property
-    def code_format(self) -> CodeFormat:
-        """Code format or None if no code is required."""
-        return CodeFormat.NUMBER
-
-    @functools.cached_property
-    def supported_features(self) -> int:
-        """Return the list of supported features."""
-        return (
-            SUPPORT_ALARM_ARM_HOME
-            | SUPPORT_ALARM_ARM_AWAY
-            | SUPPORT_ALARM_ARM_NIGHT
-            | SUPPORT_ALARM_TRIGGER
-        )
-
-    def handle_cluster_handler_state_changed(
-        self,
-        event: ClusterHandlerStateChangedEvent,  # pylint: disable=unused-argument
-    ) -> None:
-        """Handle state changed on cluster."""
-        self.maybe_emit_state_changed_event()
+        return self.code_required_arm_actions
 
     async def async_alarm_disarm(self, code: str | None = None) -> None:
         """Send disarm command."""
-        self._cluster_handler.arm(IasAce.ArmMode.Disarm, code, 0)
+        self._cmd_arm(AceCluster.ArmMode.Disarm, code, 0)
         self.maybe_emit_state_changed_event()
 
     async def async_alarm_arm_home(self, code: str | None = None) -> None:
         """Send arm home command."""
-        self._cluster_handler.arm(IasAce.ArmMode.Arm_Day_Home_Only, code, 0)
+        self._cmd_arm(AceCluster.ArmMode.Arm_Day_Home_Only, code, 0)
         self.maybe_emit_state_changed_event()
 
     async def async_alarm_arm_away(self, code: str | None = None) -> None:
         """Send arm away command."""
-        self._cluster_handler.arm(IasAce.ArmMode.Arm_All_Zones, code, 0)
+        self._cmd_arm(AceCluster.ArmMode.Arm_All_Zones, code, 0)
         self.maybe_emit_state_changed_event()
 
     async def async_alarm_arm_night(self, code: str | None = None) -> None:
         """Send arm night command."""
-        self._cluster_handler.arm(IasAce.ArmMode.Arm_Night_Sleep_Only, code, 0)
+        self._cmd_arm(AceCluster.ArmMode.Arm_Night_Sleep_Only, code, 0)
         self.maybe_emit_state_changed_event()
 
     async def async_alarm_trigger(self, code: str | None = None) -> None:  # pylint: disable=unused-argument
         """Send alarm trigger command."""
-        self._cluster_handler.panic()
+        self._panic_cmd()
         self.maybe_emit_state_changed_event()
 
     async def async_start_entry_delay(self, delay_seconds: int) -> None:
         """Start entry delay countdown on the keypad."""
-        self._cluster_handler.start_entry_delay(delay_seconds)
+        self.start_entry_delay(delay_seconds)
         self.maybe_emit_state_changed_event()
 
     async def async_start_exit_delay(
@@ -199,5 +569,5 @@ class AlarmControlPanel(PlatformEntity):
     ) -> None:
         """Start exit delay countdown on the keypad."""
         target_panel_status = _EXIT_DELAY_TARGET_PANEL_STATUS[arm_mode]
-        self._cluster_handler.start_exit_delay(delay_seconds, target_panel_status)
+        self.start_exit_delay(delay_seconds, target_panel_status)
         self.maybe_emit_state_changed_event()

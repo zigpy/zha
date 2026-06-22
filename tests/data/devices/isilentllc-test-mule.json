@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "ieee": "74:4d:bd:ff:fe:60:7c:80",
   "nwk": "0xD53C",
   "manufacturer": "iSilentLLC",
@@ -165,22 +165,6 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "BinaryInputClusterHandler",
-              "generic_id": "cluster_handler_0x000f",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 15,
-                "name": "Binary Input (Basic)",
-                "type": "server"
-              },
-              "id": "1:0x000f",
-              "unique_id": "74:4d:bd:ff:fe:60:7c:80:1:0x000f",
-              "status": "INITIALIZED",
-              "value_attribute": "present_value"
-            }
-          ],
           "device_ieee": "74:4d:bd:ff:fe:60:7c:80",
           "endpoint_id": 1,
           "available": true,
@@ -210,22 +194,6 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "IdentifyClusterHandler",
-              "generic_id": "cluster_handler_0x0003",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 3,
-                "name": "Identify",
-                "type": "server"
-              },
-              "id": "1:0x0003",
-              "unique_id": "74:4d:bd:ff:fe:60:7c:80:1:0x0003",
-              "status": "INITIALIZED",
-              "value_attribute": null
-            }
-          ],
           "device_ieee": "74:4d:bd:ff:fe:60:7c:80",
           "endpoint_id": 1,
           "available": true,
@@ -258,22 +226,6 @@
           "entity_registry_enabled_default": false,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "BasicClusterHandler",
-              "generic_id": "cluster_handler_0x0000",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 0,
-                "name": "Basic",
-                "type": "server"
-              },
-              "id": "1:0x0000",
-              "unique_id": "74:4d:bd:ff:fe:60:7c:80:1:0x0000",
-              "status": "INITIALIZED",
-              "value_attribute": null
-            }
-          ],
           "device_ieee": "74:4d:bd:ff:fe:60:7c:80",
           "endpoint_id": 1,
           "available": true,
@@ -302,22 +254,6 @@
           "entity_registry_enabled_default": false,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "BasicClusterHandler",
-              "generic_id": "cluster_handler_0x0000",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 0,
-                "name": "Basic",
-                "type": "server"
-              },
-              "id": "1:0x0000",
-              "unique_id": "74:4d:bd:ff:fe:60:7c:80:1:0x0000",
-              "status": "INITIALIZED",
-              "value_attribute": null
-            }
-          ],
           "device_ieee": "74:4d:bd:ff:fe:60:7c:80",
           "endpoint_id": 1,
           "available": true,

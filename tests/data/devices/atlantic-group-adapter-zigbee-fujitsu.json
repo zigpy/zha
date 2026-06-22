@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "ieee": "ab:cd:ef:12:8e:4d:7a:e3",
   "nwk": "0xEE14",
   "manufacturer": "ATLANTIC GROUP",
@@ -349,22 +349,6 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "IdentifyClusterHandler",
-              "generic_id": "cluster_handler_0x0003",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 3,
-                "name": "Identify",
-                "type": "server"
-              },
-              "id": "1:0x0003",
-              "unique_id": "ab:cd:ef:12:8e:4d:7a:e3:1:0x0003",
-              "status": "INITIALIZED",
-              "value_attribute": null
-            }
-          ],
           "device_ieee": "ab:cd:ef:12:8e:4d:7a:e3",
           "endpoint_id": 1,
           "available": true,
@@ -397,36 +381,6 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": true,
-          "cluster_handlers": [
-            {
-              "class_name": "ThermostatClusterHandler",
-              "generic_id": "cluster_handler_0x0201",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 513,
-                "name": "Thermostat",
-                "type": "server"
-              },
-              "id": "1:0x0201",
-              "unique_id": "ab:cd:ef:12:8e:4d:7a:e3:1:0x0201",
-              "status": "INITIALIZED",
-              "value_attribute": "local_temperature"
-            },
-            {
-              "class_name": "FanClusterHandler",
-              "generic_id": "cluster_handler_0x0202",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 514,
-                "name": "Fan Control",
-                "type": "server"
-              },
-              "id": "1:0x0202",
-              "unique_id": "ab:cd:ef:12:8e:4d:7a:e3:1:0x0202",
-              "status": "INITIALIZED",
-              "value_attribute": null
-            }
-          ],
           "device_ieee": "ab:cd:ef:12:8e:4d:7a:e3",
           "endpoint_id": 1,
           "available": true,
@@ -495,22 +449,6 @@
           "entity_registry_enabled_default": false,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "BasicClusterHandler",
-              "generic_id": "cluster_handler_0x0000",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 0,
-                "name": "Basic",
-                "type": "server"
-              },
-              "id": "1:0x0000",
-              "unique_id": "ab:cd:ef:12:8e:4d:7a:e3:1:0x0000",
-              "status": "INITIALIZED",
-              "value_attribute": null
-            }
-          ],
           "device_ieee": "ab:cd:ef:12:8e:4d:7a:e3",
           "endpoint_id": 1,
           "available": true,
@@ -539,22 +477,6 @@
           "entity_registry_enabled_default": false,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "BasicClusterHandler",
-              "generic_id": "cluster_handler_0x0000",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 0,
-                "name": "Basic",
-                "type": "server"
-              },
-              "id": "1:0x0000",
-              "unique_id": "ab:cd:ef:12:8e:4d:7a:e3:1:0x0000",
-              "status": "INITIALIZED",
-              "value_attribute": null
-            }
-          ],
           "device_ieee": "ab:cd:ef:12:8e:4d:7a:e3",
           "endpoint_id": 1,
           "available": true,
@@ -583,22 +505,6 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "ThermostatClusterHandler",
-              "generic_id": "cluster_handler_0x0201",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 513,
-                "name": "Thermostat",
-                "type": "server"
-              },
-              "id": "1:0x0201",
-              "unique_id": "ab:cd:ef:12:8e:4d:7a:e3:1:0x0201",
-              "status": "INITIALIZED",
-              "value_attribute": "local_temperature"
-            }
-          ],
           "device_ieee": "ab:cd:ef:12:8e:4d:7a:e3",
           "endpoint_id": 1,
           "available": true,
@@ -627,22 +533,6 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "ThermostatClusterHandler",
-              "generic_id": "cluster_handler_0x0201",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 513,
-                "name": "Thermostat",
-                "type": "server"
-              },
-              "id": "1:0x0201",
-              "unique_id": "ab:cd:ef:12:8e:4d:7a:e3:1:0x0201",
-              "status": "INITIALIZED",
-              "value_attribute": "local_temperature"
-            }
-          ],
           "device_ieee": "ab:cd:ef:12:8e:4d:7a:e3",
           "endpoint_id": 1,
           "available": true,
@@ -671,22 +561,6 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "ThermostatClusterHandler",
-              "generic_id": "cluster_handler_0x0201",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 513,
-                "name": "Thermostat",
-                "type": "server"
-              },
-              "id": "1:0x0201",
-              "unique_id": "ab:cd:ef:12:8e:4d:7a:e3:1:0x0201",
-              "status": "INITIALIZED",
-              "value_attribute": "local_temperature"
-            }
-          ],
           "device_ieee": "ab:cd:ef:12:8e:4d:7a:e3",
           "endpoint_id": 1,
           "available": true,

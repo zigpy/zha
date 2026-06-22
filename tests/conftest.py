@@ -1,14 +1,14 @@
 """Test configuration for the ZHA component."""
 
 import asyncio
-from collections.abc import Callable, Generator
+from collections.abc import Generator
 from contextlib import contextmanager
 import logging
 import os
 import reprlib
 import threading
 from types import TracebackType
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import patch
 
 import looptime
 import pytest
@@ -341,17 +341,6 @@ async def zha_gateway(
 
 
 @pytest.fixture(scope="session", autouse=True)
-def disable_request_retry_delay():
-    """Disable ZHA request retrying delay to speed up failures."""
-
-    with patch(
-        "zha.zigbee.cluster_handlers.RETRYABLE_REQUEST_DECORATOR",
-        zigpy.util.retryable_request(tries=3, delay=0),
-    ):
-        yield
-
-
-@pytest.fixture(scope="session", autouse=True)
 def globally_load_quirks():
     """Load quirks automatically so that ZHA tests run deterministically in isolation.
 
@@ -367,24 +356,6 @@ def globally_load_quirks():
     # Disable gateway built in quirks loading
     with patch("zha.application.gateway.setup_quirks"):
         yield
-
-
-@pytest.fixture
-def cluster_handler() -> Callable:
-    """Clueter handler mock factory fixture."""
-
-    def cluster_handler_factory(
-        name: str, cluster_id: int, endpoint_id: int = 1
-    ) -> MagicMock:
-        ch = MagicMock()
-        ch.name = name
-        ch.generic_id = f"cluster_handler_0x{cluster_id:04x}"
-        ch.id = f"{endpoint_id}:0x{cluster_id:04x}"
-        ch.async_configure = AsyncMock()
-        ch.async_initialize = AsyncMock()
-        return ch
-
-    return cluster_handler_factory
 
 
 def pytest_collection_modifyitems(config, items):

@@ -4,9 +4,8 @@ import asyncio
 from collections.abc import Awaitable, Callable
 from datetime import UTC, datetime
 from functools import partial
-import math
 from typing import Any
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import MagicMock, call, patch
 
 import pytest
 from zhaquirks.danfoss import thermostat as danfoss_thermostat
@@ -14,13 +13,17 @@ from zigpy.device import Device as ZigpyDevice
 from zigpy.profiles import zha
 import zigpy.profiles.zha
 from zigpy.quirks import CustomCluster, DeviceRegistry, get_device
-from zigpy.quirks.v2 import CustomDeviceV2, QuirkBuilder, ReportingConfig
+from zigpy.quirks.v2 import (
+    CustomDeviceV2,
+    QuirkBuilder,
+    ReportingConfig as QuirksReportingConfig,
+)
 from zigpy.quirks.v2.homeassistant import EntityPlatform, EntityType, UnitOfMass
 from zigpy.quirks.v2.homeassistant.sensor import (
     SensorDeviceClass as SensorDeviceClassV2,
 )
 import zigpy.types as t
-from zigpy.zcl import Cluster
+from zigpy.zcl import Cluster, ReportingConfig
 from zigpy.zcl.clusters import general, homeautomation, hvac, measurement, smartenergy
 from zigpy.zcl.clusters.general import AnalogInput, PowerConfiguration
 from zigpy.zcl.clusters.general_const import AnalogInputType, ApplicationType
@@ -34,11 +37,11 @@ from tests.common import (
     create_mock_zigpy_device,
     get_entity,
     join_zigpy_device,
+    patch_cluster_for_testing,
     send_attributes_report,
     zigpy_device_from_json,
 )
 from zha.application import Platform
-from zha.application.const import ZCL_INIT_ATTRS, ZHA_CLUSTER_HANDLER_READS_PER_REQ
 from zha.application.gateway import Gateway
 from zha.application.platforms import PlatformEntity, sensor
 from zha.application.platforms.sensor import (
@@ -55,8 +58,6 @@ from zha.units import (
     UnitOfPressure,
     UnitOfVolume,
 )
-from zha.zigbee.cluster_handlers import AttrReportConfig
-from zha.zigbee.cluster_handlers.manufacturerspecific import OppleRemoteClusterHandler
 from zha.zigbee.device import Device
 
 EMAttrs = homeautomation.ElectricalMeasurement.AttributeDefs
@@ -607,7 +608,7 @@ async def async_test_em_dc_power(
         ),
         (
             homeautomation.ElectricalMeasurement.cluster_id,
-            sensor.PolledElectricalMeasurement,
+            sensor.ElectricalMeasurementActivePower,
             async_test_electrical_measurement,
             {"ac_power_divisor": 1000, "ac_power_multiplier": 1},
             {"apparent_power", "rms_current", "rms_voltage"},
@@ -892,10 +893,7 @@ def assert_state(entity: PlatformEntity, state: Any, unit_of_measurement: str) -
     assert entity.info_object.unit == unit_of_measurement
 
 
-async def test_electrical_measurement_init(
-    zha_gateway: Gateway,
-    caplog: pytest.LogCaptureFixture,
-) -> None:
+async def test_electrical_measurement_init(zha_gateway: Gateway) -> None:
     """Test proper initialization of the electrical measurement cluster."""
 
     cluster_id = homeautomation.ElectricalMeasurement.cluster_id
@@ -917,7 +915,7 @@ async def test_electrical_measurement_init(
     entity = get_entity(
         zha_device,
         platform=Platform.SENSOR,
-        exact_entity_type=sensor.PolledElectricalMeasurement,
+        exact_entity_type=sensor.ElectricalMeasurementActivePower,
     )
 
     await send_attributes_report(
@@ -927,82 +925,19 @@ async def test_electrical_measurement_init(
     )
     assert entity.state["state"] == 100
 
-    cluster_handler = list(zha_device._endpoints.values())[0].all_cluster_handlers[
-        "1:0x0b04"
-    ]
-    assert cluster_handler.ac_power_divisor == 1
-    assert cluster_handler.ac_power_multiplier == 1
-
-    # update power divisor
-    await send_attributes_report(
-        zha_gateway,
-        cluster,
-        {EMAttrs.active_power.id: 20, EMAttrs.power_divisor.id: 5},
-    )
-    assert cluster_handler.ac_power_divisor == 5
-    assert cluster_handler.ac_power_multiplier == 1
-    assert entity.state["state"] == 4.0
-
-    zha_device.on_network = False
-
-    await asyncio.sleep(entity.__polling_interval + 1)
-    await zha_gateway.async_block_till_done(wait_background_tasks=True)
-    assert (
-        "-1-2820: skipping polling for updated state, available: False, allow polled requests: True"
-        in caplog.text
-    )
-
-    zha_device.on_network = True
-
     await send_attributes_report(
         zha_gateway,
         cluster,
         {EMAttrs.active_power.id: 30, EMAttrs.ac_power_divisor.id: 10},
     )
-    assert cluster_handler.ac_power_divisor == 10
-    assert cluster_handler.ac_power_multiplier == 1
     assert entity.state["state"] == 3.0
-
-    # update power multiplier
-    await send_attributes_report(
-        zha_gateway,
-        cluster,
-        {EMAttrs.active_power.id: 20, EMAttrs.power_multiplier.id: 6},
-    )
-    assert cluster_handler.ac_power_divisor == 10
-    assert cluster_handler.ac_power_multiplier == 6
-    assert entity.state["state"] == 12.0
 
     await send_attributes_report(
         zha_gateway,
         cluster,
         {EMAttrs.active_power.id: 30, EMAttrs.ac_power_multiplier.id: 20},
     )
-    assert cluster_handler.ac_power_divisor == 10
-    assert cluster_handler.ac_power_multiplier == 20
     assert entity.state["state"] == 60.0
-
-    entity._refresh = AsyncMock(wraps=entity._refresh)
-
-    assert entity._refresh.await_count == 0
-
-    entity.disable()
-
-    assert entity.enabled is False
-
-    await asyncio.sleep(entity.__polling_interval + 1)
-    await zha_gateway.async_block_till_done(wait_background_tasks=True)
-
-    assert entity._refresh.await_count == 0
-
-    entity.enable()
-
-    assert entity.enabled is True
-
-    await asyncio.sleep(entity.__polling_interval + 1)
-    await zha_gateway.async_block_till_done(wait_background_tasks=True)
-
-    assert entity._refresh.await_count == 1
 
 
 @pytest.mark.parametrize(
@@ -1021,7 +956,7 @@ async def test_electrical_measurement_init(
                 "rms_current",
             },
             {
-                sensor.PolledElectricalMeasurement,
+                sensor.ElectricalMeasurementActivePower,
                 sensor.ElectricalMeasurementFrequency,
                 sensor.ElectricalMeasurementPowerFactor,
             },
@@ -1041,7 +976,7 @@ async def test_electrical_measurement_init(
             },
             {
                 sensor.ElectricalMeasurementRMSVoltage,
-                sensor.PolledElectricalMeasurement,
+                sensor.ElectricalMeasurementActivePower,
             },
             {
                 sensor.ElectricalMeasurementApparentPower,
@@ -1055,7 +990,7 @@ async def test_electrical_measurement_init(
             set(),
             {
                 sensor.ElectricalMeasurementRMSVoltage,
-                sensor.PolledElectricalMeasurement,
+                sensor.ElectricalMeasurementActivePower,
                 sensor.ElectricalMeasurementApparentPower,
                 sensor.ElectricalMeasurementRMSCurrent,
                 sensor.ElectricalMeasurementFrequency,
@@ -1322,7 +1257,7 @@ async def test_elec_measurement_sensor_polling(zha_gateway: Gateway) -> None:
     entity = get_entity(
         zha_dev,
         platform=Platform.SENSOR,
-        exact_entity_type=sensor.PolledElectricalMeasurement,
+        exact_entity_type=sensor.ElectricalMeasurementActivePower,
     )
     assert entity.state["state"] == 2.0
 
@@ -1356,7 +1291,7 @@ async def test_metering_sensor_polling(zha_gateway: Gateway) -> None:
     entity = get_entity(
         zha_dev,
         platform=Platform.SENSOR,
-        exact_entity_type=sensor.PolledSmartEnergySummation,
+        exact_entity_type=sensor.SmartEnergySummation,
     )
     assert entity.state["state"] == 2.0
 
@@ -1380,29 +1315,10 @@ async def test_metering_sensor_polling(zha_gateway: Gateway) -> None:
     "supported_attributes",
     (
         set(),
-        {
-            "active_power",
-            "active_power_max",
-            "rms_current",
-            "rms_current_max",
-            "rms_voltage",
-            "rms_voltage_max",
-        },
-        {
-            "active_power",
-        },
-        {
-            "active_power",
-            "active_power_max",
-        },
-        {
-            "rms_current",
-            "rms_current_max",
-        },
-        {
-            "rms_voltage",
-            "rms_voltage_max",
-        },
+        {"active_power", "rms_current", "rms_voltage"},
+        {"active_power"},
+        {"rms_current"},
+        {"rms_voltage"},
     ),
 )
 async def test_elec_measurement_skip_unsupported_attribute(
@@ -1442,6 +1358,8 @@ async def test_elec_measurement_skip_unsupported_attribute(
         "power_factor_ph_c",
         "ac_frequency",
         "ac_frequency_max",
+        "ac_frequency_divisor",
+        "ac_frequency_multiplier",
         "ac_voltage_divisor",
         "ac_current_divisor",
         "ac_power_divisor",
@@ -1450,6 +1368,7 @@ async def test_elec_measurement_skip_unsupported_attribute(
         "ac_current_multiplier",
         "power_divisor",
         "power_multiplier",
+        "measurement_type",
         "dc_voltage",
         "dc_voltage_divisor",
         "dc_voltage_multiplier",
@@ -1464,16 +1383,14 @@ async def test_elec_measurement_skip_unsupported_attribute(
         cluster.add_unsupported_attribute(attr)
     cluster.read_attributes.reset_mock()
 
-    entity = get_entity(
+    poller = get_entity(
         zha_dev,
-        platform=Platform.SENSOR,
-        exact_entity_type=sensor.PolledElectricalMeasurement,
+        platform=Platform.VIRTUAL,
+        exact_entity_type=sensor.ElectricalMeasurementPoller,
     )
-    await entity.async_update()
+    await poller.async_update()
     await zha_dev.gateway.async_block_till_done()
-    assert cluster.read_attributes.call_count == math.ceil(
-        len(supported_attributes) / ZHA_CLUSTER_HANDLER_READS_PER_REQ
-    )
+
     read_attrs = {
         a for call in cluster.read_attributes.call_args_list for a in call[0][0]
     }
@@ -1546,7 +1463,7 @@ async def test_timestamp_sensor_v2(zha_gateway: Gateway) -> None:
     assert isinstance(zha_device.device, CustomDeviceV2)
     entity = get_entity(zha_device, platform=Platform.SENSOR, qualifier="start_time")
 
-    await send_attributes_report(zha_gateway, cluster, {0xEF65: 781355715})
+    await send_attributes_report(zha_gateway, cluster, {"start_time": 781355715})
     assert entity.state["state"] == datetime(2024, 10, 4, 11, 15, 15, tzinfo=UTC)
 
 
@@ -1577,7 +1494,7 @@ class OppleCluster(CustomCluster, ManufacturerSpecificCluster):
         unit=UnitOfMass.GRAMS,
         translation_key="last_feeding_size",
         fallback_name="Last feeding size",
-        reporting_config=ReportingConfig(
+        reporting_config=QuirksReportingConfig(
             min_interval=0, max_interval=60, reportable_change=1
         ),
     )
@@ -1650,10 +1567,10 @@ async def test_last_feeding_size_sensor_v2(zha_gateway: Gateway) -> None:
         zha_device, platform=Platform.SENSOR, qualifier="last_feeding_size"
     )
 
-    await send_attributes_report(zha_gateway, cluster, {0x010C: 1})
+    await send_attributes_report(zha_gateway, cluster, {"last_feeding_size": 1})
     assert_state(entity, 1.0, "g")
 
-    await send_attributes_report(zha_gateway, cluster, {0x010C: 5})
+    await send_attributes_report(zha_gateway, cluster, {"last_feeding_size": 5})
     assert_state(entity, 5.0, "g")
 
 
@@ -1688,59 +1605,43 @@ async def test_state_class(
     assert "Quirks provided an invalid state class: energy" in caplog.text
 
 
-async def test_cluster_handler_quirks_attribute_reporting(zha_gateway: Gateway) -> None:
-    """Test quirks sensor setting up ZCL_INIT_ATTRS and REPORT_CONFIG correctly."""
-
-    # Suppress normal endpoint probing, as this will claim the Opple cluster handler
-    # already due to it being in the "CLUSTER_HANDLER_ONLY_CLUSTERS" registry.
-    # We want to test the handler also gets claimed via quirks v2 reporting config.
+async def test_quirks_v2_sensor_reporting_configures_cluster(
+    zha_gateway: Gateway,
+) -> None:
+    """A quirks v2 sensor with reporting_config binds the cluster and configures reporting."""
+    # Suppress normal endpoint probing so that virtual entities for the Opple
+    # cluster (e.g. AqaraOppleBind) don't bind it themselves — we want to
+    # observe the bind triggered by the quirks v2 sensor's reporting config.
     with patch("zha.application.discovery.discover_entities_for_endpoint"):
-        zha_device, cluster = await zigpy_device_aqara_sensor_v2_mock(zha_gateway)
+        zha_device, opple_cluster = await zigpy_device_aqara_sensor_v2_mock(zha_gateway)
 
     assert isinstance(zha_device.device, CustomDeviceV2)
 
-    # get cluster handler of OppleCluster
-    opple_ch = zha_device.endpoints[1].all_cluster_handlers["1:0xfcc0"]
-    assert isinstance(opple_ch, OppleRemoteClusterHandler)
+    # The quirks v2 sensor entity is created
+    last_feeding_size = get_entity(
+        zha_device, platform=Platform.SENSOR, qualifier="last_feeding_size"
+    )
+    assert last_feeding_size is not None
 
-    # make sure the cluster handler was claimed due to reporting config, so ZHA binds it
-    assert opple_ch in zha_device.endpoints[1].claimed_cluster_handlers.values()
+    # The reporting_config attached to the sensor causes a bind + configure_reporting
+    assert len(opple_cluster.bind.mock_calls) == 1
 
-    # check that BIND is not set to False, as reporting is configured
-    assert opple_ch.BIND is True
-
-    # check ZCL_INIT_ATTRS contains sensor attributes that are not in REPORT_CONFIG
-    assert opple_ch.ZCL_INIT_ATTRS == {
-        "energy": True,
-        "energy_delivered": True,
-        "energy_invalid_state_class": True,
-        "power": True,
-    }
-    # check that ZCL_INIT_ATTRS is an instance variable and not a class variable now
-    assert opple_ch.ZCL_INIT_ATTRS is opple_ch.__dict__[ZCL_INIT_ATTRS]
-    assert opple_ch.ZCL_INIT_ATTRS is not OppleRemoteClusterHandler.ZCL_INIT_ATTRS
-
-    # double check we didn't modify the class variable
-    assert OppleRemoteClusterHandler.ZCL_INIT_ATTRS == {}
-
-    # check if REPORT_CONFIG is set correctly
-    assert (
-        (
-            AttrReportConfig(
-                attr="last_feeding_size",
-                config=(0, 60, 1),
-            ),
+    last_feeding_size_def = opple_cluster.find_attribute("last_feeding_size")
+    assert opple_cluster.configure_reporting_multiple.mock_calls == [
+        call(
+            {
+                last_feeding_size_def: ReportingConfig(
+                    min_interval=0, max_interval=60, reportable_change=1
+                ),
+            }
         )
-    ) == opple_ch.REPORT_CONFIG
-
-    # this cannot be wrong, as REPORT_CONFIG is an immutable tuple and not a list/dict,
-    # but let's check it anyway in case the type changes in the future
-    assert opple_ch.REPORT_CONFIG is not OppleRemoteClusterHandler.REPORT_CONFIG
-    assert OppleRemoteClusterHandler.REPORT_CONFIG == ()
+    ]
 
 
-async def test_cluster_handler_quirks_attribute_reading(zha_gateway: Gateway) -> None:
-    """Test quirks sensor setting up ZCL_INIT_ATTRS, claiming cluster handler."""
+async def test_quirks_v2_sensor_attribute_init_reads_cluster(
+    zha_gateway: Gateway,
+) -> None:
+    """A quirks v2 sensor without reporting_config reads its attribute but doesn't bind."""
 
     registry = DeviceRegistry()
     (
@@ -1774,40 +1675,36 @@ async def test_cluster_handler_quirks_attribute_reading(zha_gateway: Gateway) ->
         model="Fake_Model_sensor_2",
     )
     zigpy_device = registry.get_device(zigpy_device)
+    # `registry.get_device` swaps in the replaced OppleCluster instance; patch its
+    # network methods so we can assert bind/reporting/reading behavior.
+    opple_cluster = zigpy_device.endpoints[1].opple_cluster
+    patch_cluster_for_testing(opple_cluster)
 
-    # Suppress normal endpoint probing, as this will claim the Opple cluster handler
-    # already due to it being in the "CLUSTER_HANDLER_ONLY_CLUSTERS" registry.
-    # We want to test the handler also gets claimed via quirks v2 attributes init.
+    # Suppress normal endpoint probing so virtual entities for the Opple cluster
+    # (e.g. AqaraOppleBind) don't bind it themselves — we want to observe only
+    # the quirks v2 sensor's effect.
     with patch("zha.application.discovery.discover_entities_for_endpoint"):
         zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
 
     assert isinstance(zha_device.device, CustomDeviceV2)
 
-    # get cluster handler of OppleCluster
-    opple_ch = zha_device.endpoints[1].all_cluster_handlers["1:0xfcc0"]
-    assert isinstance(opple_ch, OppleRemoteClusterHandler)
+    # The quirks v2 sensor entity is created
+    last_feeding_size = get_entity(
+        zha_device, platform=Platform.SENSOR, qualifier="last_feeding_size"
+    )
+    assert last_feeding_size is not None
 
-    # make sure the cluster handler was claimed due to attributes to be initialized
-    # otherwise, ZHA won't configure the cluster handler, so attributes are not read
-    assert opple_ch in zha_device.endpoints[1].claimed_cluster_handlers.values()
+    # No reporting config -> no bind, no configure_reporting
+    assert len(opple_cluster.bind.mock_calls) == 0
+    assert len(opple_cluster.configure_reporting_multiple.mock_calls) == 0
 
-    # check that BIND is set to False, as no reporting is configured
-    assert opple_ch.BIND is False
-
-    # check ZCL_INIT_ATTRS contains sensor attributes that are not in REPORT_CONFIG
-    assert opple_ch.ZCL_INIT_ATTRS == {
-        "last_feeding_size": True,
-    }
-    # check that ZCL_INIT_ATTRS is an instance variable and not a class variable now
-    assert opple_ch.ZCL_INIT_ATTRS is opple_ch.__dict__[ZCL_INIT_ATTRS]
-    assert opple_ch.ZCL_INIT_ATTRS is not OppleRemoteClusterHandler.ZCL_INIT_ATTRS
-
-    # double check we didn't modify the class variable
-    assert OppleRemoteClusterHandler.ZCL_INIT_ATTRS == {}
-
-    # check if REPORT_CONFIG is empty, both instance and class variable
-    assert opple_ch.REPORT_CONFIG == ()
-    assert OppleRemoteClusterHandler.REPORT_CONFIG == ()
+    # But the attribute IS read on startup so the sensor has an initial value
+    attr_reads = [
+        c
+        for c in opple_cluster.read_attributes.mock_calls
+        if c.args and "last_feeding_size" in c.args[0]
+    ]
+    assert len(attr_reads) == 1
 
 
 async def test_device_counter_sensors(zha_gateway: Gateway) -> None:
@@ -1978,7 +1875,7 @@ async def test_danfoss_thermostat_sw_error(zha_gateway: Gateway) -> None:
         zha_gateway,
         cluster,
         {
-            danfoss_thermostat.DanfossDiagnosticCluster.AttributeDefs.sw_error_code.id: 0x0001
+            danfoss_thermostat.DanfossDiagnosticCluster.AttributeDefs.sw_error_code.name: 0x0001
         },
     )
 
@@ -2068,6 +1965,70 @@ async def test_ignore_non_value(zha_gateway: Gateway) -> None:
     assert entity.state["state"] is None
 
 
+async def test_ignore_non_value_quirks_v2(zha_gateway: Gateway) -> None:
+    """Test quirks v2 sensor entities also ignore ZCL datatype non-values."""
+
+    zigpy_dev = await zigpy_device_from_json(
+        zha_gateway.application_controller,
+        "tests/data/devices/frient-a-s-aqszb-110.json",
+    )
+    assert isinstance(zigpy_dev, CustomDeviceV2)
+
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
+    cluster = zha_device.device.endpoints[38].develco_voc_level
+    entity = get_entity(zha_device, platform=Platform.SENSOR, qualifier="voc_level")
+
+    # Normal attribute report
+    await send_attributes_report(zha_gateway, cluster, {"measured_value": 100})
+    assert entity.state["state"] == 100
+
+    # Invalid attribute value (uint16 non_value), should be ignored
+    await send_attributes_report(zha_gateway, cluster, {"measured_value": 0xFFFF})
+    assert entity.state["state"] is None
+
+
+async def test_ignore_nan_value(zha_gateway: Gateway) -> None:
+    """Test sensor updates ignoring NaN values (e.g. from CO concentration sensors)."""
+
+    zigpy_dev = await zigpy_device_from_json(
+        zha_gateway.application_controller,
+        "tests/data/devices/frient-a-s-scazb-141.json",
+    )
+
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
+    cluster = zha_device.device.endpoints[46].carbon_monoxide_concentration
+    entity = get_entity(
+        zha_device,
+        platform=Platform.SENSOR,
+        entity_type=sensor.CarbonMonoxideConcentration,
+    )
+
+    # Initial value from the diagnostics file (0.0 * 1e6 = 0.0 ppm)
+    assert entity.state["state"] == 0.0
+
+    # Normal attribute report
+    await send_attributes_report(
+        zha_gateway,
+        cluster,
+        {
+            measurement.CarbonMonoxideConcentration.AttributeDefs.measured_value.id: 0.001
+        },
+    )
+    assert entity.state["state"] == 1000.0
+
+    # NaN attribute value should result in None state
+    await send_attributes_report(
+        zha_gateway,
+        cluster,
+        {
+            measurement.CarbonMonoxideConcentration.AttributeDefs.measured_value.id: float(
+                "nan"
+            ),
+        },
+    )
+    assert entity.state["state"] is None
+
+
 @pytest.mark.parametrize(
     ("resolution", "precision"),
     [
@@ -2115,7 +2076,7 @@ async def test_enum_sensor(zha_gateway: Gateway) -> None:
     registry = DeviceRegistry()
     zigpy_dev = await zigpy_device_from_json(
         zha_gateway.application_controller,
-        "tests/data/devices/third-reality-inc-3rsm0147z.json",
+        "tests/data/devices/centralite-3405-l.json",
     )
 
     zigpy_dev.endpoints[1].power.update_attribute(
@@ -2151,3 +2112,38 @@ async def test_enum_sensor(zha_gateway: Gateway) -> None:
     )
 
     assert entity.state["state"] == "undefined_0xab"  # TODO: should this be `None`?
+
+
+async def test_em_poller_runs_independently_of_entity_enabled_state(
+    zha_gateway: Gateway,
+) -> None:
+    """Disabling the active_power entity must not stop EM cluster polling."""
+
+    zigpy_dev = await zigpy_device_from_json(
+        zha_gateway.application_controller,
+        "tests/data/devices/ubisys-s1-5501.json",
+    )
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
+
+    poller = get_entity(
+        zha_device,
+        platform=Platform.VIRTUAL,
+        exact_entity_type=sensor.ElectricalMeasurementPoller,
+    )
+    active_power = get_entity(
+        zha_device,
+        platform=Platform.SENSOR,
+        exact_entity_type=sensor.ElectricalMeasurementActivePower,
+    )
+
+    assert len(poller._tracked_tasks) == 1
+    poll_task = poller._tracked_tasks[0]
+    assert not poll_task.done()
+
+    active_power.disable()
+    assert active_power.enabled is False
+    assert not poll_task.done()
+
+    active_power.enable()
+    assert active_power.enabled is True
+    assert not poll_task.done()

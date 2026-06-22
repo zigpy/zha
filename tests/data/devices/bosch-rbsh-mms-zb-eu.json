@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "ieee": "ab:cd:ef:12:75:e4:96:a5",
   "nwk": "0x0CE8",
   "manufacturer": "Bosch",
@@ -661,22 +661,6 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "IdentifyClusterHandler",
-              "generic_id": "cluster_handler_0x0003",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 3,
-                "name": "Identify",
-                "type": "server"
-              },
-              "id": "1:0x0003",
-              "unique_id": "ab:cd:ef:12:75:e4:96:a5:1:0x0003",
-              "status": "INITIALIZED",
-              "value_attribute": null
-            }
-          ],
           "device_ieee": "ab:cd:ef:12:75:e4:96:a5",
           "endpoint_id": 1,
           "available": true,
@@ -709,22 +693,6 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "WindowCoveringClusterHandler",
-              "generic_id": "cluster_handler_0x0102",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 258,
-                "name": "Window Covering",
-                "type": "server"
-              },
-              "id": "1:0x0102",
-              "unique_id": "ab:cd:ef:12:75:e4:96:a5:1:0x0102",
-              "status": "INITIALIZED",
-              "value_attribute": "current_position_lift_percentage"
-            }
-          ],
           "device_ieee": "ab:cd:ef:12:75:e4:96:a5",
           "endpoint_id": 1,
           "available": true,
@@ -738,7 +706,8 @@
           "state": "open",
           "is_opening": false,
           "is_closing": false,
-          "is_closed": false
+          "is_closed": false,
+          "supported_features": 255
         }
       }
     ],
@@ -758,22 +727,6 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "OnOffClusterHandler",
-              "generic_id": "cluster_handler_0x0006",
-              "endpoint_id": 2,
-              "cluster": {
-                "id": 6,
-                "name": "On/Off",
-                "type": "server"
-              },
-              "id": "2:0x0006",
-              "unique_id": "ab:cd:ef:12:75:e4:96:a5:2:0x0006",
-              "status": "INITIALIZED",
-              "value_attribute": "on_off"
-            }
-          ],
           "device_ieee": "ab:cd:ef:12:75:e4:96:a5",
           "endpoint_id": 2,
           "available": true,
@@ -824,22 +777,6 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "OnOffClusterHandler",
-              "generic_id": "cluster_handler_0x0006",
-              "endpoint_id": 3,
-              "cluster": {
-                "id": 6,
-                "name": "On/Off",
-                "type": "server"
-              },
-              "id": "3:0x0006",
-              "unique_id": "ab:cd:ef:12:75:e4:96:a5:3:0x0006",
-              "status": "INITIALIZED",
-              "value_attribute": "on_off"
-            }
-          ],
           "device_ieee": "ab:cd:ef:12:75:e4:96:a5",
           "endpoint_id": 3,
           "available": true,
@@ -892,22 +829,6 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "ClusterHandler",
-              "generic_id": "cluster_handler_0xfca0",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 64672,
-                "name": "BoschLightShutterControlII",
-                "type": "server"
-              },
-              "id": "1:0xfca0",
-              "unique_id": "ab:cd:ef:12:75:e4:96:a5:1:0xfca0",
-              "status": "INITIALIZED",
-              "value_attribute": null
-            }
-          ],
           "device_ieee": "ab:cd:ef:12:75:e4:96:a5",
           "endpoint_id": 1,
           "available": true,
@@ -939,22 +860,6 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "ClusterHandler",
-              "generic_id": "cluster_handler_0xfca0",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 64672,
-                "name": "BoschLightShutterControlII",
-                "type": "server"
-              },
-              "id": "1:0xfca0",
-              "unique_id": "ab:cd:ef:12:75:e4:96:a5:1:0xfca0",
-              "status": "INITIALIZED",
-              "value_attribute": null
-            }
-          ],
           "device_ieee": "ab:cd:ef:12:75:e4:96:a5",
           "endpoint_id": 1,
           "available": true,
@@ -986,22 +891,6 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "ClusterHandler",
-              "generic_id": "cluster_handler_0xfca0",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 64672,
-                "name": "BoschLightShutterControlII",
-                "type": "server"
-              },
-              "id": "1:0xfca0",
-              "unique_id": "ab:cd:ef:12:75:e4:96:a5:1:0xfca0",
-              "status": "INITIALIZED",
-              "value_attribute": null
-            }
-          ],
           "device_ieee": "ab:cd:ef:12:75:e4:96:a5",
           "endpoint_id": 1,
           "available": true,
@@ -1033,22 +922,6 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "ClusterHandler",
-              "generic_id": "cluster_handler_0xfca0",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 64672,
-                "name": "BoschLightShutterControlII",
-                "type": "server"
-              },
-              "id": "1:0xfca0",
-              "unique_id": "ab:cd:ef:12:75:e4:96:a5:1:0xfca0",
-              "status": "INITIALIZED",
-              "value_attribute": null
-            }
-          ],
           "device_ieee": "ab:cd:ef:12:75:e4:96:a5",
           "endpoint_id": 1,
           "available": true,
@@ -1082,22 +955,6 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "ClusterHandler",
-              "generic_id": "cluster_handler_0xfca0",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 64672,
-                "name": "BoschLightShutterControlII",
-                "type": "server"
-              },
-              "id": "1:0xfca0",
-              "unique_id": "ab:cd:ef:12:75:e4:96:a5:1:0xfca0",
-              "status": "INITIALIZED",
-              "value_attribute": null
-            }
-          ],
           "device_ieee": "ab:cd:ef:12:75:e4:96:a5",
           "endpoint_id": 1,
           "available": true,
@@ -1130,22 +987,6 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "ClusterHandler",
-              "generic_id": "cluster_handler_0xfca0",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 64672,
-                "name": "BoschLightShutterControlII",
-                "type": "server"
-              },
-              "id": "1:0xfca0",
-              "unique_id": "ab:cd:ef:12:75:e4:96:a5:1:0xfca0",
-              "status": "INITIALIZED",
-              "value_attribute": null
-            }
-          ],
           "device_ieee": "ab:cd:ef:12:75:e4:96:a5",
           "endpoint_id": 1,
           "available": true,
@@ -1179,22 +1020,6 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "OnOffClusterHandler",
-              "generic_id": "cluster_handler_0x0006",
-              "endpoint_id": 2,
-              "cluster": {
-                "id": 6,
-                "name": "On/Off",
-                "type": "server"
-              },
-              "id": "2:0x0006",
-              "unique_id": "ab:cd:ef:12:75:e4:96:a5:2:0x0006",
-              "status": "INITIALIZED",
-              "value_attribute": "on_off"
-            }
-          ],
           "device_ieee": "ab:cd:ef:12:75:e4:96:a5",
           "endpoint_id": 2,
           "available": true,
@@ -1228,22 +1053,6 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "OnOffClusterHandler",
-              "generic_id": "cluster_handler_0x0006",
-              "endpoint_id": 3,
-              "cluster": {
-                "id": 6,
-                "name": "On/Off",
-                "type": "server"
-              },
-              "id": "3:0x0006",
-              "unique_id": "ab:cd:ef:12:75:e4:96:a5:3:0x0006",
-              "status": "INITIALIZED",
-              "value_attribute": "on_off"
-            }
-          ],
           "device_ieee": "ab:cd:ef:12:75:e4:96:a5",
           "endpoint_id": 3,
           "available": true,
@@ -1279,22 +1088,6 @@
           "entity_registry_enabled_default": false,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "BasicClusterHandler",
-              "generic_id": "cluster_handler_0x0000",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 0,
-                "name": "Basic",
-                "type": "server"
-              },
-              "id": "1:0x0000",
-              "unique_id": "ab:cd:ef:12:75:e4:96:a5:1:0x0000",
-              "status": "INITIALIZED",
-              "value_attribute": null
-            }
-          ],
           "device_ieee": "ab:cd:ef:12:75:e4:96:a5",
           "endpoint_id": 1,
           "available": true,
@@ -1323,22 +1116,6 @@
           "entity_registry_enabled_default": false,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "BasicClusterHandler",
-              "generic_id": "cluster_handler_0x0000",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 0,
-                "name": "Basic",
-                "type": "server"
-              },
-              "id": "1:0x0000",
-              "unique_id": "ab:cd:ef:12:75:e4:96:a5:1:0x0000",
-              "status": "INITIALIZED",
-              "value_attribute": null
-            }
-          ],
           "device_ieee": "ab:cd:ef:12:75:e4:96:a5",
           "endpoint_id": 1,
           "available": true,
@@ -1367,27 +1144,11 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "MeteringClusterHandler",
-              "generic_id": "cluster_handler_0x0702",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 1794,
-                "name": "Metering",
-                "type": "server"
-              },
-              "id": "1:0x0702",
-              "unique_id": "ab:cd:ef:12:75:e4:96:a5:1:0x0702",
-              "status": "INITIALIZED",
-              "value_attribute": "instantaneous_demand"
-            }
-          ],
           "device_ieee": "ab:cd:ef:12:75:e4:96:a5",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
-          "suggested_display_precision": null,
+          "suggested_display_precision": 1,
           "unit": "W"
         },
         "state": {
@@ -1419,22 +1180,6 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "MeteringClusterHandler",
-              "generic_id": "cluster_handler_0x0702",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 1794,
-                "name": "Metering",
-                "type": "server"
-              },
-              "id": "1:0x0702",
-              "unique_id": "ab:cd:ef:12:75:e4:96:a5:1:0x0702",
-              "status": "INITIALIZED",
-              "value_attribute": "instantaneous_demand"
-            }
-          ],
           "device_ieee": "ab:cd:ef:12:75:e4:96:a5",
           "endpoint_id": 1,
           "available": true,
@@ -1471,22 +1216,6 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "WindowCoveringClusterHandler",
-              "generic_id": "cluster_handler_0x0102",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 258,
-                "name": "Window Covering",
-                "type": "server"
-              },
-              "id": "1:0x0102",
-              "unique_id": "ab:cd:ef:12:75:e4:96:a5:1:0x0102",
-              "status": "INITIALIZED",
-              "value_attribute": "current_position_lift_percentage"
-            }
-          ],
           "device_ieee": "ab:cd:ef:12:75:e4:96:a5",
           "endpoint_id": 1,
           "available": true,
@@ -1506,7 +1235,7 @@
           "unique_id": "ab:cd:ef:12:75:e4:96:a5-1-2820",
           "migrate_unique_ids": [],
           "platform": "sensor",
-          "class_name": "PolledElectricalMeasurement",
+          "class_name": "ElectricalMeasurementActivePower",
           "translation_key": null,
           "translation_placeholders": null,
           "device_class": "power",
@@ -1515,22 +1244,6 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "ElectricalMeasurementClusterHandler",
-              "generic_id": "cluster_handler_0x0b04",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 2820,
-                "name": "Electrical Measurement",
-                "type": "server"
-              },
-              "id": "1:0x0b04",
-              "unique_id": "ab:cd:ef:12:75:e4:96:a5:1:0x0b04",
-              "status": "INITIALIZED",
-              "value_attribute": "ac_voltage_multiplier"
-            }
-          ],
           "device_ieee": "ab:cd:ef:12:75:e4:96:a5",
           "endpoint_id": 1,
           "available": true,
@@ -1539,7 +1252,7 @@
           "unit": "W"
         },
         "state": {
-          "class_name": "PolledElectricalMeasurement",
+          "class_name": "ElectricalMeasurementActivePower",
           "available": true,
           "state": 0.0,
           "measurement_type": "ACTIVE_MEASUREMENT"
@@ -1564,22 +1277,6 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "ClusterHandler",
-              "generic_id": "cluster_handler_0xfca0",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 64672,
-                "name": "BoschLightShutterControlII",
-                "type": "server"
-              },
-              "id": "1:0xfca0",
-              "unique_id": "ab:cd:ef:12:75:e4:96:a5:1:0xfca0",
-              "status": "INITIALIZED",
-              "value_attribute": null
-            }
-          ],
           "device_ieee": "ab:cd:ef:12:75:e4:96:a5",
           "endpoint_id": 1,
           "available": true,
@@ -1610,22 +1307,6 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "WindowCoveringClusterHandler",
-              "generic_id": "cluster_handler_0x0102",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 258,
-                "name": "Window Covering",
-                "type": "server"
-              },
-              "id": "1:0x0102",
-              "unique_id": "ab:cd:ef:12:75:e4:96:a5:1:0x0102",
-              "status": "INITIALIZED",
-              "value_attribute": "current_position_lift_percentage"
-            }
-          ],
           "device_ieee": "ab:cd:ef:12:75:e4:96:a5",
           "endpoint_id": 1,
           "available": true,
@@ -1658,22 +1339,6 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "ClusterHandler",
-              "generic_id": "cluster_handler_0xfca0",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 64672,
-                "name": "BoschLightShutterControlII",
-                "type": "server"
-              },
-              "id": "1:0xfca0",
-              "unique_id": "ab:cd:ef:12:75:e4:96:a5:1:0xfca0",
-              "status": "INITIALIZED",
-              "value_attribute": null
-            }
-          ],
           "device_ieee": "ab:cd:ef:12:75:e4:96:a5",
           "endpoint_id": 1,
           "available": true,
@@ -1706,22 +1371,6 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "ClusterHandler",
-              "generic_id": "cluster_handler_0xfca0",
-              "endpoint_id": 2,
-              "cluster": {
-                "id": 64672,
-                "name": "BoschLightShutterControlII",
-                "type": "server"
-              },
-              "id": "2:0xfca0",
-              "unique_id": "ab:cd:ef:12:75:e4:96:a5:2:0xfca0",
-              "status": "INITIALIZED",
-              "value_attribute": null
-            }
-          ],
           "device_ieee": "ab:cd:ef:12:75:e4:96:a5",
           "endpoint_id": 2,
           "available": true,
@@ -1754,22 +1403,6 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "ClusterHandler",
-              "generic_id": "cluster_handler_0xfca0",
-              "endpoint_id": 3,
-              "cluster": {
-                "id": 64672,
-                "name": "BoschLightShutterControlII",
-                "type": "server"
-              },
-              "id": "3:0xfca0",
-              "unique_id": "ab:cd:ef:12:75:e4:96:a5:3:0xfca0",
-              "status": "INITIALIZED",
-              "value_attribute": null
-            }
-          ],
           "device_ieee": "ab:cd:ef:12:75:e4:96:a5",
           "endpoint_id": 3,
           "available": true,
@@ -1804,22 +1437,6 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "OtaClientClusterHandler",
-              "generic_id": "cluster_handler_0x0019_client",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 25,
-                "name": "Ota",
-                "type": "client"
-              },
-              "id": "1:0x0019_client",
-              "unique_id": "ab:cd:ef:12:75:e4:96:a5:1:0x0019_CLIENT",
-              "status": "INITIALIZED",
-              "value_attribute": null
-            }
-          ],
           "device_ieee": "ab:cd:ef:12:75:e4:96:a5",
           "endpoint_id": 1,
           "available": true,

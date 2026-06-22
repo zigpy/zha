@@ -7,7 +7,7 @@ from zigpy.profiles import zha, zll
 from zigpy.zcl.clusters.general import Identify
 
 DEFAULT_ON_OFF_TRANSITION = 1  # most bulbs default to a 1-second turn on/off transition
-DEFAULT_EXTRA_TRANSITION_DELAY_SHORT = 0.25
+DEFAULT_EXTRA_TRANSITION_DELAY_SHORT = 0.5
 DEFAULT_EXTRA_TRANSITION_DELAY_LONG = 2.0
 DEFAULT_LONG_TRANSITION_TIME = 10
 DEFAULT_MIN_BRIGHTNESS = 2

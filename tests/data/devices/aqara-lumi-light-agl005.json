@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "ieee": "ab:cd:ef:12:5f:ec:15:50",
   "nwk": "0x47E3",
   "manufacturer": "Aqara",
@@ -644,22 +644,6 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "IdentifyClusterHandler",
-              "generic_id": "cluster_handler_0x0003",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 3,
-                "name": "Identify",
-                "type": "server"
-              },
-              "id": "1:0x0003",
-              "unique_id": "ab:cd:ef:12:5f:ec:15:50:1:0x0003",
-              "status": "INITIALIZED",
-              "value_attribute": null
-            }
-          ],
           "device_ieee": "ab:cd:ef:12:5f:ec:15:50",
           "endpoint_id": 1,
           "available": true,
@@ -692,50 +676,6 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": true,
-          "cluster_handlers": [
-            {
-              "class_name": "OnOffClusterHandler",
-              "generic_id": "cluster_handler_0x0006",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 6,
-                "name": "On/Off",
-                "type": "server"
-              },
-              "id": "1:0x0006",
-              "unique_id": "ab:cd:ef:12:5f:ec:15:50:1:0x0006",
-              "status": "INITIALIZED",
-              "value_attribute": "on_off"
-            },
-            {
-              "class_name": "LevelControlClusterHandler",
-              "generic_id": "cluster_handler_0x0008",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 8,
-                "name": "Level control",
-                "type": "server"
-              },
-              "id": "1:0x0008",
-              "unique_id": "ab:cd:ef:12:5f:ec:15:50:1:0x0008",
-              "status": "INITIALIZED",
-              "value_attribute": "current_level"
-            },
-            {
-              "class_name": "ColorClusterHandler",
-              "generic_id": "cluster_handler_0x0300",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 768,
-                "name": "Color Control",
-                "type": "server"
-              },
-              "id": "1:0x0300",
-              "unique_id": "ab:cd:ef:12:5f:ec:15:50:1:0x0300",
-              "status": "INITIALIZED",
-              "value_attribute": "current_x"
-            }
-          ],
           "device_ieee": "ab:cd:ef:12:5f:ec:15:50",
           "endpoint_id": 1,
           "available": true,
@@ -794,22 +734,6 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "ColorClusterHandler",
-              "generic_id": "cluster_handler_0x0300",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 768,
-                "name": "Color Control",
-                "type": "server"
-              },
-              "id": "1:0x0300",
-              "unique_id": "ab:cd:ef:12:5f:ec:15:50:1:0x0300",
-              "status": "INITIALIZED",
-              "value_attribute": "current_x"
-            }
-          ],
           "device_ieee": "ab:cd:ef:12:5f:ec:15:50",
           "endpoint_id": 1,
           "available": true,
@@ -841,22 +765,6 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "LevelControlClusterHandler",
-              "generic_id": "cluster_handler_0x0008",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 8,
-                "name": "Level control",
-                "type": "server"
-              },
-              "id": "1:0x0008",
-              "unique_id": "ab:cd:ef:12:5f:ec:15:50:1:0x0008",
-              "status": "INITIALIZED",
-              "value_attribute": "current_level"
-            }
-          ],
           "device_ieee": "ab:cd:ef:12:5f:ec:15:50",
           "endpoint_id": 1,
           "available": true,
@@ -888,22 +796,6 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "LevelControlClusterHandler",
-              "generic_id": "cluster_handler_0x0008",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 8,
-                "name": "Level control",
-                "type": "server"
-              },
-              "id": "1:0x0008",
-              "unique_id": "ab:cd:ef:12:5f:ec:15:50:1:0x0008",
-              "status": "INITIALIZED",
-              "value_attribute": "current_level"
-            }
-          ],
           "device_ieee": "ab:cd:ef:12:5f:ec:15:50",
           "endpoint_id": 1,
           "available": true,
@@ -935,22 +827,6 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "LevelControlClusterHandler",
-              "generic_id": "cluster_handler_0x0008",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 8,
-                "name": "Level control",
-                "type": "server"
-              },
-              "id": "1:0x0008",
-              "unique_id": "ab:cd:ef:12:5f:ec:15:50:1:0x0008",
-              "status": "INITIALIZED",
-              "value_attribute": "current_level"
-            }
-          ],
           "device_ieee": "ab:cd:ef:12:5f:ec:15:50",
           "endpoint_id": 1,
           "available": true,
@@ -982,22 +858,6 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "LevelControlClusterHandler",
-              "generic_id": "cluster_handler_0x0008",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 8,
-                "name": "Level control",
-                "type": "server"
-              },
-              "id": "1:0x0008",
-              "unique_id": "ab:cd:ef:12:5f:ec:15:50:1:0x0008",
-              "status": "INITIALIZED",
-              "value_attribute": "current_level"
-            }
-          ],
           "device_ieee": "ab:cd:ef:12:5f:ec:15:50",
           "endpoint_id": 1,
           "available": true,
@@ -1031,22 +891,6 @@
           "entity_registry_enabled_default": false,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "BasicClusterHandler",
-              "generic_id": "cluster_handler_0x0000",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 0,
-                "name": "Basic",
-                "type": "server"
-              },
-              "id": "1:0x0000",
-              "unique_id": "ab:cd:ef:12:5f:ec:15:50:1:0x0000",
-              "status": "INITIALIZED",
-              "value_attribute": null
-            }
-          ],
           "device_ieee": "ab:cd:ef:12:5f:ec:15:50",
           "endpoint_id": 1,
           "available": true,
@@ -1075,22 +919,6 @@
           "entity_registry_enabled_default": false,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "BasicClusterHandler",
-              "generic_id": "cluster_handler_0x0000",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 0,
-                "name": "Basic",
-                "type": "server"
-              },
-              "id": "1:0x0000",
-              "unique_id": "ab:cd:ef:12:5f:ec:15:50:1:0x0000",
-              "status": "INITIALIZED",
-              "value_attribute": null
-            }
-          ],
           "device_ieee": "ab:cd:ef:12:5f:ec:15:50",
           "endpoint_id": 1,
           "available": true,
@@ -1119,22 +947,6 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "MeteringClusterHandler",
-              "generic_id": "cluster_handler_0x0702",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 1794,
-                "name": "Metering",
-                "type": "server"
-              },
-              "id": "1:0x0702",
-              "unique_id": "ab:cd:ef:12:5f:ec:15:50:1:0x0702",
-              "status": "INITIALIZED",
-              "value_attribute": "instantaneous_demand"
-            }
-          ],
           "device_ieee": "ab:cd:ef:12:5f:ec:15:50",
           "endpoint_id": 1,
           "available": true,
@@ -1161,7 +973,7 @@
           "unique_id": "ab:cd:ef:12:5f:ec:15:50-1-2820",
           "migrate_unique_ids": [],
           "platform": "sensor",
-          "class_name": "PolledElectricalMeasurement",
+          "class_name": "ElectricalMeasurementActivePower",
           "translation_key": null,
           "translation_placeholders": null,
           "device_class": "power",
@@ -1170,22 +982,6 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "ElectricalMeasurementClusterHandler",
-              "generic_id": "cluster_handler_0x0b04",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 2820,
-                "name": "Electrical Measurement",
-                "type": "server"
-              },
-              "id": "1:0x0b04",
-              "unique_id": "ab:cd:ef:12:5f:ec:15:50:1:0x0b04",
-              "status": "INITIALIZED",
-              "value_attribute": "ac_voltage_multiplier"
-            }
-          ],
           "device_ieee": "ab:cd:ef:12:5f:ec:15:50",
           "endpoint_id": 1,
           "available": true,
@@ -1194,7 +990,7 @@
           "unit": "W"
         },
         "state": {
-          "class_name": "PolledElectricalMeasurement",
+          "class_name": "ElectricalMeasurementActivePower",
           "available": true,
           "state": 0.0,
           "measurement_type": "ACTIVE_MEASUREMENT"
@@ -1221,22 +1017,6 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "OtaClientClusterHandler",
-              "generic_id": "cluster_handler_0x0019_client",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 25,
-                "name": "Ota",
-                "type": "client"
-              },
-              "id": "1:0x0019_client",
-              "unique_id": "ab:cd:ef:12:5f:ec:15:50:1:0x0019_CLIENT",
-              "status": "INITIALIZED",
-              "value_attribute": null
-            }
-          ],
           "device_ieee": "ab:cd:ef:12:5f:ec:15:50",
           "endpoint_id": 1,
           "available": true,

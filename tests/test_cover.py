@@ -38,6 +38,7 @@ from zha.application.platforms.cover.const import (
     CoverEntityFeature,
     CoverState,
 )
+from zha.const import STATE_CHANGED
 from zha.exceptions import ZHAException
 from zha.zigbee.device import Device
 
@@ -135,12 +136,7 @@ async def test_cover_non_tilt_initial_state(  # pylint: disable=unused-argument
     )
 
     cluster = zigpy_cover_device.endpoints[1].window_covering
-    assert (
-        not zha_device.endpoints[1]
-        .all_cluster_handlers[f"1:0x{cluster.cluster_id:04x}"]
-        .inverted
-    )
-    assert cluster.read_attributes.call_count == 3
+    assert cluster.read_attributes.call_count == 2
     assert (
         WCAttrs.current_position_lift_percentage.name
         in cluster.read_attributes.call_args[0][0]
@@ -183,12 +179,7 @@ async def test_cover_non_lift_initial_state(  # pylint: disable=unused-argument
     )
 
     cluster = zigpy_cover_device.endpoints[1].window_covering
-    assert (
-        not zha_device.endpoints[1]
-        .all_cluster_handlers[f"1:0x{cluster.cluster_id:04x}"]
-        .inverted
-    )
-    assert cluster.read_attributes.call_count == 3
+    assert cluster.read_attributes.call_count == 2
     assert (
         WCAttrs.current_position_lift_percentage.name
         in cluster.read_attributes.call_args[0][0]
@@ -231,12 +222,7 @@ async def test_cover(
     )
 
     cluster = zigpy_cover_device.endpoints[1].window_covering
-    assert (
-        not zha_device.endpoints[1]
-        .all_cluster_handlers[f"1:0x{cluster.cluster_id:04x}"]
-        .inverted
-    )
-    assert cluster.read_attributes.call_count == 3
+    assert cluster.read_attributes.call_count == 2
     assert (
         WCAttrs.current_position_lift_percentage.name
         in cluster.read_attributes.call_args[0][0]
@@ -687,6 +673,43 @@ async def test_cover(
         assert cluster.request.call_args[1]["expect_reply"] is True
 
 
+async def test_cover_recompute_capabilities_on_type_update(
+    zha_gateway: Gateway,
+) -> None:
+    """Test supported features update when window covering type changes."""
+    zha_device, zigpy_cover_device = await device_cover_mock(
+        zha_gateway,
+        current_position_lift_percentage=None,
+        current_position_tilt_percentage=None,
+        window_covering_type=WCT.Drapery,
+    )
+    cluster = zigpy_cover_device.endpoints[1].window_covering
+    entity = get_entity(zha_device, platform=Platform.COVER)
+    subscriber = MagicMock()
+    entity.on_event(STATE_CHANGED, subscriber)
+
+    assert entity.supported_features == (
+        CoverEntityFeature.OPEN
+        | CoverEntityFeature.CLOSE
+        | CoverEntityFeature.STOP
+        | CoverEntityFeature.SET_POSITION
+    )
+    assert len(subscriber.mock_calls) == 0
+
+    await send_attributes_report(
+        zha_gateway,
+        cluster,
+        {WCAttrs.window_covering_type: WCT.Tilt_blind_tilt_only},
+    )
+    assert entity.supported_features == (
+        CoverEntityFeature.OPEN_TILT
+        | CoverEntityFeature.CLOSE_TILT
+        | CoverEntityFeature.STOP_TILT
+        | CoverEntityFeature.SET_TILT_POSITION
+    )
+    assert len(subscriber.mock_calls) == 1
+
+
 async def test_cover_failures(zha_gateway: Gateway) -> None:
     """Test ZHA cover platform failure cases."""
 
@@ -1046,9 +1069,7 @@ async def test_keen_vent(
     # open from client command fails
     p1 = patch.object(cluster_on_off, "request", side_effect=asyncio.TimeoutError)
     p2 = patch.object(cluster_level, "request", AsyncMock(return_value=[4, 0]))
-    p3 = pytest.raises(
-        ZHAException, match="Failed to send request: device did not respond"
-    )
+    p3 = pytest.raises(asyncio.TimeoutError)
 
     with p1, p2, p3:
         await entity.async_open_cover()

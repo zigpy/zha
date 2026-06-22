@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "ieee": "ab:cd:ef:12:64:8d:3f:7f",
   "nwk": "0x83CF",
   "manufacturer": "_TZE204_qvxrkeif",
@@ -7,8 +7,8 @@
   "friendly_manufacturer": "_TZE204_qvxrkeif",
   "friendly_model": "TS0601",
   "name": "_TZE204_qvxrkeif TS0601",
-  "quirk_applied": false,
-  "quirk_class": "zigpy.device.Device",
+  "quirk_applied": true,
+  "quirk_class": "zigpy.quirks.v2.CustomDeviceV2",
   "exposes_features": [],
   "manufacturer_code": 4417,
   "power_source": "Mains",
@@ -76,8 +76,20 @@
           "attributes": []
         },
         {
+          "cluster_id": "0x0500",
+          "endpoint_attribute": "ias_zone",
+          "attributes": [
+            {
+              "id": "0x0001",
+              "name": "zone_type",
+              "zcl_type": "enum16",
+              "value": 43
+            }
+          ]
+        },
+        {
           "cluster_id": "0xef00",
-          "endpoint_attribute": null,
+          "endpoint_attribute": "tuya_manufacturer",
           "attributes": []
         }
       ],
@@ -161,6 +173,116 @@
     }
   },
   "zha_lib_entities": {
+    "binary_sensor": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:64:8d:3f:7f-1-1280",
+          "migrate_unique_ids": [],
+          "platform": "binary_sensor",
+          "class_name": "IASZone",
+          "translation_key": null,
+          "translation_placeholders": null,
+          "device_class": "carbon_monoxide",
+          "state_class": null,
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": true,
+          "device_ieee": "ab:cd:ef:12:64:8d:3f:7f",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "attribute_name": "zone_status"
+        },
+        "state": {
+          "class_name": "IASZone",
+          "available": true,
+          "state": false
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Fault alarm",
+          "unique_id": "ab:cd:ef:12:64:8d:3f:7f-1-fault_alarm",
+          "migrate_unique_ids": [],
+          "platform": "binary_sensor",
+          "class_name": "BinarySensor",
+          "translation_key": "fault_alarm",
+          "translation_placeholders": null,
+          "device_class": "problem",
+          "state_class": null,
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "device_ieee": "ab:cd:ef:12:64:8d:3f:7f",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "attribute_name": "fault_alarm"
+        },
+        "state": {
+          "class_name": "BinarySensor",
+          "available": true,
+          "state": false
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Lifecycle",
+          "unique_id": "ab:cd:ef:12:64:8d:3f:7f-1-lifecycle",
+          "migrate_unique_ids": [],
+          "platform": "binary_sensor",
+          "class_name": "BinarySensor",
+          "translation_key": "lifecycle",
+          "translation_placeholders": null,
+          "device_class": "problem",
+          "state_class": null,
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "device_ieee": "ab:cd:ef:12:64:8d:3f:7f",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "attribute_name": "lifecycle"
+        },
+        "state": {
+          "class_name": "BinarySensor",
+          "available": true,
+          "state": false
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Preheat",
+          "unique_id": "ab:cd:ef:12:64:8d:3f:7f-1-preheat",
+          "migrate_unique_ids": [],
+          "platform": "binary_sensor",
+          "class_name": "BinarySensor",
+          "translation_key": "preheat",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "device_ieee": "ab:cd:ef:12:64:8d:3f:7f",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "attribute_name": "preheat"
+        },
+        "state": {
+          "class_name": "BinarySensor",
+          "available": true,
+          "state": false
+        }
+      }
+    ],
     "sensor": [
       {
         "info_object": {
@@ -177,22 +299,6 @@
           "entity_registry_enabled_default": false,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "BasicClusterHandler",
-              "generic_id": "cluster_handler_0x0000",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 0,
-                "name": "Basic",
-                "type": "server"
-              },
-              "id": "1:0x0000",
-              "unique_id": "ab:cd:ef:12:64:8d:3f:7f:1:0x0000",
-              "status": "INITIALIZED",
-              "value_attribute": null
-            }
-          ],
           "device_ieee": "ab:cd:ef:12:64:8d:3f:7f",
           "endpoint_id": 1,
           "available": true,
@@ -221,22 +327,6 @@
           "entity_registry_enabled_default": false,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "BasicClusterHandler",
-              "generic_id": "cluster_handler_0x0000",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 0,
-                "name": "Basic",
-                "type": "server"
-              },
-              "id": "1:0x0000",
-              "unique_id": "ab:cd:ef:12:64:8d:3f:7f:1:0x0000",
-              "status": "INITIALIZED",
-              "value_attribute": null
-            }
-          ],
           "device_ieee": "ab:cd:ef:12:64:8d:3f:7f",
           "endpoint_id": 1,
           "available": true,
@@ -267,22 +357,6 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "OtaClientClusterHandler",
-              "generic_id": "cluster_handler_0x0019_client",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 25,
-                "name": "Ota",
-                "type": "client"
-              },
-              "id": "1:0x0019_client",
-              "unique_id": "ab:cd:ef:12:64:8d:3f:7f:1:0x0019_CLIENT",
-              "status": "INITIALIZED",
-              "value_attribute": null
-            }
-          ],
           "device_ieee": "ab:cd:ef:12:64:8d:3f:7f",
           "endpoint_id": 1,
           "available": true,

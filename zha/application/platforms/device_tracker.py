@@ -2,31 +2,34 @@
 
 from __future__ import annotations
 
+from abc import ABC, abstractmethod
 from enum import StrEnum
 import functools
 import time
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, Any
 
 from zigpy.profiles import zha
+from zigpy.zcl import (
+    AttributeReadEvent,
+    AttributeReportedEvent,
+    AttributeUpdatedEvent,
+    AttributeWrittenEvent,
+    ReportingConfig,
+)
 from zigpy.zcl.clusters.general import PowerConfiguration
 
 from zha.application import Platform
 from zha.application.platforms import (
-    ClusterHandlerMatch,
+    AttrConfig,
+    ClusterConfig,
+    ClusterMatch,
     PlatformEntity,
     register_entity,
 )
 from zha.application.platforms.sensor import Battery
 from zha.decorators import periodic
-from zha.zigbee.cluster_handlers import ClusterAttributeUpdatedEvent
-from zha.zigbee.cluster_handlers.const import (
-    CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
-    CLUSTER_HANDLER_POWER_CONFIGURATION,
-)
-from zha.zigbee.cluster_handlers.general import PowerConfigurationClusterHandler
 
 if TYPE_CHECKING:
-    from zha.zigbee.cluster_handlers import ClusterHandler
     from zha.zigbee.device import Device
     from zha.zigbee.endpoint import Endpoint
 
@@ -45,42 +48,96 @@ class SourceType(StrEnum):
     BLUETOOTH_LE = "bluetooth_le"
 
 
-@register_entity(PowerConfiguration.cluster_id)
-class DeviceScannerEntity(PlatformEntity):
-    """Represent a tracked device."""
+class BaseDeviceTracker(PlatformEntity, ABC):
+    """Abstract base class for ZHA device tracker entities."""
 
     PLATFORM = Platform.DEVICE_TRACKER
+
+    @property
+    def state(self) -> dict[str, Any]:
+        """Return the state of the device."""
+        response = super().state
+        response.update(
+            {
+                "connected": self.is_connected,
+                "battery_level": self.battery_level,
+            }
+        )
+        return response
+
+    @property
+    @abstractmethod
+    def is_connected(self) -> bool:
+        """Return true if the device is connected to the network."""
+
+    @property
+    @abstractmethod
+    def battery_level(self) -> float | None:
+        """Return the battery level of the device."""
+
+    @property
+    @abstractmethod
+    def source_type(self) -> SourceType:
+        """Return the source type, eg gps or router, of the device."""
+
+
+@register_entity(PowerConfiguration.cluster_id)
+class DeviceScannerEntity(BaseDeviceTracker):
+    """Represent a tracked device."""
 
     _attr_should_poll = True  # BaseZhaEntity defaults to False
     _attr_fallback_name: str = "Device scanner"
     __polling_interval: int
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_POWER_CONFIGURATION}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({PowerConfiguration.cluster_id}),
         profile_device_types=frozenset(
             {(zha.PROFILE_ID, SMARTTHINGS_ARRIVAL_SENSOR_DEVICE_TYPE)}
         ),
     )
 
+    _server_cluster_config = {
+        PowerConfiguration.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                PowerConfiguration.AttributeDefs.battery_voltage: AttrConfig(
+                    read_on_startup=False,
+                    reporting=ReportingConfig(
+                        min_interval=3600, max_interval=10800, reportable_change=1
+                    ),
+                ),
+                PowerConfiguration.AttributeDefs.battery_percentage_remaining: AttrConfig(
+                    read_on_startup=False,
+                    reporting=ReportingConfig(
+                        min_interval=3600, max_interval=10800, reportable_change=1
+                    ),
+                ),
+                PowerConfiguration.AttributeDefs.battery_size: AttrConfig(
+                    read_on_startup=True,
+                ),
+                PowerConfiguration.AttributeDefs.battery_quantity: AttrConfig(
+                    read_on_startup=True,
+                ),
+            },
+        ),
+    }
+
     def __init__(
         self,
-        cluster_handlers: list[ClusterHandler],
         endpoint: Endpoint,
         device: Device,
         **kwargs,
     ):
         """Initialize the ZHA device tracker."""
         super().__init__(
-            cluster_handlers,
-            endpoint,
-            device,
-            **kwargs,
+            endpoint=endpoint,
+            device=device,
             legacy_discovery_unique_id=f"{endpoint.device.ieee}-{endpoint.id}",
+            **kwargs,
         )
-        self._battery_cluster_handler: PowerConfigurationClusterHandler = cast(
-            PowerConfigurationClusterHandler,
-            self.cluster_handlers[CLUSTER_HANDLER_POWER_CONFIGURATION],
-        )
+        self._cluster = endpoint.zigpy_endpoint.in_clusters[
+            PowerConfiguration.cluster_id
+        ]
         self._connected: bool = False
         self._keepalive_interval: int = 60
         self._should_poll: bool = True
@@ -89,12 +146,17 @@ class DeviceScannerEntity(PlatformEntity):
     def on_add(self) -> None:
         """Run when entity is added."""
         super().on_add()
-        self._on_remove_callbacks.append(
-            self._battery_cluster_handler.on_event(
-                CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
-                self.handle_cluster_handler_attribute_updated,
+        for event_type in (
+            AttributeReadEvent,
+            AttributeReportedEvent,
+            AttributeUpdatedEvent,
+            AttributeWrittenEvent,
+        ):
+            self._on_remove_callbacks.append(
+                self._cluster.on_event(
+                    event_type.event_type, self.handle_attribute_updated
+                )
             )
-        )
 
         self._tracked_tasks.append(
             self.device.gateway.async_create_background_task(
@@ -108,18 +170,6 @@ class DeviceScannerEntity(PlatformEntity):
             "started polling with refresh interval of %s",
             getattr(self, "__polling_interval"),
         )
-
-    @property
-    def state(self) -> dict[str, Any]:
-        """Return the state of the device."""
-        response = super().state
-        response.update(
-            {
-                "connected": self._connected,
-                "battery_level": self._battery_level,
-            }
-        )
-        return response
 
     @property
     def is_connected(self):
@@ -156,8 +206,12 @@ class DeviceScannerEntity(PlatformEntity):
                 self._connected = True
         self.maybe_emit_state_changed_event()
 
-    def handle_cluster_handler_attribute_updated(
-        self, event: ClusterAttributeUpdatedEvent
+    def handle_attribute_updated(
+        self,
+        event: AttributeReadEvent
+        | AttributeReportedEvent
+        | AttributeUpdatedEvent
+        | AttributeWrittenEvent,
     ) -> None:
         """Handle tracking."""
         if (
@@ -165,7 +219,7 @@ class DeviceScannerEntity(PlatformEntity):
             != PowerConfiguration.AttributeDefs.battery_percentage_remaining.name
         ):
             return
-        self.debug("battery_percentage_remaining updated: %s", event.attribute_value)
+        self.debug("battery_percentage_remaining updated: %s", event.value)
         self._connected = True
-        self._battery_level = Battery.formatter(event.attribute_value)
+        self._battery_level = Battery.formatter(event.value)
         self.maybe_emit_state_changed_event()
