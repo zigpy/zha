@@ -3,7 +3,6 @@
 import asyncio
 from unittest.mock import patch
 
-from zhaquirks.quirk_ids import SIREN_BASIC
 from zigpy.const import SIG_EP_PROFILE
 from zigpy.profiles import zha
 from zigpy.zcl.clusters import general, security
@@ -21,6 +20,7 @@ from tests.common import (
 from zha.application import Platform
 from zha.application.gateway import Gateway
 from zha.application.platforms.siren import SirenEntityFeature
+from zha.quirks import SIREN_BASIC
 from zha.zigbee.device import Device
 
 

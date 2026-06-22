@@ -13,7 +13,6 @@ from zhaquirks.builder.metadata import (
     DeviceAlertMetadata,
     ExposesFeatureMetadata,
 )
-from zhaquirks.legacy import DeviceRegistry
 from zigpy.exceptions import ZigbeeException
 import zigpy.profiles.zha
 import zigpy.types
@@ -57,6 +56,7 @@ from zha.application.platforms.sensor.device_class import (
 )
 from zha.application.platforms.switch import Switch
 from zha.exceptions import ZHAException
+from zha.quirks import DeviceRegistry
 from zha.zigbee.device import (
     ClusterBinding,
     Device,
@@ -838,12 +838,12 @@ async def test_quirks_v2_device_renaming(zha_gateway: Gateway) -> None:
     registry = DeviceRegistry()
 
     (
-        QuirkBuilder("CentraLite", "3405-L", registry=registry)
+        QuirkBuilder("CentraLite", "3405-L")
         .friendly_name(manufacturer="Lowe's", model="IRIS Keypad V2")
-        .add_to_registry()
+        .add_to_registry(registry)
     )
 
-    zigpy_dev = registry.get_device(
+    zigpy_dev = registry.resolve(
         await zigpy_device_from_json(
             zha_gateway.application_controller,
             "tests/data/devices/centralite-3405-l.json",
@@ -870,12 +870,12 @@ async def test_quirks_v2_device_alerts(zha_gateway: Gateway) -> None:
     registry = DeviceRegistry()
 
     (
-        QuirkBuilder("CentraLite", "3405-L", registry=registry)
+        QuirkBuilder("CentraLite", "3405-L")
         .device_alert(level=DeviceAlertLevel.WARNING, message="Test warning")
-        .add_to_registry()
+        .add_to_registry(registry)
     )
 
-    zigpy_dev = registry.get_device(
+    zigpy_dev = registry.resolve(
         await zigpy_device_from_json(
             zha_gateway.application_controller,
             "tests/data/devices/centralite-3405-l.json",
@@ -953,7 +953,7 @@ async def test_quirks_v2_primary_entity(zha_gateway: Gateway) -> None:
     registry = DeviceRegistry()
 
     (
-        QuirkBuilder("CentraLite", "3405-L", registry=registry)
+        QuirkBuilder("CentraLite", "3405-L")
         .sensor(
             attribute_name=PowerConfiguration.AttributeDefs.battery_quantity.id,
             cluster_id=PowerConfiguration.cluster_id,
@@ -961,10 +961,10 @@ async def test_quirks_v2_primary_entity(zha_gateway: Gateway) -> None:
             fallback_name="Battery quantity",
             primary=True,
         )
-        .add_to_registry()
+        .add_to_registry(registry)
     )
 
-    zigpy_dev = registry.get_device(
+    zigpy_dev = registry.resolve(
         await zigpy_device_from_json(
             zha_gateway.application_controller,
             "tests/data/devices/centralite-3405-l.json",
@@ -982,7 +982,7 @@ async def test_quirks_v2_prevent_default_entities(zha_gateway: Gateway) -> None:
     registry = DeviceRegistry()
 
     (
-        QuirkBuilder("CentraLite", "3405-L", registry=registry)
+        QuirkBuilder("CentraLite", "3405-L")
         .prevent_default_entity_creation(endpoint_id=123)
         .prevent_default_entity_creation(cluster_id=0x4567)
         .prevent_default_entity_creation(unique_id_suffix="_something")
@@ -990,10 +990,10 @@ async def test_quirks_v2_prevent_default_entities(zha_gateway: Gateway) -> None:
         .prevent_default_entity_creation(
             function=lambda entity: entity.__class__.__name__ == "IdentifyButton"
         )
-        .add_to_registry()
+        .add_to_registry(registry)
     )
 
-    zigpy_dev = registry.get_device(
+    zigpy_dev = registry.resolve(
         await zigpy_device_from_json(
             zha_gateway.application_controller,
             "tests/data/devices/centralite-3405-l.json",
@@ -1023,7 +1023,7 @@ async def test_quirks_v2_change_entity_metadata(zha_gateway: Gateway) -> None:
         return entity.__class__.__name__ == "LQISensor"
 
     (
-        QuirkBuilder("CentraLite", "3405-L", registry=registry)
+        QuirkBuilder("CentraLite", "3405-L")
         .change_entity_metadata(
             endpoint_id=1,
             unique_id_suffix="-lqi",
@@ -1062,10 +1062,10 @@ async def test_quirks_v2_change_entity_metadata(zha_gateway: Gateway) -> None:
             unique_id_suffix="generated_battery_voltage",
             new_translation_key="changed_via_cluster_id",
         )
-        .add_to_registry()
+        .add_to_registry(registry)
     )
 
-    zigpy_dev = registry.get_device(
+    zigpy_dev = registry.resolve(
         await zigpy_device_from_json(
             zha_gateway.application_controller,
             "tests/data/devices/centralite-3405-l.json",
@@ -1109,7 +1109,7 @@ async def test_quirks_v2_translation_placeholders(zha_gateway: Gateway) -> None:
     registry = DeviceRegistry()
 
     (
-        QuirkBuilder("CentraLite", "3405-L", registry=registry)
+        QuirkBuilder("CentraLite", "3405-L")
         .sensor(
             PowerConfiguration.AttributeDefs.battery_voltage.name,
             PowerConfiguration.cluster_id,
@@ -1117,10 +1117,10 @@ async def test_quirks_v2_translation_placeholders(zha_gateway: Gateway) -> None:
             translation_placeholders={"sensor_index": "1"},
             fallback_name="Some battery sensor {sensor_index}",
         )
-        .add_to_registry()
+        .add_to_registry(registry)
     )
 
-    zigpy_dev = registry.get_device(
+    zigpy_dev = registry.resolve(
         await zigpy_device_from_json(
             zha_gateway.application_controller,
             "tests/data/devices/centralite-3405-l.json",
@@ -1145,13 +1145,13 @@ async def test_quirks_v2_exposed_features(zha_gateway: Gateway) -> None:
     registry = DeviceRegistry()
 
     (
-        QuirkBuilder("CentraLite", "3405-L", registry=registry)
+        QuirkBuilder("CentraLite", "3405-L")
         .exposes_feature("some_feature")
         .exposes_feature("another_feature", config={"option": True})
-        .add_to_registry()
+        .add_to_registry(registry)
     )
 
-    zigpy_dev = registry.get_device(
+    zigpy_dev = registry.resolve(
         await zigpy_device_from_json(
             zha_gateway.application_controller,
             "tests/data/devices/centralite-3405-l.json",

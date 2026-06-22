@@ -13,7 +13,7 @@ from zhaquirks.builder.metadata import ReportingConfig as QuirksReportingConfig
 from zhaquirks.clusters import CustomCluster
 from zhaquirks.danfoss import thermostat as danfoss_thermostat
 from zhaquirks.device import CustomZigpyDevice
-from zhaquirks.legacy import DeviceRegistry, get_device
+from zhaquirks.legacy import get_device
 from zigpy.device import Device as ZigpyDevice
 from zigpy.profiles import zha
 import zigpy.profiles.zha
@@ -49,6 +49,7 @@ from zha.application.platforms.sensor.device_class import (
     SensorDeviceClass as SensorDeviceClassV2,
 )
 from zha.application.platforms.sensor.helpers import resolution_to_decimal_precision
+from zha.quirks import DeviceRegistry
 from zha.units import (
     PERCENTAGE,
     UnitOfElectricPotential,
@@ -1645,7 +1646,7 @@ async def test_quirks_v2_sensor_attribute_init_reads_cluster(
     registry = DeviceRegistry()
     (
         QuirkBuilder(
-            "Fake_Manufacturer_sensor_2", "Fake_Model_sensor_2", registry=registry
+            "Fake_Manufacturer_sensor_2", "Fake_Model_sensor_2"
         )
         .replaces(OppleCluster)
         .sensor(
@@ -1654,7 +1655,7 @@ async def test_quirks_v2_sensor_attribute_init_reads_cluster(
             translation_key="last_feeding_size",
             fallback_name="Last feeding size",
         )
-        .add_to_registry()
+        .add_to_registry(registry)
     )
 
     zigpy_device = create_mock_zigpy_device(
@@ -1673,8 +1674,8 @@ async def test_quirks_v2_sensor_attribute_init_reads_cluster(
         manufacturer="Fake_Manufacturer_sensor_2",
         model="Fake_Model_sensor_2",
     )
-    zigpy_device = registry.get_device(zigpy_device)
-    # `registry.get_device` swaps in the replaced OppleCluster instance; patch its
+    zigpy_device = registry.resolve(zigpy_device)
+    # `registry.resolve` swaps in the replaced OppleCluster instance; patch its
     # network methods so we can assert bind/reporting/reading behavior.
     opple_cluster = zigpy_device.endpoints[1].opple_cluster
     patch_cluster_for_testing(opple_cluster)
@@ -1906,7 +1907,7 @@ async def test_quirks_sensor_attr_converter(zha_gateway: Gateway) -> None:
     )
 
     (
-        QuirkBuilder(zigpy_dev.manufacturer, zigpy_dev.model, registry=registry)
+        QuirkBuilder(zigpy_dev.manufacturer, zigpy_dev.model)
         .sensor(
             AnalogInput.AttributeDefs.present_value.name,
             AnalogInput.cluster_id,
@@ -1914,10 +1915,10 @@ async def test_quirks_sensor_attr_converter(zha_gateway: Gateway) -> None:
             fallback_name="Quirks sensor",
             attribute_converter=lambda x: x + 100,
         )
-        .add_to_registry()
+        .add_to_registry(registry)
     )
 
-    zigpy_device_ = registry.get_device(zigpy_dev)
+    zigpy_device_ = registry.resolve(zigpy_dev)
 
     assert isinstance(zigpy_device_, CustomZigpyDevice)
     cluster = zigpy_device_.endpoints[1].analog_input
@@ -2084,7 +2085,7 @@ async def test_enum_sensor(zha_gateway: Gateway) -> None:
     )
 
     (
-        QuirkBuilder(zigpy_dev.manufacturer, zigpy_dev.model, registry=registry)
+        QuirkBuilder(zigpy_dev.manufacturer, zigpy_dev.model)
         .enum(
             entity_platform=EntityPlatform.SENSOR,
             entity_type=EntityType.DIAGNOSTIC,
@@ -2095,10 +2096,10 @@ async def test_enum_sensor(zha_gateway: Gateway) -> None:
             translation_key="battery_size",
             fallback_name="Battery size",
         )
-        .add_to_registry()
+        .add_to_registry(registry)
     )
 
-    zigpy_dev = registry.get_device(zigpy_dev)
+    zigpy_dev = registry.resolve(zigpy_dev)
 
     zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
     entity = get_entity(zha_device, platform=Platform.SENSOR, qualifier="battery_size")

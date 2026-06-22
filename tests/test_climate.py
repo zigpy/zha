@@ -55,7 +55,7 @@ from zha.application.platforms.sensor import (
 )
 from zha.const import STATE_CHANGED
 from zha.exceptions import ZHAException
-from zha.quirks import DeviceMatch, ModelInfo, register_device, resolve_zigpy_device
+from zha.quirks import DeviceMatch, DeviceRegistry, ModelInfo
 from zha.zigbee.device import Device
 
 _LOGGER = logging.getLogger(__name__)
@@ -1636,13 +1636,18 @@ async def test_thermostat_quirkv2_local_temperature_calibration_config_overwrite
 ) -> None:
     """Test that a quirk v2 local temperature calibration config overwrites the default one."""
 
+    registry = DeviceRegistry()
     zigpy_device = create_mock_zigpy_device(
-        zha_gateway, CLIMATE, manufacturer="unk_manufacturer", model="FakeModel"
+        zha_gateway,
+        CLIMATE,
+        manufacturer="unk_manufacturer",
+        model="FakeModel",
+        registry=registry,
     )
     zigpy_device.node_desc.mac_capability_flags |= 0b_0000_0100
     zigpy_device.endpoints[1].thermostat.PLUGGED_ATTR_READS = ZCL_ATTR_PLUG
 
-    @register_device
+    @registry.register_device
     class FakeThermostatQuirk(Device):
         _device_match = DeviceMatch(
             applies_to=(ModelInfo("unk_manufacturer", "FakeModel"),)
@@ -1670,7 +1675,7 @@ async def test_thermostat_quirkv2_local_temperature_calibration_config_overwrite
                 fallback_name="Local temperature offset",
             )
 
-    zigpy_device = resolve_zigpy_device(zigpy_device)
+    zigpy_device = registry.resolve(zigpy_device)
     zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
 
     assert zha_device.model == "FakeModel"

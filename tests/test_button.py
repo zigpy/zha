@@ -14,7 +14,7 @@ from zhaquirks.const import (
     PROFILE_ID,
 )
 from zhaquirks.device import CustomZigpyDevice
-from zhaquirks.legacy import CustomDevice, DeviceRegistry
+from zhaquirks.legacy import CustomDevice
 from zhaquirks.tuya.tuya_valve import ParksideTuyaValveManufCluster
 import zigpy
 from zigpy.exceptions import ZigbeeException
@@ -46,6 +46,7 @@ from zha.application.platforms.button import (
     WriteAttributeButton,
 )
 from zha.application.platforms.button.const import ButtonDeviceClass
+from zha.quirks import DeviceRegistry
 from zha.zigbee.device import Device
 
 ZIGPY_DEVICE = {
@@ -213,7 +214,7 @@ async def custom_button_device(zha_gateway: Gateway):
     )
 
     (
-        QuirkBuilder("Fake_Model", "Fake_Manufacturer", registry=registry)
+        QuirkBuilder("Fake_Model", "Fake_Manufacturer")
         .replaces(FakeManufacturerCluster)
         .command_button(
             FakeManufacturerCluster.ServerCommandDefs.self_test.name,
@@ -229,10 +230,10 @@ async def custom_button_device(zha_gateway: Gateway):
             translation_key="feed",
             fallback_name="Feed",
         )
-        .add_to_registry()
+        .add_to_registry(registry)
     )
 
-    zigpy_device = registry.get_device(zigpy_device)
+    zigpy_device = registry.resolve(zigpy_device)
 
     assert isinstance(zigpy_device, CustomZigpyDevice)
     # XXX: this should be handled automatically, patch quirks added cluster
@@ -315,7 +316,7 @@ async def test_quirks_write_attr_buttons_uid(zha_gateway: Gateway) -> None:
     )
 
     (
-        QuirkBuilder("Fake_Model", "Fake_Manufacturer", registry=registry)
+        QuirkBuilder("Fake_Model", "Fake_Manufacturer")
         .replaces(FakeManufacturerCluster)
         .write_attr_button(
             FakeManufacturerCluster.AttributeDefs.feed.name,
@@ -333,10 +334,10 @@ async def test_quirks_write_attr_buttons_uid(zha_gateway: Gateway) -> None:
             translation_key="btn_2",
             fallback_name="Button 2",
         )
-        .add_to_registry()
+        .add_to_registry(registry)
     )
 
-    zigpy_device_ = registry.get_device(zigpy_dev)
+    zigpy_device_ = registry.resolve(zigpy_dev)
 
     assert isinstance(zigpy_device_, CustomZigpyDevice)
     zha_device = await join_zigpy_device(zha_gateway, zigpy_device_)
@@ -378,7 +379,7 @@ async def test_quirks_v2_button_only_cluster_is_not_configured(
     registry = DeviceRegistry()
     (
         QuirkBuilder(
-            "Fake_Manufacturer_sensor_2", "Fake_Model_sensor_2", registry=registry
+            "Fake_Manufacturer_sensor_2", "Fake_Model_sensor_2"
         )
         .replaces(OppleCluster)
         .command_button(
@@ -388,7 +389,7 @@ async def test_quirks_v2_button_only_cluster_is_not_configured(
             translation_key="self_test",
             fallback_name="Self test",
         )
-        .add_to_registry()
+        .add_to_registry(registry)
     )
 
     zigpy_device = create_mock_zigpy_device(
@@ -407,8 +408,8 @@ async def test_quirks_v2_button_only_cluster_is_not_configured(
         manufacturer="Fake_Manufacturer_sensor_2",
         model="Fake_Model_sensor_2",
     )
-    zigpy_device = registry.get_device(zigpy_device)
-    # `registry.get_device` swaps in the replaced OppleCluster instance; patch its
+    zigpy_device = registry.resolve(zigpy_device)
+    # `registry.resolve` swaps in the replaced OppleCluster instance; patch its
     # network methods so we can assert bind/reporting/reading didn't happen.
     opple_cluster = zigpy_device.endpoints[1].opple_cluster
     patch_cluster_for_testing(opple_cluster)

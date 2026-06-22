@@ -174,7 +174,30 @@ class DeviceRegistry:
 
         return entry
 
-    def get(self, zigpy_device: zigpy.device.Device) -> QuirkRegistryEntry | None:
+    def register_device(self, cls: type[Device]) -> type[Device]:
+        """Register a hand-written `Device` subclass as a quirk in this registry."""
+        if cls._device_match is None:
+            raise ValueError(f"{cls!r} does not define `_device_match`")
+
+        transforms: list[Callable[[zigpy.device.Device], zigpy.device.Device]] = []
+        if cls._zigpy_device_cls is not None:
+            transforms.append(make_zigpy_device_replacement(cls._zigpy_device_cls))
+        transforms.extend(cls._zigpy_device_transforms)
+
+        self.register(
+            QuirkRegistryEntry(
+                device_match=cls._device_match,
+                zigpy_transforms=tuple(transforms),
+                zha_device_factory=cls,
+                source=QuirkSource.from_class(cls),
+            )
+        )
+
+        return cls
+
+    def match_entry(
+        self, zigpy_device: zigpy.device.Device
+    ) -> QuirkRegistryEntry | None:
         """Return the first registered entry matching `zigpy_device`."""
         for key in (
             ModelInfo(zigpy_device.manufacturer, zigpy_device.model),
@@ -190,6 +213,33 @@ class DeviceRegistry:
                 return entry
 
         return None
+
+    def resolve(self, zigpy_device: zigpy.device.Device) -> zigpy.device.Device:
+        """Apply the quirk transforms registered for `zigpy_device` and return the result."""
+
+        # Resolution is idempotent: an already-quirked device is returned as-is
+        if hasattr(zigpy_device, QUIRK_REGISTRY_ENTRY_ATTR):
+            return zigpy_device
+
+        entry = self.match_entry(zigpy_device)
+        if entry is None:
+            return zigpy_device
+
+        _LOGGER.debug(
+            "Resolved %s/%s (%s) to quirk %s",
+            zigpy_device.manufacturer,
+            zigpy_device.model,
+            zigpy_device.ieee,
+            entry,
+        )
+
+        resolved_device = zigpy_device
+        for transform in entry.zigpy_transforms:
+            resolved_device = transform(resolved_device)
+
+        setattr(resolved_device, QUIRK_REGISTRY_ENTRY_ATTR, entry)
+
+        return resolved_device
 
     def __iter__(self) -> Iterator[QuirkRegistryEntry]:
         """Yield every registered entry once (deduplicated across model keys)."""
@@ -235,54 +285,3 @@ class DeviceRegistry:
 
 
 DEVICE_REGISTRY = DeviceRegistry()
-
-
-def register_device(cls: type[Device]) -> type[Device]:
-    """Class decorator registering a hand-written `Device` subclass as a quirk."""
-    if cls._device_match is None:
-        raise ValueError(f"{cls!r} does not define `_device_match`")
-
-    transforms: list[Callable[[zigpy.device.Device], zigpy.device.Device]] = []
-    if cls._zigpy_device_cls is not None:
-        transforms.append(make_zigpy_device_replacement(cls._zigpy_device_cls))
-    transforms.extend(cls._zigpy_device_transforms)
-
-    DEVICE_REGISTRY.register(
-        QuirkRegistryEntry(
-            device_match=cls._device_match,
-            zigpy_transforms=tuple(transforms),
-            zha_device_factory=cls,
-            source=QuirkSource.from_class(cls),
-        )
-    )
-
-    return cls
-
-
-def resolve_zigpy_device(zigpy_device: zigpy.device.Device) -> zigpy.device.Device:
-    """Provide zigpy a way to resolve a bare ZCL-compliant device to its final form."""
-
-    # Resolution is idempotent: an already-quirked device is returned as-is
-    if hasattr(zigpy_device, QUIRK_REGISTRY_ENTRY_ATTR):
-        return zigpy_device
-
-    entry = DEVICE_REGISTRY.get(zigpy_device)
-    if entry is None:
-        return zigpy_device
-
-    _LOGGER.debug(
-        "Resolved %s/%s (%s) to quirk %s",
-        zigpy_device.manufacturer,
-        zigpy_device.model,
-        zigpy_device.ieee,
-        entry,
-    )
-
-    resolved_device = zigpy_device
-
-    for transform in entry.zigpy_transforms:
-        resolved_device = transform(resolved_device)
-
-    # Sneak the registry entry in with the device so ZHA can use it
-    setattr(resolved_device, QUIRK_REGISTRY_ENTRY_ATTR, entry)
-    return resolved_device

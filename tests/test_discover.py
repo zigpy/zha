@@ -4,6 +4,7 @@ import asyncio
 from collections import defaultdict
 from collections.abc import Callable
 import contextlib
+import dataclasses
 import enum
 import json
 import pathlib
@@ -61,11 +62,10 @@ from zha.application.platforms.const import PHILIPS_REMOTE_CLUSTER
 from zha.application.platforms.light import HueLight
 from zha.application.platforms.number import BaseNumber, NumberMode
 from zha.quirks import (
-    DEVICE_REGISTRY as QUIRKS_DEVICE_REGISTRY,
     QUIRK_REGISTRY_ENTRY_ATTR,
     DeviceMatch,
+    DeviceRegistry,
     ModelInfo,
-    resolve_zigpy_device,
 )
 from zha.units import UnitOfTime
 
@@ -207,6 +207,7 @@ async def test_quirks_v2_entity_discovery(
 ) -> None:
     """Test quirks v2 discovery."""
 
+    registry = DeviceRegistry()
     zigpy_device = create_mock_zigpy_device(
         zha_gateway,
         {
@@ -226,6 +227,7 @@ async def test_quirks_v2_entity_discovery(
         ieee="01:2d:6f:00:0a:90:69:e8",
         manufacturer="Ikea of Sweden",
         model="TRADFRI remote control",
+        registry=registry,
     )
 
     (
@@ -244,10 +246,10 @@ async def test_quirks_v2_entity_discovery(
             translation_key="off_wait_time",
             fallback_name="Off wait time",
         )
-        .add_to_registry()
+        .add_to_registry(registry)
     )
 
-    zigpy_device = resolve_zigpy_device(zigpy_device)
+    zigpy_device = registry.resolve(zigpy_device)
     zigpy_device.endpoints[1].power.PLUGGED_ATTR_READS = {
         "battery_voltage": 3,
         "battery_percentage_remaining": 100,
@@ -288,6 +290,7 @@ async def test_quirks_v2_entity_discovery_e1_curtain(
             }
         )
 
+    registry = DeviceRegistry()
     (
         QuirkBuilder("LUMI", "lumi.curtain.agl006")
         .adds(LocalIlluminanceMeasurementCluster)
@@ -320,7 +323,7 @@ async def test_quirks_v2_entity_discovery_e1_curtain(
             translation_key="error_detected",
             fallback_name="Error detected",
         )
-        .add_to_registry()
+        .add_to_registry(registry)
     )
 
     aqara_E1_device = create_mock_zigpy_device(
@@ -348,8 +351,9 @@ async def test_quirks_v2_entity_discovery_e1_curtain(
         ieee="01:2d:6f:00:0a:90:69:e8",
         manufacturer="LUMI",
         model="lumi.curtain.agl006",
+        registry=registry,
     )
-    aqara_E1_device = resolve_zigpy_device(aqara_E1_device)
+    aqara_E1_device = registry.resolve(aqara_E1_device)
 
     aqara_E1_device.endpoints[1].opple_cluster.PLUGGED_ATTR_READS = {
         "hand_open": 0,
@@ -412,6 +416,7 @@ def _get_test_device(
     model: str,
     augment_method: Callable[[QuirkBuilder], QuirkBuilder] | None = None,
 ):
+    registry = DeviceRegistry()
     zigpy_device = create_mock_zigpy_device(
         zha_gateway,
         {
@@ -431,6 +436,7 @@ def _get_test_device(
         ieee="01:2d:6f:00:0a:90:69:e8",
         manufacturer=manufacturer,
         model=model,
+        registry=registry,
     )
 
     quirk_builder = (
@@ -472,9 +478,9 @@ def _get_test_device(
     if augment_method:
         quirk_builder = augment_method(quirk_builder)
 
-    quirk_builder.add_to_registry()
+    quirk_builder.add_to_registry(registry)
 
-    zigpy_device = resolve_zigpy_device(zigpy_device)
+    zigpy_device = registry.resolve(zigpy_device)
     zigpy_device.endpoints[1].power.PLUGGED_ATTR_READS = {
         "battery_voltage": 3,
         "battery_percentage_remaining": 100,
@@ -496,11 +502,16 @@ async def test_quirks_v2_entity_no_metadata(
     zigpy_device = _get_test_device(
         zha_gateway, "Ikea of Sweden2", "TRADFRI remote control2"
     )
-    factory_kwargs = getattr(
-        zigpy_device, QUIRK_REGISTRY_ENTRY_ATTR
-    ).zha_device_factory.keywords
-    factory_kwargs["quirk_definition"] = attrs.evolve(
-        factory_kwargs["quirk_definition"], entity_metadata=()
+    entry = getattr(zigpy_device, QUIRK_REGISTRY_ENTRY_ATTR)
+    factory = entry.zha_device_factory
+    new_factory = dataclasses.replace(
+        factory,
+        quirk_definition=attrs.evolve(factory.quirk_definition, entity_metadata=()),
+    )
+    setattr(
+        zigpy_device,
+        QUIRK_REGISTRY_ENTRY_ATTR,
+        dataclasses.replace(entry, zha_device_factory=new_factory),
     )
     zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
     assert (
@@ -526,15 +537,22 @@ async def test_quirks_v2_entity_discovery_errors(
         cluster_type = ClusterType.Server
         entity_platform = Platform.UPDATE
 
-    factory_kwargs = getattr(
-        zigpy_device, QUIRK_REGISTRY_ENTRY_ATTR
-    ).zha_device_factory.keywords
-    factory_kwargs["quirk_definition"] = attrs.evolve(
-        factory_kwargs["quirk_definition"],
-        entity_metadata=(
-            *factory_kwargs["quirk_definition"].entity_metadata,
-            UnknownEntityMetadata(),
+    entry = getattr(zigpy_device, QUIRK_REGISTRY_ENTRY_ATTR)
+    factory = entry.zha_device_factory
+    new_factory = dataclasses.replace(
+        factory,
+        quirk_definition=attrs.evolve(
+            factory.quirk_definition,
+            entity_metadata=(
+                *factory.quirk_definition.entity_metadata,
+                UnknownEntityMetadata(),
+            ),
         ),
+    )
+    setattr(
+        zigpy_device,
+        QUIRK_REGISTRY_ENTRY_ATTR,
+        dataclasses.replace(entry, zha_device_factory=new_factory),
     )
 
     zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
@@ -649,9 +667,6 @@ async def test_quirks_v2_metadata_bad_device_classes(
     await join_zigpy_device(zha_gateway, zigpy_device)
 
     assert expected_exception_string in caplog.text
-
-    # remove the quirk so we don't pollute the rest of the tests
-    QUIRKS_DEVICE_REGISTRY.remove(getattr(zigpy_device, QUIRK_REGISTRY_ENTRY_ATTR))
 
 
 async def test_quirks_v2_fallback_name(zha_gateway: Gateway) -> None:

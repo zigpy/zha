@@ -188,6 +188,14 @@ async def test_on_off_select_attribute_report_v2(
         },
         manufacturer="Fake_Manufacturer",
         model="Fake_Model",
+        attributes={
+            1: {
+                "opple_cluster": {
+                    "motion_sensitivity": AqaraMotionSensitivities.Medium,
+                    "motion_sensitivity_disabled": AqaraMotionSensitivities.Medium,
+                }
+            }
+        },
     )
     zigpy_device = get_device(zigpy_device)
 

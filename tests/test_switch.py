@@ -42,7 +42,7 @@ from zha.application import Platform
 from zha.application.gateway import Gateway
 from zha.application.platforms import GroupEntity, PlatformEntity
 from zha.exceptions import ZHAException
-from zha.quirks import ZHA_DEVICE_CLASS_ATTRIBUTE, resolve_zigpy_device
+from zha.quirks import QUIRK_REGISTRY_ENTRY_ATTR, DeviceRegistry
 from zha.zigbee.device import Device
 from zha.zigbee.group import Group, GroupMemberReference
 
@@ -497,6 +497,7 @@ async def test_switch_configurable_custom_on_off_values(zha_gateway: Gateway) ->
         model="model",
     )
 
+    registry = DeviceRegistry()
     (
         QuirkBuilder(zigpy_dev.manufacturer, zigpy_dev.model)
         .adds(WindowDetectionFunctionQuirk.TuyaManufCluster)
@@ -508,12 +509,12 @@ async def test_switch_configurable_custom_on_off_values(zha_gateway: Gateway) ->
             translation_key="window_detection_function",
             fallback_name="Window detection function",
         )
-        .add_to_registry()
+        .add_to_registry(registry)
     )
 
-    zigpy_device_ = resolve_zigpy_device(zigpy_dev)
+    zigpy_device_ = registry.resolve(zigpy_dev)
 
-    assert getattr(zigpy_device_, ZHA_DEVICE_CLASS_ATTRIBUTE, None) is not None
+    assert getattr(zigpy_device_, QUIRK_REGISTRY_ENTRY_ATTR, None) is not None
     cluster = zigpy_device_.endpoints[1].tuya_manufacturer
     cluster.PLUGGED_ATTR_READS = {"window_detection_function": 5}
     update_attribute_cache(cluster)
@@ -577,6 +578,7 @@ async def test_switch_configurable_custom_on_off_values_force_inverted(
         model="model2",
     )
 
+    registry = DeviceRegistry()
     (
         QuirkBuilder(zigpy_dev.manufacturer, zigpy_dev.model)
         .adds(WindowDetectionFunctionQuirk.TuyaManufCluster)
@@ -589,12 +591,12 @@ async def test_switch_configurable_custom_on_off_values_force_inverted(
             translation_key="window_detection_function",
             fallback_name="Window detection function",
         )
-        .add_to_registry()
+        .add_to_registry(registry)
     )
 
-    zigpy_device_ = resolve_zigpy_device(zigpy_dev)
+    zigpy_device_ = registry.resolve(zigpy_dev)
 
-    assert getattr(zigpy_device_, ZHA_DEVICE_CLASS_ATTRIBUTE, None) is not None
+    assert getattr(zigpy_device_, QUIRK_REGISTRY_ENTRY_ATTR, None) is not None
     cluster = zigpy_device_.endpoints[1].tuya_manufacturer
     cluster.PLUGGED_ATTR_READS = {"window_detection_function": 5}
     update_attribute_cache(cluster)
@@ -658,6 +660,7 @@ async def test_switch_configurable_custom_on_off_values_inverter_attribute(
         model="model3",
     )
 
+    registry = DeviceRegistry()
     (
         QuirkBuilder(zigpy_dev.manufacturer, zigpy_dev.model)
         .adds(WindowDetectionFunctionQuirk.TuyaManufCluster)
@@ -670,12 +673,12 @@ async def test_switch_configurable_custom_on_off_values_inverter_attribute(
             translation_key="window_detection_function",
             fallback_name="Window detection function",
         )
-        .add_to_registry()
+        .add_to_registry(registry)
     )
 
-    zigpy_device_ = resolve_zigpy_device(zigpy_dev)
+    zigpy_device_ = registry.resolve(zigpy_dev)
 
-    assert getattr(zigpy_device_, ZHA_DEVICE_CLASS_ATTRIBUTE, None) is not None
+    assert getattr(zigpy_device_, QUIRK_REGISTRY_ENTRY_ATTR, None) is not None
     cluster = zigpy_device_.endpoints[1].tuya_manufacturer
     cluster.PLUGGED_ATTR_READS = {
         "window_detection_function": 5,

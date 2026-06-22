@@ -53,7 +53,7 @@ from zha.async_ import (
     gather_with_limited_concurrency,
 )
 from zha.event import EventBase
-from zha.quirks import resolve_zigpy_device
+from zha.quirks import DEVICE_REGISTRY
 from zha.zigbee.device import Device, DeviceInfo, DeviceStatus, ExtendedDeviceInfo
 from zha.zigbee.group import Group, GroupInfo, GroupMemberReference
 
@@ -249,7 +249,7 @@ class Gateway(AsyncUtilMixin, EventBase):
             config=app_config,
             auto_form=False,
             start_radio=False,
-            device_resolver=resolve_zigpy_device,
+            device_resolver=DEVICE_REGISTRY.resolve,
             uninitialized_packet_handler=(
                 self.config.config.quirks_configuration.uninitialized_packet_handler
             ),
