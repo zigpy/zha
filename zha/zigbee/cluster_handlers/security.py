@@ -5,6 +5,7 @@ from __future__ import annotations
 import asyncio
 from collections.abc import Callable
 import dataclasses
+import math
 from typing import TYPE_CHECKING, Any, Final
 
 import zigpy.zcl
@@ -32,6 +33,12 @@ if TYPE_CHECKING:
 
 SIGNAL_ARMED_STATE_CHANGED = "zha_armed_state_changed"
 SIGNAL_ALARM_TRIGGERED = "zha_armed_triggered"
+
+_ARM_EXIT_DELAY_LOG_LABELS: Final[dict[AceCluster.PanelStatus, str]] = {
+    AceCluster.PanelStatus.Armed_Away: "all IAS ACE zones",
+    AceCluster.PanelStatus.Armed_Stay: "day/home IAS ACE zones",
+    AceCluster.PanelStatus.Armed_Night: "night/sleep IAS ACE zones",
+}
 
 
 @dataclasses.dataclass(frozen=True, kw_only=True)
@@ -115,6 +122,7 @@ class IasAceClientClusterHandler(ClientClusterHandler):
         self._endpoint.device.gateway.async_create_task(zigbee_reply)
 
         if self.invalid_tries >= self.max_invalid_tries:
+            self._cancel_all_timers()
             self.alarm_status = AceCluster.AlarmStatus.Emergency
             self.armed_state = AceCluster.PanelStatus.In_Alarm
             self.emit_zha_event(f"{self.unique_id}_{SIGNAL_ALARM_TRIGGERED}", [])
@@ -198,11 +206,12 @@ class IasAceClientClusterHandler(ClientClusterHandler):
             )
         else:
             self.debug(
-                "Arming all IAS ACE zones with %d second exit delay (configured in ZHA options)",
+                "Arming %s with %d second exit delay (configured in ZHA options)",
+                _ARM_EXIT_DELAY_LOG_LABELS[panel_status],
                 exit_delay,
             )
             # Use configured exit delay in seconds
-            self.start_exit_delay(exit_delay, panel_status)
+            self.start_exit_delay(exit_delay, panel_status, emit_panel_status=False)
             zigbee_reply = self.arm_response(armed_type)
         return zigbee_reply
 
@@ -254,12 +263,12 @@ class IasAceClientClusterHandler(ClientClusterHandler):
 
         # Check entry delay first (higher priority)
         if self._entry_delay_end_time is not None:
-            remaining = int(self._entry_delay_end_time - current_time)
+            remaining = math.ceil(self._entry_delay_end_time - current_time)
             return max(0, remaining)
 
         # Check exit delay
         if self._exit_delay_end_time is not None:
-            remaining = int(self._exit_delay_end_time - current_time)
+            remaining = math.ceil(self._exit_delay_end_time - current_time)
             return max(0, remaining)
 
         return 0
@@ -273,13 +282,19 @@ class IasAceClientClusterHandler(ClientClusterHandler):
         self._emit_panel_status_changed()
 
     def start_exit_delay(
-        self, delay_seconds: int, target_panel_status: AceCluster.PanelStatus
+        self,
+        delay_seconds: int,
+        target_panel_status: AceCluster.PanelStatus,
+        *,
+        emit_panel_status: bool = True,
     ) -> None:
         """Start exit delay timer.
 
         Can be called:
         - Internally when arming (uses configured delays)
         - Externally via service (overrides with service duration)
+
+        When called from arm(), emit_panel_status=False — arm() sends the notification.
         """
         # Cancel all timers to ensure only one is active
         self._cancel_all_timers()
@@ -299,8 +314,8 @@ class IasAceClientClusterHandler(ClientClusterHandler):
                 )
             )
 
-            # Notify devices about the state change
-            self._emit_panel_status_changed()
+            if emit_panel_status:
+                self._emit_panel_status_changed()
         else:
             # No delay - arm immediately
             # Don't call _emit_panel_status_changed here as arm_response will be sent right after
@@ -351,8 +366,8 @@ class IasAceClientClusterHandler(ClientClusterHandler):
     async def _entry_delay_complete(self) -> None:
         """Handle entry delay timer completion - alarm should trigger."""
         # Entry delay timer expired without disarming
-        # Transition to In_Alarm state
         self.armed_state = AceCluster.PanelStatus.In_Alarm
+        self.alarm_status = AceCluster.AlarmStatus.Burglar
         self._entry_delay_end_time = None
         self._emit_panel_status_changed()
         self.info("Entry delay expired - alarm triggered")

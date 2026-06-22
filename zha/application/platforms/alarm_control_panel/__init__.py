@@ -5,7 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 import functools
 import logging
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, Any, Final, Literal, cast
 
 from zigpy.profiles import zha
 from zigpy.zcl.clusters.security import IasAce
@@ -41,6 +41,12 @@ if TYPE_CHECKING:
     from zha.zigbee.endpoint import Endpoint
 
 _LOGGER = logging.getLogger(__name__)
+
+_EXIT_DELAY_TARGET_PANEL_STATUS: Final[dict[str, IasAce.PanelStatus]] = {
+    "away": IasAce.PanelStatus.Armed_Away,
+    "home": IasAce.PanelStatus.Armed_Stay,
+    "night": IasAce.PanelStatus.Armed_Night,
+}
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -161,28 +167,37 @@ class AlarmControlPanel(PlatformEntity):
         self._cluster_handler.arm(IasAce.ArmMode.Disarm, code, 0)
         self.maybe_emit_state_changed_event()
 
-    async def async_alarm_arm_home(
-        self, code: str | None = None, delay: int = 0
-    ) -> None:
+    async def async_alarm_arm_home(self, code: str | None = None) -> None:
         """Send arm home command."""
-        self._cluster_handler.arm(IasAce.ArmMode.Arm_Day_Home_Only, code, delay)
+        self._cluster_handler.arm(IasAce.ArmMode.Arm_Day_Home_Only, code, 0)
         self.maybe_emit_state_changed_event()
 
-    async def async_alarm_arm_away(
-        self, code: str | None = None, delay: int = 0
-    ) -> None:
+    async def async_alarm_arm_away(self, code: str | None = None) -> None:
         """Send arm away command."""
-        self._cluster_handler.arm(IasAce.ArmMode.Arm_All_Zones, code, delay)
+        self._cluster_handler.arm(IasAce.ArmMode.Arm_All_Zones, code, 0)
         self.maybe_emit_state_changed_event()
 
-    async def async_alarm_arm_night(
-        self, code: str | None = None, delay: int = 0
-    ) -> None:
+    async def async_alarm_arm_night(self, code: str | None = None) -> None:
         """Send arm night command."""
-        self._cluster_handler.arm(IasAce.ArmMode.Arm_Night_Sleep_Only, code, delay)
+        self._cluster_handler.arm(IasAce.ArmMode.Arm_Night_Sleep_Only, code, 0)
         self.maybe_emit_state_changed_event()
 
     async def async_alarm_trigger(self, code: str | None = None) -> None:  # pylint: disable=unused-argument
         """Send alarm trigger command."""
         self._cluster_handler.panic()
+        self.maybe_emit_state_changed_event()
+
+    async def async_start_entry_delay(self, delay_seconds: int) -> None:
+        """Start entry delay countdown on the keypad."""
+        self._cluster_handler.start_entry_delay(delay_seconds)
+        self.maybe_emit_state_changed_event()
+
+    async def async_start_exit_delay(
+        self,
+        delay_seconds: int,
+        arm_mode: Literal["away", "home", "night"] = "away",
+    ) -> None:
+        """Start exit delay countdown on the keypad."""
+        target_panel_status = _EXIT_DELAY_TARGET_PANEL_STATUS[arm_mode]
+        self._cluster_handler.start_exit_delay(delay_seconds, target_panel_status)
         self.maybe_emit_state_changed_event()
