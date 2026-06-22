@@ -53,7 +53,7 @@ from zha.async_ import (
     gather_with_limited_concurrency,
 )
 from zha.event import EventBase
-from zha.quirks import DEVICE_REGISTRY
+from zha.quirks import DEVICE_REGISTRY, QUIRK_REGISTRY_ENTRY_ATTR
 from zha.zigbee.device import Device, DeviceInfo, DeviceStatus, ExtendedDeviceInfo
 from zha.zigbee.group import Group, GroupInfo, GroupMemberReference
 
@@ -488,13 +488,31 @@ class Gateway(AsyncUtilMixin, EventBase):
             )
             return
 
-        _LOGGER.debug(
-            "Rebuilding device %s:%s after reinterview",
-            new_zigpy_device.nwk,
-            new_zigpy_device.ieee,
-        )
+        old_entry = getattr(zha_device.device, QUIRK_REGISTRY_ENTRY_ATTR, None)
+        new_entry = getattr(new_zigpy_device, QUIRK_REGISTRY_ENTRY_ATTR, None)
 
-        await zha_device.async_rebuild_from_zigpy_device(new_zigpy_device)
+        if old_entry is new_entry:
+            _LOGGER.debug(
+                "Rebuilding device %s:%s after reinterview",
+                new_zigpy_device.nwk,
+                new_zigpy_device.ieee,
+            )
+            await zha_device.async_rebuild_from_zigpy_device(new_zigpy_device)
+        else:
+            # A different quirk now matches. Replace the object with one dispatched by
+            # `Device.new` against the freshly-resolved registry entry.
+            _LOGGER.debug(
+                "Replacing device %s:%s after reinterview: resolved quirk changed",
+                new_zigpy_device.nwk,
+                new_zigpy_device.ieee,
+            )
+            await zha_device.async_teardown(emit_entity_events=True)
+
+            zha_device = Device.new(new_zigpy_device, self)
+            self._devices[new_zigpy_device.ieee] = zha_device
+
+            zha_device.available = True
+            zha_device.on_network = True
 
         configure_succeeded = False
         all_succeeded = False

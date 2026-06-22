@@ -1033,7 +1033,7 @@ class Device(LogMixin, EventBase):
         underlying zigpy device.  Emits entity removal events so listeners
         (e.g. HA) can clean up stale entities.
         """
-        await self._async_teardown(emit_entity_events=True)
+        await self.async_teardown(emit_entity_events=True)
         self._init_from_zigpy_device(zigpy_device)
 
     def emit_reconfigure_done(self) -> None:
@@ -1240,7 +1240,7 @@ class Device(LogMixin, EventBase):
         self.status = DeviceStatus.INITIALIZED
         self.debug("completed initialization")
 
-    async def _async_teardown(self, *, emit_entity_events: bool) -> None:
+    async def async_teardown(self, *, emit_entity_events: bool) -> None:
         """Tear down handlers, entities, and endpoints.
 
         Args:
@@ -1290,7 +1290,7 @@ class Device(LogMixin, EventBase):
 
     async def on_remove(self) -> None:
         """Cancel tasks this device owns (shutdown path)."""
-        await self._async_teardown(emit_entity_events=False)
+        await self.async_teardown(emit_entity_events=False)
 
     def async_get_clusters(self) -> dict[int, dict[str, dict[int, Cluster]]]:
         """Get all clusters for this device."""

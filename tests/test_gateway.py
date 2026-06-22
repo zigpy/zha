@@ -5,6 +5,7 @@ from contextlib import suppress
 from unittest.mock import AsyncMock, MagicMock, PropertyMock, call, patch
 
 import pytest
+from zhaquirks.builder import QuirkBuilder
 from zigpy.application import ControllerApplication
 from zigpy.config import CONF_NWK, CONF_NWK_COUNTRY_CODE
 from zigpy.profiles import zha
@@ -39,6 +40,7 @@ from zha.application.gateway import (
 from zha.application.helpers import ZHAData
 from zha.application.platforms import GroupEntity
 from zha.application.platforms.light.const import EFFECT_OFF, LightEntityFeature
+from zha.quirks import DeviceRegistry
 from zha.zigbee.device import Device
 from zha.zigbee.group import Group, GroupMemberReference
 
@@ -643,6 +645,82 @@ async def test_gateway_device_reinterviewed_no_bookkeeping_loss_on_rapid_event(
 
     await zha_gateway.async_block_till_done()
     assert zigpy_dev.ieee not in zha_gateway._device_init_tasks
+
+
+async def test_reinterview_replaces_device_when_quirk_changes(
+    zha_gateway: Gateway,
+) -> None:
+    """A re-interview resolving a different quirk replaces the device object."""
+    registry = DeviceRegistry()
+    (
+        QuirkBuilder("Fake_Manufacturer", "Model_A")
+        .friendly_name(model="Quirk A", manufacturer="Fake_Manufacturer")
+        .add_to_registry(registry)
+    )
+    (
+        QuirkBuilder("Fake_Manufacturer", "Model_B")
+        .friendly_name(model="Quirk B", manufacturer="Fake_Manufacturer")
+        .add_to_registry(registry)
+    )
+
+    zigpy_device = create_mock_zigpy_device(
+        zha_gateway,
+        ZIGPY_DEVICE_BASIC,
+        manufacturer="Fake_Manufacturer",
+        model="Model_A",
+        registry=registry,
+    )
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
+    assert zha_device.quirk_applied
+    assert zha_device.model == "Quirk A"
+
+    reinterviewed = create_mock_zigpy_device(
+        zha_gateway,
+        ZIGPY_DEVICE_BASIC,
+        manufacturer="Fake_Manufacturer",
+        model="Model_B",
+        registry=registry,
+    )
+    zha_gateway.device_reinterviewed(reinterviewed)
+    await zha_gateway.async_block_till_done()
+
+    new_zha_device = zha_gateway.get_device(zigpy_device.ieee)
+    assert new_zha_device is not zha_device
+    assert new_zha_device.quirk_applied
+    assert new_zha_device.model == "Quirk B"
+
+
+async def test_reinterview_rebuilds_in_place_when_quirk_unchanged(
+    zha_gateway: Gateway,
+) -> None:
+    """A re-interview resolving the same quirk rebuilds in place, preserving identity."""
+    registry = DeviceRegistry()
+    (
+        QuirkBuilder("Fake_Manufacturer", "Model_A")
+        .friendly_name(model="Quirk A", manufacturer="Fake_Manufacturer")
+        .add_to_registry(registry)
+    )
+
+    zigpy_device = create_mock_zigpy_device(
+        zha_gateway,
+        ZIGPY_DEVICE_BASIC,
+        manufacturer="Fake_Manufacturer",
+        model="Model_A",
+        registry=registry,
+    )
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
+
+    reinterviewed = create_mock_zigpy_device(
+        zha_gateway,
+        ZIGPY_DEVICE_BASIC,
+        manufacturer="Fake_Manufacturer",
+        model="Model_A",
+        registry=registry,
+    )
+    zha_gateway.device_reinterviewed(reinterviewed)
+    await zha_gateway.async_block_till_done()
+
+    assert zha_gateway.get_device(zigpy_device.ieee) is zha_device
 
 
 def test_gateway_raw_device_initialized(
