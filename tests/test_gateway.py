@@ -1079,6 +1079,7 @@ def test_radio_type():
         "EZSP = Silicon Labs EmberZNet protocol: Elelabs, HUSBZB-1, Telegesis",
         "ZNP = Texas Instruments Z-Stack ZNP protocol: CC253x, CC26x2, CC13x2",
         "deCONZ = dresden elektronik deCONZ protocol: ConBee I/II, RaspBee I/II",
+        "Ziggurat = Open source host-side Zigbee stack in Rust",
         "ZiGate = ZiGate Zigbee radios: PiZiGate, ZiGate USB-TTL, ZiGate WiFi",
         "XBee = Digi XBee Zigbee radios: Digi XBee Series 2, 2C, 3",
     ]
