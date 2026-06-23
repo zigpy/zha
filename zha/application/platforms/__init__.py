@@ -617,6 +617,41 @@ class PlatformEntity(BaseEntity):
         """Return the ZCL cluster backing this entity."""
         return self._cluster
 
+    def targets_cluster(
+        self,
+        cluster_id: int,
+        cluster_type: zigpy.zcl.ClusterType | None = None,
+    ) -> bool:
+        """Return True if this entity targets the given cluster."""
+        match = self._cluster_match
+        if match is None:
+            # Generated quirks-v2 entities have no class-level `_cluster_match`
+            # but do have a concrete backing cluster; match against it directly.
+            cluster = self.cluster
+            if cluster.cluster_id != cluster_id:
+                return False
+            actual_type = (
+                zigpy.zcl.ClusterType.Client
+                if cluster.is_client
+                else zigpy.zcl.ClusterType.Server
+            )
+            return cluster_type is None or cluster_type == actual_type
+
+        in_server = (
+            cluster_id in match.server_clusters
+            or cluster_id in match.optional_server_clusters
+        )
+        in_client = (
+            cluster_id in match.client_clusters
+            or cluster_id in match.optional_client_clusters
+        )
+
+        if cluster_type == zigpy.zcl.ClusterType.Server:
+            return in_server
+        if cluster_type == zigpy.zcl.ClusterType.Client:
+            return in_client
+        return in_server or in_client
+
     @property
     def should_poll(self) -> bool:
         """Return True if we need to poll for state changes."""
