@@ -238,9 +238,15 @@ class DeviceRegistry:
             entry,
         )
 
+        # A failing quirk must not prevent the device from loading: log and fall
+        # back to the bare device rather than letting the exception propagate.
         resolved_device = zigpy_device
-        for transform in entry.zigpy_transforms:
-            resolved_device = transform(resolved_device)
+        try:
+            for transform in entry.zigpy_transforms:
+                resolved_device = transform(resolved_device)
+        except Exception:
+            _LOGGER.exception("Failed to load quirk for %s", zigpy_device)
+            return zigpy_device
 
         setattr(resolved_device, QUIRK_REGISTRY_ENTRY_ATTR, entry)
 
