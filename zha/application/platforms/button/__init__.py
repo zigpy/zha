@@ -21,10 +21,8 @@ from zha.application.platforms import (
     register_entity,
 )
 from zha.application.platforms.button.const import DEFAULT_DURATION, ButtonDeviceClass
-from zha.application.platforms.const import (
-    AQARA_OPPLE_CLUSTER,
-    TUYA_MANUFACTURER_CLUSTER,
-)
+from zha.application.platforms.const import TUYA_MANUFACTURER_CLUSTER
+from zha.application.platforms.legacy_quirks import AQARA_OPPLE_CLUSTER
 
 if TYPE_CHECKING:
     from zha.zigbee.device import Device

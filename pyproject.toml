@@ -21,7 +21,6 @@ dependencies = [
     "zigpy-deconz==0.25.5",
     "zigpy-xbee==0.21.1",
     "zigpy-zigate==0.14.0",
-    "zha-quirks>=2.0.0",
     "zigpy==2.0.0",
 ]
 
@@ -54,6 +53,7 @@ testing = [
     "python-slugify",
     "ruff==0.15.16",
     "uv>=0.11.16",
+    "zha-quirks>=2.0.0",
 ]
 ci = [
     {include-group = "testing"},

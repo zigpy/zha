@@ -39,7 +39,6 @@ from zha.application.platforms import (
     register_entity,
 )
 from zha.application.platforms.const import (
-    AQARA_OPPLE_CLUSTER,
     IKEA_REMOTE_CLUSTER,
     IKEA_SHORTCUT_V1_CLUSTER,
     INOVELLI_CLUSTER,
@@ -50,6 +49,7 @@ from zha.application.platforms.const import (
     SONOFF_CLUSTER,
     TUYA_MANUFACTURER_CLUSTER,
 )
+from zha.application.platforms.legacy_quirks import AQARA_OPPLE_CLUSTER
 from zha.exceptions import ZHAException
 from zha.quirks import TUYA_PLUG_MANUFACTURER
 from zha.zigbee.endpoint import cluster_event_unique_id, split_event_arg

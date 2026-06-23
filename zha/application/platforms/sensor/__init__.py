@@ -14,7 +14,6 @@ import numbers
 import typing
 from typing import TYPE_CHECKING, Any, cast
 
-from zhaquirks.danfoss import thermostat as danfoss_thermostat
 from zigpy import types
 from zigpy.state import Counter, State
 from zigpy.zcl import (
@@ -72,7 +71,6 @@ from zha.application.platforms import (
 )
 from zha.application.platforms.climate.const import HVACAction
 from zha.application.platforms.const import (
-    AQARA_OPPLE_CLUSTER,
     IKEA_AIR_PURIFIER_CLUSTER,
     INOVELLI_CLUSTER,
     SMARTTHINGS_HUMIDITY_CLUSTER,
@@ -81,6 +79,12 @@ from zha.application.platforms.const import (
     VOC_LEVEL_CLUSTER,
 )
 from zha.application.platforms.helpers import validate_device_class
+from zha.application.platforms.legacy_quirks import (
+    AQARA_OPPLE_CLUSTER,
+    DanfossAdaptationRunStatusBitmap,
+    DanfossOpenWindowDetectionEnum,
+    DanfossSoftwareErrorCodeBitmap,
+)
 from zha.application.platforms.number.bacnet import BACNET_UNITS_TO_HA_UNITS
 from zha.application.platforms.sensor.const import (
     ANALOG_INPUT_APPTYPE_DEV_CLASS,
@@ -3676,7 +3680,7 @@ class DanfossOpenWindowDetection(EnumSensor):
     _unique_id_suffix = "open_window_detection"
     _attribute_name = "open_window_detection"
     _attr_translation_key: str = "open_window_detected"
-    _enum = danfoss_thermostat.DanfossOpenWindowDetectionEnum
+    _enum = DanfossOpenWindowDetectionEnum
     _cluster_id = Thermostat.cluster_id
 
     _cluster_match = ClusterMatch(
@@ -3737,7 +3741,7 @@ class DanfossAdaptationRunStatus(BitMapSensor):
     _attribute_name = "adaptation_run_status"
     _attr_translation_key: str = "adaptation_run_status"
     _attr_entity_category = EntityCategory.DIAGNOSTIC
-    _bitmap = danfoss_thermostat.DanfossAdaptationRunStatusBitmap
+    _bitmap = DanfossAdaptationRunStatusBitmap
     _cluster_id = Thermostat.cluster_id
 
     _cluster_match = ClusterMatch(
@@ -3799,7 +3803,7 @@ class DanfossSoftwareErrorCode(BitMapSensor):
     _attribute_name = "sw_error_code"
     _attr_translation_key: str = "software_error"
     _attr_entity_category = EntityCategory.DIAGNOSTIC
-    _bitmap = danfoss_thermostat.DanfossSoftwareErrorCodeBitmap
+    _bitmap = DanfossSoftwareErrorCodeBitmap
     _cluster_id = Diagnostic.cluster_id
 
     _cluster_match = ClusterMatch(

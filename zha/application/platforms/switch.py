@@ -39,12 +39,12 @@ from zha.application.platforms import (
     register_group_entity,
 )
 from zha.application.platforms.const import (
-    AQARA_OPPLE_CLUSTER,
     IKEA_AIR_PURIFIER_CLUSTER,
     INOVELLI_CLUSTER,
     SINOPE_MANUFACTURER_CLUSTER,
     TUYA_MANUFACTURER_CLUSTER,
 )
+from zha.application.platforms.legacy_quirks import AQARA_OPPLE_CLUSTER
 from zha.application.platforms.light.const import LIGHT_PROFILE_DEVICE_TYPES
 from zha.exceptions import ZHAException
 from zha.quirks import DANFOSS_ALLY_THERMOSTAT, TUYA_PLUG_ONOFF

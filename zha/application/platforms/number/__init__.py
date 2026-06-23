@@ -33,13 +33,13 @@ from zha.application.platforms import (
     register_entity,
 )
 from zha.application.platforms.const import (
-    AQARA_OPPLE_CLUSTER,
     IKEA_AIR_PURIFIER_CLUSTER,
     INOVELLI_CLUSTER,
     SINOPE_MANUFACTURER_CLUSTER,
     TUYA_MANUFACTURER_CLUSTER,
 )
 from zha.application.platforms.helpers import validate_device_class
+from zha.application.platforms.legacy_quirks import AQARA_OPPLE_CLUSTER
 from zha.application.platforms.number.bacnet import BACNET_UNITS_TO_HA_UNITS
 from zha.application.platforms.number.const import ICONS, NumberDeviceClass, NumberMode
 from zha.quirks import DANFOSS_ALLY_THERMOSTAT

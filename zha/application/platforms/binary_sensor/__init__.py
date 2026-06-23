@@ -39,12 +39,12 @@ from zha.application.platforms.binary_sensor.const import (
     BinarySensorDeviceClass,
 )
 from zha.application.platforms.const import (
-    AQARA_OPPLE_CLUSTER,
     IKEA_AIR_PURIFIER_CLUSTER,
     SMARTTHINGS_ACCELERATION_CLUSTER,
     TUYA_MANUFACTURER_CLUSTER,
 )
 from zha.application.platforms.helpers import validate_device_class
+from zha.application.platforms.legacy_quirks import AQARA_OPPLE_CLUSTER
 from zha.quirks import DANFOSS_ALLY_THERMOSTAT
 
 if TYPE_CHECKING:

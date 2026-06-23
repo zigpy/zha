@@ -9,9 +9,6 @@ import functools
 import logging
 from typing import TYPE_CHECKING, Any, cast
 
-from zhaquirks.danfoss import thermostat as danfoss_thermostat
-from zhaquirks.xiaomi.aqara.magnet_ac01 import OppleCluster as MagnetAC01OppleCluster
-from zhaquirks.xiaomi.aqara.switch_acn047 import OppleCluster as T2RelayOppleCluster
 from zigpy import types
 from zigpy.zcl import (
     AttributeReadEvent,
@@ -44,10 +41,17 @@ from zha.application.platforms import (
     register_entity,
 )
 from zha.application.platforms.const import (
-    AQARA_OPPLE_CLUSTER,
     INOVELLI_CLUSTER,
     SINOPE_MANUFACTURER_CLUSTER,
     TUYA_MANUFACTURER_CLUSTER,
+)
+from zha.application.platforms.legacy_quirks import (
+    AQARA_OPPLE_CLUSTER,
+    DanfossAdaptationRunControlEnum,
+    DanfossExerciseDayOfTheWeekEnum,
+    DanfossViewingDirectionEnum,
+    MagnetAC01OppleCluster,
+    T2RelayOppleCluster,
 )
 from zha.application.platforms.siren import AdvancedSiren
 from zha.quirks import (
@@ -984,7 +988,7 @@ class DanfossExerciseDayOfTheWeek(ZCLEnumSelectEntity):
     _unique_id_suffix = "exercise_day_of_week"
     _attribute_name = "exercise_day_of_week"
     _attr_translation_key: str = "exercise_day_of_week"
-    _enum = danfoss_thermostat.DanfossExerciseDayOfTheWeekEnum
+    _enum = DanfossExerciseDayOfTheWeekEnum
     _cluster_id = Thermostat.cluster_id
 
     _cluster_match = ClusterMatch(
@@ -1137,7 +1141,7 @@ class DanfossAdaptationRunControl(ZCLEnumSelectEntity):
     _unique_id_suffix = "adaptation_run_control"
     _attribute_name = "adaptation_run_control"
     _attr_translation_key: str = "adaptation_run_command"
-    _enum = danfoss_thermostat.DanfossAdaptationRunControlEnum
+    _enum = DanfossAdaptationRunControlEnum
     _cluster_id = Thermostat.cluster_id
 
     _cluster_match = ClusterMatch(
@@ -1194,7 +1198,7 @@ class DanfossViewingDirection(ZCLEnumSelectEntity):
     _unique_id_suffix = "viewing_direction"
     _attribute_name = "viewing_direction"
     _attr_translation_key: str = "viewing_direction"
-    _enum = danfoss_thermostat.DanfossViewingDirectionEnum
+    _enum = DanfossViewingDirectionEnum
     _cluster_id = UserInterface.cluster_id
 
     _cluster_match = ClusterMatch(
