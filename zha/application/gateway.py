@@ -489,9 +489,21 @@ class Gateway(AsyncUtilMixin, EventBase):
             return
 
         old_entry = getattr(zha_device.device, QUIRK_REGISTRY_ENTRY_ATTR, None)
-        new_entry = getattr(new_zigpy_device, QUIRK_REGISTRY_ENTRY_ATTR, None)
+        old_factory = (
+            old_entry.zha_device_factory
+            if old_entry is not None and old_entry.zha_device_factory
+            else Device
+        )
 
-        if old_entry is new_entry:
+        new_entry = getattr(new_zigpy_device, QUIRK_REGISTRY_ENTRY_ATTR, None)
+        new_factory = (
+            new_entry.zha_device_factory
+            if new_entry is not None and new_entry.zha_device_factory
+            else Device
+        )
+
+        # Only a `Device` swap requires a new object
+        if new_factory is old_factory:
             _LOGGER.debug(
                 "Rebuilding device %s:%s after reinterview",
                 new_zigpy_device.nwk,
