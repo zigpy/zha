@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections import defaultdict
 from collections.abc import Callable, Iterator
 import contextlib
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 import inspect
 import logging
 from pathlib import Path
@@ -121,15 +121,15 @@ class QuirkSource:
         )
 
 
-def make_zigpy_device_replacement(
-    device_cls: type[zigpy.device.Device],
-) -> Callable[[zigpy.device.Device], zigpy.device.Device]:
-    """Return a transform wrapping a device in `device_cls` (a `BaseCustomDevice`)."""
+@dataclass(frozen=True)
+class ReplaceZigpyDevice:
+    """A transform wrapping a device in `device_cls` (a `BaseCustomDevice`)."""
 
-    def _replace(device: zigpy.device.Device) -> zigpy.device.Device:
-        return device_cls(device.application, device.ieee, device.nwk, device)
+    device_cls: type[zigpy.device.Device]
 
-    return _replace
+    def __call__(self, device: zigpy.device.Device) -> zigpy.device.Device:
+        """Replace a zigpy device."""
+        return self.device_cls(device.application, device.ieee, device.nwk, device)
 
 
 @dataclass(frozen=True)
@@ -141,7 +141,9 @@ class QuirkRegistryEntry:
         Callable[[zigpy.device.Device], zigpy.device.Device], ...
     ] = ()
     zha_device_factory: Callable[..., Device] | None = None
-    source: QuirkSource | None = None
+    # Excluded from equality so identical quirks registered at different sites still
+    # deduplicate.
+    source: QuirkSource | None = field(default=None, compare=False)
 
 
 class DeviceRegistry:
@@ -159,9 +161,10 @@ class DeviceRegistry:
         self._wildcard_registry: list[QuirkRegistryEntry] = []
 
     def register(self, entry: QuirkRegistryEntry) -> QuirkRegistryEntry:
-        """Add a quirk entry to the registry."""
+        """Add a quirk entry to the registry, ignoring exact duplicates."""
         if not entry.device_match.applies_to:
-            self._wildcard_registry.insert(0, entry)
+            if entry not in self._wildcard_registry:
+                self._wildcard_registry.insert(0, entry)
             return entry
 
         for manufacturer, model in entry.device_match.applies_to:
@@ -170,7 +173,9 @@ class DeviceRegistry:
                     f"{entry!r} must specify a manufacturer and/or model to match"
                 )
 
-            self._registry[ModelInfo(manufacturer, model)].insert(0, entry)
+            entries = self._registry[ModelInfo(manufacturer, model)]
+            if entry not in entries:
+                entries.insert(0, entry)
 
         return entry
 
@@ -181,7 +186,7 @@ class DeviceRegistry:
 
         transforms: list[Callable[[zigpy.device.Device], zigpy.device.Device]] = []
         if cls._zigpy_device_cls is not None:
-            transforms.append(make_zigpy_device_replacement(cls._zigpy_device_cls))
+            transforms.append(ReplaceZigpyDevice(cls._zigpy_device_cls))
         transforms.extend(cls._zigpy_device_transforms)
 
         self.register(
