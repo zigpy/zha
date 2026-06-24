@@ -219,23 +219,21 @@ def zigpy_device_from_legacy_diagnostics(  # noqa: C901
                     or attr_id in cluster["unsupported_attributes"]
                 ):
                     continue
-                real_cluster._attr_cache[int(attr_id, 16)] = parse_legacy_value(
-                    attr["value"]
-                )
-                real_cluster.PLUGGED_ATTR_READS[int(attr_id, 16)] = parse_legacy_value(
-                    attr["value"]
-                )
+                attr_id_int = int(attr_id, 16)
+                parsed = parse_legacy_value(attr["value"])
+                if attr_id_int in real_cluster.attributes:
+                    real_cluster._attr_cache[attr_id_int] = parsed
+                else:
+                    real_cluster._attr_cache.set_legacy_value(attr_id_int, parsed)
+                real_cluster.PLUGGED_ATTR_READS[attr_id_int] = parsed
             for unsupported_attr in cluster["unsupported_attributes"]:
                 if isinstance(unsupported_attr, str) and unsupported_attr.startswith(
                     "0x"
                 ):
                     attrid = int(unsupported_attr, 16)
-                    real_cluster.add_unsupported_attribute(attrid)
                     if attrid in real_cluster.attributes:
-                        real_cluster.add_unsupported_attribute(
-                            real_cluster.attributes[attrid].name
-                        )
-                else:
+                        real_cluster.add_unsupported_attribute(attrid)
+                elif unsupported_attr in real_cluster.attributes_by_name:
                     real_cluster.add_unsupported_attribute(unsupported_attr)
 
         for cluster_id, cluster in ep["out_clusters"].items():
@@ -260,23 +258,21 @@ def zigpy_device_from_legacy_diagnostics(  # noqa: C901
                     or attr_id in cluster["unsupported_attributes"]
                 ):
                     continue
-                real_cluster._attr_cache[int(attr_id, 16)] = parse_legacy_value(
-                    attr["value"]
-                )
-                real_cluster.PLUGGED_ATTR_READS[int(attr_id, 16)] = parse_legacy_value(
-                    attr["value"]
-                )
+                attr_id_int = int(attr_id, 16)
+                parsed = parse_legacy_value(attr["value"])
+                if attr_id_int in real_cluster.attributes:
+                    real_cluster._attr_cache[attr_id_int] = parsed
+                else:
+                    real_cluster._attr_cache.set_legacy_value(attr_id_int, parsed)
+                real_cluster.PLUGGED_ATTR_READS[attr_id_int] = parsed
             for unsupported_attr in cluster["unsupported_attributes"]:
                 if isinstance(unsupported_attr, str) and unsupported_attr.startswith(
                     "0x"
                 ):
                     attrid = int(unsupported_attr, 16)
-                    real_cluster.add_unsupported_attribute(attrid)
                     if attrid in real_cluster.attributes:
-                        real_cluster.add_unsupported_attribute(
-                            real_cluster.attributes[attrid].name
-                        )
-                else:
+                        real_cluster.add_unsupported_attribute(attrid)
+                elif unsupported_attr in real_cluster.attributes_by_name:
                     real_cluster.add_unsupported_attribute(unsupported_attr)
 
     if device.model is None and device.manufacturer is None:
@@ -298,6 +294,10 @@ def zigpy_device_from_diagnostics(
 
     if "version" not in zha_data:
         return zigpy_device_from_legacy_diagnostics(app, data, patch_cluster)
+
+    # Some diagnostics are hand-redacted (e.g. nwk "0xREDACTED"), fake a NWK instead
+    if "REDACTED" in zha_data["nwk"]:
+        zha_data["nwk"] = "0x1234"
 
     # Home Assistant diagnostics contain redacted IEEE info, fake an IEEE instead
     if "REDACTED" in zha_data["ieee"]:
@@ -345,7 +345,7 @@ async def main(paths: list[str]):
                     app=zha_gateway.application_controller,
                     device_data=data,
                 )
-            except ValueError:
+            except Exception:
                 if "home_assistant" not in data:
                     _LOGGER.debug("Skipping, missing 'home_assistant' key")
                     continue
