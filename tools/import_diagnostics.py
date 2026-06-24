@@ -224,6 +224,12 @@ def zigpy_device_from_legacy_diagnostics(  # noqa: C901
                 if attr_id_int in real_cluster.attributes:
                     real_cluster._attr_cache[attr_id_int] = parsed
                 else:
+                    _LOGGER.warning(
+                        "Setting legacy value for unknown attribute %s on server cluster %s: %r",
+                        attr_id,
+                        cluster_id,
+                        parsed,
+                    )
                     real_cluster._attr_cache.set_legacy_value(attr_id_int, parsed)
                 real_cluster.PLUGGED_ATTR_READS[attr_id_int] = parsed
             for unsupported_attr in cluster["unsupported_attributes"]:
@@ -263,6 +269,12 @@ def zigpy_device_from_legacy_diagnostics(  # noqa: C901
                 if attr_id_int in real_cluster.attributes:
                     real_cluster._attr_cache[attr_id_int] = parsed
                 else:
+                    _LOGGER.warning(
+                        "Setting legacy value for unknown attribute %s on client cluster %s: %r",
+                        attr_id,
+                        cluster_id,
+                        parsed,
+                    )
                     real_cluster._attr_cache.set_legacy_value(attr_id_int, parsed)
                 real_cluster.PLUGGED_ATTR_READS[attr_id_int] = parsed
             for unsupported_attr in cluster["unsupported_attributes"]:
