@@ -340,31 +340,30 @@ async def main(paths: list[str]):
                 _LOGGER.debug("Skipping, not valid JSON")
                 continue
 
-            if "home_assistant" not in data:
-                _LOGGER.debug("Skipping, missing 'home_assistant' key")
-                continue
-
-            zigpy_device = zigpy_device_from_diagnostics(
-                zha_gateway.application_controller, data
-            )
-
-            if zigpy_device is None:
-                _LOGGER.debug("Skipping, diagnostics are not valid")
-                continue
-
-            output_path = (
-                REPO_ROOT
-                / "tests"
-                / "data"
-                / "devices"
-                / (
-                    slugify(f"{zigpy_device.manufacturer}-{zigpy_device.model}")
-                    + ".json"
+            try:
+                zigpy_device = zigpy_device_from_device_data(
+                    app=zha_gateway.application_controller,
+                    device_data=data,
                 )
-            )
+            except ValueError:
+                if "home_assistant" not in data:
+                    _LOGGER.debug("Skipping, missing 'home_assistant' key")
+                    continue
 
-            if output_path.is_file():
-                continue
+                ha_data = data["home_assistant"].get("data", {})
+                if (
+                    ha_data.get("last_seen") == "2026-03-04T18:21:39.038488+00:00"
+                ) and (ha_data.get("model") == "J1 (5502)"):
+                    _LOGGER.debug("Skipping known-bad DIY device")
+                    continue
+
+                zigpy_device = zigpy_device_from_diagnostics(
+                    zha_gateway.application_controller, data
+                )
+
+                if zigpy_device is None:
+                    _LOGGER.debug("Skipping, diagnostics are not valid")
+                    continue
 
             with patch("zigpy.zcl.Cluster._update_attribute"):
                 zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
@@ -395,6 +394,22 @@ async def main(paths: list[str]):
                     "Rejoined device %s does not match original diagnostics JSON, quirk has modified the device signature",
                     path,
                 )
+                continue
+
+            fw_version = rejoined_zha_device.firmware_version
+            suffix = f"-{fw_version}" if fw_version is not None else ""
+            output_path = (
+                REPO_ROOT
+                / "tests"
+                / "data"
+                / "devices"
+                / (
+                    slugify(f"{zigpy_device.manufacturer}-{zigpy_device.model}{suffix}")
+                    + ".json"
+                )
+            )
+
+            if output_path.is_file():
                 continue
 
             _LOGGER.info("Importing %s as %s", path, output_path.name)
