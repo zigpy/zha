@@ -9,13 +9,6 @@ resolution-markers = [
     "python_full_version < '3.13.2'",
 ]
 
-[manifest]
-
-[[manifest.dependency-metadata]]
-name = "zha-quirks"
-version = "2.0.0"
-requires-dist = ["zigpy>=2.0.0", "zha"]
-
 [[package]]
 name = "acme"
 version = "2.10.0"
@@ -4957,7 +4950,7 @@ ci = [
     { name = "python-slugify" },
     { name = "ruff", specifier = "==0.15.16" },
     { name = "uv", specifier = ">=0.11.16" },
-    { name = "zha-quirks", git = "https://github.com/puddly/zha-device-handlers?rev=7ac5b603cec5ae12fd24a7f40522aeb607aa4b1a" },
+    { name = "zha-quirks", specifier = ">=2.0.0" },
 ]
 testing = [
     { name = "codespell", specifier = "==2.4.2" },
@@ -4976,16 +4969,20 @@ testing = [
     { name = "python-slugify" },
     { name = "ruff", specifier = "==0.15.16" },
     { name = "uv", specifier = ">=0.11.16" },
-    { name = "zha-quirks", git = "https://github.com/puddly/zha-device-handlers?rev=7ac5b603cec5ae12fd24a7f40522aeb607aa4b1a" },
+    { name = "zha-quirks", specifier = ">=2.0.0" },
 ]
 
 [[package]]
 name = "zha-quirks"
 version = "2.0.0"
-source = { git = "https://github.com/puddly/zha-device-handlers?rev=7ac5b603cec5ae12fd24a7f40522aeb607aa4b1a#7ac5b603cec5ae12fd24a7f40522aeb607aa4b1a" }
+source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "zha" },
     { name = "zigpy" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/99/f6/e232e05fc118e64ad4c020715e517c36ef98dde165e05c6b4758069f7d37/zha_quirks-2.0.0.tar.gz", hash = "sha256:63d5d7ab341cdadcda17d051a1829e768c865271652beb98e61cf9e1c8ed8f38", size = 467213, upload-time = "2026-06-24T03:35:32.213Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/24/8a/61065afd013975c350019a31ced13cd9d83d95e7800b18f9869c37522481/zha_quirks-2.0.0-py3-none-any.whl", hash = "sha256:8964e61388616c44f1fa0eb8a0ba30fa04cc2b74e85360ea176a4d4ecc51bfb4", size = 568194, upload-time = "2026-06-24T03:35:30.74Z" },
 ]
 
 [[package]]

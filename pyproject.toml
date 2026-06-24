@@ -65,16 +65,6 @@ ci = [
 [tool.uv]
 default-groups = ["testing"]
 
-# `zha` and `zha-quirks` mutually pin `>=2.0.0`, but neither is tagged 2.0.0 yet. Drop
-# those bounds for the dev lock so resolution succeeds. Will be fixed in 2.0.1.
-[[tool.uv.dependency-metadata]]
-name = "zha-quirks"
-version = "2.0.0"
-requires-dist = ["zigpy>=2.0.0", "zha"]
-
-[tool.uv.sources]
-zha-quirks = { git = "https://github.com/puddly/zha-device-handlers", rev = "7ac5b603cec5ae12fd24a7f40522aeb607aa4b1a" }
-
 [tool.setuptools-git-versioning]
 enabled = true
 
