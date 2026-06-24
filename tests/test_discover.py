@@ -107,7 +107,10 @@ async def test_device_override(
 async def test_device_override_entities(zha_gateway: Gateway) -> None:
     """Test device discovery entity changes."""
     device_data_text = await asyncio.get_running_loop().run_in_executor(
-        None, pathlib.Path("tests/data/devices/tz3000-tqlv4ug4-ts0001.json").read_text
+        None,
+        pathlib.Path(
+            "tests/data/devices/tz3000-tqlv4ug4-ts0001-0x00000048.json"
+        ).read_text,
     )
     device_data = json.loads(device_data_text)
 
@@ -153,7 +156,7 @@ async def test_device_override_picks_highest_priority(
     # entity should be created, not duplicates from collecting all priority levels.
     zigpy_device = await zigpy_device_from_json(
         zha_gateway.application_controller,
-        "tests/data/devices/philips-lct014.json",
+        "tests/data/devices/philips-lct014-0x01001a02.json",
     )
     zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
 
@@ -915,7 +918,7 @@ async def test_get_diagnostics_json_repeated_calls(zha_gateway: Gateway) -> None
     """Test that calling get_diagnostics_json twice produces the same result."""
     zigpy_device = await zigpy_device_from_json(
         zha_gateway.application_controller,
-        "tests/data/devices/jasco-products-45856.json",
+        "tests/data/devices/jasco-products-45856-0x00000006.json",
     )
     zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
 
@@ -932,7 +935,7 @@ async def test_diagnostics_includes_ota_last_query_cmd(zha_gateway: Gateway) -> 
     """Test that diagnostics includes last_query_cmd for OTA clusters."""
     zigpy_device = await zigpy_device_from_json(
         zha_gateway.application_controller,
-        "tests/data/devices/ikea-of-sweden-tradfri-bulb-gu10-ws-400lm.json",
+        "tests/data/devices/ikea-of-sweden-tradfri-bulb-gu10-ws-400lm-0x23095631.json",
     )
 
     ota_cluster = zigpy_device.endpoints[1].out_clusters[Ota.cluster_id]
@@ -964,7 +967,7 @@ async def test_diagnostics_omits_ota_last_query_cmd_when_none(
     """Test that diagnostics omits last_query_cmd when it is None."""
     zigpy_device = await zigpy_device_from_json(
         zha_gateway.application_controller,
-        "tests/data/devices/ikea-of-sweden-tradfri-bulb-gu10-ws-400lm.json",
+        "tests/data/devices/ikea-of-sweden-tradfri-bulb-gu10-ws-400lm-0x23095631.json",
     )
 
     zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
@@ -983,7 +986,7 @@ async def test_entityless_cluster_binds_via_virtual_entity(
     """Manufacturer clusters that don't produce entities are still bound."""
     zigpy_device = await zigpy_device_from_json(
         zha_gateway.application_controller,
-        "tests/data/devices/signify-netherlands-b-v-rwl022.json",
+        "tests/data/devices/signify-netherlands-b-v-rwl022-0x02004d27.json",
     )
 
     # The Philips remote cluster (0xFC00) has no HA entity but `PhilipsRemoteBind`
