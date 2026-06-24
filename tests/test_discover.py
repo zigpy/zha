@@ -21,6 +21,7 @@ from zhaquirks.builder.metadata import (
     NumberMetadata,
     ZCLSensorMetadata,
 )
+from zhaquirks.clusters import CustomCluster
 from zhaquirks.ikea import PowerConfig1CRCluster, ScenesCluster
 from zhaquirks.xiaomi import (
     BasicCluster,
@@ -34,7 +35,7 @@ from zhaquirks.xiaomi.aqara.driver_curtain_e1 import (
 import zigpy.device
 import zigpy.profiles.zha
 import zigpy.types
-from zigpy.zcl import ClusterType
+from zigpy.zcl import ClusterType, ReportingConfig
 import zigpy.zcl.clusters.closures
 import zigpy.zcl.clusters.general
 from zigpy.zcl.clusters.general import Ota, QueryNextImageCommand
@@ -50,6 +51,7 @@ from tests.common import (
     create_mock_zigpy_device,
     get_entity,
     join_zigpy_device,
+    patch_cluster_for_testing,
     update_attribute_cache,
     zigpy_device_from_device_data,
     zigpy_device_from_json,
@@ -58,7 +60,7 @@ from zha.application import EntityType, Platform
 from zha.application.gateway import Gateway
 from zha.application.helpers import DeviceOverridesConfiguration
 from zha.application.platforms import PlatformEntity, binary_sensor, sensor
-from zha.application.platforms.const import PHILIPS_REMOTE_CLUSTER
+from zha.application.platforms.const import PHILIPS_REMOTE_CLUSTER, SHELLY_RPC_CLUSTER
 from zha.application.platforms.light import HueLight
 from zha.application.platforms.number import BaseNumber, NumberMode
 from zha.quirks import QUIRK_REGISTRY_ENTRY_ATTR, DeviceMatch, DeviceRegistry, ModelInfo
@@ -997,3 +999,45 @@ async def test_entityless_cluster_binds_via_virtual_entity(
     await zha_gateway.async_block_till_done(wait_background_tasks=True)
 
     assert len(philips_cluster.bind.mock_calls) == 1
+
+
+async def test_shelly_rpc_cluster_reporting_configured(
+    zha_gateway: Gateway,
+) -> None:
+    """Shelly RPC clusters need reporting so input status notifications are read."""
+    zigpy_device = await zigpy_device_from_json(
+        zha_gateway.application_controller,
+        "tests/data/devices/shelly-mini1pm.json",
+    )
+
+    class ShellyTestRpcCluster(CustomCluster):
+        cluster_id = SHELLY_RPC_CLUSTER
+        ep_attribute = "shelly_rpc"
+
+        class AttributeDefs(zcl_f.BaseAttributeDefs):
+            rx_ctl = zcl_f.ZCLAttributeDef(
+                id=0x0002,
+                type=zigpy.types.uint32_t,
+                access="r",
+                manufacturer_code=0x1490,
+            )
+
+    rpc_cluster = ShellyTestRpcCluster(zigpy_device.endpoints[239], is_server=True)
+    patch_cluster_for_testing(rpc_cluster)
+    zigpy_device.endpoints[239].add_input_cluster(SHELLY_RPC_CLUSTER, rpc_cluster)
+
+    rx_ctl_def = rpc_cluster.find_attribute("rx_ctl")
+
+    await join_zigpy_device(zha_gateway, zigpy_device)
+    await zha_gateway.async_block_till_done(wait_background_tasks=True)
+
+    assert len(rpc_cluster.bind.mock_calls) == 1
+    assert rpc_cluster.configure_reporting_multiple.mock_calls == [
+        mock.call(
+            {
+                rx_ctl_def: ReportingConfig(
+                    min_interval=0, max_interval=900, reportable_change=1
+                ),
+            }
+        )
+    ]

@@ -44,6 +44,7 @@ from zha.application.platforms.const import (
     INOVELLI_CLUSTER,
     OSRAM_CLUSTER,
     PHILIPS_REMOTE_CLUSTER,
+    SHELLY_RPC_CLUSTER,
     SINOPE_MANUFACTURER_CLUSTER,
     SMARTTHINGS_ACCELERATION_CLUSTER,
     SONOFF_CLUSTER,
@@ -909,6 +910,33 @@ class TuyaPlugManufacturerInit(VirtualEntity):
             attributes={
                 "backlight_mode": AttrConfig(read_on_startup=False),
                 "power_on_state": AttrConfig(read_on_startup=False),
+            },
+        ),
+    }
+
+
+@register_entity(SHELLY_RPC_CLUSTER)
+class ShellyRpcReporting(VirtualEntity):
+    """Bind Shelly RPC cluster and enable pending-frame reports."""
+
+    _unique_id_suffix = "shelly_rpc_reporting"
+
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({SHELLY_RPC_CLUSTER}),
+        manufacturers=frozenset({"Shelly"}),
+        profile_ids=None,
+        match_renamed_clusters=True,
+    )
+    _server_cluster_config = {
+        SHELLY_RPC_CLUSTER: ClusterConfig(
+            bind=True,
+            attributes={
+                "rx_ctl": AttrConfig(
+                    read_on_startup=False,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
+                ),
             },
         ),
     }
