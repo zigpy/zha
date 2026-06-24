@@ -12,11 +12,14 @@ import dataclasses
 from dataclasses import dataclass
 import datetime
 import enum
+import importlib
+import importlib.metadata
 import logging
 import re
 from typing import TYPE_CHECKING, Any, ParamSpec, TypeVar
 
 import voluptuous as vol
+from zigpy.application import RADIO_ENTRY_POINT_GROUP
 import zigpy.exceptions
 import zigpy.types
 from zigpy.typing import UNDEFINED, UndefinedType
@@ -41,6 +44,8 @@ from zha.decorators import periodic
 from zha.exceptions import ZHAException
 
 if TYPE_CHECKING:
+    from zigpy.application import ControllerApplication
+
     from zha.application.gateway import Gateway
     from zha.zigbee.device import Device
 
@@ -61,6 +66,107 @@ BINDABLE_CLUSTERS: frozenset[int] = frozenset(
         Color.cluster_id,
     }
 )
+
+
+class BuiltinRadioType(enum.StrEnum):
+    """Names of the built-in radio types."""
+
+    EZSP = "ezsp"
+    ZNP = "znp"
+    DECONZ = "deconz"
+    ZIGATE = "zigate"
+    XBEE = "xbee"
+
+
+@dataclass(kw_only=True, slots=True)
+class RadioLibrary:
+    """ZHA external radio library configuration."""
+
+    radio_type: str
+    display_name: str
+    description: str
+    module_path: str
+
+    # The actual controller class will be imported dynamically
+    controller: type[ControllerApplication] = None  # type: ignore[assignment]
+
+    def import_controller(self) -> type[ControllerApplication]:
+        """Import the radio library and return its controller class."""
+        import_path, cls_name = self.module_path.split(":", 1)
+        module = importlib.import_module(import_path)
+        controller: type[ControllerApplication] = getattr(module, cls_name)
+        return controller
+
+
+RADIO_LIBRARIES = {
+    BuiltinRadioType.EZSP: RadioLibrary(
+        radio_type=BuiltinRadioType.EZSP,
+        display_name="EZSP",
+        description="Silicon Labs EmberZNet: Elelabs, HUSBZB-1, Telegesis",
+        module_path="bellows.zigbee.application:ControllerApplication",
+    ),
+    BuiltinRadioType.ZNP: RadioLibrary(
+        radio_type=BuiltinRadioType.ZNP,
+        display_name="ZNP",
+        description="Texas Instruments Z-Stack ZNP: CC253x, CC26x2, CC13x2",
+        module_path="zigpy_znp.zigbee.application:ControllerApplication",
+    ),
+    BuiltinRadioType.DECONZ: RadioLibrary(
+        radio_type=BuiltinRadioType.DECONZ,
+        display_name="deCONZ",
+        description="dresden elektronik deCONZ: ConBee, RaspBee",
+        module_path="zigpy_deconz.zigbee.application:ControllerApplication",
+    ),
+    BuiltinRadioType.ZIGATE: RadioLibrary(
+        radio_type=BuiltinRadioType.ZIGATE,
+        display_name="ZiGate",
+        description="ZiGate: PiZiGate, ZiGate USB-TTL, ZiGate WiFi",
+        module_path="zigpy_zigate.zigbee.application:ControllerApplication",
+    ),
+    BuiltinRadioType.XBEE: RadioLibrary(
+        radio_type=BuiltinRadioType.XBEE,
+        display_name="XBee",
+        description="Digi XBee: Series 2, 2C, 3",
+        module_path="zigpy_xbee.zigbee.application:ControllerApplication",
+    ),
+}
+
+
+def get_radio_libraries() -> dict[str, RadioLibrary]:
+    """Return built-in and discovered external radio libraries, keyed by radio type."""
+
+    radio_libraries: dict[str, RadioLibrary] = dict(RADIO_LIBRARIES)
+
+    # External radio libraries are discovered via the `zigpy.radio` entry point group.
+    # This performs blocking imports and must be called from an executor thread, not
+    # the event loop.
+    for entry_point in importlib.metadata.entry_points(group=RADIO_ENTRY_POINT_GROUP):
+        try:
+            controller = entry_point.load()
+        except Exception:  # pylint: disable=broad-except
+            _LOGGER.warning(
+                "Failed to load external radio library: %r",
+                entry_point.name,
+                exc_info=True,
+            )
+            continue
+
+        if controller.DISPLAY_NAME is None or controller.DESCRIPTION is None:
+            _LOGGER.warning(
+                "Ignoring external radio library with missing metadata: %r",
+                entry_point.name,
+            )
+            continue
+
+        radio_libraries[entry_point.name] = RadioLibrary(
+            radio_type=entry_point.name,
+            display_name=controller.DISPLAY_NAME,
+            description=controller.DESCRIPTION,
+            module_path=entry_point.value,
+            controller=controller,
+        )
+
+    return radio_libraries
 
 
 @dataclass

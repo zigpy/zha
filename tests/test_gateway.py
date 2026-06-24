@@ -2,6 +2,7 @@
 
 import asyncio
 from contextlib import suppress
+import importlib.metadata
 from unittest.mock import AsyncMock, MagicMock, PropertyMock, call, patch
 
 import pytest
@@ -27,7 +28,7 @@ from tests.common import (
     zigpy_device_from_json,
 )
 from zha.application import Platform
-from zha.application.const import ZHA_GW_MSG, ZHA_GW_MSG_CONNECTION_LOST, RadioType
+from zha.application.const import ZHA_GW_MSG, ZHA_GW_MSG_CONNECTION_LOST
 from zha.application.gateway import (
     ConnectionLostEvent,
     DeviceFullInitEvent,
@@ -38,7 +39,7 @@ from zha.application.gateway import (
     RawDeviceInitializedDeviceInfo,
     RawDeviceInitializedEvent,
 )
-from zha.application.helpers import ZHAData
+from zha.application.helpers import ZHAData, get_radio_libraries
 from zha.application.platforms import GroupEntity
 from zha.application.platforms.light.const import EFFECT_OFF, LightEntityFeature
 from zha.quirks import DeviceMatch, DeviceRegistry, ModelInfo, QuirkRegistryEntry
@@ -194,10 +195,6 @@ async def test_gateway_starts_entity_exception(
             return_value=zigpy_app_controller,
         ),
         patch(
-            "bellows.zigbee.application.ControllerApplication",
-            return_value=zigpy_app_controller,
-        ),
-        patch(
             "zha.application.platforms.sensor.DeviceCounterSensor.__init__",
             side_effect=Exception,
         ),
@@ -221,15 +218,9 @@ async def test_mains_devices_startup_polling_config(
 ) -> None:
     """Test mains powered device startup polling config is respected."""
 
-    with (
-        patch(
-            "bellows.zigbee.application.ControllerApplication.new",
-            return_value=zigpy_app_controller,
-        ),
-        patch(
-            "bellows.zigbee.application.ControllerApplication",
-            return_value=zigpy_app_controller,
-        ),
+    with patch(
+        "bellows.zigbee.application.ControllerApplication.new",
+        return_value=zigpy_app_controller,
     ):
         zha_data.config.device_options.enable_mains_startup_polling = enabled
         zha_gateway = await Gateway.async_from_config(zha_data)
@@ -1072,32 +1063,6 @@ async def test_gateway_handle_message(
     assert zha_dev_basic.on_network is True
 
 
-def test_radio_type():
-    """Test radio type."""
-
-    assert RadioType.list() == [
-        "EZSP = Silicon Labs EmberZNet protocol: Elelabs, HUSBZB-1, Telegesis",
-        "ZNP = Texas Instruments Z-Stack ZNP protocol: CC253x, CC26x2, CC13x2",
-        "deCONZ = dresden elektronik deCONZ protocol: ConBee I/II, RaspBee I/II",
-        "ZiGate = ZiGate Zigbee radios: PiZiGate, ZiGate USB-TTL, ZiGate WiFi",
-        "XBee = Digi XBee Zigbee radios: Digi XBee Series 2, 2C, 3",
-    ]
-
-    assert (
-        RadioType.get_by_description(
-            "EZSP = Silicon Labs EmberZNet protocol: Elelabs, HUSBZB-1, Telegesis"
-        )
-        == RadioType.ezsp
-    )
-
-    assert RadioType.ezsp.description == (
-        "EZSP = Silicon Labs EmberZNet protocol: Elelabs, HUSBZB-1, Telegesis"
-    )
-
-    with pytest.raises(ValueError):
-        RadioType.get_by_description("Invalid description")
-
-
 @pytest.mark.parametrize(
     ("country_code", "yaml_config", "expected_country_code"),
     [
@@ -1119,7 +1084,7 @@ async def test_country_code_passthrough(
     zha_data.zigpy_config = yaml_config
 
     gateway = Gateway(zha_data)
-    _, app_config = gateway.get_application_controller_data()
+    app_config = gateway.get_application_controller_config()
 
     assert (
         app_config.get(CONF_NWK, {}).get(CONF_NWK_COUNTRY_CODE) == expected_country_code
@@ -1284,3 +1249,83 @@ async def test_group_on_remove_entity_failure(
 
     assert "Failed to remove group entity" in caplog.text
     assert "Group entity removal failed" in caplog.text
+
+
+class FakeExternalController:
+    """Fake external radio controller."""
+
+    DISPLAY_NAME = "Fake"
+    DESCRIPTION = "A fake external radio"
+
+
+class FakeExternalControllerMissingMetadata(ControllerApplication):
+    """Fake external radio controller without metadata."""
+
+
+def _fake_entry_point() -> importlib.metadata.EntryPoint:
+    return importlib.metadata.EntryPoint(
+        name="fake", value=f"{__name__}:FakeExternalController", group="zigpy.radio"
+    )
+
+
+def test_get_radio_libraries() -> None:
+    """Test external radio library discovery via the entry point group."""
+    with patch("importlib.metadata.entry_points", return_value=[_fake_entry_point()]):
+        radio_libraries = get_radio_libraries()
+
+    library = radio_libraries["fake"]
+    assert library.controller is FakeExternalController
+    assert library.display_name == "Fake"
+    assert library.description == "A fake external radio"
+    assert "ezsp" in radio_libraries
+
+
+async def test_external_radio_libraries(zha_data: ZHAData) -> None:
+    """Test that discovered radio libraries are merged into the gateway registry."""
+    gateway = Gateway(zha_data)
+
+    with patch("importlib.metadata.entry_points", return_value=[_fake_entry_point()]):
+        radio_libraries = gateway.radio_libraries
+
+    assert radio_libraries["fake"].controller is FakeExternalController
+    assert radio_libraries["ezsp"].controller is not None
+
+
+def test_get_radio_libraries_load_failure(caplog: pytest.LogCaptureFixture) -> None:
+    """Test that an external radio library failing to import is skipped."""
+    entry_point = importlib.metadata.EntryPoint(
+        name="broken", value="some_nonexistent_module:Controller", group="zigpy.radio"
+    )
+
+    with patch("importlib.metadata.entry_points", return_value=[entry_point]):
+        radio_libraries = get_radio_libraries()
+
+    assert "broken" not in radio_libraries
+    assert "Failed to load external radio library: 'broken'" in caplog.text
+
+
+def test_get_radio_libraries_missing_metadata(caplog: pytest.LogCaptureFixture) -> None:
+    """Test that an external radio library without metadata is skipped."""
+    entry_point = importlib.metadata.EntryPoint(
+        name="incomplete",
+        value=f"{__name__}:FakeExternalControllerMissingMetadata",
+        group="zigpy.radio",
+    )
+
+    with patch("importlib.metadata.entry_points", return_value=[entry_point]):
+        radio_libraries = get_radio_libraries()
+
+    assert "incomplete" not in radio_libraries
+    assert (
+        "Ignoring external radio library with missing metadata: 'incomplete'"
+        in caplog.text
+    )
+
+
+async def test_unknown_radio_type(zha_data: ZHAData) -> None:
+    """Test that an unknown radio type raises a ValueError."""
+    zha_data.config.coordinator_configuration.radio_type = "unknown"
+    gateway = Gateway(zha_data)
+
+    with pytest.raises(ValueError, match="Unknown radio type: 'unknown'"):
+        _ = gateway.radio_library

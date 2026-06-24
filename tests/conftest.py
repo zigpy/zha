@@ -8,7 +8,7 @@ import os
 import reprlib
 import threading
 from types import TracebackType
-from unittest.mock import patch
+from unittest.mock import AsyncMock, patch
 
 import looptime
 import pytest
@@ -321,14 +321,12 @@ class TestGateway:
         with (
             looptime.enabled(),
             patch(
-                "bellows.zigbee.application.ControllerApplication.new",
-                return_value=self.app,
-            ),
-            patch(
                 "bellows.zigbee.application.ControllerApplication",
                 return_value=self.app,
-            ),
+            ) as mock_app,
         ):
+            mock_app.new = AsyncMock(return_value=self.app)
+
             self.zha_gateway = await Gateway.async_from_config(self.zha_data)
             await self.zha_gateway.async_initialize()
             await self.zha_gateway.async_block_till_done()
