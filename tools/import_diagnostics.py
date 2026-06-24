@@ -213,14 +213,17 @@ def zigpy_device_from_legacy_diagnostics(  # noqa: C901
 
             if patch_cluster:
                 patch_cluster_for_testing(real_cluster)
+
             for attr_id, attr in cluster["attributes"].items():
                 if (
                     attr.get("value") is None
                     or attr_id in cluster["unsupported_attributes"]
                 ):
                     continue
+
                 attr_id_int = int(attr_id, 16)
                 parsed = parse_legacy_value(attr["value"])
+
                 if attr_id_int in real_cluster.attributes:
                     real_cluster._attr_cache[attr_id_int] = parsed
                 else:
@@ -231,7 +234,9 @@ def zigpy_device_from_legacy_diagnostics(  # noqa: C901
                         parsed,
                     )
                     real_cluster._attr_cache.set_legacy_value(attr_id_int, parsed)
+
                 real_cluster.PLUGGED_ATTR_READS[attr_id_int] = parsed
+
             for unsupported_attr in cluster["unsupported_attributes"]:
                 if isinstance(unsupported_attr, str) and unsupported_attr.startswith(
                     "0x"
@@ -258,14 +263,17 @@ def zigpy_device_from_legacy_diagnostics(  # noqa: C901
 
             if patch_cluster:
                 patch_cluster_for_testing(real_cluster)
+
             for attr_id, attr in cluster["attributes"].items():
                 if (
                     attr.get("value") is None
                     or attr_id in cluster["unsupported_attributes"]
                 ):
                     continue
+
                 attr_id_int = int(attr_id, 16)
                 parsed = parse_legacy_value(attr["value"])
+
                 if attr_id_int in real_cluster.attributes:
                     real_cluster._attr_cache[attr_id_int] = parsed
                 else:
@@ -276,7 +284,9 @@ def zigpy_device_from_legacy_diagnostics(  # noqa: C901
                         parsed,
                     )
                     real_cluster._attr_cache.set_legacy_value(attr_id_int, parsed)
+
                 real_cluster.PLUGGED_ATTR_READS[attr_id_int] = parsed
+
             for unsupported_attr in cluster["unsupported_attributes"]:
                 if isinstance(unsupported_attr, str) and unsupported_attr.startswith(
                     "0x"
