@@ -362,16 +362,21 @@ async def main(paths: list[str]):
                 _LOGGER.debug("Skipping, not valid JSON")
                 continue
 
-            try:
+            if "version" in data and "node_descriptor" in data and "endpoints" in data:
+                # Directly parse the diagnostics JSON
                 zigpy_device = zigpy_device_from_device_data(
                     app=zha_gateway.application_controller,
                     device_data=data,
                 )
-            except Exception:
+            else:
+                # Otherwise, try to import one of the many legacy ZHA formats
                 if "home_assistant" not in data:
                     _LOGGER.debug("Skipping, missing 'home_assistant' key")
                     continue
 
+                # There is currently just one known "bad" device: a DIY device that
+                # copies the model and manufacturer strings from an unrelated device. We
+                # skip it.
                 ha_data = data["home_assistant"].get("data", {})
                 if (
                     ha_data.get("last_seen") == "2026-03-04T18:21:39.038488+00:00"
