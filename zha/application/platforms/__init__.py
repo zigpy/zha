@@ -40,7 +40,7 @@ _LOGGER = logging.getLogger(__name__)
 
 DEFAULT_UPDATE_GROUP_FROM_CHILD_DELAY: float = 0.5
 
-ENTITY_REGISTRY: dict[ClusterId, list[type[PlatformEntity]]] = defaultdict(list)
+ENTITY_REGISTRY: dict[ClusterId | int, list[type[PlatformEntity]]] = defaultdict(list)
 GROUP_ENTITY_REGISTRY: list[type[GroupEntity]] = []
 
 
@@ -142,7 +142,9 @@ class ClusterMatch:
                 )
 
 
-def register_entity[T: type[PlatformEntity]](cluster_id: ClusterId) -> Callable[[T], T]:
+def register_entity[T: type[PlatformEntity]](
+    cluster_id: ClusterId | int,
+) -> Callable[[T], T]:
     """Register an entity class for discovery."""
 
     def inner(cls: T) -> T:

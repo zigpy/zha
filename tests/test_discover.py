@@ -61,12 +61,7 @@ from zha.application.platforms import PlatformEntity, binary_sensor, sensor
 from zha.application.platforms.const import PHILIPS_REMOTE_CLUSTER
 from zha.application.platforms.light import HueLight
 from zha.application.platforms.number import BaseNumber, NumberMode
-from zha.quirks import (
-    QUIRK_REGISTRY_ENTRY_ATTR,
-    DeviceMatch,
-    DeviceRegistry,
-    ModelInfo,
-)
+from zha.quirks import QUIRK_REGISTRY_ENTRY_ATTR, DeviceMatch, DeviceRegistry, ModelInfo
 from zha.units import UnitOfTime
 
 

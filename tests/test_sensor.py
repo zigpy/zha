@@ -1645,9 +1645,7 @@ async def test_quirks_v2_sensor_attribute_init_reads_cluster(
 
     registry = DeviceRegistry()
     (
-        QuirkBuilder(
-            "Fake_Manufacturer_sensor_2", "Fake_Model_sensor_2"
-        )
+        QuirkBuilder("Fake_Manufacturer_sensor_2", "Fake_Model_sensor_2")
         .replaces(OppleCluster)
         .sensor(
             "last_feeding_size",

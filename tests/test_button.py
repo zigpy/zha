@@ -378,9 +378,7 @@ async def test_quirks_v2_button_only_cluster_is_not_configured(
 
     registry = DeviceRegistry()
     (
-        QuirkBuilder(
-            "Fake_Manufacturer_sensor_2", "Fake_Model_sensor_2"
-        )
+        QuirkBuilder("Fake_Manufacturer_sensor_2", "Fake_Model_sensor_2")
         .replaces(OppleCluster)
         .command_button(
             OppleCluster.ServerCommandDefs.self_test.name,

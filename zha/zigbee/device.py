@@ -87,7 +87,11 @@ from zha.const import STATE_CHANGED
 from zha.event import EventBase
 from zha.exceptions import ZHAException
 from zha.mixins import LogMixin
-from zha.quirks import QUIRK_REGISTRY_ENTRY_ATTR, DeviceMatch
+from zha.quirks import (
+    QUIRK_REGISTRY_ENTRY_ATTR,
+    DeviceMatch,
+    ReplacingZigpyDeviceFactory,
+)
 from zha.zigbee.cluster_config import (
     aggregate_cluster_configs,
     configure_cluster_configs,
@@ -330,7 +334,7 @@ class Device(LogMixin, EventBase):
 
     # Authoring surface for hand-written quirks; `None` marks the unquirked fallback.
     _device_match: DeviceMatch | None = None
-    _zigpy_device_cls: type[zigpy.device.Device] | None = None
+    _zigpy_device_cls: ReplacingZigpyDeviceFactory | None = None
     _zigpy_device_transforms: tuple[
         Callable[[zigpy.device.Device], zigpy.device.Device], ...
     ] = ()

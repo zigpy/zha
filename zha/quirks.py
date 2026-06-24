@@ -17,6 +17,9 @@ from zigpy.zcl import ClusterType
 from zigpy.zcl.clusters.general import Ota
 
 if TYPE_CHECKING:
+    from zigpy.application import ControllerApplication
+    from zigpy.types import EUI64, NWK
+
     from zha.zigbee.device import Device
 
 _LOGGER = logging.getLogger(__name__)
@@ -121,11 +124,17 @@ class QuirkSource:
         )
 
 
+# A zigpy device class whose constructor takes the device it replaces as a 4th arg.
+ReplacingZigpyDeviceFactory = Callable[
+    [ControllerApplication, EUI64, NWK, zigpy.device.Device], zigpy.device.Device
+]
+
+
 @dataclass(frozen=True)
 class ReplaceZigpyDevice:
-    """A transform wrapping a device in `device_cls` (a `BaseCustomDevice`)."""
+    """A transform wrapping a device in `device_cls` (a `ReplacingZigpyDeviceFactory`)."""
 
-    device_cls: type[zigpy.device.Device]
+    device_cls: ReplacingZigpyDeviceFactory
 
     def __call__(self, device: zigpy.device.Device) -> zigpy.device.Device:
         """Replace a zigpy device."""
