@@ -8,7 +8,7 @@
   "friendly_model": "Hue White Ambiance BR30 E26",
   "name": "Philips Hue White Ambiance BR30 E26",
   "quirk_applied": true,
-  "quirk_class": "zigpy.quirks.v2.CustomDeviceV2",
+  "quirk_class": "zhaquirks.philips.hue_light:(Signify Netherlands B.V. / LTB003)",
   "exposes_features": [],
   "manufacturer_code": 4107,
   "power_source": "Mains",

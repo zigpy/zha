@@ -8,7 +8,7 @@
   "friendly_model": "lumi.weather",
   "name": "LUMI lumi.weather",
   "quirk_applied": true,
-  "quirk_class": "zhaquirks.xiaomi.aqara.weather.Weather",
+  "quirk_class": "zhaquirks.xiaomi.aqara.weather:Weather",
   "exposes_features": [],
   "manufacturer_code": 4151,
   "power_source": "Battery or Unknown",

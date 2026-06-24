@@ -8,7 +8,7 @@
   "friendly_model": "lumi.remote.b286opcn01",
   "name": "LUMI lumi.remote.b286opcn01",
   "quirk_applied": true,
-  "quirk_class": "zhaquirks.xiaomi.aqara.opple_remote.RemoteB286OPCN01V4",
+  "quirk_class": "zhaquirks.xiaomi.aqara.opple_remote:RemoteB286OPCN01V4",
   "exposes_features": [],
   "manufacturer_code": 4447,
   "power_source": "Battery or Unknown",

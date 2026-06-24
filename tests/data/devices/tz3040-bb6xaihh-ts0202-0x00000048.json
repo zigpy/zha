@@ -8,7 +8,7 @@
   "friendly_model": "TS0202",
   "name": "_TZ3040_bb6xaihh TS0202",
   "quirk_applied": true,
-  "quirk_class": "zhaquirks.tuya.builder.EnchantedDeviceV2",
+  "quirk_class": "zhaquirks.tuya.builder:(_TZ3000_bb6xaihh / SNZB-03)",
   "exposes_features": [],
   "manufacturer_code": 4417,
   "power_source": "Battery or Unknown",

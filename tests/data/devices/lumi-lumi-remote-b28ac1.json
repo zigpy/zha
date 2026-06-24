@@ -8,7 +8,7 @@
   "friendly_model": "lumi.remote.b28ac1",
   "name": "LUMI lumi.remote.b28ac1",
   "quirk_applied": true,
-  "quirk_class": "zigpy.quirks.v2.CustomDeviceV2",
+  "quirk_class": "zhaquirks.xiaomi.aqara.remote_h1:(LUMI / lumi.remote.b28ac1)",
   "exposes_features": [],
   "manufacturer_code": 4447,
   "power_source": "Battery or Unknown",

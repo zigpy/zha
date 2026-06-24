@@ -8,7 +8,7 @@
   "friendly_model": "MOSZB-153",
   "name": "frient A/S MOSZB-153",
   "quirk_applied": true,
-  "quirk_class": "zigpy.quirks.v2.CustomDeviceV2",
+  "quirk_class": "zhaquirks.develco.motion:(frient A/S / MOSZB-153)",
   "exposes_features": [],
   "manufacturer_code": 4117,
   "power_source": "Battery or Unknown",

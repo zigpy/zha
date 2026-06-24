@@ -8,7 +8,7 @@
   "friendly_model": "EKO07259",
   "name": "Schneider Electric EKO07259",
   "quirk_applied": true,
-  "quirk_class": "zigpy.quirks.v2.CustomDeviceV2",
+  "quirk_class": "zhaquirks.schneiderelectric.thermostat:(Schneider Electric / EKO07259)",
   "exposes_features": [],
   "manufacturer_code": 4190,
   "power_source": "Mains",

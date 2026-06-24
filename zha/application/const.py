@@ -10,6 +10,7 @@ import zigpy.application
 import zigpy_deconz.zigbee.application
 import zigpy_xbee.zigbee.application
 import zigpy_zigate.zigbee.application
+import zigpy_ziggurat.zigbee.application
 import zigpy_znp.zigbee.application
 
 ATTR_ACTIVE_COORDINATOR = "active_coordinator"
@@ -109,6 +110,10 @@ class RadioType(enum.Enum):
     deconz = (
         "deCONZ = dresden elektronik deCONZ protocol: ConBee I/II, RaspBee I/II",
         zigpy_deconz.zigbee.application.ControllerApplication,
+    )
+    ziggurat = (
+        "Ziggurat = Open source host-side Zigbee stack in Rust",
+        zigpy_ziggurat.zigbee.application.ControllerApplication,
     )
     zigate = (
         "ZiGate = ZiGate Zigbee radios: PiZiGate, ZiGate USB-TTL, ZiGate WiFi",

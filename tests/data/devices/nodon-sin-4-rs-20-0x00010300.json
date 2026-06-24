@@ -8,7 +8,7 @@
   "friendly_model": "SIN-4-RS-20",
   "name": "NodOn SIN-4-RS-20",
   "quirk_applied": true,
-  "quirk_class": "zigpy.quirks.v2.CustomDeviceV2",
+  "quirk_class": "zhaquirks.nodon.roller_shutter:(NodOn / SIN-4-RS-20)",
   "exposes_features": [],
   "manufacturer_code": 4747,
   "power_source": "Mains",

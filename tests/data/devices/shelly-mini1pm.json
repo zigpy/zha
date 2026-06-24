@@ -7,8 +7,8 @@
   "friendly_manufacturer": "Shelly",
   "friendly_model": "Mini1PM",
   "name": "Shelly Mini1PM",
-  "quirk_applied": false,
-  "quirk_class": "zigpy.device.Device",
+  "quirk_applied": true,
+  "quirk_class": "zhaquirks.shelly.wifi:(Shelly / 1PM)",
   "exposes_features": [],
   "manufacturer_code": 5264,
   "power_source": "Mains",
@@ -427,7 +427,7 @@
         },
         {
           "cluster_id": "0xfc02",
-          "endpoint_attribute": "manufacturer_specific",
+          "endpoint_attribute": "shelly_wifi_setup",
           "attributes": []
         }
       ],

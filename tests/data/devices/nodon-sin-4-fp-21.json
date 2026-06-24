@@ -8,7 +8,7 @@
   "friendly_model": "SIN-4-FP-21",
   "name": "NodOn SIN-4-FP-21",
   "quirk_applied": true,
-  "quirk_class": "zigpy.quirks.v2.CustomDeviceV2",
+  "quirk_class": "zhaquirks.nodon.pilot_wire:(NodOn / SIN-4-FP-21)",
   "exposes_features": [],
   "manufacturer_code": 4747,
   "power_source": "Mains",

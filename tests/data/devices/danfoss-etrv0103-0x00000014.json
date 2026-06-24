@@ -8,7 +8,7 @@
   "friendly_model": "eTRV0103",
   "name": "Danfoss eTRV0103",
   "quirk_applied": true,
-  "quirk_class": "zhaquirks.danfoss.thermostat.DanfossThermostat",
+  "quirk_class": "zhaquirks.danfoss.thermostat:DanfossThermostat",
   "exposes_features": [
     "danfoss.ally_thermostat"
   ],

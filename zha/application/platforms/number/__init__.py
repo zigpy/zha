@@ -8,8 +8,6 @@ import functools
 import logging
 from typing import TYPE_CHECKING, Any
 
-from zhaquirks.quirk_ids import DANFOSS_ALLY_THERMOSTAT
-from zigpy.quirks.v2 import NumberMetadata
 from zigpy.zcl import (
     AttributeReadEvent,
     AttributeReportedEvent,
@@ -35,19 +33,21 @@ from zha.application.platforms import (
     register_entity,
 )
 from zha.application.platforms.const import (
-    AQARA_OPPLE_CLUSTER,
     IKEA_AIR_PURIFIER_CLUSTER,
     INOVELLI_CLUSTER,
     SINOPE_MANUFACTURER_CLUSTER,
     TUYA_MANUFACTURER_CLUSTER,
 )
 from zha.application.platforms.helpers import validate_device_class
+from zha.application.platforms.legacy_quirks import AQARA_OPPLE_CLUSTER
 from zha.application.platforms.number.bacnet import BACNET_UNITS_TO_HA_UNITS
 from zha.application.platforms.number.const import ICONS, NumberDeviceClass, NumberMode
+from zha.quirks import DANFOSS_ALLY_THERMOSTAT
 from zha.units import UnitOfMass, UnitOfTemperature, UnitOfTime
 
 if TYPE_CHECKING:
-    pass
+    from zha.zigbee.device import Device
+    from zha.zigbee.endpoint import Endpoint
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -260,6 +260,46 @@ class NumberConfigurationEntity(BaseNumber):
     _multiplier: float = 1
     _attribute_name: str
 
+    def __init__(
+        self,
+        endpoint: Endpoint,
+        device: Device,
+        *,
+        attribute_name: str | None = None,
+        min_value: float | None = None,
+        max_value: float | None = None,
+        step: float | None = None,
+        multiplier: float | None = None,
+        device_class: NumberDeviceClass | None = None,
+        unit: str | None = None,
+        mode: str | None = None,
+        **kwargs: Any,
+    ) -> None:
+        """Init this number configuration entity."""
+        if attribute_name is not None:
+            self._attribute_name = attribute_name
+        if min_value is not None:
+            self._attr_native_min_value = min_value
+        if max_value is not None:
+            self._attr_native_max_value = max_value
+        if step is not None:
+            self._attr_native_step = step
+        if multiplier is not None:
+            self._multiplier = multiplier
+        if device_class is not None:
+            self._attr_device_class = validate_device_class(
+                NumberDeviceClass,
+                device_class,
+                Platform.NUMBER.value,
+                _LOGGER,
+            )
+        if unit is not None:
+            self._attr_native_unit_of_measurement = unit
+        if mode is not None and mode in NumberMode:
+            self._attr_mode = NumberMode(mode)
+
+        super().__init__(endpoint=endpoint, device=device, **kwargs)
+
     def _is_supported(self) -> bool:
         """Return if the entity is supported for the device, internal."""
         if (
@@ -290,31 +330,6 @@ class NumberConfigurationEntity(BaseNumber):
                     event_type.event_type, self.handle_attribute_updated
                 )
             )
-
-    def _init_from_quirks_metadata(self, entity_metadata: NumberMetadata) -> None:
-        """Init this entity from the quirks metadata."""
-        super()._init_from_quirks_metadata(entity_metadata)
-        self._attribute_name = entity_metadata.attribute_name
-
-        if entity_metadata.min is not None:
-            self._attr_native_min_value = entity_metadata.min
-        if entity_metadata.max is not None:
-            self._attr_native_max_value = entity_metadata.max
-        if entity_metadata.step is not None:
-            self._attr_native_step = entity_metadata.step
-        if entity_metadata.multiplier is not None:
-            self._multiplier = entity_metadata.multiplier
-        if entity_metadata.device_class is not None:
-            self._attr_device_class = validate_device_class(
-                NumberDeviceClass,
-                entity_metadata.device_class,
-                Platform.NUMBER.value,
-                _LOGGER,
-            )
-        if entity_metadata.unit is not None:
-            self._attr_native_unit_of_measurement = entity_metadata.unit
-        if entity_metadata.mode in NumberMode:
-            self._attr_mode = NumberMode(entity_metadata.mode)
 
     @property
     def state(self) -> dict[str, Any]:

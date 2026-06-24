@@ -8,7 +8,7 @@
   "friendly_model": "RDM005",
   "name": "Signify Netherlands B.V. RDM005",
   "quirk_applied": true,
-  "quirk_class": "zhaquirks.philips.rom001.PhilipsROM001",
+  "quirk_class": "zhaquirks.philips.rom001:PhilipsROM001",
   "exposes_features": [],
   "manufacturer_code": 4107,
   "power_source": "Battery or Unknown",

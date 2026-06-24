@@ -8,7 +8,7 @@
   "friendly_model": "lumi.sensor_switch.aq2",
   "name": "LUMI lumi.sensor_switch.aq2",
   "quirk_applied": true,
-  "quirk_class": "zhaquirks.xiaomi.aqara.switch_aq2.SwitchAQ2",
+  "quirk_class": "zhaquirks.xiaomi.aqara.switch_aq2:SwitchAQ2",
   "exposes_features": [],
   "manufacturer_code": 4151,
   "power_source": "Battery or Unknown",

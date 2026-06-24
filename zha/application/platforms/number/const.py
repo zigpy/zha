@@ -1,8 +1,7 @@
 """Constants for the Number platform."""
 
-from zigpy.quirks.v2.homeassistant.number import NumberDeviceClass, NumberMode
+from zha.application.platforms.number.device_class import NumberDeviceClass, NumberMode
 
-# Re-exported from zigpy for use throughout ZHA
 __all__ = ["NumberDeviceClass", "NumberMode"]
 
 ICONS = {

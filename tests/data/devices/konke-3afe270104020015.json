@@ -8,7 +8,7 @@
   "friendly_model": "3AFE270104020015",
   "name": "Konke 3AFE270104020015",
   "quirk_applied": true,
-  "quirk_class": "zhaquirks.konke.magnet.KonkeMagnet",
+  "quirk_class": "zhaquirks.konke.magnet:KonkeMagnet",
   "exposes_features": [],
   "manufacturer_code": 4712,
   "power_source": "Battery or Unknown",

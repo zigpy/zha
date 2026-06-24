@@ -8,7 +8,7 @@
   "friendly_model": "TS011F",
   "name": "_TZ3000_r6buo8ba TS011F",
   "quirk_applied": true,
-  "quirk_class": "zhaquirks.tuya.ts011f_plug.Plug_v6",
+  "quirk_class": "zhaquirks.tuya.ts011f_plug:Plug_v6",
   "exposes_features": [],
   "manufacturer_code": 0,
   "power_source": "Mains",

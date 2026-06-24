@@ -9,9 +9,7 @@ import functools
 import logging
 from typing import TYPE_CHECKING, Any
 
-from zhaquirks.quirk_ids import DANFOSS_ALLY_THERMOSTAT
 from zigpy.profiles import zha, zll
-from zigpy.quirks.v2 import BinarySensorMetadata
 from zigpy.zcl import (
     AttributeReadEvent,
     AttributeReportedEvent,
@@ -41,12 +39,13 @@ from zha.application.platforms.binary_sensor.const import (
     BinarySensorDeviceClass,
 )
 from zha.application.platforms.const import (
-    AQARA_OPPLE_CLUSTER,
     IKEA_AIR_PURIFIER_CLUSTER,
     SMARTTHINGS_ACCELERATION_CLUSTER,
     TUYA_MANUFACTURER_CLUSTER,
 )
 from zha.application.platforms.helpers import validate_device_class
+from zha.application.platforms.legacy_quirks import AQARA_OPPLE_CLUSTER
+from zha.quirks import DANFOSS_ALLY_THERMOSTAT
 
 if TYPE_CHECKING:
     from zha.zigbee.device import Device
@@ -92,9 +91,25 @@ class BinarySensor(BaseBinarySensor):
         self,
         endpoint: Endpoint,
         device: Device,
+        *,
+        attribute_name: str | None = None,
+        attribute_converter: Callable[[Any], Any] | None = None,
+        device_class: BinarySensorDeviceClass | None = None,
         **kwargs,
     ) -> None:
         """Initialize the ZHA binary sensor."""
+        if attribute_name is not None:
+            self._attribute_name = attribute_name
+        if attribute_converter is not None:
+            self._attribute_converter = attribute_converter
+        if device_class is not None:
+            self._attr_device_class = validate_device_class(
+                BinarySensorDeviceClass,
+                device_class,
+                Platform.BINARY_SENSOR.value,
+                _LOGGER,
+            )
+
         super().__init__(endpoint=endpoint, device=device, **kwargs)
         self._state: bool = self.is_on
         self.recompute_capabilities()
@@ -117,20 +132,6 @@ class BinarySensor(BaseBinarySensor):
                 self._cluster.on_event(
                     event_type.event_type, self.handle_attribute_updated
                 )
-            )
-
-    def _init_from_quirks_metadata(self, entity_metadata: BinarySensorMetadata) -> None:
-        """Init this entity from the quirks metadata."""
-        super()._init_from_quirks_metadata(entity_metadata)
-        self._attribute_name = entity_metadata.attribute_name
-        if entity_metadata.attribute_converter is not None:
-            self._attribute_converter = entity_metadata.attribute_converter
-        if entity_metadata.device_class is not None:
-            self._attr_device_class = validate_device_class(
-                BinarySensorDeviceClass,
-                entity_metadata.device_class,
-                Platform.BINARY_SENSOR.value,
-                _LOGGER,
             )
 
     @functools.cached_property

@@ -8,7 +8,7 @@
   "friendly_model": "TRADFRI remote control",
   "name": "IKEA of Sweden TRADFRI remote control",
   "quirk_applied": true,
-  "quirk_class": "zhaquirks.ikea.fivebtnremote.IkeaTradfriRemote1",
+  "quirk_class": "zhaquirks.ikea.fivebtnremote:IkeaTradfriRemote1",
   "exposes_features": [],
   "manufacturer_code": 4476,
   "power_source": "Battery or Unknown",

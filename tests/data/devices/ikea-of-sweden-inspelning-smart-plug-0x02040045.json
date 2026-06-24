@@ -8,7 +8,7 @@
   "friendly_model": "INSPELNING Smart plug",
   "name": "IKEA of Sweden INSPELNING Smart plug",
   "quirk_applied": true,
-  "quirk_class": "zigpy.quirks.v2.CustomDeviceV2",
+  "quirk_class": "zhaquirks.ikea.plug_g2:(IKEA of Sweden / INSPELNING Smart plug)",
   "exposes_features": [],
   "manufacturer_code": 4476,
   "power_source": "Mains",

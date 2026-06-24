@@ -8,7 +8,7 @@
   "friendly_model": "TS0205",
   "name": "_TZ3210_up3pngle TS0205",
   "quirk_applied": true,
-  "quirk_class": "zigpy.quirks.v2.CustomDeviceV2",
+  "quirk_class": "zhaquirks.tuya.tuya_smoke:(_TZ3210_up3pngle / TS0205)",
   "exposes_features": [],
   "manufacturer_code": 4417,
   "power_source": "Battery or Unknown",

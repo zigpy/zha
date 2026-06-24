@@ -2,7 +2,6 @@
 
 from typing import Final
 
-AQARA_OPPLE_CLUSTER: Final[int] = 0xFCC0
 IKEA_AIR_PURIFIER_CLUSTER: Final[int] = 0xFC7D
 IKEA_REMOTE_CLUSTER: Final[int] = 0xFC80
 IKEA_SHORTCUT_V1_CLUSTER: Final[int] = 0xFC7F

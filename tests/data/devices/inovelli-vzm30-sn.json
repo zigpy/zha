@@ -8,7 +8,7 @@
   "friendly_model": "VZM30-SN",
   "name": "Inovelli VZM30-SN",
   "quirk_applied": true,
-  "quirk_class": "zigpy.quirks.v2.CustomDeviceV2",
+  "quirk_class": "zhaquirks.inovelli.VZM30SN:(Inovelli / VZM30-SN)",
   "exposes_features": [],
   "manufacturer_code": 4655,
   "power_source": "Mains",

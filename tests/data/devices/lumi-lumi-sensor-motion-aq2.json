@@ -8,7 +8,7 @@
   "friendly_model": "lumi.sensor_motion.aq2",
   "name": "LUMI lumi.sensor_motion.aq2",
   "quirk_applied": true,
-  "quirk_class": "zhaquirks.xiaomi.aqara.motion_aq2.MotionAQ2",
+  "quirk_class": "zhaquirks.xiaomi.aqara.motion_aq2:MotionAQ2",
   "exposes_features": [],
   "manufacturer_code": 4151,
   "power_source": "Battery or Unknown",

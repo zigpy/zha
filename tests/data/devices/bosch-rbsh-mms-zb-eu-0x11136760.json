@@ -8,7 +8,7 @@
   "friendly_model": "BMCT-SLZ",
   "name": "Bosch BMCT-SLZ",
   "quirk_applied": true,
-  "quirk_class": "zigpy.quirks.v2.CustomDeviceV2",
+  "quirk_class": "zhaquirks.bosch.relay_rbsh-mms-zb-eu:(Bosch / RBSH-MMS-ZB-EU)",
   "exposes_features": [],
   "manufacturer_code": 4617,
   "power_source": "Mains",

@@ -8,7 +8,7 @@
   "friendly_model": " Dimmer switch w/o neutral",
   "name": " Legrand  Dimmer switch w/o neutral",
   "quirk_applied": true,
-  "quirk_class": "zhaquirks.legrand.dimmer.DimmerWithoutNeutralAndBallast",
+  "quirk_class": "zhaquirks.legrand.dimmer:DimmerWithoutNeutralAndBallast",
   "exposes_features": [],
   "manufacturer_code": 4129,
   "power_source": "Mains",

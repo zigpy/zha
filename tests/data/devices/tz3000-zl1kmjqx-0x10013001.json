@@ -8,7 +8,7 @@
   "friendly_model": "",
   "name": "_TZ3000_zl1kmjqx ",
   "quirk_applied": true,
-  "quirk_class": "zhaquirks.tuya.builder.EnchantedDeviceV2",
+  "quirk_class": "zhaquirks.tuya.builder:(_TZ3000_bjawzodf / TY0201)",
   "exposes_features": [],
   "manufacturer_code": 4417,
   "power_source": "Battery or Unknown",

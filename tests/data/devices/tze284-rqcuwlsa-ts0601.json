@@ -8,7 +8,7 @@
   "friendly_model": "TS0601",
   "name": "_TZE284_rqcuwlsa TS0601",
   "quirk_applied": true,
-  "quirk_class": "zhaquirks.tuya.builder.EnchantedDeviceV2",
+  "quirk_class": "zhaquirks.tuya.builder:(_TZE284_rqcuwlsa / TS0601)",
   "exposes_features": [],
   "manufacturer_code": 4417,
   "power_source": "Battery or Unknown",
@@ -356,7 +356,7 @@
           "available": true,
           "group_id": null,
           "suggested_display_precision": null,
-          "unit": "\u00b5S/cm"
+          "unit": "\u03bcS/cm"
         },
         "state": {
           "class_name": "ElectricalConductivity",

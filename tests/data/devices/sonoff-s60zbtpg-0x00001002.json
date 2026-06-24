@@ -8,7 +8,7 @@
   "friendly_model": "S60ZBTPG",
   "name": "SONOFF S60ZBTPG",
   "quirk_applied": true,
-  "quirk_class": "zigpy.quirks.v2.CustomDeviceV2",
+  "quirk_class": "zhaquirks.sonoff.s60zbtpf:(SONOFF / S60ZBTPF)",
   "exposes_features": [],
   "manufacturer_code": 4742,
   "power_source": "Mains",

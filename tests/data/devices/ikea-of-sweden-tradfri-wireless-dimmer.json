@@ -8,7 +8,7 @@
   "friendly_model": "TRADFRI wireless dimmer",
   "name": "IKEA of Sweden TRADFRI wireless dimmer",
   "quirk_applied": true,
-  "quirk_class": "zhaquirks.ikea.dimmer.IkeaDimmer",
+  "quirk_class": "zhaquirks.ikea.dimmer:IkeaDimmer",
   "exposes_features": [],
   "manufacturer_code": 4476,
   "power_source": "Battery or Unknown",

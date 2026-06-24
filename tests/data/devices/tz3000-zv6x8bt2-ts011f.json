@@ -8,7 +8,7 @@
   "friendly_model": "TS011F",
   "name": "_TZ3000_zv6x8bt2 TS011F",
   "quirk_applied": true,
-  "quirk_class": "zhaquirks.tuya.ts011f_plug.Plug_CB_Metering",
+  "quirk_class": "zhaquirks.tuya.ts011f_plug:Plug_CB_Metering",
   "exposes_features": [
     "tuya.plug_on_off_attributes"
   ],

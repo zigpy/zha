@@ -8,7 +8,7 @@
   "friendly_model": "TS0001",
   "name": "_TZ3000_wn65ixz9 TS0001",
   "quirk_applied": true,
-  "quirk_class": "zhaquirks.tuya.ts000x.Switch_1G_GPP",
+  "quirk_class": "zhaquirks.tuya.ts000x:Switch_1G_GPP",
   "exposes_features": [
     "tuya.plug_on_off_attributes"
   ],

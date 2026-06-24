@@ -8,7 +8,7 @@
   "friendly_model": "RWL021",
   "name": "Philips RWL021",
   "quirk_applied": true,
-  "quirk_class": "zhaquirks.philips.rwlfirstgen.PhilipsRWLFirstGen",
+  "quirk_class": "zhaquirks.philips.rwlfirstgen:PhilipsRWLFirstGen",
   "exposes_features": [],
   "manufacturer_code": 4107,
   "power_source": "Battery or Unknown",

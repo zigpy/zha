@@ -8,7 +8,7 @@
   "friendly_model": " Double gangs remote switch",
   "name": " Legrand  Double gangs remote switch",
   "quirk_applied": true,
-  "quirk_class": "zigpy.quirks.v2.CustomDeviceV2",
+  "quirk_class": "zhaquirks.legrand.wirelessswitch:( Legrand /  Double gangs remote switch)",
   "exposes_features": [],
   "manufacturer_code": 4129,
   "power_source": "Battery or Unknown",

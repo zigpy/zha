@@ -8,7 +8,7 @@
   "friendly_model": "lumi.motion.ac01",
   "name": "aqara lumi.motion.ac01",
   "quirk_applied": true,
-  "quirk_class": "zhaquirks.xiaomi.aqara.motion_ac01.AqaraLumiMotionAc01",
+  "quirk_class": "zhaquirks.xiaomi.aqara.motion_ac01:AqaraLumiMotionAc01",
   "exposes_features": [],
   "manufacturer_code": 4660,
   "power_source": "Mains",
