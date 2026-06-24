@@ -9,7 +9,7 @@ from dataclasses import dataclass, field
 import inspect
 import logging
 from pathlib import Path
-from typing import NamedTuple
+from typing import TYPE_CHECKING, NamedTuple
 
 from zigpy.application import ControllerApplication
 import zigpy.device
@@ -18,7 +18,8 @@ from zigpy.types import EUI64, NWK
 from zigpy.zcl import ClusterType
 from zigpy.zcl.clusters.general import Ota
 
-from zha.zigbee.device import Device
+if TYPE_CHECKING:
+    from zha.zigbee.device import Device
 
 _LOGGER = logging.getLogger(__name__)
 
