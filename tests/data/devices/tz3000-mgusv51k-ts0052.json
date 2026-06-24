@@ -357,7 +357,7 @@
           "device_class": null,
           "state_class": null,
           "entity_category": "config",
-          "entity_registry_enabled_default": true,
+          "entity_registry_enabled_default": false,
           "enabled": true,
           "primary": false,
           "device_ieee": "ab:cd:ef:12:77:a4:24:d4",
