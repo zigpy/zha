@@ -8,7 +8,7 @@
   "friendly_model": "lumi.curtain.acn002",
   "name": "LUMI lumi.curtain.acn002",
   "quirk_applied": true,
-  "quirk_class": "zigpy.quirks.v2.CustomDeviceV2",
+  "quirk_class": "zhaquirks.xiaomi.aqara.roller_curtain_e1:(LUMI / lumi.curtain.acn002)",
   "exposes_features": [],
   "manufacturer_code": 4447,
   "power_source": "Battery or Unknown",

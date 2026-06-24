@@ -8,7 +8,7 @@
   "friendly_model": "SMSZB-120",
   "name": "frient A/S SMSZB-120",
   "quirk_applied": true,
-  "quirk_class": "zigpy.quirks.v2.CustomDeviceV2",
+  "quirk_class": "zhaquirks.develco.smoke_alarm:(frient A/S / SMSZB-120)",
   "exposes_features": [
     "siren_basic"
   ],

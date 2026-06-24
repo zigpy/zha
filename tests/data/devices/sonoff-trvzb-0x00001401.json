@@ -8,7 +8,7 @@
   "friendly_model": "TRVZB",
   "name": "SONOFF TRVZB",
   "quirk_applied": true,
-  "quirk_class": "zigpy.quirks.v2.CustomDeviceV2",
+  "quirk_class": "zhaquirks.sonoff.trvzb:(SONOFF / TRVZB)",
   "exposes_features": [],
   "manufacturer_code": 4742,
   "power_source": "Battery or Unknown",

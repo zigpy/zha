@@ -8,7 +8,7 @@
   "friendly_model": "TS0013",
   "name": "_TZ3000_09gto2zn TS0013",
   "quirk_applied": true,
-  "quirk_class": "zhaquirks.tuya.ts001x.TuyaTripleNoNeutralSwitch_2",
+  "quirk_class": "zhaquirks.tuya.ts001x:TuyaTripleNoNeutralSwitch_2",
   "exposes_features": [],
   "manufacturer_code": 4417,
   "power_source": "Battery or Unknown",

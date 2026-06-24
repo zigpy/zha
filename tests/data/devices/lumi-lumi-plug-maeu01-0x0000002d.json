@@ -8,7 +8,7 @@
   "friendly_model": "lumi.plug.maeu01",
   "name": "LUMI lumi.plug.maeu01",
   "quirk_applied": true,
-  "quirk_class": "zhaquirks.xiaomi.aqara.plug_eu.PlugMAEU01",
+  "quirk_class": "zhaquirks.xiaomi.aqara.plug_eu:PlugMAEU01",
   "exposes_features": [],
   "manufacturer_code": 4447,
   "power_source": "Mains",
