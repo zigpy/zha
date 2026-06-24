@@ -33,6 +33,8 @@ from tests.common import (
 )
 from tests.conftest import TestGateway, make_zha_data, make_zigpy_app_controller
 
+from .const import KNOWN_LEGACY_ATTRIBUTES
+
 _LOGGER = logging.getLogger(__name__)
 REPO_ROOT = pathlib.Path(__file__).parent.parent
 
@@ -227,12 +229,18 @@ def zigpy_device_from_legacy_diagnostics(  # noqa: C901
                 if attr_id_int in real_cluster.attributes:
                     real_cluster._attr_cache[attr_id_int] = parsed
                 else:
-                    _LOGGER.warning(
-                        "Setting legacy value for unknown attribute %s on server cluster %s: %r",
-                        attr_id,
-                        cluster_id,
+                    key = (
+                        device.model,
+                        device.manufacturer,
+                        int(cluster_id, 16),
+                        "server",
+                        attr_id_int,
                         parsed,
                     )
+                    if key not in KNOWN_LEGACY_ATTRIBUTES:
+                        raise RuntimeError(
+                            f"Unexpected legacy attribute write: {key!r}"
+                        )
                     real_cluster._attr_cache.set_legacy_value(attr_id_int, parsed)
 
                 real_cluster.PLUGGED_ATTR_READS[attr_id_int] = parsed
@@ -277,12 +285,18 @@ def zigpy_device_from_legacy_diagnostics(  # noqa: C901
                 if attr_id_int in real_cluster.attributes:
                     real_cluster._attr_cache[attr_id_int] = parsed
                 else:
-                    _LOGGER.warning(
-                        "Setting legacy value for unknown attribute %s on client cluster %s: %r",
-                        attr_id,
-                        cluster_id,
+                    key = (
+                        device.model,
+                        device.manufacturer,
+                        int(cluster_id, 16),
+                        "client",
+                        attr_id_int,
                         parsed,
                     )
+                    if key not in KNOWN_LEGACY_ATTRIBUTES:
+                        raise RuntimeError(
+                            f"Unexpected legacy attribute write: {key!r}"
+                        )
                     real_cluster._attr_cache.set_legacy_value(attr_id_int, parsed)
 
                 real_cluster.PLUGGED_ATTR_READS[attr_id_int] = parsed
@@ -362,7 +376,14 @@ async def main(paths: list[str]):
                 _LOGGER.debug("Skipping, not valid JSON")
                 continue
 
-            if "version" in data and "node_descriptor" in data and "endpoints" in data:
+            if (
+                "version" in data
+                and "node_descriptor" in data
+                and "endpoints" in data
+                # Manually-redacted JSON needs to be parsed with the lenient importer.
+                # It will create a fake but stable IEEE address for the device.
+                and "**REDACTED**" not in data["ieee"]
+            ):
                 # Directly parse the diagnostics JSON
                 zigpy_device = zigpy_device_from_device_data(
                     app=zha_gateway.application_controller,
