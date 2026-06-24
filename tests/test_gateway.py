@@ -30,6 +30,7 @@ from zha.application import Platform
 from zha.application.const import ZHA_GW_MSG, ZHA_GW_MSG_CONNECTION_LOST, RadioType
 from zha.application.gateway import (
     ConnectionLostEvent,
+    DeviceFullInitEvent,
     DeviceJoinedDeviceInfo,
     DeviceJoinedEvent,
     DevicePairingStatus,
@@ -688,6 +689,56 @@ async def test_reinterview_replaces_device_when_quirk_changes(
     assert new_zha_device is not zha_device
     assert new_zha_device.quirk_applied
     assert new_zha_device.model == "Quirk B"
+
+
+async def test_reinterview_swap_emits_full_init_configured(
+    zha_gateway: Gateway,
+) -> None:
+    """A re-interview that replaces the device emits a CONFIGURED full-init event.
+
+    HA repoints its (IEEE-keyed) device proxy off this event, so the swap must
+    still surface it with `CONFIGURED` status and `new_join=False`.
+    """
+    registry = DeviceRegistry()
+    (
+        QuirkBuilder("Fake_Manufacturer", "Model_A")
+        .friendly_name(model="Quirk A", manufacturer="Fake_Manufacturer")
+        .add_to_registry(registry)
+    )
+    (
+        QuirkBuilder("Fake_Manufacturer", "Model_B")
+        .friendly_name(model="Quirk B", manufacturer="Fake_Manufacturer")
+        .add_to_registry(registry)
+    )
+
+    zigpy_device = create_mock_zigpy_device(
+        zha_gateway,
+        ZIGPY_DEVICE_BASIC,
+        manufacturer="Fake_Manufacturer",
+        model="Model_A",
+        registry=registry,
+    )
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
+
+    events = []
+    zha_gateway.on_all_events(events.append)
+
+    reinterviewed = create_mock_zigpy_device(
+        zha_gateway,
+        ZIGPY_DEVICE_BASIC,
+        manufacturer="Fake_Manufacturer",
+        model="Model_B",
+        registry=registry,
+    )
+    zha_gateway.device_reinterviewed(reinterviewed)
+    await zha_gateway.async_block_till_done()
+
+    assert zha_gateway.get_device(zigpy_device.ieee) is not zha_device
+
+    full_inits = [e for e in events if isinstance(e, DeviceFullInitEvent)]
+    assert len(full_inits) == 1
+    assert full_inits[0].device_info.pairing_status is DevicePairingStatus.CONFIGURED
+    assert full_inits[0].new_join is False
 
 
 async def test_reinterview_rebuilds_in_place_when_quirk_unchanged(
