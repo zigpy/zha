@@ -795,7 +795,7 @@ async def test_device_firmware_version_syncing(zha_gateway: Gateway) -> None:
     """Test device firmware version syncing."""
     zigpy_dev = await zigpy_device_from_json(
         zha_gateway.application_controller,
-        "tests/data/devices/philips-sml001.json",
+        "tests/data/devices/philips-sml001-0x42006bb7.json",
     )
 
     zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
@@ -846,7 +846,7 @@ async def test_quirks_v2_device_renaming(zha_gateway: Gateway) -> None:
     zigpy_dev = registry.resolve(
         await zigpy_device_from_json(
             zha_gateway.application_controller,
-            "tests/data/devices/centralite-3405-l.json",
+            "tests/data/devices/centralite-3405-l-0x10025310.json",
         )
     )
 
@@ -861,7 +861,7 @@ async def test_quirks_v2_device_alerts(zha_gateway: Gateway) -> None:
     # Normal device, no alerts
     zigpy_dev = await zigpy_device_from_json(
         zha_gateway.application_controller,
-        "tests/data/devices/ikea-of-sweden-tradfri-bulb-e26-opal-1000lm.json",
+        "tests/data/devices/ikea-of-sweden-tradfri-bulb-e26-opal-1000lm-0x23094631.json",
     )
     zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
     assert not zha_device.device_alerts
@@ -878,7 +878,7 @@ async def test_quirks_v2_device_alerts(zha_gateway: Gateway) -> None:
     zigpy_dev = registry.resolve(
         await zigpy_device_from_json(
             zha_gateway.application_controller,
-            "tests/data/devices/centralite-3405-l.json",
+            "tests/data/devices/centralite-3405-l-0x10025310.json",
         )
     )
 
@@ -893,13 +893,13 @@ async def test_quirks_v2_device_alerts(zha_gateway: Gateway) -> None:
     [
         # Light bulb
         (
-            "tests/data/devices/ikea-of-sweden-tradfri-bulb-gu10-ws-400lm.json",
+            "tests/data/devices/ikea-of-sweden-tradfri-bulb-gu10-ws-400lm-0x23095631.json",
             Platform.LIGHT,
             Light,
         ),
         # Night light with a bulb and a motion sensor
         (
-            "tests/data/devices/third-reality-inc-3rsnl02043z.json",
+            "tests/data/devices/third-reality-inc-3rsnl02043z-0x0000003c.json",
             Platform.LIGHT,
             Light,
         ),
@@ -911,7 +911,7 @@ async def test_quirks_v2_device_alerts(zha_gateway: Gateway) -> None:
         ),
         # Smart plug with energy monitoring
         (
-            "tests/data/devices/innr-sp-234.json",
+            "tests/data/devices/innr-sp-234-0x31016610.json",
             Platform.SWITCH,
             Switch,
         ),
@@ -967,7 +967,7 @@ async def test_quirks_v2_primary_entity(zha_gateway: Gateway) -> None:
     zigpy_dev = registry.resolve(
         await zigpy_device_from_json(
             zha_gateway.application_controller,
-            "tests/data/devices/centralite-3405-l.json",
+            "tests/data/devices/centralite-3405-l-0x10025310.json",
         )
     )
 
@@ -996,7 +996,7 @@ async def test_quirks_v2_prevent_default_entities(zha_gateway: Gateway) -> None:
     zigpy_dev = registry.resolve(
         await zigpy_device_from_json(
             zha_gateway.application_controller,
-            "tests/data/devices/centralite-3405-l.json",
+            "tests/data/devices/centralite-3405-l-0x10025310.json",
         )
     )
 
@@ -1068,7 +1068,7 @@ async def test_quirks_v2_change_entity_metadata(zha_gateway: Gateway) -> None:
     zigpy_dev = registry.resolve(
         await zigpy_device_from_json(
             zha_gateway.application_controller,
-            "tests/data/devices/centralite-3405-l.json",
+            "tests/data/devices/centralite-3405-l-0x10025310.json",
         )
     )
 
@@ -1123,7 +1123,7 @@ async def test_quirks_v2_translation_placeholders(zha_gateway: Gateway) -> None:
     zigpy_dev = registry.resolve(
         await zigpy_device_from_json(
             zha_gateway.application_controller,
-            "tests/data/devices/centralite-3405-l.json",
+            "tests/data/devices/centralite-3405-l-0x10025310.json",
         )
     )
 
@@ -1154,7 +1154,7 @@ async def test_quirks_v2_exposed_features(zha_gateway: Gateway) -> None:
     zigpy_dev = registry.resolve(
         await zigpy_device_from_json(
             zha_gateway.application_controller,
-            "tests/data/devices/centralite-3405-l.json",
+            "tests/data/devices/centralite-3405-l-0x10025310.json",
         )
     )
 
@@ -1262,7 +1262,7 @@ async def test_unquirked_client_cluster_events(zha_gateway: Gateway) -> None:
 
     zigpy_dev = await zigpy_device_from_json(
         zha_gateway.application_controller,
-        "tests/data/devices/innr-rc-250.json",
+        "tests/data/devices/innr-rc-250-0x21086500.json",
     )
     zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
 
@@ -1392,7 +1392,7 @@ async def test_somrig_events(zha_gateway: Gateway) -> None:
 
     zigpy_dev = await zigpy_device_from_json(
         zha_gateway.application_controller,
-        "tests/data/devices/ikea-of-sweden-somrig-shortcut-button.json",
+        "tests/data/devices/ikea-of-sweden-somrig-shortcut-button-0x01000021.json",
     )
 
     zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
@@ -1439,7 +1439,7 @@ async def test_symfonisk_events(
 
     zigpy_dev = await zigpy_device_from_json(
         zha_gateway.application_controller,
-        "tests/data/devices/ikea-of-sweden-symfonisk-sound-remote-gen2.json",
+        "tests/data/devices/ikea-of-sweden-symfonisk-sound-remote-gen2-0x00010012.json",
     )
 
     zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
@@ -1486,7 +1486,7 @@ async def test_device_on_remove_callback_failure(
     """Test that device.on_remove continues when callback fails."""
     zigpy_dev = await zigpy_device_from_json(
         zha_gateway.application_controller,
-        "tests/data/devices/philips-sml001.json",
+        "tests/data/devices/philips-sml001-0x43007401.json",
     )
     zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
 
@@ -1507,7 +1507,7 @@ async def test_device_on_remove_platform_entity_failure(
     """Test that device.on_remove continues when platform entity removal fails."""
     zigpy_dev = await zigpy_device_from_json(
         zha_gateway.application_controller,
-        "tests/data/devices/philips-sml001.json",
+        "tests/data/devices/philips-sml001-0x43007401.json",
     )
     zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
 
@@ -1528,7 +1528,7 @@ async def test_device_on_remove_pending_entity_failure(
     """Test that device.on_remove continues when pending entity removal fails."""
     zigpy_dev = await zigpy_device_from_json(
         zha_gateway.application_controller,
-        "tests/data/devices/philips-sml001.json",
+        "tests/data/devices/philips-sml001-0x43007401.json",
     )
     zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
 
@@ -1552,7 +1552,7 @@ async def test_initial_entity_discovery_does_not_emit_events(
     """Test that first device initialization does not emit entity events."""
     zigpy_dev = await zigpy_device_from_json(
         zha_gateway.application_controller,
-        "tests/data/devices/ikea-of-sweden-tradfri-bulb-gu10-ws-400lm.json",
+        "tests/data/devices/ikea-of-sweden-tradfri-bulb-gu10-ws-400lm-0x23095631.json",
     )
     zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
 
@@ -1577,7 +1577,7 @@ async def test_reinitialize_emits_events_for_new_entities(
     """Test that re-initializing a device emits events for new entities."""
     zigpy_dev = await zigpy_device_from_json(
         zha_gateway.application_controller,
-        "tests/data/devices/ikea-of-sweden-tradfri-bulb-gu10-ws-400lm.json",
+        "tests/data/devices/ikea-of-sweden-tradfri-bulb-gu10-ws-400lm-0x23095631.json",
     )
     zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
 
@@ -1604,7 +1604,7 @@ async def test_reinitialize_after_on_remove_emits_events(
     """Test that re-init after on_remove (all entities cleared) still emits events."""
     zigpy_dev = await zigpy_device_from_json(
         zha_gateway.application_controller,
-        "tests/data/devices/ikea-of-sweden-tradfri-bulb-gu10-ws-400lm.json",
+        "tests/data/devices/ikea-of-sweden-tradfri-bulb-gu10-ws-400lm-0x23095631.json",
     )
     zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
     entity_count = len(zha_device.platform_entities)
@@ -1626,7 +1626,7 @@ async def test_remove_entity_no_event(zha_gateway: Gateway) -> None:
     """Test that _remove_entity with emit_event=False does not emit."""
     zigpy_dev = await zigpy_device_from_json(
         zha_gateway.application_controller,
-        "tests/data/devices/ikea-of-sweden-tradfri-bulb-gu10-ws-400lm.json",
+        "tests/data/devices/ikea-of-sweden-tradfri-bulb-gu10-ws-400lm-0x23095631.json",
     )
     zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
 
@@ -1643,7 +1643,7 @@ async def test_entity_recomputation(zha_gateway: Gateway) -> None:
     """Test entity recomputation."""
     zigpy_dev = await zigpy_device_from_json(
         zha_gateway.application_controller,
-        "tests/data/devices/ikea-of-sweden-tradfri-bulb-gu10-ws-400lm.json",
+        "tests/data/devices/ikea-of-sweden-tradfri-bulb-gu10-ws-400lm-0x23095631.json",
     )
     zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
 
@@ -1704,7 +1704,7 @@ async def test_add_entity_duplicate(zha_gateway: Gateway) -> None:
     """Test that adding a duplicate entity raises an error."""
     zigpy_dev = await zigpy_device_from_json(
         zha_gateway.application_controller,
-        "tests/data/devices/ikea-of-sweden-tradfri-bulb-gu10-ws-400lm.json",
+        "tests/data/devices/ikea-of-sweden-tradfri-bulb-gu10-ws-400lm-0x23095631.json",
     )
     zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
 
@@ -1718,7 +1718,7 @@ async def test_remove_entity_nonexistent(zha_gateway: Gateway) -> None:
     """Test that removing a nonexistent entity raises an error."""
     zigpy_dev = await zigpy_device_from_json(
         zha_gateway.application_controller,
-        "tests/data/devices/ikea-of-sweden-tradfri-bulb-gu10-ws-400lm.json",
+        "tests/data/devices/ikea-of-sweden-tradfri-bulb-gu10-ws-400lm-0x23095631.json",
     )
     zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
 

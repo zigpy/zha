@@ -285,7 +285,7 @@ async def test_bega_color_temperature_channel_select(zha_gateway: Gateway) -> No
     """Test BEGA color temperature channel select entity."""
     zigpy_device = await zigpy_device_from_json(
         zha_gateway.application_controller,
-        "tests/data/devices/bega-gantenbrink-leuchten-kg-smart-dimmable-light.json",
+        "tests/data/devices/bega-gantenbrink-leuchten-kg-smart-dimmable-light-0x00990be9.json",
     )
 
     cluster = zigpy_device.endpoints[1].in_clusters[general.LevelControl.cluster_id]
@@ -351,7 +351,7 @@ async def test_bega_color_temperature_channel_select_unsupported(
     """Test BEGA select entity is not created when a color temp is 0xFFFF."""
     zigpy_device = await zigpy_device_from_json(
         zha_gateway.application_controller,
-        "tests/data/devices/bega-gantenbrink-leuchten-kg-smart-dimmable-light.json",
+        "tests/data/devices/bega-gantenbrink-leuchten-kg-smart-dimmable-light-0x00990be9.json",
     )
 
     cluster = zigpy_device.endpoints[1].in_clusters[general.LevelControl.cluster_id]

@@ -1232,7 +1232,7 @@ async def test_gateway_shutdown_group_on_remove_failure(
     """Test that gateway shutdown continues when group.on_remove fails."""
     zigpy_dev_1 = await zigpy_device_from_json(
         zha_gateway.application_controller,
-        "tests/data/devices/ikea-of-sweden-tradfri-bulb-gu10-ws-400lm.json",
+        "tests/data/devices/ikea-of-sweden-tradfri-bulb-gu10-ws-400lm-0x23095631.json",
     )
     zha_device_1 = await join_zigpy_device(zha_gateway, zigpy_dev_1)
 
@@ -1259,11 +1259,11 @@ async def test_group_on_remove_entity_failure(
     """Test that group.on_remove continues when group entity removal fails."""
     zigpy_dev_1 = await zigpy_device_from_json(
         zha_gateway.application_controller,
-        "tests/data/devices/ikea-of-sweden-tradfri-bulb-gu10-ws-400lm.json",
+        "tests/data/devices/ikea-of-sweden-tradfri-bulb-gu10-ws-400lm-0x23095631.json",
     )
     zigpy_dev_2 = await zigpy_device_from_json(
         zha_gateway.application_controller,
-        "tests/data/devices/ikea-of-sweden-tradfri-bulb-e26-opal-1000lm.json",
+        "tests/data/devices/ikea-of-sweden-tradfri-bulb-e26-opal-1000lm-0x23094631.json",
     )
     zha_device_1 = await join_zigpy_device(zha_gateway, zigpy_dev_1)
     zha_device_2 = await join_zigpy_device(zha_gateway, zigpy_dev_2)
