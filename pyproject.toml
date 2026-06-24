@@ -64,10 +64,6 @@ ci = [
 [tool.uv]
 default-groups = ["testing"]
 
-# Temporary, until the `device_resolver` hook is released in zigpy
-[tool.uv.sources]
-zigpy = { path = "../zigpy", editable = true }
-
 [tool.setuptools-git-versioning]
 enabled = true
 
