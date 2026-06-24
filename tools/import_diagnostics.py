@@ -372,7 +372,6 @@ async def main(paths: list[str]):
             # First, try to join the device
             initial_json = zha_device.get_diagnostics_json()
 
-            await zha_gateway.async_remove_device(zha_device)
             await zha_device.on_remove()
             del zha_gateway.devices[zha_device.ieee]
 
@@ -389,14 +388,17 @@ async def main(paths: list[str]):
                 await zha_gateway.async_block_till_done(wait_background_tasks=True)
 
             rejoined_json = rejoined_zha_device.get_diagnostics_json()
+            fw_version = rejoined_zha_device.firmware_version
+
+            await rejoined_zha_device.on_remove()
+            del zha_gateway.devices[rejoined_zha_device.ieee]
+
             if initial_json != rejoined_json:
                 _LOGGER.warning(
                     "Rejoined device %s does not match original diagnostics JSON, quirk has modified the device signature",
                     path,
                 )
                 continue
-
-            fw_version = rejoined_zha_device.firmware_version
             suffix = f"-{fw_version}" if fw_version is not None else ""
             output_path = (
                 REPO_ROOT
