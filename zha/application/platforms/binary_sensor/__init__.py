@@ -111,7 +111,13 @@ class BinarySensor(BaseBinarySensor):
             )
 
         super().__init__(endpoint=endpoint, device=device, **kwargs)
-        self._state: bool = self.is_on
+
+        if not self.is_supported():
+            # `self.is_on` can raise if an attribute is missing
+            self._state = False
+        else:
+            self._state = self.is_on
+
         self.recompute_capabilities()
 
     def _is_supported(self) -> bool:
