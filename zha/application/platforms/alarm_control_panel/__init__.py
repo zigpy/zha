@@ -571,3 +571,7 @@ class AlarmControlPanel(BaseAlarmControlPanel):
         target_panel_status = _EXIT_DELAY_TARGET_PANEL_STATUS[arm_mode]
         self.start_exit_delay(delay_seconds, target_panel_status)
         self.maybe_emit_state_changed_event()
+
+    async def async_send_arm_notification(self, notification: ArmNotification) -> None:
+        """Send IAS ACE arm response to the keypad."""
+        await self._cluster.arm_response(notification)
