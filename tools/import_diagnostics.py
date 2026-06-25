@@ -20,8 +20,6 @@ from typing import Any
 from unittest.mock import AsyncMock, patch
 
 from slugify import slugify
-from zigpy.application import ControllerApplication
-from zigpy.quirks import get_device as quirks_get_device
 import zigpy.zcl
 import zigpy.zdo.types as zdo_t
 
@@ -32,6 +30,7 @@ from tests.common import (
     zigpy_device_from_device_data,
 )
 from tests.conftest import TestGateway, make_zha_data, make_zigpy_app_controller
+from zha.quirks import DEVICE_REGISTRY
 
 from .const import KNOWN_LEGACY_ATTRIBUTES
 
@@ -80,7 +79,7 @@ def parse_legacy_value(value: Any) -> Any:
 
 
 def zigpy_device_from_legacy_diagnostics(  # noqa: C901
-    app: ControllerApplication,
+    gateway: TestGateway,
     data: dict,
     patch_cluster: bool = True,
 ) -> zigpy.device.Device | None:
@@ -157,7 +156,7 @@ def zigpy_device_from_legacy_diagnostics(  # noqa: C901
     # real (unique) IEEE is redacted
     ieee = ieee_from_manufacturer_model(manufacturer, model)
 
-    device = zigpy.device.Device(app, ieee, nwk)
+    device = zigpy.device.Device(gateway.application_controller, ieee, nwk)
     device.manufacturer = manufacturer
     device.model = model
 
@@ -195,7 +194,8 @@ def zigpy_device_from_legacy_diagnostics(  # noqa: C901
         for cluster_id in ep["output_clusters"]:
             endpoint.add_output_cluster(int(cluster_id, 16))
 
-    device = quirks_get_device(device)
+    if device.original_signature is None:
+        device = DEVICE_REGISTRY.resolve(device)
 
     for epid, ep in cluster_data.items():
         endpoint.request = AsyncMock(return_value=[0])
@@ -318,7 +318,7 @@ def zigpy_device_from_legacy_diagnostics(  # noqa: C901
 
 
 def zigpy_device_from_diagnostics(
-    app: ControllerApplication,
+    gateway: TestGateway,
     data: dict,
     patch_cluster: bool = True,
 ) -> zigpy.device.Device | None:
@@ -329,7 +329,7 @@ def zigpy_device_from_diagnostics(
     zha_data = data["data"]
 
     if "version" not in zha_data:
-        return zigpy_device_from_legacy_diagnostics(app, data, patch_cluster)
+        return zigpy_device_from_legacy_diagnostics(gateway, data, patch_cluster)
 
     # Some diagnostics are hand-redacted (e.g. nwk "0xREDACTED"), fake a NWK instead
     if "REDACTED" in zha_data["nwk"]:
@@ -348,7 +348,9 @@ def zigpy_device_from_diagnostics(
     zha_data["routes"] = []
 
     # Use our normal testing function to load the data
-    return zigpy_device_from_device_data(app, zha_data, patch_cluster)
+    return zigpy_device_from_device_data(
+        gateway.application_controller, zha_data, patch_cluster
+    )
 
 
 @contextlib.asynccontextmanager
@@ -405,9 +407,7 @@ async def main(paths: list[str]):
                     _LOGGER.debug("Skipping known-bad DIY device")
                     continue
 
-                zigpy_device = zigpy_device_from_diagnostics(
-                    zha_gateway.application_controller, data
-                )
+                zigpy_device = zigpy_device_from_diagnostics(zha_gateway, data)
 
                 if zigpy_device is None:
                     _LOGGER.debug("Skipping, diagnostics are not valid")
@@ -448,21 +448,32 @@ async def main(paths: list[str]):
                 )
                 continue
             suffix = f"-{fw_version}" if fw_version is not None else ""
-            output_path = (
-                REPO_ROOT
-                / "tests"
-                / "data"
-                / "devices"
-                / (
-                    slugify(f"{zigpy_device.manufacturer}-{zigpy_device.model}{suffix}")
-                    + ".json"
-                )
+            filename = (
+                slugify(f"{zigpy_device.manufacturer}-{zigpy_device.model}{suffix}")
+                + ".json"
             )
+            devices_path = REPO_ROOT / "tests" / "data" / "devices" / filename
+            legacy_path = REPO_ROOT / "tests" / "data" / "legacy_devices" / filename
+
+            # Diagnostics with a recorded `original_signature` faithfully reconstruct
+            # the raw pre-quirk device. Prefer them over legacy diagnostics, whose
+            # signature may be polluted by runtime quirk modification and so cannot
+            # re-match.
+            if "original_signature" in initial_json:
+                output_path = devices_path
+                # A preferred version supersedes any legacy import of the same device.
+                legacy_path.unlink(missing_ok=True)
+            elif devices_path.is_file():
+                # A preferred version already exists; skip the legacy diagnostic.
+                continue
+            else:
+                output_path = legacy_path
 
             if output_path.is_file():
                 continue
 
-            _LOGGER.info("Importing %s as %s", path, output_path.name)
+            output_path.parent.mkdir(parents=True, exist_ok=True)
+            _LOGGER.info("Importing %s as %s", path, output_path)
             new_json = json.dumps(initial_json, indent=2, cls=ZhaJsonEncoder)
             output_path.write_text(new_json)
 

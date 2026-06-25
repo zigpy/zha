@@ -358,6 +358,80 @@ async def group_entity_availability_test(
     assert entity.state["available"] is True
 
 
+def _load_attribute_cache(
+    device: zigpy.device.Device,
+    device_data: dict,
+    *,
+    patch_cluster: bool,
+) -> None:
+    """Populate the attribute cache from diagnostics data, mirroring zigpy `appdb`."""
+    for epid, ep in device_data["endpoints"].items():
+        try:
+            endpoint = device.endpoints[int(epid)]
+        except KeyError:
+            _LOGGER.warning("Endpoint %d not found on device %s", int(epid), device)
+            continue
+
+        endpoint.request = AsyncMock(return_value=[0])
+
+        for cluster_type in ("in_clusters", "out_clusters"):
+            clusters = getattr(endpoint, cluster_type)
+
+            for cluster in ep[cluster_type]:
+                cluster_id = int(cluster["cluster_id"], 16)
+
+                try:
+                    real_cluster = clusters[cluster_id]
+                except KeyError:
+                    _LOGGER.warning(
+                        "Cluster %0#06x not found on endpoint %r of device %s",
+                        cluster_id,
+                        endpoint,
+                        device,
+                    )
+                    continue
+
+                if patch_cluster:
+                    patch_cluster_for_testing(real_cluster)
+
+                for attr in cluster["attributes"]:
+                    attrid = int(attr["id"], 16)
+                    attr_name = attr.get("name")
+                    value = attr.get("value")
+
+                    try:
+                        attr_def = real_cluster.find_attribute(attrid)
+                    except KeyError:
+                        # Multiple definitions share this id (a manufacturer-specific
+                        # attribute): the name disambiguates it like `manufacturer_code`
+                        # does for the database load. Only accept it if the id matches,
+                        # so a quirk-moved name still falls through to a legacy value.
+                        attr_def = None
+                        if attr_name is not None:
+                            try:
+                                by_name = real_cluster.find_attribute(attr_name)
+                            except KeyError:
+                                by_name = None
+                            if by_name is not None and by_name.id == attrid:
+                                attr_def = by_name
+
+                    # Unknown attribute, or an ambiguous manufacturer-specific id: cache
+                    # it as a legacy value so the device still loads.
+                    if attr_def is None:
+                        if value is not None:
+                            real_cluster._attr_cache.set_legacy_value(attrid, value)
+                            if patch_cluster:
+                                real_cluster.PLUGGED_ATTR_READS[attrid] = value
+                        continue
+
+                    if value is not None:
+                        real_cluster._attr_cache.set_value(attr_def, value)
+                        if patch_cluster:
+                            real_cluster.PLUGGED_ATTR_READS[attrid] = value
+                    elif attr.get("unsupported", False):
+                        real_cluster.add_unsupported_attribute(attr_def)
+
+
 def zigpy_device_from_device_data(  # noqa: C901
     app: ControllerApplication,
     device_data: dict,
@@ -398,6 +472,9 @@ def zigpy_device_from_device_data(  # noqa: C901
 
             for cluster_id in ep.get("output_clusters", []):
                 endpoint.add_output_cluster(int(cluster_id, 16))
+
+        # Record the raw pre-quirk signature from the source diagnostic.
+        device.original_signature = device.get_signature()
     else:
         for epid, ep in device_data["endpoints"].items():
             endpoint = device.add_endpoint(int(epid))
@@ -419,81 +496,23 @@ def zigpy_device_from_device_data(  # noqa: C901
             for cluster in ep["out_clusters"]:
                 endpoint.add_output_cluster(int(cluster["cluster_id"], 16))
 
-    device.original_signature = device.get_signature()
+    # First pass: populate the attribute cache on the bare clusters for quirks
+    _load_attribute_cache(device, device_data, patch_cluster=False)
 
     if quirk:
         device = quirk(app, device.ieee, device.nwk, device)
     else:
         device = registry.resolve(device)
 
-    for epid, ep in device_data["endpoints"].items():
-        try:
-            endpoint = device.endpoints[int(epid)]
-        except KeyError:
-            _LOGGER.warning(
-                "Endpoint %d not found on device %s",
-                int(epid),
-                device,
-            )
-            continue
+    # Second pass: clear the cache so the quirked state is rebuilt cleanly, then
+    # repopulate against the final quirked clusters
+    for endpoint in device.non_zdo_endpoints:
+        for cluster in itertools.chain(
+            endpoint.in_clusters.values(), endpoint.out_clusters.values()
+        ):
+            cluster._attr_cache.clear()
 
-        endpoint.request = AsyncMock(return_value=[0])
-
-        for cluster_type in ("in_clusters", "out_clusters"):
-            clusters = getattr(endpoint, cluster_type)
-
-            for cluster in ep[cluster_type]:
-                cluster_id = int(cluster["cluster_id"], 16)
-
-                try:
-                    real_cluster = clusters[cluster_id]
-                except KeyError:
-                    _LOGGER.warning(
-                        "Cluster %0#04x not found on endpoint %r of device %s",
-                        cluster_id,
-                        endpoint,
-                        device,
-                    )
-                    continue
-
-                if patch_cluster:
-                    patch_cluster_for_testing(real_cluster)
-
-                for attr in cluster["attributes"]:
-                    attrid = int(attr["id"], 16)
-                    attr_name = attr.get("name")
-
-                    # Look up by name to avoid ambiguity with manufacturer-specific attrs
-                    try:
-                        if attr_name is not None:
-                            attr_def = real_cluster.find_attribute(attr_name)
-                        else:
-                            attr_def = real_cluster.find_attribute(attrid)
-                    except KeyError:
-                        attr_def = None
-
-                    # The attribute may not be defined on the cluster, or a quirk may
-                    # have moved its name to a different id. Cache it as a legacy value
-                    # so the device still loads.
-                    if attr_def is None or attr_def.id != attrid:
-                        if attr.get("value", None) is not None:
-                            real_cluster._attr_cache.set_legacy_value(
-                                attrid, attr["value"]
-                            )
-                            real_cluster.PLUGGED_ATTR_READS[attrid] = attr["value"]
-                        continue
-
-                    # Quirks can mark attributes as unsupported during cluster init so
-                    # the attribute both has a cached value and is unsupported. We need
-                    # to preserve the "unsupported" state.
-                    was_unsupported = real_cluster.is_attribute_unsupported(attr_def)
-
-                    if attr.get("value", None) is not None:
-                        real_cluster._attr_cache.set_value(attr_def, attr["value"])
-                        real_cluster.PLUGGED_ATTR_READS[attrid] = attr["value"]
-
-                    if attr.get("unsupported", False) or was_unsupported:
-                        real_cluster.add_unsupported_attribute(attr_def)
+    _load_attribute_cache(device, device_data, patch_cluster=patch_cluster)
 
     for obj in device_data["neighbors"]:
         app.topology.neighbors[device.ieee].append(
@@ -639,11 +658,16 @@ def create_mock_zigpy_device(
 
 
 class ZhaJsonEncoder(json.JSONEncoder):
-    """JSON encoder to handle common Python data types, currently just `set`."""
+    """JSON encoder to handle common Python data types."""
 
     def default(self, obj):
         """Convert non-JSON types."""
         if isinstance(obj, set):
             return sorted(obj, key=repr)
+
+        # Bytes-valued attributes (e.g. Aqara aggregate blobs) are encoded the same way
+        # Home Assistant diagnostics encode them, which `parse_legacy_value` reads back.
+        if isinstance(obj, (bytes, bytearray)):
+            return {"__type": str(bytes), "repr": repr(bytes(obj))}
 
         return super().default(obj)

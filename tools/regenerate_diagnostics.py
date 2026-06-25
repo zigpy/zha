@@ -37,7 +37,10 @@ async def create_zha_gateway():
 async def main(files: list[str] | None = None) -> None:
     """Entry point."""
     if files is None:
-        paths = list((REPO_ROOT / "tests" / "data" / "devices").glob("**/*.json"))
+        data_root = REPO_ROOT / "tests" / "data"
+        paths = sorted((data_root / "devices").glob("**/*.json")) + sorted(
+            (data_root / "legacy_devices").glob("**/*.json")
+        )
     else:
         paths = [pathlib.Path(f) for f in files]
 

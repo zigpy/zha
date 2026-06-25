@@ -763,7 +763,9 @@ def pytest_generate_tests(metafunc):
     """Generate tests for all device files."""
     if "file_path" in metafunc.fixturenames:
         # use the filename as ID for better test names
-        file_paths = sorted(pathlib.Path("tests/data/devices").glob("**/*.json"))
+        file_paths = sorted(
+            pathlib.Path("tests/data/devices").glob("**/*.json")
+        ) + sorted(pathlib.Path("tests/data/legacy_devices").glob("**/*.json"))
         file_paths = [
             f for f in file_paths if f.name != "lumi-lumi-motion-agl04.json"
         ]  # TODO: fix lingering timer for `_Motion._turn_off` in quirks
