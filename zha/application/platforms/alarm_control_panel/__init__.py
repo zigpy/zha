@@ -53,6 +53,12 @@ _EXIT_DELAY_TARGET_PANEL_STATUS: Final[dict[str, PanelStatus]] = {
     "night": AceCluster.PanelStatus.Armed_Night,
 }
 
+_ARM_NOTIFICATION_MAP: Final[dict[str, ArmNotification]] = {
+    "away": AceCluster.ArmNotification.All_Zones_Armed,
+    "home": AceCluster.ArmNotification.Only_Day_Home_Zones_Armed,
+    "night": AceCluster.ArmNotification.Only_Night_Sleep_Zones_Armed,
+}
+
 _ARM_EXIT_DELAY_LOG_LABELS: Final[dict[PanelStatus, str]] = {
     AceCluster.PanelStatus.Armed_Away: "all IAS ACE zones",
     AceCluster.PanelStatus.Armed_Stay: "day/home IAS ACE zones",
@@ -571,7 +577,4 @@ class AlarmControlPanel(BaseAlarmControlPanel):
         target_panel_status = _EXIT_DELAY_TARGET_PANEL_STATUS[arm_mode]
         self.start_exit_delay(delay_seconds, target_panel_status)
         self.maybe_emit_state_changed_event()
-
-    async def async_send_arm_notification(self, notification: ArmNotification) -> None:
-        """Send IAS ACE arm response to the keypad."""
-        await self._cluster.arm_response(notification)
+        await self._cluster.arm_response(_ARM_NOTIFICATION_MAP[arm_mode])
