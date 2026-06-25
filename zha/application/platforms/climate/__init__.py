@@ -7,7 +7,7 @@ from asyncio import Task
 from dataclasses import dataclass
 import datetime as dt
 import functools
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from zigpy.profiles import zha
 from zigpy.zcl import (
@@ -29,7 +29,7 @@ from zha.application import Platform
 from zha.application.helpers import write_attributes_safe
 from zha.application.platforms import (
     AttrConfig,
-    BaseEntityInfo,
+    BaseEntityState,
     ClusterConfig,
     ClusterMatch,
     PlatformEntity,
@@ -39,12 +39,6 @@ from zha.application.platforms import (
 from zha.application.platforms.climate.const import (
     ATTR_OCCP_COOL_SETPT,
     ATTR_OCCP_HEAT_SETPT,
-    ATTR_OCCUPANCY,
-    ATTR_PI_COOLING_DEMAND,
-    ATTR_PI_HEATING_DEMAND,
-    ATTR_SYS_MODE,
-    ATTR_UNOCCP_COOL_SETPT,
-    ATTR_UNOCCP_HEAT_SETPT,
     FAN_AUTO,
     FAN_ON,
     HVAC_MODE_2_SYSTEM,
@@ -66,9 +60,18 @@ if TYPE_CHECKING:
 
 
 @dataclass(frozen=True, kw_only=True)
-class ThermostatEntityInfo(BaseEntityInfo):
-    """Thermostat entity info."""
+class ClimateState(BaseEntityState):
+    """State for climate entities."""
 
+    current_temperature: float | None
+    outdoor_temperature: float | None
+    target_temperature: float | None
+    target_temperature_high: float | None
+    target_temperature_low: float | None
+    hvac_action: HVACAction | None
+    hvac_mode: HVACMode | None
+    preset_mode: str | None
+    fan_mode: str | None
     max_temp: float
     min_temp: float
     supported_features: ClimateEntityFeature
@@ -77,25 +80,46 @@ class ThermostatEntityInfo(BaseEntityInfo):
     hvac_modes: list[HVACMode]
 
 
+@dataclass(frozen=True, kw_only=True)
+class ThermostatState(ClimateState):
+    """State for thermostat entities with extra attributes."""
+
+    sys_mode: str | None = None
+    occupancy: int | None = None
+    occupied_cooling_setpoint: int | None = None
+    occupied_heating_setpoint: int | None = None
+    pi_heating_demand: int | None = None
+    pi_cooling_demand: int | None = None
+    unoccupied_cooling_setpoint: int | None = None
+    unoccupied_heating_setpoint: int | None = None
+
+
 class BaseThermostat(PlatformEntity, ABC):
     """Abstract base class for climate entities."""
 
     PLATFORM = Platform.CLIMATE
 
     @property
-    def state(self) -> dict[str, Any]:
+    def state(self) -> ClimateState:
         """Get the state of the climate entity."""
-        response = super().state
-        response["current_temperature"] = self.current_temperature
-        response["outdoor_temperature"] = self.outdoor_temperature
-        response["target_temperature"] = self.target_temperature
-        response["target_temperature_high"] = self.target_temperature_high
-        response["target_temperature_low"] = self.target_temperature_low
-        response["hvac_action"] = self.hvac_action
-        response["hvac_mode"] = self.hvac_mode
-        response["preset_mode"] = self.preset_mode
-        response["fan_mode"] = self.fan_mode
-        return response
+        return ClimateState(
+            **super().state.__dict__,
+            current_temperature=self.current_temperature,
+            outdoor_temperature=self.outdoor_temperature,
+            target_temperature=self.target_temperature,
+            target_temperature_high=self.target_temperature_high,
+            target_temperature_low=self.target_temperature_low,
+            hvac_action=self.hvac_action,
+            hvac_mode=self.hvac_mode,
+            preset_mode=self.preset_mode,
+            fan_mode=self.fan_mode,
+            max_temp=self.max_temp,
+            min_temp=self.min_temp,
+            supported_features=self.supported_features,
+            fan_modes=self.fan_modes,
+            preset_modes=self.preset_modes,
+            hvac_modes=self.hvac_modes,
+        )
 
     @property
     @abstractmethod
@@ -207,16 +231,6 @@ class Thermostat(BaseThermostat):
     _attr_temperature_unit = UnitOfTemperature.CELSIUS
     _attr_translation_key: str = "thermostat"
     _enable_turn_on_off_backwards_compatibility = False
-    _attr_extra_state_attribute_names: set[str] = {
-        ATTR_SYS_MODE,
-        ATTR_OCCUPANCY,
-        ATTR_OCCP_COOL_SETPT,
-        ATTR_OCCP_HEAT_SETPT,
-        ATTR_PI_HEATING_DEMAND,
-        ATTR_PI_COOLING_DEMAND,
-        ATTR_UNOCCP_COOL_SETPT,
-        ATTR_UNOCCP_HEAT_SETPT,
-    }
 
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({ThermostatCluster.cluster_id}),
@@ -544,39 +558,28 @@ class Thermostat(BaseThermostat):
                 )
             )
 
-    @functools.cached_property
-    def info_object(self) -> ThermostatEntityInfo:
-        """Return a representation of the thermostat."""
-        return ThermostatEntityInfo(
-            **super().info_object.__dict__,
-            max_temp=self.max_temp,
-            min_temp=self.min_temp,
-            supported_features=self.supported_features,
-            fan_modes=self.fan_modes,
-            preset_modes=self.preset_modes,
-            hvac_modes=self.hvac_modes,
+    @property
+    def state(self) -> ThermostatState:
+        """Get the state of the thermostat."""
+        return ThermostatState(
+            **super().state.__dict__,
+            sys_mode=self.system_mode_string,
+            occupancy=self._occupancy,
+            occupied_cooling_setpoint=self._occupied_cooling_setpoint,
+            occupied_heating_setpoint=self._occupied_heating_setpoint,
+            pi_heating_demand=self._pi_heating_demand,
+            pi_cooling_demand=self._pi_cooling_demand,
+            unoccupied_cooling_setpoint=self._unoccupied_cooling_setpoint,
+            unoccupied_heating_setpoint=self._unoccupied_heating_setpoint,
         )
 
     @property
-    def state(self) -> dict[str, Any]:
-        """Get the state of the thermostat."""
+    def system_mode_string(self) -> str | None:
+        """Return a formatted system mode string."""
+        if self.hvac_mode is None:
+            return None
         system_mode = SYSTEM_MODE_2_HVAC.get(self._system_mode, "unknown")
-
-        response = super().state
-
-        response[ATTR_SYS_MODE] = (
-            f"[{self._system_mode}]/{system_mode}"
-            if self.hvac_mode is not None
-            else None
-        )
-        response[ATTR_OCCUPANCY] = self._occupancy
-        response[ATTR_OCCP_COOL_SETPT] = self._occupied_cooling_setpoint
-        response[ATTR_OCCP_HEAT_SETPT] = self._occupied_heating_setpoint
-        response[ATTR_PI_HEATING_DEMAND] = self._pi_heating_demand
-        response[ATTR_PI_COOLING_DEMAND] = self._pi_cooling_demand
-        response[ATTR_UNOCCP_COOL_SETPT] = self._unoccupied_cooling_setpoint
-        response[ATTR_UNOCCP_HEAT_SETPT] = self._unoccupied_heating_setpoint
-        return response
+        return f"[{self._system_mode}]/{system_mode}"
 
     @property
     def current_temperature(self):
@@ -1096,21 +1099,14 @@ class ZehnderThermostat(Thermostat):
         return None
 
     @property
-    def state(self) -> dict[str, Any]:
-        """Get the state of the lock."""
+    def system_mode_string(self) -> str | None:
+        """Return a formatted system mode string."""
+        if self.hvac_mode is None:
+            return None
         system_mode = ZehnderThermostat.ZEHNDER_SYSTEM_MODE_2_HVAC.get(
             self._system_mode, "unknown"
         )
-
-        response = super().state
-
-        response[ATTR_SYS_MODE] = (
-            f"[{self._system_mode}]/{system_mode}"
-            if self.hvac_mode is not None
-            else None
-        )
-
-        return response
+        return f"[{self._system_mode}]/{system_mode}"
 
     @property
     def hvac_mode(self) -> HVACMode | None:

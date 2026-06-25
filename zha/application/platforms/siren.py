@@ -7,7 +7,6 @@ import asyncio
 import contextlib
 from dataclasses import dataclass
 from enum import Enum, IntFlag
-import functools
 from typing import TYPE_CHECKING, Any, Final
 
 from zigpy.profiles import zha
@@ -24,7 +23,7 @@ from zigpy.zcl.clusters.security import (
 
 from zha.application import Platform
 from zha.application.platforms import (
-    BaseEntityInfo,
+    BaseEntityState,
     ClusterConfig,
     ClusterMatch,
     PlatformEntity,
@@ -57,9 +56,10 @@ class SirenEntityFeature(IntFlag):
 
 
 @dataclass(frozen=True, kw_only=True)
-class SirenEntityInfo(BaseEntityInfo):
-    """Siren entity info."""
+class SirenState(BaseEntityState):
+    """State for siren entities."""
 
+    state: bool
     available_tones: dict[int, str]
     supported_features: SirenEntityFeature
 
@@ -74,11 +74,14 @@ class BaseSiren(PlatformEntity, ABC):
     _attr_supported_features: SirenEntityFeature
 
     @property
-    def state(self) -> dict[str, Any]:
+    def state(self) -> SirenState:
         """Get the state of the siren."""
-        response = super().state
-        response["state"] = self.is_on
-        return response
+        return SirenState(
+            **super().state.__dict__,
+            state=self.is_on,
+            available_tones=self.available_tones,
+            supported_features=self.supported_features,
+        )
 
     @property
     def is_on(self) -> bool:
@@ -94,15 +97,6 @@ class BaseSiren(PlatformEntity, ABC):
     def supported_features(self) -> SirenEntityFeature:
         """Return supported features."""
         return self._attr_supported_features
-
-    @functools.cached_property
-    def info_object(self) -> SirenEntityInfo:
-        """Return representation of the siren."""
-        return SirenEntityInfo(
-            **super().info_object.__dict__,
-            available_tones=self.available_tones,
-            supported_features=self.supported_features,
-        )
 
     @abstractmethod
     async def async_turn_on(

@@ -661,7 +661,7 @@ class Gateway(AsyncUtilMixin, EventBase):
                 gateway_message_type,
                 GroupEvent(
                     event=gateway_message_type,
-                    group_info=zha_group.info_object,
+                    group_info=zha_group.state,
                 ),
             )
 
