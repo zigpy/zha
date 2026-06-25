@@ -13,7 +13,10 @@ from tests.common import join_zigpy_device, zigpy_device_from_json
 from zha.application import Platform
 from zha.application.gateway import Gateway
 from zha.application.platforms.alarm_control_panel import AlarmControlPanel
-from zha.application.platforms.alarm_control_panel.const import AlarmState
+from zha.application.platforms.alarm_control_panel.const import (
+    IAS_ACE_STATE_MAP,
+    AlarmState,
+)
 from zha.zigbee.device import Device
 
 _LOGGER = logging.getLogger(__name__)
@@ -715,18 +718,14 @@ async def test_alarm_control_panel_bypass_command(
 
 def test_ias_ace_state_map_arming_panel_statuses() -> None:
     """Arming_* panel statuses map to HA arming (same as Exit_Delay)."""
-    from zha.application.platforms.alarm_control_panel.const import (
-        IAS_ACE_STATE_MAP,
-        AlarmState,
+    assert (
+        IAS_ACE_STATE_MAP[security.IasAce.PanelStatus.Exit_Delay] == AlarmState.ARMING
     )
-
-    assert IAS_ACE_STATE_MAP[security.IasAce.PanelStatus.Exit_Delay] == AlarmState.ARMING
     assert (
         IAS_ACE_STATE_MAP[security.IasAce.PanelStatus.Arming_Stay] == AlarmState.ARMING
     )
     assert (
-        IAS_ACE_STATE_MAP[security.IasAce.PanelStatus.Arming_Night]
-        == AlarmState.ARMING
+        IAS_ACE_STATE_MAP[security.IasAce.PanelStatus.Arming_Night] == AlarmState.ARMING
     )
     assert (
         IAS_ACE_STATE_MAP[security.IasAce.PanelStatus.Arming_Away] == AlarmState.ARMING

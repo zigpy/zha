@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-import asyncio
 from abc import ABC, abstractmethod
+import asyncio
 from collections.abc import Callable
 from dataclasses import dataclass
 import functools
@@ -436,11 +436,9 @@ class AlarmControlPanel(BaseAlarmControlPanel):
             self._exit_delay_end_time = loop.time() + delay_seconds
             self._pending_arm_mode = target_panel_status
 
-            self._exit_delay_task = (
-                self._device.gateway.async_create_background_task(
-                    self._exit_delay_timer(delay_seconds),
-                    name=f"exit_delay_{self._cluster_event_unique_id}",
-                )
+            self._exit_delay_task = self._device.gateway.async_create_background_task(
+                self._exit_delay_timer(delay_seconds),
+                name=f"exit_delay_{self._cluster_event_unique_id}",
             )
 
             if emit_panel_status:
@@ -465,11 +463,9 @@ class AlarmControlPanel(BaseAlarmControlPanel):
             loop = asyncio.get_running_loop()
             self._entry_delay_end_time = loop.time() + delay_seconds
 
-            self._entry_delay_task = (
-                self._device.gateway.async_create_background_task(
-                    self._entry_delay_timer(delay_seconds),
-                    name=f"entry_delay_{self._cluster_event_unique_id}",
-                )
+            self._entry_delay_task = self._device.gateway.async_create_background_task(
+                self._entry_delay_timer(delay_seconds),
+                name=f"entry_delay_{self._cluster_event_unique_id}",
             )
             self._emit_panel_status_changed()
         else:
