@@ -8,10 +8,8 @@ import functools
 import logging
 from typing import TYPE_CHECKING, Any
 
-from zhaquirks.quirk_ids import DANFOSS_ALLY_THERMOSTAT, TUYA_PLUG_ONOFF
 from zigpy import types as t
 from zigpy.profiles import zha, zll
-from zigpy.quirks.v2 import EntityMetadata, SwitchMetadata
 import zigpy.zcl
 from zigpy.zcl import (
     AttributeReadEvent,
@@ -41,14 +39,15 @@ from zha.application.platforms import (
     register_group_entity,
 )
 from zha.application.platforms.const import (
-    AQARA_OPPLE_CLUSTER,
     IKEA_AIR_PURIFIER_CLUSTER,
     INOVELLI_CLUSTER,
     SINOPE_MANUFACTURER_CLUSTER,
     TUYA_MANUFACTURER_CLUSTER,
 )
+from zha.application.platforms.legacy_quirks import AQARA_OPPLE_CLUSTER
 from zha.application.platforms.light.const import LIGHT_PROFILE_DEVICE_TYPES
 from zha.exceptions import ZHAException
+from zha.quirks import DANFOSS_ALLY_THERMOSTAT, TUYA_PLUG_ONOFF
 from zha.zigbee.group import Group
 
 if TYPE_CHECKING:
@@ -404,12 +403,17 @@ class ConfigurableAttributeSwitch(PlatformEntity):
         device: Device,
         *,
         cluster: zigpy.zcl.Cluster,
-        entity_metadata: EntityMetadata | None = None,
+        from_quirk: bool = False,
+        attribute_name: str | None = None,
+        invert_attribute_name: str | None = None,
+        force_inverted: bool = False,
+        off_value: int = 0,
+        on_value: int = 1,
         legacy_discovery_unique_id: str | None = None,
         **kwargs: Any,
     ) -> None:
-        """Init this number configuration entity."""
-        if legacy_discovery_unique_id is None and entity_metadata is None:
+        """Init this switch configuration entity."""
+        if legacy_discovery_unique_id is None and not from_quirk:
             legacy_discovery_unique_id = (
                 f"{endpoint.device.ieee}-{endpoint.id}"
                 if (
@@ -425,11 +429,20 @@ class ConfigurableAttributeSwitch(PlatformEntity):
                 else f"{endpoint.device.ieee}-{endpoint.id}-{int(cluster.cluster_id)}"
             )
 
+        if attribute_name is not None:
+            self._attribute_name = attribute_name
+        if invert_attribute_name:
+            self._inverter_attribute_name = invert_attribute_name
+        if force_inverted:
+            self._force_inverted = force_inverted
+        self._off_value = off_value
+        self._on_value = on_value
+
         super().__init__(
             endpoint=endpoint,
             device=device,
             cluster=cluster,
-            entity_metadata=entity_metadata,
+            from_quirk=from_quirk,
             legacy_discovery_unique_id=legacy_discovery_unique_id,
             **kwargs,
         )
@@ -448,17 +461,6 @@ class ConfigurableAttributeSwitch(PlatformEntity):
                     event_type.event_type, self.handle_attribute_updated
                 )
             )
-
-    def _init_from_quirks_metadata(self, entity_metadata: SwitchMetadata) -> None:
-        """Init this entity from the quirks metadata."""
-        super()._init_from_quirks_metadata(entity_metadata)
-        self._attribute_name = entity_metadata.attribute_name
-        if entity_metadata.invert_attribute_name:
-            self._inverter_attribute_name = entity_metadata.invert_attribute_name
-        if entity_metadata.force_inverted:
-            self._force_inverted = entity_metadata.force_inverted
-        self._off_value = entity_metadata.off_value
-        self._on_value = entity_metadata.on_value
 
     def _is_supported(self) -> bool:
         if (

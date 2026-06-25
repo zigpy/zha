@@ -8,7 +8,7 @@
   "friendly_model": "ZLinky_TIC",
   "name": "LiXee ZLinky_TIC",
   "quirk_applied": true,
-  "quirk_class": "zhaquirks.lixee.zlinky.ZLinkyTICFWV12",
+  "quirk_class": "zhaquirks.lixee.zlinky:ZLinkyTICFWV12",
   "exposes_features": [],
   "manufacturer_code": 4151,
   "power_source": "Mains",

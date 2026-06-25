@@ -8,7 +8,7 @@
   "friendly_model": "TRADFRI control outlet",
   "name": "IKEA of Sweden TRADFRI control outlet",
   "quirk_applied": true,
-  "quirk_class": "zigpy.quirks.v2.CustomDeviceV2",
+  "quirk_class": "zhaquirks.ikea.plug:(IKEA of Sweden / TRADFRI control outlet)",
   "exposes_features": [],
   "manufacturer_code": 4476,
   "power_source": "Mains",

@@ -9,18 +9,7 @@ import functools
 import logging
 from typing import TYPE_CHECKING, Any, cast
 
-from zhaquirks.danfoss import thermostat as danfoss_thermostat
-from zhaquirks.quirk_ids import (
-    BEGA_LIGHT_SWITCHABLE_WHITE,
-    DANFOSS_ALLY_THERMOSTAT,
-    SIREN_BASIC,
-    TUYA_PLUG_MANUFACTURER,
-    TUYA_PLUG_ONOFF,
-)
-from zhaquirks.xiaomi.aqara.magnet_ac01 import OppleCluster as MagnetAC01OppleCluster
-from zhaquirks.xiaomi.aqara.switch_acn047 import OppleCluster as T2RelayOppleCluster
 from zigpy import types
-from zigpy.quirks.v2 import ZCLEnumMetadata
 from zigpy.zcl import (
     AttributeReadEvent,
     AttributeReportedEvent,
@@ -52,12 +41,26 @@ from zha.application.platforms import (
     register_entity,
 )
 from zha.application.platforms.const import (
-    AQARA_OPPLE_CLUSTER,
     INOVELLI_CLUSTER,
     SINOPE_MANUFACTURER_CLUSTER,
     TUYA_MANUFACTURER_CLUSTER,
 )
+from zha.application.platforms.legacy_quirks import (
+    AQARA_OPPLE_CLUSTER,
+    DanfossAdaptationRunControlEnum,
+    DanfossExerciseDayOfTheWeekEnum,
+    DanfossViewingDirectionEnum,
+    MagnetAC01OppleCluster,
+    T2RelayOppleCluster,
+)
 from zha.application.platforms.siren import AdvancedSiren
+from zha.quirks import (
+    BEGA_LIGHT_SWITCHABLE_WHITE,
+    DANFOSS_ALLY_THERMOSTAT,
+    SIREN_BASIC,
+    TUYA_PLUG_MANUFACTURER,
+    TUYA_PLUG_ONOFF,
+)
 
 if TYPE_CHECKING:
     from zha.zigbee.device import Device
@@ -248,9 +251,17 @@ class ZCLEnumSelectEntity(BaseSelectEntity, PlatformEntity):
         self,
         endpoint: Endpoint,
         device: Device,
+        *,
+        attribute_name: str | None = None,
+        enum: type[Enum] | None = None,
         **kwargs: Any,
     ) -> None:
         """Init this select entity."""
+        if attribute_name is not None:
+            self._attribute_name = attribute_name
+        if enum is not None:
+            self._enum = enum
+
         super().__init__(endpoint=endpoint, device=device, **kwargs)
         self._attr_options = [entry.name.replace("_", " ") for entry in self._enum]
 
@@ -283,12 +294,6 @@ class ZCLEnumSelectEntity(BaseSelectEntity, PlatformEntity):
             return False
 
         return super()._is_supported()
-
-    def _init_from_quirks_metadata(self, entity_metadata: ZCLEnumMetadata) -> None:
-        """Init this entity from the quirks metadata."""
-        super()._init_from_quirks_metadata(entity_metadata)
-        self._attribute_name = entity_metadata.attribute_name
-        self._enum = entity_metadata.enum
 
     @functools.cached_property
     def info_object(self) -> EnumSelectInfo:
@@ -983,7 +988,7 @@ class DanfossExerciseDayOfTheWeek(ZCLEnumSelectEntity):
     _unique_id_suffix = "exercise_day_of_week"
     _attribute_name = "exercise_day_of_week"
     _attr_translation_key: str = "exercise_day_of_week"
-    _enum = danfoss_thermostat.DanfossExerciseDayOfTheWeekEnum
+    _enum = DanfossExerciseDayOfTheWeekEnum
     _cluster_id = Thermostat.cluster_id
 
     _cluster_match = ClusterMatch(
@@ -1136,7 +1141,7 @@ class DanfossAdaptationRunControl(ZCLEnumSelectEntity):
     _unique_id_suffix = "adaptation_run_control"
     _attribute_name = "adaptation_run_control"
     _attr_translation_key: str = "adaptation_run_command"
-    _enum = danfoss_thermostat.DanfossAdaptationRunControlEnum
+    _enum = DanfossAdaptationRunControlEnum
     _cluster_id = Thermostat.cluster_id
 
     _cluster_match = ClusterMatch(
@@ -1193,7 +1198,7 @@ class DanfossViewingDirection(ZCLEnumSelectEntity):
     _unique_id_suffix = "viewing_direction"
     _attribute_name = "viewing_direction"
     _attr_translation_key: str = "viewing_direction"
-    _enum = danfoss_thermostat.DanfossViewingDirectionEnum
+    _enum = DanfossViewingDirectionEnum
     _cluster_id = UserInterface.cluster_id
 
     _cluster_match = ClusterMatch(

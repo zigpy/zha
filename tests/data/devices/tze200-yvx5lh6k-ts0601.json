@@ -8,7 +8,7 @@
   "friendly_model": "TS0601",
   "name": "_TZE200_yvx5lh6k TS0601",
   "quirk_applied": true,
-  "quirk_class": "zigpy.quirks.v2.CustomDeviceV2",
+  "quirk_class": "zhaquirks.tuya.builder:(_TZE200_7bztmfm1 / TS0601)",
   "exposes_features": [],
   "manufacturer_code": 4417,
   "power_source": "Mains",
@@ -289,7 +289,7 @@
           "available": true,
           "group_id": null,
           "suggested_display_precision": null,
-          "unit": "\u00b5g/m\u00b3"
+          "unit": "\u03bcg/m\u00b3"
         },
         "state": {
           "class_name": "PM25",
@@ -317,7 +317,7 @@
           "available": true,
           "group_id": null,
           "suggested_display_precision": 0,
-          "unit": "\u00b5g/m\u00b3"
+          "unit": "\u03bcg/m\u00b3"
         },
         "state": {
           "class_name": "VOCLevel",

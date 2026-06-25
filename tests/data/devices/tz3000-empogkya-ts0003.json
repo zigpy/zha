@@ -8,7 +8,7 @@
   "friendly_model": "TS0003",
   "name": "_TZ3000_empogkya TS0003",
   "quirk_applied": true,
-  "quirk_class": "zhaquirks.tuya.ts000x.Switch_3G_GPP_Var2",
+  "quirk_class": "zhaquirks.tuya.ts000x:Switch_3G_GPP_Var2",
   "exposes_features": [
     "tuya.plug_on_off_attributes"
   ],

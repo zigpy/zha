@@ -9,7 +9,7 @@ import datetime as dt
 import functools
 from typing import TYPE_CHECKING, Any
 
-from zhaquirks.quirk_ids import THERMOSTAT_FAN_ONLY_HVAC
+from zha.quirks import THERMOSTAT_FAN_ONLY_HVAC
 from zigpy.profiles import zha
 from zigpy.zcl import (
     AttributeReadEvent,

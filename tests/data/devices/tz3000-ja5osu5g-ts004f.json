@@ -8,7 +8,7 @@
   "friendly_model": "TS004F",
   "name": "_TZ3000_ja5osu5g TS004F",
   "quirk_applied": true,
-  "quirk_class": "zhaquirks.tuya.ts004f.TuyaSmartRemote004FSK",
+  "quirk_class": "zhaquirks.tuya.ts004f:TuyaSmartRemote004FSK",
   "exposes_features": [],
   "manufacturer_code": 4098,
   "power_source": "Battery or Unknown",

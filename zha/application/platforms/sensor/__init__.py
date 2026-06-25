@@ -14,10 +14,7 @@ import numbers
 import typing
 from typing import TYPE_CHECKING, Any, cast
 
-from zhaquirks.danfoss import thermostat as danfoss_thermostat
-from zhaquirks.quirk_ids import DANFOSS_ALLY_THERMOSTAT, SE_POLL_SUMMATION
 from zigpy import types
-from zigpy.quirks.v2 import ZCLEnumMetadata, ZCLSensorMetadata
 from zigpy.state import Counter, State
 from zigpy.zcl import (
     AttributeReadEvent,
@@ -74,7 +71,6 @@ from zha.application.platforms import (
 )
 from zha.application.platforms.climate.const import HVACAction
 from zha.application.platforms.const import (
-    AQARA_OPPLE_CLUSTER,
     IKEA_AIR_PURIFIER_CLUSTER,
     INOVELLI_CLUSTER,
     SMARTTHINGS_HUMIDITY_CLUSTER,
@@ -83,6 +79,12 @@ from zha.application.platforms.const import (
     VOC_LEVEL_CLUSTER,
 )
 from zha.application.platforms.helpers import validate_device_class
+from zha.application.platforms.legacy_quirks import (
+    AQARA_OPPLE_CLUSTER,
+    DanfossAdaptationRunStatusBitmap,
+    DanfossOpenWindowDetectionEnum,
+    DanfossSoftwareErrorCodeBitmap,
+)
 from zha.application.platforms.number.bacnet import BACNET_UNITS_TO_HA_UNITS
 from zha.application.platforms.sensor.const import (
     ANALOG_INPUT_APPTYPE_DEV_CLASS,
@@ -108,6 +110,7 @@ from zha.application.platforms.sensor.helpers import (
 )
 from zha.application.platforms.virtual import VirtualEntity
 from zha.decorators import periodic
+from zha.quirks import DANFOSS_ALLY_THERMOSTAT, SE_POLL_SUMMATION
 from zha.units import (
     CONCENTRATION_MICROGRAMS_PER_CUBIC_METER,
     CONCENTRATION_PARTS_PER_BILLION,
@@ -245,10 +248,38 @@ class Sensor(BaseSensor):
         self,
         endpoint: Endpoint,
         device: Device,
+        *,
+        attribute_name: str | None = None,
+        attribute_converter: typing.Callable[[typing.Any], typing.Any] | None = None,
+        divisor: int | None = None,
+        multiplier: int | None = None,
+        device_class: SensorDeviceClass | None = None,
+        state_class: SensorStateClass | None = None,
+        unit: str | None = None,
         **kwargs: Any,
     ) -> None:
         """Init this sensor."""
         self._attr_def: foundation.ZCLAttributeDef | None = None
+
+        if attribute_name is not None:
+            self._attribute_name = attribute_name
+        if attribute_converter is not None:
+            self._attribute_converter = attribute_converter
+        if divisor is not None and divisor != 1:
+            self._divisor = divisor
+        if multiplier is not None and multiplier != 1:
+            self._multiplier = multiplier
+        if device_class is not None:
+            self._attr_device_class = validate_device_class(
+                SensorDeviceClass,
+                device_class,
+                Platform.SENSOR.value,
+                _LOGGER,
+            )
+        if state_class is not None:
+            self._attr_state_class = self._validate_state_class(state_class)
+        if unit is not None:
+            self._attr_native_unit_of_measurement = unit
 
         super().__init__(endpoint=endpoint, device=device, **kwargs)
 
@@ -308,30 +339,6 @@ class Sensor(BaseSensor):
                 ex,
             )
             return None
-
-    def _init_from_quirks_metadata(self, entity_metadata: ZCLSensorMetadata) -> None:
-        """Init this entity from the quirks metadata."""
-        super()._init_from_quirks_metadata(entity_metadata)
-        self._attribute_name = entity_metadata.attribute_name
-        if entity_metadata.attribute_converter is not None:
-            self._attribute_converter = entity_metadata.attribute_converter
-        if entity_metadata.divisor is not None and entity_metadata.divisor != 1:
-            self._divisor = entity_metadata.divisor
-        if entity_metadata.multiplier is not None and entity_metadata.multiplier != 1:
-            self._multiplier = entity_metadata.multiplier
-        if entity_metadata.device_class is not None:
-            self._attr_device_class = validate_device_class(
-                SensorDeviceClass,
-                entity_metadata.device_class,
-                Platform.SENSOR.value,
-                _LOGGER,
-            )
-        if entity_metadata.state_class is not None:
-            self._attr_state_class = self._validate_state_class(
-                entity_metadata.state_class
-            )
-        if entity_metadata.unit is not None:
-            self._attr_native_unit_of_measurement = entity_metadata.unit
 
     @property
     def native_value(self) -> date | datetime | str | int | float | None:
@@ -531,21 +538,22 @@ class EnumSensor(Sensor):
         self,
         endpoint: Endpoint,
         device: Device,
+        *,
+        attribute_name: str | None = None,
+        enum: type[enum.Enum] | None = None,
         **kwargs: Any,
     ) -> None:
         """Init this sensor."""
+        if attribute_name is not None:
+            self._attribute_name = attribute_name
+        if enum is not None:
+            self._enum = enum
+
         super().__init__(endpoint=endpoint, device=device, **kwargs)
         self._attr_options = [e.name for e in self._enum]
 
         # XXX: This class is not meant to be initialized directly, as `unique_id`
         # depends on the value of `_attribute_name`
-
-    def _init_from_quirks_metadata(self, entity_metadata: ZCLEnumMetadata) -> None:
-        """Init this entity from the quirks metadata."""
-        self._attribute_name = entity_metadata.attribute_name
-        self._enum = entity_metadata.enum
-
-        PlatformEntity._init_from_quirks_metadata(self, entity_metadata)  # pylint: disable=protected-access
 
     def formatter(self, value: int) -> str | None:
         """Use name of enum."""
@@ -3672,7 +3680,7 @@ class DanfossOpenWindowDetection(EnumSensor):
     _unique_id_suffix = "open_window_detection"
     _attribute_name = "open_window_detection"
     _attr_translation_key: str = "open_window_detected"
-    _enum = danfoss_thermostat.DanfossOpenWindowDetectionEnum
+    _enum = DanfossOpenWindowDetectionEnum
     _cluster_id = Thermostat.cluster_id
 
     _cluster_match = ClusterMatch(
@@ -3733,7 +3741,7 @@ class DanfossAdaptationRunStatus(BitMapSensor):
     _attribute_name = "adaptation_run_status"
     _attr_translation_key: str = "adaptation_run_status"
     _attr_entity_category = EntityCategory.DIAGNOSTIC
-    _bitmap = danfoss_thermostat.DanfossAdaptationRunStatusBitmap
+    _bitmap = DanfossAdaptationRunStatusBitmap
     _cluster_id = Thermostat.cluster_id
 
     _cluster_match = ClusterMatch(
@@ -3795,7 +3803,7 @@ class DanfossSoftwareErrorCode(BitMapSensor):
     _attribute_name = "sw_error_code"
     _attr_translation_key: str = "software_error"
     _attr_entity_category = EntityCategory.DIAGNOSTIC
-    _bitmap = danfoss_thermostat.DanfossSoftwareErrorCodeBitmap
+    _bitmap = DanfossSoftwareErrorCodeBitmap
     _cluster_id = Diagnostic.cluster_id
 
     _cluster_match = ClusterMatch(

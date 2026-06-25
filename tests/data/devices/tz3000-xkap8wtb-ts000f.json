@@ -8,7 +8,7 @@
   "friendly_model": "TS000F",
   "name": "_TZ3000_xkap8wtb TS000F",
   "quirk_applied": true,
-  "quirk_class": "zhaquirks.tuya.ts000f_switch.Tuya_1G_Wall_Switch_Metering",
+  "quirk_class": "zhaquirks.tuya.ts000f_switch:Tuya_1G_Wall_Switch_Metering",
   "exposes_features": [],
   "manufacturer_code": 4107,
   "power_source": "Mains",

@@ -8,7 +8,7 @@
   "friendly_model": "TS0601",
   "name": "_TZE200_qrztc3ev TS0601",
   "quirk_applied": true,
-  "quirk_class": "zhaquirks.tuya.builder.EnchantedDeviceV2",
+  "quirk_class": "zhaquirks.tuya.builder:(_TZE200_lve3dvpy / TS0601)",
   "exposes_features": [],
   "manufacturer_code": 4742,
   "power_source": "Battery or Unknown",

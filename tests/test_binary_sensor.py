@@ -6,10 +6,10 @@ from typing import Any
 from unittest.mock import call
 
 import pytest
+from zhaquirks.builder import QuirkBuilder
+from zhaquirks.device import CustomZigpyDevice
 from zigpy.profiles import zha
 import zigpy.profiles.zha
-from zigpy.quirks import DeviceRegistry
-from zigpy.quirks.v2 import CustomDeviceV2, QuirkBuilder
 from zigpy.typing import UNDEFINED
 from zigpy.zcl.clusters import general, measurement, security
 from zigpy.zcl.clusters.general import OnOff
@@ -38,6 +38,7 @@ from zha.application.platforms.binary_sensor import (
     Occupancy,
 )
 from zha.application.platforms.const import SMARTTHINGS_ACCELERATION_CLUSTER
+from zha.quirks import DeviceRegistry
 
 DEVICE_IAS = {
     1: {
@@ -274,7 +275,7 @@ async def test_quirks_binary_sensor_attr_converter(zha_gateway: Gateway) -> None
     )
 
     (
-        QuirkBuilder(zigpy_dev.manufacturer, zigpy_dev.model, registry=registry)
+        QuirkBuilder(zigpy_dev.manufacturer, zigpy_dev.model)
         .binary_sensor(
             OnOff.AttributeDefs.on_off.name,
             OnOff.cluster_id,
@@ -282,12 +283,12 @@ async def test_quirks_binary_sensor_attr_converter(zha_gateway: Gateway) -> None
             fallback_name="On/off",
             attribute_converter=lambda x: not bool(x),  # invert value with lambda
         )
-        .add_to_registry()
+        .add_to_registry(registry)
     )
 
-    zigpy_device_ = registry.get_device(zigpy_dev)
+    zigpy_device_ = registry.resolve(zigpy_dev)
 
-    assert isinstance(zigpy_device_, CustomDeviceV2)
+    assert isinstance(zigpy_device_, CustomZigpyDevice)
     cluster = zigpy_device_.endpoints[1].on_off
 
     zha_device = await join_zigpy_device(zha_gateway, zigpy_device_)

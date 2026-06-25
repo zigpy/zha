@@ -8,7 +8,7 @@
   "friendly_model": "FLSZB-110",
   "name": "frient A/S FLSZB-110",
   "quirk_applied": true,
-  "quirk_class": "zigpy.quirks.v2.CustomDeviceV2",
+  "quirk_class": "zhaquirks.develco.water_leak:(frient A/S / FLSZB-110)",
   "exposes_features": [
     "siren_basic"
   ],

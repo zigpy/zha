@@ -8,7 +8,7 @@
   "friendly_model": "3RSNL02043Z",
   "name": "Third Reality, Inc 3RSNL02043Z",
   "quirk_applied": true,
-  "quirk_class": "zhaquirks.thirdreality.night_light.Nightlight",
+  "quirk_class": "zhaquirks.thirdreality.night_light:Nightlight",
   "exposes_features": [],
   "manufacturer_code": 4877,
   "power_source": "Mains",

@@ -8,7 +8,7 @@
   "friendly_model": "RDM004",
   "name": "Signify Netherlands B.V. RDM004",
   "quirk_applied": true,
-  "quirk_class": "zhaquirks.philips.wall_switch.PhilipsWallSwitchNewFirmware",
+  "quirk_class": "zhaquirks.philips.wall_switch:PhilipsWallSwitchNewFirmware",
   "exposes_features": [],
   "manufacturer_code": 4107,
   "power_source": "Battery or Unknown",

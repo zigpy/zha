@@ -8,7 +8,7 @@
   "friendly_model": "lumi.sensor_switch",
   "name": "LUMI lumi.sensor_switch",
   "quirk_applied": true,
-  "quirk_class": "zhaquirks.xiaomi.mija.sensor_switch.MijaButton",
+  "quirk_class": "zhaquirks.xiaomi.mija.sensor_switch:MijaButton",
   "exposes_features": [],
   "manufacturer_code": 4151,
   "power_source": "Battery or Unknown",

@@ -8,7 +8,7 @@
   "friendly_model": "FLEX RGBW",
   "name": "LEDVANCE FLEX RGBW",
   "quirk_applied": true,
-  "quirk_class": "zhaquirks.ledvance.flexrgbw.FlexRGBW",
+  "quirk_class": "zhaquirks.ledvance.flexrgbw:FlexRGBW",
   "exposes_features": [],
   "manufacturer_code": 4489,
   "power_source": "Mains",

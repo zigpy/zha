@@ -8,7 +8,7 @@
   "friendly_model": "AQSZB-110",
   "name": "frient A/S AQSZB-110",
   "quirk_applied": true,
-  "quirk_class": "zigpy.quirks.v2.CustomDeviceV2",
+  "quirk_class": "zhaquirks.develco.air_quality:(frient A/S / AQSZB-110)",
   "exposes_features": [],
   "manufacturer_code": 4117,
   "power_source": "Battery or Unknown",

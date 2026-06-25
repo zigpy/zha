@@ -8,7 +8,7 @@
   "friendly_model": "EMIZB-141",
   "name": "frient A/S EMIZB-141",
   "quirk_applied": true,
-  "quirk_class": "zhaquirks.develco.ManufacturerDeviceV2",
+  "quirk_class": "zhaquirks.develco.emi_led:(frient A/S / EMIZB-141)",
   "exposes_features": [],
   "manufacturer_code": 4117,
   "power_source": "Battery or Unknown",

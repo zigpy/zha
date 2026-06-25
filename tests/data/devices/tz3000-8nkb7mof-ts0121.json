@@ -8,7 +8,7 @@
   "friendly_model": "TS0121",
   "name": "_TZ3000_8nkb7mof TS0121",
   "quirk_applied": true,
-  "quirk_class": "zhaquirks.tuya.ts0121_plug.TS0121B",
+  "quirk_class": "zhaquirks.tuya.ts0121_plug:TS0121B",
   "exposes_features": [
     "tuya.plug_on_off_attributes"
   ],

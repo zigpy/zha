@@ -8,7 +8,7 @@
   "friendly_model": "S1 (5501)",
   "name": "ubisys S1 (5501)",
   "quirk_applied": true,
-  "quirk_class": "zigpy.quirks.v2.CustomDeviceV2",
+  "quirk_class": "zhaquirks.ubisys.switch_s1:(ubisys / S1 (5501))",
   "exposes_features": [
     "se_poll_summation"
   ],

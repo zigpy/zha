@@ -8,7 +8,7 @@
   "friendly_model": "Led strip T1",
   "name": "Aqara Led strip T1",
   "quirk_applied": true,
-  "quirk_class": "zigpy.quirks.v2.CustomDeviceV2",
+  "quirk_class": "zhaquirks.xiaomi.aqara.led_strip_t1:(Aqara / lumi.light.acn132)",
   "exposes_features": [],
   "manufacturer_code": 4447,
   "power_source": "Mains",

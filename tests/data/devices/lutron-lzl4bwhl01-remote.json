@@ -8,7 +8,7 @@
   "friendly_model": "LZL4BWHL01 Remote",
   "name": " Lutron LZL4BWHL01 Remote",
   "quirk_applied": true,
-  "quirk_class": "zhaquirks.lutron.lzl4bwhl01remote.LutronLZL4BWHL01Remote",
+  "quirk_class": "zhaquirks.lutron.lzl4bwhl01remote:LutronLZL4BWHL01Remote",
   "exposes_features": [],
   "manufacturer_code": 4420,
   "power_source": "Battery or Unknown",

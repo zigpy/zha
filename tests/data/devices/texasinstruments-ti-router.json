@@ -8,7 +8,7 @@
   "friendly_model": "ti.router",
   "name": "TexasInstruments ti.router",
   "quirk_applied": true,
-  "quirk_class": "zhaquirks.texasinstruments.router.TiRouter",
+  "quirk_class": "zhaquirks.texasinstruments.router:TiRouter",
   "exposes_features": [],
   "manufacturer_code": 0,
   "power_source": "Mains",

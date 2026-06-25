@@ -8,7 +8,7 @@
   "friendly_model": "VALLHORN Wireless Motion Sensor",
   "name": "IKEA of Sweden VALLHORN Wireless Motion Sensor",
   "quirk_applied": true,
-  "quirk_class": "zigpy.quirks.v2.CustomDeviceV2",
+  "quirk_class": "zhaquirks.ikea.vallhorn:(IKEA of Sweden / VALLHORN Wireless Motion Sensor)",
   "exposes_features": [],
   "manufacturer_code": 4476,
   "power_source": "Battery or Unknown",

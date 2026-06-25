@@ -8,7 +8,7 @@
   "friendly_model": "5j6ifxj",
   "name": "_TYST11_i5j6ifxj 5j6ifxj",
   "quirk_applied": true,
-  "quirk_class": "zigpy.quirks.v2.CustomDeviceV2",
+  "quirk_class": "zhaquirks.tuya.builder:(_TYST11_i5j6ifxj / 5j6ifxj)",
   "exposes_features": [],
   "manufacturer_code": 0,
   "power_source": "Battery or Unknown",

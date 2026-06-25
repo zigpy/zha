@@ -10,10 +10,12 @@ from zhaquirks import (
     OUTPUT_CLUSTERS,
     PROFILE_ID,
 )
+from zhaquirks.builder import QuirkBuilder
+from zhaquirks.clusters import CustomCluster
+from zhaquirks.device import CustomZigpyDevice
+from zhaquirks.legacy import CustomDevice, get_device
 from zigpy.const import SIG_EP_PROFILE
 from zigpy.profiles import zha
-from zigpy.quirks import CustomCluster, CustomDevice, get_device
-from zigpy.quirks.v2 import CustomDeviceV2, QuirkBuilder
 import zigpy.types as t
 from zigpy.typing import UNDEFINED
 from zigpy.zcl import foundation
@@ -186,12 +188,20 @@ async def test_on_off_select_attribute_report_v2(
         },
         manufacturer="Fake_Manufacturer",
         model="Fake_Model",
+        attributes={
+            1: {
+                "opple_cluster": {
+                    "motion_sensitivity": AqaraMotionSensitivities.Medium,
+                    "motion_sensitivity_disabled": AqaraMotionSensitivities.Medium,
+                }
+            }
+        },
     )
     zigpy_device = get_device(zigpy_device)
 
     zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
     cluster = zigpy_device.endpoints[1].opple_cluster
-    assert isinstance(zha_device.device, CustomDeviceV2)
+    assert isinstance(zha_device.device, CustomZigpyDevice)
 
     entity = get_entity(
         zha_device,

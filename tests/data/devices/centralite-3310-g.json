@@ -8,7 +8,7 @@
   "friendly_model": "3310-G",
   "name": "CentraLite 3310-G",
   "quirk_applied": true,
-  "quirk_class": "zhaquirks.centralite.cl_3310S.CentraLite3310S",
+  "quirk_class": "zhaquirks.centralite.cl_3310S:CentraLite3310S",
   "exposes_features": [],
   "manufacturer_code": 4174,
   "power_source": "Battery or Unknown",

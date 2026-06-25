@@ -8,7 +8,7 @@
   "friendly_model": "lumi.vibration.aq1",
   "name": "LUMI lumi.vibration.aq1",
   "quirk_applied": true,
-  "quirk_class": "zhaquirks.xiaomi.aqara.vibration_aq1.VibrationAQ1",
+  "quirk_class": "zhaquirks.xiaomi.aqara.vibration_aq1:VibrationAQ1",
   "exposes_features": [
     "xiaomi.aqara_vibration_aq1"
   ],

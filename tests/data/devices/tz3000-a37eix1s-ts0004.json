@@ -8,7 +8,7 @@
   "friendly_model": "TS0004",
   "name": "_TZ3000_a37eix1s TS0004",
   "quirk_applied": true,
-  "quirk_class": "zhaquirks.tuya.ts000x.Switch_4G_GPP_Var2",
+  "quirk_class": "zhaquirks.tuya.ts000x:Switch_4G_GPP_Var2",
   "exposes_features": [
     "tuya.plug_on_off_attributes"
   ],

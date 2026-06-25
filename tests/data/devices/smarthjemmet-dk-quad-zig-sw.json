@@ -8,7 +8,7 @@
   "friendly_model": "QUAD-ZIG-SW",
   "name": "smarthjemmet.dk QUAD-ZIG-SW",
   "quirk_applied": true,
-  "quirk_class": "zigpy.quirks.v2.CustomDeviceV2",
+  "quirk_class": "zhaquirks.smarthjemmet.quadzigsw:(smarthjemmet.dk / QUAD-ZIG-SW)",
   "exposes_features": [],
   "manufacturer_code": 64447,
   "power_source": "Battery or Unknown",

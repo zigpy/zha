@@ -12,6 +12,8 @@ from unittest.mock import patch
 
 import looptime
 import pytest
+import zhaquirks
+import zhaquirks.legacy
 import zigpy
 from zigpy.application import ControllerApplication
 import zigpy.config
@@ -30,10 +32,12 @@ from zha.application.helpers import (
     AlarmControlPanelOptions,
     CoordinatorConfiguration,
     LightOptions,
+    QuirksConfiguration,
     ZHAConfiguration,
     ZHAData,
 )
 from zha.async_ import ZHAJob
+from zha.quirks import DEVICE_REGISTRY
 
 FIXTURE_GRP_ID = 0x1001
 FIXTURE_GRP_NAME = "fixture group"
@@ -117,6 +121,13 @@ def long_repr_strings() -> Generator[None, None, None]:
     finally:
         arepr.maxstring = original_maxstring
         arepr.maxother = original_maxother
+
+
+@pytest.fixture(autouse=True)
+def preserve_quirk_registry() -> Generator[None, None, None]:
+    """Roll back any quirks a test registers so they don't leak into later tests."""
+    with DEVICE_REGISTRY.preserve_state():
+        yield
 
 
 @pytest.fixture(autouse=True)
@@ -278,6 +289,13 @@ def make_zha_data() -> ZHAData:
                 master_code="4321",
                 failed_tries=2,
             ),
+            quirks_configuration=QuirksConfiguration(
+                enabled=True,
+                setup_function=zhaquirks.setup,
+                uninitialized_packet_handler=(
+                    zhaquirks.legacy.handle_message_from_uninitialized_sender
+                ),
+            ),
         )
     )
 
@@ -353,9 +371,7 @@ def globally_load_quirks():
 
     zhaquirks.setup()
 
-    # Disable gateway built in quirks loading
-    with patch("zha.application.gateway.setup_quirks"):
-        yield
+    yield
 
 
 def pytest_collection_modifyitems(config, items):

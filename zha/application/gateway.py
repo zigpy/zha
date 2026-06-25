@@ -12,7 +12,6 @@ import logging
 import time
 from typing import Any, Final, Self, TypeVar, cast
 
-from zhaquirks import setup as setup_quirks
 from zigpy.application import ControllerApplication
 from zigpy.config import (
     CONF_DEVICE,
@@ -26,7 +25,6 @@ from zigpy.config import (
 import zigpy.device
 import zigpy.endpoint
 import zigpy.group
-from zigpy.quirks.v2 import UNBUILT_QUIRK_BUILDERS
 from zigpy.state import State
 import zigpy.types as t
 from zigpy.types.named import EUI64
@@ -55,6 +53,7 @@ from zha.async_ import (
     gather_with_limited_concurrency,
 )
 from zha.event import EventBase
+from zha.quirks import DEVICE_REGISTRY, QUIRK_REGISTRY_ENTRY_ATTR
 from zha.zigbee.device import Device, DeviceInfo, DeviceStatus, ExtendedDeviceInfo
 from zha.zigbee.group import Group, GroupInfo, GroupMemberReference
 
@@ -222,23 +221,22 @@ class Gateway(AsyncUtilMixin, EventBase):
         """Create an instance of a gateway from config objects."""
         instance = cls(config)
 
-        if config.config.quirks_configuration.enabled:
-            for quirk in UNBUILT_QUIRK_BUILDERS:
-                # v2 quirks with no manufacturer model metadata explicitly do not call
-                # add_to_registry. They are used to share code between v2 quirks.
-                if quirk.manufacturer_model_metadata:
-                    _LOGGER.warning(
-                        "Found a v2 quirk that was not added to the registry: %s",
-                        quirk,
-                    )
-                    quirk.add_to_registry()
-
-            UNBUILT_QUIRK_BUILDERS.clear()
-
-            await instance.async_add_executor_job(
-                setup_quirks,
-                instance.config.config.quirks_configuration.custom_quirks_path,
-            )
+        # Load quirks via the injected provider (e.g. `zhaquirks.setup`). ZHA
+        # never imports a quirks package itself; the consumer supplies it. The
+        # provider owns registry population, the custom-quirks purge and the
+        # unbuilt-builder flush — see `zhaquirks.setup`.
+        quirks_config = config.config.quirks_configuration
+        if quirks_config.enabled:
+            if quirks_config.setup_function is None:
+                _LOGGER.warning(
+                    "Quirks are enabled but no setup function was provided; "
+                    "no quirks will be loaded"
+                )
+            else:
+                await instance.async_add_executor_job(
+                    quirks_config.setup_function,
+                    quirks_config.custom_quirks_path,
+                )
 
         return instance
 
@@ -251,6 +249,10 @@ class Gateway(AsyncUtilMixin, EventBase):
             config=app_config,
             auto_form=False,
             start_radio=False,
+            device_resolver=DEVICE_REGISTRY.resolve,
+            uninitialized_packet_handler=(
+                self.config.config.quirks_configuration.uninitialized_packet_handler
+            ),
         )
 
         await self.application_controller.startup(auto_form=True)
@@ -486,13 +488,43 @@ class Gateway(AsyncUtilMixin, EventBase):
             )
             return
 
-        _LOGGER.debug(
-            "Rebuilding device %s:%s after reinterview",
-            new_zigpy_device.nwk,
-            new_zigpy_device.ieee,
+        old_entry = getattr(zha_device.device, QUIRK_REGISTRY_ENTRY_ATTR, None)
+        old_factory = (
+            old_entry.zha_device_factory
+            if old_entry is not None and old_entry.zha_device_factory
+            else Device
         )
 
-        await zha_device.async_rebuild_from_zigpy_device(new_zigpy_device)
+        new_entry = getattr(new_zigpy_device, QUIRK_REGISTRY_ENTRY_ATTR, None)
+        new_factory = (
+            new_entry.zha_device_factory
+            if new_entry is not None and new_entry.zha_device_factory
+            else Device
+        )
+
+        # Only a `Device` swap requires a new object
+        if new_factory is old_factory:
+            _LOGGER.debug(
+                "Rebuilding device %s:%s after reinterview",
+                new_zigpy_device.nwk,
+                new_zigpy_device.ieee,
+            )
+            await zha_device.async_rebuild_from_zigpy_device(new_zigpy_device)
+        else:
+            # A different quirk now matches. Replace the object with one dispatched by
+            # `Device.new` against the freshly-resolved registry entry.
+            _LOGGER.debug(
+                "Replacing device %s:%s after reinterview: resolved quirk changed",
+                new_zigpy_device.nwk,
+                new_zigpy_device.ieee,
+            )
+            await zha_device.async_teardown(emit_entity_events=True)
+
+            zha_device = Device.new(new_zigpy_device, self)
+            self._devices[new_zigpy_device.ieee] = zha_device
+
+            zha_device.available = True
+            zha_device.on_network = True
 
         configure_succeeded = False
         all_succeeded = False

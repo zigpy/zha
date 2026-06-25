@@ -8,7 +8,7 @@
   "friendly_model": "lumi.plug.maus01",
   "name": "LUMI lumi.plug.maus01",
   "quirk_applied": true,
-  "quirk_class": "zhaquirks.xiaomi.aqara.plug_maus01.Plug",
+  "quirk_class": "zhaquirks.xiaomi.aqara.plug_maus01:Plug",
   "exposes_features": [],
   "manufacturer_code": 4447,
   "power_source": "Mains",

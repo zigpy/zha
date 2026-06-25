@@ -8,7 +8,7 @@
   "friendly_model": "3315-Seu",
   "name": "CentraLite 3315-Seu",
   "quirk_applied": true,
-  "quirk_class": "zhaquirks.centralite.ias.CentraLiteIASSensorV3",
+  "quirk_class": "zhaquirks.centralite.ias:CentraLiteIASSensorV3",
   "exposes_features": [],
   "manufacturer_code": 4174,
   "power_source": "Battery or Unknown",

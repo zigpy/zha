@@ -8,7 +8,7 @@
   "friendly_model": "SIRZB-111",
   "name": "frient A/S SIRZB-111",
   "quirk_applied": true,
-  "quirk_class": "zigpy.quirks.v2.CustomDeviceV2",
+  "quirk_class": "zhaquirks.develco.smart_siren:(frient A/S / SIRZB-111)",
   "exposes_features": [],
   "manufacturer_code": 4117,
   "power_source": "Mains",

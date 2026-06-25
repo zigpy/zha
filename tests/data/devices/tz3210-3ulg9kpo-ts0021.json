@@ -8,7 +8,7 @@
   "friendly_model": "TS0021",
   "name": "_TZ3210_3ulg9kpo TS0021",
   "quirk_applied": true,
-  "quirk_class": "zhaquirks.tuya.ts0021.TS0021",
+  "quirk_class": "zhaquirks.tuya.ts0021:TS0021",
   "exposes_features": [],
   "manufacturer_code": 4417,
   "power_source": "Battery or Unknown",
