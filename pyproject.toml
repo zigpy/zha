@@ -69,7 +69,7 @@ default-groups = ["testing"]
 enabled = true
 
 [tool.codespell]
-skip = ["tests/data/devices/*"]
+skip = ["tests/data/*"]
 ignore-words-list = "hass, checkin"
 
 [tool.mypy]
