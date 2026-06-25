@@ -1,20 +1,20 @@
 {
   "version": 2,
-  "ieee": "54:ef:44:10:00:14:f3:e7",
-  "nwk": "0x67CE",
+  "ieee": "ab:cd:ef:12:6c:02:d4:c2",
+  "nwk": "0x63F2",
   "manufacturer": "LUMI",
   "model": "lumi.remote.cagl02",
   "friendly_manufacturer": "LUMI",
   "friendly_model": "lumi.remote.cagl02",
   "name": "LUMI lumi.remote.cagl02",
-  "quirk_applied": true,
-  "quirk_class": "zhaquirks.xiaomi.aqara.cube_aqgl01:CubeCAGL02",
+  "quirk_applied": false,
+  "quirk_class": "zigpy.device.Device",
   "exposes_features": [],
   "manufacturer_code": 4447,
   "power_source": "Battery or Unknown",
   "lqi": null,
   "rssi": null,
-  "last_seen": "2025-04-24T17:34:08.355505+00:00",
+  "last_seen": "2023-06-26T19:29:14",
   "available": true,
   "device_type": "EndDevice",
   "active_coordinator": false,
@@ -44,26 +44,7 @@
         {
           "cluster_id": "0x0000",
           "endpoint_attribute": "basic",
-          "attributes": [
-            {
-              "id": "0x0001",
-              "name": "app_version",
-              "zcl_type": "uint8",
-              "value": 22
-            },
-            {
-              "id": "0x0004",
-              "name": "manufacturer",
-              "zcl_type": "string",
-              "value": "LUMI"
-            },
-            {
-              "id": "0x0005",
-              "name": "model",
-              "zcl_type": "string",
-              "value": "lumi.remote.cagl02"
-            }
-          ]
+          "attributes": []
         },
         {
           "cluster_id": "0x0001",
@@ -91,7 +72,7 @@
               "id": "0x0020",
               "name": "battery_voltage",
               "zcl_type": "uint8",
-              "value": 28
+              "unsupported": true
             }
           ]
         },
@@ -144,7 +125,7 @@
               "id": "0x0055",
               "name": "present_value",
               "zcl_type": "uint16",
-              "value": 0.0
+              "value": 2.0
             }
           ]
         }
@@ -172,7 +153,7 @@
               "id": "0x0055",
               "name": "present_value",
               "zcl_type": "single",
-              "value": 24.570003509521484
+              "value": 4.000000476837158
             }
           ]
         }
@@ -186,69 +167,12 @@
       ]
     }
   },
-  "original_signature": {
-    "manufacturer": "LUMI",
-    "model": "lumi.remote.cagl02",
-    "node_desc": {
-      "logical_type": 2,
-      "complex_descriptor_available": 0,
-      "user_descriptor_available": 0,
-      "reserved": 0,
-      "aps_flags": 0,
-      "frequency_band": 8,
-      "mac_capability_flags": 128,
-      "manufacturer_code": 4447,
-      "maximum_buffer_size": 127,
-      "maximum_incoming_transfer_size": 100,
-      "server_mask": 11264,
-      "maximum_outgoing_transfer_size": 100,
-      "descriptor_capability_field": 0
-    },
-    "endpoints": {
-      "1": {
-        "profile_id": "0x0104",
-        "device_type": "0x0103",
-        "input_clusters": [
-          "0x0000",
-          "0x0001",
-          "0x0003",
-          "0x0006",
-          "0x0012"
-        ],
-        "output_clusters": [
-          "0x0000",
-          "0x0003",
-          "0x0019"
-        ]
-      },
-      "2": {
-        "profile_id": "0x0104",
-        "device_type": "0x0103",
-        "input_clusters": [
-          "0x0012"
-        ],
-        "output_clusters": [
-          "0x0012"
-        ]
-      },
-      "3": {
-        "profile_id": "0x0104",
-        "device_type": "0x0103",
-        "input_clusters": [
-          "0x000c"
-        ],
-        "output_clusters": [
-          "0x000c"
-        ]
-      }
-    }
-  },
   "zha_lib_entities": {
     "button": [
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "54:ef:44:10:00:14:f3:e7-1-3",
+          "unique_id": "ab:cd:ef:12:6c:02:d4:c2-1-3",
           "migrate_unique_ids": [],
           "platform": "button",
           "class_name": "IdentifyButton",
@@ -260,7 +184,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "device_ieee": "54:ef:44:10:00:14:f3:e7",
+          "device_ieee": "ab:cd:ef:12:6c:02:d4:c2",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -280,7 +204,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "54:ef:44:10:00:14:f3:e7-1-0-lqi",
+          "unique_id": "ab:cd:ef:12:6c:02:d4:c2-1-0-lqi",
           "migrate_unique_ids": [],
           "platform": "sensor",
           "class_name": "LQISensor",
@@ -292,7 +216,7 @@
           "entity_registry_enabled_default": false,
           "enabled": true,
           "primary": false,
-          "device_ieee": "54:ef:44:10:00:14:f3:e7",
+          "device_ieee": "ab:cd:ef:12:6c:02:d4:c2",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -308,7 +232,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "54:ef:44:10:00:14:f3:e7-1-0-rssi",
+          "unique_id": "ab:cd:ef:12:6c:02:d4:c2-1-0-rssi",
           "migrate_unique_ids": [],
           "platform": "sensor",
           "class_name": "RSSISensor",
@@ -320,7 +244,7 @@
           "entity_registry_enabled_default": false,
           "enabled": true,
           "primary": false,
-          "device_ieee": "54:ef:44:10:00:14:f3:e7",
+          "device_ieee": "ab:cd:ef:12:6c:02:d4:c2",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -336,7 +260,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "54:ef:44:10:00:14:f3:e7-1-1",
+          "unique_id": "ab:cd:ef:12:6c:02:d4:c2-1-1",
           "migrate_unique_ids": [],
           "platform": "sensor",
           "class_name": "Battery",
@@ -348,7 +272,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "device_ieee": "54:ef:44:10:00:14:f3:e7",
+          "device_ieee": "ab:cd:ef:12:6c:02:d4:c2",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -360,8 +284,7 @@
           "available": true,
           "state": null,
           "battery_size": "CR2450",
-          "battery_quantity": 1,
-          "battery_voltage": 2.8
+          "battery_quantity": 1
         },
         "extra_state_attributes": [
           "battery_quantity",
@@ -374,7 +297,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "54:ef:44:10:00:14:f3:e7-1-25-firmware_update",
+          "unique_id": "ab:cd:ef:12:6c:02:d4:c2-1-25-firmware_update",
           "migrate_unique_ids": [],
           "platform": "update",
           "class_name": "FirmwareUpdateEntity",
@@ -386,7 +309,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "device_ieee": "54:ef:44:10:00:14:f3:e7",
+          "device_ieee": "ab:cd:ef:12:6c:02:d4:c2",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,

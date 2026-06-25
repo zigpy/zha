@@ -1,7 +1,7 @@
 {
   "version": 2,
-  "ieee": "28:2c:02:bf:ff:e7:ba:8c",
-  "nwk": "0xED4B",
+  "ieee": "ab:cd:ef:12:a4:64:ee:6a",
+  "nwk": "0x8235",
   "manufacturer": "Third Reality, Inc",
   "model": "3RMS16BZ",
   "friendly_manufacturer": "Third Reality, Inc",
@@ -12,9 +12,9 @@
   "exposes_features": [],
   "manufacturer_code": 4659,
   "power_source": "Battery or Unknown",
-  "lqi": null,
-  "rssi": null,
-  "last_seen": "2025-04-24T17:34:07.865864+00:00",
+  "lqi": 255,
+  "rssi": -84,
+  "last_seen": "2026-02-09T12:50:55.609567+00:00",
   "available": true,
   "device_type": "EndDevice",
   "active_coordinator": false,
@@ -79,7 +79,7 @@
               "id": "0x0021",
               "name": "battery_percentage_remaining",
               "zcl_type": "uint8",
-              "value": 101
+              "value": 105
             },
             {
               "id": "0x0033",
@@ -141,6 +141,11 @@
           ]
         },
         {
+          "cluster_id": "0xff00",
+          "endpoint_attribute": "manufacturer_specific",
+          "attributes": []
+        },
+        {
           "cluster_id": "0xff01",
           "endpoint_attribute": null,
           "attributes": [
@@ -193,9 +198,10 @@
         "device_type": "0x0402",
         "input_clusters": [
           "0x0000",
+          "0xff01",
+          "0xff00",
           "0x0001",
-          "0x0500",
-          "0xff01"
+          "0x0500"
         ],
         "output_clusters": [
           "0x0019"
@@ -208,7 +214,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "28:2c:02:bf:ff:e7:ba:8c-1-1280",
+          "unique_id": "ab:cd:ef:12:a4:64:ee:6a-1-1280",
           "migrate_unique_ids": [],
           "platform": "binary_sensor",
           "class_name": "IASZone",
@@ -220,7 +226,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": true,
-          "device_ieee": "28:2c:02:bf:ff:e7:ba:8c",
+          "device_ieee": "ab:cd:ef:12:a4:64:ee:6a",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -237,7 +243,7 @@
       {
         "info_object": {
           "fallback_name": "Detection interval",
-          "unique_id": "28:2c:02:bf:ff:e7:ba:8c-1-detection_interval",
+          "unique_id": "ab:cd:ef:12:a4:64:ee:6a-1-detection_interval",
           "migrate_unique_ids": [],
           "platform": "number",
           "class_name": "NumberConfigurationEntity",
@@ -249,7 +255,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "device_ieee": "28:2c:02:bf:ff:e7:ba:8c",
+          "device_ieee": "ab:cd:ef:12:a4:64:ee:6a",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -270,7 +276,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "28:2c:02:bf:ff:e7:ba:8c-1-0-lqi",
+          "unique_id": "ab:cd:ef:12:a4:64:ee:6a-1-0-lqi",
           "migrate_unique_ids": [],
           "platform": "sensor",
           "class_name": "LQISensor",
@@ -282,7 +288,7 @@
           "entity_registry_enabled_default": false,
           "enabled": true,
           "primary": false,
-          "device_ieee": "28:2c:02:bf:ff:e7:ba:8c",
+          "device_ieee": "ab:cd:ef:12:a4:64:ee:6a",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -292,13 +298,13 @@
         "state": {
           "class_name": "LQISensor",
           "available": true,
-          "state": null
+          "state": 255
         }
       },
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "28:2c:02:bf:ff:e7:ba:8c-1-0-rssi",
+          "unique_id": "ab:cd:ef:12:a4:64:ee:6a-1-0-rssi",
           "migrate_unique_ids": [],
           "platform": "sensor",
           "class_name": "RSSISensor",
@@ -310,7 +316,7 @@
           "entity_registry_enabled_default": false,
           "enabled": true,
           "primary": false,
-          "device_ieee": "28:2c:02:bf:ff:e7:ba:8c",
+          "device_ieee": "ab:cd:ef:12:a4:64:ee:6a",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -320,13 +326,13 @@
         "state": {
           "class_name": "RSSISensor",
           "available": true,
-          "state": null
+          "state": -84
         }
       },
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "28:2c:02:bf:ff:e7:ba:8c-1-1",
+          "unique_id": "ab:cd:ef:12:a4:64:ee:6a-1-1",
           "migrate_unique_ids": [],
           "platform": "sensor",
           "class_name": "Battery",
@@ -338,7 +344,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "device_ieee": "28:2c:02:bf:ff:e7:ba:8c",
+          "device_ieee": "ab:cd:ef:12:a4:64:ee:6a",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -348,7 +354,7 @@
         "state": {
           "class_name": "Battery",
           "available": true,
-          "state": 50.5,
+          "state": 52.5,
           "battery_voltage": 2.6
         },
         "extra_state_attributes": [
@@ -362,7 +368,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "28:2c:02:bf:ff:e7:ba:8c-1-25-firmware_update",
+          "unique_id": "ab:cd:ef:12:a4:64:ee:6a-1-25-firmware_update",
           "migrate_unique_ids": [],
           "platform": "update",
           "class_name": "FirmwareUpdateEntity",
@@ -374,7 +380,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "device_ieee": "28:2c:02:bf:ff:e7:ba:8c",
+          "device_ieee": "ab:cd:ef:12:a4:64:ee:6a",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,

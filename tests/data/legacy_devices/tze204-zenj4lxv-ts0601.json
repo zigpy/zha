@@ -1,20 +1,20 @@
 {
   "version": 2,
   "ieee": "ab:cd:ef:12:17:c8:fd:c8",
-  "nwk": "0xBC08",
+  "nwk": "0x0C96",
   "manufacturer": "_TZE204_zenj4lxv",
   "model": "TS0601",
   "friendly_manufacturer": "_TZE204_zenj4lxv",
   "friendly_model": "TS0601",
   "name": "_TZE204_zenj4lxv TS0601",
-  "quirk_applied": true,
-  "quirk_class": "zhaquirks.tuya.ts0601_dimmer:TuyaDoubleSwitchDimmerGP",
+  "quirk_applied": false,
+  "quirk_class": "zigpy.device.Device",
   "exposes_features": [],
   "manufacturer_code": 4417,
   "power_source": "Mains",
   "lqi": null,
   "rssi": null,
-  "last_seen": "2025-12-11T01:25:35.814499+00:00",
+  "last_seen": "2023-11-13T06:59:03",
   "available": true,
   "device_type": "Router",
   "active_coordinator": false,
@@ -46,10 +46,52 @@
           "endpoint_attribute": "basic",
           "attributes": [
             {
+              "id": "0x0013",
+              "name": "alarm_mask",
+              "zcl_type": "map8",
+              "unsupported": true
+            },
+            {
               "id": "0x0001",
               "name": "app_version",
               "zcl_type": "uint8",
               "value": 74
+            },
+            {
+              "id": "0xfffd",
+              "name": "cluster_revision",
+              "zcl_type": "uint16",
+              "value": 2
+            },
+            {
+              "id": "0x0006",
+              "name": "date_code",
+              "zcl_type": "string",
+              "value": ""
+            },
+            {
+              "id": "0x0012",
+              "name": "device_enabled",
+              "zcl_type": "bool",
+              "unsupported": true
+            },
+            {
+              "id": "0x0014",
+              "name": "disable_local_config",
+              "zcl_type": "map8",
+              "unsupported": true
+            },
+            {
+              "id": "0x0008",
+              "name": "generic_device_class",
+              "zcl_type": "enum8",
+              "unsupported": true
+            },
+            {
+              "id": "0x0009",
+              "name": "generic_device_type",
+              "zcl_type": "enum8",
+              "unsupported": true
             },
             {
               "id": "0x0004",
@@ -68,12 +110,38 @@
         {
           "cluster_id": "0x0004",
           "endpoint_attribute": "groups",
-          "attributes": []
+          "attributes": [
+            {
+              "id": "0xfffd",
+              "name": "cluster_revision",
+              "zcl_type": "uint16",
+              "value": 2
+            },
+            {
+              "id": "0x0000",
+              "name": "name_support",
+              "zcl_type": "map8",
+              "value": 0
+            },
+            {
+              "id": "0xfffe",
+              "name": "reporting_status",
+              "zcl_type": "enum8",
+              "unsupported": true
+            }
+          ]
         },
         {
           "cluster_id": "0x0005",
           "endpoint_attribute": "scenes",
-          "attributes": []
+          "attributes": [
+            {
+              "id": "0xfffd",
+              "name": "cluster_revision",
+              "zcl_type": "uint16",
+              "value": 2
+            }
+          ]
         },
         {
           "cluster_id": "0x0006",
@@ -83,7 +151,7 @@
               "id": "0x0000",
               "name": "on_off",
               "zcl_type": "bool",
-              "unsupported": true
+              "value": 0
             },
             {
               "id": "0x4003",
@@ -96,11 +164,36 @@
         {
           "cluster_id": "0x0008",
           "endpoint_attribute": "level",
-          "attributes": []
+          "attributes": [
+            {
+              "id": "0x0000",
+              "name": "current_level",
+              "zcl_type": "uint8",
+              "value": 255
+            },
+            {
+              "id": "0x0013",
+              "name": "off_transition_time",
+              "zcl_type": "uint16",
+              "value": 0
+            },
+            {
+              "id": "0x0011",
+              "name": "on_level",
+              "zcl_type": "uint8",
+              "value": "None"
+            },
+            {
+              "id": "0x0010",
+              "name": "on_off_transition_time",
+              "zcl_type": "uint16",
+              "value": 0
+            }
+          ]
         },
         {
           "cluster_id": "0xef00",
-          "endpoint_attribute": "tuya_manufacturer",
+          "endpoint_attribute": null,
           "attributes": []
         }
       ],
@@ -132,7 +225,7 @@
               "id": "0x0000",
               "name": "on_off",
               "zcl_type": "bool",
-              "unsupported": true
+              "value": 0
             },
             {
               "id": "0x4003",
@@ -145,7 +238,32 @@
         {
           "cluster_id": "0x0008",
           "endpoint_attribute": "level",
-          "attributes": []
+          "attributes": [
+            {
+              "id": "0x0000",
+              "name": "current_level",
+              "zcl_type": "uint8",
+              "value": 255
+            },
+            {
+              "id": "0x0003",
+              "name": "max_level",
+              "zcl_type": "uint8",
+              "value": "None"
+            },
+            {
+              "id": "0x0013",
+              "name": "off_transition_time",
+              "zcl_type": "uint16",
+              "value": 0
+            },
+            {
+              "id": "0x0010",
+              "name": "on_off_transition_time",
+              "zcl_type": "uint16",
+              "value": 0
+            }
+          ]
         }
       ],
       "out_clusters": []
@@ -164,49 +282,6 @@
           "attributes": []
         }
       ]
-    }
-  },
-  "original_signature": {
-    "manufacturer": "_TZE204_zenj4lxv",
-    "model": "TS0601",
-    "node_desc": {
-      "logical_type": 1,
-      "complex_descriptor_available": 0,
-      "user_descriptor_available": 0,
-      "reserved": 0,
-      "aps_flags": 0,
-      "frequency_band": 8,
-      "mac_capability_flags": 142,
-      "manufacturer_code": 4417,
-      "maximum_buffer_size": 66,
-      "maximum_incoming_transfer_size": 66,
-      "server_mask": 10752,
-      "maximum_outgoing_transfer_size": 66,
-      "descriptor_capability_field": 0
-    },
-    "endpoints": {
-      "1": {
-        "profile_id": "0x0104",
-        "device_type": "0x0051",
-        "input_clusters": [
-          "0x0000",
-          "0x0004",
-          "0x0005",
-          "0xef00"
-        ],
-        "output_clusters": [
-          "0x000a",
-          "0x0019"
-        ]
-      },
-      "242": {
-        "profile_id": "0xa1e0",
-        "device_type": "0x0061",
-        "input_clusters": [],
-        "output_clusters": [
-          "0x0021"
-        ]
-      }
     }
   },
   "zha_lib_entities": {
@@ -241,7 +316,7 @@
           "class_name": "Light",
           "available": true,
           "on": false,
-          "brightness": null,
+          "brightness": 255,
           "xy_color": null,
           "color_temp": null,
           "effect_list": [
@@ -292,7 +367,7 @@
           "class_name": "Light",
           "available": true,
           "on": false,
-          "brightness": null,
+          "brightness": 255,
           "xy_color": null,
           "color_temp": null,
           "effect_list": [
@@ -312,6 +387,163 @@
           "off_brightness",
           "off_with_transition"
         ]
+      }
+    ],
+    "number": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:17:c8:fd:c8-1-8-off_transition_time",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "OffTransitionTimeConfigurationEntity",
+          "translation_key": "off_transition_time",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "device_ieee": "ab:cd:ef:12:17:c8:fd:c8",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "mode": "auto",
+          "native_max_value": 65534,
+          "native_min_value": 0,
+          "native_step": 1.0,
+          "native_unit_of_measurement": null
+        },
+        "state": {
+          "class_name": "OffTransitionTimeConfigurationEntity",
+          "available": true,
+          "state": 0
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:17:c8:fd:c8-1-8-on_level",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "OnLevelConfigurationEntity",
+          "translation_key": "on_level",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "device_ieee": "ab:cd:ef:12:17:c8:fd:c8",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "mode": "auto",
+          "native_max_value": 255,
+          "native_min_value": 0,
+          "native_step": 1.0,
+          "native_unit_of_measurement": null
+        },
+        "state": {
+          "class_name": "OnLevelConfigurationEntity",
+          "available": true,
+          "state": "None"
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:17:c8:fd:c8-1-8-on_off_transition_time",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "OnOffTransitionTimeConfigurationEntity",
+          "translation_key": "on_off_transition_time",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "device_ieee": "ab:cd:ef:12:17:c8:fd:c8",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "mode": "auto",
+          "native_max_value": 65535,
+          "native_min_value": 0,
+          "native_step": 1.0,
+          "native_unit_of_measurement": null
+        },
+        "state": {
+          "class_name": "OnOffTransitionTimeConfigurationEntity",
+          "available": true,
+          "state": 0
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:17:c8:fd:c8-2-8-off_transition_time",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "OffTransitionTimeConfigurationEntity",
+          "translation_key": "off_transition_time",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "device_ieee": "ab:cd:ef:12:17:c8:fd:c8",
+          "endpoint_id": 2,
+          "available": true,
+          "group_id": null,
+          "mode": "auto",
+          "native_max_value": 65534,
+          "native_min_value": 0,
+          "native_step": 1.0,
+          "native_unit_of_measurement": null
+        },
+        "state": {
+          "class_name": "OffTransitionTimeConfigurationEntity",
+          "available": true,
+          "state": 0
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:17:c8:fd:c8-2-8-on_off_transition_time",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "OnOffTransitionTimeConfigurationEntity",
+          "translation_key": "on_off_transition_time",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "device_ieee": "ab:cd:ef:12:17:c8:fd:c8",
+          "endpoint_id": 2,
+          "available": true,
+          "group_id": null,
+          "mode": "auto",
+          "native_max_value": 65535,
+          "native_min_value": 0,
+          "native_step": 1.0,
+          "native_unit_of_measurement": null
+        },
+        "state": {
+          "class_name": "OnOffTransitionTimeConfigurationEntity",
+          "available": true,
+          "state": 0
+        }
       }
     ],
     "sensor": [

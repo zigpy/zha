@@ -1,7 +1,7 @@
 {
   "version": 2,
   "ieee": "ab:cd:ef:12:8d:ae:d7:5d",
-  "nwk": "0xFF3D",
+  "nwk": "0x642D",
   "manufacturer": "Aqara",
   "model": "lumi.switch.aeu003",
   "friendly_manufacturer": "Aqara",
@@ -12,9 +12,9 @@
   "exposes_features": [],
   "manufacturer_code": 4447,
   "power_source": "Mains",
-  "lqi": 196,
-  "rssi": -62,
-  "last_seen": "2025-10-17T13:19:26.838076+00:00",
+  "lqi": 136,
+  "rssi": -77,
+  "last_seen": "2026-01-14T14:05:28.016299+00:00",
   "available": true,
   "device_type": "Router",
   "active_coordinator": false,
@@ -75,6 +75,11 @@
           "attributes": []
         },
         {
+          "cluster_id": "0x0012",
+          "endpoint_attribute": "multistate_input",
+          "attributes": []
+        },
+        {
           "cluster_id": "0x0102",
           "endpoint_attribute": "window_covering",
           "attributes": [
@@ -85,10 +90,16 @@
               "value": 0
             },
             {
+              "id": "0x0003",
+              "name": "current_position_lift",
+              "zcl_type": "uint16",
+              "value": 0
+            },
+            {
               "id": "0x0008",
               "name": "current_position_lift_percentage",
               "zcl_type": "uint8",
-              "value": 0
+              "value": 100
             },
             {
               "id": "0x0009",
@@ -124,7 +135,7 @@
               "id": "0x0017",
               "name": "window_covering_mode",
               "zcl_type": "map8",
-              "value": 0
+              "value": 1
             },
             {
               "id": "0x0000",
@@ -142,7 +153,7 @@
               "id": "0x0000",
               "name": "current_summ_delivered",
               "zcl_type": "uint48",
-              "value": 0
+              "value": 20
             },
             {
               "id": "0x0001",
@@ -492,6 +503,11 @@
       },
       "in_clusters": [
         {
+          "cluster_id": "0x0012",
+          "endpoint_attribute": "multistate_input",
+          "attributes": []
+        },
+        {
           "cluster_id": "0xfcc0",
           "endpoint_attribute": "manufacturer_specific",
           "attributes": []
@@ -514,7 +530,7 @@
               "id": "0x0055",
               "name": "present_value",
               "zcl_type": "uint16",
-              "value": 1
+              "value": 2
             }
           ]
         },
@@ -630,79 +646,6 @@
       "out_clusters": []
     }
   },
-  "original_signature": {
-    "manufacturer": "Aqara",
-    "model": "lumi.switch.aeu003",
-    "node_desc": {
-      "logical_type": 1,
-      "complex_descriptor_available": 0,
-      "user_descriptor_available": 0,
-      "reserved": 0,
-      "aps_flags": 0,
-      "frequency_band": 8,
-      "mac_capability_flags": 142,
-      "manufacturer_code": 4447,
-      "maximum_buffer_size": 82,
-      "maximum_incoming_transfer_size": 82,
-      "server_mask": 11264,
-      "maximum_outgoing_transfer_size": 82,
-      "descriptor_capability_field": 0
-    },
-    "endpoints": {
-      "1": {
-        "profile_id": "0x0104",
-        "device_type": "0x0000",
-        "input_clusters": [
-          "0x0000",
-          "0x0003",
-          "0x0004",
-          "0x0005",
-          "0x0102",
-          "0x0702",
-          "0x0b04",
-          "0xfcc0"
-        ],
-        "output_clusters": [
-          "0x000a",
-          "0x0019"
-        ]
-      },
-      "2": {
-        "profile_id": "0x0104",
-        "device_type": "0x0000",
-        "input_clusters": [
-          "0xfcc0"
-        ],
-        "output_clusters": []
-      },
-      "3": {
-        "profile_id": "0x0104",
-        "device_type": "0x0000",
-        "input_clusters": [
-          "0x0012",
-          "0xfcc0"
-        ],
-        "output_clusters": []
-      },
-      "4": {
-        "profile_id": "0x0104",
-        "device_type": "0x0000",
-        "input_clusters": [
-          "0x0012",
-          "0xfcc0"
-        ],
-        "output_clusters": []
-      },
-      "21": {
-        "profile_id": "0x0104",
-        "device_type": "0x0000",
-        "input_clusters": [
-          "0x000c"
-        ],
-        "output_clusters": []
-      }
-    }
-  },
   "zha_lib_entities": {
     "button": [
       {
@@ -760,12 +703,12 @@
         "state": {
           "class_name": "Cover",
           "available": true,
-          "current_position": 100,
+          "current_position": 0,
           "current_tilt_position": null,
-          "state": "open",
+          "state": "closed",
           "is_opening": false,
           "is_closing": false,
-          "is_closed": false,
+          "is_closed": true,
           "supported_features": 15
         }
       }
@@ -796,7 +739,7 @@
         "state": {
           "class_name": "LQISensor",
           "available": true,
-          "state": 196
+          "state": 136
         }
       },
       {
@@ -824,7 +767,7 @@
         "state": {
           "class_name": "RSSISensor",
           "available": true,
-          "state": -62
+          "state": -77
         }
       },
       {
@@ -852,7 +795,7 @@
         "state": {
           "class_name": "SmartEnergySummation",
           "available": true,
-          "state": 0.0,
+          "state": 0.02,
           "device_type": "Electric Metering",
           "zcl_unit_of_measurement": 0
         },

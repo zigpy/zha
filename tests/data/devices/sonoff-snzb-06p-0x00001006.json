@@ -1,7 +1,7 @@
 {
   "version": 2,
   "ieee": "ab:cd:ef:12:dd:23:ca:15",
-  "nwk": "0xB334",
+  "nwk": "0x3CE1",
   "manufacturer": "SONOFF",
   "model": "SNZB-06P",
   "friendly_manufacturer": "SONOFF",
@@ -12,9 +12,9 @@
   "exposes_features": [],
   "manufacturer_code": 4742,
   "power_source": "Mains",
-  "lqi": 240,
-  "rssi": -51,
-  "last_seen": "2025-09-18T10:27:28.172559+00:00",
+  "lqi": 80,
+  "rssi": -80,
+  "last_seen": "2026-06-10T11:07:43.311139+00:00",
   "available": true,
   "device_type": "Router",
   "active_coordinator": false,
@@ -75,16 +75,22 @@
               "value": 0
             },
             {
+              "id": "0x0010",
+              "name": "pir_o_to_u_delay",
+              "zcl_type": "uint16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0011",
+              "name": "pir_u_to_o_delay",
+              "zcl_type": "uint16",
+              "unsupported": true
+            },
+            {
               "id": "0x0020",
               "name": "ultrasonic_o_to_u_delay",
               "zcl_type": "uint16",
-              "value": 15
-            },
-            {
-              "id": "0x0022",
-              "name": "ultrasonic_u_to_o_threshold",
-              "zcl_type": "uint8",
-              "value": 1
+              "value": 30
             }
           ]
         },
@@ -96,7 +102,7 @@
               "id": "0x2001",
               "name": "last_illumination_state",
               "zcl_type": "enum8",
-              "value": 1
+              "unsupported": true
             }
           ]
         },
@@ -154,8 +160,8 @@
           "0x0003",
           "0x0406",
           "0x0500",
-          "0xfc11",
-          "0xfc57"
+          "0xfc57",
+          "0xfc11"
         ],
         "output_clusters": [
           "0x0003",
@@ -255,41 +261,7 @@
         "state": {
           "class_name": "SonoffPresenceSenorTimeout",
           "available": true,
-          "state": 15
-        }
-      }
-    ],
-    "select": [
-      {
-        "info_object": {
-          "fallback_name": null,
-          "unique_id": "ab:cd:ef:12:dd:23:ca:15-1-1030-detection_sensitivity",
-          "migrate_unique_ids": [],
-          "platform": "select",
-          "class_name": "SonoffPresenceDetectionSensitivity",
-          "translation_key": "detection_sensitivity",
-          "translation_placeholders": null,
-          "device_class": null,
-          "state_class": null,
-          "entity_category": "config",
-          "entity_registry_enabled_default": true,
-          "enabled": true,
-          "primary": false,
-          "device_ieee": "ab:cd:ef:12:dd:23:ca:15",
-          "endpoint_id": 1,
-          "available": true,
-          "group_id": null,
-          "enum": "SonoffPresenceDetectionSensitivityEnum",
-          "options": [
-            "Low",
-            "Medium",
-            "High"
-          ]
-        },
-        "state": {
-          "class_name": "SonoffPresenceDetectionSensitivity",
-          "available": true,
-          "state": "Low"
+          "state": 30
         }
       }
     ],
@@ -319,7 +291,7 @@
         "state": {
           "class_name": "LQISensor",
           "available": true,
-          "state": 240
+          "state": 80
         }
       },
       {
@@ -347,35 +319,7 @@
         "state": {
           "class_name": "RSSISensor",
           "available": true,
-          "state": -51
-        }
-      },
-      {
-        "info_object": {
-          "fallback_name": null,
-          "unique_id": "ab:cd:ef:12:dd:23:ca:15-1-64529-last_illumination",
-          "migrate_unique_ids": [],
-          "platform": "sensor",
-          "class_name": "SonoffPresenceSenorIlluminationStatus",
-          "translation_key": "last_illumination_state",
-          "translation_placeholders": null,
-          "device_class": "enum",
-          "state_class": null,
-          "entity_category": null,
-          "entity_registry_enabled_default": true,
-          "enabled": true,
-          "primary": false,
-          "device_ieee": "ab:cd:ef:12:dd:23:ca:15",
-          "endpoint_id": 1,
-          "available": true,
-          "group_id": null,
-          "suggested_display_precision": null,
-          "unit": null
-        },
-        "state": {
-          "class_name": "SonoffPresenceSenorIlluminationStatus",
-          "available": true,
-          "state": "Light"
+          "state": -80
         }
       }
     ],

@@ -142,7 +142,7 @@
               "id": "0x0017",
               "name": "window_covering_mode",
               "zcl_type": "map8",
-              "unsupported": true
+              "value": 8
             },
             {
               "id": "0x0000",
@@ -189,56 +189,6 @@
           "attributes": []
         }
       ]
-    }
-  },
-  "original_signature": {
-    "manufacturer": "Shelly",
-    "model": "2PM",
-    "node_desc": {
-      "logical_type": 1,
-      "complex_descriptor_available": 0,
-      "user_descriptor_available": 0,
-      "reserved": 0,
-      "aps_flags": 0,
-      "frequency_band": 8,
-      "mac_capability_flags": 142,
-      "manufacturer_code": 5264,
-      "maximum_buffer_size": 108,
-      "maximum_incoming_transfer_size": 1613,
-      "server_mask": 11264,
-      "maximum_outgoing_transfer_size": 1613,
-      "descriptor_capability_field": 0
-    },
-    "endpoints": {
-      "1": {
-        "profile_id": "0x0104",
-        "device_type": "0x0202",
-        "input_clusters": [
-          "0x0000",
-          "0x0003",
-          "0x0004",
-          "0x0005",
-          "0x0102"
-        ],
-        "output_clusters": []
-      },
-      "239": {
-        "profile_id": "0xc001",
-        "device_type": "0x2001",
-        "input_clusters": [
-          "0xfc01",
-          "0xfc02"
-        ],
-        "output_clusters": []
-      },
-      "242": {
-        "profile_id": "0xa1e0",
-        "device_type": "0x0061",
-        "input_clusters": [],
-        "output_clusters": [
-          "0x0021"
-        ]
-      }
     }
   },
   "zha_lib_entities": {
@@ -391,6 +341,40 @@
           "class_name": "WindowCoveringTypeSensor",
           "available": true,
           "state": "Shutter"
+        }
+      }
+    ],
+    "switch": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:9c:bd:cb:14-1-258-inverted",
+          "migrate_unique_ids": [],
+          "platform": "switch",
+          "class_name": "WindowCoveringInversionSwitch",
+          "translation_key": "inverted",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "device_ieee": "ab:cd:ef:12:9c:bd:cb:14",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "attribute_name": "config_status",
+          "invert_attribute_name": null,
+          "force_inverted": false,
+          "off_value": 0,
+          "on_value": 1
+        },
+        "state": {
+          "class_name": "WindowCoveringInversionSwitch",
+          "available": true,
+          "state": false,
+          "inverted": false
         }
       }
     ]

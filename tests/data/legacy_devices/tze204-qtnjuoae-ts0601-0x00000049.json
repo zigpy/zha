@@ -1,7 +1,7 @@
 {
   "version": 2,
   "ieee": "ab:cd:ef:12:65:78:bd:46",
-  "nwk": "0xAEF2",
+  "nwk": "0x9A1B",
   "manufacturer": "_TZE204_qtnjuoae",
   "model": "TS0601",
   "friendly_manufacturer": "_TZE204_qtnjuoae",
@@ -14,7 +14,7 @@
   "power_source": "Battery or Unknown",
   "lqi": null,
   "rssi": null,
-  "last_seen": "2025-04-29T19:02:50.229543+00:00",
+  "last_seen": "2024-08-06T14:56:56",
   "available": true,
   "device_type": "EndDevice",
   "active_coordinator": false,
@@ -45,12 +45,6 @@
           "cluster_id": "0x0000",
           "endpoint_attribute": "basic",
           "attributes": [
-            {
-              "id": "0x0001",
-              "name": "app_version",
-              "zcl_type": "uint8",
-              "value": 73
-            },
             {
               "id": "0x0004",
               "name": "manufacturer",
@@ -100,41 +94,6 @@
           ]
         }
       ]
-    }
-  },
-  "original_signature": {
-    "manufacturer": "_TZE204_qtnjuoae",
-    "model": "TS0601",
-    "node_desc": {
-      "logical_type": 2,
-      "complex_descriptor_available": 0,
-      "user_descriptor_available": 0,
-      "reserved": 0,
-      "aps_flags": 0,
-      "frequency_band": 8,
-      "mac_capability_flags": 128,
-      "manufacturer_code": 4417,
-      "maximum_buffer_size": 66,
-      "maximum_incoming_transfer_size": 66,
-      "server_mask": 10752,
-      "maximum_outgoing_transfer_size": 66,
-      "descriptor_capability_field": 0
-    },
-    "endpoints": {
-      "1": {
-        "profile_id": "0x0104",
-        "device_type": "0x0051",
-        "input_clusters": [
-          "0x0000",
-          "0x0004",
-          "0x0005",
-          "0xef00"
-        ],
-        "output_clusters": [
-          "0x000a",
-          "0x0019"
-        ]
-      }
     }
   },
   "zha_lib_entities": {

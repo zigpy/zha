@@ -1,7 +1,7 @@
 {
   "version": 2,
   "ieee": "ab:cd:ef:12:5c:57:ce:53",
-  "nwk": "0x3A30",
+  "nwk": "0xB8B8",
   "manufacturer": "_TZE204_vjpaih9f",
   "model": "TS0601",
   "friendly_manufacturer": "_TZE204_vjpaih9f",
@@ -12,9 +12,9 @@
   "exposes_features": [],
   "manufacturer_code": 4417,
   "power_source": "Battery or Unknown",
-  "lqi": 168,
-  "rssi": -69,
-  "last_seen": "2025-11-07T18:58:07.652627+00:00",
+  "lqi": 0,
+  "rssi": null,
+  "last_seen": "2026-03-02T17:53:41.651203+00:00",
   "available": true,
   "device_type": "EndDevice",
   "active_coordinator": false,
@@ -50,18 +50,6 @@
               "name": "app_version",
               "zcl_type": "uint8",
               "value": 74
-            },
-            {
-              "id": "0x0004",
-              "name": "manufacturer",
-              "zcl_type": "string",
-              "value": "_TZE204_vjpaih9f"
-            },
-            {
-              "id": "0x0005",
-              "name": "model",
-              "zcl_type": "string",
-              "value": "TS0601"
             }
           ]
         },
@@ -164,7 +152,7 @@
         "state": {
           "class_name": "LQISensor",
           "available": true,
-          "state": 168
+          "state": 0
         }
       },
       {
@@ -192,7 +180,7 @@
         "state": {
           "class_name": "RSSISensor",
           "available": true,
-          "state": -69
+          "state": null
         }
       }
     ],

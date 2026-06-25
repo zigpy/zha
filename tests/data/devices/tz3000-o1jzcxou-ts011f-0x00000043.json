@@ -105,6 +105,18 @@
           "endpoint_attribute": "on_off",
           "attributes": [
             {
+              "id": "0x8001",
+              "name": "backlight_mode",
+              "zcl_type": "enum8",
+              "value": 1
+            },
+            {
+              "id": "0x8000",
+              "name": "child_lock",
+              "zcl_type": "bool",
+              "value": 0
+            },
+            {
               "id": "0x4002",
               "name": "off_wait_time",
               "zcl_type": "uint16",
@@ -123,6 +135,12 @@
               "value": 0
             },
             {
+              "id": "0x8002",
+              "name": "power_on_state",
+              "zcl_type": "enum8",
+              "value": 2
+            },
+            {
               "id": "0x4003",
               "name": "start_up_on_off",
               "zcl_type": "enum8",
@@ -138,7 +156,14 @@
         {
           "cluster_id": "0xe001",
           "endpoint_attribute": "tuya_external_switch_type",
-          "attributes": []
+          "attributes": [
+            {
+              "id": "0xd030",
+              "name": "external_switch_type",
+              "zcl_type": "enum8",
+              "value": 0
+            }
+          ]
         }
       ],
       "out_clusters": [
@@ -241,6 +266,72 @@
         }
       }
     ],
+    "select": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:8f:94:54:69-1-6-backlight_mode",
+          "migrate_unique_ids": [],
+          "platform": "select",
+          "class_name": "TuyaBacklightModeSelectEntity",
+          "translation_key": "backlight_mode",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "device_ieee": "ab:cd:ef:12:8f:94:54:69",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "enum": "TuyaBacklightMode",
+          "options": [
+            "Off",
+            "LightWhenOn",
+            "LightWhenOff"
+          ]
+        },
+        "state": {
+          "class_name": "TuyaBacklightModeSelectEntity",
+          "available": true,
+          "state": "LightWhenOn"
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:8f:94:54:69-1-6-power_on_state",
+          "migrate_unique_ids": [],
+          "platform": "select",
+          "class_name": "TuyaPowerOnStateSelectEntity",
+          "translation_key": "power_on_state",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "device_ieee": "ab:cd:ef:12:8f:94:54:69",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "enum": "TuyaPowerOnState",
+          "options": [
+            "Off",
+            "On",
+            "LastState"
+          ]
+        },
+        "state": {
+          "class_name": "TuyaPowerOnStateSelectEntity",
+          "available": true,
+          "state": "LastState"
+        }
+      }
+    ],
     "sensor": [
       {
         "info_object": {
@@ -324,6 +415,38 @@
           "class_name": "Switch",
           "state": 0,
           "available": true
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:8f:94:54:69-1-child_lock",
+          "migrate_unique_ids": [],
+          "platform": "switch",
+          "class_name": "TuyaChildLockSwitch",
+          "translation_key": "child_lock",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "device_ieee": "ab:cd:ef:12:8f:94:54:69",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "attribute_name": "child_lock",
+          "invert_attribute_name": null,
+          "force_inverted": false,
+          "off_value": 0,
+          "on_value": 1
+        },
+        "state": {
+          "class_name": "TuyaChildLockSwitch",
+          "available": true,
+          "state": false,
+          "inverted": false
         }
       }
     ],

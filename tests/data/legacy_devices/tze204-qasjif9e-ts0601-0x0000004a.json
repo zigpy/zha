@@ -1,7 +1,7 @@
 {
   "version": 2,
-  "ieee": "a4:c1:38:f8:a7:c0:f2:88",
-  "nwk": "0x8BCC",
+  "ieee": "ab:cd:ef:12:79:99:09:90",
+  "nwk": "0x92DA",
   "manufacturer": "_TZE204_qasjif9e",
   "model": "TS0601",
   "friendly_manufacturer": "_TZE204_qasjif9e",
@@ -12,9 +12,9 @@
   "exposes_features": [],
   "manufacturer_code": 4417,
   "power_source": "Mains",
-  "lqi": null,
+  "lqi": 116,
   "rssi": null,
-  "last_seen": "2025-04-24T17:34:08.664834+00:00",
+  "last_seen": "2025-05-16T13:50:15.727823+00:00",
   "available": true,
   "device_type": "Router",
   "active_coordinator": false,
@@ -89,7 +89,7 @@
               "id": "0x0000",
               "name": "measured_value",
               "zcl_type": "uint16",
-              "value": 12553
+              "value": 19031.899869919434
             }
           ]
         },
@@ -101,7 +101,7 @@
               "id": "0x0000",
               "name": "occupancy",
               "zcl_type": "map8",
-              "value": 0
+              "value": false
             }
           ]
         },
@@ -110,10 +110,46 @@
           "endpoint_attribute": "tuya_manufacturer",
           "attributes": [
             {
+              "id": "0xef65",
+              "name": "detection_delay",
+              "zcl_type": "uint16",
+              "value": 10
+            },
+            {
+              "id": "0xef04",
+              "name": "detection_distance_max",
+              "zcl_type": "uint16",
+              "value": 750
+            },
+            {
+              "id": "0xef03",
+              "name": "detection_distance_min",
+              "zcl_type": "uint16",
+              "value": 60
+            },
+            {
+              "id": "0xef09",
+              "name": "distance",
+              "zcl_type": "uint16",
+              "value": 0
+            },
+            {
+              "id": "0xef66",
+              "name": "fading_time",
+              "zcl_type": "uint16",
+              "value": 20
+            },
+            {
               "id": "0xef00",
               "name": "mcu_version",
               "zcl_type": "uint48",
               "value": "1.0.2"
+            },
+            {
+              "id": "0xef02",
+              "name": "move_sensitivity",
+              "zcl_type": "uint16",
+              "value": 8
             }
           ]
         }
@@ -154,57 +190,12 @@
       ]
     }
   },
-  "original_signature": {
-    "manufacturer": "_TZE204_qasjif9e",
-    "model": "TS0601",
-    "node_desc": {
-      "logical_type": 1,
-      "complex_descriptor_available": 0,
-      "user_descriptor_available": 0,
-      "reserved": 0,
-      "aps_flags": 0,
-      "frequency_band": 8,
-      "mac_capability_flags": 142,
-      "manufacturer_code": 4417,
-      "maximum_buffer_size": 66,
-      "maximum_incoming_transfer_size": 66,
-      "server_mask": 10752,
-      "maximum_outgoing_transfer_size": 66,
-      "descriptor_capability_field": 0
-    },
-    "endpoints": {
-      "1": {
-        "profile_id": "0x0104",
-        "device_type": "0x0051",
-        "input_clusters": [
-          "0x0000",
-          "0x0004",
-          "0x0005",
-          "0x0400",
-          "0x0406",
-          "0xef00"
-        ],
-        "output_clusters": [
-          "0x000a",
-          "0x0019"
-        ]
-      },
-      "242": {
-        "profile_id": "0xa1e0",
-        "device_type": "0x0061",
-        "input_clusters": [],
-        "output_clusters": [
-          "0x0021"
-        ]
-      }
-    }
-  },
   "zha_lib_entities": {
     "binary_sensor": [
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "a4:c1:38:f8:a7:c0:f2:88-1-1030",
+          "unique_id": "ab:cd:ef:12:79:99:09:90-1-1030",
           "migrate_unique_ids": [],
           "platform": "binary_sensor",
           "class_name": "Occupancy",
@@ -216,7 +207,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": true,
-          "device_ieee": "a4:c1:38:f8:a7:c0:f2:88",
+          "device_ieee": "ab:cd:ef:12:79:99:09:90",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -233,7 +224,7 @@
       {
         "info_object": {
           "fallback_name": "Detection delay",
-          "unique_id": "a4:c1:38:f8:a7:c0:f2:88-1-detection_delay",
+          "unique_id": "ab:cd:ef:12:79:99:09:90-1-detection_delay",
           "migrate_unique_ids": [],
           "platform": "number",
           "class_name": "NumberConfigurationEntity",
@@ -245,7 +236,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "device_ieee": "a4:c1:38:f8:a7:c0:f2:88",
+          "device_ieee": "ab:cd:ef:12:79:99:09:90",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -258,13 +249,13 @@
         "state": {
           "class_name": "NumberConfigurationEntity",
           "available": true,
-          "state": null
+          "state": 1.0
         }
       },
       {
         "info_object": {
           "fallback_name": "Maximum range",
-          "unique_id": "a4:c1:38:f8:a7:c0:f2:88-1-detection_distance_max",
+          "unique_id": "ab:cd:ef:12:79:99:09:90-1-detection_distance_max",
           "migrate_unique_ids": [],
           "platform": "number",
           "class_name": "NumberConfigurationEntity",
@@ -276,7 +267,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "device_ieee": "a4:c1:38:f8:a7:c0:f2:88",
+          "device_ieee": "ab:cd:ef:12:79:99:09:90",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -289,13 +280,13 @@
         "state": {
           "class_name": "NumberConfigurationEntity",
           "available": true,
-          "state": null
+          "state": 7.5
         }
       },
       {
         "info_object": {
           "fallback_name": "Minimum range",
-          "unique_id": "a4:c1:38:f8:a7:c0:f2:88-1-detection_distance_min",
+          "unique_id": "ab:cd:ef:12:79:99:09:90-1-detection_distance_min",
           "migrate_unique_ids": [],
           "platform": "number",
           "class_name": "NumberConfigurationEntity",
@@ -307,7 +298,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "device_ieee": "a4:c1:38:f8:a7:c0:f2:88",
+          "device_ieee": "ab:cd:ef:12:79:99:09:90",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -320,13 +311,13 @@
         "state": {
           "class_name": "NumberConfigurationEntity",
           "available": true,
-          "state": null
+          "state": 0.6
         }
       },
       {
         "info_object": {
           "fallback_name": "Fading time",
-          "unique_id": "a4:c1:38:f8:a7:c0:f2:88-1-fading_time",
+          "unique_id": "ab:cd:ef:12:79:99:09:90-1-fading_time",
           "migrate_unique_ids": [],
           "platform": "number",
           "class_name": "NumberConfigurationEntity",
@@ -338,7 +329,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "device_ieee": "a4:c1:38:f8:a7:c0:f2:88",
+          "device_ieee": "ab:cd:ef:12:79:99:09:90",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -351,13 +342,13 @@
         "state": {
           "class_name": "NumberConfigurationEntity",
           "available": true,
-          "state": null
+          "state": 2.0
         }
       },
       {
         "info_object": {
           "fallback_name": "Motion sensitivity",
-          "unique_id": "a4:c1:38:f8:a7:c0:f2:88-1-move_sensitivity",
+          "unique_id": "ab:cd:ef:12:79:99:09:90-1-move_sensitivity",
           "migrate_unique_ids": [],
           "platform": "number",
           "class_name": "NumberConfigurationEntity",
@@ -369,7 +360,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "device_ieee": "a4:c1:38:f8:a7:c0:f2:88",
+          "device_ieee": "ab:cd:ef:12:79:99:09:90",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -382,7 +373,7 @@
         "state": {
           "class_name": "NumberConfigurationEntity",
           "available": true,
-          "state": null
+          "state": 8
         }
       }
     ],
@@ -390,7 +381,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "a4:c1:38:f8:a7:c0:f2:88-1-0-lqi",
+          "unique_id": "ab:cd:ef:12:79:99:09:90-1-0-lqi",
           "migrate_unique_ids": [],
           "platform": "sensor",
           "class_name": "LQISensor",
@@ -402,7 +393,7 @@
           "entity_registry_enabled_default": false,
           "enabled": true,
           "primary": false,
-          "device_ieee": "a4:c1:38:f8:a7:c0:f2:88",
+          "device_ieee": "ab:cd:ef:12:79:99:09:90",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -412,13 +403,13 @@
         "state": {
           "class_name": "LQISensor",
           "available": true,
-          "state": null
+          "state": 116
         }
       },
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "a4:c1:38:f8:a7:c0:f2:88-1-0-rssi",
+          "unique_id": "ab:cd:ef:12:79:99:09:90-1-0-rssi",
           "migrate_unique_ids": [],
           "platform": "sensor",
           "class_name": "RSSISensor",
@@ -430,7 +421,7 @@
           "entity_registry_enabled_default": false,
           "enabled": true,
           "primary": false,
-          "device_ieee": "a4:c1:38:f8:a7:c0:f2:88",
+          "device_ieee": "ab:cd:ef:12:79:99:09:90",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -446,7 +437,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "a4:c1:38:f8:a7:c0:f2:88-1-1024",
+          "unique_id": "ab:cd:ef:12:79:99:09:90-1-1024",
           "migrate_unique_ids": [],
           "platform": "sensor",
           "class_name": "Illuminance",
@@ -458,7 +449,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "device_ieee": "a4:c1:38:f8:a7:c0:f2:88",
+          "device_ieee": "ab:cd:ef:12:79:99:09:90",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -468,13 +459,13 @@
         "state": {
           "class_name": "Illuminance",
           "available": true,
-          "state": 18
+          "state": 80
         }
       },
       {
         "info_object": {
           "fallback_name": "Target distance",
-          "unique_id": "a4:c1:38:f8:a7:c0:f2:88-1-distance",
+          "unique_id": "ab:cd:ef:12:79:99:09:90-1-distance",
           "migrate_unique_ids": [],
           "platform": "sensor",
           "class_name": "Sensor",
@@ -486,7 +477,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "device_ieee": "a4:c1:38:f8:a7:c0:f2:88",
+          "device_ieee": "ab:cd:ef:12:79:99:09:90",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -496,7 +487,7 @@
         "state": {
           "class_name": "Sensor",
           "available": true,
-          "state": null
+          "state": 0.0
         }
       }
     ],
@@ -504,7 +495,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "a4:c1:38:f8:a7:c0:f2:88-1-25-firmware_update",
+          "unique_id": "ab:cd:ef:12:79:99:09:90-1-25-firmware_update",
           "migrate_unique_ids": [],
           "platform": "update",
           "class_name": "FirmwareUpdateEntity",
@@ -516,7 +507,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "device_ieee": "a4:c1:38:f8:a7:c0:f2:88",
+          "device_ieee": "ab:cd:ef:12:79:99:09:90",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,

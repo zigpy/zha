@@ -1,7 +1,7 @@
 {
   "version": 2,
   "ieee": "ab:cd:ef:12:50:51:3e:41",
-  "nwk": "0x96A0",
+  "nwk": "0x5936",
   "manufacturer": "_TZE284_78ioiaml",
   "model": "TS0601",
   "friendly_manufacturer": "_TZE284_78ioiaml",
@@ -12,9 +12,9 @@
   "exposes_features": [],
   "manufacturer_code": 4098,
   "power_source": "Mains",
-  "lqi": 117,
+  "lqi": 80,
   "rssi": null,
-  "last_seen": "2026-02-02T19:31:14.694810+00:00",
+  "last_seen": "2026-04-06T21:46:55.562701+00:00",
   "available": true,
   "device_type": "Router",
   "active_coordinator": false,
@@ -133,12 +133,12 @@
           "0x0000",
           "0x0004",
           "0x0005",
-          "0xed00",
-          "0xef00"
+          "0xef00",
+          "0xed00"
         ],
         "output_clusters": [
-          "0x000a",
-          "0x0019"
+          "0x0019",
+          "0x000a"
         ]
       }
     }
@@ -170,7 +170,7 @@
         "state": {
           "class_name": "LQISensor",
           "available": true,
-          "state": 117
+          "state": 80
         }
       },
       {

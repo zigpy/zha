@@ -1,7 +1,7 @@
 {
   "version": 2,
   "ieee": "ab:cd:ef:12:e6:20:71:50",
-  "nwk": "0x3C22",
+  "nwk": "0xBCEE",
   "manufacturer": "_TZE284_hodyryli",
   "model": "TS0601",
   "friendly_manufacturer": "_TZE284_hodyryli",
@@ -12,9 +12,9 @@
   "exposes_features": [],
   "manufacturer_code": 4417,
   "power_source": "Battery or Unknown",
-  "lqi": 255,
-  "rssi": -33,
-  "last_seen": "2025-11-14T01:32:40.846964+00:00",
+  "lqi": 9,
+  "rssi": null,
+  "last_seen": "2026-02-17T09:41:28.781196+00:00",
   "available": true,
   "device_type": "EndDevice",
   "active_coordinator": false,
@@ -130,15 +130,15 @@
         "profile_id": "0x0104",
         "device_type": "0x0051",
         "input_clusters": [
-          "0x0000",
           "0x0004",
           "0x0005",
-          "0xed00",
-          "0xef00"
+          "0xef00",
+          "0x0000",
+          "0xed00"
         ],
         "output_clusters": [
-          "0x000a",
-          "0x0019"
+          "0x0019",
+          "0x000a"
         ]
       }
     }
@@ -170,7 +170,7 @@
         "state": {
           "class_name": "LQISensor",
           "available": true,
-          "state": 255
+          "state": 9
         }
       },
       {
@@ -198,7 +198,7 @@
         "state": {
           "class_name": "RSSISensor",
           "available": true,
-          "state": -33
+          "state": null
         }
       }
     ],

@@ -1,7 +1,7 @@
 {
   "version": 2,
   "ieee": "ab:cd:ef:12:62:93:68:a8",
-  "nwk": "0x6F45",
+  "nwk": "0x747D",
   "manufacturer": "eWeLink",
   "model": "TH01",
   "friendly_manufacturer": "eWeLink",
@@ -12,9 +12,9 @@
   "exposes_features": [],
   "manufacturer_code": 0,
   "power_source": "Battery or Unknown",
-  "lqi": 192,
-  "rssi": -63,
-  "last_seen": "2025-07-05T16:12:49.487019+00:00",
+  "lqi": null,
+  "rssi": null,
+  "last_seen": "2023-09-16T11:46:10",
   "available": true,
   "device_type": "EndDevice",
   "active_coordinator": false,
@@ -102,7 +102,7 @@
               "id": "0x0000",
               "name": "measured_value",
               "zcl_type": "int16",
-              "value": 2660
+              "value": 2591
             }
           ]
         },
@@ -114,7 +114,7 @@
               "id": "0x0000",
               "name": "measured_value",
               "zcl_type": "uint16",
-              "value": 5775
+              "value": 5175
             }
           ]
         }
@@ -126,41 +126,6 @@
           "attributes": []
         }
       ]
-    }
-  },
-  "original_signature": {
-    "manufacturer": "eWeLink",
-    "model": "TH01",
-    "node_desc": {
-      "logical_type": 2,
-      "complex_descriptor_available": 0,
-      "user_descriptor_available": 0,
-      "reserved": 0,
-      "aps_flags": 0,
-      "frequency_band": 8,
-      "mac_capability_flags": 128,
-      "manufacturer_code": 0,
-      "maximum_buffer_size": 80,
-      "maximum_incoming_transfer_size": 160,
-      "server_mask": 0,
-      "maximum_outgoing_transfer_size": 160,
-      "descriptor_capability_field": 0
-    },
-    "endpoints": {
-      "1": {
-        "profile_id": "0x0104",
-        "device_type": "0x0302",
-        "input_clusters": [
-          "0x0000",
-          "0x0001",
-          "0x0003",
-          "0x0402",
-          "0x0405"
-        ],
-        "output_clusters": [
-          "0x0003"
-        ]
-      }
     }
   },
   "zha_lib_entities": {
@@ -222,7 +187,7 @@
         "state": {
           "class_name": "LQISensor",
           "available": true,
-          "state": 192
+          "state": null
         }
       },
       {
@@ -250,7 +215,7 @@
         "state": {
           "class_name": "RSSISensor",
           "available": true,
-          "state": -63
+          "state": null
         }
       },
       {
@@ -312,7 +277,7 @@
         "state": {
           "class_name": "Temperature",
           "available": true,
-          "state": 26.6
+          "state": 25.91
         }
       },
       {
@@ -340,7 +305,7 @@
         "state": {
           "class_name": "Humidity",
           "available": true,
-          "state": 57.75
+          "state": 51.75
         }
       }
     ]

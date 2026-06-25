@@ -206,18 +206,6 @@
               "value": 140
             },
             {
-              "id": "0x0016",
-              "name": "max_heat_setpoint_limit",
-              "zcl_type": "int16",
-              "value": 3000
-            },
-            {
-              "id": "0x0015",
-              "name": "min_heat_setpoint_limit",
-              "zcl_type": "int16",
-              "value": 500
-            },
-            {
               "id": "0x0012",
               "name": "occupied_heating_setpoint",
               "zcl_type": "int16",
@@ -581,7 +569,7 @@
           "available": true,
           "group_id": null,
           "max_temp": 30.0,
-          "min_temp": 5.0,
+          "min_temp": 7.0,
           "supported_features": 385,
           "fan_modes": null,
           "preset_modes": [],
@@ -684,68 +672,6 @@
           "class_name": "ThermostatLocalTempCalibration",
           "available": true,
           "state": 14.0
-        }
-      },
-      {
-        "info_object": {
-          "fallback_name": null,
-          "unique_id": "ab:cd:ef:12:a2:68:cb:79-1-513-max_heat_setpoint_limit",
-          "migrate_unique_ids": [],
-          "platform": "number",
-          "class_name": "MaxHeatSetpointLimit",
-          "translation_key": "max_heat_setpoint_limit",
-          "translation_placeholders": null,
-          "device_class": null,
-          "state_class": null,
-          "entity_category": "config",
-          "entity_registry_enabled_default": true,
-          "enabled": true,
-          "primary": false,
-          "device_ieee": "ab:cd:ef:12:a2:68:cb:79",
-          "endpoint_id": 1,
-          "available": true,
-          "group_id": null,
-          "mode": "box",
-          "native_max_value": 327.67,
-          "native_min_value": 5.0,
-          "native_step": 0.5,
-          "native_unit_of_measurement": "\u00b0C"
-        },
-        "state": {
-          "class_name": "MaxHeatSetpointLimit",
-          "available": true,
-          "state": 30.0
-        }
-      },
-      {
-        "info_object": {
-          "fallback_name": null,
-          "unique_id": "ab:cd:ef:12:a2:68:cb:79-1-513-min_heat_setpoint_limit",
-          "migrate_unique_ids": [],
-          "platform": "number",
-          "class_name": "MinHeatSetpointLimit",
-          "translation_key": "min_heat_setpoint_limit",
-          "translation_placeholders": null,
-          "device_class": null,
-          "state_class": null,
-          "entity_category": "config",
-          "entity_registry_enabled_default": true,
-          "enabled": true,
-          "primary": false,
-          "device_ieee": "ab:cd:ef:12:a2:68:cb:79",
-          "endpoint_id": 1,
-          "available": true,
-          "group_id": null,
-          "mode": "box",
-          "native_max_value": 30.0,
-          "native_min_value": -273.15000000000003,
-          "native_step": 0.5,
-          "native_unit_of_measurement": "\u00b0C"
-        },
-        "state": {
-          "class_name": "MinHeatSetpointLimit",
-          "available": true,
-          "state": 5.0
         }
       },
       {

@@ -1,7 +1,7 @@
 {
   "version": 2,
   "ieee": "ab:cd:ef:12:15:61:a8:f8",
-  "nwk": "0x8AD7",
+  "nwk": "0x8BCA",
   "manufacturer": "_TZ3290_ot6ewjvmejq5ekhl",
   "model": "TS1201",
   "friendly_manufacturer": "_TZ3290_ot6ewjvmejq5ekhl",
@@ -12,9 +12,9 @@
   "exposes_features": [],
   "manufacturer_code": 4098,
   "power_source": "Battery or Unknown",
-  "lqi": 120,
-  "rssi": null,
-  "last_seen": "2025-08-05T14:08:34.872297+00:00",
+  "lqi": 240,
+  "rssi": -40,
+  "last_seen": "2026-01-10T22:02:40.374268+00:00",
   "available": true,
   "device_type": "EndDevice",
   "active_coordinator": false,
@@ -46,12 +46,6 @@
           "endpoint_attribute": "basic",
           "attributes": [
             {
-              "id": "0x0013",
-              "name": "alarm_mask",
-              "zcl_type": "map8",
-              "unsupported": true
-            },
-            {
               "id": "0x0004",
               "name": "manufacturer",
               "zcl_type": "string",
@@ -73,7 +67,7 @@
               "id": "0x0021",
               "name": "battery_percentage_remaining",
               "zcl_type": "uint8",
-              "value": 122
+              "value": 200
             },
             {
               "id": "0x0033",
@@ -91,7 +85,7 @@
               "id": "0x0020",
               "name": "battery_voltage",
               "zcl_type": "uint8",
-              "value": 13
+              "value": 15
             }
           ]
         },
@@ -258,7 +252,7 @@
         "state": {
           "class_name": "LQISensor",
           "available": true,
-          "state": 120
+          "state": 240
         }
       },
       {
@@ -286,7 +280,7 @@
         "state": {
           "class_name": "RSSISensor",
           "available": true,
-          "state": null
+          "state": -40
         }
       },
       {
@@ -314,8 +308,8 @@
         "state": {
           "class_name": "Battery",
           "available": true,
-          "state": 61.0,
-          "battery_voltage": 1.3
+          "state": 100.0,
+          "battery_voltage": 1.5
         },
         "extra_state_attributes": [
           "battery_quantity",

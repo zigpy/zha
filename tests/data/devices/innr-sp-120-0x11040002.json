@@ -1,7 +1,7 @@
 {
   "version": 2,
   "ieee": "ab:cd:ef:12:76:d3:fb:4b",
-  "nwk": "0x66C3",
+  "nwk": "0x6A6F",
   "manufacturer": "innr",
   "model": "SP 120",
   "friendly_manufacturer": "innr",
@@ -12,9 +12,9 @@
   "exposes_features": [],
   "manufacturer_code": 4454,
   "power_source": "Mains",
-  "lqi": null,
+  "lqi": 33,
   "rssi": null,
-  "last_seen": "2025-04-29T19:12:44.489403+00:00",
+  "last_seen": "2026-01-14T12:21:39.200435+00:00",
   "available": true,
   "device_type": "Router",
   "active_coordinator": false,
@@ -56,12 +56,6 @@
               "name": "model",
               "zcl_type": "string",
               "value": "SP 120"
-            },
-            {
-              "id": "0x0007",
-              "name": "power_source",
-              "zcl_type": "enum8",
-              "value": 1
             }
           ]
         },
@@ -88,7 +82,7 @@
               "id": "0x0000",
               "name": "on_off",
               "zcl_type": "bool",
-              "value": 1
+              "value": 0
             },
             {
               "id": "0x4003",
@@ -159,7 +153,7 @@
               "id": "0x0000",
               "name": "current_summ_delivered",
               "zcl_type": "uint48",
-              "value": 14526
+              "value": 76
             },
             {
               "id": "0x0001",
@@ -232,12 +226,6 @@
               "name": "multiplier",
               "zcl_type": "uint24",
               "value": 1
-            },
-            {
-              "id": "0x0205",
-              "name": "remaining_battery_life_days",
-              "zcl_type": "uint16",
-              "unsupported": true
             },
             {
               "id": "0x0200",
@@ -441,7 +429,7 @@
               "id": "0x0505",
               "name": "rms_voltage",
               "zcl_type": "uint16",
-              "value": 238
+              "value": 235
             },
             {
               "id": "0x0507",
@@ -471,6 +459,12 @@
               "id": "0x0a05",
               "name": "rms_voltage_ph_c",
               "zcl_type": "uint16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0304",
+              "name": "total_active_power",
+              "zcl_type": "int32",
               "unsupported": true
             }
           ]
@@ -658,7 +652,7 @@
         "state": {
           "class_name": "LQISensor",
           "available": true,
-          "state": null
+          "state": 33
         }
       },
       {
@@ -714,7 +708,7 @@
         "state": {
           "class_name": "SmartEnergySummation",
           "available": true,
-          "state": 145.26,
+          "state": 0.76,
           "device_type": "Electric Metering",
           "status": "NO_ALARMS",
           "zcl_unit_of_measurement": 0
@@ -816,7 +810,7 @@
         "state": {
           "class_name": "ElectricalMeasurementRMSVoltage",
           "available": true,
-          "state": 238.0,
+          "state": 235.0,
           "measurement_type": ""
         },
         "extra_state_attributes": [
@@ -848,7 +842,7 @@
         },
         "state": {
           "class_name": "Switch",
-          "state": 1,
+          "state": 0,
           "available": true
         }
       }

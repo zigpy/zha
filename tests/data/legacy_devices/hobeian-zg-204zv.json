@@ -1,7 +1,7 @@
 {
   "version": 2,
   "ieee": "ab:cd:ef:12:d9:4b:d8:42",
-  "nwk": "0xAF28",
+  "nwk": "0x4C86",
   "manufacturer": "HOBEIAN",
   "model": "ZG-204ZV",
   "friendly_manufacturer": "HOBEIAN",
@@ -12,9 +12,9 @@
   "exposes_features": [],
   "manufacturer_code": 4742,
   "power_source": "Battery or Unknown",
-  "lqi": 184,
-  "rssi": -54,
-  "last_seen": "2025-08-15T18:06:45.853422+00:00",
+  "lqi": 255,
+  "rssi": -34,
+  "last_seen": "2025-11-23T21:24:49.671903+00:00",
   "available": true,
   "device_type": "EndDevice",
   "active_coordinator": false,
@@ -46,6 +46,36 @@
           "endpoint_attribute": "basic",
           "attributes": [
             {
+              "id": "0x0001",
+              "name": "app_version",
+              "zcl_type": "uint8",
+              "value": 147
+            },
+            {
+              "id": "0xfffd",
+              "name": "cluster_revision",
+              "zcl_type": "uint16",
+              "value": 1
+            },
+            {
+              "id": "0x0006",
+              "name": "date_code",
+              "zcl_type": "string",
+              "value": "30082025"
+            },
+            {
+              "id": "0x0012",
+              "name": "device_enabled",
+              "zcl_type": "bool",
+              "value": 1
+            },
+            {
+              "id": "0x0003",
+              "name": "hw_version",
+              "zcl_type": "uint8",
+              "value": 1
+            },
+            {
               "id": "0x0004",
               "name": "manufacturer",
               "zcl_type": "string",
@@ -56,6 +86,30 @@
               "name": "model",
               "zcl_type": "string",
               "value": "ZG-204ZV"
+            },
+            {
+              "id": "0x0007",
+              "name": "power_source",
+              "zcl_type": "enum8",
+              "value": 3
+            },
+            {
+              "id": "0x0002",
+              "name": "stack_version",
+              "zcl_type": "uint8",
+              "value": 2
+            },
+            {
+              "id": "0x4000",
+              "name": "sw_build_id",
+              "zcl_type": "string",
+              "value": "0130082025"
+            },
+            {
+              "id": "0x0000",
+              "name": "zcl_version",
+              "zcl_type": "uint8",
+              "value": 3
             }
           ]
         },
@@ -85,24 +139,61 @@
               "id": "0x0020",
               "name": "battery_voltage",
               "zcl_type": "uint8",
-              "value": 30
+              "value": 27
+            },
+            {
+              "id": "0xfffd",
+              "name": "cluster_revision",
+              "zcl_type": "uint16",
+              "value": 1
             }
           ]
         },
         {
           "cluster_id": "0x0003",
           "endpoint_attribute": "identify",
-          "attributes": []
+          "attributes": [
+            {
+              "id": "0xfffd",
+              "name": "cluster_revision",
+              "zcl_type": "uint16",
+              "value": 1
+            },
+            {
+              "id": "0x0000",
+              "name": "identify_time",
+              "zcl_type": "uint16",
+              "value": 0
+            }
+          ]
         },
         {
           "cluster_id": "0x0400",
           "endpoint_attribute": "illuminance",
           "attributes": [
             {
+              "id": "0xfffd",
+              "name": "cluster_revision",
+              "zcl_type": "uint16",
+              "value": 1
+            },
+            {
+              "id": "0x0002",
+              "name": "max_measured_value",
+              "zcl_type": "uint16",
+              "value": 4000
+            },
+            {
               "id": "0x0000",
               "name": "measured_value",
               "zcl_type": "uint16",
-              "value": 31688
+              "value": 27531
+            },
+            {
+              "id": "0x0001",
+              "name": "min_measured_value",
+              "zcl_type": "uint16",
+              "value": 0
             }
           ]
         },
@@ -111,10 +202,34 @@
           "endpoint_attribute": "temperature",
           "attributes": [
             {
+              "id": "0xfffd",
+              "name": "cluster_revision",
+              "zcl_type": "uint16",
+              "value": 1
+            },
+            {
+              "id": "0x0002",
+              "name": "max_measured_value",
+              "zcl_type": "int16",
+              "value": -32768
+            },
+            {
               "id": "0x0000",
               "name": "measured_value",
               "zcl_type": "int16",
-              "value": 2330
+              "value": 2220
+            },
+            {
+              "id": "0x0001",
+              "name": "min_measured_value",
+              "zcl_type": "int16",
+              "value": -32768
+            },
+            {
+              "id": "0x0003",
+              "name": "tolerance",
+              "zcl_type": "uint16",
+              "value": 0
             }
           ]
         },
@@ -123,10 +238,34 @@
           "endpoint_attribute": "humidity",
           "attributes": [
             {
+              "id": "0xfffd",
+              "name": "cluster_revision",
+              "zcl_type": "uint16",
+              "value": 1
+            },
+            {
+              "id": "0x0002",
+              "name": "max_measured_value",
+              "zcl_type": "uint16",
+              "value": 32768
+            },
+            {
               "id": "0x0000",
               "name": "measured_value",
               "zcl_type": "uint16",
-              "value": 4130
+              "value": 3340
+            },
+            {
+              "id": "0x0001",
+              "name": "min_measured_value",
+              "zcl_type": "uint16",
+              "value": 32768
+            },
+            {
+              "id": "0x0003",
+              "name": "tolerance",
+              "zcl_type": "uint16",
+              "value": 0
             }
           ]
         },
@@ -148,6 +287,18 @@
                 21,
                 0
               ]
+            },
+            {
+              "id": "0x0013",
+              "name": "current_zone_sensitivity_level",
+              "zcl_type": "uint8",
+              "value": 200
+            },
+            {
+              "id": "0x0011",
+              "name": "zone_id",
+              "zcl_type": "uint8",
+              "value": 0
             },
             {
               "id": "0x0000",
@@ -179,47 +330,22 @@
         {
           "cluster_id": "0x0003",
           "endpoint_attribute": "identify",
-          "attributes": []
+          "attributes": [
+            {
+              "id": "0xfffd",
+              "name": "cluster_revision",
+              "zcl_type": "uint16",
+              "value": 1
+            },
+            {
+              "id": "0x0000",
+              "name": "identify_time",
+              "zcl_type": "uint16",
+              "value": 0
+            }
+          ]
         }
       ]
-    }
-  },
-  "original_signature": {
-    "manufacturer": "HOBEIAN",
-    "model": "ZG-204ZV",
-    "node_desc": {
-      "logical_type": 2,
-      "complex_descriptor_available": 0,
-      "user_descriptor_available": 0,
-      "reserved": 0,
-      "aps_flags": 0,
-      "frequency_band": 8,
-      "mac_capability_flags": 128,
-      "manufacturer_code": 4742,
-      "maximum_buffer_size": 66,
-      "maximum_incoming_transfer_size": 66,
-      "server_mask": 10752,
-      "maximum_outgoing_transfer_size": 66,
-      "descriptor_capability_field": 0
-    },
-    "endpoints": {
-      "1": {
-        "profile_id": "0x0104",
-        "device_type": "0x0402",
-        "input_clusters": [
-          "0x0000",
-          "0x0001",
-          "0x0003",
-          "0x0400",
-          "0x0402",
-          "0x0405",
-          "0x0500",
-          "0xef00"
-        ],
-        "output_clusters": [
-          "0x0003"
-        ]
-      }
     }
   },
   "zha_lib_entities": {
@@ -310,7 +436,7 @@
         "state": {
           "class_name": "LQISensor",
           "available": true,
-          "state": 184
+          "state": 255
         }
       },
       {
@@ -338,7 +464,7 @@
         "state": {
           "class_name": "RSSISensor",
           "available": true,
-          "state": -54
+          "state": -34
         }
       },
       {
@@ -367,7 +493,7 @@
           "class_name": "Battery",
           "available": true,
           "state": 100.0,
-          "battery_voltage": 3.0
+          "battery_voltage": 2.7
         },
         "extra_state_attributes": [
           "battery_quantity",
@@ -400,7 +526,7 @@
         "state": {
           "class_name": "Illuminance",
           "available": true,
-          "state": 1475
+          "state": 566
         }
       },
       {
@@ -428,7 +554,7 @@
         "state": {
           "class_name": "Temperature",
           "available": true,
-          "state": 23.3
+          "state": 22.2
         }
       },
       {
@@ -456,7 +582,7 @@
         "state": {
           "class_name": "Humidity",
           "available": true,
-          "state": 41.3
+          "state": 33.4
         }
       }
     ]

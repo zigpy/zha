@@ -1,7 +1,7 @@
 {
   "version": 2,
-  "ieee": "00:15:bc:00:43:00:4a:39",
-  "nwk": "0x0422",
+  "ieee": "ab:cd:ef:12:44:6d:00:26",
+  "nwk": "0xF401",
   "manufacturer": "frient A/S",
   "model": "KEPZB-110",
   "friendly_manufacturer": "frient A/S",
@@ -12,9 +12,9 @@
   "exposes_features": [],
   "manufacturer_code": 4117,
   "power_source": "Battery or Unknown",
-  "lqi": null,
-  "rssi": null,
-  "last_seen": "2025-04-21T22:41:56.580469+00:00",
+  "lqi": 208,
+  "rssi": -59,
+  "last_seen": "2025-10-05T15:29:45.556070+00:00",
   "available": true,
   "device_type": "EndDevice",
   "active_coordinator": false,
@@ -123,14 +123,7 @@
         {
           "cluster_id": "0x0020",
           "endpoint_attribute": "poll_control",
-          "attributes": [
-            {
-              "id": "0x0000",
-              "name": "checkin_interval",
-              "zcl_type": "uint32",
-              "value": 13200
-            }
-          ]
+          "attributes": []
         },
         {
           "cluster_id": "0x0500",
@@ -161,7 +154,7 @@
               "id": "0x0002",
               "name": "zone_status",
               "zcl_type": "map16",
-              "value": 20
+              "value": 16
             },
             {
               "id": "0x0001",
@@ -208,60 +201,12 @@
       ]
     }
   },
-  "original_signature": {
-    "manufacturer": "frient A/S",
-    "model": "KEPZB-110",
-    "node_desc": {
-      "logical_type": 2,
-      "complex_descriptor_available": 0,
-      "user_descriptor_available": 0,
-      "reserved": 0,
-      "aps_flags": 0,
-      "frequency_band": 8,
-      "mac_capability_flags": 128,
-      "manufacturer_code": 4117,
-      "maximum_buffer_size": 82,
-      "maximum_incoming_transfer_size": 1500,
-      "server_mask": 11264,
-      "maximum_outgoing_transfer_size": 1500,
-      "descriptor_capability_field": 0
-    },
-    "endpoints": {
-      "1": {
-        "profile_id": "0xc0c9",
-        "device_type": "0x0001",
-        "input_clusters": [
-          "0x0005",
-          "0x0006"
-        ],
-        "output_clusters": []
-      },
-      "44": {
-        "profile_id": "0x0104",
-        "device_type": "0x0401",
-        "input_clusters": [
-          "0x0000",
-          "0x0001",
-          "0x0003",
-          "0x0020",
-          "0x0500",
-          "0x0b05"
-        ],
-        "output_clusters": [
-          "0x0003",
-          "0x000a",
-          "0x0019",
-          "0x0501"
-        ]
-      }
-    }
-  },
   "zha_lib_entities": {
     "alarm_control_panel": [
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "00:15:bc:00:43:00:4a:39-44-1281",
+          "unique_id": "ab:cd:ef:12:44:6d:00:26-44-1281",
           "migrate_unique_ids": [],
           "platform": "alarm_control_panel",
           "class_name": "AlarmControlPanel",
@@ -273,7 +218,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "device_ieee": "00:15:bc:00:43:00:4a:39",
+          "device_ieee": "ab:cd:ef:12:44:6d:00:26",
           "endpoint_id": 44,
           "available": true,
           "group_id": null,
@@ -292,7 +237,7 @@
       {
         "info_object": {
           "fallback_name": "Tamper",
-          "unique_id": "00:15:bc:00:43:00:4a:39-44-tamper",
+          "unique_id": "ab:cd:ef:12:44:6d:00:26-44-tamper",
           "migrate_unique_ids": [],
           "platform": "binary_sensor",
           "class_name": "BinarySensor",
@@ -304,7 +249,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "device_ieee": "00:15:bc:00:43:00:4a:39",
+          "device_ieee": "ab:cd:ef:12:44:6d:00:26",
           "endpoint_id": 44,
           "available": true,
           "group_id": null,
@@ -313,7 +258,7 @@
         "state": {
           "class_name": "BinarySensor",
           "available": true,
-          "state": true
+          "state": false
         }
       }
     ],
@@ -321,7 +266,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "00:15:bc:00:43:00:4a:39-44-3",
+          "unique_id": "ab:cd:ef:12:44:6d:00:26-44-3",
           "migrate_unique_ids": [],
           "platform": "button",
           "class_name": "IdentifyButton",
@@ -333,7 +278,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "device_ieee": "00:15:bc:00:43:00:4a:39",
+          "device_ieee": "ab:cd:ef:12:44:6d:00:26",
           "endpoint_id": 44,
           "available": true,
           "group_id": null,
@@ -353,7 +298,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "00:15:bc:00:43:00:4a:39-44-0-lqi",
+          "unique_id": "ab:cd:ef:12:44:6d:00:26-44-0-lqi",
           "migrate_unique_ids": [],
           "platform": "sensor",
           "class_name": "LQISensor",
@@ -365,7 +310,7 @@
           "entity_registry_enabled_default": false,
           "enabled": true,
           "primary": false,
-          "device_ieee": "00:15:bc:00:43:00:4a:39",
+          "device_ieee": "ab:cd:ef:12:44:6d:00:26",
           "endpoint_id": 44,
           "available": true,
           "group_id": null,
@@ -375,13 +320,13 @@
         "state": {
           "class_name": "LQISensor",
           "available": true,
-          "state": null
+          "state": 208
         }
       },
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "00:15:bc:00:43:00:4a:39-44-0-rssi",
+          "unique_id": "ab:cd:ef:12:44:6d:00:26-44-0-rssi",
           "migrate_unique_ids": [],
           "platform": "sensor",
           "class_name": "RSSISensor",
@@ -393,7 +338,7 @@
           "entity_registry_enabled_default": false,
           "enabled": true,
           "primary": false,
-          "device_ieee": "00:15:bc:00:43:00:4a:39",
+          "device_ieee": "ab:cd:ef:12:44:6d:00:26",
           "endpoint_id": 44,
           "available": true,
           "group_id": null,
@@ -403,13 +348,13 @@
         "state": {
           "class_name": "RSSISensor",
           "available": true,
-          "state": null
+          "state": -59
         }
       },
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "00:15:bc:00:43:00:4a:39-44-1",
+          "unique_id": "ab:cd:ef:12:44:6d:00:26-44-1",
           "migrate_unique_ids": [],
           "platform": "sensor",
           "class_name": "Battery",
@@ -421,7 +366,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "device_ieee": "00:15:bc:00:43:00:4a:39",
+          "device_ieee": "ab:cd:ef:12:44:6d:00:26",
           "endpoint_id": 44,
           "available": true,
           "group_id": null,
@@ -447,7 +392,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "00:15:bc:00:43:00:4a:39-44-25-firmware_update",
+          "unique_id": "ab:cd:ef:12:44:6d:00:26-44-25-firmware_update",
           "migrate_unique_ids": [],
           "platform": "update",
           "class_name": "FirmwareUpdateEntity",
@@ -459,7 +404,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "device_ieee": "00:15:bc:00:43:00:4a:39",
+          "device_ieee": "ab:cd:ef:12:44:6d:00:26",
           "endpoint_id": 44,
           "available": true,
           "group_id": null,

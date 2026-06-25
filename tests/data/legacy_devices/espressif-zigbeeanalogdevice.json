@@ -1,7 +1,7 @@
 {
   "version": 2,
   "ieee": "ab:cd:ef:12:39:a2:73:55",
-  "nwk": "0xA62B",
+  "nwk": "0xA137",
   "manufacturer": "Espressif",
   "model": "ZigbeeAnalogDevice",
   "friendly_manufacturer": "Espressif",
@@ -14,7 +14,7 @@
   "power_source": "Mains",
   "lqi": null,
   "rssi": null,
-  "last_seen": "2025-04-29T19:12:44.332742+00:00",
+  "last_seen": "2025-03-17T16:09:53",
   "available": true,
   "device_type": "EndDevice",
   "active_coordinator": false,
@@ -67,68 +67,7 @@
         {
           "cluster_id": "0x000c",
           "endpoint_attribute": "analog_input",
-          "attributes": [
-            {
-              "id": "0x0100",
-              "name": "application_type",
-              "zcl_type": "uint32",
-              "value": 589824
-            },
-            {
-              "id": "0x001c",
-              "name": "description",
-              "zcl_type": "string",
-              "value": "Power Consumption (Watts)"
-            },
-            {
-              "id": "0x0075",
-              "name": "engineering_units",
-              "zcl_type": "enum16",
-              "unsupported": true
-            },
-            {
-              "id": "0x0041",
-              "name": "max_present_value",
-              "zcl_type": "single",
-              "unsupported": true
-            },
-            {
-              "id": "0x0045",
-              "name": "min_present_value",
-              "zcl_type": "single",
-              "unsupported": true
-            },
-            {
-              "id": "0x0051",
-              "name": "out_of_service",
-              "zcl_type": "bool",
-              "value": 0
-            },
-            {
-              "id": "0x0055",
-              "name": "present_value",
-              "zcl_type": "single",
-              "value": 280.0
-            },
-            {
-              "id": "0x0067",
-              "name": "reliability",
-              "zcl_type": "enum8",
-              "unsupported": true
-            },
-            {
-              "id": "0x006a",
-              "name": "resolution",
-              "zcl_type": "single",
-              "unsupported": true
-            },
-            {
-              "id": "0x006f",
-              "name": "status_flags",
-              "zcl_type": "map8",
-              "value": 0
-            }
-          ]
+          "attributes": []
         },
         {
           "cluster_id": "0x000d",
@@ -138,13 +77,13 @@
               "id": "0x0100",
               "name": "application_type",
               "zcl_type": "uint32",
-              "value": 17235967
+              "unsupported": true
             },
             {
               "id": "0x001c",
               "name": "description",
               "zcl_type": "string",
-              "value": "Fan Speed (RPM)"
+              "unsupported": true
             },
             {
               "id": "0x0075",
@@ -188,38 +127,6 @@
       "out_clusters": []
     }
   },
-  "original_signature": {
-    "manufacturer": "Espressif",
-    "model": "ZigbeeAnalogDevice",
-    "node_desc": {
-      "logical_type": 2,
-      "complex_descriptor_available": 0,
-      "user_descriptor_available": 0,
-      "reserved": 0,
-      "aps_flags": 0,
-      "frequency_band": 8,
-      "mac_capability_flags": 140,
-      "manufacturer_code": 4660,
-      "maximum_buffer_size": 108,
-      "maximum_incoming_transfer_size": 1613,
-      "server_mask": 11264,
-      "maximum_outgoing_transfer_size": 1613,
-      "descriptor_capability_field": 0
-    },
-    "endpoints": {
-      "1": {
-        "profile_id": "0x0104",
-        "device_type": "0x000c",
-        "input_clusters": [
-          "0x0000",
-          "0x0003",
-          "0x000c",
-          "0x000d"
-        ],
-        "output_clusters": []
-      }
-    }
-  },
   "zha_lib_entities": {
     "button": [
       {
@@ -256,7 +163,7 @@
     "number": [
       {
         "info_object": {
-          "fallback_name": "Fan Speed (RPM)",
+          "fallback_name": null,
           "unique_id": "ab:cd:ef:12:39:a2:73:55-1-13",
           "migrate_unique_ids": [],
           "platform": "number",
@@ -341,34 +248,6 @@
           "class_name": "RSSISensor",
           "available": true,
           "state": null
-        }
-      },
-      {
-        "info_object": {
-          "fallback_name": "Power Consumption (Watts)",
-          "unique_id": "ab:cd:ef:12:39:a2:73:55-1-12-analog_input",
-          "migrate_unique_ids": [],
-          "platform": "sensor",
-          "class_name": "AnalogInputSensor",
-          "translation_key": null,
-          "translation_placeholders": null,
-          "device_class": "power",
-          "state_class": "measurement",
-          "entity_category": null,
-          "entity_registry_enabled_default": true,
-          "enabled": true,
-          "primary": false,
-          "device_ieee": "ab:cd:ef:12:39:a2:73:55",
-          "endpoint_id": 1,
-          "available": true,
-          "group_id": null,
-          "suggested_display_precision": null,
-          "unit": "W"
-        },
-        "state": {
-          "class_name": "AnalogInputSensor",
-          "available": true,
-          "state": 280.0
         }
       }
     ]

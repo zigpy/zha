@@ -1,7 +1,7 @@
 {
   "version": 2,
   "ieee": "ab:cd:ef:12:33:57:93:05",
-  "nwk": "0xCD22",
+  "nwk": "0xF9C9",
   "manufacturer": "SONOFF",
   "model": "DONGLE-E_R",
   "friendly_manufacturer": "SONOFF",
@@ -12,9 +12,9 @@
   "exposes_features": [],
   "manufacturer_code": 4742,
   "power_source": "Mains",
-  "lqi": 212,
-  "rssi": -47,
-  "last_seen": "2025-10-10T12:12:17.282357+00:00",
+  "lqi": null,
+  "rssi": null,
+  "last_seen": "2023-12-29T12:00:00",
   "available": true,
   "device_type": "Router",
   "active_coordinator": false,
@@ -100,7 +100,7 @@
               "id": "0x0000",
               "name": "current_level",
               "zcl_type": "uint8",
-              "value": 51
+              "value": 228
             },
             {
               "id": "0x0014",
@@ -136,7 +136,7 @@
               "id": "0x4000",
               "name": "start_up_current_level",
               "zcl_type": "uint8",
-              "value": 51
+              "value": 228
             }
           ]
         }
@@ -196,7 +196,7 @@
               "id": "0x0000",
               "name": "current_level",
               "zcl_type": "uint8",
-              "value": 51
+              "value": 228
             },
             {
               "id": "0x0014",
@@ -232,7 +232,7 @@
               "id": "0x4000",
               "name": "start_up_current_level",
               "zcl_type": "uint8",
-              "value": 51
+              "value": 228
             }
           ]
         },
@@ -277,6 +277,18 @@
               "value": 17476
             },
             {
+              "id": "0x0000",
+              "name": "current_hue",
+              "zcl_type": "uint8",
+              "value": 0
+            },
+            {
+              "id": "0x0001",
+              "name": "current_saturation",
+              "zcl_type": "uint8",
+              "value": 0
+            },
+            {
               "id": "0x0003",
               "name": "current_x",
               "zcl_type": "uint16",
@@ -287,6 +299,12 @@
               "name": "current_y",
               "zcl_type": "uint16",
               "value": 24701
+            },
+            {
+              "id": "0x4000",
+              "name": "enhanced_current_hue",
+              "zcl_type": "uint16",
+              "value": 0
             },
             {
               "id": "0x000f",
@@ -324,63 +342,6 @@
           "attributes": []
         }
       ]
-    }
-  },
-  "original_signature": {
-    "manufacturer": "SONOFF",
-    "model": "DONGLE-E_R",
-    "node_desc": {
-      "logical_type": 1,
-      "complex_descriptor_available": 0,
-      "user_descriptor_available": 0,
-      "reserved": 0,
-      "aps_flags": 0,
-      "frequency_band": 8,
-      "mac_capability_flags": 142,
-      "manufacturer_code": 4742,
-      "maximum_buffer_size": 82,
-      "maximum_incoming_transfer_size": 82,
-      "server_mask": 11264,
-      "maximum_outgoing_transfer_size": 82,
-      "descriptor_capability_field": 0
-    },
-    "endpoints": {
-      "1": {
-        "profile_id": "0x0104",
-        "device_type": "0x0101",
-        "input_clusters": [
-          "0x0000",
-          "0x0003",
-          "0x0004",
-          "0x0005",
-          "0x0006",
-          "0x0008"
-        ],
-        "output_clusters": []
-      },
-      "2": {
-        "profile_id": "0x0104",
-        "device_type": "0x010d",
-        "input_clusters": [
-          "0x0000",
-          "0x0003",
-          "0x0004",
-          "0x0005",
-          "0x0006",
-          "0x0008",
-          "0x0300",
-          "0x1000"
-        ],
-        "output_clusters": []
-      },
-      "242": {
-        "profile_id": "0xa1e0",
-        "device_type": "0x0061",
-        "input_clusters": [],
-        "output_clusters": [
-          "0x0021"
-        ]
-      }
     }
   },
   "zha_lib_entities": {
@@ -447,7 +408,7 @@
           "class_name": "Light",
           "available": true,
           "on": false,
-          "brightness": 51,
+          "brightness": 228,
           "xy_color": null,
           "color_temp": null,
           "effect_list": [
@@ -498,7 +459,7 @@
           "class_name": "Light",
           "available": true,
           "on": false,
-          "brightness": 51,
+          "brightness": 228,
           "xy_color": null,
           "color_temp": 17476,
           "effect_list": [
@@ -550,7 +511,7 @@
         "state": {
           "class_name": "StartUpCurrentLevelConfigurationEntity",
           "available": true,
-          "state": 51
+          "state": 228
         }
       },
       {
@@ -612,7 +573,7 @@
         "state": {
           "class_name": "StartUpCurrentLevelConfigurationEntity",
           "available": true,
-          "state": 51
+          "state": 228
         }
       }
     ],
@@ -710,7 +671,7 @@
         "state": {
           "class_name": "LQISensor",
           "available": true,
-          "state": 212
+          "state": null
         }
       },
       {
@@ -738,7 +699,7 @@
         "state": {
           "class_name": "RSSISensor",
           "available": true,
-          "state": -47
+          "state": null
         }
       }
     ]

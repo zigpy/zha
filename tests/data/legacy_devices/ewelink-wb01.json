@@ -1,7 +1,7 @@
 {
   "version": 2,
-  "ieee": "00:12:4b:00:25:12:e0:f9",
-  "nwk": "0x7D23",
+  "ieee": "ab:cd:ef:12:db:5f:f2:3a",
+  "nwk": "0xE18B",
   "manufacturer": "eWeLink",
   "model": "WB01",
   "friendly_manufacturer": "eWeLink",
@@ -14,7 +14,7 @@
   "power_source": "Battery or Unknown",
   "lqi": null,
   "rssi": null,
-  "last_seen": "2025-04-24T17:34:09.050882+00:00",
+  "last_seen": "2023-12-19T23:35:28+00:00",
   "available": true,
   "device_type": "EndDevice",
   "active_coordinator": false,
@@ -85,7 +85,7 @@
               "id": "0x0020",
               "name": "battery_voltage",
               "zcl_type": "uint8",
-              "value": 30
+              "value": 32
             }
           ]
         },
@@ -97,11 +97,6 @@
       ],
       "out_clusters": [
         {
-          "cluster_id": "0x0003",
-          "endpoint_attribute": "identify",
-          "attributes": []
-        },
-        {
           "cluster_id": "0x0006",
           "endpoint_attribute": "on_off",
           "attributes": []
@@ -109,46 +104,12 @@
       ]
     }
   },
-  "original_signature": {
-    "manufacturer": "eWeLink",
-    "model": "WB01",
-    "node_desc": {
-      "logical_type": 2,
-      "complex_descriptor_available": 0,
-      "user_descriptor_available": 0,
-      "reserved": 0,
-      "aps_flags": 0,
-      "frequency_band": 8,
-      "mac_capability_flags": 128,
-      "manufacturer_code": 0,
-      "maximum_buffer_size": 80,
-      "maximum_incoming_transfer_size": 160,
-      "server_mask": 0,
-      "maximum_outgoing_transfer_size": 160,
-      "descriptor_capability_field": 0
-    },
-    "endpoints": {
-      "1": {
-        "profile_id": "0x0104",
-        "device_type": "0x0000",
-        "input_clusters": [
-          "0x0000",
-          "0x0001",
-          "0x0003"
-        ],
-        "output_clusters": [
-          "0x0003",
-          "0x0006"
-        ]
-      }
-    }
-  },
   "zha_lib_entities": {
     "button": [
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "00:12:4b:00:25:12:e0:f9-1-3",
+          "unique_id": "ab:cd:ef:12:db:5f:f2:3a-1-3",
           "migrate_unique_ids": [],
           "platform": "button",
           "class_name": "IdentifyButton",
@@ -160,7 +121,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "device_ieee": "00:12:4b:00:25:12:e0:f9",
+          "device_ieee": "ab:cd:ef:12:db:5f:f2:3a",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -180,7 +141,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "00:12:4b:00:25:12:e0:f9-1-0-lqi",
+          "unique_id": "ab:cd:ef:12:db:5f:f2:3a-1-0-lqi",
           "migrate_unique_ids": [],
           "platform": "sensor",
           "class_name": "LQISensor",
@@ -192,7 +153,7 @@
           "entity_registry_enabled_default": false,
           "enabled": true,
           "primary": false,
-          "device_ieee": "00:12:4b:00:25:12:e0:f9",
+          "device_ieee": "ab:cd:ef:12:db:5f:f2:3a",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -208,7 +169,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "00:12:4b:00:25:12:e0:f9-1-0-rssi",
+          "unique_id": "ab:cd:ef:12:db:5f:f2:3a-1-0-rssi",
           "migrate_unique_ids": [],
           "platform": "sensor",
           "class_name": "RSSISensor",
@@ -220,7 +181,7 @@
           "entity_registry_enabled_default": false,
           "enabled": true,
           "primary": false,
-          "device_ieee": "00:12:4b:00:25:12:e0:f9",
+          "device_ieee": "ab:cd:ef:12:db:5f:f2:3a",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -236,7 +197,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "00:12:4b:00:25:12:e0:f9-1-1",
+          "unique_id": "ab:cd:ef:12:db:5f:f2:3a-1-1",
           "migrate_unique_ids": [],
           "platform": "sensor",
           "class_name": "Battery",
@@ -248,7 +209,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "device_ieee": "00:12:4b:00:25:12:e0:f9",
+          "device_ieee": "ab:cd:ef:12:db:5f:f2:3a",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -259,7 +220,7 @@
           "class_name": "Battery",
           "available": true,
           "state": 100.0,
-          "battery_voltage": 3.0
+          "battery_voltage": 3.2
         },
         "extra_state_attributes": [
           "battery_quantity",

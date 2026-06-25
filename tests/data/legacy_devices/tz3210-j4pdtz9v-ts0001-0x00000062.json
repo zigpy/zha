@@ -1,7 +1,7 @@
 {
   "version": 2,
   "ieee": "ab:cd:ef:12:c8:12:1d:0b",
-  "nwk": "0xB576",
+  "nwk": "0xE96B",
   "manufacturer": "_TZ3210_j4pdtz9v",
   "model": "TS0001",
   "friendly_manufacturer": "_TZ3210_j4pdtz9v",
@@ -14,7 +14,7 @@
   "power_source": "Battery or Unknown",
   "lqi": null,
   "rssi": null,
-  "last_seen": "2025-04-29T19:02:50.365399+00:00",
+  "last_seen": "2025-03-03T14:08:27+00:00",
   "available": true,
   "device_type": "EndDevice",
   "active_coordinator": false,
@@ -88,6 +88,12 @@
           "endpoint_attribute": "power",
           "attributes": [
             {
+              "id": "0x0021",
+              "name": "battery_percentage_remaining",
+              "zcl_type": "uint8",
+              "value": 150
+            },
+            {
               "id": "0x0033",
               "name": "battery_quantity",
               "zcl_type": "uint8",
@@ -121,7 +127,7 @@
               "id": "0x0000",
               "name": "on_off",
               "zcl_type": "bool",
-              "value": 1
+              "value": 0
             },
             {
               "id": "0x4003",
@@ -139,7 +145,7 @@
               "id": "0xef65",
               "name": "mode",
               "zcl_type": "enum8",
-              "value": 1
+              "value": 0
             }
           ]
         }
@@ -163,41 +169,6 @@
           ]
         }
       ]
-    }
-  },
-  "original_signature": {
-    "manufacturer": "_TZ3210_j4pdtz9v",
-    "model": "TS0001",
-    "node_desc": {
-      "logical_type": 2,
-      "complex_descriptor_available": 0,
-      "user_descriptor_available": 0,
-      "reserved": 0,
-      "aps_flags": 0,
-      "frequency_band": 8,
-      "mac_capability_flags": 128,
-      "manufacturer_code": 4417,
-      "maximum_buffer_size": 66,
-      "maximum_incoming_transfer_size": 66,
-      "server_mask": 10752,
-      "maximum_outgoing_transfer_size": 66,
-      "descriptor_capability_field": 0
-    },
-    "endpoints": {
-      "1": {
-        "profile_id": "0x0104",
-        "device_type": "0x0000",
-        "input_clusters": [
-          "0x0000",
-          "0x0001",
-          "0x0006",
-          "0xef00"
-        ],
-        "output_clusters": [
-          "0x000a",
-          "0x0019"
-        ]
-      }
     }
   },
   "zha_lib_entities": {
@@ -326,7 +297,7 @@
         "state": {
           "class_name": "ZCLEnumSelectEntity",
           "available": true,
-          "state": "SWITCH"
+          "state": "CLICK"
         }
       },
       {
@@ -443,7 +414,7 @@
         "state": {
           "class_name": "Battery",
           "available": true,
-          "state": null,
+          "state": 75.0,
           "battery_size": "CR2",
           "battery_quantity": 1
         },
@@ -477,7 +448,7 @@
         },
         "state": {
           "class_name": "Switch",
-          "state": 1,
+          "state": 0,
           "available": true
         }
       },

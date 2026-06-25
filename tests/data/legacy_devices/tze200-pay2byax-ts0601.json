@@ -1,7 +1,7 @@
 {
   "version": 2,
   "ieee": "ab:cd:ef:12:e7:bc:ea:ac",
-  "nwk": "0xADC3",
+  "nwk": "0xCC82",
   "manufacturer": "_TZE200_pay2byax",
   "model": "TS0601",
   "friendly_manufacturer": "_TZE200_pay2byax",
@@ -10,11 +10,11 @@
   "quirk_applied": true,
   "quirk_class": "zhaquirks.tuya.builder:(_TZE200_pay2byax / TS0601)",
   "exposes_features": [],
-  "manufacturer_code": 4742,
+  "manufacturer_code": 4417,
   "power_source": "Battery or Unknown",
   "lqi": null,
   "rssi": null,
-  "last_seen": "2025-04-29T19:02:49.189150+00:00",
+  "last_seen": "2024-08-28T20:15:36+00:00",
   "available": true,
   "device_type": "EndDevice",
   "active_coordinator": false,
@@ -26,7 +26,7 @@
     "aps_flags": 0,
     "frequency_band": 8,
     "mac_capability_flags": 128,
-    "manufacturer_code": 4742,
+    "manufacturer_code": 4417,
     "maximum_buffer_size": 66,
     "maximum_incoming_transfer_size": 66,
     "server_mask": 10752,
@@ -91,7 +91,7 @@
               "id": "0x0020",
               "name": "battery_voltage",
               "zcl_type": "uint8",
-              "value": 27
+              "value": 33
             }
           ]
         },
@@ -114,7 +114,7 @@
               "id": "0x0000",
               "name": "measured_value",
               "zcl_type": "uint16",
-              "value": 26822
+              "value": 1000
             }
           ]
         },
@@ -122,6 +122,27 @@
           "cluster_id": "0x0500",
           "endpoint_attribute": "ias_zone",
           "attributes": [
+            {
+              "id": "0x0010",
+              "name": "cie_addr",
+              "zcl_type": "EUI64",
+              "value": [
+                193,
+                50,
+                221,
+                28,
+                0,
+                75,
+                18,
+                0
+              ]
+            },
+            {
+              "id": "0x0000",
+              "name": "zone_state",
+              "zcl_type": "enum8",
+              "value": 0
+            },
             {
               "id": "0x0002",
               "name": "zone_status",
@@ -137,46 +158,17 @@
           ]
         },
         {
+          "cluster_id": "0xe002",
+          "endpoint_attribute": null,
+          "attributes": []
+        },
+        {
           "cluster_id": "0xef00",
           "endpoint_attribute": "tuya_manufacturer",
           "attributes": []
         }
       ],
       "out_clusters": []
-    }
-  },
-  "original_signature": {
-    "manufacturer": "_TZE200_pay2byax",
-    "model": "TS0601",
-    "node_desc": {
-      "logical_type": 2,
-      "complex_descriptor_available": 0,
-      "user_descriptor_available": 0,
-      "reserved": 0,
-      "aps_flags": 0,
-      "frequency_band": 8,
-      "mac_capability_flags": 128,
-      "manufacturer_code": 4742,
-      "maximum_buffer_size": 66,
-      "maximum_incoming_transfer_size": 66,
-      "server_mask": 10752,
-      "maximum_outgoing_transfer_size": 66,
-      "descriptor_capability_field": 0
-    },
-    "endpoints": {
-      "1": {
-        "profile_id": "0x0104",
-        "device_type": "0x0402",
-        "input_clusters": [
-          "0x0000",
-          "0x0001",
-          "0x0003",
-          "0x0400",
-          "0x0500",
-          "0xef00"
-        ],
-        "output_clusters": []
-      }
     }
   },
   "zha_lib_entities": {
@@ -326,7 +318,7 @@
           "state": 100.0,
           "battery_size": "CR2032",
           "battery_quantity": 1,
-          "battery_voltage": 2.7
+          "battery_voltage": 3.3
         },
         "extra_state_attributes": [
           "battery_quantity",
@@ -359,7 +351,7 @@
         "state": {
           "class_name": "Illuminance",
           "available": true,
-          "state": 481
+          "state": 1
         }
       }
     ]

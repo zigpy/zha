@@ -1,7 +1,7 @@
 {
   "version": 2,
   "ieee": "ab:cd:ef:12:f0:e2:89:82",
-  "nwk": "0xDF16",
+  "nwk": "0xFF47",
   "manufacturer": "_TZE200_c88teujp",
   "model": "TS0601",
   "friendly_manufacturer": "_TZE200_c88teujp",
@@ -14,7 +14,7 @@
   "power_source": "Battery or Unknown",
   "lqi": null,
   "rssi": null,
-  "last_seen": "2025-10-28T18:05:41.528419+00:00",
+  "last_seen": "2025-02-07T22:02:28+00:00",
   "available": true,
   "device_type": "EndDevice",
   "active_coordinator": false,
@@ -95,7 +95,7 @@
               "id": "0x0000",
               "name": "local_temperature",
               "zcl_type": "int16",
-              "value": 1900
+              "value": 1480
             },
             {
               "id": "0x0010",
@@ -107,19 +107,19 @@
               "id": "0x0016",
               "name": "max_heat_setpoint_limit",
               "zcl_type": "int16",
-              "unsupported": true
+              "value": 3000
             },
             {
               "id": "0x0015",
               "name": "min_heat_setpoint_limit",
               "zcl_type": "int16",
-              "unsupported": true
+              "value": 500
             },
             {
               "id": "0x0012",
               "name": "occupied_heating_setpoint",
               "zcl_type": "int16",
-              "value": 2000
+              "value": 2150
             },
             {
               "id": "0x0008",
@@ -149,7 +149,7 @@
               "id": "0x001c",
               "name": "system_mode",
               "zcl_type": "enum8",
-              "value": 4
+              "value": 0
             }
           ]
         },
@@ -158,46 +158,10 @@
           "endpoint_attribute": "tuya_manufacturer",
           "attributes": [
             {
-              "id": "0xef6a",
-              "name": "away_mode",
-              "zcl_type": "bool",
-              "value": 0
-            },
-            {
-              "id": "0xef69",
-              "name": "battery_low",
-              "zcl_type": "bool",
-              "value": 0
-            },
-            {
-              "id": "0xef28",
-              "name": "child_lock",
-              "zcl_type": "bool",
-              "value": 1
-            },
-            {
-              "id": "0xef0a",
-              "name": "frost_protection",
-              "zcl_type": "bool",
-              "value": 1
-            },
-            {
-              "id": "0xef82",
-              "name": "scale_protection",
-              "zcl_type": "bool",
-              "value": 1
-            },
-            {
-              "id": "0xef6c",
-              "name": "schedule_enable",
-              "zcl_type": "bool",
-              "value": 0
-            },
-            {
-              "id": "0xef08",
-              "name": "window_detection",
-              "zcl_type": "bool",
-              "value": 1
+              "id": "0xef00",
+              "name": "mcu_version",
+              "zcl_type": "uint48",
+              "value": "1.0.0"
             }
           ]
         }
@@ -221,42 +185,6 @@
           ]
         }
       ]
-    }
-  },
-  "original_signature": {
-    "manufacturer": "_TZE200_c88teujp",
-    "model": "TS0601",
-    "node_desc": {
-      "logical_type": 2,
-      "complex_descriptor_available": 0,
-      "user_descriptor_available": 0,
-      "reserved": 0,
-      "aps_flags": 0,
-      "frequency_band": 8,
-      "mac_capability_flags": 128,
-      "manufacturer_code": 4098,
-      "maximum_buffer_size": 82,
-      "maximum_incoming_transfer_size": 82,
-      "server_mask": 11264,
-      "maximum_outgoing_transfer_size": 82,
-      "descriptor_capability_field": 0
-    },
-    "endpoints": {
-      "1": {
-        "profile_id": "0x0104",
-        "device_type": "0x0301",
-        "input_clusters": [
-          "0x0000",
-          "0x0004",
-          "0x0005",
-          "0x0201",
-          "0xef00"
-        ],
-        "output_clusters": [
-          "0x000a",
-          "0x0019"
-        ]
-      }
     }
   },
   "zha_lib_entities": {
@@ -322,19 +250,19 @@
         "state": {
           "class_name": "Thermostat",
           "available": true,
-          "current_temperature": 19.0,
+          "current_temperature": 14.8,
           "outdoor_temperature": null,
-          "target_temperature": 20.0,
+          "target_temperature": null,
           "target_temperature_high": null,
           "target_temperature_low": null,
           "hvac_action": null,
-          "hvac_mode": "heat",
+          "hvac_mode": "off",
           "preset_mode": "none",
           "fan_mode": "auto",
-          "system_mode": "[4]/heat",
+          "system_mode": "[0]/off",
           "occupancy": null,
           "occupied_cooling_setpoint": null,
-          "occupied_heating_setpoint": 2000,
+          "occupied_heating_setpoint": 2150,
           "pi_heating_demand": null,
           "pi_cooling_demand": null,
           "unoccupied_cooling_setpoint": null,
@@ -353,6 +281,68 @@
       }
     ],
     "number": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:f0:e2:89:82-1-513-max_heat_setpoint_limit",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "MaxHeatSetpointLimit",
+          "translation_key": "max_heat_setpoint_limit",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "device_ieee": "ab:cd:ef:12:f0:e2:89:82",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "mode": "box",
+          "native_max_value": 30.0,
+          "native_min_value": 5.0,
+          "native_step": 0.5,
+          "native_unit_of_measurement": "\u00b0C"
+        },
+        "state": {
+          "class_name": "MaxHeatSetpointLimit",
+          "available": true,
+          "state": 30.0
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:f0:e2:89:82-1-513-min_heat_setpoint_limit",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "MinHeatSetpointLimit",
+          "translation_key": "min_heat_setpoint_limit",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "device_ieee": "ab:cd:ef:12:f0:e2:89:82",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "mode": "box",
+          "native_max_value": 30.0,
+          "native_min_value": 5.0,
+          "native_step": 0.5,
+          "native_unit_of_measurement": "\u00b0C"
+        },
+        "state": {
+          "class_name": "MinHeatSetpointLimit",
+          "available": true,
+          "state": 5.0
+        }
+      },
       {
         "info_object": {
           "fallback_name": "Local temperature calibration",
@@ -560,7 +550,7 @@
         "state": {
           "class_name": "ConfigurableAttributeSwitch",
           "available": true,
-          "state": true,
+          "state": false,
           "inverted": false
         }
       },
@@ -592,7 +582,7 @@
         "state": {
           "class_name": "ConfigurableAttributeSwitch",
           "available": true,
-          "state": true,
+          "state": false,
           "inverted": false
         }
       },
@@ -624,7 +614,7 @@
         "state": {
           "class_name": "ConfigurableAttributeSwitch",
           "available": true,
-          "state": true,
+          "state": false,
           "inverted": false
         }
       },
@@ -688,7 +678,7 @@
         "state": {
           "class_name": "ConfigurableAttributeSwitch",
           "available": true,
-          "state": true,
+          "state": false,
           "inverted": false
         }
       }

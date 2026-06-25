@@ -1,7 +1,7 @@
 {
   "version": 2,
-  "ieee": "04:87:27:ff:fe:4a:b3:25",
-  "nwk": "0xD4C9",
+  "ieee": "ab:cd:ef:12:43:1a:e3:7a",
+  "nwk": "0x0189",
   "manufacturer": "IKEA of Sweden",
   "model": "PARASOLL Door/Window Sensor",
   "friendly_manufacturer": "IKEA of Sweden",
@@ -14,7 +14,7 @@
   "power_source": "Battery or Unknown",
   "lqi": null,
   "rssi": null,
-  "last_seen": "2025-04-24T17:34:07.615603+00:00",
+  "last_seen": "2025-02-12T13:20:41",
   "available": true,
   "device_type": "EndDevice",
   "active_coordinator": false,
@@ -62,32 +62,7 @@
         {
           "cluster_id": "0x0001",
           "endpoint_attribute": "power",
-          "attributes": [
-            {
-              "id": "0x0021",
-              "name": "battery_percentage_remaining",
-              "zcl_type": "uint8",
-              "value": 200
-            },
-            {
-              "id": "0x0033",
-              "name": "battery_quantity",
-              "zcl_type": "uint8",
-              "value": 1
-            },
-            {
-              "id": "0x0031",
-              "name": "battery_size",
-              "zcl_type": "enum8",
-              "value": 4
-            },
-            {
-              "id": "0x0020",
-              "name": "battery_voltage",
-              "zcl_type": "uint8",
-              "value": 16
-            }
-          ]
+          "attributes": []
         },
         {
           "cluster_id": "0x0003",
@@ -199,12 +174,6 @@
               ]
             },
             {
-              "id": "0x0000",
-              "name": "zone_state",
-              "zcl_type": "enum8",
-              "value": 1
-            },
-            {
               "id": "0x0002",
               "name": "zone_status",
               "zcl_type": "map16",
@@ -228,66 +197,12 @@
       ]
     }
   },
-  "original_signature": {
-    "manufacturer": "IKEA of Sweden",
-    "model": "PARASOLL Door/Window Sensor",
-    "node_desc": {
-      "logical_type": 2,
-      "complex_descriptor_available": 0,
-      "user_descriptor_available": 0,
-      "reserved": 0,
-      "aps_flags": 0,
-      "frequency_band": 8,
-      "mac_capability_flags": 128,
-      "manufacturer_code": 4476,
-      "maximum_buffer_size": 82,
-      "maximum_incoming_transfer_size": 82,
-      "server_mask": 11264,
-      "maximum_outgoing_transfer_size": 82,
-      "descriptor_capability_field": 0
-    },
-    "endpoints": {
-      "1": {
-        "profile_id": "0x0104",
-        "device_type": "0x0103",
-        "input_clusters": [
-          "0x0000",
-          "0x0001",
-          "0x0003",
-          "0x0020",
-          "0x0b05",
-          "0x1000",
-          "0xfc7c",
-          "0xfc81"
-        ],
-        "output_clusters": [
-          "0x0003",
-          "0x0004",
-          "0x0006",
-          "0x0019",
-          "0x1000"
-        ]
-      },
-      "2": {
-        "profile_id": "0x0104",
-        "device_type": "0x0402",
-        "input_clusters": [
-          "0x0000",
-          "0x0003",
-          "0x0500"
-        ],
-        "output_clusters": [
-          "0x0003"
-        ]
-      }
-    }
-  },
   "zha_lib_entities": {
     "binary_sensor": [
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "04:87:27:ff:fe:4a:b3:25-2-1280",
+          "unique_id": "ab:cd:ef:12:43:1a:e3:7a-2-1280",
           "migrate_unique_ids": [],
           "platform": "binary_sensor",
           "class_name": "IASZone",
@@ -299,7 +214,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": true,
-          "device_ieee": "04:87:27:ff:fe:4a:b3:25",
+          "device_ieee": "ab:cd:ef:12:43:1a:e3:7a",
           "endpoint_id": 2,
           "available": true,
           "group_id": null,
@@ -316,7 +231,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "04:87:27:ff:fe:4a:b3:25-1-3",
+          "unique_id": "ab:cd:ef:12:43:1a:e3:7a-1-3",
           "migrate_unique_ids": [],
           "platform": "button",
           "class_name": "IdentifyButton",
@@ -328,7 +243,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "device_ieee": "04:87:27:ff:fe:4a:b3:25",
+          "device_ieee": "ab:cd:ef:12:43:1a:e3:7a",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -348,7 +263,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "04:87:27:ff:fe:4a:b3:25-1-0-lqi",
+          "unique_id": "ab:cd:ef:12:43:1a:e3:7a-1-0-lqi",
           "migrate_unique_ids": [],
           "platform": "sensor",
           "class_name": "LQISensor",
@@ -360,7 +275,7 @@
           "entity_registry_enabled_default": false,
           "enabled": true,
           "primary": false,
-          "device_ieee": "04:87:27:ff:fe:4a:b3:25",
+          "device_ieee": "ab:cd:ef:12:43:1a:e3:7a",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -376,7 +291,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "04:87:27:ff:fe:4a:b3:25-1-0-rssi",
+          "unique_id": "ab:cd:ef:12:43:1a:e3:7a-1-0-rssi",
           "migrate_unique_ids": [],
           "platform": "sensor",
           "class_name": "RSSISensor",
@@ -388,7 +303,7 @@
           "entity_registry_enabled_default": false,
           "enabled": true,
           "primary": false,
-          "device_ieee": "04:87:27:ff:fe:4a:b3:25",
+          "device_ieee": "ab:cd:ef:12:43:1a:e3:7a",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -404,7 +319,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "04:87:27:ff:fe:4a:b3:25-1-1",
+          "unique_id": "ab:cd:ef:12:43:1a:e3:7a-1-1",
           "migrate_unique_ids": [],
           "platform": "sensor",
           "class_name": "Battery",
@@ -416,7 +331,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "device_ieee": "04:87:27:ff:fe:4a:b3:25",
+          "device_ieee": "ab:cd:ef:12:43:1a:e3:7a",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -426,10 +341,7 @@
         "state": {
           "class_name": "Battery",
           "available": true,
-          "state": 100.0,
-          "battery_size": "AAA",
-          "battery_quantity": 1,
-          "battery_voltage": 1.6
+          "state": null
         },
         "extra_state_attributes": [
           "battery_quantity",
@@ -442,7 +354,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "04:87:27:ff:fe:4a:b3:25-1-25-firmware_update",
+          "unique_id": "ab:cd:ef:12:43:1a:e3:7a-1-25-firmware_update",
           "migrate_unique_ids": [],
           "platform": "update",
           "class_name": "FirmwareUpdateEntity",
@@ -454,7 +366,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "device_ieee": "04:87:27:ff:fe:4a:b3:25",
+          "device_ieee": "ab:cd:ef:12:43:1a:e3:7a",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,

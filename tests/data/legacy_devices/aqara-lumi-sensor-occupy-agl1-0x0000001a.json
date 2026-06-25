@@ -14,7 +14,7 @@
   "power_source": "Mains",
   "lqi": null,
   "rssi": null,
-  "last_seen": "2025-12-11T01:40:55.476869+00:00",
+  "last_seen": "2024-08-13T17:34:04+00:00",
   "available": true,
   "device_type": "EndDevice",
   "active_coordinator": false,
@@ -78,7 +78,20 @@
         {
           "cluster_id": "0x0406",
           "endpoint_attribute": "occupancy",
-          "attributes": []
+          "attributes": [
+            {
+              "id": "0x0010",
+              "name": "pir_o_to_u_delay",
+              "zcl_type": "uint16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0011",
+              "name": "pir_u_to_o_delay",
+              "zcl_type": "uint16",
+              "unsupported": true
+            }
+          ]
         },
         {
           "cluster_id": "0x0500",
@@ -123,43 +136,6 @@
           ]
         }
       ]
-    }
-  },
-  "original_signature": {
-    "manufacturer": "aqara",
-    "model": "lumi.sensor_occupy.agl1",
-    "node_desc": {
-      "logical_type": 2,
-      "complex_descriptor_available": 0,
-      "user_descriptor_available": 0,
-      "reserved": 0,
-      "aps_flags": 0,
-      "frequency_band": 8,
-      "mac_capability_flags": 140,
-      "manufacturer_code": 4660,
-      "maximum_buffer_size": 108,
-      "maximum_incoming_transfer_size": 127,
-      "server_mask": 11264,
-      "maximum_outgoing_transfer_size": 127,
-      "descriptor_capability_field": 0
-    },
-    "endpoints": {
-      "1": {
-        "profile_id": "0x0104",
-        "device_type": "0xfff0",
-        "input_clusters": [
-          "0x0000",
-          "0x0002",
-          "0x0003",
-          "0x0406",
-          "0x0500",
-          "0xfcc0"
-        ],
-        "output_clusters": [
-          "0x0003",
-          "0x0019"
-        ]
-      }
     }
   },
   "zha_lib_entities": {

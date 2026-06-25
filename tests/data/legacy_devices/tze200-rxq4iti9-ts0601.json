@@ -14,7 +14,7 @@
   "power_source": "Battery or Unknown",
   "lqi": null,
   "rssi": null,
-  "last_seen": "2025-12-11T01:25:34.652864+00:00",
+  "last_seen": "2024-10-06T00:15:10+00:00",
   "available": true,
   "device_type": "EndDevice",
   "active_coordinator": false,
@@ -196,7 +196,7 @@
               "id": "0x0016",
               "name": "max_heat_setpoint_limit",
               "zcl_type": "int16",
-              "unsupported": true
+              "value": 3000
             },
             {
               "id": "0x0017",
@@ -208,7 +208,7 @@
               "id": "0x0015",
               "name": "min_heat_setpoint_limit",
               "zcl_type": "int16",
-              "unsupported": true
+              "value": 500
             },
             {
               "id": "0x0002",
@@ -302,44 +302,6 @@
           "attributes": []
         }
       ]
-    }
-  },
-  "original_signature": {
-    "manufacturer": "_TZE200_rxq4iti9",
-    "model": "TS0601",
-    "node_desc": {
-      "logical_type": 2,
-      "complex_descriptor_available": 0,
-      "user_descriptor_available": 0,
-      "reserved": 0,
-      "aps_flags": 0,
-      "frequency_band": 8,
-      "mac_capability_flags": 128,
-      "manufacturer_code": 4417,
-      "maximum_buffer_size": 66,
-      "maximum_incoming_transfer_size": 66,
-      "server_mask": 10752,
-      "maximum_outgoing_transfer_size": 66,
-      "descriptor_capability_field": 0
-    },
-    "endpoints": {
-      "1": {
-        "profile_id": "0x0104",
-        "device_type": "0x0301",
-        "input_clusters": [
-          "0x0000",
-          "0x0001",
-          "0x0004",
-          "0x0005",
-          "0x000d",
-          "0x0201",
-          "0xef00"
-        ],
-        "output_clusters": [
-          "0x000a",
-          "0x0019"
-        ]
-      }
     }
   },
   "zha_lib_entities": {
@@ -465,6 +427,68 @@
           "class_name": "AnalogOutputNumber",
           "available": true,
           "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:44:6e:72:22-1-513-max_heat_setpoint_limit",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "MaxHeatSetpointLimit",
+          "translation_key": "max_heat_setpoint_limit",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "device_ieee": "ab:cd:ef:12:44:6e:72:22",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "mode": "box",
+          "native_max_value": 30.0,
+          "native_min_value": 5.0,
+          "native_step": 0.5,
+          "native_unit_of_measurement": "\u00b0C"
+        },
+        "state": {
+          "class_name": "MaxHeatSetpointLimit",
+          "available": true,
+          "state": 30.0
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:44:6e:72:22-1-513-min_heat_setpoint_limit",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "MinHeatSetpointLimit",
+          "translation_key": "min_heat_setpoint_limit",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "device_ieee": "ab:cd:ef:12:44:6e:72:22",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "mode": "box",
+          "native_max_value": 30.0,
+          "native_min_value": 5.0,
+          "native_step": 0.5,
+          "native_unit_of_measurement": "\u00b0C"
+        },
+        "state": {
+          "class_name": "MinHeatSetpointLimit",
+          "available": true,
+          "state": 5.0
         }
       },
       {

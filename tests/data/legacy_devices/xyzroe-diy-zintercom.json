@@ -14,7 +14,7 @@
   "power_source": "Battery or Unknown",
   "lqi": null,
   "rssi": null,
-  "last_seen": "2025-10-28T18:05:42.287040+00:00",
+  "last_seen": "2025-01-23T02:14:53",
   "available": true,
   "device_type": "EndDevice",
   "active_coordinator": false,
@@ -69,7 +69,7 @@
               "id": "0x0000",
               "name": "on_off",
               "zcl_type": "bool",
-              "value": 0
+              "unsupported": true
             },
             {
               "id": "0x4003",
@@ -85,38 +85,6 @@
           "attributes": []
         }
       ]
-    }
-  },
-  "original_signature": {
-    "manufacturer": "xyzroe",
-    "model": "DIY_Zintercom",
-    "node_desc": {
-      "logical_type": 2,
-      "complex_descriptor_available": 0,
-      "user_descriptor_available": 0,
-      "reserved": 0,
-      "aps_flags": 0,
-      "frequency_band": 8,
-      "mac_capability_flags": 128,
-      "manufacturer_code": 0,
-      "maximum_buffer_size": 80,
-      "maximum_incoming_transfer_size": 160,
-      "server_mask": 0,
-      "maximum_outgoing_transfer_size": 160,
-      "descriptor_capability_field": 0
-    },
-    "endpoints": {
-      "1": {
-        "profile_id": "0x0104",
-        "device_type": "0x000c",
-        "input_clusters": [
-          "0x0000"
-        ],
-        "output_clusters": [
-          "0x0006",
-          "0x0101"
-        ]
-      }
     }
   },
   "zha_lib_entities": {

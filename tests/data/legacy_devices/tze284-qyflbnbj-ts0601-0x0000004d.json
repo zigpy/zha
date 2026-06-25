@@ -14,7 +14,7 @@
   "power_source": "Battery or Unknown",
   "lqi": null,
   "rssi": null,
-  "last_seen": "2025-04-29T19:02:50.331452+00:00",
+  "last_seen": "2024-12-28T02:05:38+00:00",
   "available": true,
   "device_type": "EndDevice",
   "active_coordinator": false,
@@ -70,12 +70,6 @@
           "endpoint_attribute": "power",
           "attributes": [
             {
-              "id": "0x0052",
-              "name": "battery_2_a_hr_rating",
-              "zcl_type": "uint16",
-              "unsupported": true
-            },
-            {
               "id": "0x0033",
               "name": "battery_quantity",
               "zcl_type": "uint8",
@@ -108,32 +102,7 @@
         {
           "cluster_id": "0x0402",
           "endpoint_attribute": "temperature",
-          "attributes": [
-            {
-              "id": "0xfffd",
-              "name": "cluster_revision",
-              "zcl_type": "uint16",
-              "unsupported": true
-            },
-            {
-              "id": "0x0002",
-              "name": "max_measured_value",
-              "zcl_type": "int16",
-              "unsupported": true
-            },
-            {
-              "id": "0x0001",
-              "name": "min_measured_value",
-              "zcl_type": "int16",
-              "unsupported": true
-            },
-            {
-              "id": "0x0003",
-              "name": "tolerance",
-              "zcl_type": "uint16",
-              "unsupported": true
-            }
-          ]
+          "attributes": []
         },
         {
           "cluster_id": "0x0405",
@@ -155,32 +124,7 @@
         {
           "cluster_id": "0x000a",
           "endpoint_attribute": "time",
-          "attributes": [
-            {
-              "id": "0x0004",
-              "name": "dst_end",
-              "zcl_type": "uint32",
-              "unsupported": true
-            },
-            {
-              "id": "0x0005",
-              "name": "dst_shift",
-              "zcl_type": "int32",
-              "unsupported": true
-            },
-            {
-              "id": "0x0007",
-              "name": "local_time",
-              "zcl_type": "uint32",
-              "unsupported": true
-            },
-            {
-              "id": "0x0000",
-              "name": "time",
-              "zcl_type": "UTC",
-              "unsupported": true
-            }
-          ]
+          "attributes": []
         },
         {
           "cluster_id": "0x0019",
@@ -195,45 +139,6 @@
           ]
         }
       ]
-    }
-  },
-  "original_signature": {
-    "manufacturer": "_TZE284_qyflbnbj",
-    "model": "TS0601",
-    "node_desc": {
-      "logical_type": 2,
-      "complex_descriptor_available": 0,
-      "user_descriptor_available": 0,
-      "reserved": 0,
-      "aps_flags": 0,
-      "frequency_band": 8,
-      "mac_capability_flags": 128,
-      "manufacturer_code": 4417,
-      "maximum_buffer_size": 66,
-      "maximum_incoming_transfer_size": 66,
-      "server_mask": 10752,
-      "maximum_outgoing_transfer_size": 66,
-      "descriptor_capability_field": 0
-    },
-    "endpoints": {
-      "1": {
-        "profile_id": "0x0104",
-        "device_type": "0x0051",
-        "input_clusters": [
-          "0x0000",
-          "0x0001",
-          "0x0004",
-          "0x0005",
-          "0x0402",
-          "0x0405",
-          "0xed00",
-          "0xef00"
-        ],
-        "output_clusters": [
-          "0x000a",
-          "0x0019"
-        ]
-      }
     }
   },
   "zha_lib_entities": {

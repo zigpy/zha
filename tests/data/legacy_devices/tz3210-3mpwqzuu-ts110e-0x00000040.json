@@ -1,7 +1,7 @@
 {
   "version": 2,
   "ieee": "ab:cd:ef:12:01:e4:a9:87",
-  "nwk": "0x68A5",
+  "nwk": "0x0DE5",
   "manufacturer": "_TZ3210_3mpwqzuu",
   "model": "TS110E",
   "friendly_manufacturer": "_TZ3210_3mpwqzuu",
@@ -12,9 +12,9 @@
   "exposes_features": [],
   "manufacturer_code": 4417,
   "power_source": "Mains",
-  "lqi": 176,
-  "rssi": -67,
-  "last_seen": "2025-07-29T11:39:42.554072+00:00",
+  "lqi": 164,
+  "rssi": -59,
+  "last_seen": "2026-01-03T22:31:44.852144+00:00",
   "available": true,
   "device_type": "Router",
   "active_coordinator": false,
@@ -56,6 +56,12 @@
               "name": "model",
               "zcl_type": "string",
               "value": "TS110E"
+            },
+            {
+              "id": "0x4000",
+              "name": "sw_build_id",
+              "zcl_type": "string",
+              "unsupported": true
             }
           ]
         },
@@ -78,12 +84,6 @@
           "cluster_id": "0x0006",
           "endpoint_attribute": "on_off",
           "attributes": [
-            {
-              "id": "0xfffd",
-              "name": "cluster_revision",
-              "zcl_type": "uint16",
-              "unsupported": true
-            },
             {
               "id": "0x0000",
               "name": "on_off",
@@ -109,32 +109,14 @@
           "endpoint_attribute": "level",
           "attributes": [
             {
-              "id": "0xfffd",
-              "name": "cluster_revision",
-              "zcl_type": "uint16",
-              "unsupported": true
-            },
-            {
               "id": "0x0000",
               "name": "current_level",
               "zcl_type": "uint8",
-              "value": 254
+              "value": 3
             },
             {
               "id": "0x0014",
               "name": "default_move_rate",
-              "zcl_type": "uint8",
-              "unsupported": true
-            },
-            {
-              "id": "0x0003",
-              "name": "max_level",
-              "zcl_type": "uint8",
-              "unsupported": true
-            },
-            {
-              "id": "0x0002",
-              "name": "min_level",
               "zcl_type": "uint8",
               "unsupported": true
             },
@@ -160,6 +142,12 @@
               "id": "0x0012",
               "name": "on_transition_time",
               "zcl_type": "uint16",
+              "unsupported": true
+            },
+            {
+              "id": "0x000f",
+              "name": "options",
+              "zcl_type": "map8",
               "unsupported": true
             },
             {
@@ -250,7 +238,7 @@
               "id": "0x0000",
               "name": "current_level",
               "zcl_type": "uint8",
-              "value": 254
+              "value": 231
             },
             {
               "id": "0x0014",
@@ -283,9 +271,9 @@
               "unsupported": true
             },
             {
-              "id": "0xfffe",
-              "name": "reporting_status",
-              "zcl_type": "enum8",
+              "id": "0x000f",
+              "name": "options",
+              "zcl_type": "map8",
               "unsupported": true
             },
             {
@@ -318,65 +306,6 @@
           "attributes": []
         }
       ]
-    }
-  },
-  "original_signature": {
-    "manufacturer": "_TZ3210_3mpwqzuu",
-    "model": "TS110E",
-    "node_desc": {
-      "logical_type": 1,
-      "complex_descriptor_available": 0,
-      "user_descriptor_available": 0,
-      "reserved": 0,
-      "aps_flags": 0,
-      "frequency_band": 8,
-      "mac_capability_flags": 142,
-      "manufacturer_code": 4417,
-      "maximum_buffer_size": 66,
-      "maximum_incoming_transfer_size": 66,
-      "server_mask": 10752,
-      "maximum_outgoing_transfer_size": 66,
-      "descriptor_capability_field": 0
-    },
-    "endpoints": {
-      "1": {
-        "profile_id": "0x0104",
-        "device_type": "0x0101",
-        "input_clusters": [
-          "0x0000",
-          "0x0003",
-          "0x0004",
-          "0x0005",
-          "0x0006",
-          "0x0008",
-          "0xef00"
-        ],
-        "output_clusters": [
-          "0x000a",
-          "0x0019"
-        ]
-      },
-      "2": {
-        "profile_id": "0x0104",
-        "device_type": "0x0101",
-        "input_clusters": [
-          "0x0003",
-          "0x0004",
-          "0x0005",
-          "0x0006",
-          "0x0008",
-          "0xef00"
-        ],
-        "output_clusters": []
-      },
-      "242": {
-        "profile_id": "0xa1e0",
-        "device_type": "0x0061",
-        "input_clusters": [],
-        "output_clusters": [
-          "0x0021"
-        ]
-      }
     }
   },
   "zha_lib_entities": {
@@ -443,7 +372,7 @@
           "class_name": "Light",
           "available": true,
           "on": false,
-          "brightness": 254,
+          "brightness": 3,
           "xy_color": null,
           "color_temp": null,
           "effect_list": [
@@ -494,7 +423,7 @@
           "class_name": "Light",
           "available": true,
           "on": false,
-          "brightness": 254,
+          "brightness": 231,
           "xy_color": null,
           "color_temp": null,
           "effect_list": [
@@ -542,7 +471,7 @@
         "state": {
           "class_name": "LQISensor",
           "available": true,
-          "state": 176
+          "state": 164
         }
       },
       {
@@ -570,7 +499,7 @@
         "state": {
           "class_name": "RSSISensor",
           "available": true,
-          "state": -67
+          "state": -59
         }
       }
     ],

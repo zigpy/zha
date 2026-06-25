@@ -1,7 +1,7 @@
 {
   "version": 2,
   "ieee": "ab:cd:ef:12:1b:1e:95:0a",
-  "nwk": "0x616B",
+  "nwk": "0x90BC",
   "manufacturer": "_TZE204_ltwbm23f",
   "model": "TS0601",
   "friendly_manufacturer": "_TZE204_ltwbm23f",
@@ -12,9 +12,9 @@
   "exposes_features": [],
   "manufacturer_code": 4417,
   "power_source": "Battery or Unknown",
-  "lqi": null,
-  "rssi": null,
-  "last_seen": "2025-10-28T18:05:41.596767+00:00",
+  "lqi": 188,
+  "rssi": -53,
+  "last_seen": "2026-02-09T20:37:30.290352+00:00",
   "available": true,
   "device_type": "EndDevice",
   "active_coordinator": false,
@@ -52,6 +52,18 @@
               "value": 74
             },
             {
+              "id": "0x0006",
+              "name": "date_code",
+              "zcl_type": "string",
+              "value": ""
+            },
+            {
+              "id": "0x0003",
+              "name": "hw_version",
+              "zcl_type": "uint8",
+              "value": 1
+            },
+            {
               "id": "0x0004",
               "name": "manufacturer",
               "zcl_type": "string",
@@ -62,6 +74,24 @@
               "name": "model",
               "zcl_type": "string",
               "value": "TS0601"
+            },
+            {
+              "id": "0x0007",
+              "name": "power_source",
+              "zcl_type": "enum8",
+              "value": 3
+            },
+            {
+              "id": "0x0002",
+              "name": "stack_version",
+              "zcl_type": "uint8",
+              "value": 0
+            },
+            {
+              "id": "0x0000",
+              "name": "zcl_version",
+              "zcl_type": "uint8",
+              "value": 3
             }
           ]
         },
@@ -69,6 +99,48 @@
           "cluster_id": "0x0001",
           "endpoint_attribute": "power",
           "attributes": [
+            {
+              "id": "0x0052",
+              "name": "battery_2_a_hr_rating",
+              "zcl_type": "uint16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0040",
+              "name": "battery_2_voltage",
+              "zcl_type": "uint8",
+              "unsupported": true
+            },
+            {
+              "id": "0x0072",
+              "name": "battery_3_a_hr_rating",
+              "zcl_type": "uint16",
+              "unsupported": true
+            },
+            {
+              "id": "0x007e",
+              "name": "battery_3_alarm_state",
+              "zcl_type": "map32",
+              "unsupported": true
+            },
+            {
+              "id": "0x0070",
+              "name": "battery_3_manufacturer",
+              "zcl_type": "string",
+              "unsupported": true
+            },
+            {
+              "id": "0x0061",
+              "name": "battery_3_percentage_remaining",
+              "zcl_type": "uint8",
+              "unsupported": true
+            },
+            {
+              "id": "0x0021",
+              "name": "battery_percentage_remaining",
+              "zcl_type": "uint8",
+              "value": 162
+            },
             {
               "id": "0x0033",
               "name": "battery_quantity",
@@ -86,18 +158,80 @@
               "name": "battery_size",
               "zcl_type": "enum8",
               "value": 3
+            },
+            {
+              "id": "0x0036",
+              "name": "battery_volt_min_thres",
+              "zcl_type": "uint8",
+              "unsupported": true
+            },
+            {
+              "id": "0x0020",
+              "name": "battery_voltage",
+              "zcl_type": "uint8",
+              "unsupported": true
             }
           ]
         },
         {
           "cluster_id": "0x0004",
           "endpoint_attribute": "groups",
-          "attributes": []
+          "attributes": [
+            {
+              "id": "0xfffd",
+              "name": "cluster_revision",
+              "zcl_type": "uint16",
+              "value": 2
+            },
+            {
+              "id": "0x0000",
+              "name": "name_support",
+              "zcl_type": "map8",
+              "value": 0
+            }
+          ]
         },
         {
           "cluster_id": "0x0005",
           "endpoint_attribute": "scenes",
-          "attributes": []
+          "attributes": [
+            {
+              "id": "0xfffd",
+              "name": "cluster_revision",
+              "zcl_type": "uint16",
+              "value": 2
+            },
+            {
+              "id": "0x0000",
+              "name": "count",
+              "zcl_type": "uint8",
+              "value": 0
+            },
+            {
+              "id": "0x0002",
+              "name": "current_group",
+              "zcl_type": "uint16",
+              "value": 0
+            },
+            {
+              "id": "0x0001",
+              "name": "current_scene",
+              "zcl_type": "uint8",
+              "value": 0
+            },
+            {
+              "id": "0x0004",
+              "name": "name_support",
+              "zcl_type": "map8",
+              "value": 0
+            },
+            {
+              "id": "0x0003",
+              "name": "scene_valid",
+              "zcl_type": "bool",
+              "value": 0
+            }
+          ]
         },
         {
           "cluster_id": "0x0201",
@@ -125,7 +259,7 @@
               "id": "0x0000",
               "name": "local_temperature",
               "zcl_type": "int16",
-              "value": 1970
+              "value": 1740
             },
             {
               "id": "0x0010",
@@ -149,7 +283,7 @@
               "id": "0x0012",
               "name": "occupied_heating_setpoint",
               "zcl_type": "int16",
-              "value": 1800
+              "value": 1550
             },
             {
               "id": "0x0008",
@@ -174,6 +308,12 @@
               "name": "setpoint_change_source_timestamp",
               "zcl_type": "UTC",
               "unsupported": true
+            },
+            {
+              "id": "0x001c",
+              "name": "system_mode",
+              "zcl_type": "enum8",
+              "value": 4
             }
           ]
         },
@@ -182,27 +322,99 @@
           "endpoint_attribute": "tuya_manufacturer",
           "attributes": [
             {
+              "id": "0xef07",
+              "name": "child_lock",
+              "zcl_type": "bool",
+              "value": 0
+            },
+            {
               "id": "0xef77",
               "name": "comfort_temperature",
               "zcl_type": "uint16",
-              "value": 170
+              "value": 160
+            },
+            {
+              "id": "0xef6f",
+              "name": "display_brightness",
+              "zcl_type": "enum8",
+              "value": 1
+            },
+            {
+              "id": "0xef71",
+              "name": "display_orientation",
+              "zcl_type": "enum8",
+              "value": 0
             },
             {
               "id": "0xef78",
               "name": "eco_temperature",
               "zcl_type": "uint16",
-              "value": 200
+              "value": 155
+            },
+            {
+              "id": "0xef79",
+              "name": "holiday_temperature",
+              "zcl_type": "uint16",
+              "value": 80
+            },
+            {
+              "id": "0xef7f",
+              "name": "hysteresis_mode",
+              "zcl_type": "enum8",
+              "value": 0
             },
             {
               "id": "0xef2f",
               "name": "local_temperature_calibration",
               "zcl_type": "int32",
-              "value": 0
+              "value": -10
+            },
+            {
+              "id": "0xef09",
+              "name": "max_temperature",
+              "zcl_type": "uint16",
+              "value": 300
+            },
+            {
+              "id": "0xef00",
+              "name": "mcu_version",
+              "zcl_type": "uint48",
+              "value": "1.0.7"
+            },
+            {
+              "id": "0xef0a",
+              "name": "min_temperature",
+              "zcl_type": "uint16",
+              "value": 50
+            },
+            {
+              "id": "0xef6e",
+              "name": "motor_thrust",
+              "zcl_type": "enum8",
+              "value": 1
+            },
+            {
+              "id": "0xef02",
+              "name": "preset_mode",
+              "zcl_type": "uint16",
+              "value": 2
             },
             {
               "id": "0xef72",
               "name": "valve_position",
               "zcl_type": "int16",
+              "value": 10
+            },
+            {
+              "id": "0xef0e",
+              "name": "window_detection",
+              "zcl_type": "bool",
+              "value": 1
+            },
+            {
+              "id": "0xef0f",
+              "name": "window_open",
+              "zcl_type": "bool",
               "value": 0
             }
           ]
@@ -212,17 +424,84 @@
         {
           "cluster_id": "0x000a",
           "endpoint_attribute": "time",
-          "attributes": []
+          "attributes": [
+            {
+              "id": "0xfffd",
+              "name": "cluster_revision",
+              "zcl_type": "uint16",
+              "value": 1
+            }
+          ]
         },
         {
           "cluster_id": "0x0019",
           "endpoint_attribute": "ota",
           "attributes": [
             {
+              "id": "0xfffd",
+              "name": "cluster_revision",
+              "zcl_type": "uint16",
+              "value": 3
+            },
+            {
               "id": "0x0002",
               "name": "current_file_version",
               "zcl_type": "uint32",
               "value": 74
+            },
+            {
+              "id": "0x0003",
+              "name": "current_zigbee_stack_version",
+              "zcl_type": "uint16",
+              "value": 2
+            },
+            {
+              "id": "0x0004",
+              "name": "downloaded_file_version",
+              "zcl_type": "uint32",
+              "value": 4294967295
+            },
+            {
+              "id": "0x0005",
+              "name": "downloaded_zigbee_stack_version",
+              "zcl_type": "uint16",
+              "value": 65535
+            },
+            {
+              "id": "0x0001",
+              "name": "file_offset",
+              "zcl_type": "uint32",
+              "value": 4294967295
+            },
+            {
+              "id": "0x0008",
+              "name": "image_type_id",
+              "zcl_type": "uint16",
+              "value": 65535
+            },
+            {
+              "id": "0x0006",
+              "name": "image_upgrade_status",
+              "zcl_type": "enum8",
+              "value": 0
+            },
+            {
+              "id": "0x0007",
+              "name": "manufacturer_id",
+              "zcl_type": "uint16",
+              "value": 4417
+            },
+            {
+              "id": "0x0009",
+              "name": "minimum_block_req_delay",
+              "zcl_type": "uint16",
+              "value": 0
+            },
+            {
+              "id": "0x0000",
+              "name": "upgrade_server_id",
+              "zcl_type": "EUI64",
+              "value": "ff:ff:ff:ff:ff:ff:ff:ff"
             }
           ]
         }
@@ -253,15 +532,13 @@
         "device_type": "0x0051",
         "input_clusters": [
           "0x0000",
-          "0x0001",
           "0x0004",
           "0x0005",
-          "0x0201",
           "0xef00"
         ],
         "output_clusters": [
-          "0x000a",
-          "0x0019"
+          "0x0019",
+          "0x000a"
         ]
       }
     }
@@ -329,19 +606,19 @@
         "state": {
           "class_name": "Thermostat",
           "available": true,
-          "current_temperature": 19.7,
+          "current_temperature": 17.4,
           "outdoor_temperature": null,
-          "target_temperature": null,
+          "target_temperature": 15.5,
           "target_temperature_high": null,
           "target_temperature_low": null,
           "hvac_action": "heating",
-          "hvac_mode": null,
+          "hvac_mode": "heat",
           "preset_mode": "none",
           "fan_mode": "auto",
-          "system_mode": null,
+          "system_mode": "[4]/heat",
           "occupancy": null,
           "occupied_cooling_setpoint": null,
-          "occupied_heating_setpoint": 1800,
+          "occupied_heating_setpoint": 1550,
           "pi_heating_demand": null,
           "pi_cooling_demand": null,
           "unoccupied_cooling_setpoint": null,
@@ -388,7 +665,7 @@
         "state": {
           "class_name": "NumberConfigurationEntity",
           "available": true,
-          "state": 17.0
+          "state": 16.0
         }
       },
       {
@@ -419,7 +696,7 @@
         "state": {
           "class_name": "NumberConfigurationEntity",
           "available": true,
-          "state": 20.0
+          "state": 15.5
         }
       },
       {
@@ -450,7 +727,7 @@
         "state": {
           "class_name": "NumberConfigurationEntity",
           "available": true,
-          "state": null
+          "state": 8.0
         }
       },
       {
@@ -481,7 +758,7 @@
         "state": {
           "class_name": "NumberConfigurationEntity",
           "available": true,
-          "state": 0.0
+          "state": -1.0
         }
       },
       {
@@ -512,7 +789,7 @@
         "state": {
           "class_name": "NumberConfigurationEntity",
           "available": true,
-          "state": null
+          "state": 30.0
         }
       },
       {
@@ -543,7 +820,7 @@
         "state": {
           "class_name": "NumberConfigurationEntity",
           "available": true,
-          "state": null
+          "state": 5.0
         }
       }
     ],
@@ -577,7 +854,7 @@
         "state": {
           "class_name": "ZCLEnumSelectEntity",
           "available": true,
-          "state": null
+          "state": "Medium"
         }
       },
       {
@@ -608,7 +885,7 @@
         "state": {
           "class_name": "ZCLEnumSelectEntity",
           "available": true,
-          "state": null
+          "state": "Up"
         }
       },
       {
@@ -639,7 +916,7 @@
         "state": {
           "class_name": "ZCLEnumSelectEntity",
           "available": true,
-          "state": null
+          "state": "Comfort"
         }
       },
       {
@@ -671,7 +948,7 @@
         "state": {
           "class_name": "ZCLEnumSelectEntity",
           "available": true,
-          "state": null
+          "state": "Middle"
         }
       },
       {
@@ -704,7 +981,7 @@
         "state": {
           "class_name": "ZCLEnumSelectEntity",
           "available": true,
-          "state": null
+          "state": "Off"
         }
       }
     ],
@@ -734,7 +1011,7 @@
         "state": {
           "class_name": "LQISensor",
           "available": true,
-          "state": null
+          "state": 188
         }
       },
       {
@@ -762,7 +1039,7 @@
         "state": {
           "class_name": "RSSISensor",
           "available": true,
-          "state": null
+          "state": -53
         }
       },
       {
@@ -790,7 +1067,7 @@
         "state": {
           "class_name": "Battery",
           "available": true,
-          "state": null,
+          "state": 81.0,
           "battery_size": "AA",
           "battery_quantity": 2
         },
@@ -853,7 +1130,7 @@
         "state": {
           "class_name": "Sensor",
           "available": true,
-          "state": 0.0
+          "state": 1.0
         }
       }
     ],
@@ -918,7 +1195,7 @@
         "state": {
           "class_name": "ConfigurableAttributeSwitch",
           "available": true,
-          "state": false,
+          "state": true,
           "inverted": false
         }
       }

@@ -14,7 +14,7 @@
   "power_source": "Mains",
   "lqi": null,
   "rssi": null,
-  "last_seen": "2025-10-28T18:05:44.844134+00:00",
+  "last_seen": "2024-11-23T12:17:09+00:00",
   "available": true,
   "device_type": "Router",
   "active_coordinator": false,
@@ -193,7 +193,7 @@
               "id": "0x0000",
               "name": "measured_value",
               "zcl_type": "int16",
-              "value": 1850
+              "unsupported": true
             }
           ]
         },
@@ -205,7 +205,7 @@
               "id": "0x0000",
               "name": "measured_value",
               "zcl_type": "uint16",
-              "value": 7180
+              "unsupported": true
             }
           ]
         },
@@ -217,7 +217,7 @@
               "id": "0x0000",
               "name": "measured_value",
               "zcl_type": "single",
-              "value": 0.00048699999999999997
+              "unsupported": true
             }
           ]
         },
@@ -234,7 +234,7 @@
               "id": "0x0000",
               "name": "measured_value",
               "zcl_type": "single",
-              "value": 3.4e-05
+              "unsupported": true
             }
           ]
         },
@@ -310,55 +310,6 @@
       ]
     }
   },
-  "original_signature": {
-    "manufacturer": "_TZE204_c2fmom5z",
-    "model": "TS0601",
-    "node_desc": {
-      "logical_type": 1,
-      "complex_descriptor_available": 0,
-      "user_descriptor_available": 0,
-      "reserved": 0,
-      "aps_flags": 0,
-      "frequency_band": 8,
-      "mac_capability_flags": 142,
-      "manufacturer_code": 4417,
-      "maximum_buffer_size": 66,
-      "maximum_incoming_transfer_size": 66,
-      "server_mask": 10752,
-      "maximum_outgoing_transfer_size": 66,
-      "descriptor_capability_field": 0
-    },
-    "endpoints": {
-      "1": {
-        "profile_id": "0x0104",
-        "device_type": "0x0100",
-        "input_clusters": [
-          "0x0000",
-          "0x0004",
-          "0x0005",
-          "0x0402",
-          "0x0405",
-          "0x040d",
-          "0x042a",
-          "0x042b",
-          "0x042e",
-          "0xef00"
-        ],
-        "output_clusters": [
-          "0x000a",
-          "0x0019"
-        ]
-      },
-      "242": {
-        "profile_id": "0xa1e0",
-        "device_type": "0x0061",
-        "input_clusters": [],
-        "output_clusters": [
-          "0x0021"
-        ]
-      }
-    }
-  },
   "zha_lib_entities": {
     "sensor": [
       {
@@ -420,90 +371,6 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "ab:cd:ef:12:e1:f5:c9:be-1-1026",
-          "migrate_unique_ids": [],
-          "platform": "sensor",
-          "class_name": "Temperature",
-          "translation_key": null,
-          "translation_placeholders": null,
-          "device_class": "temperature",
-          "state_class": "measurement",
-          "entity_category": null,
-          "entity_registry_enabled_default": true,
-          "enabled": true,
-          "primary": false,
-          "device_ieee": "ab:cd:ef:12:e1:f5:c9:be",
-          "endpoint_id": 1,
-          "available": true,
-          "group_id": null,
-          "suggested_display_precision": null,
-          "unit": "\u00b0C"
-        },
-        "state": {
-          "class_name": "Temperature",
-          "available": true,
-          "state": 18.5
-        }
-      },
-      {
-        "info_object": {
-          "fallback_name": null,
-          "unique_id": "ab:cd:ef:12:e1:f5:c9:be-1-1029",
-          "migrate_unique_ids": [],
-          "platform": "sensor",
-          "class_name": "Humidity",
-          "translation_key": null,
-          "translation_placeholders": null,
-          "device_class": "humidity",
-          "state_class": "measurement",
-          "entity_category": null,
-          "entity_registry_enabled_default": true,
-          "enabled": true,
-          "primary": false,
-          "device_ieee": "ab:cd:ef:12:e1:f5:c9:be",
-          "endpoint_id": 1,
-          "available": true,
-          "group_id": null,
-          "suggested_display_precision": null,
-          "unit": "%"
-        },
-        "state": {
-          "class_name": "Humidity",
-          "available": true,
-          "state": 71.8
-        }
-      },
-      {
-        "info_object": {
-          "fallback_name": null,
-          "unique_id": "ab:cd:ef:12:e1:f5:c9:be-1-1037",
-          "migrate_unique_ids": [],
-          "platform": "sensor",
-          "class_name": "CarbonDioxideConcentration",
-          "translation_key": null,
-          "translation_placeholders": null,
-          "device_class": "carbon_dioxide",
-          "state_class": "measurement",
-          "entity_category": null,
-          "entity_registry_enabled_default": true,
-          "enabled": true,
-          "primary": false,
-          "device_ieee": "ab:cd:ef:12:e1:f5:c9:be",
-          "endpoint_id": 1,
-          "available": true,
-          "group_id": null,
-          "suggested_display_precision": 0,
-          "unit": "ppm"
-        },
-        "state": {
-          "class_name": "CarbonDioxideConcentration",
-          "available": true,
-          "state": 486.99999999999994
-        }
-      },
-      {
-        "info_object": {
-          "fallback_name": null,
           "unique_id": "ab:cd:ef:12:e1:f5:c9:be-1-1066",
           "migrate_unique_ids": [],
           "platform": "sensor",
@@ -527,34 +394,6 @@
           "class_name": "PM25",
           "available": true,
           "state": null
-        }
-      },
-      {
-        "info_object": {
-          "fallback_name": null,
-          "unique_id": "ab:cd:ef:12:e1:f5:c9:be-1-1067",
-          "migrate_unique_ids": [],
-          "platform": "sensor",
-          "class_name": "FormaldehydeConcentration",
-          "translation_key": "formaldehyde",
-          "translation_placeholders": null,
-          "device_class": null,
-          "state_class": "measurement",
-          "entity_category": null,
-          "entity_registry_enabled_default": true,
-          "enabled": true,
-          "primary": false,
-          "device_ieee": "ab:cd:ef:12:e1:f5:c9:be",
-          "endpoint_id": 1,
-          "available": true,
-          "group_id": null,
-          "suggested_display_precision": 0,
-          "unit": "ppm"
-        },
-        "state": {
-          "class_name": "FormaldehydeConcentration",
-          "available": true,
-          "state": 34.0
         }
       },
       {

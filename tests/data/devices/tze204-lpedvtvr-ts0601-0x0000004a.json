@@ -1,7 +1,7 @@
 {
   "version": 2,
   "ieee": "ab:cd:ef:12:3b:28:22:86",
-  "nwk": "0xA88C",
+  "nwk": "0xF1A0",
   "manufacturer": "_TZE204_lpedvtvr",
   "model": "TS0601",
   "friendly_manufacturer": "_TZE204_lpedvtvr",
@@ -12,9 +12,9 @@
   "exposes_features": [],
   "manufacturer_code": 4417,
   "power_source": "Mains",
-  "lqi": null,
+  "lqi": 57,
   "rssi": null,
-  "last_seen": "2025-10-28T18:08:50.482185+00:00",
+  "last_seen": "2026-04-30T09:16:03.886807+00:00",
   "available": true,
   "device_type": "Router",
   "active_coordinator": false,
@@ -37,8 +37,8 @@
     "1": {
       "profile_id": 260,
       "device_type": {
-        "name": "THERMOSTAT",
-        "id": 769
+        "name": "SMART_PLUG",
+        "id": 81
       },
       "in_clusters": [
         {
@@ -74,162 +74,6 @@
           "cluster_id": "0x0005",
           "endpoint_attribute": "scenes",
           "attributes": []
-        },
-        {
-          "cluster_id": "0x0201",
-          "endpoint_attribute": "thermostat",
-          "attributes": [
-            {
-              "id": "0x0006",
-              "name": "abs_max_cool_setpoint_limit",
-              "zcl_type": "int16",
-              "unsupported": true
-            },
-            {
-              "id": "0x0004",
-              "name": "abs_max_heat_setpoint_limit",
-              "zcl_type": "int16",
-              "unsupported": true
-            },
-            {
-              "id": "0x0005",
-              "name": "abs_min_cool_setpoint_limit",
-              "zcl_type": "int16",
-              "unsupported": true
-            },
-            {
-              "id": "0x0003",
-              "name": "abs_min_heat_setpoint_limit",
-              "zcl_type": "int16",
-              "unsupported": true
-            },
-            {
-              "id": "0x001b",
-              "name": "ctrl_sequence_of_oper",
-              "zcl_type": "enum8",
-              "value": 2
-            },
-            {
-              "id": "0x0000",
-              "name": "local_temperature",
-              "zcl_type": "int16",
-              "value": 2150
-            },
-            {
-              "id": "0x0010",
-              "name": "local_temperature_calibration",
-              "zcl_type": "int8",
-              "unsupported": true
-            },
-            {
-              "id": "0x0018",
-              "name": "max_cool_setpoint_limit",
-              "zcl_type": "int16",
-              "unsupported": true
-            },
-            {
-              "id": "0x0016",
-              "name": "max_heat_setpoint_limit",
-              "zcl_type": "int16",
-              "unsupported": true
-            },
-            {
-              "id": "0x0017",
-              "name": "min_cool_setpoint_limit",
-              "zcl_type": "int16",
-              "unsupported": true
-            },
-            {
-              "id": "0x0015",
-              "name": "min_heat_setpoint_limit",
-              "zcl_type": "int16",
-              "unsupported": true
-            },
-            {
-              "id": "0x0002",
-              "name": "occupancy",
-              "zcl_type": "map8",
-              "unsupported": true
-            },
-            {
-              "id": "0x0011",
-              "name": "occupied_cooling_setpoint",
-              "zcl_type": "int16",
-              "unsupported": true
-            },
-            {
-              "id": "0x0012",
-              "name": "occupied_heating_setpoint",
-              "zcl_type": "int16",
-              "value": 2000
-            },
-            {
-              "id": "0x0007",
-              "name": "pi_cooling_demand",
-              "zcl_type": "uint8",
-              "unsupported": true
-            },
-            {
-              "id": "0x0008",
-              "name": "pi_heating_demand",
-              "zcl_type": "uint8",
-              "unsupported": true
-            },
-            {
-              "id": "0x0025",
-              "name": "programing_oper_mode",
-              "zcl_type": "map8",
-              "value": 2
-            },
-            {
-              "id": "0x001e",
-              "name": "running_mode",
-              "zcl_type": "enum8",
-              "value": 0
-            },
-            {
-              "id": "0x0029",
-              "name": "running_state",
-              "zcl_type": "map16",
-              "value": 0
-            },
-            {
-              "id": "0x0030",
-              "name": "setpoint_change_source",
-              "zcl_type": "enum8",
-              "unsupported": true
-            },
-            {
-              "id": "0x001c",
-              "name": "system_mode",
-              "zcl_type": "enum8",
-              "value": 1
-            },
-            {
-              "id": "0x0013",
-              "name": "unoccupied_cooling_setpoint",
-              "zcl_type": "int16",
-              "unsupported": true
-            },
-            {
-              "id": "0x0014",
-              "name": "unoccupied_heating_setpoint",
-              "zcl_type": "int16",
-              "unsupported": true
-            }
-          ]
-        },
-        {
-          "cluster_id": "0x0204",
-          "endpoint_attribute": "thermostat_ui",
-          "attributes": [
-            {
-              "id": "0x0001",
-              "name": "keypad_lockout",
-              "zcl_type": "enum8",
-              "value": 0
-            }
-          ]
         },
         {
           "cluster_id": "0xef00",
@@ -294,18 +138,16 @@
     "endpoints": {
       "1": {
         "profile_id": "0x0104",
-        "device_type": "0x0301",
+        "device_type": "0x0051",
         "input_clusters": [
-          "0x0000",
           "0x0004",
           "0x0005",
-          "0x0201",
-          "0x0204",
-          "0xef00"
+          "0xef00",
+          "0x0000"
         ],
         "output_clusters": [
-          "0x000a",
-          "0x0019"
+          "0x0019",
+          "0x000a"
         ]
       },
       "242": {
@@ -319,105 +161,6 @@
     }
   },
   "zha_lib_entities": {
-    "climate": [
-      {
-        "info_object": {
-          "fallback_name": null,
-          "unique_id": "ab:cd:ef:12:3b:28:22:86-1",
-          "migrate_unique_ids": [],
-          "platform": "climate",
-          "class_name": "Thermostat",
-          "translation_key": "thermostat",
-          "translation_placeholders": null,
-          "device_class": null,
-          "state_class": null,
-          "entity_category": null,
-          "entity_registry_enabled_default": true,
-          "enabled": true,
-          "primary": true,
-          "device_ieee": "ab:cd:ef:12:3b:28:22:86",
-          "endpoint_id": 1,
-          "available": true,
-          "group_id": null,
-          "max_temp": 30.0,
-          "min_temp": 7.0,
-          "supported_features": 385,
-          "fan_modes": null,
-          "preset_modes": [],
-          "hvac_modes": [
-            "off",
-            "heat"
-          ]
-        },
-        "state": {
-          "class_name": "Thermostat",
-          "available": true,
-          "current_temperature": 21.5,
-          "outdoor_temperature": null,
-          "target_temperature": null,
-          "target_temperature_high": null,
-          "target_temperature_low": 20.0,
-          "hvac_action": "idle",
-          "hvac_mode": "heat_cool",
-          "preset_mode": "none",
-          "fan_mode": "auto",
-          "system_mode": "[1]/heat_cool",
-          "occupancy": null,
-          "occupied_cooling_setpoint": null,
-          "occupied_heating_setpoint": 2000,
-          "pi_heating_demand": null,
-          "pi_cooling_demand": null,
-          "unoccupied_cooling_setpoint": null,
-          "unoccupied_heating_setpoint": null
-        },
-        "extra_state_attributes": [
-          "occupancy",
-          "occupied_cooling_setpoint",
-          "occupied_heating_setpoint",
-          "pi_cooling_demand",
-          "pi_heating_demand",
-          "system_mode",
-          "unoccupied_cooling_setpoint",
-          "unoccupied_heating_setpoint"
-        ]
-      }
-    ],
-    "select": [
-      {
-        "info_object": {
-          "fallback_name": null,
-          "unique_id": "ab:cd:ef:12:3b:28:22:86-1-516-keypad_lockout",
-          "migrate_unique_ids": [],
-          "platform": "select",
-          "class_name": "KeypadLockout",
-          "translation_key": "keypad_lockout",
-          "translation_placeholders": null,
-          "device_class": null,
-          "state_class": null,
-          "entity_category": "config",
-          "entity_registry_enabled_default": true,
-          "enabled": true,
-          "primary": false,
-          "device_ieee": "ab:cd:ef:12:3b:28:22:86",
-          "endpoint_id": 1,
-          "available": true,
-          "group_id": null,
-          "enum": "KeypadLockoutEnum",
-          "options": [
-            "Unlock",
-            "Lock1",
-            "Lock2",
-            "Lock3",
-            "Lock4"
-          ]
-        },
-        "state": {
-          "class_name": "KeypadLockout",
-          "available": true,
-          "state": "Unlock"
-        }
-      }
-    ],
     "sensor": [
       {
         "info_object": {
@@ -444,7 +187,7 @@
         "state": {
           "class_name": "LQISensor",
           "available": true,
-          "state": null
+          "state": 57
         }
       },
       {
@@ -471,62 +214,6 @@
         },
         "state": {
           "class_name": "RSSISensor",
-          "available": true,
-          "state": null
-        }
-      },
-      {
-        "info_object": {
-          "fallback_name": null,
-          "unique_id": "ab:cd:ef:12:3b:28:22:86-1-513-hvac_action",
-          "migrate_unique_ids": [],
-          "platform": "sensor",
-          "class_name": "ThermostatHVACAction",
-          "translation_key": "hvac_action",
-          "translation_placeholders": null,
-          "device_class": null,
-          "state_class": null,
-          "entity_category": null,
-          "entity_registry_enabled_default": true,
-          "enabled": true,
-          "primary": false,
-          "device_ieee": "ab:cd:ef:12:3b:28:22:86",
-          "endpoint_id": 1,
-          "available": true,
-          "group_id": null,
-          "suggested_display_precision": null,
-          "unit": null
-        },
-        "state": {
-          "class_name": "ThermostatHVACAction",
-          "available": true,
-          "state": "idle"
-        }
-      },
-      {
-        "info_object": {
-          "fallback_name": null,
-          "unique_id": "ab:cd:ef:12:3b:28:22:86-1-513-setpoint_change_source_timestamp",
-          "migrate_unique_ids": [],
-          "platform": "sensor",
-          "class_name": "SetpointChangeSourceTimestamp",
-          "translation_key": "setpoint_change_source_timestamp",
-          "translation_placeholders": null,
-          "device_class": "timestamp",
-          "state_class": null,
-          "entity_category": "diagnostic",
-          "entity_registry_enabled_default": true,
-          "enabled": true,
-          "primary": false,
-          "device_ieee": "ab:cd:ef:12:3b:28:22:86",
-          "endpoint_id": 1,
-          "available": true,
-          "group_id": null,
-          "suggested_display_precision": null,
-          "unit": null
-        },
-        "state": {
-          "class_name": "SetpointChangeSourceTimestamp",
           "available": true,
           "state": null
         }

@@ -1,7 +1,7 @@
 {
   "version": 2,
   "ieee": "ab:cd:ef:12:49:f4:f9:87",
-  "nwk": "0x21D2",
+  "nwk": "0xAA47",
   "manufacturer": "_TZE204_tagezcph",
   "model": "TS0601",
   "friendly_manufacturer": "_TZE204_tagezcph",
@@ -12,9 +12,9 @@
   "exposes_features": [],
   "manufacturer_code": 4417,
   "power_source": "Mains",
-  "lqi": 100,
-  "rssi": -75,
-  "last_seen": "2025-12-05T20:36:51.504572+00:00",
+  "lqi": 61,
+  "rssi": null,
+  "last_seen": "2026-01-11T20:34:14.761644+00:00",
   "available": true,
   "device_type": "Router",
   "active_coordinator": false,
@@ -187,7 +187,7 @@
         "state": {
           "class_name": "LQISensor",
           "available": true,
-          "state": 100
+          "state": 61
         }
       },
       {
@@ -215,7 +215,7 @@
         "state": {
           "class_name": "RSSISensor",
           "available": true,
-          "state": -75
+          "state": null
         }
       }
     ],
