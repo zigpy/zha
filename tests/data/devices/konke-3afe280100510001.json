@@ -8,7 +8,7 @@
   "friendly_model": "3AFE280100510001",
   "name": "Konke 3AFE280100510001",
   "quirk_applied": true,
-  "quirk_class": "zhaquirks.konke.button.KonkeButtonRemote1",
+  "quirk_class": "zhaquirks.konke.button:KonkeButtonRemote1",
   "exposes_features": [
     "konke.button_remote"
   ],

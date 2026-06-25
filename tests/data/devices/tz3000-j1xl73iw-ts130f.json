@@ -8,7 +8,7 @@
   "friendly_model": "TS130F",
   "name": "_TZ3000_j1xl73iw TS130F",
   "quirk_applied": true,
-  "quirk_class": "zhaquirks.tuya.ts130f.TuyaTS130Double_GP_ESTC",
+  "quirk_class": "zhaquirks.tuya.ts130f:TuyaTS130Double_GP_ESTC",
   "exposes_features": [],
   "manufacturer_code": 4417,
   "power_source": "Mains",

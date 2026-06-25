@@ -8,7 +8,7 @@
   "friendly_model": "TRADFRI motion sensor",
   "name": "IKEA of Sweden TRADFRI motion sensor",
   "quirk_applied": true,
-  "quirk_class": "zhaquirks.ikea.motionzha.IkeaTradfriMotionE1745_Var02",
+  "quirk_class": "zhaquirks.ikea.motionzha:IkeaTradfriMotionE1745_Var02",
   "exposes_features": [],
   "manufacturer_code": 4476,
   "power_source": "Battery or Unknown",

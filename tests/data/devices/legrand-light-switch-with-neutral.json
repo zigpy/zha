@@ -8,7 +8,7 @@
   "friendly_model": " Light switch with neutral",
   "name": " Legrand  Light switch with neutral",
   "quirk_applied": true,
-  "quirk_class": "zigpy.quirks.v2.CustomDeviceV2",
+  "quirk_class": "zhaquirks.legrand.switch:( Legrand /  Light switch with neutral)",
   "exposes_features": [],
   "manufacturer_code": 4129,
   "power_source": "Mains",

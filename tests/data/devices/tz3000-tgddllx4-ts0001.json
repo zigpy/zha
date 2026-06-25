@@ -8,7 +8,7 @@
   "friendly_model": "TS0001",
   "name": "_TZ3000_tgddllx4 TS0001",
   "quirk_applied": true,
-  "quirk_class": "zigpy.quirks.v2.CustomDeviceV2",
+  "quirk_class": "zhaquirks.tuya.ts0001_switch:(_TZ3000_xkap8wtb / TS0001)",
   "exposes_features": [],
   "manufacturer_code": 4660,
   "power_source": "Mains",

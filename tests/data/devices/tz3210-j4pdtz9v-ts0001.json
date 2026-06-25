@@ -8,7 +8,7 @@
   "friendly_model": "TS0001",
   "name": "_TZ3210_j4pdtz9v TS0001",
   "quirk_applied": true,
-  "quirk_class": "zhaquirks.tuya.builder.EnchantedDeviceV2",
+  "quirk_class": "zhaquirks.tuya.builder:(_TZ3210_dse8ogfy / TS0001)",
   "exposes_features": [],
   "manufacturer_code": 4417,
   "power_source": "Battery or Unknown",

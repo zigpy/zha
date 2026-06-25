@@ -8,7 +8,7 @@
   "friendly_model": "3AFE28010402000D",
   "name": "Konke 3AFE28010402000D",
   "quirk_applied": true,
-  "quirk_class": "zhaquirks.konke.motion.KonkeMotion",
+  "quirk_class": "zhaquirks.konke.motion:KonkeMotion",
   "exposes_features": [],
   "manufacturer_code": 4712,
   "power_source": "Battery or Unknown",

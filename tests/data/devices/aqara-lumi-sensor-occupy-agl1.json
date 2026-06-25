@@ -8,7 +8,7 @@
   "friendly_model": "Presence Sensor FP1E",
   "name": "Aqara Presence Sensor FP1E",
   "quirk_applied": true,
-  "quirk_class": "zigpy.quirks.v2.CustomDeviceV2",
+  "quirk_class": "zhaquirks.xiaomi.aqara.motion_agl1:(aqara / lumi.sensor_occupy.agl1)",
   "exposes_features": [],
   "manufacturer_code": 4660,
   "power_source": "Mains",

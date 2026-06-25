@@ -13,7 +13,6 @@ from unittest.mock import AsyncMock
 
 from zigpy.application import ControllerApplication
 from zigpy.const import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_PROFILE, SIG_EP_TYPE
-from zigpy.quirks import get_device as quirks_get_device
 import zigpy.types as t
 import zigpy.zcl
 import zigpy.zcl.foundation as zcl_f
@@ -22,6 +21,7 @@ import zigpy.zdo.types as zdo_t
 from zha.application import Platform
 from zha.application.gateway import Gateway
 from zha.application.platforms import BaseEntity, GroupEntity, PlatformEntity
+from zha.quirks import DEVICE_REGISTRY, DeviceRegistry
 from zha.zigbee.device import Device
 from zha.zigbee.group import Group
 
@@ -363,6 +363,7 @@ def zigpy_device_from_device_data(
     device_data: dict,
     patch_cluster: bool = True,
     quirk: Callable | None = None,
+    registry: DeviceRegistry = DEVICE_REGISTRY,
 ) -> zigpy.device.Device:
     """Make a fake device using the specified cluster classes."""
 
@@ -423,7 +424,7 @@ def zigpy_device_from_device_data(
     if quirk:
         device = quirk(app, device.ieee, device.nwk, device)
     else:
-        device = quirks_get_device(device)
+        device = registry.resolve(device)
 
     for epid, ep in device_data["endpoints"].items():
         try:
@@ -557,6 +558,7 @@ def create_mock_zigpy_device(
     patch_cluster: bool = True,
     quirk: Callable | None = None,
     attributes: dict[int, dict[str, dict[str, Any]]] = None,
+    registry: DeviceRegistry = DEVICE_REGISTRY,
 ) -> zigpy.device.Device:
     """Make a fake device using the specified cluster classes."""
     zigpy_app_controller = zha_gateway.application_controller
@@ -601,7 +603,7 @@ def create_mock_zigpy_device(
     if quirk:
         device = quirk(zigpy_app_controller, device.ieee, device.nwk, device)
     else:
-        device = quirks_get_device(device)
+        device = registry.resolve(device)
 
     if patch_cluster:
         for endpoint in (ep for epid, ep in device.endpoints.items() if epid):

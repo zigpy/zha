@@ -8,7 +8,7 @@
   "friendly_model": "ZBT-CCTSwitch-D0001",
   "name": "LDS ZBT-CCTSwitch-D0001",
   "quirk_applied": true,
-  "quirk_class": "zhaquirks.lds.cctswitch.CCTSwitch",
+  "quirk_class": "zhaquirks.lds.cctswitch:CCTSwitch",
   "exposes_features": [],
   "manufacturer_code": 4456,
   "power_source": "Battery or Unknown",

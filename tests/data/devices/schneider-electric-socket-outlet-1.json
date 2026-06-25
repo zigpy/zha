@@ -8,7 +8,7 @@
   "friendly_model": "SOCKET/OUTLET/1",
   "name": "Schneider Electric SOCKET/OUTLET/1",
   "quirk_applied": true,
-  "quirk_class": "zhaquirks.schneiderelectric.outlet.SocketOutlet",
+  "quirk_class": "zhaquirks.schneiderelectric.outlet:SocketOutlet",
   "exposes_features": [],
   "manufacturer_code": 4190,
   "power_source": "Mains",

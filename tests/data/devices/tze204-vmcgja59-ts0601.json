@@ -8,7 +8,7 @@
   "friendly_model": "TS0601",
   "name": "_TZE204_vmcgja59 TS0601",
   "quirk_applied": true,
-  "quirk_class": "zhaquirks.tuya.ts0601_switch.TuyaSwitchX16GP",
+  "quirk_class": "zhaquirks.tuya.ts0601_switch:TuyaSwitchX16GP",
   "exposes_features": [],
   "manufacturer_code": 4417,
   "power_source": "Mains",

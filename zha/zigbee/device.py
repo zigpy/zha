@@ -6,7 +6,7 @@ from __future__ import annotations
 
 import asyncio
 from collections import defaultdict
-from collections.abc import Callable, Iterable, Sequence
+from collections.abc import Callable, Iterable, Iterator, Sequence
 import contextlib
 import copy
 import dataclasses
@@ -15,13 +15,11 @@ from enum import Enum
 from functools import cached_property
 import logging
 import time
-from typing import TYPE_CHECKING, Any, Final, Self
+from typing import TYPE_CHECKING, Any, Final
 
 from zigpy.device import Device as ZigpyDevice
 import zigpy.exceptions
 from zigpy.profiles import PROFILES
-import zigpy.quirks
-from zigpy.quirks.v2 import DeviceAlertMetadata, QuirksV2RegistryEntry
 from zigpy.types import uint1_t, uint8_t, uint16_t
 from zigpy.types.named import EUI64, NWK, ExtendedPanId
 from zigpy.typing import UNDEFINED, UndefinedType
@@ -82,12 +80,18 @@ from zha.application.platforms import (
     BaseEntityInfo,
     EntityStateChangedEvent,
     PlatformEntity,
+    sensor,
 )
 from zha.application.platforms.update import BaseFirmwareUpdateEntity
 from zha.const import STATE_CHANGED
 from zha.event import EventBase
 from zha.exceptions import ZHAException
 from zha.mixins import LogMixin
+from zha.quirks import (
+    QUIRK_REGISTRY_ENTRY_ATTR,
+    DeviceMatch,
+    ReplacingZigpyDeviceFactory,
+)
 from zha.zigbee.cluster_config import (
     aggregate_cluster_configs,
     configure_cluster_configs,
@@ -101,44 +105,6 @@ if TYPE_CHECKING:
 _LOGGER = logging.getLogger(__name__)
 _CHECKIN_GRACE_PERIODS = 2
 DIAGNOSTICS_JSON_VERSION = 2
-
-
-def _entity_targets_cluster(
-    entity: PlatformEntity,
-    cluster_id: int,
-    cluster_type: zigpy.zcl.ClusterType | None = None,
-) -> bool:
-    """Return True if `entity` targets the given cluster (and direction)."""
-    match = entity._cluster_match
-    if match is None:
-        # Generated quirks-v2 entities have no class-level `_cluster_match` but
-        # do have a concrete backing cluster; match against it directly.
-        cluster = entity.cluster
-        if cluster.cluster_id != cluster_id:
-            return False
-        if cluster_type is None:
-            return True
-        actual_type = (
-            zigpy.zcl.ClusterType.Client
-            if cluster.is_client
-            else zigpy.zcl.ClusterType.Server
-        )
-        return cluster_type == actual_type
-
-    if cluster_type is None or cluster_type == zigpy.zcl.ClusterType.Server:
-        if (
-            cluster_id in match.server_clusters
-            or cluster_id in match.optional_server_clusters
-        ):
-            return True
-        if cluster_type is not None:
-            return False
-    if (cluster_type is None or cluster_type == zigpy.zcl.ClusterType.Client) and (
-        cluster_id in match.client_clusters
-        or cluster_id in match.optional_client_clusters
-    ):
-        return True
-    return False
 
 
 def get_cluster_attr_data(cluster: Cluster) -> list[dict]:
@@ -366,7 +332,12 @@ class ExtendedDeviceInfo(DeviceInfo):
 class Device(LogMixin, EventBase):
     """ZHA Zigbee device object."""
 
-    unique_id: str
+    # Authoring surface for hand-written quirks; `None` marks the unquirked fallback.
+    _device_match: DeviceMatch | None = None
+    _zigpy_device_cls: ReplacingZigpyDeviceFactory | None = None
+    _zigpy_device_transforms: tuple[
+        Callable[[zigpy.device.Device], zigpy.device.Device], ...
+    ] = ()
 
     # Cached properties that depend on the zigpy device and must be invalidated
     # when the underlying device is swapped (e.g. after a re-interview).
@@ -440,23 +411,23 @@ class Device(LogMixin, EventBase):
             with contextlib.suppress(AttributeError):
                 delattr(self, attr)
 
-        self.quirk_applied: bool = isinstance(
-            self._zigpy_device, zigpy.quirks.BaseCustomDevice
-        )
-        self.quirk_class: str = (
-            f"{self._zigpy_device.__class__.__module__}."
-            f"{self._zigpy_device.__class__.__name__}"
-        )
+        # Both v1 and v2 quirks stash their registry entry on the resolved device.
+        entry = getattr(self._zigpy_device, QUIRK_REGISTRY_ENTRY_ATTR, None)
+        self.quirk_applied: bool = entry is not None
+        if entry is not None and entry.source is not None:
+            self.quirk_class: str = f"{entry.source.module}:{entry.source.label}"
+        else:
+            self.quirk_class = (
+                f"{self._zigpy_device.__class__.__module__}."
+                f"{self._zigpy_device.__class__.__name__}"
+            )
 
         # add v1 quirk exposed features (legacy quirk id)
         qid: set[str] | str = getattr(self._zigpy_device, ATTR_QUIRK_ID, set())
         self.exposes_features: set[str] = {qid} if isinstance(qid, str) else set(qid)
 
-        # add v2 quirk exposed features
-        if self.quirk_metadata is not None:
-            self.exposes_features.update(
-                f.feature for f in self.quirk_metadata.exposes_features
-            )
+        # add quirk-exposed features (declarative quirks override this hook)
+        self.exposes_features |= self._quirk_exposes_features()
 
         self._firmware_version: str | None = None
 
@@ -508,26 +479,48 @@ class Device(LogMixin, EventBase):
         return self._zigpy_device.ieee
 
     @property
-    def quirk_metadata(self) -> QuirksV2RegistryEntry | None:
-        """Return the quirk metadata for this device."""
-        return getattr(self._zigpy_device, "quirk_metadata", None)
+    def quirk_metadata(self) -> Any | None:
+        """Return the ZHA-level quirk metadata, or None.
+
+        The base class and hand-written/v1 quirks have none; zhaquirks'
+        `QuirkV2Device` overrides this (and the `_quirk_*`/`_resolve_*` hooks
+        below) to surface its `QuirkDefinition`.
+        """
+        return None
+
+    def _quirk_exposes_features(self) -> set[str]:
+        """Extra exposed features contributed by a quirk."""
+        return set()
+
+    def _quirk_skip_configuration(self) -> bool:
+        """Whether a quirk forces configuration to be skipped."""
+        return False
+
+    def _quirk_device_automation_triggers(
+        self,
+    ) -> dict[tuple[str, str], dict[str, str]]:
+        """Device automation triggers contributed by a quirk."""
+        return {}
+
+    def _is_entity_removed_by_quirk(self, entity: PlatformEntity) -> bool:
+        """Whether a quirk hides this default entity (declarative quirks override)."""
+        return False
+
+    def _apply_entity_metadata_changes(self, entity: PlatformEntity) -> None:
+        """Apply a quirk's metadata overrides to an entity (declarative quirks override)."""
 
     @cached_property
     def manufacturer(self) -> str:
         """Return manufacturer for device."""
+        return self._resolve_manufacturer()
+
+    def _resolve_manufacturer(self) -> str:
+        """Resolve the manufacturer name (declarative quirks override this)."""
         if self.is_active_coordinator:
             manufacturer = (
                 self.gateway.application_controller.state.node_info.manufacturer
             )
-            if manufacturer is None:
-                return ""
-            return manufacturer
-
-        if (
-            self.quirk_metadata is not None
-            and self.quirk_metadata.friendly_name is not None
-        ):
-            return self.quirk_metadata.friendly_name.manufacturer
+            return manufacturer if manufacturer is not None else ""
 
         if self._zigpy_device.manufacturer is None:
             return UNKNOWN_MANUFACTURER
@@ -537,17 +530,15 @@ class Device(LogMixin, EventBase):
     @cached_property
     def model(self) -> str:
         """Return model for device."""
+        return self._resolve_model()
+
+    def _resolve_model(self) -> str:
+        """Resolve the model name (declarative quirks override this)."""
         if self.is_active_coordinator:
             model = self.gateway.application_controller.state.node_info.model
             if model is None:
                 return f"Generic Zigbee Coordinator ({self.gateway.radio_type.pretty_name})"
             return model
-
-        if (
-            self.quirk_metadata is not None
-            and self.quirk_metadata.friendly_name is not None
-        ):
-            return self.quirk_metadata.friendly_name.model
 
         if self._zigpy_device.model is None:
             return UNKNOWN_MODEL
@@ -555,12 +546,9 @@ class Device(LogMixin, EventBase):
         return self._zigpy_device.model
 
     @cached_property
-    def device_alerts(self) -> Iterable[DeviceAlertMetadata]:
-        """Return device alerts for this device."""
-        if self.quirk_metadata is None:
-            return []
-
-        return self.quirk_metadata.device_alerts
+    def device_alerts(self) -> Iterable[Any]:
+        """Return device alerts for this device (declarative quirks override this)."""
+        return []
 
     @cached_property
     def manufacturer_code(self) -> int | None:
@@ -655,6 +643,8 @@ class Device(LogMixin, EventBase):
     @cached_property
     def skip_configuration(self) -> bool:
         """Return true if the device should not issue configuration related commands."""
+        if self._quirk_skip_configuration():
+            return True
         return self._zigpy_device.skip_configuration or bool(self.is_active_coordinator)
 
     @property
@@ -674,7 +664,9 @@ class Device(LogMixin, EventBase):
     @cached_property
     def device_automation_triggers(self) -> dict[tuple[str, str], dict[str, str]]:
         """Return the device automation triggers for this device."""
-        return get_device_automation_triggers(self._zigpy_device)
+        triggers = get_device_automation_triggers(self._zigpy_device)
+        triggers.update(self._quirk_device_automation_triggers())
+        return triggers
 
     @property
     def available(self):
@@ -791,8 +783,15 @@ class Device(LogMixin, EventBase):
         cls,
         zigpy_dev: zigpy.device.Device,
         gateway: Gateway,
-    ) -> Self:
-        """Create new device."""
+    ) -> Device:
+        """Create new device, dispatching to the factory matched during resolution."""
+        if zigpy_dev.ieee == gateway.state.node_info.ieee:
+            return CoordinatorDevice(zigpy_dev, gateway)
+
+        entry = getattr(zigpy_dev, QUIRK_REGISTRY_ENTRY_ATTR, None)
+        if entry is not None and entry.zha_device_factory is not None:
+            return entry.zha_device_factory(zigpy_dev, gateway)
+
         return cls(zigpy_dev, gateway)
 
     def async_update_firmware_version(self, firmware_version: str) -> None:
@@ -999,7 +998,7 @@ class Device(LogMixin, EventBase):
         """Configure the device."""
         self.debug("started configuration")
 
-        if isinstance(self._zigpy_device, zigpy.quirks.BaseCustomDevice):
+        if hasattr(self._zigpy_device, "apply_custom_configuration"):
             self.debug("applying quirks custom device configuration")
             await self._zigpy_device.apply_custom_configuration()
 
@@ -1038,7 +1037,7 @@ class Device(LogMixin, EventBase):
         underlying zigpy device.  Emits entity removal events so listeners
         (e.g. HA) can clean up stale entities.
         """
-        await self._async_teardown(emit_entity_events=True)
+        await self.async_teardown(emit_entity_events=True)
         self._init_from_zigpy_device(zigpy_device)
 
     def emit_reconfigure_done(self) -> None:
@@ -1052,113 +1051,44 @@ class Device(LogMixin, EventBase):
             DeviceConfiguredEvent(device_ieee=self.ieee),
         )
 
-    def _is_entity_removed_by_quirk(self, entity: PlatformEntity) -> bool:
-        if self.quirk_metadata is None:
-            return False
+    def discover_entities(self) -> Iterator[BaseEntity]:
+        """Yield the default (ZCL) entities for this device.
 
-        if entity.PLATFORM == Platform.VIRTUAL:
-            return False
-
-        for meta in self.quirk_metadata.disabled_default_entities:
-            _LOGGER.debug("Checking if entity %s is removed by %s", entity, meta)
-
-            if meta.unique_id_suffix is not None and not entity.unique_id.endswith(
-                meta.unique_id_suffix
-            ):
-                continue
-
-            if meta.endpoint_id is not None and entity.endpoint.id != meta.endpoint_id:
-                continue
-
-            if meta.cluster_id is not None and not _entity_targets_cluster(
-                entity, meta.cluster_id
-            ):
-                continue
-
-            if meta.function is not None and not meta.function(entity):
-                continue
-
-            return True
-
-        return False
-
-    def _apply_entity_metadata_changes(self, entity: PlatformEntity) -> None:
-        """Apply entity metadata changes from quirks v2."""
-        if self.quirk_metadata is None:
+        Declarative quirks add their exposed entities by overriding this in
+        zhaquirks' `QuirkV2Device`; hand-written quirks override it directly.
+        """
+        # TODO: purge old coordinator entities
+        if self.is_coordinator:
             return
 
-        if entity.PLATFORM == Platform.VIRTUAL:
-            return
-
-        for meta in self.quirk_metadata.changed_entity_metadata:
-            if meta.unique_id_suffix is not None and not entity.unique_id.endswith(
-                meta.unique_id_suffix
-            ):
+        for ep_id, endpoint in self.endpoints.items():
+            if ep_id == 0:
                 continue
 
-            if meta.endpoint_id is not None and entity.endpoint.id != meta.endpoint_id:
-                continue
-
-            if meta.cluster_id is not None and not _entity_targets_cluster(
-                entity, meta.cluster_id, cluster_type=meta.cluster_type
-            ):
-                continue
-
-            if meta.function is not None and not meta.function(entity):
-                continue
-
-            # Apply metadata changes
             _LOGGER.debug(
-                "Applying metadata changes from %s to entity %s", meta, entity
+                "Discovering entities for endpoint: %s-%s",
+                str(endpoint.device.ieee),
+                endpoint.id,
             )
-
-            if meta.new_primary is not None:
-                entity._attr_primary = meta.new_primary
-
-            if meta.new_unique_id is not None:
-                entity._unique_id = meta.new_unique_id
-
-            if meta.new_translation_key is not None:
-                entity._attr_translation_key = meta.new_translation_key
-
-            if meta.new_translation_placeholders is not None:
-                entity._attr_translation_placeholders = (
-                    meta.new_translation_placeholders
-                )
-
-            if meta.new_device_class is not None:
-                entity._attr_device_class = meta.new_device_class
-
-            if meta.new_state_class is not None:
-                entity._attr_state_class = meta.new_state_class
-
-            if meta.new_entity_category is not None:
-                entity._attr_entity_category = meta.new_entity_category
-
-            if meta.new_entity_registry_enabled_default is not None:
-                entity._attr_entity_registry_enabled_default = (
-                    meta.new_entity_registry_enabled_default
-                )
-
-            if meta.new_fallback_name is not None:
-                entity._attr_fallback_name = meta.new_fallback_name
+            yield from discovery.discover_entities_for_endpoint(endpoint)
 
     def _discover_new_entities(self) -> None:
-        new_entities: Iterable[BaseEntity]
-
         self._discovered_entities.clear()
 
-        if self.is_active_coordinator:
-            new_entities = discovery.discover_coordinator_device_entities(self)
-        elif self.is_coordinator:
-            # TODO: purge old coordinator entities
-            new_entities = []
-        else:
-            new_entities = discovery.discover_device_entities(self)
+        # Iterate defensively so a failure in any single entity construction
+        # does not abort discovery for the rest of the device.
+        iterator = iter(self.discover_entities())
+        while True:
+            try:
+                entity = next(iterator)
+            except StopIteration:
+                break
+            except Exception:  # pylint: disable=broad-except
+                _LOGGER.exception("Failed to create entity during discovery")
+                continue
 
-        # Discover all applicable entities
-        for entity in new_entities:
             self._discovered_entities.append(entity)
+
             if self._is_entity_removed_by_quirk(entity):
                 continue
 
@@ -1314,7 +1244,7 @@ class Device(LogMixin, EventBase):
         self.status = DeviceStatus.INITIALIZED
         self.debug("completed initialization")
 
-    async def _async_teardown(self, *, emit_entity_events: bool) -> None:
+    async def async_teardown(self, *, emit_entity_events: bool) -> None:
         """Tear down handlers, entities, and endpoints.
 
         Args:
@@ -1364,7 +1294,7 @@ class Device(LogMixin, EventBase):
 
     async def on_remove(self) -> None:
         """Cancel tasks this device owns (shutdown path)."""
-        await self._async_teardown(emit_entity_events=False)
+        await self.async_teardown(emit_entity_events=False)
 
     def async_get_clusters(self) -> dict[int, dict[str, dict[int, Cluster]]]:
         """Get all clusters for this device."""
@@ -1883,3 +1813,32 @@ class Device(LogMixin, EventBase):
         ]
 
         return info
+
+
+class CoordinatorDevice(Device):
+    """ZHA wrapper for the active coordinator device."""
+
+    def discover_entities(self) -> Iterator[BaseEntity]:
+        """Yield counter sensors for the active coordinator."""
+        state = self.gateway.application_controller.state
+        for counter_groups in (
+            "counters",
+            "broadcast_counters",
+            "device_counters",
+            "group_counters",
+        ):
+            for counter_group, counters in getattr(state, counter_groups).items():
+                for counter in counters:
+                    yield sensor.DeviceCounterSensor(
+                        zha_device=self,
+                        counter_groups=counter_groups,
+                        counter_group=counter_group,
+                        counter=counter,
+                    )
+
+                    _LOGGER.debug(
+                        "'%s' platform -> '%s' using %s",
+                        Platform.SENSOR,
+                        sensor.DeviceCounterSensor.__name__,
+                        f"counter groups[{counter_groups}] counter group[{counter_group}] counter[{counter}]",
+                    )

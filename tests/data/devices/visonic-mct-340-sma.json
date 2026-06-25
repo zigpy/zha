@@ -8,7 +8,7 @@
   "friendly_model": "MCT-340 SMA",
   "name": "Visonic MCT-340 SMA",
   "quirk_applied": true,
-  "quirk_class": "zhaquirks.visonic.mct340.MCT340",
+  "quirk_class": "zhaquirks.visonic.mct340:MCT340",
   "exposes_features": [],
   "manufacturer_code": 4113,
   "power_source": "Battery or Unknown",

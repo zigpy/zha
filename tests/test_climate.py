@@ -3,6 +3,7 @@
 # pylint: disable=redefined-outer-name,too-many-lines
 
 import asyncio
+from collections.abc import Iterator
 import logging
 from typing import Any
 from unittest.mock import AsyncMock, MagicMock, call, patch
@@ -10,12 +11,11 @@ import zoneinfo
 
 from freezegun import freeze_time
 import pytest
+from zhaquirks.legacy import CustomDevice
 import zhaquirks.sinope.thermostat
 from zhaquirks.sinope.thermostat import SinopeTechnologiesThermostatCluster
 import zhaquirks.tuya.ts0601_trv
 import zigpy.profiles
-import zigpy.quirks
-from zigpy.quirks.v2 import QuirkBuilder
 import zigpy.zcl.clusters
 from zigpy.zcl.clusters.hvac import Thermostat
 import zigpy.zcl.foundation as zcl_f
@@ -39,6 +39,7 @@ from zha.application.const import (
     PRESET_TEMP_MANUAL,
 )
 from zha.application.gateway import Gateway
+from zha.application.platforms import BaseEntity
 from zha.application.platforms.climate import (
     HVAC_MODE_2_SYSTEM,
     SEQ_OF_OPERATION,
@@ -54,6 +55,7 @@ from zha.application.platforms.sensor import (
 )
 from zha.const import STATE_CHANGED
 from zha.exceptions import ZHAException
+from zha.quirks import DeviceMatch, DeviceRegistry, ModelInfo
 from zha.zigbee.device import Device
 
 _LOGGER = logging.getLogger(__name__)
@@ -221,7 +223,7 @@ async def device_climate_mock(
     endpoints: dict[int, dict[str, Any]],
     plug: dict[str, Any] | None = None,
     manuf: str | None = None,
-    quirk: type[zigpy.quirks.CustomDevice] | None = None,
+    quirk: type[CustomDevice] | None = None,
 ) -> Device:
     """Test regular thermostat device."""
 
@@ -1634,29 +1636,46 @@ async def test_thermostat_quirkv2_local_temperature_calibration_config_overwrite
 ) -> None:
     """Test that a quirk v2 local temperature calibration config overwrites the default one."""
 
+    registry = DeviceRegistry()
     zigpy_device = create_mock_zigpy_device(
-        zha_gateway, CLIMATE, manufacturer="unk_manufacturer", model="FakeModel"
+        zha_gateway,
+        CLIMATE,
+        manufacturer="unk_manufacturer",
+        model="FakeModel",
+        registry=registry,
     )
     zigpy_device.node_desc.mac_capability_flags |= 0b_0000_0100
     zigpy_device.endpoints[1].thermostat.PLUGGED_ATTR_READS = ZCL_ATTR_PLUG
 
-    (
-        QuirkBuilder("unk_manufacturer", "FakeModel", zigpy.quirks.DEVICE_REGISTRY)
-        # Local temperature calibration.
-        .number(
-            Thermostat.AttributeDefs.local_temperature_calibration.name,
-            zigpy.zcl.clusters.hvac.Thermostat.cluster_id,
-            min_value=-5,
-            max_value=5,
-            step=0.1,
-            multiplier=0.1,
-            translation_key="local_temperature_calibration",
-            fallback_name="Local temperature offset",
+    @registry.register_device
+    class FakeThermostatQuirk(Device):
+        _device_match = DeviceMatch(
+            applies_to=(ModelInfo("unk_manufacturer", "FakeModel"),)
         )
-        .add_to_registry()
-    )
 
-    zigpy_device = zigpy.quirks.DEVICE_REGISTRY.get_device(zigpy_device)
+        def discover_entities(self) -> Iterator[BaseEntity]:
+            yield from super().discover_entities()
+
+            endpoint = self.endpoints[1]
+            cluster = endpoint.zigpy_endpoint.in_clusters[Thermostat.cluster_id]
+            calibration = Thermostat.AttributeDefs.local_temperature_calibration.name
+
+            yield NumberConfigurationEntity(
+                endpoint=endpoint,
+                device=self,
+                cluster=cluster,
+                from_quirk=True,
+                attribute_name=calibration,
+                unique_id_suffix=calibration,
+                min_value=-5,
+                max_value=5,
+                step=0.1,
+                multiplier=0.1,
+                translation_key="local_temperature_calibration",
+                fallback_name="Local temperature offset",
+            )
+
+    zigpy_device = registry.resolve(zigpy_device)
     zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
 
     assert zha_device.model == "FakeModel"

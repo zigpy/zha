@@ -8,7 +8,7 @@
   "friendly_model": "lumi.magnet.agl02",
   "name": "LUMI lumi.magnet.agl02",
   "quirk_applied": true,
-  "quirk_class": "zhaquirks.xiaomi.aqara.magnet_agl02.MagnetT1",
+  "quirk_class": "zhaquirks.xiaomi.aqara.magnet_agl02:MagnetT1",
   "exposes_features": [],
   "manufacturer_code": 4447,
   "power_source": "Battery or Unknown",

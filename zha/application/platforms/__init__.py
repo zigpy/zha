@@ -17,14 +17,13 @@ from typing import TYPE_CHECKING, Any, Final, final
 
 from zigpy.profiles.zha import PROFILE_ID as ZHA_PROFILE_ID
 from zigpy.profiles.zll import PROFILE_ID as ZLL_PROFILE_ID
-from zigpy.quirks.v2 import EntityMetadata, EntityType
 from zigpy.types import ClusterId
 from zigpy.types.named import EUI64
 import zigpy.zcl
 from zigpy.zcl import ReportingConfig
 from zigpy.zcl.foundation import ZCLAttributeDef
 
-from zha.application import Platform
+from zha.application import EntityType, Platform
 from zha.application.const import UniqueIdMigration
 from zha.const import STATE_CHANGED
 from zha.debounce import Debouncer
@@ -41,7 +40,7 @@ _LOGGER = logging.getLogger(__name__)
 
 DEFAULT_UPDATE_GROUP_FROM_CHILD_DELAY: float = 0.5
 
-ENTITY_REGISTRY: dict[ClusterId, list[type[PlatformEntity]]] = defaultdict(list)
+ENTITY_REGISTRY: dict[ClusterId | int, list[type[PlatformEntity]]] = defaultdict(list)
 GROUP_ENTITY_REGISTRY: list[type[GroupEntity]] = []
 
 
@@ -143,7 +142,9 @@ class ClusterMatch:
                 )
 
 
-def register_entity[T: type[PlatformEntity]](cluster_id: ClusterId) -> Callable[[T], T]:
+def register_entity[T: type[PlatformEntity]](
+    cluster_id: ClusterId | int,
+) -> Callable[[T], T]:
     """Register an entity class for discovery."""
 
     def inner(cls: T) -> T:
@@ -495,16 +496,37 @@ class PlatformEntity(BaseEntity):
         device: Device,
         *,
         cluster: zigpy.zcl.Cluster,
-        entity_metadata: EntityMetadata | None = None,
+        from_quirk: bool = False,
+        fallback_name: str | None = None,
+        translation_key: str | None = None,
+        translation_placeholders: Mapping[str, str] | None = None,
+        unique_id_suffix: str | None = None,
+        entity_type: EntityType | None = None,
+        primary: bool | None = None,
+        initially_disabled: bool = False,
         legacy_discovery_unique_id: str | None = None,
         **kwargs: Any,
     ):
-        """Initialize the platform entity."""
-        if entity_metadata is not None:
-            self._init_from_quirks_metadata(entity_metadata)
+        """Initialize the platform entity.
+
+        Quirk entities are constructed with `from_quirk=True` and the generic
+        config keywords (`fallback_name`, `translation_key`, `entity_type`, etc.);
+        the platform subclasses add their own keywords. Default-discovery
+        entities pass none of these.
+        """
+        if from_quirk:
+            self._apply_quirk_entity_config(
+                fallback_name=fallback_name,
+                translation_key=translation_key,
+                translation_placeholders=translation_placeholders,
+                unique_id_suffix=unique_id_suffix,
+                entity_type=entity_type,
+                primary=primary,
+                initially_disabled=initially_disabled,
+            )
 
         if legacy_discovery_unique_id is None:
-            if entity_metadata is not None:
+            if from_quirk:
                 legacy_discovery_unique_id = f"{device.ieee}-{endpoint.id}"
             else:
                 legacy_discovery_unique_id = (
@@ -522,45 +544,45 @@ class PlatformEntity(BaseEntity):
         self._endpoint = endpoint
         self._cluster: zigpy.zcl.Cluster = cluster
 
-    def _init_from_quirks_metadata(self, entity_metadata: EntityMetadata) -> None:
-        """Init this entity from the quirks metadata."""
-        if entity_metadata.initially_disabled:
+    def _apply_quirk_entity_config(
+        self,
+        *,
+        fallback_name: str | None,
+        translation_key: str | None,
+        translation_placeholders: Mapping[str, str] | None,
+        unique_id_suffix: str | None,
+        entity_type: EntityType | None,
+        primary: bool | None,
+        initially_disabled: bool,
+    ) -> None:
+        """Apply the generic quirk entity configuration keywords."""
+        if initially_disabled:
             self._attr_entity_registry_enabled_default = False
 
-        # v2 quirks entities are assumed to always be supported
+        # quirk entities are assumed to always be supported
         self._attr_always_supported = True
 
-        has_attribute_name = hasattr(entity_metadata, "attribute_name")
-        has_command_name = hasattr(entity_metadata, "command_name")
-        has_fallback_name = hasattr(entity_metadata, "fallback_name")
+        if fallback_name:
+            self._attr_fallback_name = fallback_name
 
-        if has_fallback_name:
-            self._attr_fallback_name = entity_metadata.fallback_name
+        if translation_key:
+            self._attr_translation_key = translation_key
 
-        if entity_metadata.translation_key:
-            self._attr_translation_key = entity_metadata.translation_key
+        if translation_placeholders:
+            self._attr_translation_placeholders = translation_placeholders
 
-        if entity_metadata.translation_placeholders:
-            self._attr_translation_placeholders = (
-                entity_metadata.translation_placeholders
-            )
-
-        if unique_id_suffix := entity_metadata.unique_id_suffix:
+        if unique_id_suffix is not None:
             self._unique_id_suffix = unique_id_suffix
-        elif has_attribute_name:
-            self._unique_id_suffix = entity_metadata.attribute_name
-        elif has_command_name:
-            self._unique_id_suffix = entity_metadata.command_name
 
-        if entity_metadata.entity_type is EntityType.CONFIG:
+        if entity_type == EntityType.CONFIG:
             self._attr_entity_category = EntityCategory.CONFIG
-        elif entity_metadata.entity_type is EntityType.DIAGNOSTIC:
+        elif entity_type == EntityType.DIAGNOSTIC:
             self._attr_entity_category = EntityCategory.DIAGNOSTIC
         else:
             self._attr_entity_category = None
 
-        if entity_metadata.primary is not None:
-            self._attr_primary = entity_metadata.primary
+        if primary is not None:
+            self._attr_primary = primary
 
     @cached_property
     def identifiers(self) -> PlatformEntityIdentifiers:
@@ -596,6 +618,41 @@ class PlatformEntity(BaseEntity):
     def cluster(self) -> zigpy.zcl.Cluster:
         """Return the ZCL cluster backing this entity."""
         return self._cluster
+
+    def targets_cluster(
+        self,
+        cluster_id: int,
+        cluster_type: zigpy.zcl.ClusterType | None = None,
+    ) -> bool:
+        """Return True if this entity targets the given cluster."""
+        match = self._cluster_match
+        if match is None:
+            # Generated quirks-v2 entities have no class-level `_cluster_match`
+            # but do have a concrete backing cluster; match against it directly.
+            cluster = self.cluster
+            if cluster.cluster_id != cluster_id:
+                return False
+            actual_type = (
+                zigpy.zcl.ClusterType.Client
+                if cluster.is_client
+                else zigpy.zcl.ClusterType.Server
+            )
+            return cluster_type is None or cluster_type == actual_type
+
+        in_server = (
+            cluster_id in match.server_clusters
+            or cluster_id in match.optional_server_clusters
+        )
+        in_client = (
+            cluster_id in match.client_clusters
+            or cluster_id in match.optional_client_clusters
+        )
+
+        if cluster_type == zigpy.zcl.ClusterType.Server:
+            return in_server
+        if cluster_type == zigpy.zcl.ClusterType.Client:
+            return in_client
+        return in_server or in_client
 
     @property
     def should_poll(self) -> bool:

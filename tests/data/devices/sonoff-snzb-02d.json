@@ -8,7 +8,7 @@
   "friendly_model": "SNZB-02D",
   "name": "SONOFF SNZB-02D",
   "quirk_applied": true,
-  "quirk_class": "zigpy.quirks.v2.CustomDeviceV2",
+  "quirk_class": "zhaquirks.sonoff.snzb02d:(SONOFF / SNZB-02D)",
   "exposes_features": [],
   "manufacturer_code": 4742,
   "power_source": "Battery or Unknown",

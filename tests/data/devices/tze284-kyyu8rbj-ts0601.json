@@ -8,7 +8,7 @@
   "friendly_model": "TS0601",
   "name": "_TZE284_kyyu8rbj TS0601",
   "quirk_applied": true,
-  "quirk_class": "zigpy.quirks.v2.CustomDeviceV2",
+  "quirk_class": "zhaquirks.tuya.builder:(_TZE284_kyyu8rbj / TS0601)",
   "exposes_features": [],
   "manufacturer_code": 4417,
   "power_source": "Battery or Unknown",

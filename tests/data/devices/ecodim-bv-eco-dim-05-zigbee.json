@@ -8,7 +8,7 @@
   "friendly_model": "Eco-Dim.05 Zigbee",
   "name": "EcoDim BV Eco-Dim.05 Zigbee",
   "quirk_applied": true,
-  "quirk_class": "zigpy.quirks.v2.CustomDeviceV2",
+  "quirk_class": "zhaquirks.hzc.doubledimmerswitch:(EcoDim BV / EcoDim-Zigbee 3.0)",
   "exposes_features": [],
   "manufacturer_code": 4098,
   "power_source": "Mains",

@@ -8,7 +8,7 @@
   "friendly_model": "TS130F",
   "name": "_TZ3210_dwytrmda TS130F",
   "quirk_applied": true,
-  "quirk_class": "zhaquirks.tuya.ts130f.TuyaTS130FTOGP",
+  "quirk_class": "zhaquirks.tuya.ts130f:TuyaTS130FTOGP",
   "exposes_features": [],
   "manufacturer_code": 4417,
   "power_source": "Mains",

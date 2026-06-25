@@ -8,7 +8,7 @@
   "friendly_model": "TS0601",
   "name": "_TZE204_58of2pfn TS0601",
   "quirk_applied": true,
-  "quirk_class": "zhaquirks.tuya.ts0601_switch.TuyaQuadrupleSwitchGP",
+  "quirk_class": "zhaquirks.tuya.ts0601_switch:TuyaQuadrupleSwitchGP",
   "exposes_features": [],
   "manufacturer_code": 4417,
   "power_source": "Mains",

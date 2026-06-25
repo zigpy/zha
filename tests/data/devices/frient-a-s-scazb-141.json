@@ -8,7 +8,7 @@
   "friendly_model": "SCAZB-141",
   "name": "frient A/S SCAZB-141",
   "quirk_applied": true,
-  "quirk_class": "zigpy.quirks.v2.CustomDeviceV2",
+  "quirk_class": "zhaquirks.develco.smoke_alarm_us:(frient A/S / SCAZB-141)",
   "exposes_features": [
     "siren_basic"
   ],

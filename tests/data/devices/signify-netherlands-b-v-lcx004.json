@@ -8,7 +8,7 @@
   "friendly_model": "Hue Gradient lightstrip",
   "name": "Philips Hue Gradient lightstrip",
   "quirk_applied": true,
-  "quirk_class": "zigpy.quirks.v2.CustomDeviceV2",
+  "quirk_class": "zhaquirks.philips.hue_light:(Signify Netherlands B.V. / LCX004)",
   "exposes_features": [],
   "manufacturer_code": 4107,
   "power_source": "Mains",

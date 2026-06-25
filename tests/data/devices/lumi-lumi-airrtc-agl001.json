@@ -8,7 +8,7 @@
   "friendly_model": "lumi.airrtc.agl001",
   "name": "LUMI lumi.airrtc.agl001",
   "quirk_applied": true,
-  "quirk_class": "zhaquirks.xiaomi.aqara.thermostat_agl001.AGL001",
+  "quirk_class": "zhaquirks.xiaomi.aqara.thermostat_agl001:AGL001",
   "exposes_features": [],
   "manufacturer_code": 4447,
   "power_source": "Battery or Unknown",

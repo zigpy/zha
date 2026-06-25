@@ -8,7 +8,7 @@
   "friendly_model": "TERNCY-SD01",
   "name": "Xiaoyan TERNCY-SD01",
   "quirk_applied": true,
-  "quirk_class": "zhaquirks.terncy.sd01.TerncyKnobSmartDimmer",
+  "quirk_class": "zhaquirks.terncy.sd01:TerncyKnobSmartDimmer",
   "exposes_features": [],
   "manufacturer_code": 4648,
   "power_source": "Battery or Unknown",

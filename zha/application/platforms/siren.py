@@ -10,7 +10,6 @@ from enum import Enum, IntFlag
 import functools
 from typing import TYPE_CHECKING, Any, Final
 
-from zhaquirks.quirk_ids import SIREN_BASIC
 from zigpy.profiles import zha
 from zigpy.zcl.clusters.security import (
     IasWd,
@@ -32,6 +31,7 @@ from zha.application.platforms import (
     PlatformFeatureGroup,
     register_entity,
 )
+from zha.quirks import SIREN_BASIC
 
 if TYPE_CHECKING:
     from zha.zigbee.device import Device

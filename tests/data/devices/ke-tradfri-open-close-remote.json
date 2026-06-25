@@ -8,7 +8,7 @@
   "friendly_model": "TRADFRI open/close remote",
   "name": "\u0002KE TRADFRI open/close remote",
   "quirk_applied": true,
-  "quirk_class": "zhaquirks.ikea.opencloseremote.IkeaTradfriOpenCloseRemote",
+  "quirk_class": "zhaquirks.ikea.opencloseremote:IkeaTradfriOpenCloseRemote",
   "exposes_features": [],
   "manufacturer_code": 4476,
   "power_source": "Battery or Unknown",

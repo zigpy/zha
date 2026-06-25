@@ -8,7 +8,7 @@
   "friendly_model": "TS0003",
   "name": "_TZ3000_mw1pqqqt TS0003",
   "quirk_applied": true,
-  "quirk_class": "zhaquirks.tuya.ts000x.Switch_3G_Metering",
+  "quirk_class": "zhaquirks.tuya.ts000x:Switch_3G_Metering",
   "exposes_features": [
     "tuya.plug_on_off_attributes"
   ],
