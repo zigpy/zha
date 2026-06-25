@@ -10,12 +10,12 @@ import ast
 import asyncio
 import contextlib
 from contextlib import suppress
+from datetime import datetime
 import hashlib
 import json
 import logging
 import pathlib
 import re
-import time
 from typing import Any
 from unittest.mock import AsyncMock, patch
 
@@ -161,7 +161,7 @@ def zigpy_device_from_legacy_diagnostics(  # noqa: C901
     device.model = model
 
     device.node_desc = node_desc
-    device.last_seen = time.time()
+    device.last_seen = datetime.fromisoformat(device_data["last_seen"])
 
     for epid, ep in endpoints.items():
         # Old diagnostics just used strings for clusters, there was no cache
