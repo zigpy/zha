@@ -1,20 +1,20 @@
 {
   "version": 2,
-  "ieee": "ab:cd:ef:12:03:3d:90:21",
-  "nwk": "0xE534",
+  "ieee": "ab:cd:ef:12:25:9f:47:fc",
+  "nwk": "0x253A",
   "manufacturer": "Inovelli",
-  "model": "VZM35-SN",
+  "model": "VZM36",
   "friendly_manufacturer": "Inovelli",
-  "friendly_model": "VZM35-SN",
-  "name": "Inovelli VZM35-SN",
+  "friendly_model": "VZM36",
+  "name": "Inovelli VZM36",
   "quirk_applied": true,
-  "quirk_class": "zhaquirks.inovelli.VZM35SN:(Inovelli / VZM35-SN)",
+  "quirk_class": "zhaquirks.inovelli.VZM36:(Inovelli / VZM36)",
   "exposes_features": [],
   "manufacturer_code": 4655,
   "power_source": "Mains",
-  "lqi": 184,
-  "rssi": -54,
-  "last_seen": "2025-07-31T03:54:23.594775+00:00",
+  "lqi": null,
+  "rssi": null,
+  "last_seen": "2025-11-24T04:45:21.574337+00:00",
   "available": true,
   "device_type": "Router",
   "active_coordinator": false,
@@ -28,9 +28,9 @@
     "mac_capability_flags": 142,
     "manufacturer_code": 4655,
     "maximum_buffer_size": 82,
-    "maximum_incoming_transfer_size": 512,
+    "maximum_incoming_transfer_size": 500,
     "server_mask": 11264,
-    "maximum_outgoing_transfer_size": 512,
+    "maximum_outgoing_transfer_size": 500,
     "descriptor_capability_field": 0
   },
   "endpoints": {
@@ -55,7 +55,13 @@
               "id": "0x0005",
               "name": "model",
               "zcl_type": "string",
-              "value": "VZM35-SN"
+              "value": "VZM36"
+            },
+            {
+              "id": "0x4000",
+              "name": "sw_build_id",
+              "zcl_type": "string",
+              "value": "1.00"
             }
           ]
         },
@@ -100,13 +106,13 @@
               "id": "0x0000",
               "name": "current_level",
               "zcl_type": "uint8",
-              "value": 254
+              "value": 128
             },
             {
               "id": "0x0014",
               "name": "default_move_rate",
               "zcl_type": "uint8",
-              "unsupported": true
+              "value": 0
             },
             {
               "id": "0x0013",
@@ -124,7 +130,7 @@
               "id": "0x0010",
               "name": "on_off_transition_time",
               "zcl_type": "uint16",
-              "value": 0
+              "value": 25
             },
             {
               "id": "0x0012",
@@ -146,238 +152,14 @@
           "attributes": []
         },
         {
+          "cluster_id": "0x1000",
+          "endpoint_attribute": "lightlink",
+          "attributes": []
+        },
+        {
           "cluster_id": "0xfc31",
           "endpoint_attribute": "inovelli_vzm31sn_cluster",
-          "attributes": [
-            {
-              "id": "0x000c",
-              "name": "auto_off_timer",
-              "zcl_type": "uint16",
-              "value": 3600
-            },
-            {
-              "id": "0x007b",
-              "name": "aux_switch_scenes",
-              "zcl_type": "bool",
-              "value": 0
-            },
-            {
-              "id": "0x0032",
-              "name": "button_delay",
-              "zcl_type": "uint8",
-              "value": 5
-            },
-            {
-              "id": "0x000d",
-              "name": "default_level_local",
-              "zcl_type": "uint8",
-              "value": 255
-            },
-            {
-              "id": "0x000e",
-              "name": "default_level_remote",
-              "zcl_type": "uint8",
-              "value": 255
-            },
-            {
-              "id": "0x0006",
-              "name": "dimming_speed_down_local",
-              "zcl_type": "uint8",
-              "value": 127
-            },
-            {
-              "id": "0x0005",
-              "name": "dimming_speed_down_remote",
-              "zcl_type": "uint8",
-              "value": 127
-            },
-            {
-              "id": "0x0002",
-              "name": "dimming_speed_up_local",
-              "zcl_type": "uint8",
-              "value": 127
-            },
-            {
-              "id": "0x0001",
-              "name": "dimming_speed_up_remote",
-              "zcl_type": "uint8",
-              "value": 25
-            },
-            {
-              "id": "0x0036",
-              "name": "double_tap_down_enabled",
-              "zcl_type": "bool",
-              "value": 0
-            },
-            {
-              "id": "0x0038",
-              "name": "double_tap_down_level",
-              "zcl_type": "uint8",
-              "value": 2
-            },
-            {
-              "id": "0x0035",
-              "name": "double_tap_up_enabled",
-              "zcl_type": "bool",
-              "value": 0
-            },
-            {
-              "id": "0x0037",
-              "name": "double_tap_up_level",
-              "zcl_type": "uint8",
-              "value": 254
-            },
-            {
-              "id": "0x0104",
-              "name": "firmware_progress_led",
-              "zcl_type": "bool",
-              "value": 1
-            },
-            {
-              "id": "0x000b",
-              "name": "invert_switch",
-              "zcl_type": "bool",
-              "value": 0
-            },
-            {
-              "id": "0x0060",
-              "name": "led_color_when_off",
-              "zcl_type": "uint8",
-              "value": 170
-            },
-            {
-              "id": "0x005f",
-              "name": "led_color_when_on",
-              "zcl_type": "uint8",
-              "value": 170
-            },
-            {
-              "id": "0x0062",
-              "name": "led_intensity_when_off",
-              "zcl_type": "uint8",
-              "value": 1
-            },
-            {
-              "id": "0x0061",
-              "name": "led_intensity_when_on",
-              "zcl_type": "uint8",
-              "value": 33
-            },
-            {
-              "id": "0x0011",
-              "name": "load_level_indicator_timeout",
-              "zcl_type": "uint8",
-              "value": 11
-            },
-            {
-              "id": "0x0100",
-              "name": "local_protection",
-              "zcl_type": "bool",
-              "value": 0
-            },
-            {
-              "id": "0x000a",
-              "name": "maximum_level",
-              "zcl_type": "uint8",
-              "value": 255
-            },
-            {
-              "id": "0x0009",
-              "name": "minimum_level",
-              "zcl_type": "uint8",
-              "value": 254
-            },
-            {
-              "id": "0x001f",
-              "name": "non_neutral_aux_low_gear_learn_value",
-              "zcl_type": "uint8",
-              "value": 110
-            },
-            {
-              "id": "0x001e",
-              "name": "non_neutral_aux_med_gear_learn_value",
-              "zcl_type": "uint8",
-              "value": 90
-            },
-            {
-              "id": "0x0103",
-              "name": "on_off_led_mode",
-              "zcl_type": "bool",
-              "value": 0
-            },
-            {
-              "id": "0x0102",
-              "name": "output_mode",
-              "zcl_type": "bool",
-              "value": 1
-            },
-            {
-              "id": "0x0021",
-              "name": "overheated",
-              "zcl_type": "bool",
-              "value": 0
-            },
-            {
-              "id": "0x0015",
-              "name": "power_type",
-              "zcl_type": "bool",
-              "value": 0
-            },
-            {
-              "id": "0x0017",
-              "name": "quick_start_time",
-              "zcl_type": "uint8",
-              "value": 0
-            },
-            {
-              "id": "0x0004",
-              "name": "ramp_rate_off_to_on_local",
-              "zcl_type": "uint8",
-              "value": 127
-            },
-            {
-              "id": "0x0003",
-              "name": "ramp_rate_off_to_on_remote",
-              "zcl_type": "uint8",
-              "value": 0
-            },
-            {
-              "id": "0x0008",
-              "name": "ramp_rate_on_to_off_local",
-              "zcl_type": "uint8",
-              "value": 127
-            },
-            {
-              "id": "0x0007",
-              "name": "ramp_rate_on_to_off_remote",
-              "zcl_type": "uint8",
-              "value": 127
-            },
-            {
-              "id": "0x0034",
-              "name": "smart_fan_mode",
-              "zcl_type": "bool",
-              "value": 0
-            },
-            {
-              "id": "0x0107",
-              "name": "smart_fan_led_display_levels",
-              "zcl_type": "uint8",
-              "value": 10
-            },
-            {
-              "id": "0x000f",
-              "name": "state_after_power_restored",
-              "zcl_type": "uint8",
-              "value": 255
-            },
-            {
-              "id": "0x0016",
-              "name": "switch_type",
-              "zcl_type": "uint8",
-              "value": 0
-            }
-          ]
+          "attributes": []
         },
         {
           "cluster_id": "0xfc57",
@@ -394,7 +176,7 @@
               "id": "0x0002",
               "name": "current_file_version",
               "zcl_type": "uint32",
-              "value": 33685767
+              "unsupported": true
             }
           ]
         }
@@ -403,8 +185,8 @@
     "2": {
       "profile_id": 260,
       "device_type": {
-        "name": "DIMMER_SWITCH",
-        "id": 260
+        "name": "DIMMABLE_LIGHT",
+        "id": 257
       },
       "in_clusters": [
         {
@@ -426,22 +208,99 @@
           "cluster_id": "0x0005",
           "endpoint_attribute": "scenes",
           "attributes": []
-        }
-      ],
-      "out_clusters": [
-        {
-          "cluster_id": "0x0003",
-          "endpoint_attribute": "identify",
-          "attributes": []
         },
         {
           "cluster_id": "0x0006",
           "endpoint_attribute": "on_off",
-          "attributes": []
+          "attributes": [
+            {
+              "id": "0x0000",
+              "name": "on_off",
+              "zcl_type": "bool",
+              "value": 0
+            },
+            {
+              "id": "0x4003",
+              "name": "start_up_on_off",
+              "zcl_type": "enum8",
+              "value": 255
+            }
+          ]
         },
         {
           "cluster_id": "0x0008",
           "endpoint_attribute": "level",
+          "attributes": [
+            {
+              "id": "0x0000",
+              "name": "current_level",
+              "zcl_type": "uint8",
+              "value": 83
+            },
+            {
+              "id": "0x0014",
+              "name": "default_move_rate",
+              "zcl_type": "uint8",
+              "value": 0
+            },
+            {
+              "id": "0x0013",
+              "name": "off_transition_time",
+              "zcl_type": "uint16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0011",
+              "name": "on_level",
+              "zcl_type": "uint8",
+              "value": 255
+            },
+            {
+              "id": "0x0010",
+              "name": "on_off_transition_time",
+              "zcl_type": "uint16",
+              "value": 25
+            },
+            {
+              "id": "0x0012",
+              "name": "on_transition_time",
+              "zcl_type": "uint16",
+              "unsupported": true
+            },
+            {
+              "id": "0x4000",
+              "name": "start_up_current_level",
+              "zcl_type": "uint8",
+              "value": 255
+            }
+          ]
+        },
+        {
+          "cluster_id": "0x0202",
+          "endpoint_attribute": "fan",
+          "attributes": [
+            {
+              "id": "0x0000",
+              "name": "fan_mode",
+              "zcl_type": "enum8",
+              "value": 0
+            },
+            {
+              "id": "0x0001",
+              "name": "fan_mode_sequence",
+              "zcl_type": "enum8",
+              "value": 2
+            }
+          ]
+        },
+        {
+          "cluster_id": "0x0b05",
+          "endpoint_attribute": "diagnostic",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x1000",
+          "endpoint_attribute": "lightlink",
           "attributes": []
         },
         {
@@ -449,20 +308,19 @@
           "endpoint_attribute": "inovelli_vzm31sn_cluster",
           "attributes": []
         }
-      ]
-    },
-    "3": {
-      "profile_id": 260,
-      "device_type": {
-        "name": "DIMMER_SWITCH",
-        "id": 260
-      },
-      "in_clusters": [],
+      ],
       "out_clusters": [
         {
-          "cluster_id": "0xfc31",
-          "endpoint_attribute": "inovelli_vzm31sn_cluster",
-          "attributes": []
+          "cluster_id": "0x0019",
+          "endpoint_attribute": "ota",
+          "attributes": [
+            {
+              "id": "0x0002",
+              "name": "current_file_version",
+              "zcl_type": "uint32",
+              "unsupported": true
+            }
+          ]
         }
       ]
     },
@@ -484,7 +342,7 @@
   },
   "original_signature": {
     "manufacturer": "Inovelli",
-    "model": "VZM35-SN",
+    "model": "VZM36",
     "node_desc": {
       "logical_type": 1,
       "complex_descriptor_available": 0,
@@ -495,9 +353,9 @@
       "mac_capability_flags": 142,
       "manufacturer_code": 4655,
       "maximum_buffer_size": 82,
-      "maximum_incoming_transfer_size": 512,
+      "maximum_incoming_transfer_size": 500,
       "server_mask": 11264,
-      "maximum_outgoing_transfer_size": 512,
+      "maximum_outgoing_transfer_size": 500,
       "descriptor_capability_field": 0
     },
     "endpoints": {
@@ -512,6 +370,7 @@
           "0x0006",
           "0x0008",
           "0x0b05",
+          "0x1000",
           "0xfc31",
           "0xfc57"
         ],
@@ -521,26 +380,21 @@
       },
       "2": {
         "profile_id": "0x0104",
-        "device_type": "0x0104",
+        "device_type": "0x0101",
         "input_clusters": [
           "0x0000",
           "0x0003",
           "0x0004",
-          "0x0005"
-        ],
-        "output_clusters": [
-          "0x0003",
+          "0x0005",
           "0x0006",
           "0x0008",
+          "0x0202",
+          "0x0b05",
+          "0x1000",
           "0xfc31"
-        ]
-      },
-      "3": {
-        "profile_id": "0x0104",
-        "device_type": "0x0104",
-        "input_clusters": [],
+        ],
         "output_clusters": [
-          "0xfc31"
+          "0x0019"
         ]
       },
       "242": {
@@ -558,7 +412,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "ab:cd:ef:12:03:3d:90:21-1-3",
+          "unique_id": "ab:cd:ef:12:25:9f:47:fc-1-3",
           "migrate_unique_ids": [],
           "platform": "button",
           "class_name": "IdentifyButton",
@@ -570,7 +424,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "device_ieee": "ab:cd:ef:12:03:3d:90:21",
+          "device_ieee": "ab:cd:ef:12:25:9f:47:fc",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -586,11 +440,58 @@
         }
       }
     ],
+    "fan": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:25:9f:47:fc-2-514",
+          "migrate_unique_ids": [],
+          "platform": "fan",
+          "class_name": "Fan",
+          "translation_key": "fan",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "device_ieee": "ab:cd:ef:12:25:9f:47:fc",
+          "endpoint_id": 2,
+          "available": true,
+          "group_id": null,
+          "preset_modes": [
+            "on",
+            "auto",
+            "smart"
+          ],
+          "supported_features": 49,
+          "speed_count": 3,
+          "speed_list": [
+            "off",
+            "low",
+            "medium",
+            "high",
+            "on",
+            "auto",
+            "smart"
+          ]
+        },
+        "state": {
+          "class_name": "Fan",
+          "available": true,
+          "preset_mode": null,
+          "percentage": 0,
+          "is_on": false,
+          "speed": "off"
+        }
+      }
+    ],
     "light": [
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "ab:cd:ef:12:03:3d:90:21-1",
+          "unique_id": "ab:cd:ef:12:25:9f:47:fc-1",
           "migrate_unique_ids": [],
           "platform": "light",
           "class_name": "Light",
@@ -601,8 +502,8 @@
           "entity_category": null,
           "entity_registry_enabled_default": true,
           "enabled": true,
-          "primary": true,
-          "device_ieee": "ab:cd:ef:12:03:3d:90:21",
+          "primary": false,
+          "device_ieee": "ab:cd:ef:12:25:9f:47:fc",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -617,7 +518,58 @@
           "class_name": "Light",
           "available": true,
           "on": false,
-          "brightness": 254,
+          "brightness": 128,
+          "xy_color": null,
+          "color_temp": null,
+          "effect_list": [
+            "off"
+          ],
+          "effect": "off",
+          "supported_features": 40,
+          "color_mode": "brightness",
+          "supported_color_modes": [
+            "brightness",
+            "onoff"
+          ],
+          "off_with_transition": false,
+          "off_brightness": null
+        },
+        "extra_state_attributes": [
+          "off_brightness",
+          "off_with_transition"
+        ]
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:25:9f:47:fc-2",
+          "migrate_unique_ids": [],
+          "platform": "light",
+          "class_name": "Light",
+          "translation_key": "light",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "device_ieee": "ab:cd:ef:12:25:9f:47:fc",
+          "endpoint_id": 2,
+          "available": true,
+          "group_id": null,
+          "effect_list": [
+            "off"
+          ],
+          "supported_features": 40,
+          "min_mireds": 153,
+          "max_mireds": 500
+        },
+        "state": {
+          "class_name": "Light",
+          "available": true,
+          "on": false,
+          "brightness": 83,
           "xy_color": null,
           "color_temp": null,
           "effect_list": [
@@ -643,7 +595,7 @@
       {
         "info_object": {
           "fallback_name": "Automatic switch shutoff timer",
-          "unique_id": "ab:cd:ef:12:03:3d:90:21-1-64561-auto_off_timer",
+          "unique_id": "ab:cd:ef:12:25:9f:47:fc-1-64561-auto_off_timer",
           "migrate_unique_ids": [],
           "platform": "number",
           "class_name": "NumberConfigurationEntity",
@@ -655,7 +607,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "device_ieee": "ab:cd:ef:12:03:3d:90:21",
+          "device_ieee": "ab:cd:ef:12:25:9f:47:fc",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -668,75 +620,13 @@
         "state": {
           "class_name": "NumberConfigurationEntity",
           "available": true,
-          "state": 3600
-        }
-      },
-      {
-        "info_object": {
-          "fallback_name": "Button delay",
-          "unique_id": "ab:cd:ef:12:03:3d:90:21-1-64561-button_delay",
-          "migrate_unique_ids": [],
-          "platform": "number",
-          "class_name": "NumberConfigurationEntity",
-          "translation_key": "button_delay",
-          "translation_placeholders": null,
-          "device_class": null,
-          "state_class": null,
-          "entity_category": "config",
-          "entity_registry_enabled_default": true,
-          "enabled": true,
-          "primary": false,
-          "device_ieee": "ab:cd:ef:12:03:3d:90:21",
-          "endpoint_id": 1,
-          "available": true,
-          "group_id": null,
-          "mode": "auto",
-          "native_max_value": 9,
-          "native_min_value": 0,
-          "native_step": 1.0,
-          "native_unit_of_measurement": null
-        },
-        "state": {
-          "class_name": "NumberConfigurationEntity",
-          "available": true,
-          "state": 5
-        }
-      },
-      {
-        "info_object": {
-          "fallback_name": "Local default dimming level",
-          "unique_id": "ab:cd:ef:12:03:3d:90:21-1-64561-default_level_local",
-          "migrate_unique_ids": [],
-          "platform": "number",
-          "class_name": "NumberConfigurationEntity",
-          "translation_key": "default_level_local",
-          "translation_placeholders": null,
-          "device_class": null,
-          "state_class": null,
-          "entity_category": "config",
-          "entity_registry_enabled_default": true,
-          "enabled": true,
-          "primary": false,
-          "device_ieee": "ab:cd:ef:12:03:3d:90:21",
-          "endpoint_id": 1,
-          "available": true,
-          "group_id": null,
-          "mode": "auto",
-          "native_max_value": 255,
-          "native_min_value": 0,
-          "native_step": 1.0,
-          "native_unit_of_measurement": null
-        },
-        "state": {
-          "class_name": "NumberConfigurationEntity",
-          "available": true,
-          "state": 255
+          "state": null
         }
       },
       {
         "info_object": {
           "fallback_name": "Remote default dimming level",
-          "unique_id": "ab:cd:ef:12:03:3d:90:21-1-64561-default_level_remote",
+          "unique_id": "ab:cd:ef:12:25:9f:47:fc-1-64561-default_level_remote",
           "migrate_unique_ids": [],
           "platform": "number",
           "class_name": "NumberConfigurationEntity",
@@ -748,7 +638,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "device_ieee": "ab:cd:ef:12:03:3d:90:21",
+          "device_ieee": "ab:cd:ef:12:25:9f:47:fc",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -761,44 +651,13 @@
         "state": {
           "class_name": "NumberConfigurationEntity",
           "available": true,
-          "state": 255
-        }
-      },
-      {
-        "info_object": {
-          "fallback_name": "Local dimming down speed",
-          "unique_id": "ab:cd:ef:12:03:3d:90:21-1-64561-dimming_speed_down_local",
-          "migrate_unique_ids": [],
-          "platform": "number",
-          "class_name": "NumberConfigurationEntity",
-          "translation_key": "dimming_speed_down_local",
-          "translation_placeholders": null,
-          "device_class": null,
-          "state_class": null,
-          "entity_category": "config",
-          "entity_registry_enabled_default": true,
-          "enabled": true,
-          "primary": false,
-          "device_ieee": "ab:cd:ef:12:03:3d:90:21",
-          "endpoint_id": 1,
-          "available": true,
-          "group_id": null,
-          "mode": "auto",
-          "native_max_value": 127,
-          "native_min_value": 0,
-          "native_step": 1.0,
-          "native_unit_of_measurement": null
-        },
-        "state": {
-          "class_name": "NumberConfigurationEntity",
-          "available": true,
-          "state": 127
+          "state": null
         }
       },
       {
         "info_object": {
           "fallback_name": "Remote dimming down speed",
-          "unique_id": "ab:cd:ef:12:03:3d:90:21-1-64561-dimming_speed_down_remote",
+          "unique_id": "ab:cd:ef:12:25:9f:47:fc-1-64561-dimming_speed_down_remote",
           "migrate_unique_ids": [],
           "platform": "number",
           "class_name": "NumberConfigurationEntity",
@@ -810,7 +669,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "device_ieee": "ab:cd:ef:12:03:3d:90:21",
+          "device_ieee": "ab:cd:ef:12:25:9f:47:fc",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -823,44 +682,13 @@
         "state": {
           "class_name": "NumberConfigurationEntity",
           "available": true,
-          "state": 127
-        }
-      },
-      {
-        "info_object": {
-          "fallback_name": "Local dimming up speed",
-          "unique_id": "ab:cd:ef:12:03:3d:90:21-1-64561-dimming_speed_up_local",
-          "migrate_unique_ids": [],
-          "platform": "number",
-          "class_name": "NumberConfigurationEntity",
-          "translation_key": "dimming_speed_up_local",
-          "translation_placeholders": null,
-          "device_class": null,
-          "state_class": null,
-          "entity_category": "config",
-          "entity_registry_enabled_default": true,
-          "enabled": true,
-          "primary": false,
-          "device_ieee": "ab:cd:ef:12:03:3d:90:21",
-          "endpoint_id": 1,
-          "available": true,
-          "group_id": null,
-          "mode": "auto",
-          "native_max_value": 127,
-          "native_min_value": 0,
-          "native_step": 1.0,
-          "native_unit_of_measurement": null
-        },
-        "state": {
-          "class_name": "NumberConfigurationEntity",
-          "available": true,
-          "state": 127
+          "state": null
         }
       },
       {
         "info_object": {
           "fallback_name": "Remote dimming up speed",
-          "unique_id": "ab:cd:ef:12:03:3d:90:21-1-64561-dimming_speed_up_remote",
+          "unique_id": "ab:cd:ef:12:25:9f:47:fc-1-64561-dimming_speed_up_remote",
           "migrate_unique_ids": [],
           "platform": "number",
           "class_name": "NumberConfigurationEntity",
@@ -872,7 +700,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "device_ieee": "ab:cd:ef:12:03:3d:90:21",
+          "device_ieee": "ab:cd:ef:12:25:9f:47:fc",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -885,106 +713,13 @@
         "state": {
           "class_name": "NumberConfigurationEntity",
           "available": true,
-          "state": 25
-        }
-      },
-      {
-        "info_object": {
-          "fallback_name": "Double tap down level",
-          "unique_id": "ab:cd:ef:12:03:3d:90:21-1-64561-double_tap_down_level",
-          "migrate_unique_ids": [],
-          "platform": "number",
-          "class_name": "NumberConfigurationEntity",
-          "translation_key": "double_tap_down_level",
-          "translation_placeholders": null,
-          "device_class": null,
-          "state_class": null,
-          "entity_category": "config",
-          "entity_registry_enabled_default": true,
-          "enabled": true,
-          "primary": false,
-          "device_ieee": "ab:cd:ef:12:03:3d:90:21",
-          "endpoint_id": 1,
-          "available": true,
-          "group_id": null,
-          "mode": "auto",
-          "native_max_value": 254,
-          "native_min_value": 0,
-          "native_step": 1.0,
-          "native_unit_of_measurement": null
-        },
-        "state": {
-          "class_name": "NumberConfigurationEntity",
-          "available": true,
-          "state": 2
-        }
-      },
-      {
-        "info_object": {
-          "fallback_name": "Double tap up level",
-          "unique_id": "ab:cd:ef:12:03:3d:90:21-1-64561-double_tap_up_level",
-          "migrate_unique_ids": [],
-          "platform": "number",
-          "class_name": "NumberConfigurationEntity",
-          "translation_key": "double_tap_up_level",
-          "translation_placeholders": null,
-          "device_class": null,
-          "state_class": null,
-          "entity_category": "config",
-          "entity_registry_enabled_default": true,
-          "enabled": true,
-          "primary": false,
-          "device_ieee": "ab:cd:ef:12:03:3d:90:21",
-          "endpoint_id": 1,
-          "available": true,
-          "group_id": null,
-          "mode": "auto",
-          "native_max_value": 254,
-          "native_min_value": 2,
-          "native_step": 1.0,
-          "native_unit_of_measurement": null
-        },
-        "state": {
-          "class_name": "NumberConfigurationEntity",
-          "available": true,
-          "state": 254
-        }
-      },
-      {
-        "info_object": {
-          "fallback_name": "Default all LED off color",
-          "unique_id": "ab:cd:ef:12:03:3d:90:21-1-64561-led_color_when_off",
-          "migrate_unique_ids": [],
-          "platform": "number",
-          "class_name": "NumberConfigurationEntity",
-          "translation_key": "led_color_when_off",
-          "translation_placeholders": null,
-          "device_class": null,
-          "state_class": null,
-          "entity_category": "config",
-          "entity_registry_enabled_default": true,
-          "enabled": true,
-          "primary": false,
-          "device_ieee": "ab:cd:ef:12:03:3d:90:21",
-          "endpoint_id": 1,
-          "available": true,
-          "group_id": null,
-          "mode": "auto",
-          "native_max_value": 255,
-          "native_min_value": 0,
-          "native_step": 1.0,
-          "native_unit_of_measurement": null
-        },
-        "state": {
-          "class_name": "NumberConfigurationEntity",
-          "available": true,
-          "state": 170
+          "state": null
         }
       },
       {
         "info_object": {
           "fallback_name": "Default all LED on color",
-          "unique_id": "ab:cd:ef:12:03:3d:90:21-1-64561-led_color_when_on",
+          "unique_id": "ab:cd:ef:12:25:9f:47:fc-1-64561-led_color_when_on",
           "migrate_unique_ids": [],
           "platform": "number",
           "class_name": "NumberConfigurationEntity",
@@ -996,7 +731,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "device_ieee": "ab:cd:ef:12:03:3d:90:21",
+          "device_ieee": "ab:cd:ef:12:25:9f:47:fc",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -1009,44 +744,13 @@
         "state": {
           "class_name": "NumberConfigurationEntity",
           "available": true,
-          "state": 170
-        }
-      },
-      {
-        "info_object": {
-          "fallback_name": "Default all LED off intensity",
-          "unique_id": "ab:cd:ef:12:03:3d:90:21-1-64561-led_intensity_when_off",
-          "migrate_unique_ids": [],
-          "platform": "number",
-          "class_name": "NumberConfigurationEntity",
-          "translation_key": "led_intensity_when_off",
-          "translation_placeholders": null,
-          "device_class": null,
-          "state_class": null,
-          "entity_category": "config",
-          "entity_registry_enabled_default": true,
-          "enabled": true,
-          "primary": false,
-          "device_ieee": "ab:cd:ef:12:03:3d:90:21",
-          "endpoint_id": 1,
-          "available": true,
-          "group_id": null,
-          "mode": "auto",
-          "native_max_value": 100,
-          "native_min_value": 0,
-          "native_step": 1.0,
-          "native_unit_of_measurement": null
-        },
-        "state": {
-          "class_name": "NumberConfigurationEntity",
-          "available": true,
-          "state": 1
+          "state": null
         }
       },
       {
         "info_object": {
           "fallback_name": "Default all LED on intensity",
-          "unique_id": "ab:cd:ef:12:03:3d:90:21-1-64561-led_intensity_when_on",
+          "unique_id": "ab:cd:ef:12:25:9f:47:fc-1-64561-led_intensity_when_on",
           "migrate_unique_ids": [],
           "platform": "number",
           "class_name": "NumberConfigurationEntity",
@@ -1058,7 +762,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "device_ieee": "ab:cd:ef:12:03:3d:90:21",
+          "device_ieee": "ab:cd:ef:12:25:9f:47:fc",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -1071,44 +775,13 @@
         "state": {
           "class_name": "NumberConfigurationEntity",
           "available": true,
-          "state": 33
-        }
-      },
-      {
-        "info_object": {
-          "fallback_name": "Load level indicator timeout",
-          "unique_id": "ab:cd:ef:12:03:3d:90:21-1-64561-load_level_indicator_timeout",
-          "migrate_unique_ids": [],
-          "platform": "number",
-          "class_name": "NumberConfigurationEntity",
-          "translation_key": "load_level_indicator_timeout",
-          "translation_placeholders": null,
-          "device_class": null,
-          "state_class": null,
-          "entity_category": "config",
-          "entity_registry_enabled_default": true,
-          "enabled": true,
-          "primary": false,
-          "device_ieee": "ab:cd:ef:12:03:3d:90:21",
-          "endpoint_id": 1,
-          "available": true,
-          "group_id": null,
-          "mode": "auto",
-          "native_max_value": 11,
-          "native_min_value": 0,
-          "native_step": 1.0,
-          "native_unit_of_measurement": null
-        },
-        "state": {
-          "class_name": "NumberConfigurationEntity",
-          "available": true,
-          "state": 11
+          "state": null
         }
       },
       {
         "info_object": {
           "fallback_name": "Maximum load dimming level",
-          "unique_id": "ab:cd:ef:12:03:3d:90:21-1-64561-maximum_level",
+          "unique_id": "ab:cd:ef:12:25:9f:47:fc-1-64561-maximum_level",
           "migrate_unique_ids": [],
           "platform": "number",
           "class_name": "NumberConfigurationEntity",
@@ -1120,7 +793,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "device_ieee": "ab:cd:ef:12:03:3d:90:21",
+          "device_ieee": "ab:cd:ef:12:25:9f:47:fc",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -1133,13 +806,13 @@
         "state": {
           "class_name": "NumberConfigurationEntity",
           "available": true,
-          "state": 255
+          "state": null
         }
       },
       {
         "info_object": {
           "fallback_name": "Minimum load dimming level",
-          "unique_id": "ab:cd:ef:12:03:3d:90:21-1-64561-minimum_level",
+          "unique_id": "ab:cd:ef:12:25:9f:47:fc-1-64561-minimum_level",
           "migrate_unique_ids": [],
           "platform": "number",
           "class_name": "NumberConfigurationEntity",
@@ -1151,7 +824,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "device_ieee": "ab:cd:ef:12:03:3d:90:21",
+          "device_ieee": "ab:cd:ef:12:25:9f:47:fc",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -1164,75 +837,13 @@
         "state": {
           "class_name": "NumberConfigurationEntity",
           "available": true,
-          "state": 254
-        }
-      },
-      {
-        "info_object": {
-          "fallback_name": "Quick start time",
-          "unique_id": "ab:cd:ef:12:03:3d:90:21-1-64561-quick_start_time",
-          "migrate_unique_ids": [],
-          "platform": "number",
-          "class_name": "NumberConfigurationEntity",
-          "translation_key": "quick_start_time",
-          "translation_placeholders": null,
-          "device_class": null,
-          "state_class": null,
-          "entity_category": "config",
-          "entity_registry_enabled_default": true,
-          "enabled": true,
-          "primary": false,
-          "device_ieee": "ab:cd:ef:12:03:3d:90:21",
-          "endpoint_id": 1,
-          "available": true,
-          "group_id": null,
-          "mode": "auto",
-          "native_max_value": 10,
-          "native_min_value": 0,
-          "native_step": 1.0,
-          "native_unit_of_measurement": null
-        },
-        "state": {
-          "class_name": "NumberConfigurationEntity",
-          "available": true,
-          "state": 0
-        }
-      },
-      {
-        "info_object": {
-          "fallback_name": "Local ramp rate off to on",
-          "unique_id": "ab:cd:ef:12:03:3d:90:21-1-64561-ramp_rate_off_to_on_local",
-          "migrate_unique_ids": [],
-          "platform": "number",
-          "class_name": "NumberConfigurationEntity",
-          "translation_key": "ramp_rate_off_to_on_local",
-          "translation_placeholders": null,
-          "device_class": null,
-          "state_class": null,
-          "entity_category": "config",
-          "entity_registry_enabled_default": true,
-          "enabled": true,
-          "primary": false,
-          "device_ieee": "ab:cd:ef:12:03:3d:90:21",
-          "endpoint_id": 1,
-          "available": true,
-          "group_id": null,
-          "mode": "auto",
-          "native_max_value": 127,
-          "native_min_value": 0,
-          "native_step": 1.0,
-          "native_unit_of_measurement": null
-        },
-        "state": {
-          "class_name": "NumberConfigurationEntity",
-          "available": true,
-          "state": 127
+          "state": null
         }
       },
       {
         "info_object": {
           "fallback_name": "Remote ramp rate off to on",
-          "unique_id": "ab:cd:ef:12:03:3d:90:21-1-64561-ramp_rate_off_to_on_remote",
+          "unique_id": "ab:cd:ef:12:25:9f:47:fc-1-64561-ramp_rate_off_to_on_remote",
           "migrate_unique_ids": [],
           "platform": "number",
           "class_name": "NumberConfigurationEntity",
@@ -1244,7 +855,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "device_ieee": "ab:cd:ef:12:03:3d:90:21",
+          "device_ieee": "ab:cd:ef:12:25:9f:47:fc",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -1257,44 +868,13 @@
         "state": {
           "class_name": "NumberConfigurationEntity",
           "available": true,
-          "state": 0
-        }
-      },
-      {
-        "info_object": {
-          "fallback_name": "Local ramp rate on to off",
-          "unique_id": "ab:cd:ef:12:03:3d:90:21-1-64561-ramp_rate_on_to_off_local",
-          "migrate_unique_ids": [],
-          "platform": "number",
-          "class_name": "NumberConfigurationEntity",
-          "translation_key": "ramp_rate_on_to_off_local",
-          "translation_placeholders": null,
-          "device_class": null,
-          "state_class": null,
-          "entity_category": "config",
-          "entity_registry_enabled_default": true,
-          "enabled": true,
-          "primary": false,
-          "device_ieee": "ab:cd:ef:12:03:3d:90:21",
-          "endpoint_id": 1,
-          "available": true,
-          "group_id": null,
-          "mode": "auto",
-          "native_max_value": 127,
-          "native_min_value": 0,
-          "native_step": 1.0,
-          "native_unit_of_measurement": null
-        },
-        "state": {
-          "class_name": "NumberConfigurationEntity",
-          "available": true,
-          "state": 127
+          "state": null
         }
       },
       {
         "info_object": {
           "fallback_name": "Remote ramp rate on to off",
-          "unique_id": "ab:cd:ef:12:03:3d:90:21-1-64561-ramp_rate_on_to_off_remote",
+          "unique_id": "ab:cd:ef:12:25:9f:47:fc-1-64561-ramp_rate_on_to_off_remote",
           "migrate_unique_ids": [],
           "platform": "number",
           "class_name": "NumberConfigurationEntity",
@@ -1306,7 +886,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "device_ieee": "ab:cd:ef:12:03:3d:90:21",
+          "device_ieee": "ab:cd:ef:12:25:9f:47:fc",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -1319,13 +899,13 @@
         "state": {
           "class_name": "NumberConfigurationEntity",
           "available": true,
-          "state": 127
+          "state": null
         }
       },
       {
         "info_object": {
           "fallback_name": "Start-up default dimming level",
-          "unique_id": "ab:cd:ef:12:03:3d:90:21-1-64561-state_after_power_restored",
+          "unique_id": "ab:cd:ef:12:25:9f:47:fc-1-64561-state_after_power_restored",
           "migrate_unique_ids": [],
           "platform": "number",
           "class_name": "NumberConfigurationEntity",
@@ -1337,7 +917,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "device_ieee": "ab:cd:ef:12:03:3d:90:21",
+          "device_ieee": "ab:cd:ef:12:25:9f:47:fc",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -1350,13 +930,44 @@
         "state": {
           "class_name": "NumberConfigurationEntity",
           "available": true,
-          "state": 255
+          "state": null
         }
       },
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "ab:cd:ef:12:03:3d:90:21-1-8-on_level",
+          "unique_id": "ab:cd:ef:12:25:9f:47:fc-1-8-default_move_rate",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "DefaultMoveRateConfigurationEntity",
+          "translation_key": "default_move_rate",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": false,
+          "enabled": true,
+          "primary": false,
+          "device_ieee": "ab:cd:ef:12:25:9f:47:fc",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "mode": "auto",
+          "native_max_value": 254,
+          "native_min_value": 0,
+          "native_step": 1.0,
+          "native_unit_of_measurement": null
+        },
+        "state": {
+          "class_name": "DefaultMoveRateConfigurationEntity",
+          "available": true,
+          "state": 0
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:25:9f:47:fc-1-8-on_level",
           "migrate_unique_ids": [],
           "platform": "number",
           "class_name": "OnLevelConfigurationEntity",
@@ -1368,7 +979,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "device_ieee": "ab:cd:ef:12:03:3d:90:21",
+          "device_ieee": "ab:cd:ef:12:25:9f:47:fc",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -1387,7 +998,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "ab:cd:ef:12:03:3d:90:21-1-8-on_off_transition_time",
+          "unique_id": "ab:cd:ef:12:25:9f:47:fc-1-8-on_off_transition_time",
           "migrate_unique_ids": [],
           "platform": "number",
           "class_name": "OnOffTransitionTimeConfigurationEntity",
@@ -1399,7 +1010,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "device_ieee": "ab:cd:ef:12:03:3d:90:21",
+          "device_ieee": "ab:cd:ef:12:25:9f:47:fc",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -1412,13 +1023,13 @@
         "state": {
           "class_name": "OnOffTransitionTimeConfigurationEntity",
           "available": true,
-          "state": 0
+          "state": 25
         }
       },
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "ab:cd:ef:12:03:3d:90:21-1-8-start_up_current_level",
+          "unique_id": "ab:cd:ef:12:25:9f:47:fc-1-8-start_up_current_level",
           "migrate_unique_ids": [],
           "platform": "number",
           "class_name": "StartUpCurrentLevelConfigurationEntity",
@@ -1430,8 +1041,473 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "device_ieee": "ab:cd:ef:12:03:3d:90:21",
+          "device_ieee": "ab:cd:ef:12:25:9f:47:fc",
           "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "mode": "auto",
+          "native_max_value": 255,
+          "native_min_value": 0,
+          "native_step": 1.0,
+          "native_unit_of_measurement": null
+        },
+        "state": {
+          "class_name": "StartUpCurrentLevelConfigurationEntity",
+          "available": true,
+          "state": 255
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Automatic switch shutoff timer",
+          "unique_id": "ab:cd:ef:12:25:9f:47:fc-2-64561-auto_off_timer",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "NumberConfigurationEntity",
+          "translation_key": "auto_off_timer",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "device_ieee": "ab:cd:ef:12:25:9f:47:fc",
+          "endpoint_id": 2,
+          "available": true,
+          "group_id": null,
+          "mode": "auto",
+          "native_max_value": 32767,
+          "native_min_value": 0,
+          "native_step": 1.0,
+          "native_unit_of_measurement": null
+        },
+        "state": {
+          "class_name": "NumberConfigurationEntity",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Remote default dimming level",
+          "unique_id": "ab:cd:ef:12:25:9f:47:fc-2-64561-default_level_remote",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "NumberConfigurationEntity",
+          "translation_key": "default_level_remote",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "device_ieee": "ab:cd:ef:12:25:9f:47:fc",
+          "endpoint_id": 2,
+          "available": true,
+          "group_id": null,
+          "mode": "auto",
+          "native_max_value": 255,
+          "native_min_value": 0,
+          "native_step": 1.0,
+          "native_unit_of_measurement": null
+        },
+        "state": {
+          "class_name": "NumberConfigurationEntity",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Remote dimming down speed",
+          "unique_id": "ab:cd:ef:12:25:9f:47:fc-2-64561-dimming_speed_down_remote",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "NumberConfigurationEntity",
+          "translation_key": "dimming_speed_down_remote",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "device_ieee": "ab:cd:ef:12:25:9f:47:fc",
+          "endpoint_id": 2,
+          "available": true,
+          "group_id": null,
+          "mode": "auto",
+          "native_max_value": 127,
+          "native_min_value": 0,
+          "native_step": 1.0,
+          "native_unit_of_measurement": null
+        },
+        "state": {
+          "class_name": "NumberConfigurationEntity",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Remote dimming up speed",
+          "unique_id": "ab:cd:ef:12:25:9f:47:fc-2-64561-dimming_speed_up_remote",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "NumberConfigurationEntity",
+          "translation_key": "dimming_speed_up_remote",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "device_ieee": "ab:cd:ef:12:25:9f:47:fc",
+          "endpoint_id": 2,
+          "available": true,
+          "group_id": null,
+          "mode": "auto",
+          "native_max_value": 126,
+          "native_min_value": 0,
+          "native_step": 1.0,
+          "native_unit_of_measurement": null
+        },
+        "state": {
+          "class_name": "NumberConfigurationEntity",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Default all LED on color",
+          "unique_id": "ab:cd:ef:12:25:9f:47:fc-2-64561-led_color_when_on",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "NumberConfigurationEntity",
+          "translation_key": "led_color_when_on",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "device_ieee": "ab:cd:ef:12:25:9f:47:fc",
+          "endpoint_id": 2,
+          "available": true,
+          "group_id": null,
+          "mode": "auto",
+          "native_max_value": 255,
+          "native_min_value": 0,
+          "native_step": 1.0,
+          "native_unit_of_measurement": null
+        },
+        "state": {
+          "class_name": "NumberConfigurationEntity",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Default all LED on intensity",
+          "unique_id": "ab:cd:ef:12:25:9f:47:fc-2-64561-led_intensity_when_on",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "NumberConfigurationEntity",
+          "translation_key": "led_intensity_when_on",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "device_ieee": "ab:cd:ef:12:25:9f:47:fc",
+          "endpoint_id": 2,
+          "available": true,
+          "group_id": null,
+          "mode": "auto",
+          "native_max_value": 100,
+          "native_min_value": 0,
+          "native_step": 1.0,
+          "native_unit_of_measurement": null
+        },
+        "state": {
+          "class_name": "NumberConfigurationEntity",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Maximum load dimming level",
+          "unique_id": "ab:cd:ef:12:25:9f:47:fc-2-64561-maximum_level",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "NumberConfigurationEntity",
+          "translation_key": "maximum_level",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "device_ieee": "ab:cd:ef:12:25:9f:47:fc",
+          "endpoint_id": 2,
+          "available": true,
+          "group_id": null,
+          "mode": "auto",
+          "native_max_value": 255,
+          "native_min_value": 2,
+          "native_step": 1.0,
+          "native_unit_of_measurement": null
+        },
+        "state": {
+          "class_name": "NumberConfigurationEntity",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Minimum load dimming level",
+          "unique_id": "ab:cd:ef:12:25:9f:47:fc-2-64561-minimum_level",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "NumberConfigurationEntity",
+          "translation_key": "minimum_level",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "device_ieee": "ab:cd:ef:12:25:9f:47:fc",
+          "endpoint_id": 2,
+          "available": true,
+          "group_id": null,
+          "mode": "auto",
+          "native_max_value": 254,
+          "native_min_value": 1,
+          "native_step": 1.0,
+          "native_unit_of_measurement": null
+        },
+        "state": {
+          "class_name": "NumberConfigurationEntity",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Remote ramp rate off to on",
+          "unique_id": "ab:cd:ef:12:25:9f:47:fc-2-64561-ramp_rate_off_to_on_remote",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "NumberConfigurationEntity",
+          "translation_key": "ramp_rate_off_to_on_remote",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "device_ieee": "ab:cd:ef:12:25:9f:47:fc",
+          "endpoint_id": 2,
+          "available": true,
+          "group_id": null,
+          "mode": "auto",
+          "native_max_value": 127,
+          "native_min_value": 0,
+          "native_step": 1.0,
+          "native_unit_of_measurement": null
+        },
+        "state": {
+          "class_name": "NumberConfigurationEntity",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Remote ramp rate on to off",
+          "unique_id": "ab:cd:ef:12:25:9f:47:fc-2-64561-ramp_rate_on_to_off_remote",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "NumberConfigurationEntity",
+          "translation_key": "ramp_rate_on_to_off_remote",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "device_ieee": "ab:cd:ef:12:25:9f:47:fc",
+          "endpoint_id": 2,
+          "available": true,
+          "group_id": null,
+          "mode": "auto",
+          "native_max_value": 127,
+          "native_min_value": 0,
+          "native_step": 1.0,
+          "native_unit_of_measurement": null
+        },
+        "state": {
+          "class_name": "NumberConfigurationEntity",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Start-up default dimming level",
+          "unique_id": "ab:cd:ef:12:25:9f:47:fc-2-64561-state_after_power_restored",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "NumberConfigurationEntity",
+          "translation_key": "state_after_power_restored",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "device_ieee": "ab:cd:ef:12:25:9f:47:fc",
+          "endpoint_id": 2,
+          "available": true,
+          "group_id": null,
+          "mode": "auto",
+          "native_max_value": 255,
+          "native_min_value": 0,
+          "native_step": 1.0,
+          "native_unit_of_measurement": null
+        },
+        "state": {
+          "class_name": "NumberConfigurationEntity",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:25:9f:47:fc-2-8-default_move_rate",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "DefaultMoveRateConfigurationEntity",
+          "translation_key": "default_move_rate",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": false,
+          "enabled": true,
+          "primary": false,
+          "device_ieee": "ab:cd:ef:12:25:9f:47:fc",
+          "endpoint_id": 2,
+          "available": true,
+          "group_id": null,
+          "mode": "auto",
+          "native_max_value": 254,
+          "native_min_value": 0,
+          "native_step": 1.0,
+          "native_unit_of_measurement": null
+        },
+        "state": {
+          "class_name": "DefaultMoveRateConfigurationEntity",
+          "available": true,
+          "state": 0
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:25:9f:47:fc-2-8-on_level",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "OnLevelConfigurationEntity",
+          "translation_key": "on_level",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "device_ieee": "ab:cd:ef:12:25:9f:47:fc",
+          "endpoint_id": 2,
+          "available": true,
+          "group_id": null,
+          "mode": "auto",
+          "native_max_value": 255,
+          "native_min_value": 0,
+          "native_step": 1.0,
+          "native_unit_of_measurement": null
+        },
+        "state": {
+          "class_name": "OnLevelConfigurationEntity",
+          "available": true,
+          "state": 255
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:25:9f:47:fc-2-8-on_off_transition_time",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "OnOffTransitionTimeConfigurationEntity",
+          "translation_key": "on_off_transition_time",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "device_ieee": "ab:cd:ef:12:25:9f:47:fc",
+          "endpoint_id": 2,
+          "available": true,
+          "group_id": null,
+          "mode": "auto",
+          "native_max_value": 65535,
+          "native_min_value": 0,
+          "native_step": 1.0,
+          "native_unit_of_measurement": null
+        },
+        "state": {
+          "class_name": "OnOffTransitionTimeConfigurationEntity",
+          "available": true,
+          "state": 25
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:25:9f:47:fc-2-8-start_up_current_level",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "StartUpCurrentLevelConfigurationEntity",
+          "translation_key": "start_up_current_level",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "device_ieee": "ab:cd:ef:12:25:9f:47:fc",
+          "endpoint_id": 2,
           "available": true,
           "group_id": null,
           "mode": "auto",
@@ -1451,7 +1527,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "ab:cd:ef:12:03:3d:90:21-1-6-StartUpOnOff",
+          "unique_id": "ab:cd:ef:12:25:9f:47:fc-1-6-StartUpOnOff",
           "migrate_unique_ids": [],
           "platform": "select",
           "class_name": "StartupOnOffSelectEntity",
@@ -1463,7 +1539,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "device_ieee": "ab:cd:ef:12:03:3d:90:21",
+          "device_ieee": "ab:cd:ef:12:25:9f:47:fc",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -1483,8 +1559,70 @@
       },
       {
         "info_object": {
+          "fallback_name": "Increased non-neutral output",
+          "unique_id": "ab:cd:ef:12:25:9f:47:fc-1-64561-increased_non_neutral_output",
+          "migrate_unique_ids": [],
+          "platform": "select",
+          "class_name": "ZCLEnumSelectEntity",
+          "translation_key": "increased_non_neutral_output",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "device_ieee": "ab:cd:ef:12:25:9f:47:fc",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "enum": "InovelliNonNeutralOutput",
+          "options": [
+            "Low",
+            "High"
+          ]
+        },
+        "state": {
+          "class_name": "ZCLEnumSelectEntity",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Dimming mode",
+          "unique_id": "ab:cd:ef:12:25:9f:47:fc-1-64561-leading_or_trailing_edge",
+          "migrate_unique_ids": [],
+          "platform": "select",
+          "class_name": "ZCLEnumSelectEntity",
+          "translation_key": "leading_or_trailing_edge",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "device_ieee": "ab:cd:ef:12:25:9f:47:fc",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "enum": "InovelliDimmingMode",
+          "options": [
+            "LeadingEdge",
+            "TrailingEdge"
+          ]
+        },
+        "state": {
+          "class_name": "ZCLEnumSelectEntity",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
           "fallback_name": "Output mode",
-          "unique_id": "ab:cd:ef:12:03:3d:90:21-1-64561-output_mode",
+          "unique_id": "ab:cd:ef:12:25:9f:47:fc-1-64561-output_mode",
           "migrate_unique_ids": [],
           "platform": "select",
           "class_name": "ZCLEnumSelectEntity",
@@ -1496,7 +1634,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "device_ieee": "ab:cd:ef:12:03:3d:90:21",
+          "device_ieee": "ab:cd:ef:12:25:9f:47:fc",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -1509,17 +1647,17 @@
         "state": {
           "class_name": "ZCLEnumSelectEntity",
           "available": true,
-          "state": "OnOff"
+          "state": null
         }
       },
       {
         "info_object": {
-          "fallback_name": "Smart fan LED display levels",
-          "unique_id": "ab:cd:ef:12:03:3d:90:21-1-64561-smart_fan_led_display_levels",
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:25:9f:47:fc-2-6-StartUpOnOff",
           "migrate_unique_ids": [],
           "platform": "select",
-          "class_name": "ZCLEnumSelectEntity",
-          "translation_key": "smart_fan_led_display_levels",
+          "class_name": "StartupOnOffSelectEntity",
+          "translation_key": "start_up_on_off",
           "translation_placeholders": null,
           "device_class": null,
           "state_class": null,
@@ -1527,39 +1665,32 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "device_ieee": "ab:cd:ef:12:03:3d:90:21",
-          "endpoint_id": 1,
+          "device_ieee": "ab:cd:ef:12:25:9f:47:fc",
+          "endpoint_id": 2,
           "available": true,
           "group_id": null,
-          "enum": "InovelliFanLedScalingMode",
+          "enum": "StartUpOnOff",
           "options": [
-            "VZM31SN",
-            "Grade 1",
-            "Grade 2",
-            "Grade 3",
-            "Grade 4",
-            "Grade 5",
-            "Grade 6",
-            "Grade 7",
-            "Grade 8",
-            "Grade 9",
-            "Adaptive"
+            "Off",
+            "On",
+            "Toggle",
+            "PreviousValue"
           ]
         },
         "state": {
-          "class_name": "ZCLEnumSelectEntity",
+          "class_name": "StartupOnOffSelectEntity",
           "available": true,
-          "state": "Adaptive"
+          "state": "PreviousValue"
         }
       },
       {
         "info_object": {
-          "fallback_name": "Switch type",
-          "unique_id": "ab:cd:ef:12:03:3d:90:21-1-64561-switch_type",
+          "fallback_name": "Output mode",
+          "unique_id": "ab:cd:ef:12:25:9f:47:fc-2-64561-output_mode",
           "migrate_unique_ids": [],
           "platform": "select",
           "class_name": "ZCLEnumSelectEntity",
-          "translation_key": "switch_type",
+          "translation_key": "output_mode",
           "translation_placeholders": null,
           "device_class": null,
           "state_class": null,
@@ -1567,20 +1698,20 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "device_ieee": "ab:cd:ef:12:03:3d:90:21",
-          "endpoint_id": 1,
+          "device_ieee": "ab:cd:ef:12:25:9f:47:fc",
+          "endpoint_id": 2,
           "available": true,
           "group_id": null,
-          "enum": "InovelliFanSwitchType",
+          "enum": "InovelliOutputMode",
           "options": [
-            "Load Only",
-            "Three Way AUX"
+            "Dimmer",
+            "OnOff"
           ]
         },
         "state": {
           "class_name": "ZCLEnumSelectEntity",
           "available": true,
-          "state": "Load Only"
+          "state": null
         }
       }
     ],
@@ -1588,7 +1719,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "ab:cd:ef:12:03:3d:90:21-1-0-lqi",
+          "unique_id": "ab:cd:ef:12:25:9f:47:fc-1-0-lqi",
           "migrate_unique_ids": [],
           "platform": "sensor",
           "class_name": "LQISensor",
@@ -1600,7 +1731,7 @@
           "entity_registry_enabled_default": false,
           "enabled": true,
           "primary": false,
-          "device_ieee": "ab:cd:ef:12:03:3d:90:21",
+          "device_ieee": "ab:cd:ef:12:25:9f:47:fc",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -1610,13 +1741,13 @@
         "state": {
           "class_name": "LQISensor",
           "available": true,
-          "state": 184
+          "state": null
         }
       },
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "ab:cd:ef:12:03:3d:90:21-1-0-rssi",
+          "unique_id": "ab:cd:ef:12:25:9f:47:fc-1-0-rssi",
           "migrate_unique_ids": [],
           "platform": "sensor",
           "class_name": "RSSISensor",
@@ -1628,7 +1759,7 @@
           "entity_registry_enabled_default": false,
           "enabled": true,
           "primary": false,
-          "device_ieee": "ab:cd:ef:12:03:3d:90:21",
+          "device_ieee": "ab:cd:ef:12:25:9f:47:fc",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -1638,13 +1769,13 @@
         "state": {
           "class_name": "RSSISensor",
           "available": true,
-          "state": -54
+          "state": null
         }
       },
       {
         "info_object": {
           "fallback_name": "Internal temperature",
-          "unique_id": "ab:cd:ef:12:03:3d:90:21-1-64561",
+          "unique_id": "ab:cd:ef:12:25:9f:47:fc-1-64561",
           "migrate_unique_ids": [],
           "platform": "sensor",
           "class_name": "Sensor",
@@ -1656,7 +1787,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "device_ieee": "ab:cd:ef:12:03:3d:90:21",
+          "device_ieee": "ab:cd:ef:12:25:9f:47:fc",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -1672,7 +1803,7 @@
       {
         "info_object": {
           "fallback_name": "Overheat protection",
-          "unique_id": "ab:cd:ef:12:03:3d:90:21-1-64561-overheated",
+          "unique_id": "ab:cd:ef:12:25:9f:47:fc-1-64561-overheated",
           "migrate_unique_ids": [],
           "platform": "sensor",
           "class_name": "EnumSensor",
@@ -1684,7 +1815,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "device_ieee": "ab:cd:ef:12:03:3d:90:21",
+          "device_ieee": "ab:cd:ef:12:25:9f:47:fc",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -1694,271 +1825,71 @@
         "state": {
           "class_name": "EnumSensor",
           "available": true,
-          "state": "Normal"
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Internal temperature",
+          "unique_id": "ab:cd:ef:12:25:9f:47:fc-2-64561",
+          "migrate_unique_ids": [],
+          "platform": "sensor",
+          "class_name": "Sensor",
+          "translation_key": "internal_temp_monitor",
+          "translation_placeholders": null,
+          "device_class": "temperature",
+          "state_class": "measurement",
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "device_ieee": "ab:cd:ef:12:25:9f:47:fc",
+          "endpoint_id": 2,
+          "available": true,
+          "group_id": null,
+          "suggested_display_precision": null,
+          "unit": "\u00b0C"
+        },
+        "state": {
+          "class_name": "Sensor",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Overheat protection",
+          "unique_id": "ab:cd:ef:12:25:9f:47:fc-2-64561-overheated",
+          "migrate_unique_ids": [],
+          "platform": "sensor",
+          "class_name": "EnumSensor",
+          "translation_key": "overheated",
+          "translation_placeholders": null,
+          "device_class": "enum",
+          "state_class": null,
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "device_ieee": "ab:cd:ef:12:25:9f:47:fc",
+          "endpoint_id": 2,
+          "available": true,
+          "group_id": null,
+          "suggested_display_precision": null,
+          "unit": null
+        },
+        "state": {
+          "class_name": "EnumSensor",
+          "available": true,
+          "state": null
         }
       }
     ],
     "switch": [
       {
         "info_object": {
-          "fallback_name": "Aux switch scenes",
-          "unique_id": "ab:cd:ef:12:03:3d:90:21-1-64561-aux_switch_scenes",
-          "migrate_unique_ids": [],
-          "platform": "switch",
-          "class_name": "ConfigurableAttributeSwitch",
-          "translation_key": "aux_switch_scenes",
-          "translation_placeholders": null,
-          "device_class": null,
-          "state_class": null,
-          "entity_category": "config",
-          "entity_registry_enabled_default": true,
-          "enabled": true,
-          "primary": false,
-          "device_ieee": "ab:cd:ef:12:03:3d:90:21",
-          "endpoint_id": 1,
-          "available": true,
-          "group_id": null,
-          "attribute_name": "aux_switch_scenes",
-          "invert_attribute_name": null,
-          "force_inverted": false,
-          "off_value": 0,
-          "on_value": 1
-        },
-        "state": {
-          "class_name": "ConfigurableAttributeSwitch",
-          "available": true,
-          "state": false,
-          "inverted": false
-        }
-      },
-      {
-        "info_object": {
-          "fallback_name": "Disable config 2x tap to clear notifications",
-          "unique_id": "ab:cd:ef:12:03:3d:90:21-1-64561-disable_clear_notifications_double_tap",
-          "migrate_unique_ids": [],
-          "platform": "switch",
-          "class_name": "ConfigurableAttributeSwitch",
-          "translation_key": "disable_clear_notifications_double_tap",
-          "translation_placeholders": null,
-          "device_class": null,
-          "state_class": null,
-          "entity_category": "config",
-          "entity_registry_enabled_default": true,
-          "enabled": true,
-          "primary": false,
-          "device_ieee": "ab:cd:ef:12:03:3d:90:21",
-          "endpoint_id": 1,
-          "available": true,
-          "group_id": null,
-          "attribute_name": "disable_clear_notifications_double_tap",
-          "invert_attribute_name": null,
-          "force_inverted": false,
-          "off_value": 0,
-          "on_value": 1
-        },
-        "state": {
-          "class_name": "ConfigurableAttributeSwitch",
-          "available": true,
-          "state": false,
-          "inverted": false
-        }
-      },
-      {
-        "info_object": {
-          "fallback_name": "Double tap down enabled",
-          "unique_id": "ab:cd:ef:12:03:3d:90:21-1-64561-double_tap_down_enabled",
-          "migrate_unique_ids": [],
-          "platform": "switch",
-          "class_name": "ConfigurableAttributeSwitch",
-          "translation_key": "double_tap_down_enabled",
-          "translation_placeholders": null,
-          "device_class": null,
-          "state_class": null,
-          "entity_category": "config",
-          "entity_registry_enabled_default": true,
-          "enabled": true,
-          "primary": false,
-          "device_ieee": "ab:cd:ef:12:03:3d:90:21",
-          "endpoint_id": 1,
-          "available": true,
-          "group_id": null,
-          "attribute_name": "double_tap_down_enabled",
-          "invert_attribute_name": null,
-          "force_inverted": false,
-          "off_value": 0,
-          "on_value": 1
-        },
-        "state": {
-          "class_name": "ConfigurableAttributeSwitch",
-          "available": true,
-          "state": false,
-          "inverted": false
-        }
-      },
-      {
-        "info_object": {
-          "fallback_name": "Double tap up enabled",
-          "unique_id": "ab:cd:ef:12:03:3d:90:21-1-64561-double_tap_up_enabled",
-          "migrate_unique_ids": [],
-          "platform": "switch",
-          "class_name": "ConfigurableAttributeSwitch",
-          "translation_key": "double_tap_up_enabled",
-          "translation_placeholders": null,
-          "device_class": null,
-          "state_class": null,
-          "entity_category": "config",
-          "entity_registry_enabled_default": true,
-          "enabled": true,
-          "primary": false,
-          "device_ieee": "ab:cd:ef:12:03:3d:90:21",
-          "endpoint_id": 1,
-          "available": true,
-          "group_id": null,
-          "attribute_name": "double_tap_up_enabled",
-          "invert_attribute_name": null,
-          "force_inverted": false,
-          "off_value": 0,
-          "on_value": 1
-        },
-        "state": {
-          "class_name": "ConfigurableAttributeSwitch",
-          "available": true,
-          "state": false,
-          "inverted": false
-        }
-      },
-      {
-        "info_object": {
-          "fallback_name": "Firmware progress LED",
-          "unique_id": "ab:cd:ef:12:03:3d:90:21-1-64561-firmware_progress_led",
-          "migrate_unique_ids": [],
-          "platform": "switch",
-          "class_name": "ConfigurableAttributeSwitch",
-          "translation_key": "firmware_progress_led",
-          "translation_placeholders": null,
-          "device_class": null,
-          "state_class": null,
-          "entity_category": "config",
-          "entity_registry_enabled_default": true,
-          "enabled": true,
-          "primary": false,
-          "device_ieee": "ab:cd:ef:12:03:3d:90:21",
-          "endpoint_id": 1,
-          "available": true,
-          "group_id": null,
-          "attribute_name": "firmware_progress_led",
-          "invert_attribute_name": null,
-          "force_inverted": false,
-          "off_value": 0,
-          "on_value": 1
-        },
-        "state": {
-          "class_name": "ConfigurableAttributeSwitch",
-          "available": true,
-          "state": true,
-          "inverted": false
-        }
-      },
-      {
-        "info_object": {
-          "fallback_name": "Invert switch",
-          "unique_id": "ab:cd:ef:12:03:3d:90:21-1-64561-invert_switch",
-          "migrate_unique_ids": [],
-          "platform": "switch",
-          "class_name": "ConfigurableAttributeSwitch",
-          "translation_key": "invert_switch",
-          "translation_placeholders": null,
-          "device_class": null,
-          "state_class": null,
-          "entity_category": "config",
-          "entity_registry_enabled_default": true,
-          "enabled": true,
-          "primary": false,
-          "device_ieee": "ab:cd:ef:12:03:3d:90:21",
-          "endpoint_id": 1,
-          "available": true,
-          "group_id": null,
-          "attribute_name": "invert_switch",
-          "invert_attribute_name": null,
-          "force_inverted": false,
-          "off_value": 0,
-          "on_value": 1
-        },
-        "state": {
-          "class_name": "ConfigurableAttributeSwitch",
-          "available": true,
-          "state": false,
-          "inverted": false
-        }
-      },
-      {
-        "info_object": {
-          "fallback_name": "Local protection",
-          "unique_id": "ab:cd:ef:12:03:3d:90:21-1-64561-local_protection",
-          "migrate_unique_ids": [],
-          "platform": "switch",
-          "class_name": "ConfigurableAttributeSwitch",
-          "translation_key": "local_protection",
-          "translation_placeholders": null,
-          "device_class": null,
-          "state_class": null,
-          "entity_category": "config",
-          "entity_registry_enabled_default": true,
-          "enabled": true,
-          "primary": false,
-          "device_ieee": "ab:cd:ef:12:03:3d:90:21",
-          "endpoint_id": 1,
-          "available": true,
-          "group_id": null,
-          "attribute_name": "local_protection",
-          "invert_attribute_name": null,
-          "force_inverted": false,
-          "off_value": 0,
-          "on_value": 1
-        },
-        "state": {
-          "class_name": "ConfigurableAttributeSwitch",
-          "available": true,
-          "state": false,
-          "inverted": false
-        }
-      },
-      {
-        "info_object": {
-          "fallback_name": "Only 1 LED mode",
-          "unique_id": "ab:cd:ef:12:03:3d:90:21-1-64561-on_off_led_mode",
-          "migrate_unique_ids": [],
-          "platform": "switch",
-          "class_name": "ConfigurableAttributeSwitch",
-          "translation_key": "one_led_mode",
-          "translation_placeholders": null,
-          "device_class": null,
-          "state_class": null,
-          "entity_category": "config",
-          "entity_registry_enabled_default": true,
-          "enabled": true,
-          "primary": false,
-          "device_ieee": "ab:cd:ef:12:03:3d:90:21",
-          "endpoint_id": 1,
-          "available": true,
-          "group_id": null,
-          "attribute_name": "on_off_led_mode",
-          "invert_attribute_name": null,
-          "force_inverted": false,
-          "off_value": 0,
-          "on_value": 1
-        },
-        "state": {
-          "class_name": "ConfigurableAttributeSwitch",
-          "available": true,
-          "state": false,
-          "inverted": false
-        }
-      },
-      {
-        "info_object": {
           "fallback_name": "Smart bulb mode",
-          "unique_id": "ab:cd:ef:12:03:3d:90:21-1-64561-smart_bulb_mode",
+          "unique_id": "ab:cd:ef:12:25:9f:47:fc-1-64561-smart_bulb_mode",
           "migrate_unique_ids": [],
           "platform": "switch",
           "class_name": "ConfigurableAttributeSwitch",
@@ -1970,7 +1901,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "device_ieee": "ab:cd:ef:12:03:3d:90:21",
+          "device_ieee": "ab:cd:ef:12:25:9f:47:fc",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -1989,12 +1920,12 @@
       },
       {
         "info_object": {
-          "fallback_name": "Smart fan mode",
-          "unique_id": "ab:cd:ef:12:03:3d:90:21-1-64561-smart_fan_mode",
+          "fallback_name": "Smart bulb mode",
+          "unique_id": "ab:cd:ef:12:25:9f:47:fc-2-64561-smart_bulb_mode",
           "migrate_unique_ids": [],
           "platform": "switch",
           "class_name": "ConfigurableAttributeSwitch",
-          "translation_key": "smart_fan_mode",
+          "translation_key": "smart_bulb_mode",
           "translation_placeholders": null,
           "device_class": null,
           "state_class": null,
@@ -2002,11 +1933,11 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "device_ieee": "ab:cd:ef:12:03:3d:90:21",
-          "endpoint_id": 1,
+          "device_ieee": "ab:cd:ef:12:25:9f:47:fc",
+          "endpoint_id": 2,
           "available": true,
           "group_id": null,
-          "attribute_name": "smart_fan_mode",
+          "attribute_name": "smart_bulb_mode",
           "invert_attribute_name": null,
           "force_inverted": false,
           "off_value": 0,
@@ -2024,7 +1955,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "ab:cd:ef:12:03:3d:90:21-1-25-firmware_update",
+          "unique_id": "ab:cd:ef:12:25:9f:47:fc-1-25-firmware_update",
           "migrate_unique_ids": [],
           "platform": "update",
           "class_name": "FirmwareUpdateEntity",
@@ -2036,7 +1967,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "device_ieee": "ab:cd:ef:12:03:3d:90:21",
+          "device_ieee": "ab:cd:ef:12:25:9f:47:fc",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -2045,7 +1976,40 @@
         "state": {
           "class_name": "FirmwareUpdateEntity",
           "available": true,
-          "installed_version": "0x02020107",
+          "installed_version": null,
+          "in_progress": false,
+          "update_percentage": null,
+          "latest_version": null,
+          "release_summary": null,
+          "release_notes": null,
+          "release_url": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:25:9f:47:fc-2-25-firmware_update",
+          "migrate_unique_ids": [],
+          "platform": "update",
+          "class_name": "FirmwareUpdateEntity",
+          "translation_key": null,
+          "translation_placeholders": null,
+          "device_class": "firmware",
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "device_ieee": "ab:cd:ef:12:25:9f:47:fc",
+          "endpoint_id": 2,
+          "available": true,
+          "group_id": null,
+          "supported_features": 7
+        },
+        "state": {
+          "class_name": "FirmwareUpdateEntity",
+          "available": true,
+          "installed_version": null,
           "in_progress": false,
           "update_percentage": null,
           "latest_version": null,
