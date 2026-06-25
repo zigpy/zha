@@ -1968,7 +1968,7 @@ async def test_ignore_non_value_quirks_v2(zha_gateway: Gateway) -> None:
 
     zigpy_dev = await zigpy_device_from_json(
         zha_gateway.application_controller,
-        "tests/data/devices/frient-a-s-aqszb-110-0x00040001.json",
+        "tests/data/legacy_devices/frient-a-s-aqszb-110-0x00040001.json",
     )
     assert isinstance(zigpy_dev, CustomZigpyDevice)
 

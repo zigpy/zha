@@ -79,7 +79,7 @@ async def test_device_override(
 
     zigpy_device = await zigpy_device_from_json(
         zha_gateway.application_controller,
-        "tests/data/devices/sonoff-basiczbr3.json",
+        "tests/data/devices/sonoff-s31-lite-zb.json",
     )
 
     zha_gateway.config.config.device_overrides = {
@@ -181,13 +181,13 @@ async def test_device_override_filter_bypassing(
 ) -> None:
     """Test that profile filtering is only bypassed for the override platform."""
 
-    # The sercomm device is an ON_OFF_LIGHT with a PowerConfiguration cluster.
-    # DeviceTracker matches PowerConfiguration but is restricted by profile_device_types
-    # to the SmartThings arrival sensor device type. A SWITCH override should not cause
-    # DeviceTracker to bypass that filter.
+    # The IKEA TRADFRI on/off switch is a battery remote with a PowerConfiguration
+    # cluster. DeviceTracker matches PowerConfiguration but is restricted by
+    # profile_device_types to the SmartThings arrival sensor device type. A SWITCH
+    # override should not cause DeviceTracker to bypass that filter.
     zigpy_device = await zigpy_device_from_json(
         zha_gateway.application_controller,
-        "tests/data/devices/sercomm-corp-sz-esw01-au.json",
+        "tests/data/devices/ikea-of-sweden-tradfri-on-off-switch.json",
     )
 
     zha_gateway.config.config.device_overrides = {
