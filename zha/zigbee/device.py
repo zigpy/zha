@@ -1185,11 +1185,17 @@ class Device(LogMixin, EventBase):
         for entity in new_entities.values():
             self._add_entity(entity, emit_event=emit_event)
 
-        # Computing the primary entity changes the `primary` field, which is now part
-        # of the entity state. Absorb that change into each entity's previous-state
-        # baseline without emitting spurious state-changed events.
+        # New entities have no listener yet (consumers capture their initial state when
+        # the add event registers them), so silence their changes
         with suppress_events():
-            for entity in all_entities.values():
+            for entity in new_entities.values():
+                entity.maybe_emit_state_changed_event()
+
+        # `_compute_primary_entity` above can flip `primary` on an existing entity, and
+        # the caller may have recomputed their capabilities beforehand; emit so those
+        # changes reach consumers.
+        for key, entity in all_entities.items():
+            if key not in new_entities:
                 entity.maybe_emit_state_changed_event()
 
     async def recompute_entities(self) -> None:
