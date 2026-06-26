@@ -83,7 +83,7 @@ class Button(BaseButton):
         device: Device,
         *,
         command_name: str | None = None,
-        command_args: tuple | None = None,
+        command_args: list[Any] | None = None,
         command_kwargs: dict[str, Any] | None = None,
         **kwargs: Any,
     ) -> None:

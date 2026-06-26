@@ -71,8 +71,8 @@ class UpdateState(BaseEntityState):
     """State for update entities."""
 
     installed_version: str | None
-    in_progress: bool | int
-    update_percentage: int | None
+    in_progress: bool | None
+    update_percentage: float | None
     latest_version: str | None
     release_summary: str | None
     release_notes: str | None
@@ -307,6 +307,8 @@ class FirmwareUpdateEntity(BaseFirmwareUpdateEntity):
             },
         ),
     }
+
+    _cluster: Ota
 
     def __init__(
         self,

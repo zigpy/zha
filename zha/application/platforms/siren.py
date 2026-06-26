@@ -14,6 +14,7 @@ from zigpy.zcl.clusters.security import (
     IasWd,
     SirenLevel,
     Squawk,
+    SquawkLevel,
     SquawkMode,
     Strobe,
     StrobeLevel,
@@ -200,8 +201,8 @@ class BaseZclSiren(BaseSiren, ABC):
         """Issue an IAS WD squawk command."""
         squawk = Squawk()
         squawk.mode = mode
-        squawk.strobe = strobe
-        squawk.level = squawk_level
+        squawk.strobe = Strobe(strobe)  # type:ignore[no-untyped-call]
+        squawk.level = SquawkLevel(squawk_level)  # type:ignore[no-untyped-call]
         await self._cluster.squawk(squawk=squawk)
 
     def _async_set_off(self) -> None:
