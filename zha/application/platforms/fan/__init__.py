@@ -70,6 +70,8 @@ class FanState(BaseEntityState):
     supported_features: FanEntityFeature
     speed_count: int
     speed_list: list[str]
+    speed_range: tuple[int, int]
+    default_on_percentage: int
 
 
 class BaseFan(BaseEntity, ABC):
@@ -170,6 +172,8 @@ class BaseFan(BaseEntity, ABC):
             supported_features=self.supported_features,
             speed_count=self.speed_count,
             speed_list=self.speed_list,
+            speed_range=self.speed_range,
+            default_on_percentage=self.default_on_percentage,
         )
 
     async def async_turn_on(
