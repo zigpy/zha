@@ -167,7 +167,7 @@ _LOGGER = logging.getLogger(__name__)
 class SensorState(BaseEntityState):
     """State for sensor entities."""
 
-    state: date | datetime | str | int | float | None
+    native_value: date | datetime | str | int | float | None
     suggested_display_precision: int | None = None
     unit: str | None = None
 
@@ -176,7 +176,7 @@ class SensorState(BaseEntityState):
 class DeviceCounterSensorState(BaseEntityState):
     """State for device counter sensor entities."""
 
-    state: int | None
+    native_value: int | None
     suggested_display_precision: int
     counter: str
     counter_value: int
@@ -216,7 +216,7 @@ class BaseSensor(PlatformEntity, ABC):
         """Return the state for this sensor."""
         return SensorState(
             **super().state.__dict__,
-            state=self.native_value,
+            native_value=self.native_value,
             suggested_display_precision=self.suggested_display_precision,
             unit=self.native_unit_of_measurement,
         )
@@ -469,7 +469,7 @@ class DeviceCounterSensor(BaseEntity):
         """Return the state for this sensor."""
         return DeviceCounterSensorState(
             **super().state.__dict__,
-            state=self._zigpy_counter.value,
+            native_value=self._zigpy_counter.value,
             suggested_display_precision=self._attr_suggested_display_precision,
             counter=self._zigpy_counter.name,
             counter_value=self._zigpy_counter.value,

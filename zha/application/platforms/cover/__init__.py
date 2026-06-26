@@ -71,7 +71,6 @@ class CoverEntityState(BaseEntityState):
 
     current_position: int | None
     current_tilt_position: int | None
-    state: CoverState | None
     is_opening: bool | None
     is_closing: bool | None
     is_closed: bool | None
@@ -309,7 +308,6 @@ class Cover(BaseCover):
             **super().state.__dict__,
             current_position=self.current_cover_position,
             current_tilt_position=self.current_cover_tilt_position,
-            state=self._state,
             is_opening=self.is_opening,
             is_closing=self.is_closing,
             is_closed=self.is_closed,
@@ -895,15 +893,10 @@ class Shade(BaseCover):
     @property
     def state(self) -> CoverEntityState:
         """Get the state of the cover."""
-        if (closed := self.is_closed) is None:
-            state = None
-        else:
-            state = CoverState.CLOSED if closed else CoverState.OPEN
         return CoverEntityState(
             **super().state.__dict__,
             current_position=self.current_cover_position,
             current_tilt_position=self.current_cover_tilt_position,
-            state=state,
             is_opening=self.is_opening,
             is_closing=self.is_closing,
             is_closed=self.is_closed,

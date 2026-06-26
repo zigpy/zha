@@ -316,14 +316,14 @@ async def test_climate_hvac_action_running_state(
     sensor_entity.on_event(STATE_CHANGED, subscriber2)
 
     assert entity.state.hvac_action == "off"
-    assert sensor_entity.state.state == "off"
+    assert sensor_entity.state.native_value == "off"
 
     await send_attributes_report(
         zha_gateway, thrm_cluster, {0x001E: Thermostat.RunningMode.Off}
     )
     await zha_gateway.async_block_till_done(wait_background_tasks=True)
     assert entity.state.hvac_action == "off"
-    assert sensor_entity.state.state == "off"
+    assert sensor_entity.state.native_value == "off"
     assert len(subscriber1.mock_calls) == len(subscriber2.mock_calls) == 0
 
     await send_attributes_report(
@@ -331,7 +331,7 @@ async def test_climate_hvac_action_running_state(
     )
     await zha_gateway.async_block_till_done(wait_background_tasks=True)
     assert entity.state.hvac_action == "idle"
-    assert sensor_entity.state.state == "idle"
+    assert sensor_entity.state.native_value == "idle"
     assert len(subscriber1.mock_calls) == len(subscriber2.mock_calls) == 1
 
     await send_attributes_report(
@@ -339,7 +339,7 @@ async def test_climate_hvac_action_running_state(
     )
     await zha_gateway.async_block_till_done(wait_background_tasks=True)
     assert entity.state.hvac_action == "cooling"
-    assert sensor_entity.state.state == "cooling"
+    assert sensor_entity.state.native_value == "cooling"
     assert len(subscriber1.mock_calls) == len(subscriber2.mock_calls) == 2
 
     await send_attributes_report(
@@ -347,7 +347,7 @@ async def test_climate_hvac_action_running_state(
     )
     await zha_gateway.async_block_till_done(wait_background_tasks=True)
     assert entity.state.hvac_action == "heating"
-    assert sensor_entity.state.state == "heating"
+    assert sensor_entity.state.native_value == "heating"
     assert len(subscriber1.mock_calls) == len(subscriber2.mock_calls) == 3
 
     await send_attributes_report(
@@ -355,7 +355,7 @@ async def test_climate_hvac_action_running_state(
     )
     await zha_gateway.async_block_till_done(wait_background_tasks=True)
     assert entity.state.hvac_action == "idle"
-    assert sensor_entity.state.state == "idle"
+    assert sensor_entity.state.native_value == "idle"
     assert len(subscriber1.mock_calls) == len(subscriber2.mock_calls) == 4
 
     await send_attributes_report(
@@ -363,7 +363,7 @@ async def test_climate_hvac_action_running_state(
     )
     await zha_gateway.async_block_till_done(wait_background_tasks=True)
     assert entity.state.hvac_action == "fan"
-    assert sensor_entity.state.state == "fan"
+    assert sensor_entity.state.native_value == "fan"
     assert len(subscriber1.mock_calls) == len(subscriber2.mock_calls) == 5
 
 
@@ -452,61 +452,61 @@ async def test_climate_hvac_action_running_state_zen(
     assert isinstance(sensor_entity, ThermostatHVACAction)
 
     assert entity.state.hvac_action is None
-    assert sensor_entity.state.state is None
+    assert sensor_entity.state.native_value is None
 
     await send_attributes_report(
         zha_gateway, thrm_cluster, {0x0029: Thermostat.RunningState.Cool_2nd_Stage_On}
     )
     assert entity.state.hvac_action == "cooling"
-    assert sensor_entity.state.state == "cooling"
+    assert sensor_entity.state.native_value == "cooling"
 
     await send_attributes_report(
         zha_gateway, thrm_cluster, {0x0029: Thermostat.RunningState.Fan_State_On}
     )
     assert entity.state.hvac_action == "fan"
-    assert sensor_entity.state.state == "fan"
+    assert sensor_entity.state.native_value == "fan"
 
     await send_attributes_report(
         zha_gateway, thrm_cluster, {0x0029: Thermostat.RunningState.Heat_2nd_Stage_On}
     )
     assert entity.state.hvac_action == "heating"
-    assert sensor_entity.state.state == "heating"
+    assert sensor_entity.state.native_value == "heating"
 
     await send_attributes_report(
         zha_gateway, thrm_cluster, {0x0029: Thermostat.RunningState.Fan_2nd_Stage_On}
     )
     assert entity.state.hvac_action == "fan"
-    assert sensor_entity.state.state == "fan"
+    assert sensor_entity.state.native_value == "fan"
 
     await send_attributes_report(
         zha_gateway, thrm_cluster, {0x0029: Thermostat.RunningState.Cool_State_On}
     )
     assert entity.state.hvac_action == "cooling"
-    assert sensor_entity.state.state == "cooling"
+    assert sensor_entity.state.native_value == "cooling"
 
     await send_attributes_report(
         zha_gateway, thrm_cluster, {0x0029: Thermostat.RunningState.Fan_3rd_Stage_On}
     )
     assert entity.state.hvac_action == "fan"
-    assert sensor_entity.state.state == "fan"
+    assert sensor_entity.state.native_value == "fan"
 
     await send_attributes_report(
         zha_gateway, thrm_cluster, {0x0029: Thermostat.RunningState.Heat_State_On}
     )
     assert entity.state.hvac_action == "heating"
-    assert sensor_entity.state.state == "heating"
+    assert sensor_entity.state.native_value == "heating"
 
     await send_attributes_report(
         zha_gateway, thrm_cluster, {0x0029: Thermostat.RunningState.Idle}
     )
     assert entity.state.hvac_action == "off"
-    assert sensor_entity.state.state == "off"
+    assert sensor_entity.state.native_value == "off"
 
     await send_attributes_report(
         zha_gateway, thrm_cluster, {0x001C: Thermostat.SystemMode.Heat}
     )
     assert entity.state.hvac_action == "idle"
-    assert sensor_entity.state.state == "idle"
+    assert sensor_entity.state.native_value == "idle"
 
 
 async def test_climate_hvac_action_running_state_zehnder(

@@ -60,7 +60,7 @@ class SirenEntityFeature(IntFlag):
 class SirenState(BaseEntityState):
     """State for siren entities."""
 
-    state: bool
+    is_on: bool
     available_tones: dict[int, str]
     supported_features: SirenEntityFeature
 
@@ -79,7 +79,7 @@ class BaseSiren(PlatformEntity, ABC):
         """Get the state of the siren."""
         return SirenState(
             **super().state.__dict__,
-            state=self.is_on,
+            is_on=self.is_on,
             available_tones=self.available_tones,
             supported_features=self.supported_features,
         )

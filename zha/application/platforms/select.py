@@ -72,7 +72,7 @@ _LOGGER = logging.getLogger(__name__)
 class SelectState(BaseEntityState):
     """State for select entities."""
 
-    state: str | None
+    current_option: str | None
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -100,7 +100,7 @@ class BaseSelectEntity(BaseEntity, ABC):
         """Return the state of the select."""
         return SelectState(
             **super().state.__dict__,
-            state=self.current_option,
+            current_option=self.current_option,
         )
 
     @property

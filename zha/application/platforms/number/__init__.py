@@ -56,7 +56,7 @@ _LOGGER = logging.getLogger(__name__)
 class NumberState(BaseEntityState):
     """State for number entities."""
 
-    state: float | None
+    native_value: float | None
     mode: NumberMode
     native_max_value: float
     native_min_value: float
@@ -88,7 +88,7 @@ class BaseNumber(PlatformEntity, ABC):
         """Return the state of the entity."""
         return NumberState(
             **super().state.__dict__,
-            state=self.native_value,
+            native_value=self.native_value,
             mode=self.mode,
             native_max_value=self.native_max_value,
             native_min_value=self.native_min_value,

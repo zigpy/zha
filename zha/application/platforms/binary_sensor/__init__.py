@@ -57,7 +57,7 @@ _LOGGER = logging.getLogger(__name__)
 class BinarySensorState(BaseEntityState):
     """State for binary sensor entities."""
 
-    state: bool
+    is_on: bool
     attribute_name: str
 
 
@@ -84,7 +84,7 @@ class BinarySensor(BaseBinarySensor):
         """Return the state of the binary sensor."""
         return BinarySensorState(
             **super().state.__dict__,
-            state=self.is_on,
+            is_on=self.is_on,
             attribute_name=self._attribute_name,
         )
 

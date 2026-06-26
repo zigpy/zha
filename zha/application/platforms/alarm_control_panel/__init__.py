@@ -49,7 +49,7 @@ SIGNAL_ALARM_TRIGGERED = "zha_armed_triggered"
 class AlarmControlPanelState(BaseEntityState):
     """State for alarm control panel entities."""
 
-    state: AlarmState
+    alarm_state: AlarmState
     code_arm_required: bool
     code_format: CodeFormat
     supported_features: int
@@ -65,7 +65,7 @@ class BaseAlarmControlPanel(PlatformEntity, ABC):
         """Get the state of the alarm control panel."""
         return AlarmControlPanelState(
             **super().state.__dict__,
-            state=self.alarm_state,
+            alarm_state=self.alarm_state,
             code_arm_required=self.code_arm_required,
             code_format=self.code_format,
             supported_features=self.supported_features,

@@ -60,7 +60,7 @@ _LOGGER = logging.getLogger(__name__)
 class SwitchState(BaseEntityState):
     """State for switch entities."""
 
-    state: bool
+    is_on: bool
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -85,7 +85,7 @@ class BaseSwitch(BaseEntity, ABC):
         """Return the state of the switch."""
         return SwitchState(
             **super().state.__dict__,
-            state=self.is_on,
+            is_on=self.is_on,
         )
 
     @property
@@ -384,7 +384,7 @@ class SwitchGroup(GroupEntity, BaseSwitch):  # type: ignore[misc]
         self.debug(
             "All platform entity states for group entity members: %s", all_states
         )
-        on_states = [state for state in all_states if state.state]
+        on_states = [state for state in all_states if state.is_on]
 
         self._state = len(on_states) > 0
 
@@ -488,7 +488,7 @@ class ConfigurableAttributeSwitch(PlatformEntity):
         """Return the state of the switch."""
         return ConfigurableAttributeSwitchState(
             **super().state.__dict__,
-            state=self.is_on,
+            is_on=self.is_on,
             inverted=self.inverted,
             attribute_name=self._attribute_name,
             invert_attribute_name=self._inverter_attribute_name,
