@@ -234,6 +234,22 @@ class EntityStateChangedEvent:
     device_ieee: EUI64 | None = None
     endpoint_id: int | None = None
     group_id: int | None = None
+    state_diff: dict[str, Any]
+
+
+def compute_state_diff(
+    old: BaseEntityState | None, new: BaseEntityState
+) -> dict[str, Any]:
+    """Return the fields of `new` that differ from `old`."""
+    new_values = new.__dict__
+
+    if old is None:
+        return dict(new_values)
+
+    old_values = old.__dict__
+    return {
+        name: value for name, value in new_values.items() if old_values[name] != value
+    }
 
 
 class BaseEntity(LogMixin, EventBase):
@@ -448,9 +464,14 @@ class BaseEntity(LogMixin, EventBase):
     def maybe_emit_state_changed_event(self) -> None:
         """Send the state of this platform entity."""
         state = self.state
-        if self.__previous_state != state:
+        previous_state = self.__previous_state
+        if previous_state != state:
             self.emit(
-                STATE_CHANGED, EntityStateChangedEvent(**self.identifiers.__dict__)
+                STATE_CHANGED,
+                EntityStateChangedEvent(
+                    **self.identifiers.__dict__,
+                    state_diff=compute_state_diff(previous_state, state),
+                ),
             )
             self.__previous_state = state
 
