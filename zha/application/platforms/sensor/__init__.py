@@ -809,6 +809,7 @@ class ElectricalMeasurementState(SensorState):
 
     measurement_type: str | None = None
     max_value: float | int | None = None
+    max_attribute_name: str | None = None
 
 
 class BaseElectricalMeasurement(Sensor):
@@ -862,6 +863,7 @@ class BaseElectricalMeasurement(Sensor):
             **super().state.__dict__,
             measurement_type=self._measurement_type,
             max_value=max_value,
+            max_attribute_name=self._attr_max_attribute_name,
         )
 
     @property
