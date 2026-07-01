@@ -82,6 +82,11 @@ async def test_select(zha_gateway: Gateway) -> None:
         entity.state["state"] == security.IasWd.Warning.WarningMode.Burglar.name.lower()
     )
 
+    # Backwards compatibility: the previous spaced option format is still accepted
+    await entity.async_select_option("Police Panic")
+    await zha_gateway.async_block_till_done()
+    assert entity.state["state"] == "police_panic"
+
 
 class MotionSensitivityQuirk(CustomDevice):
     """Quirk with motion sensitivity attribute."""
@@ -337,6 +342,15 @@ async def test_bega_color_temperature_channel_select(zha_gateway: Gateway) -> No
         assert cluster.write_attributes.call_count == 1
         assert cluster.write_attributes.call_args == call(
             {"switchable_white": BegaColorTemperatureChannel.Warm_white},
+            manufacturer=UNDEFINED,
+        )
+
+        # Backwards compatibility: the previous spaced option format is still accepted
+        cluster.write_attributes.reset_mock()
+        await entity.async_select_option("Cool white")
+        await zha_gateway.async_block_till_done()
+        assert cluster.write_attributes.call_args == call(
+            {"switchable_white": BegaColorTemperatureChannel.Cool_white},
             manufacturer=UNDEFINED,
         )
 
