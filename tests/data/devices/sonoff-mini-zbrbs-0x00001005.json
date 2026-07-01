@@ -393,8 +393,8 @@
           "group_id": null,
           "enum": "SonoffExternalSwitchTriggerType",
           "options": [
-            "edge trigger",
-            "pulse trigger"
+            "edge_trigger",
+            "pulse_trigger"
           ]
         },
         "state": {
@@ -486,7 +486,7 @@
         "state": {
           "class_name": "WindowCoveringTypeSensor",
           "available": true,
-          "state": "Rollershade"
+          "state": "rollershade"
         }
       },
       {

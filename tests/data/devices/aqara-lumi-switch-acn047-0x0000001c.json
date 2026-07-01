@@ -845,14 +845,14 @@
           "group_id": null,
           "enum": "DecoupledMode",
           "options": [
-            "Decoupled",
-            "ControlRelay"
+            "decoupled",
+            "controlrelay"
           ]
         },
         "state": {
           "class_name": "AqaraT2RelayDecoupledMode",
           "available": true,
-          "state": "ControlRelay"
+          "state": "controlrelay"
         }
       },
       {
@@ -876,16 +876,16 @@
           "group_id": null,
           "enum": "StartupOnOff",
           "options": [
-            "On",
-            "Previous",
-            "Off",
-            "Toggle"
+            "on",
+            "previous",
+            "off",
+            "toggle"
           ]
         },
         "state": {
           "class_name": "AqaraT2RelayStartupOnOff",
           "available": true,
-          "state": "Previous"
+          "state": "previous"
         }
       },
       {
@@ -909,15 +909,15 @@
           "group_id": null,
           "enum": "SwitchMode",
           "options": [
-            "Power",
-            "Pulse",
-            "Dry"
+            "power",
+            "pulse",
+            "dry"
           ]
         },
         "state": {
           "class_name": "AqaraT2RelaySwitchMode",
           "available": true,
-          "state": "Power"
+          "state": "power"
         }
       },
       {
@@ -941,15 +941,15 @@
           "group_id": null,
           "enum": "SwitchType",
           "options": [
-            "Toggle",
-            "Momentary",
-            "NoSwitch"
+            "toggle",
+            "momentary",
+            "noswitch"
           ]
         },
         "state": {
           "class_name": "AqaraT2RelaySwitchType",
           "available": true,
-          "state": "Toggle"
+          "state": "toggle"
         }
       },
       {
@@ -973,14 +973,14 @@
           "group_id": null,
           "enum": "DecoupledMode",
           "options": [
-            "Decoupled",
-            "ControlRelay"
+            "decoupled",
+            "controlrelay"
           ]
         },
         "state": {
           "class_name": "AqaraT2RelayDecoupledMode",
           "available": true,
-          "state": "ControlRelay"
+          "state": "controlrelay"
         }
       }
     ],

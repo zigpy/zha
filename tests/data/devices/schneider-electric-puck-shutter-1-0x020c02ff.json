@@ -683,7 +683,7 @@
         "state": {
           "class_name": "WindowCoveringTypeSensor",
           "available": true,
-          "state": "Tilt_blind_tilt_and_lift"
+          "state": "tilt_blind_tilt_and_lift"
         }
       }
     ],

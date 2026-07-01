@@ -468,16 +468,16 @@
           "group_id": null,
           "enum": "BacklightMode",
           "options": [
-            "Off",
-            "Low",
-            "Medium",
-            "High"
+            "off",
+            "low",
+            "medium",
+            "high"
           ]
         },
         "state": {
           "class_name": "ZCLEnumSelectEntity",
           "available": true,
-          "state": "High"
+          "state": "high"
         }
       },
       {
@@ -501,15 +501,15 @@
           "group_id": null,
           "enum": "PresetModeV03",
           "options": [
-            "Auto",
-            "Manual",
-            "Temporary Manual"
+            "auto",
+            "manual",
+            "temporary_manual"
           ]
         },
         "state": {
           "class_name": "ZCLEnumSelectEntity",
           "available": true,
-          "state": "Manual"
+          "state": "manual"
         }
       },
       {
@@ -533,9 +533,9 @@
           "group_id": null,
           "enum": "SensorMode",
           "options": [
-            "Air",
-            "Floor",
-            "Both"
+            "air",
+            "floor",
+            "both"
           ]
         },
         "state": {
@@ -565,16 +565,16 @@
           "group_id": null,
           "enum": "WorkingDayV02",
           "options": [
-            "Disabled",
-            "Five Two",
-            "Six One",
-            "Seven"
+            "disabled",
+            "five_two",
+            "six_one",
+            "seven"
           ]
         },
         "state": {
           "class_name": "ZCLEnumSelectEntity",
           "available": true,
-          "state": "Disabled"
+          "state": "disabled"
         }
       }
     ],

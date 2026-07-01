@@ -404,17 +404,17 @@
           "group_id": null,
           "enum": "KeypadLockoutEnum",
           "options": [
-            "Unlock",
-            "Lock1",
-            "Lock2",
-            "Lock3",
-            "Lock4"
+            "unlock",
+            "lock1",
+            "lock2",
+            "lock3",
+            "lock4"
           ]
         },
         "state": {
           "class_name": "KeypadLockout",
           "available": true,
-          "state": "Unlock"
+          "state": "unlock"
         }
       }
     ],

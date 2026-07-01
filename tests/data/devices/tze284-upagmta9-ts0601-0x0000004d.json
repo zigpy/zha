@@ -203,8 +203,8 @@
           "group_id": null,
           "enum": "TuyaTempUnitConvert",
           "options": [
-            "Celsius",
-            "Fahrenheit"
+            "celsius",
+            "fahrenheit"
           ]
         },
         "state": {

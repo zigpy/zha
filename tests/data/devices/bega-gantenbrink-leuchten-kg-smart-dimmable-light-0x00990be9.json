@@ -734,16 +734,16 @@
           "group_id": null,
           "enum": "StartUpOnOff",
           "options": [
-            "Off",
-            "On",
-            "Toggle",
-            "PreviousValue"
+            "off",
+            "on",
+            "toggle",
+            "previousvalue"
           ]
         },
         "state": {
           "class_name": "StartupOnOffSelectEntity",
           "available": true,
-          "state": "On"
+          "state": "on"
         }
       },
       {
@@ -767,14 +767,14 @@
           "group_id": null,
           "enum": "BegaColorTemperatureChannel",
           "options": [
-            "Warm white",
-            "Cool white"
+            "warm_white",
+            "cool_white"
           ]
         },
         "state": {
           "class_name": "BegaColorTemperatureChannelSelect",
           "available": true,
-          "state": "Warm white"
+          "state": "warm_white"
         }
       }
     ],

@@ -290,8 +290,8 @@
           "group_id": null,
           "enum": "AqaraSwitchClickMode",
           "options": [
-            "Single",
-            "Multiple"
+            "single",
+            "multiple"
           ]
         },
         "state": {
@@ -321,8 +321,8 @@
           "group_id": null,
           "enum": "AqaraSwitchOperationMode",
           "options": [
-            "Command",
-            "Event"
+            "command",
+            "event"
           ]
         },
         "state": {

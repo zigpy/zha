@@ -961,9 +961,9 @@
           "group_id": null,
           "enum": "BoschDeviceMode",
           "options": [
-            "Disabled",
-            "Cover",
-            "Light"
+            "disabled",
+            "cover",
+            "light"
           ]
         },
         "state": {
@@ -993,10 +993,10 @@
           "group_id": null,
           "enum": "BoschSwitchType",
           "options": [
-            "Button",
-            "Button key change",
-            "Rocker switch",
-            "Rocker switch key change"
+            "button",
+            "button_key_change",
+            "rocker_switch",
+            "rocker_switch_key_change"
           ]
         },
         "state": {
@@ -1026,16 +1026,16 @@
           "group_id": null,
           "enum": "StartUpOnOff",
           "options": [
-            "Off",
-            "On",
-            "Toggle",
-            "PreviousValue"
+            "off",
+            "on",
+            "toggle",
+            "previousvalue"
           ]
         },
         "state": {
           "class_name": "StartupOnOffSelectEntity",
           "available": true,
-          "state": "Off"
+          "state": "off"
         }
       },
       {
@@ -1059,16 +1059,16 @@
           "group_id": null,
           "enum": "StartUpOnOff",
           "options": [
-            "Off",
-            "On",
-            "Toggle",
-            "PreviousValue"
+            "off",
+            "on",
+            "toggle",
+            "previousvalue"
           ]
         },
         "state": {
           "class_name": "StartupOnOffSelectEntity",
           "available": true,
-          "state": "Off"
+          "state": "off"
         }
       }
     ],
@@ -1226,7 +1226,7 @@
         "state": {
           "class_name": "WindowCoveringTypeSensor",
           "available": true,
-          "state": "Tilt_blind_tilt_and_lift"
+          "state": "tilt_blind_tilt_and_lift"
         }
       },
       {

@@ -496,8 +496,8 @@
           "group_id": null,
           "enum": "TuyaThermostatEcoMode",
           "options": [
-            "Comfort",
-            "Eco"
+            "comfort",
+            "eco"
           ]
         },
         "state": {

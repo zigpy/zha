@@ -319,16 +319,16 @@
           "group_id": null,
           "enum": "TuyaMotionFadeTime",
           "options": [
-            " 10 seconds",
-            " 30 seconds",
-            " 60 seconds",
-            " 120 seconds"
+            "_10_seconds",
+            "_30_seconds",
+            "_60_seconds",
+            "_120_seconds"
           ]
         },
         "state": {
           "class_name": "ZCLEnumSelectEntity",
           "available": true,
-          "state": " 10 seconds"
+          "state": "_10_seconds"
         }
       },
       {
@@ -352,15 +352,15 @@
           "group_id": null,
           "enum": "TuyaMotionPresenceSensitivity",
           "options": [
-            "Low",
-            "Medium",
-            "High"
+            "low",
+            "medium",
+            "high"
           ]
         },
         "state": {
           "class_name": "ZCLEnumSelectEntity",
           "available": true,
-          "state": "Medium"
+          "state": "medium"
         }
       }
     ],

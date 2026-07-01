@@ -795,16 +795,16 @@
           "group_id": null,
           "enum": "StartUpOnOff",
           "options": [
-            "Off",
-            "On",
-            "Toggle",
-            "PreviousValue"
+            "off",
+            "on",
+            "toggle",
+            "previousvalue"
           ]
         },
         "state": {
           "class_name": "StartupOnOffSelectEntity",
           "available": true,
-          "state": "PreviousValue"
+          "state": "previousvalue"
         }
       },
       {
@@ -828,16 +828,16 @@
           "group_id": null,
           "enum": "StartUpOnOff",
           "options": [
-            "Off",
-            "On",
-            "Toggle",
-            "PreviousValue"
+            "off",
+            "on",
+            "toggle",
+            "previousvalue"
           ]
         },
         "state": {
           "class_name": "StartupOnOffSelectEntity",
           "available": true,
-          "state": "Off"
+          "state": "off"
         }
       }
     ],

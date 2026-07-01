@@ -451,14 +451,14 @@
           "group_id": null,
           "enum": "TemperatureUnit",
           "options": [
-            "Celsius",
-            "Fahrenheit"
+            "celsius",
+            "fahrenheit"
           ]
         },
         "state": {
           "class_name": "ZCLEnumSelectEntity",
           "available": true,
-          "state": "Fahrenheit"
+          "state": "fahrenheit"
         }
       }
     ],

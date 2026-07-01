@@ -443,9 +443,9 @@
           "group_id": null,
           "enum": "TuyaMotionDetectionMode",
           "options": [
-            "Only PIR",
-            "PIR and radar",
-            "Only radar"
+            "only_pir",
+            "pir_and_radar",
+            "only_radar"
           ]
         },
         "state": {

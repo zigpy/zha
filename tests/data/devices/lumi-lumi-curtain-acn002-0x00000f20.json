@@ -519,15 +519,15 @@
           "group_id": null,
           "enum": "AqaraRollerDriverSpeed",
           "options": [
-            "Low",
-            "Medium",
-            "High"
+            "low",
+            "medium",
+            "high"
           ]
         },
         "state": {
           "class_name": "ZCLEnumSelectEntity",
           "available": true,
-          "state": "High"
+          "state": "high"
         }
       }
     ],
@@ -676,7 +676,7 @@
         "state": {
           "class_name": "WindowCoveringTypeSensor",
           "available": true,
-          "state": "Rollershade"
+          "state": "rollershade"
         }
       }
     ],

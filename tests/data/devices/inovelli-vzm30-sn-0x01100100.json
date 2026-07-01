@@ -998,16 +998,16 @@
           "group_id": null,
           "enum": "StartUpOnOff",
           "options": [
-            "Off",
-            "On",
-            "Toggle",
-            "PreviousValue"
+            "off",
+            "on",
+            "toggle",
+            "previousvalue"
           ]
         },
         "state": {
           "class_name": "StartupOnOffSelectEntity",
           "available": true,
-          "state": "PreviousValue"
+          "state": "previousvalue"
         }
       }
     ],
@@ -1253,7 +1253,7 @@
         "state": {
           "class_name": "InovelliOverheated",
           "available": true,
-          "state": "Normal"
+          "state": "normal"
         }
       },
       {

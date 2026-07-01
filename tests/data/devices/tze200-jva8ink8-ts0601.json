@@ -536,7 +536,7 @@
         "state": {
           "class_name": "EnumSensor",
           "available": true,
-          "state": "CheckSuccess"
+          "state": "checksuccess"
         }
       }
     ],

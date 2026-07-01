@@ -446,7 +446,7 @@ async def async_test_setpoint_change_source(
         cluster,
         {hvac.Thermostat.AttributeDefs.setpoint_change_source.id: 0x01},
     )
-    assert entity.state["state"] == "Schedule"
+    assert entity.state["state"] == "schedule"
 
 
 async def async_test_pi_heating_demand(
@@ -2102,7 +2102,7 @@ async def test_enum_sensor(zha_gateway: Gateway) -> None:
     zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
     entity = get_entity(zha_device, platform=Platform.SENSOR, qualifier="battery_size")
 
-    assert entity.state["state"] == "AAA"
+    assert entity.state["state"] == "aaa"
 
     zigpy_dev.endpoints[1].power.update_attribute(
         PowerConfiguration.AttributeDefs.battery_size.id,

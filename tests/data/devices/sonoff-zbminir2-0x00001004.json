@@ -367,16 +367,16 @@
           "group_id": null,
           "enum": "StartUpOnOff",
           "options": [
-            "Off",
-            "On",
-            "Toggle",
-            "PreviousValue"
+            "off",
+            "on",
+            "toggle",
+            "previousvalue"
           ]
         },
         "state": {
           "class_name": "StartupOnOffSelectEntity",
           "available": true,
-          "state": "Off"
+          "state": "off"
         }
       },
       {
@@ -400,16 +400,16 @@
           "group_id": null,
           "enum": "SonoffExternalSwitchTriggerType",
           "options": [
-            "Edge trigger",
-            "Pulse trigger",
-            "Normally off follow trigger",
-            "Normally on follow trigger"
+            "edge_trigger",
+            "pulse_trigger",
+            "normally_off_follow_trigger",
+            "normally_on_follow_trigger"
           ]
         },
         "state": {
           "class_name": "ZCLEnumSelectEntity",
           "available": true,
-          "state": "Edge trigger"
+          "state": "edge_trigger"
         }
       }
     ],

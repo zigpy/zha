@@ -557,12 +557,12 @@
           "group_id": null,
           "enum": "TuyaPresenceStateV02",
           "options": [
-            "Unoccupied",
-            "Large",
-            "Medium",
-            "Small",
-            "Huge",
-            "Gigantic"
+            "unoccupied",
+            "large",
+            "medium",
+            "small",
+            "huge",
+            "gigantic"
           ]
         },
         "state": {

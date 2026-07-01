@@ -337,17 +337,17 @@
           "group_id": null,
           "enum": "HueV2MotionSensitivities",
           "options": [
-            "Lowest",
-            "Low",
-            "Medium",
-            "High",
-            "Highest"
+            "lowest",
+            "low",
+            "medium",
+            "high",
+            "highest"
           ]
         },
         "state": {
           "class_name": "HueV2MotionSensitivity",
           "available": true,
-          "state": "Lowest"
+          "state": "lowest"
         }
       }
     ],

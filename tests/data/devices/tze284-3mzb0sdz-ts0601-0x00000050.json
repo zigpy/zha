@@ -366,8 +366,8 @@
           "group_id": null,
           "enum": "MotorDirection",
           "options": [
-            "Forward",
-            "Back"
+            "forward",
+            "back"
           ]
         },
         "state": {

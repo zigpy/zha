@@ -380,15 +380,15 @@
           "group_id": null,
           "enum": "HueV1MotionSensitivities",
           "options": [
-            "Low",
-            "Medium",
-            "High"
+            "low",
+            "medium",
+            "high"
           ]
         },
         "state": {
           "class_name": "HueV1MotionSensitivity",
           "available": true,
-          "state": "High"
+          "state": "high"
         }
       }
     ],

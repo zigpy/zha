@@ -355,15 +355,15 @@
           "group_id": null,
           "enum": "AqaraMotionSensitivities",
           "options": [
-            "Low",
-            "Medium",
-            "High"
+            "low",
+            "medium",
+            "high"
           ]
         },
         "state": {
           "class_name": "AqaraMotionSensitivity",
           "available": true,
-          "state": "High"
+          "state": "high"
         }
       }
     ],

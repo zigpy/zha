@@ -245,15 +245,15 @@
           "group_id": null,
           "enum": "DetectionDistance",
           "options": [
-            "TenMillimeters",
-            "TwentyMillimeters",
-            "ThirtyMillimeters"
+            "tenmillimeters",
+            "twentymillimeters",
+            "thirtymillimeters"
           ]
         },
         "state": {
           "class_name": "AqaraMagnetAC01DetectionDistance",
           "available": true,
-          "state": "TwentyMillimeters"
+          "state": "twentymillimeters"
         }
       }
     ],

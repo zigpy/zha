@@ -303,15 +303,15 @@
           "group_id": null,
           "enum": "AqaraApproachDistances",
           "options": [
-            "Far",
-            "Medium",
-            "Near"
+            "far",
+            "medium",
+            "near"
           ]
         },
         "state": {
           "class_name": "AqaraApproachDistance",
           "available": true,
-          "state": "Far"
+          "state": "far"
         }
       },
       {
@@ -335,14 +335,14 @@
           "group_id": null,
           "enum": "AqaraMonitoringModess",
           "options": [
-            "Undirected",
-            "Left Right"
+            "undirected",
+            "left_right"
           ]
         },
         "state": {
           "class_name": "AqaraMonitoringMode",
           "available": true,
-          "state": "Left Right"
+          "state": "left_right"
         }
       },
       {
@@ -366,15 +366,15 @@
           "group_id": null,
           "enum": "AqaraMotionSensitivities",
           "options": [
-            "Low",
-            "Medium",
-            "High"
+            "low",
+            "medium",
+            "high"
           ]
         },
         "state": {
           "class_name": "AqaraMotionSensitivity",
           "available": true,
-          "state": "High"
+          "state": "high"
         }
       }
     ],

@@ -505,16 +505,16 @@
           "group_id": null,
           "enum": "StartUpOnOff",
           "options": [
-            "Off",
-            "On",
-            "Toggle",
-            "PreviousValue"
+            "off",
+            "on",
+            "toggle",
+            "previousvalue"
           ]
         },
         "state": {
           "class_name": "StartupOnOffSelectEntity",
           "available": true,
-          "state": "PreviousValue"
+          "state": "previousvalue"
         }
       },
       {
@@ -538,12 +538,12 @@
           "group_id": null,
           "enum": "NodOnPilotWireMode",
           "options": [
-            "Off",
-            "Comfort",
-            "Eco",
-            "FrostProtection",
-            "ComfortMinus1",
-            "ComfortMinus2"
+            "off",
+            "comfort",
+            "eco",
+            "frostprotection",
+            "comfortminus1",
+            "comfortminus2"
           ]
         },
         "state": {

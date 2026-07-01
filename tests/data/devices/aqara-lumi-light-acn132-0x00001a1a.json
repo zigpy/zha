@@ -666,8 +666,8 @@
           "group_id": null,
           "enum": "LedStripT1Audio",
           "options": [
-            "Off",
-            "On"
+            "off",
+            "on"
           ]
         },
         "state": {
@@ -697,10 +697,10 @@
           "group_id": null,
           "enum": "LedStripT1AudioEffect",
           "options": [
-            "Random",
-            "Blink",
-            "Rainbow",
-            "Wave"
+            "random",
+            "blink",
+            "rainbow",
+            "wave"
           ]
         },
         "state": {
@@ -730,9 +730,9 @@
           "group_id": null,
           "enum": "LedStripT1AudioSensitivity",
           "options": [
-            "Low",
-            "Medium",
-            "High"
+            "low",
+            "medium",
+            "high"
           ]
         },
         "state": {
@@ -762,10 +762,10 @@
           "group_id": null,
           "enum": "LedStripT1PowerOnStateMode",
           "options": [
-            "On",
-            "Previous",
-            "Off",
-            "Toggle"
+            "on",
+            "previous",
+            "off",
+            "toggle"
           ]
         },
         "state": {
@@ -795,14 +795,14 @@
           "group_id": null,
           "enum": "LedStripT1Preset",
           "options": [
-            "Breathe",
-            "Rainbow",
-            "Sweep",
-            "Flashing",
-            "Strobe",
-            "ReversedRainbow",
-            "Colorful",
-            "Scan"
+            "breathe",
+            "rainbow",
+            "sweep",
+            "flashing",
+            "strobe",
+            "reversedrainbow",
+            "colorful",
+            "scan"
           ]
         },
         "state": {

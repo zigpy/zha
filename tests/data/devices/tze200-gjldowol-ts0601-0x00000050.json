@@ -279,9 +279,9 @@
           "group_id": null,
           "enum": "TuyaSensitivityMode",
           "options": [
-            "Low",
-            "Medium",
-            "High"
+            "low",
+            "medium",
+            "high"
           ]
         },
         "state": {

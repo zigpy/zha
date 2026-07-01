@@ -2050,17 +2050,17 @@
           "group_id": null,
           "enum": "KeypadLockoutEnum",
           "options": [
-            "Unlock",
-            "Lock1",
-            "Lock2",
-            "Lock3",
-            "Lock4"
+            "unlock",
+            "lock1",
+            "lock2",
+            "lock3",
+            "lock4"
           ]
         },
         "state": {
           "class_name": "KeypadLockout",
           "available": true,
-          "state": "Unlock"
+          "state": "unlock"
         }
       },
       {
@@ -2084,15 +2084,15 @@
           "group_id": null,
           "enum": "SEControlType",
           "options": [
-            "OnOff",
-            "PI",
-            "NoControl"
+            "onoff",
+            "pi",
+            "nocontrol"
           ]
         },
         "state": {
           "class_name": "ZCLEnumSelectEntity",
           "available": true,
-          "state": "NoControl"
+          "state": "nocontrol"
         }
       },
       {
@@ -2116,15 +2116,15 @@
           "group_id": null,
           "enum": "SEHeatTransferMedium",
           "options": [
-            "Nothing",
-            "Hydronic",
-            "Air"
+            "nothing",
+            "hydronic",
+            "air"
           ]
         },
         "state": {
           "class_name": "ZCLEnumSelectEntity",
           "available": true,
-          "state": "Nothing"
+          "state": "nothing"
         }
       },
       {
@@ -2148,18 +2148,18 @@
           "group_id": null,
           "enum": "SEHeatingEmitterType",
           "options": [
-            "Direct",
-            "Radiator",
-            "FanAssistedRadiator",
-            "RadiantPanel",
-            "Floor",
-            "NotSpecified"
+            "direct",
+            "radiator",
+            "fanassistedradiator",
+            "radiantpanel",
+            "floor",
+            "notspecified"
           ]
         },
         "state": {
           "class_name": "ZCLEnumSelectEntity",
           "available": true,
-          "state": "Floor"
+          "state": "floor"
         }
       },
       {
@@ -2183,20 +2183,20 @@
           "group_id": null,
           "enum": "SEHeatingFuel",
           "options": [
-            "Electricity",
-            "Gas",
-            "Oil",
-            "SolidFuel",
-            "Solar",
-            "ComunityHeating",
-            "HeatPump",
-            "NotSpecified"
+            "electricity",
+            "gas",
+            "oil",
+            "solidfuel",
+            "solar",
+            "comunityheating",
+            "heatpump",
+            "notspecified"
           ]
         },
         "state": {
           "class_name": "ZCLEnumSelectEntity",
           "available": true,
-          "state": "Electricity"
+          "state": "electricity"
         }
       },
       {
@@ -2220,14 +2220,14 @@
           "group_id": null,
           "enum": "SELocalTemperatureSourceSelect",
           "options": [
-            "Ambient",
-            "External"
+            "ambient",
+            "external"
           ]
         },
         "state": {
           "class_name": "ZCLEnumSelectEntity",
           "available": true,
-          "state": "Ambient"
+          "state": "ambient"
         }
       },
       {
@@ -2251,15 +2251,15 @@
           "group_id": null,
           "enum": "SEThermostatApplication",
           "options": [
-            "OccupiedSpace",
-            "Floor",
-            "NotKnown"
+            "occupiedspace",
+            "floor",
+            "notknown"
           ]
         },
         "state": {
           "class_name": "ZCLEnumSelectEntity",
           "available": true,
-          "state": "Floor"
+          "state": "floor"
         }
       },
       {
@@ -2283,19 +2283,19 @@
           "group_id": null,
           "enum": "SETemperatureSensorType",
           "options": [
-            "Sensor2kOhm",
-            "Sensor10kOhm",
-            "Sensor12kOhm",
-            "Sensor15kOhm",
-            "Sensor33kOhm",
-            "Sensor47kOhm",
-            "SensorAbsent"
+            "sensor2kohm",
+            "sensor10kohm",
+            "sensor12kohm",
+            "sensor15kohm",
+            "sensor33kohm",
+            "sensor47kohm",
+            "sensorabsent"
           ]
         },
         "state": {
           "class_name": "ZCLEnumSelectEntity",
           "available": true,
-          "state": "SensorAbsent"
+          "state": "sensorabsent"
         }
       }
     ],
@@ -2465,7 +2465,7 @@
         "state": {
           "class_name": "EnumSensor",
           "available": true,
-          "state": "NormalOperation"
+          "state": "normaloperation"
         }
       },
       {

@@ -1469,16 +1469,16 @@
           "group_id": null,
           "enum": "StartUpOnOff",
           "options": [
-            "Off",
-            "On",
-            "Toggle",
-            "PreviousValue"
+            "off",
+            "on",
+            "toggle",
+            "previousvalue"
           ]
         },
         "state": {
           "class_name": "StartupOnOffSelectEntity",
           "available": true,
-          "state": "PreviousValue"
+          "state": "previousvalue"
         }
       },
       {
@@ -1502,14 +1502,14 @@
           "group_id": null,
           "enum": "InovelliOutputMode",
           "options": [
-            "Dimmer",
-            "OnOff"
+            "dimmer",
+            "onoff"
           ]
         },
         "state": {
           "class_name": "InovelliOutputModeEntity",
           "available": true,
-          "state": "OnOff"
+          "state": "onoff"
         }
       },
       {
@@ -1533,23 +1533,23 @@
           "group_id": null,
           "enum": "InovelliFanLedScalingMode",
           "options": [
-            "VZM31SN",
-            "Grade 1",
-            "Grade 2",
-            "Grade 3",
-            "Grade 4",
-            "Grade 5",
-            "Grade 6",
-            "Grade 7",
-            "Grade 8",
-            "Grade 9",
-            "Adaptive"
+            "vzm31sn",
+            "grade_1",
+            "grade_2",
+            "grade_3",
+            "grade_4",
+            "grade_5",
+            "grade_6",
+            "grade_7",
+            "grade_8",
+            "grade_9",
+            "adaptive"
           ]
         },
         "state": {
           "class_name": "InovelliFanLedScalingModeEntity",
           "available": true,
-          "state": "Adaptive"
+          "state": "adaptive"
         }
       },
       {
@@ -1573,14 +1573,14 @@
           "group_id": null,
           "enum": "InovelliFanSwitchType",
           "options": [
-            "Load Only",
-            "Three Way AUX"
+            "load_only",
+            "three_way_aux"
           ]
         },
         "state": {
           "class_name": "InovelliFanSwitchTypeEntity",
           "available": true,
-          "state": "Load Only"
+          "state": "load_only"
         }
       }
     ],
@@ -1694,7 +1694,7 @@
         "state": {
           "class_name": "InovelliOverheated",
           "available": true,
-          "state": "Normal"
+          "state": "normal"
         }
       }
     ],

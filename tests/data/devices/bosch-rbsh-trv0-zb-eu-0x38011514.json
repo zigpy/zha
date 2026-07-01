@@ -708,17 +708,17 @@
           "group_id": null,
           "enum": "KeypadLockoutEnum",
           "options": [
-            "Unlock",
-            "Lock1",
-            "Lock2",
-            "Lock3",
-            "Lock4"
+            "unlock",
+            "lock1",
+            "lock2",
+            "lock3",
+            "lock4"
           ]
         },
         "state": {
           "class_name": "KeypadLockout",
           "available": true,
-          "state": "Unlock"
+          "state": "unlock"
         }
       },
       {
@@ -742,14 +742,14 @@
           "group_id": null,
           "enum": "BoschControlSequenceOfOperation",
           "options": [
-            "Cooling",
-            "Heating"
+            "cooling",
+            "heating"
           ]
         },
         "state": {
           "class_name": "ZCLEnumSelectEntity",
           "available": true,
-          "state": "Heating"
+          "state": "heating"
         }
       },
       {
@@ -773,14 +773,14 @@
           "group_id": null,
           "enum": "BoschDisplayOrientation",
           "options": [
-            "Normal",
-            "Flipped"
+            "normal",
+            "flipped"
           ]
         },
         "state": {
           "class_name": "ZCLEnumSelectEntity",
           "available": true,
-          "state": "Normal"
+          "state": "normal"
         }
       },
       {
@@ -804,14 +804,14 @@
           "group_id": null,
           "enum": "BoschDisplayedTemperature",
           "options": [
-            "Target",
-            "Measured"
+            "target",
+            "measured"
           ]
         },
         "state": {
           "class_name": "ZCLEnumSelectEntity",
           "available": true,
-          "state": "Measured"
+          "state": "measured"
         }
       }
     ],
@@ -989,7 +989,7 @@
         "state": {
           "class_name": "SetpointChangeSource",
           "available": true,
-          "state": "Manual"
+          "state": "manual"
         }
       },
       {
@@ -1045,7 +1045,7 @@
         "state": {
           "class_name": "EnumSensor",
           "available": true,
-          "state": "Manual"
+          "state": "manual"
         }
       },
       {
@@ -1073,7 +1073,7 @@
         "state": {
           "class_name": "EnumSensor",
           "available": true,
-          "state": "CalibrationInProgress"
+          "state": "calibrationinprogress"
         }
       }
     ],

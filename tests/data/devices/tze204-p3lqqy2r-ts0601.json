@@ -358,9 +358,9 @@
           "group_id": null,
           "enum": "PresetModeV01",
           "options": [
-            "Manual",
-            "Home",
-            "Away"
+            "manual",
+            "home",
+            "away"
           ]
         },
         "state": {
@@ -390,11 +390,11 @@
           "group_id": null,
           "enum": "RegulatorPeriod",
           "options": [
-            " 15 min",
-            " 30 min",
-            " 45 min",
-            " 60 min",
-            " 90 min"
+            "_15_min",
+            "_30_min",
+            "_45_min",
+            "_60_min",
+            "_90_min"
           ]
         },
         "state": {
@@ -424,9 +424,9 @@
           "group_id": null,
           "enum": "SensorMode",
           "options": [
-            "Air",
-            "Floor",
-            "Both"
+            "air",
+            "floor",
+            "both"
           ]
         },
         "state": {
@@ -456,8 +456,8 @@
           "group_id": null,
           "enum": "ThermostatMode",
           "options": [
-            "Regulator",
-            "Thermostat"
+            "regulator",
+            "thermostat"
           ]
         },
         "state": {

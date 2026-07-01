@@ -864,17 +864,17 @@
           "group_id": null,
           "enum": "KeypadLockoutEnum",
           "options": [
-            "Unlock",
-            "Lock1",
-            "Lock2",
-            "Lock3",
-            "Lock4"
+            "unlock",
+            "lock1",
+            "lock2",
+            "lock3",
+            "lock4"
           ]
         },
         "state": {
           "class_name": "KeypadLockout",
           "available": true,
-          "state": "Unlock"
+          "state": "unlock"
         }
       },
       {
@@ -898,8 +898,8 @@
           "group_id": null,
           "enum": "BoschActuatorType",
           "options": [
-            "NormallyClosed",
-            "NormallyOpen"
+            "normallyclosed",
+            "normallyopen"
           ]
         },
         "state": {
@@ -929,10 +929,10 @@
           "group_id": null,
           "enum": "BoschHeaterType",
           "options": [
-            "UnderfloorHeating",
-            "Boiler",
-            "Radiator",
-            "CentralHeating"
+            "underfloorheating",
+            "boiler",
+            "radiator",
+            "centralheating"
           ]
         },
         "state": {
@@ -962,15 +962,15 @@
           "group_id": null,
           "enum": "BoschOperatingMode",
           "options": [
-            "Schedule",
-            "Manual",
-            "Pause"
+            "schedule",
+            "manual",
+            "pause"
           ]
         },
         "state": {
           "class_name": "ZCLEnumSelectEntity",
           "available": true,
-          "state": "Manual"
+          "state": "manual"
         }
       },
       {
@@ -994,9 +994,9 @@
           "group_id": null,
           "enum": "BoschSensorConnection",
           "options": [
-            "NotUsed",
-            "WithoutRegulation",
-            "WithRegulation"
+            "notused",
+            "withoutregulation",
+            "withregulation"
           ]
         },
         "state": {
@@ -1026,14 +1026,14 @@
           "group_id": null,
           "enum": "TemperatureDisplayMode",
           "options": [
-            "Metric",
-            "Imperial"
+            "metric",
+            "imperial"
           ]
         },
         "state": {
           "class_name": "ZCLEnumSelectEntity",
           "available": true,
-          "state": "Metric"
+          "state": "metric"
         }
       },
       {
@@ -1057,9 +1057,9 @@
           "group_id": null,
           "enum": "BoschValveStatusLed",
           "options": [
-            "Off",
-            "Normal",
-            "On"
+            "off",
+            "normal",
+            "on"
           ]
         },
         "state": {
@@ -1235,7 +1235,7 @@
         "state": {
           "class_name": "SetpointChangeSource",
           "available": true,
-          "state": "External"
+          "state": "external"
         }
       },
       {

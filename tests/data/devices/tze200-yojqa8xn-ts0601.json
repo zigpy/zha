@@ -305,11 +305,11 @@
           "group_id": null,
           "enum": "TuyaSirenRingtone",
           "options": [
-            "Ringtone 01",
-            "Ringtone 02",
-            "Ringtone 03",
-            "Ringtone 04",
-            "Ringtone 05"
+            "ringtone_01",
+            "ringtone_02",
+            "ringtone_03",
+            "ringtone_04",
+            "ringtone_05"
           ]
         },
         "state": {

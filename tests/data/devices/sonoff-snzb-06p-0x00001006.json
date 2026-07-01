@@ -281,15 +281,15 @@
           "group_id": null,
           "enum": "SonoffPresenceDetectionSensitivityEnum",
           "options": [
-            "Low",
-            "Medium",
-            "High"
+            "low",
+            "medium",
+            "high"
           ]
         },
         "state": {
           "class_name": "SonoffPresenceDetectionSensitivity",
           "available": true,
-          "state": "Low"
+          "state": "low"
         }
       }
     ],
@@ -375,7 +375,7 @@
         "state": {
           "class_name": "SonoffPresenceSenorIlluminationStatus",
           "available": true,
-          "state": "Light"
+          "state": "light"
         }
       }
     ],
