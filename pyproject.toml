@@ -67,6 +67,10 @@ default-groups = ["testing"]
 
 [tool.setuptools-git-versioning]
 enabled = true
+# Fallback version for tagless checkouts (e.g. Dependabot). zha-quirks depends
+# on zha>=2.0.0, so the version must satisfy that or the lock is unsatisfiable.
+# Bump on each major.
+starting_version = "2.0.0"
 
 [tool.codespell]
 skip = ["tests/data/devices/*"]
