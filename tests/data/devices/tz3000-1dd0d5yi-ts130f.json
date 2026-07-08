@@ -162,7 +162,7 @@
               "id": "0x0000",
               "name": "on_off",
               "zcl_type": "bool",
-              "value": 0
+              "unsupported": true
             },
             {
               "id": "0xfffe",
@@ -320,7 +320,7 @@
               "id": "0x0002",
               "name": "current_file_version",
               "zcl_type": "uint32",
-              "value": 71
+              "unsupported": true
             },
             {
               "id": "0x0004",
@@ -403,7 +403,7 @@
           "entity_category": null,
           "entity_registry_enabled_default": true,
           "enabled": true,
-          "primary": false,
+          "primary": true,
           "device_ieee": "ab:cd:ef:12:15:80:89:33",
           "endpoint_id": 1,
           "available": true,
@@ -480,34 +480,6 @@
         }
       }
     ],
-    "switch": [
-      {
-        "info_object": {
-          "fallback_name": null,
-          "unique_id": "ab:cd:ef:12:15:80:89:33-1-6",
-          "migrate_unique_ids": [],
-          "platform": "switch",
-          "class_name": "Switch",
-          "translation_key": "switch",
-          "translation_placeholders": null,
-          "device_class": null,
-          "state_class": null,
-          "entity_category": null,
-          "entity_registry_enabled_default": true,
-          "enabled": true,
-          "primary": false,
-          "device_ieee": "ab:cd:ef:12:15:80:89:33",
-          "endpoint_id": 1,
-          "available": true,
-          "group_id": null
-        },
-        "state": {
-          "class_name": "Switch",
-          "state": 0,
-          "available": true
-        }
-      }
-    ],
     "update": [
       {
         "info_object": {
@@ -533,7 +505,7 @@
         "state": {
           "class_name": "FirmwareUpdateEntity",
           "available": true,
-          "installed_version": "0x00000047",
+          "installed_version": null,
           "in_progress": false,
           "update_percentage": null,
           "latest_version": null,

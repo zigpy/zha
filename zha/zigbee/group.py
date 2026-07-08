@@ -19,14 +19,13 @@ from zha.application.platforms import (
 )
 from zha.const import STATE_CHANGED
 from zha.mixins import LogMixin
-from zha.zigbee.device import ExtendedDeviceInfo
 
 if TYPE_CHECKING:
     from zigpy.group import Group as ZigpyGroup, GroupEndpoint
 
     from zha.application.gateway import Gateway
     from zha.application.platforms import GroupEntity
-    from zha.zigbee.device import Device
+    from zha.zigbee.device import Device, ExtendedDeviceInfo
 
 _LOGGER = logging.getLogger(__name__)
 

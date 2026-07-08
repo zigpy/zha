@@ -63,6 +63,7 @@ async def main(files: list[str] | None = None) -> None:
                 device_json.write_text(new_json)
 
             await zha_device.on_remove()
+            del zha_gateway.devices[zha_device.ieee]
 
 
 if __name__ == "__main__":

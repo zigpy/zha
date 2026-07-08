@@ -1937,7 +1937,7 @@ async def test_ignore_non_value(zha_gateway: Gateway) -> None:
 
     zigpy_dev = await zigpy_device_from_json(
         zha_gateway.application_controller,
-        "tests/data/devices/third-reality-inc-3rsm0147z.json",
+        "tests/data/devices/third-reality-inc-3rsm0147z-0x0000001f.json",
     )
 
     zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
@@ -1968,7 +1968,7 @@ async def test_ignore_non_value_quirks_v2(zha_gateway: Gateway) -> None:
 
     zigpy_dev = await zigpy_device_from_json(
         zha_gateway.application_controller,
-        "tests/data/devices/frient-a-s-aqszb-110.json",
+        "tests/data/devices/frient-a-s-aqszb-110-0x00040001.json",
     )
     assert isinstance(zigpy_dev, CustomZigpyDevice)
 
@@ -1990,7 +1990,7 @@ async def test_ignore_nan_value(zha_gateway: Gateway) -> None:
 
     zigpy_dev = await zigpy_device_from_json(
         zha_gateway.application_controller,
-        "tests/data/devices/frient-a-s-scazb-141.json",
+        "tests/data/devices/frient-a-s-scazb-141-0x00010803.json",
     )
 
     zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
@@ -2074,7 +2074,7 @@ async def test_enum_sensor(zha_gateway: Gateway) -> None:
     registry = DeviceRegistry()
     zigpy_dev = await zigpy_device_from_json(
         zha_gateway.application_controller,
-        "tests/data/devices/centralite-3405-l.json",
+        "tests/data/devices/centralite-3405-l-0x10025310.json",
     )
 
     zigpy_dev.endpoints[1].power.update_attribute(
@@ -2119,7 +2119,7 @@ async def test_em_poller_runs_independently_of_entity_enabled_state(
 
     zigpy_dev = await zigpy_device_from_json(
         zha_gateway.application_controller,
-        "tests/data/devices/ubisys-s1-5501.json",
+        "tests/data/devices/ubisys-s1-5501-0x02600460.json",
     )
     zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
 

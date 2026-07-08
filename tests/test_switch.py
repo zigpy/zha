@@ -853,7 +853,7 @@ async def test_binary_output_cluster(zha_gateway: Gateway) -> None:
 
     zigpy_device = await zigpy_device_from_json(
         zha_gateway.application_controller,
-        "tests/data/devices/espressif-zigbeebinaryoutputdevice.json",
+        "tests/data/devices/espressif-zigbeebinaryanalogdevice.json",
     )
     cluster = zigpy_device.endpoints[1].binary_output
     zha_device = await join_zigpy_device(zha_gateway, zigpy_device)

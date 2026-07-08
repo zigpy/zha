@@ -1,7 +1,7 @@
 {
   "version": 2,
   "ieee": "ab:cd:ef:12:b5:0f:0b:2f",
-  "nwk": "0x5C8B",
+  "nwk": "0xABD5",
   "manufacturer": "_TZE200_a7sghmms",
   "model": "TS0601",
   "friendly_manufacturer": "_TZE200_a7sghmms",
@@ -12,9 +12,9 @@
   "exposes_features": [],
   "manufacturer_code": 4417,
   "power_source": "Battery or Unknown",
-  "lqi": null,
+  "lqi": 183,
   "rssi": null,
-  "last_seen": "2025-07-05T08:46:21.109364+00:00",
+  "last_seen": "2025-08-13T14:43:05.969342+00:00",
   "available": true,
   "device_type": "EndDevice",
   "active_coordinator": false,
@@ -46,12 +46,6 @@
           "endpoint_attribute": "basic",
           "attributes": [
             {
-              "id": "0x0001",
-              "name": "app_version",
-              "zcl_type": "uint8",
-              "value": 72
-            },
-            {
               "id": "0x0004",
               "name": "manufacturer",
               "zcl_type": "string",
@@ -69,12 +63,6 @@
           "cluster_id": "0x0001",
           "endpoint_attribute": "power",
           "attributes": [
-            {
-              "id": "0x0021",
-              "name": "battery_percentage_remaining",
-              "zcl_type": "uint8",
-              "value": 180
-            },
             {
               "id": "0x0033",
               "name": "battery_quantity",
@@ -113,7 +101,7 @@
               "id": "0x0000",
               "name": "on_off",
               "zcl_type": "bool",
-              "value": 0
+              "value": false
             }
           ]
         },
@@ -121,12 +109,6 @@
           "cluster_id": "0x0702",
           "endpoint_attribute": "smartenergy_metering",
           "attributes": [
-            {
-              "id": "0x0000",
-              "name": "current_summ_delivered",
-              "zcl_type": "uint48",
-              "value": 0
-            },
             {
               "id": "0x0400",
               "name": "instantaneous_demand",
@@ -150,62 +132,7 @@
         {
           "cluster_id": "0xef00",
           "endpoint_attribute": "tuya_manufacturer",
-          "attributes": [
-            {
-              "id": "0xef67",
-              "name": "irrigation_cycles",
-              "zcl_type": "uint8",
-              "value": 0
-            },
-            {
-              "id": "0xef72",
-              "name": "irrigation_duration",
-              "zcl_type": "uint32",
-              "value": 6
-            },
-            {
-              "id": "0xef66",
-              "name": "irrigation_end_time",
-              "zcl_type": "string",
-              "value": "2025-07-05 09:33:23.709383+04:00"
-            },
-            {
-              "id": "0xef69",
-              "name": "irrigation_interval",
-              "zcl_type": "uint32",
-              "value": 0
-            },
-            {
-              "id": "0xef01",
-              "name": "irrigation_mode",
-              "zcl_type": "bool",
-              "value": 0
-            },
-            {
-              "id": "0xef65",
-              "name": "irrigation_start_time",
-              "zcl_type": "string",
-              "value": "2025-07-05 09:33:17.905219+04:00"
-            },
-            {
-              "id": "0xef68",
-              "name": "irrigation_target",
-              "zcl_type": "uint32",
-              "value": 0
-            },
-            {
-              "id": "0xef00",
-              "name": "mcu_version",
-              "zcl_type": "uint48",
-              "value": "1.0.15"
-            },
-            {
-              "id": "0xef6b",
-              "name": "weather_delay",
-              "zcl_type": "enum8",
-              "value": 0
-            }
-          ]
+          "attributes": []
         }
       ],
       "out_clusters": [
@@ -217,14 +144,7 @@
         {
           "cluster_id": "0x0019",
           "endpoint_attribute": "ota",
-          "attributes": [
-            {
-              "id": "0x0002",
-              "name": "current_file_version",
-              "zcl_type": "uint32",
-              "value": 72
-            }
-          ]
+          "attributes": []
         }
       ]
     }
@@ -297,7 +217,7 @@
         "state": {
           "class_name": "NumberConfigurationEntity",
           "available": true,
-          "state": 0
+          "state": null
         }
       },
       {
@@ -328,7 +248,7 @@
         "state": {
           "class_name": "NumberConfigurationEntity",
           "available": true,
-          "state": 0
+          "state": null
         }
       },
       {
@@ -359,7 +279,7 @@
         "state": {
           "class_name": "NumberConfigurationEntity",
           "available": true,
-          "state": 0
+          "state": null
         }
       }
     ],
@@ -392,7 +312,7 @@
         "state": {
           "class_name": "ZCLEnumSelectEntity",
           "available": true,
-          "state": "Duration"
+          "state": null
         }
       },
       {
@@ -425,7 +345,7 @@
         "state": {
           "class_name": "ZCLEnumSelectEntity",
           "available": true,
-          "state": "NoDelay"
+          "state": null
         }
       }
     ],
@@ -455,7 +375,7 @@
         "state": {
           "class_name": "LQISensor",
           "available": true,
-          "state": null
+          "state": 183
         }
       },
       {
@@ -511,7 +431,7 @@
         "state": {
           "class_name": "Battery",
           "available": true,
-          "state": 90.0,
+          "state": null,
           "battery_size": "AA",
           "battery_quantity": 4
         },
@@ -546,7 +466,7 @@
         "state": {
           "class_name": "SmartEnergySummation",
           "available": true,
-          "state": 0.0,
+          "state": null,
           "device_type": "Water Metering",
           "zcl_unit_of_measurement": 7
         },
@@ -581,7 +501,7 @@
         "state": {
           "class_name": "Sensor",
           "available": true,
-          "state": 6
+          "state": null
         }
       },
       {
@@ -609,7 +529,7 @@
         "state": {
           "class_name": "Sensor",
           "available": true,
-          "state": "2025-07-05 09:33:23.709383+04:00"
+          "state": null
         }
       },
       {
@@ -637,7 +557,7 @@
         "state": {
           "class_name": "Sensor",
           "available": true,
-          "state": "2025-07-05 09:33:17.905219+04:00"
+          "state": null
         }
       }
     ],
@@ -664,7 +584,7 @@
         },
         "state": {
           "class_name": "Switch",
-          "state": 0,
+          "state": false,
           "available": true
         }
       }
@@ -694,7 +614,7 @@
         "state": {
           "class_name": "FirmwareUpdateEntity",
           "available": true,
-          "installed_version": "0x00000048",
+          "installed_version": null,
           "in_progress": false,
           "update_percentage": null,
           "latest_version": null,

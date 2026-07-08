@@ -358,7 +358,7 @@ async def group_entity_availability_test(
     assert entity.state["available"] is True
 
 
-def zigpy_device_from_device_data(
+def zigpy_device_from_device_data(  # noqa: C901
     app: ControllerApplication,
     device_data: dict,
     patch_cluster: bool = True,
@@ -464,11 +464,24 @@ def zigpy_device_from_device_data(
                     attr_name = attr.get("name")
 
                     # Look up by name to avoid ambiguity with manufacturer-specific attrs
-                    if attr_name is not None:
-                        attr_def = real_cluster.find_attribute(attr_name)
-                        assert attr_def.id == attrid
-                    else:
-                        attr_def = real_cluster.find_attribute(attrid)
+                    try:
+                        if attr_name is not None:
+                            attr_def = real_cluster.find_attribute(attr_name)
+                        else:
+                            attr_def = real_cluster.find_attribute(attrid)
+                    except KeyError:
+                        attr_def = None
+
+                    # The attribute may not be defined on the cluster, or a quirk may
+                    # have moved its name to a different id. Cache it as a legacy value
+                    # so the device still loads.
+                    if attr_def is None or attr_def.id != attrid:
+                        if attr.get("value", None) is not None:
+                            real_cluster._attr_cache.set_legacy_value(
+                                attrid, attr["value"]
+                            )
+                            real_cluster.PLUGGED_ATTR_READS[attrid] = attr["value"]
+                        continue
 
                     # Quirks can mark attributes as unsupported during cluster init so
                     # the attribute both has a cached value and is unsupported. We need

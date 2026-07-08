@@ -1,7 +1,7 @@
 {
   "version": 2,
-  "ieee": "00:15:bc:00:31:01:f8:92",
-  "nwk": "0x614F",
+  "ieee": "ab:cd:ef:12:2d:1d:92:32",
+  "nwk": "0x58EB",
   "manufacturer": "frient A/S",
   "model": "SMSZB-120",
   "friendly_manufacturer": "frient A/S",
@@ -14,9 +14,9 @@
   ],
   "manufacturer_code": 4117,
   "power_source": "Battery or Unknown",
-  "lqi": null,
-  "rssi": null,
-  "last_seen": "2025-04-21T22:42:30.528067+00:00",
+  "lqi": 212,
+  "rssi": -47,
+  "last_seen": "2025-09-09T14:07:27.359123+00:00",
   "available": true,
   "device_type": "EndDevice",
   "active_coordinator": false,
@@ -56,7 +56,14 @@
         {
           "cluster_id": "0x0006",
           "endpoint_attribute": "on_off",
-          "attributes": []
+          "attributes": [
+            {
+              "id": "0x0000",
+              "name": "on_off",
+              "zcl_type": "bool",
+              "unsupported": true
+            }
+          ]
         }
       ],
       "out_clusters": []
@@ -100,25 +107,13 @@
               "id": "0x0021",
               "name": "battery_percentage_remaining",
               "zcl_type": "uint8",
-              "value": 150
-            },
-            {
-              "id": "0x0033",
-              "name": "battery_quantity",
-              "zcl_type": "uint8",
-              "value": 1
-            },
-            {
-              "id": "0x0031",
-              "name": "battery_size",
-              "zcl_type": "enum8",
-              "value": 8
+              "value": 200
             },
             {
               "id": "0x0020",
               "name": "battery_voltage",
               "zcl_type": "uint8",
-              "value": 29
+              "value": 32
             }
           ]
         },
@@ -177,12 +172,6 @@
               ]
             },
             {
-              "id": "0x0000",
-              "name": "zone_state",
-              "zcl_type": "enum8",
-              "value": 0
-            },
-            {
               "id": "0x0002",
               "name": "zone_status",
               "zcl_type": "map16",
@@ -211,14 +200,7 @@
         {
           "cluster_id": "0x0019",
           "endpoint_attribute": "ota",
-          "attributes": [
-            {
-              "id": "0x0002",
-              "name": "current_file_version",
-              "zcl_type": "uint32",
-              "value": 262152
-            }
-          ]
+          "attributes": []
         }
       ]
     },
@@ -247,7 +229,7 @@
               "id": "0x0000",
               "name": "measured_value",
               "zcl_type": "int16",
-              "value": 2281
+              "value": 2343
             }
           ]
         }
@@ -326,7 +308,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "00:15:bc:00:31:01:f8:92-35-1280",
+          "unique_id": "ab:cd:ef:12:2d:1d:92:32-35-1280",
           "migrate_unique_ids": [],
           "platform": "binary_sensor",
           "class_name": "IASZone",
@@ -338,7 +320,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": true,
-          "device_ieee": "00:15:bc:00:31:01:f8:92",
+          "device_ieee": "ab:cd:ef:12:2d:1d:92:32",
           "endpoint_id": 35,
           "available": true,
           "group_id": null,
@@ -355,7 +337,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "00:15:bc:00:31:01:f8:92-35-3",
+          "unique_id": "ab:cd:ef:12:2d:1d:92:32-35-3",
           "migrate_unique_ids": [],
           "platform": "button",
           "class_name": "IdentifyButton",
@@ -367,7 +349,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "device_ieee": "00:15:bc:00:31:01:f8:92",
+          "device_ieee": "ab:cd:ef:12:2d:1d:92:32",
           "endpoint_id": 35,
           "available": true,
           "group_id": null,
@@ -387,7 +369,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "00:15:bc:00:31:01:f8:92-35-0-lqi",
+          "unique_id": "ab:cd:ef:12:2d:1d:92:32-35-0-lqi",
           "migrate_unique_ids": [],
           "platform": "sensor",
           "class_name": "LQISensor",
@@ -399,7 +381,7 @@
           "entity_registry_enabled_default": false,
           "enabled": true,
           "primary": false,
-          "device_ieee": "00:15:bc:00:31:01:f8:92",
+          "device_ieee": "ab:cd:ef:12:2d:1d:92:32",
           "endpoint_id": 35,
           "available": true,
           "group_id": null,
@@ -409,13 +391,13 @@
         "state": {
           "class_name": "LQISensor",
           "available": true,
-          "state": null
+          "state": 212
         }
       },
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "00:15:bc:00:31:01:f8:92-35-0-rssi",
+          "unique_id": "ab:cd:ef:12:2d:1d:92:32-35-0-rssi",
           "migrate_unique_ids": [],
           "platform": "sensor",
           "class_name": "RSSISensor",
@@ -427,7 +409,7 @@
           "entity_registry_enabled_default": false,
           "enabled": true,
           "primary": false,
-          "device_ieee": "00:15:bc:00:31:01:f8:92",
+          "device_ieee": "ab:cd:ef:12:2d:1d:92:32",
           "endpoint_id": 35,
           "available": true,
           "group_id": null,
@@ -437,13 +419,13 @@
         "state": {
           "class_name": "RSSISensor",
           "available": true,
-          "state": null
+          "state": -47
         }
       },
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "00:15:bc:00:31:01:f8:92-35-1",
+          "unique_id": "ab:cd:ef:12:2d:1d:92:32-35-1",
           "migrate_unique_ids": [],
           "platform": "sensor",
           "class_name": "Battery",
@@ -455,7 +437,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "device_ieee": "00:15:bc:00:31:01:f8:92",
+          "device_ieee": "ab:cd:ef:12:2d:1d:92:32",
           "endpoint_id": 35,
           "available": true,
           "group_id": null,
@@ -465,10 +447,8 @@
         "state": {
           "class_name": "Battery",
           "available": true,
-          "state": 75.0,
-          "battery_size": "CR123A",
-          "battery_quantity": 1,
-          "battery_voltage": 2.9
+          "state": 100.0,
+          "battery_voltage": 3.2
         },
         "extra_state_attributes": [
           "battery_quantity",
@@ -479,7 +459,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "00:15:bc:00:31:01:f8:92-38-1026",
+          "unique_id": "ab:cd:ef:12:2d:1d:92:32-38-1026",
           "migrate_unique_ids": [],
           "platform": "sensor",
           "class_name": "Temperature",
@@ -491,7 +471,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "device_ieee": "00:15:bc:00:31:01:f8:92",
+          "device_ieee": "ab:cd:ef:12:2d:1d:92:32",
           "endpoint_id": 38,
           "available": true,
           "group_id": null,
@@ -501,7 +481,7 @@
         "state": {
           "class_name": "Temperature",
           "available": true,
-          "state": 22.81
+          "state": 23.43
         }
       }
     ],
@@ -509,7 +489,7 @@
       {
         "info_object": {
           "fallback_name": "Siren",
-          "unique_id": "00:15:bc:00:31:01:f8:92-35-1282",
+          "unique_id": "ab:cd:ef:12:2d:1d:92:32-35-1282",
           "migrate_unique_ids": [],
           "platform": "siren",
           "class_name": "BasicSiren",
@@ -521,7 +501,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "device_ieee": "00:15:bc:00:31:01:f8:92",
+          "device_ieee": "ab:cd:ef:12:2d:1d:92:32",
           "endpoint_id": 35,
           "available": true,
           "group_id": null,
@@ -539,7 +519,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "00:15:bc:00:31:01:f8:92-35-25-firmware_update",
+          "unique_id": "ab:cd:ef:12:2d:1d:92:32-35-25-firmware_update",
           "migrate_unique_ids": [],
           "platform": "update",
           "class_name": "FirmwareUpdateEntity",
@@ -551,7 +531,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "device_ieee": "00:15:bc:00:31:01:f8:92",
+          "device_ieee": "ab:cd:ef:12:2d:1d:92:32",
           "endpoint_id": 35,
           "available": true,
           "group_id": null,
@@ -560,7 +540,7 @@
         "state": {
           "class_name": "FirmwareUpdateEntity",
           "available": true,
-          "installed_version": "0x00040008",
+          "installed_version": null,
           "in_progress": false,
           "update_percentage": null,
           "latest_version": null,

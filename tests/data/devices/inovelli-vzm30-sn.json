@@ -1,7 +1,7 @@
 {
   "version": 2,
   "ieee": "ab:cd:ef:12:9a:d6:cb:e7",
-  "nwk": "0x3F4D",
+  "nwk": "0x0CE2",
   "manufacturer": "Inovelli",
   "model": "VZM30-SN",
   "friendly_manufacturer": "Inovelli",
@@ -12,9 +12,9 @@
   "exposes_features": [],
   "manufacturer_code": 4655,
   "power_source": "Mains",
-  "lqi": 192,
-  "rssi": -52,
-  "last_seen": "2025-07-31T03:56:46.670783+00:00",
+  "lqi": 240,
+  "rssi": -40,
+  "last_seen": "2026-02-15T23:30:25.615727+00:00",
   "available": true,
   "device_type": "Router",
   "active_coordinator": false,
@@ -82,7 +82,7 @@
               "id": "0x0000",
               "name": "on_off",
               "zcl_type": "bool",
-              "value": 0
+              "value": 1
             },
             {
               "id": "0x4003",
@@ -148,7 +148,7 @@
               "id": "0x0000",
               "name": "current_summ_delivered",
               "zcl_type": "uint48",
-              "value": 7061
+              "value": 0
             },
             {
               "id": "0x0001",
@@ -349,6 +349,60 @@
               "unsupported": true
             },
             {
+              "id": "0x0103",
+              "name": "dc_current",
+              "zcl_type": "int16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0203",
+              "name": "dc_current_divisor",
+              "zcl_type": "uint16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0202",
+              "name": "dc_current_multiplier",
+              "zcl_type": "uint16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0106",
+              "name": "dc_power",
+              "zcl_type": "int16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0205",
+              "name": "dc_power_divisor",
+              "zcl_type": "uint16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0204",
+              "name": "dc_power_multiplier",
+              "zcl_type": "uint16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0100",
+              "name": "dc_voltage",
+              "zcl_type": "int16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0201",
+              "name": "dc_voltage_divisor",
+              "zcl_type": "uint16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0200",
+              "name": "dc_voltage_multiplier",
+              "zcl_type": "uint16",
+              "unsupported": true
+            },
+            {
               "id": "0x0000",
               "name": "measurement_type",
               "zcl_type": "map32",
@@ -424,7 +478,7 @@
               "id": "0x0505",
               "name": "rms_voltage",
               "zcl_type": "uint16",
-              "value": 1244
+              "value": 1185
             },
             {
               "id": "0x0507",
@@ -455,6 +509,12 @@
               "name": "rms_voltage_ph_c",
               "zcl_type": "uint16",
               "unsupported": true
+            },
+            {
+              "id": "0x0304",
+              "name": "total_active_power",
+              "zcl_type": "int32",
+              "unsupported": true
             }
           ]
         },
@@ -468,16 +528,106 @@
           "endpoint_attribute": "inovelli_vzm31sn_cluster",
           "attributes": [
             {
-              "id": "0x0020",
-              "name": "internal_temp_monitor",
-              "zcl_type": "int8",
-              "value": 31
+              "id": "0x0012",
+              "name": "active_power_reports",
+              "zcl_type": "uint8",
+              "value": 10
             },
             {
-              "id": "0x0021",
-              "name": "overheated",
+              "id": "0x000c",
+              "name": "auto_off_timer",
+              "zcl_type": "uint16",
+              "value": 0
+            },
+            {
+              "id": "0x000d",
+              "name": "default_level_local",
+              "zcl_type": "uint8",
+              "value": 255
+            },
+            {
+              "id": "0x000e",
+              "name": "default_level_remote",
+              "zcl_type": "uint8",
+              "value": 255
+            },
+            {
+              "id": "0x0006",
+              "name": "dimming_speed_down_local",
+              "zcl_type": "uint8",
+              "value": 127
+            },
+            {
+              "id": "0x0005",
+              "name": "dimming_speed_down_remote",
+              "zcl_type": "uint8",
+              "value": 127
+            },
+            {
+              "id": "0x0002",
+              "name": "dimming_speed_up_local",
+              "zcl_type": "uint8",
+              "value": 127
+            },
+            {
+              "id": "0x0001",
+              "name": "dimming_speed_up_remote",
+              "zcl_type": "uint8",
+              "value": 25
+            },
+            {
+              "id": "0x000b",
+              "name": "invert_switch",
               "zcl_type": "bool",
               "value": 0
+            },
+            {
+              "id": "0x0011",
+              "name": "load_level_indicator_timeout",
+              "zcl_type": "uint8",
+              "value": 11
+            },
+            {
+              "id": "0x000a",
+              "name": "maximum_level",
+              "zcl_type": "uint8",
+              "unsupported": true
+            },
+            {
+              "id": "0x0009",
+              "name": "minimum_level",
+              "zcl_type": "uint8",
+              "unsupported": true
+            },
+            {
+              "id": "0x0004",
+              "name": "ramp_rate_off_to_on_local",
+              "zcl_type": "uint8",
+              "value": 127
+            },
+            {
+              "id": "0x0003",
+              "name": "ramp_rate_off_to_on_remote",
+              "zcl_type": "uint8",
+              "value": 0
+            },
+            {
+              "id": "0x0008",
+              "name": "ramp_rate_on_to_off_local",
+              "zcl_type": "uint8",
+              "value": 127
+            },
+            {
+              "id": "0x0007",
+              "name": "ramp_rate_on_to_off_remote",
+              "zcl_type": "uint8",
+              "value": 127
+            },
+            {
+              "id": "0x000f",
+              "name": "state_after_power_restored",
+              "zcl_type": "uint8",
+              "value": 255
             }
           ]
         },
@@ -496,7 +646,7 @@
               "id": "0x0002",
               "name": "current_file_version",
               "zcl_type": "uint32",
-              "value": 17826048
+              "unsupported": true
             }
           ]
         }
@@ -629,7 +779,7 @@
               "id": "0x0000",
               "name": "measured_value",
               "zcl_type": "int16",
-              "value": 2224
+              "value": 1760
             }
           ]
         },
@@ -641,7 +791,7 @@
               "id": "0x0000",
               "name": "measured_value",
               "zcl_type": "uint16",
-              "value": 5051
+              "value": 6147
             }
           ]
         }
@@ -691,7 +841,7 @@
     "endpoints": {
       "1": {
         "profile_id": "0x0104",
-        "device_type": "0x0101",
+        "device_type": "0x0100",
         "input_clusters": [
           "0x0000",
           "0x0003",
@@ -827,7 +977,7 @@
         "state": {
           "class_name": "Light",
           "available": true,
-          "on": false,
+          "on": true,
           "brightness": 254,
           "xy_color": null,
           "color_temp": null,
@@ -851,6 +1001,409 @@
       }
     ],
     "number": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:9a:d6:cb:e7-1-64561-auto_off_timer",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "InovelliAutoShutoffTimer",
+          "translation_key": "auto_off_timer",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "device_ieee": "ab:cd:ef:12:9a:d6:cb:e7",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "mode": "auto",
+          "native_max_value": 32767,
+          "native_min_value": 0,
+          "native_step": 1.0,
+          "native_unit_of_measurement": null
+        },
+        "state": {
+          "class_name": "InovelliAutoShutoffTimer",
+          "available": true,
+          "state": 0
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:9a:d6:cb:e7-1-64561-default_level_local",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "InovelliLocalDefaultLevel",
+          "translation_key": "default_level_local",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "device_ieee": "ab:cd:ef:12:9a:d6:cb:e7",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "mode": "auto",
+          "native_max_value": 255,
+          "native_min_value": 0,
+          "native_step": 1.0,
+          "native_unit_of_measurement": null
+        },
+        "state": {
+          "class_name": "InovelliLocalDefaultLevel",
+          "available": true,
+          "state": 255
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:9a:d6:cb:e7-1-64561-default_level_remote",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "InovelliRemoteDefaultLevel",
+          "translation_key": "default_level_remote",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "device_ieee": "ab:cd:ef:12:9a:d6:cb:e7",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "mode": "auto",
+          "native_max_value": 255,
+          "native_min_value": 0,
+          "native_step": 1.0,
+          "native_unit_of_measurement": null
+        },
+        "state": {
+          "class_name": "InovelliRemoteDefaultLevel",
+          "available": true,
+          "state": 255
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:9a:d6:cb:e7-1-64561-dimming_speed_down_local",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "InovelliLocalDimmingDownSpeed",
+          "translation_key": "dimming_speed_down_local",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "device_ieee": "ab:cd:ef:12:9a:d6:cb:e7",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "mode": "auto",
+          "native_max_value": 127,
+          "native_min_value": 0,
+          "native_step": 1.0,
+          "native_unit_of_measurement": null
+        },
+        "state": {
+          "class_name": "InovelliLocalDimmingDownSpeed",
+          "available": true,
+          "state": 127
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:9a:d6:cb:e7-1-64561-dimming_speed_down_remote",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "InovelliRemoteDimmingDownSpeed",
+          "translation_key": "dimming_speed_down_remote",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "device_ieee": "ab:cd:ef:12:9a:d6:cb:e7",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "mode": "auto",
+          "native_max_value": 127,
+          "native_min_value": 0,
+          "native_step": 1.0,
+          "native_unit_of_measurement": null
+        },
+        "state": {
+          "class_name": "InovelliRemoteDimmingDownSpeed",
+          "available": true,
+          "state": 127
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:9a:d6:cb:e7-1-64561-dimming_speed_up_local",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "InovelliLocalDimmingUpSpeed",
+          "translation_key": "dimming_speed_up_local",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "device_ieee": "ab:cd:ef:12:9a:d6:cb:e7",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "mode": "auto",
+          "native_max_value": 127,
+          "native_min_value": 0,
+          "native_step": 1.0,
+          "native_unit_of_measurement": null
+        },
+        "state": {
+          "class_name": "InovelliLocalDimmingUpSpeed",
+          "available": true,
+          "state": 127
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:9a:d6:cb:e7-1-64561-dimming_speed_up_remote",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "InovelliRemoteDimmingUpSpeed",
+          "translation_key": "dimming_speed_up_remote",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "device_ieee": "ab:cd:ef:12:9a:d6:cb:e7",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "mode": "auto",
+          "native_max_value": 126,
+          "native_min_value": 0,
+          "native_step": 1.0,
+          "native_unit_of_measurement": null
+        },
+        "state": {
+          "class_name": "InovelliRemoteDimmingUpSpeed",
+          "available": true,
+          "state": 25
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:9a:d6:cb:e7-1-64561-load_level_indicator_timeout",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "InovelliLoadLevelIndicatorTimeout",
+          "translation_key": "load_level_indicator_timeout",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "device_ieee": "ab:cd:ef:12:9a:d6:cb:e7",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "mode": "auto",
+          "native_max_value": 11,
+          "native_min_value": 0,
+          "native_step": 1.0,
+          "native_unit_of_measurement": null
+        },
+        "state": {
+          "class_name": "InovelliLoadLevelIndicatorTimeout",
+          "available": true,
+          "state": 11
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:9a:d6:cb:e7-1-64561-ramp_rate_off_to_on_local",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "InovelliLocalRampRateOffToOn",
+          "translation_key": "ramp_rate_off_to_on_local",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "device_ieee": "ab:cd:ef:12:9a:d6:cb:e7",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "mode": "auto",
+          "native_max_value": 127,
+          "native_min_value": 0,
+          "native_step": 1.0,
+          "native_unit_of_measurement": null
+        },
+        "state": {
+          "class_name": "InovelliLocalRampRateOffToOn",
+          "available": true,
+          "state": 127
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:9a:d6:cb:e7-1-64561-ramp_rate_off_to_on_remote",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "InovelliRemoteDimmingSpeedOffToOn",
+          "translation_key": "ramp_rate_off_to_on_remote",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "device_ieee": "ab:cd:ef:12:9a:d6:cb:e7",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "mode": "auto",
+          "native_max_value": 127,
+          "native_min_value": 0,
+          "native_step": 1.0,
+          "native_unit_of_measurement": null
+        },
+        "state": {
+          "class_name": "InovelliRemoteDimmingSpeedOffToOn",
+          "available": true,
+          "state": 0
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:9a:d6:cb:e7-1-64561-ramp_rate_on_to_off_local",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "InovelliLocalRampRateOnToOff",
+          "translation_key": "ramp_rate_on_to_off_local",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "device_ieee": "ab:cd:ef:12:9a:d6:cb:e7",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "mode": "auto",
+          "native_max_value": 127,
+          "native_min_value": 0,
+          "native_step": 1.0,
+          "native_unit_of_measurement": null
+        },
+        "state": {
+          "class_name": "InovelliLocalRampRateOnToOff",
+          "available": true,
+          "state": 127
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:9a:d6:cb:e7-1-64561-ramp_rate_on_to_off_remote",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "InovelliRemoteDimmingSpeedOnToOff",
+          "translation_key": "ramp_rate_on_to_off_remote",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "device_ieee": "ab:cd:ef:12:9a:d6:cb:e7",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "mode": "auto",
+          "native_max_value": 127,
+          "native_min_value": 0,
+          "native_step": 1.0,
+          "native_unit_of_measurement": null
+        },
+        "state": {
+          "class_name": "InovelliRemoteDimmingSpeedOnToOff",
+          "available": true,
+          "state": 127
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:9a:d6:cb:e7-1-64561-state_after_power_restored",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "InovelliStartupDefaultLevel",
+          "translation_key": "state_after_power_restored",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "device_ieee": "ab:cd:ef:12:9a:d6:cb:e7",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "mode": "auto",
+          "native_max_value": 255,
+          "native_min_value": 0,
+          "native_step": 1.0,
+          "native_unit_of_measurement": null
+        },
+        "state": {
+          "class_name": "InovelliStartupDefaultLevel",
+          "available": true,
+          "state": 255
+        }
+      },
       {
         "info_object": {
           "fallback_name": null,
@@ -1037,7 +1590,7 @@
         "state": {
           "class_name": "LQISensor",
           "available": true,
-          "state": 192
+          "state": 240
         }
       },
       {
@@ -1065,7 +1618,7 @@
         "state": {
           "class_name": "RSSISensor",
           "available": true,
-          "state": -52
+          "state": -40
         }
       },
       {
@@ -1093,7 +1646,7 @@
         "state": {
           "class_name": "SmartEnergySummation",
           "available": true,
-          "state": 70.61,
+          "state": 0.0,
           "device_type": "Electric Metering",
           "status": "NO_ALARMS",
           "zcl_unit_of_measurement": 0
@@ -1193,7 +1746,7 @@
         "state": {
           "class_name": "ElectricalMeasurementRMSVoltage",
           "available": true,
-          "state": 124.4
+          "state": 118.5
         },
         "extra_state_attributes": [
           "measurement_type",
@@ -1225,7 +1778,7 @@
         "state": {
           "class_name": "InovelliInternalTemperature",
           "available": true,
-          "state": 31
+          "state": null
         }
       },
       {
@@ -1253,7 +1806,7 @@
         "state": {
           "class_name": "InovelliOverheated",
           "available": true,
-          "state": "Normal"
+          "state": null
         }
       },
       {
@@ -1281,7 +1834,7 @@
         "state": {
           "class_name": "Temperature",
           "available": true,
-          "state": 22.24
+          "state": 17.6
         }
       },
       {
@@ -1309,7 +1862,41 @@
         "state": {
           "class_name": "Humidity",
           "available": true,
-          "state": 50.51
+          "state": 61.47
+        }
+      }
+    ],
+    "switch": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:9a:d6:cb:e7-1-64561-invert_switch",
+          "migrate_unique_ids": [],
+          "platform": "switch",
+          "class_name": "InovelliInvertSwitch",
+          "translation_key": "invert_switch",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "device_ieee": "ab:cd:ef:12:9a:d6:cb:e7",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "attribute_name": "invert_switch",
+          "invert_attribute_name": null,
+          "force_inverted": false,
+          "off_value": 0,
+          "on_value": 1
+        },
+        "state": {
+          "class_name": "InovelliInvertSwitch",
+          "available": true,
+          "state": false,
+          "inverted": false
         }
       }
     ],
@@ -1338,7 +1925,7 @@
         "state": {
           "class_name": "FirmwareUpdateEntity",
           "available": true,
-          "installed_version": "0x01100100",
+          "installed_version": null,
           "in_progress": false,
           "update_percentage": null,
           "latest_version": null,

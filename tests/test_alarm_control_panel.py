@@ -29,7 +29,7 @@ async def test_alarm_control_panel(
     """Test zhaws alarm control panel platform."""
     zigpy_device: ZigpyDevice = await zigpy_device_from_json(
         zha_gateway.application_controller,
-        "tests/data/devices/frient-a-s-kepzb-110.json",
+        "tests/data/devices/frient-a-s-kepzb-110-0x00020005.json",
     )
     zha_device: Device = await join_zigpy_device(zha_gateway, zigpy_device)
     cluster: security.IasAce = zigpy_device.endpoints[44].out_clusters[

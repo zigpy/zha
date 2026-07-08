@@ -213,29 +213,38 @@ def zigpy_device_from_legacy_diagnostics(  # noqa: C901
 
             if patch_cluster:
                 patch_cluster_for_testing(real_cluster)
+
             for attr_id, attr in cluster["attributes"].items():
                 if (
                     attr.get("value") is None
                     or attr_id in cluster["unsupported_attributes"]
                 ):
                     continue
-                real_cluster._attr_cache[int(attr_id, 16)] = parse_legacy_value(
-                    attr["value"]
-                )
-                real_cluster.PLUGGED_ATTR_READS[int(attr_id, 16)] = parse_legacy_value(
-                    attr["value"]
-                )
+
+                attr_id_int = int(attr_id, 16)
+                parsed = parse_legacy_value(attr["value"])
+
+                if attr_id_int in real_cluster.attributes:
+                    real_cluster._attr_cache[attr_id_int] = parsed
+                else:
+                    _LOGGER.warning(
+                        "Setting legacy value for unknown attribute %s on server cluster %s: %r",
+                        attr_id,
+                        cluster_id,
+                        parsed,
+                    )
+                    real_cluster._attr_cache.set_legacy_value(attr_id_int, parsed)
+
+                real_cluster.PLUGGED_ATTR_READS[attr_id_int] = parsed
+
             for unsupported_attr in cluster["unsupported_attributes"]:
                 if isinstance(unsupported_attr, str) and unsupported_attr.startswith(
                     "0x"
                 ):
                     attrid = int(unsupported_attr, 16)
-                    real_cluster.add_unsupported_attribute(attrid)
                     if attrid in real_cluster.attributes:
-                        real_cluster.add_unsupported_attribute(
-                            real_cluster.attributes[attrid].name
-                        )
-                else:
+                        real_cluster.add_unsupported_attribute(attrid)
+                elif unsupported_attr in real_cluster.attributes_by_name:
                     real_cluster.add_unsupported_attribute(unsupported_attr)
 
         for cluster_id, cluster in ep["out_clusters"].items():
@@ -254,29 +263,38 @@ def zigpy_device_from_legacy_diagnostics(  # noqa: C901
 
             if patch_cluster:
                 patch_cluster_for_testing(real_cluster)
+
             for attr_id, attr in cluster["attributes"].items():
                 if (
                     attr.get("value") is None
                     or attr_id in cluster["unsupported_attributes"]
                 ):
                     continue
-                real_cluster._attr_cache[int(attr_id, 16)] = parse_legacy_value(
-                    attr["value"]
-                )
-                real_cluster.PLUGGED_ATTR_READS[int(attr_id, 16)] = parse_legacy_value(
-                    attr["value"]
-                )
+
+                attr_id_int = int(attr_id, 16)
+                parsed = parse_legacy_value(attr["value"])
+
+                if attr_id_int in real_cluster.attributes:
+                    real_cluster._attr_cache[attr_id_int] = parsed
+                else:
+                    _LOGGER.warning(
+                        "Setting legacy value for unknown attribute %s on client cluster %s: %r",
+                        attr_id,
+                        cluster_id,
+                        parsed,
+                    )
+                    real_cluster._attr_cache.set_legacy_value(attr_id_int, parsed)
+
+                real_cluster.PLUGGED_ATTR_READS[attr_id_int] = parsed
+
             for unsupported_attr in cluster["unsupported_attributes"]:
                 if isinstance(unsupported_attr, str) and unsupported_attr.startswith(
                     "0x"
                 ):
                     attrid = int(unsupported_attr, 16)
-                    real_cluster.add_unsupported_attribute(attrid)
                     if attrid in real_cluster.attributes:
-                        real_cluster.add_unsupported_attribute(
-                            real_cluster.attributes[attrid].name
-                        )
-                else:
+                        real_cluster.add_unsupported_attribute(attrid)
+                elif unsupported_attr in real_cluster.attributes_by_name:
                     real_cluster.add_unsupported_attribute(unsupported_attr)
 
     if device.model is None and device.manufacturer is None:
@@ -298,6 +316,10 @@ def zigpy_device_from_diagnostics(
 
     if "version" not in zha_data:
         return zigpy_device_from_legacy_diagnostics(app, data, patch_cluster)
+
+    # Some diagnostics are hand-redacted (e.g. nwk "0xREDACTED"), fake a NWK instead
+    if "REDACTED" in zha_data["nwk"]:
+        zha_data["nwk"] = "0x1234"
 
     # Home Assistant diagnostics contain redacted IEEE info, fake an IEEE instead
     if "REDACTED" in zha_data["ieee"]:
@@ -340,31 +362,35 @@ async def main(paths: list[str]):
                 _LOGGER.debug("Skipping, not valid JSON")
                 continue
 
-            if "home_assistant" not in data:
-                _LOGGER.debug("Skipping, missing 'home_assistant' key")
-                continue
-
-            zigpy_device = zigpy_device_from_diagnostics(
-                zha_gateway.application_controller, data
-            )
-
-            if zigpy_device is None:
-                _LOGGER.debug("Skipping, diagnostics are not valid")
-                continue
-
-            output_path = (
-                REPO_ROOT
-                / "tests"
-                / "data"
-                / "devices"
-                / (
-                    slugify(f"{zigpy_device.manufacturer}-{zigpy_device.model}")
-                    + ".json"
+            if "version" in data and "node_descriptor" in data and "endpoints" in data:
+                # Directly parse the diagnostics JSON
+                zigpy_device = zigpy_device_from_device_data(
+                    app=zha_gateway.application_controller,
+                    device_data=data,
                 )
-            )
+            else:
+                # Otherwise, try to import one of the many legacy ZHA formats
+                if "home_assistant" not in data:
+                    _LOGGER.debug("Skipping, missing 'home_assistant' key")
+                    continue
 
-            if output_path.is_file():
-                continue
+                # There is currently just one known "bad" device: a DIY device that
+                # copies the model and manufacturer strings from an unrelated device. We
+                # skip it.
+                ha_data = data["home_assistant"].get("data", {})
+                if (
+                    ha_data.get("last_seen") == "2026-03-04T18:21:39.038488+00:00"
+                ) and (ha_data.get("model") == "J1 (5502)"):
+                    _LOGGER.debug("Skipping known-bad DIY device")
+                    continue
+
+                zigpy_device = zigpy_device_from_diagnostics(
+                    zha_gateway.application_controller, data
+                )
+
+                if zigpy_device is None:
+                    _LOGGER.debug("Skipping, diagnostics are not valid")
+                    continue
 
             with patch("zigpy.zcl.Cluster._update_attribute"):
                 zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
@@ -373,7 +399,6 @@ async def main(paths: list[str]):
             # First, try to join the device
             initial_json = zha_device.get_diagnostics_json()
 
-            await zha_gateway.async_remove_device(zha_device)
             await zha_device.on_remove()
             del zha_gateway.devices[zha_device.ieee]
 
@@ -390,11 +415,30 @@ async def main(paths: list[str]):
                 await zha_gateway.async_block_till_done(wait_background_tasks=True)
 
             rejoined_json = rejoined_zha_device.get_diagnostics_json()
+            fw_version = rejoined_zha_device.firmware_version
+
+            await rejoined_zha_device.on_remove()
+            del zha_gateway.devices[rejoined_zha_device.ieee]
+
             if initial_json != rejoined_json:
                 _LOGGER.warning(
                     "Rejoined device %s does not match original diagnostics JSON, quirk has modified the device signature",
                     path,
                 )
+                continue
+            suffix = f"-{fw_version}" if fw_version is not None else ""
+            output_path = (
+                REPO_ROOT
+                / "tests"
+                / "data"
+                / "devices"
+                / (
+                    slugify(f"{zigpy_device.manufacturer}-{zigpy_device.model}{suffix}")
+                    + ".json"
+                )
+            )
+
+            if output_path.is_file():
                 continue
 
             _LOGGER.info("Importing %s as %s", path, output_path.name)
