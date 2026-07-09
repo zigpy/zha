@@ -74,7 +74,7 @@ enabled = true
 starting_version = "2.0.0"
 
 [tool.codespell]
-skip = ["tests/data/devices/*"]
+skip = ["tests/data/*"]
 ignore-words-list = "hass, checkin"
 
 [tool.mypy]

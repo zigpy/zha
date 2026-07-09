@@ -1,7 +1,7 @@
 {
   "version": 2,
   "ieee": "ab:cd:ef:12:15:80:89:33",
-  "nwk": "0xB0E7",
+  "nwk": "0x27A5",
   "manufacturer": "_TZ3000_1dd0d5yi",
   "model": "TS130F",
   "friendly_manufacturer": "_TZ3000_1dd0d5yi",
@@ -12,9 +12,9 @@
   "exposes_features": [],
   "manufacturer_code": 4098,
   "power_source": "Mains",
-  "lqi": 255,
-  "rssi": -73,
-  "last_seen": "2025-07-08T17:00:04.111016+00:00",
+  "lqi": 176,
+  "rssi": -56,
+  "last_seen": "2025-09-06T16:43:09.499765+00:00",
   "available": true,
   "device_type": "Router",
   "active_coordinator": false,
@@ -46,76 +46,10 @@
           "endpoint_attribute": "basic",
           "attributes": [
             {
-              "id": "0x0013",
-              "name": "alarm_mask",
-              "zcl_type": "map8",
-              "unsupported": true
-            },
-            {
-              "id": "0x0001",
-              "name": "app_version",
-              "zcl_type": "uint8",
-              "value": 71
-            },
-            {
-              "id": "0xfffd",
-              "name": "cluster_revision",
-              "zcl_type": "uint16",
-              "value": 2
-            },
-            {
-              "id": "0x0006",
-              "name": "date_code",
-              "zcl_type": "string",
-              "value": ""
-            },
-            {
-              "id": "0x0012",
-              "name": "device_enabled",
-              "zcl_type": "bool",
-              "unsupported": true
-            },
-            {
-              "id": "0x0014",
-              "name": "disable_local_config",
-              "zcl_type": "map8",
-              "unsupported": true
-            },
-            {
-              "id": "0x0008",
-              "name": "generic_device_class",
-              "zcl_type": "enum8",
-              "unsupported": true
-            },
-            {
-              "id": "0x0009",
-              "name": "generic_device_type",
-              "zcl_type": "enum8",
-              "unsupported": true
-            },
-            {
-              "id": "0x0003",
-              "name": "hw_version",
-              "zcl_type": "uint8",
-              "value": 1
-            },
-            {
-              "id": "0x0010",
-              "name": "location_desc",
-              "zcl_type": "string",
-              "unsupported": true
-            },
-            {
               "id": "0x0004",
               "name": "manufacturer",
               "zcl_type": "string",
               "value": "_TZ3000_1dd0d5yi"
-            },
-            {
-              "id": "0x000c",
-              "name": "manufacturer_version_details",
-              "zcl_type": "string",
-              "unsupported": true
             },
             {
               "id": "0x0005",
@@ -133,41 +67,16 @@
         {
           "cluster_id": "0x0005",
           "endpoint_attribute": "scenes",
-          "attributes": [
-            {
-              "id": "0x0004",
-              "name": "name_support",
-              "zcl_type": "map8",
-              "value": 0
-            },
-            {
-              "id": "0x0003",
-              "name": "scene_valid",
-              "zcl_type": "bool",
-              "value": 0
-            }
-          ]
+          "attributes": []
         },
         {
           "cluster_id": "0x0006",
           "endpoint_attribute": "on_off",
           "attributes": [
             {
-              "id": "0x8001",
-              "name": "backlight_mode",
-              "zcl_type": "enum8",
-              "unsupported": true
-            },
-            {
               "id": "0x0000",
               "name": "on_off",
               "zcl_type": "bool",
-              "unsupported": true
-            },
-            {
-              "id": "0xfffe",
-              "name": "reporting_status",
-              "zcl_type": "enum8",
               "unsupported": true
             },
             {
@@ -183,12 +92,6 @@
           "endpoint_attribute": "window_covering",
           "attributes": [
             {
-              "id": "0x0015",
-              "name": "acceleration_time_lift",
-              "zcl_type": "uint16",
-              "unsupported": true
-            },
-            {
               "id": "0xf001",
               "name": "calibration",
               "zcl_type": "enum8",
@@ -198,7 +101,7 @@
               "id": "0xf003",
               "name": "calibration_time",
               "zcl_type": "uint16",
-              "value": 300
+              "value": 230
             },
             {
               "id": "0x0007",
@@ -207,16 +110,10 @@
               "unsupported": true
             },
             {
-              "id": "0x0003",
-              "name": "current_position_lift",
-              "zcl_type": "uint16",
-              "unsupported": true
-            },
-            {
               "id": "0x0008",
               "name": "current_position_lift_percentage",
               "zcl_type": "uint8",
-              "value": 100
+              "value": 0
             },
             {
               "id": "0x0009",
@@ -249,22 +146,10 @@
               "unsupported": true
             },
             {
-              "id": "0x8000",
-              "name": "motor_mode",
-              "zcl_type": "enum8",
-              "unsupported": true
-            },
-            {
               "id": "0xf002",
               "name": "motor_reversal",
               "zcl_type": "enum8",
               "value": 0
-            },
-            {
-              "id": "0x0005",
-              "name": "number_of_actuations_lift",
-              "zcl_type": "uint16",
-              "unsupported": true
             },
             {
               "id": "0xf000",
@@ -291,26 +176,7 @@
         {
           "cluster_id": "0x000a",
           "endpoint_attribute": "time",
-          "attributes": [
-            {
-              "id": "0xfffd",
-              "name": "cluster_revision",
-              "zcl_type": "uint16",
-              "value": 1
-            },
-            {
-              "id": "0x0007",
-              "name": "local_time",
-              "zcl_type": "uint32",
-              "unsupported": true
-            },
-            {
-              "id": "0x0002",
-              "name": "time_zone",
-              "zcl_type": "int32",
-              "unsupported": true
-            }
-          ]
+          "attributes": []
         },
         {
           "cluster_id": "0x0019",
@@ -320,30 +186,6 @@
               "id": "0x0002",
               "name": "current_file_version",
               "zcl_type": "uint32",
-              "unsupported": true
-            },
-            {
-              "id": "0x0004",
-              "name": "downloaded_file_version",
-              "zcl_type": "uint32",
-              "unsupported": true
-            },
-            {
-              "id": "0x0005",
-              "name": "downloaded_zigbee_stack_version",
-              "zcl_type": "uint16",
-              "unsupported": true
-            },
-            {
-              "id": "0x000a",
-              "name": "image_stamp",
-              "zcl_type": "uint32",
-              "unsupported": true
-            },
-            {
-              "id": "0x0007",
-              "name": "manufacturer_id",
-              "zcl_type": "uint16",
               "unsupported": true
             }
           ]
@@ -412,12 +254,12 @@
         "state": {
           "class_name": "Cover",
           "available": true,
-          "current_position": 0,
+          "current_position": 100,
           "current_tilt_position": null,
-          "state": "closed",
+          "state": "open",
           "is_opening": false,
           "is_closing": false,
-          "is_closed": true,
+          "is_closed": false,
           "supported_features": 15
         }
       }
@@ -448,7 +290,7 @@
         "state": {
           "class_name": "LQISensor",
           "available": true,
-          "state": 255
+          "state": 176
         }
       },
       {
@@ -476,7 +318,7 @@
         "state": {
           "class_name": "RSSISensor",
           "available": true,
-          "state": -73
+          "state": -56
         }
       }
     ],

@@ -1,7 +1,7 @@
 {
   "version": 2,
   "ieee": "ab:cd:ef:12:b2:f6:6e:7d",
-  "nwk": "0x9CFA",
+  "nwk": "0x1392",
   "manufacturer": "LUMI",
   "model": "lumi.remote.b28ac1",
   "friendly_manufacturer": "LUMI",
@@ -12,9 +12,9 @@
   "exposes_features": [],
   "manufacturer_code": 4447,
   "power_source": "Battery or Unknown",
-  "lqi": null,
+  "lqi": 96,
   "rssi": null,
-  "last_seen": "2025-12-11T01:40:27.506951+00:00",
+  "last_seen": "2026-02-07T22:24:34.601602+00:00",
   "available": true,
   "device_type": "EndDevice",
   "active_coordinator": false,
@@ -44,7 +44,20 @@
         {
           "cluster_id": "0x0000",
           "endpoint_attribute": "basic",
-          "attributes": []
+          "attributes": [
+            {
+              "id": "0x0004",
+              "name": "manufacturer",
+              "zcl_type": "string",
+              "value": "LUMI"
+            },
+            {
+              "id": "0x0005",
+              "name": "model",
+              "zcl_type": "string",
+              "value": "lumi.remote.b28ac1"
+            }
+          ]
         },
         {
           "cluster_id": "0x0001",
@@ -54,7 +67,7 @@
               "id": "0x0021",
               "name": "battery_percentage_remaining",
               "zcl_type": "uint8",
-              "unsupported": true
+              "value": 200
             },
             {
               "id": "0x0033",
@@ -72,46 +85,10 @@
               "id": "0x0020",
               "name": "battery_voltage",
               "zcl_type": "uint8",
-              "value": 30
+              "value": 31
             }
           ]
         },
-        {
-          "cluster_id": "0x0003",
-          "endpoint_attribute": "identify",
-          "attributes": []
-        },
-        {
-          "cluster_id": "0x0012",
-          "endpoint_attribute": "multistate_input",
-          "attributes": []
-        },
-        {
-          "cluster_id": "0xfcc0",
-          "endpoint_attribute": "opple_cluster",
-          "attributes": []
-        }
-      ],
-      "out_clusters": [
-        {
-          "cluster_id": "0x0003",
-          "endpoint_attribute": "identify",
-          "attributes": []
-        },
-        {
-          "cluster_id": "0x0006",
-          "endpoint_attribute": "on_off",
-          "attributes": []
-        }
-      ]
-    },
-    "2": {
-      "profile_id": 260,
-      "device_type": {
-        "name": "ON_OFF_LIGHT_SWITCH",
-        "id": 259
-      },
-      "in_clusters": [
         {
           "cluster_id": "0x0003",
           "endpoint_attribute": "identify",
@@ -125,7 +102,25 @@
               "id": "0x0055",
               "name": "present_value",
               "zcl_type": "uint16",
-              "value": 1.0
+              "value": 1
+            }
+          ]
+        },
+        {
+          "cluster_id": "0xfcc0",
+          "endpoint_attribute": "opple_cluster",
+          "attributes": [
+            {
+              "id": "0x0125",
+              "name": "click_mode",
+              "zcl_type": "uint8",
+              "value": 2
+            },
+            {
+              "id": "0x0009",
+              "name": "operation_mode",
+              "zcl_type": "uint8",
+              "value": 1
             }
           ]
         }
@@ -136,6 +131,41 @@
           "endpoint_attribute": "identify",
           "attributes": []
         },
+        {
+          "cluster_id": "0x0006",
+          "endpoint_attribute": "on_off",
+          "attributes": [
+            {
+              "id": "0x0000",
+              "name": "on_off",
+              "zcl_type": "bool",
+              "value": false
+            }
+          ]
+        }
+      ]
+    },
+    "2": {
+      "profile_id": 260,
+      "device_type": {
+        "name": "ON_OFF_LIGHT_SWITCH",
+        "id": 259
+      },
+      "in_clusters": [
+        {
+          "cluster_id": "0x0012",
+          "endpoint_attribute": "multistate_input",
+          "attributes": [
+            {
+              "id": "0x0055",
+              "name": "present_value",
+              "zcl_type": "uint16",
+              "value": 1
+            }
+          ]
+        }
+      ],
+      "out_clusters": [
         {
           "cluster_id": "0x0006",
           "endpoint_attribute": "on_off",
@@ -162,11 +192,6 @@
         }
       ],
       "out_clusters": [
-        {
-          "cluster_id": "0x0003",
-          "endpoint_attribute": "identify",
-          "attributes": []
-        },
         {
           "cluster_id": "0x0006",
           "endpoint_attribute": "on_off",
@@ -199,22 +224,8 @@
         "device_type": "0x0103",
         "input_clusters": [
           "0x0000",
-          "0x0001",
           "0x0003",
-          "0x0012",
-          "0xfcc0"
-        ],
-        "output_clusters": [
-          "0x0003",
-          "0x0006"
-        ]
-      },
-      "2": {
-        "profile_id": "0x0104",
-        "device_type": "0x0103",
-        "input_clusters": [
-          "0x0003",
-          "0x0012"
+          "0x0001"
         ],
         "output_clusters": [
           "0x0003",
@@ -225,11 +236,9 @@
         "profile_id": "0x0104",
         "device_type": "0x0103",
         "input_clusters": [
-          "0x0003",
-          "0x0012"
+          "0x0003"
         ],
         "output_clusters": [
-          "0x0003",
           "0x0006"
         ]
       }
@@ -297,7 +306,7 @@
         "state": {
           "class_name": "ZCLEnumSelectEntity",
           "available": true,
-          "state": null
+          "state": "Multiple"
         }
       },
       {
@@ -328,7 +337,7 @@
         "state": {
           "class_name": "ZCLEnumSelectEntity",
           "available": true,
-          "state": null
+          "state": "Event"
         }
       }
     ],
@@ -358,7 +367,7 @@
         "state": {
           "class_name": "LQISensor",
           "available": true,
-          "state": null
+          "state": 96
         }
       },
       {
@@ -414,10 +423,10 @@
         "state": {
           "class_name": "Battery",
           "available": true,
-          "state": null,
+          "state": 100.0,
           "battery_size": "Unknown",
           "battery_quantity": 1,
-          "battery_voltage": 3.0
+          "battery_voltage": 3.1
         },
         "extra_state_attributes": [
           "battery_quantity",

@@ -1218,7 +1218,7 @@ async def test_styrbar_press_events(zha_gateway: Gateway) -> None:
 
     zigpy_dev = await zigpy_device_from_json(
         zha_gateway.application_controller,
-        "tests/data/devices/ikea-of-sweden-remote-control-n2.json",
+        "tests/data/legacy_devices/ikea-of-sweden-remote-control-n2.json",
     )
 
     zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)

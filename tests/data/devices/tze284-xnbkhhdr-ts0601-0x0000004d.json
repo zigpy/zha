@@ -92,12 +92,6 @@
               "value": 2040
             },
             {
-              "id": "0x0010",
-              "name": "local_temperature_calibration",
-              "zcl_type": "int8",
-              "unsupported": true
-            },
-            {
               "id": "0x0016",
               "name": "max_heat_setpoint_limit",
               "zcl_type": "int16",
@@ -110,28 +104,10 @@
               "value": 1850
             },
             {
-              "id": "0x0008",
-              "name": "pi_heating_demand",
-              "zcl_type": "uint8",
-              "unsupported": true
-            },
-            {
               "id": "0x0029",
               "name": "running_state",
               "zcl_type": "map16",
               "value": 0
-            },
-            {
-              "id": "0x0030",
-              "name": "setpoint_change_source",
-              "zcl_type": "enum8",
-              "unsupported": true
-            },
-            {
-              "id": "0x0032",
-              "name": "setpoint_change_source_timestamp",
-              "zcl_type": "UTC",
-              "unsupported": true
             },
             {
               "id": "0x001c",
@@ -661,6 +637,90 @@
           "class_name": "ThermostatHVACAction",
           "available": true,
           "state": "idle"
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:60:04:48:19-1-513-pi_heating_demand",
+          "migrate_unique_ids": [],
+          "platform": "sensor",
+          "class_name": "PiHeatingDemand",
+          "translation_key": "pi_heating_demand",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": "measurement",
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "device_ieee": "ab:cd:ef:12:60:04:48:19",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "suggested_display_precision": 0,
+          "unit": "%"
+        },
+        "state": {
+          "class_name": "PiHeatingDemand",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:60:04:48:19-1-513-setpoint_change_source",
+          "migrate_unique_ids": [],
+          "platform": "sensor",
+          "class_name": "SetpointChangeSource",
+          "translation_key": "setpoint_change_source",
+          "translation_placeholders": null,
+          "device_class": "enum",
+          "state_class": null,
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "device_ieee": "ab:cd:ef:12:60:04:48:19",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "suggested_display_precision": null,
+          "unit": null
+        },
+        "state": {
+          "class_name": "SetpointChangeSource",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:60:04:48:19-1-513-setpoint_change_source_timestamp",
+          "migrate_unique_ids": [],
+          "platform": "sensor",
+          "class_name": "SetpointChangeSourceTimestamp",
+          "translation_key": "setpoint_change_source_timestamp",
+          "translation_placeholders": null,
+          "device_class": "timestamp",
+          "state_class": null,
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "device_ieee": "ab:cd:ef:12:60:04:48:19",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "suggested_display_precision": null,
+          "unit": null
+        },
+        "state": {
+          "class_name": "SetpointChangeSourceTimestamp",
+          "available": true,
+          "state": null
         }
       }
     ],

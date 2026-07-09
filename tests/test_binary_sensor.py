@@ -313,7 +313,7 @@ async def test_onoff_client_binary_sensor_on_with_timed_off(
     """
     zigpy_device = await zigpy_device_from_json(
         zha_gateway.application_controller,
-        "tests/data/devices/ikea-of-sweden-tradfri-motion-sensor.json",
+        "tests/data/devices/ikea-of-sweden-vallhorn-wireless-motion-sensor-0x01000064.json",
     )
 
     zha_device = await join_zigpy_device(zha_gateway, zigpy_device)

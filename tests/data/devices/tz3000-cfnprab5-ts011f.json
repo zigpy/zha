@@ -1,7 +1,7 @@
 {
   "version": 2,
   "ieee": "ab:cd:ef:12:86:cf:95:48",
-  "nwk": "0x329B",
+  "nwk": "0xC6A4",
   "manufacturer": "_TZ3000_cfnprab5",
   "model": "TS011F",
   "friendly_manufacturer": "_TZ3000_cfnprab5",
@@ -10,11 +10,11 @@
   "quirk_applied": false,
   "quirk_class": "zigpy.device.Device",
   "exposes_features": [],
-  "manufacturer_code": 4660,
+  "manufacturer_code": 4417,
   "power_source": "Mains",
-  "lqi": null,
-  "rssi": null,
-  "last_seen": "2025-12-11T01:25:35.022468+00:00",
+  "lqi": 204,
+  "rssi": -49,
+  "last_seen": "2026-02-17T09:18:23.050814+00:00",
   "available": true,
   "device_type": "Router",
   "active_coordinator": false,
@@ -26,11 +26,11 @@
     "aps_flags": 0,
     "frequency_band": 8,
     "mac_capability_flags": 142,
-    "manufacturer_code": 4660,
-    "maximum_buffer_size": 108,
-    "maximum_incoming_transfer_size": 0,
-    "server_mask": 11264,
-    "maximum_outgoing_transfer_size": 0,
+    "manufacturer_code": 4417,
+    "maximum_buffer_size": 66,
+    "maximum_incoming_transfer_size": 66,
+    "server_mask": 10752,
+    "maximum_outgoing_transfer_size": 66,
     "descriptor_capability_field": 0
   },
   "endpoints": {
@@ -46,42 +46,6 @@
           "endpoint_attribute": "basic",
           "attributes": [
             {
-              "id": "0x0013",
-              "name": "alarm_mask",
-              "zcl_type": "map8",
-              "unsupported": true
-            },
-            {
-              "id": "0x0001",
-              "name": "app_version",
-              "zcl_type": "uint8",
-              "value": 100
-            },
-            {
-              "id": "0xfffd",
-              "name": "cluster_revision",
-              "zcl_type": "uint16",
-              "value": 1
-            },
-            {
-              "id": "0x0008",
-              "name": "generic_device_class",
-              "zcl_type": "enum8",
-              "unsupported": true
-            },
-            {
-              "id": "0x0009",
-              "name": "generic_device_type",
-              "zcl_type": "enum8",
-              "unsupported": true
-            },
-            {
-              "id": "0x0003",
-              "name": "hw_version",
-              "zcl_type": "uint8",
-              "value": 3
-            },
-            {
               "id": "0x0004",
               "name": "manufacturer",
               "zcl_type": "string",
@@ -92,12 +56,6 @@
               "name": "model",
               "zcl_type": "string",
               "value": "TS011F"
-            },
-            {
-              "id": "0x0007",
-              "name": "power_source",
-              "zcl_type": "enum8",
-              "value": 1
             }
           ]
         },
@@ -124,17 +82,29 @@
               "id": "0x0000",
               "name": "on_off",
               "zcl_type": "bool",
+              "value": 0
+            },
+            {
+              "id": "0x4003",
+              "name": "start_up_on_off",
+              "zcl_type": "enum8",
               "value": 1
             }
           ]
         },
         {
-          "cluster_id": "0xe001",
+          "cluster_id": "0xe000",
           "endpoint_attribute": null,
           "attributes": []
         }
       ],
-      "out_clusters": []
+      "out_clusters": [
+        {
+          "cluster_id": "0x000a",
+          "endpoint_attribute": "time",
+          "attributes": []
+        }
+      ]
     },
     "2": {
       "profile_id": 260,
@@ -171,12 +141,18 @@
               "id": "0x0000",
               "name": "on_off",
               "zcl_type": "bool",
+              "value": 0
+            },
+            {
+              "id": "0x4003",
+              "name": "start_up_on_off",
+              "zcl_type": "enum8",
               "value": 1
             }
           ]
         },
         {
-          "cluster_id": "0xe001",
+          "cluster_id": "0xe000",
           "endpoint_attribute": null,
           "attributes": []
         }
@@ -218,12 +194,18 @@
               "id": "0x0000",
               "name": "on_off",
               "zcl_type": "bool",
+              "value": 0
+            },
+            {
+              "id": "0x4003",
+              "name": "start_up_on_off",
+              "zcl_type": "enum8",
               "value": 1
             }
           ]
         },
         {
-          "cluster_id": "0xe001",
+          "cluster_id": "0xe000",
           "endpoint_attribute": null,
           "attributes": []
         }
@@ -240,7 +222,50 @@
         {
           "cluster_id": "0x0000",
           "endpoint_attribute": "basic",
-          "attributes": []
+          "attributes": [
+            {
+              "id": "0x0012",
+              "name": "device_enabled",
+              "zcl_type": "bool",
+              "value": 1
+            },
+            {
+              "id": "0x0014",
+              "name": "disable_local_config",
+              "zcl_type": "map8",
+              "unsupported": true
+            },
+            {
+              "id": "0x0008",
+              "name": "generic_device_class",
+              "zcl_type": "enum8",
+              "unsupported": true
+            },
+            {
+              "id": "0x0009",
+              "name": "generic_device_type",
+              "zcl_type": "enum8",
+              "unsupported": true
+            },
+            {
+              "id": "0x0005",
+              "name": "model",
+              "zcl_type": "string",
+              "value": "TS011F"
+            },
+            {
+              "id": "0x0007",
+              "name": "power_source",
+              "zcl_type": "enum8",
+              "value": 1
+            },
+            {
+              "id": "0x000a",
+              "name": "product_code",
+              "zcl_type": "octstr",
+              "unsupported": true
+            }
+          ]
         },
         {
           "cluster_id": "0x0003",
@@ -262,15 +287,27 @@
           "endpoint_attribute": "on_off",
           "attributes": [
             {
+              "id": "0xfffd",
+              "name": "cluster_revision",
+              "zcl_type": "uint16",
+              "value": 1
+            },
+            {
               "id": "0x0000",
               "name": "on_off",
               "zcl_type": "bool",
+              "value": 0
+            },
+            {
+              "id": "0x4003",
+              "name": "start_up_on_off",
+              "zcl_type": "enum8",
               "value": 1
             }
           ]
         },
         {
-          "cluster_id": "0xe001",
+          "cluster_id": "0xe000",
           "endpoint_attribute": null,
           "attributes": []
         }
@@ -312,12 +349,18 @@
               "id": "0x0000",
               "name": "on_off",
               "zcl_type": "bool",
+              "value": 0
+            },
+            {
+              "id": "0x4003",
+              "name": "start_up_on_off",
+              "zcl_type": "enum8",
               "value": 1
             }
           ]
         },
         {
-          "cluster_id": "0xe001",
+          "cluster_id": "0xe000",
           "endpoint_attribute": null,
           "attributes": []
         }
@@ -336,11 +379,11 @@
       "aps_flags": 0,
       "frequency_band": 8,
       "mac_capability_flags": 142,
-      "manufacturer_code": 4660,
-      "maximum_buffer_size": 108,
-      "maximum_incoming_transfer_size": 0,
-      "server_mask": 11264,
-      "maximum_outgoing_transfer_size": 0,
+      "manufacturer_code": 4417,
+      "maximum_buffer_size": 66,
+      "maximum_incoming_transfer_size": 66,
+      "server_mask": 10752,
+      "maximum_outgoing_transfer_size": 66,
       "descriptor_capability_field": 0
     },
     "endpoints": {
@@ -353,9 +396,11 @@
           "0x0004",
           "0x0005",
           "0x0006",
-          "0xe001"
+          "0xe000"
         ],
-        "output_clusters": []
+        "output_clusters": [
+          "0x000a"
+        ]
       },
       "2": {
         "profile_id": "0x0104",
@@ -366,7 +411,7 @@
           "0x0004",
           "0x0005",
           "0x0006",
-          "0xe001"
+          "0xe000"
         ],
         "output_clusters": []
       },
@@ -379,7 +424,7 @@
           "0x0004",
           "0x0005",
           "0x0006",
-          "0xe001"
+          "0xe000"
         ],
         "output_clusters": []
       },
@@ -392,7 +437,7 @@
           "0x0004",
           "0x0005",
           "0x0006",
-          "0xe001"
+          "0xe000"
         ],
         "output_clusters": []
       },
@@ -405,7 +450,7 @@
           "0x0004",
           "0x0005",
           "0x0006",
-          "0xe001"
+          "0xe000"
         ],
         "output_clusters": []
       }
@@ -474,7 +519,7 @@
         "state": {
           "class_name": "Light",
           "available": true,
-          "on": true,
+          "on": false,
           "brightness": null,
           "xy_color": null,
           "color_temp": null,
@@ -524,7 +569,7 @@
         "state": {
           "class_name": "Light",
           "available": true,
-          "on": true,
+          "on": false,
           "brightness": null,
           "xy_color": null,
           "color_temp": null,
@@ -574,7 +619,7 @@
         "state": {
           "class_name": "Light",
           "available": true,
-          "on": true,
+          "on": false,
           "brightness": null,
           "xy_color": null,
           "color_temp": null,
@@ -624,7 +669,7 @@
         "state": {
           "class_name": "Light",
           "available": true,
-          "on": true,
+          "on": false,
           "brightness": null,
           "xy_color": null,
           "color_temp": null,
@@ -674,7 +719,7 @@
         "state": {
           "class_name": "Light",
           "available": true,
-          "on": true,
+          "on": false,
           "brightness": null,
           "xy_color": null,
           "color_temp": null,
@@ -694,6 +739,173 @@
           "off_brightness",
           "off_with_transition"
         ]
+      }
+    ],
+    "select": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:86:cf:95:48-1-6-StartUpOnOff",
+          "migrate_unique_ids": [],
+          "platform": "select",
+          "class_name": "StartupOnOffSelectEntity",
+          "translation_key": "start_up_on_off",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "device_ieee": "ab:cd:ef:12:86:cf:95:48",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "enum": "StartUpOnOff",
+          "options": [
+            "Off",
+            "On",
+            "Toggle",
+            "PreviousValue"
+          ]
+        },
+        "state": {
+          "class_name": "StartupOnOffSelectEntity",
+          "available": true,
+          "state": "On"
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:86:cf:95:48-2-6-StartUpOnOff",
+          "migrate_unique_ids": [],
+          "platform": "select",
+          "class_name": "StartupOnOffSelectEntity",
+          "translation_key": "start_up_on_off",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "device_ieee": "ab:cd:ef:12:86:cf:95:48",
+          "endpoint_id": 2,
+          "available": true,
+          "group_id": null,
+          "enum": "StartUpOnOff",
+          "options": [
+            "Off",
+            "On",
+            "Toggle",
+            "PreviousValue"
+          ]
+        },
+        "state": {
+          "class_name": "StartupOnOffSelectEntity",
+          "available": true,
+          "state": "On"
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:86:cf:95:48-3-6-StartUpOnOff",
+          "migrate_unique_ids": [],
+          "platform": "select",
+          "class_name": "StartupOnOffSelectEntity",
+          "translation_key": "start_up_on_off",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "device_ieee": "ab:cd:ef:12:86:cf:95:48",
+          "endpoint_id": 3,
+          "available": true,
+          "group_id": null,
+          "enum": "StartUpOnOff",
+          "options": [
+            "Off",
+            "On",
+            "Toggle",
+            "PreviousValue"
+          ]
+        },
+        "state": {
+          "class_name": "StartupOnOffSelectEntity",
+          "available": true,
+          "state": "On"
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:86:cf:95:48-4-6-StartUpOnOff",
+          "migrate_unique_ids": [],
+          "platform": "select",
+          "class_name": "StartupOnOffSelectEntity",
+          "translation_key": "start_up_on_off",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "device_ieee": "ab:cd:ef:12:86:cf:95:48",
+          "endpoint_id": 4,
+          "available": true,
+          "group_id": null,
+          "enum": "StartUpOnOff",
+          "options": [
+            "Off",
+            "On",
+            "Toggle",
+            "PreviousValue"
+          ]
+        },
+        "state": {
+          "class_name": "StartupOnOffSelectEntity",
+          "available": true,
+          "state": "On"
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:86:cf:95:48-5-6-StartUpOnOff",
+          "migrate_unique_ids": [],
+          "platform": "select",
+          "class_name": "StartupOnOffSelectEntity",
+          "translation_key": "start_up_on_off",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "device_ieee": "ab:cd:ef:12:86:cf:95:48",
+          "endpoint_id": 5,
+          "available": true,
+          "group_id": null,
+          "enum": "StartUpOnOff",
+          "options": [
+            "Off",
+            "On",
+            "Toggle",
+            "PreviousValue"
+          ]
+        },
+        "state": {
+          "class_name": "StartupOnOffSelectEntity",
+          "available": true,
+          "state": "On"
+        }
       }
     ],
     "sensor": [
@@ -722,7 +934,7 @@
         "state": {
           "class_name": "LQISensor",
           "available": true,
-          "state": null
+          "state": 204
         }
       },
       {
@@ -750,7 +962,7 @@
         "state": {
           "class_name": "RSSISensor",
           "available": true,
-          "state": null
+          "state": -49
         }
       }
     ]

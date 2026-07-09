@@ -1,7 +1,7 @@
 {
   "version": 2,
   "ieee": "ab:cd:ef:12:25:3a:b6:6f",
-  "nwk": "0xDD91",
+  "nwk": "0xA400",
   "manufacturer": "innr",
   "model": "RC 250",
   "friendly_manufacturer": "innr",
@@ -12,9 +12,9 @@
   "exposes_features": [],
   "manufacturer_code": 4454,
   "power_source": "Battery or Unknown",
-  "lqi": 204,
-  "rssi": -60,
-  "last_seen": "2025-11-29T13:02:15.439930+00:00",
+  "lqi": 176,
+  "rssi": -56,
+  "last_seen": "2026-03-01T21:40:42.133756+00:00",
   "available": true,
   "device_type": "EndDevice",
   "active_coordinator": false,
@@ -67,7 +67,7 @@
               "id": "0x0021",
               "name": "battery_percentage_remaining",
               "zcl_type": "uint8",
-              "value": 20
+              "value": 200
             },
             {
               "id": "0x0033",
@@ -85,7 +85,7 @@
               "id": "0x0020",
               "name": "battery_voltage",
               "zcl_type": "uint8",
-              "value": 25
+              "value": 29
             }
           ]
         },
@@ -124,7 +124,14 @@
         {
           "cluster_id": "0x0006",
           "endpoint_attribute": "on_off",
-          "attributes": []
+          "attributes": [
+            {
+              "id": "0x0000",
+              "name": "on_off",
+              "zcl_type": "bool",
+              "value": 0
+            }
+          ]
         },
         {
           "cluster_id": "0x0008",
@@ -257,7 +264,7 @@
         "state": {
           "class_name": "LQISensor",
           "available": true,
-          "state": 204
+          "state": 176
         }
       },
       {
@@ -285,7 +292,7 @@
         "state": {
           "class_name": "RSSISensor",
           "available": true,
-          "state": -60
+          "state": -56
         }
       },
       {
@@ -313,10 +320,10 @@
         "state": {
           "class_name": "Battery",
           "available": true,
-          "state": 10.0,
+          "state": 100.0,
           "battery_size": "Other",
           "battery_quantity": 1,
-          "battery_voltage": 2.5
+          "battery_voltage": 2.9
         },
         "extra_state_attributes": [
           "battery_quantity",

@@ -1,20 +1,20 @@
 {
   "version": 2,
-  "ieee": "00:15:8d:00:05:4b:9d:1f",
-  "nwk": "0xFF23",
+  "ieee": "ab:cd:ef:12:23:cc:44:33",
+  "nwk": "0xC7C3",
   "manufacturer": "LUMI",
   "model": "lumi.weather",
   "friendly_manufacturer": "LUMI",
   "friendly_model": "lumi.weather",
   "name": "LUMI lumi.weather",
   "quirk_applied": true,
-  "quirk_class": "zhaquirks.xiaomi.aqara.weather:Weather",
+  "quirk_class": "zhaquirks.xiaomi.aqara.weather:Weather2",
   "exposes_features": [],
   "manufacturer_code": 4151,
   "power_source": "Battery or Unknown",
-  "lqi": null,
-  "rssi": null,
-  "last_seen": "2025-04-24T17:34:08.835738+00:00",
+  "lqi": 56,
+  "rssi": -97,
+  "last_seen": "2025-10-04T15:27:39.898234+00:00",
   "available": true,
   "device_type": "EndDevice",
   "active_coordinator": false,
@@ -37,33 +37,14 @@
     "1": {
       "profile_id": 260,
       "device_type": {
-        "name": "undefined_0x5f01",
-        "id": 24321
+        "name": "TEMPERATURE_SENSOR",
+        "id": 770
       },
       "in_clusters": [
         {
           "cluster_id": "0x0000",
           "endpoint_attribute": "basic",
-          "attributes": [
-            {
-              "id": "0x0001",
-              "name": "app_version",
-              "zcl_type": "uint8",
-              "value": 5
-            },
-            {
-              "id": "0x0004",
-              "name": "manufacturer",
-              "zcl_type": "string",
-              "value": "LUMI"
-            },
-            {
-              "id": "0x0005",
-              "name": "model",
-              "zcl_type": "string",
-              "value": "lumi.weather"
-            }
-          ]
+          "attributes": []
         },
         {
           "cluster_id": "0x0001",
@@ -73,7 +54,7 @@
               "id": "0x0021",
               "name": "battery_percentage_remaining",
               "zcl_type": "uint8",
-              "value": 118
+              "value": 139
             },
             {
               "id": "0x0033",
@@ -91,7 +72,7 @@
               "id": "0x0020",
               "name": "battery_voltage",
               "zcl_type": "uint8",
-              "value": 29.9
+              "value": 30.1
             }
           ]
         },
@@ -108,7 +89,7 @@
               "id": "0x0000",
               "name": "measured_value",
               "zcl_type": "int16",
-              "value": 2173
+              "value": 2602
             }
           ]
         },
@@ -120,7 +101,7 @@
               "id": "0x0000",
               "name": "measured_value",
               "zcl_type": "int16",
-              "value": 1009
+              "value": 992
             }
           ]
         },
@@ -132,7 +113,7 @@
               "id": "0x0000",
               "name": "measured_value",
               "zcl_type": "uint16",
-              "value": 5799
+              "value": 3778
             }
           ]
         },
@@ -182,14 +163,14 @@
     "endpoints": {
       "1": {
         "profile_id": "0x0104",
-        "device_type": "0x5f01",
+        "device_type": "0x0302",
         "input_clusters": [
           "0x0000",
           "0x0003",
-          "0xffff",
           "0x0402",
           "0x0403",
-          "0x0405"
+          "0x0405",
+          "0xffff"
         ],
         "output_clusters": [
           "0x0000",
@@ -204,7 +185,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "00:15:8d:00:05:4b:9d:1f-1-3",
+          "unique_id": "ab:cd:ef:12:23:cc:44:33-1-3",
           "migrate_unique_ids": [],
           "platform": "button",
           "class_name": "IdentifyButton",
@@ -216,7 +197,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "device_ieee": "00:15:8d:00:05:4b:9d:1f",
+          "device_ieee": "ab:cd:ef:12:23:cc:44:33",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -236,7 +217,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "00:15:8d:00:05:4b:9d:1f-1-0-lqi",
+          "unique_id": "ab:cd:ef:12:23:cc:44:33-1-0-lqi",
           "migrate_unique_ids": [],
           "platform": "sensor",
           "class_name": "LQISensor",
@@ -248,7 +229,7 @@
           "entity_registry_enabled_default": false,
           "enabled": true,
           "primary": false,
-          "device_ieee": "00:15:8d:00:05:4b:9d:1f",
+          "device_ieee": "ab:cd:ef:12:23:cc:44:33",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -258,13 +239,13 @@
         "state": {
           "class_name": "LQISensor",
           "available": true,
-          "state": null
+          "state": 56
         }
       },
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "00:15:8d:00:05:4b:9d:1f-1-0-rssi",
+          "unique_id": "ab:cd:ef:12:23:cc:44:33-1-0-rssi",
           "migrate_unique_ids": [],
           "platform": "sensor",
           "class_name": "RSSISensor",
@@ -276,7 +257,7 @@
           "entity_registry_enabled_default": false,
           "enabled": true,
           "primary": false,
-          "device_ieee": "00:15:8d:00:05:4b:9d:1f",
+          "device_ieee": "ab:cd:ef:12:23:cc:44:33",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -286,13 +267,13 @@
         "state": {
           "class_name": "RSSISensor",
           "available": true,
-          "state": null
+          "state": -97
         }
       },
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "00:15:8d:00:05:4b:9d:1f-1-1",
+          "unique_id": "ab:cd:ef:12:23:cc:44:33-1-1",
           "migrate_unique_ids": [],
           "platform": "sensor",
           "class_name": "Battery",
@@ -304,7 +285,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "device_ieee": "00:15:8d:00:05:4b:9d:1f",
+          "device_ieee": "ab:cd:ef:12:23:cc:44:33",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -314,10 +295,10 @@
         "state": {
           "class_name": "Battery",
           "available": true,
-          "state": 59.0,
+          "state": 69.5,
           "battery_size": "CR2032",
           "battery_quantity": 1,
-          "battery_voltage": 2.99
+          "battery_voltage": 3.01
         },
         "extra_state_attributes": [
           "battery_quantity",
@@ -328,7 +309,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "00:15:8d:00:05:4b:9d:1f-1-1026",
+          "unique_id": "ab:cd:ef:12:23:cc:44:33-1-1026",
           "migrate_unique_ids": [],
           "platform": "sensor",
           "class_name": "Temperature",
@@ -340,7 +321,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "device_ieee": "00:15:8d:00:05:4b:9d:1f",
+          "device_ieee": "ab:cd:ef:12:23:cc:44:33",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -350,13 +331,13 @@
         "state": {
           "class_name": "Temperature",
           "available": true,
-          "state": 21.73
+          "state": 26.02
         }
       },
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "00:15:8d:00:05:4b:9d:1f-1-1027",
+          "unique_id": "ab:cd:ef:12:23:cc:44:33-1-1027",
           "migrate_unique_ids": [],
           "platform": "sensor",
           "class_name": "Pressure",
@@ -368,7 +349,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "device_ieee": "00:15:8d:00:05:4b:9d:1f",
+          "device_ieee": "ab:cd:ef:12:23:cc:44:33",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -378,13 +359,13 @@
         "state": {
           "class_name": "Pressure",
           "available": true,
-          "state": 1009
+          "state": 992
         }
       },
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "00:15:8d:00:05:4b:9d:1f-1-1029",
+          "unique_id": "ab:cd:ef:12:23:cc:44:33-1-1029",
           "migrate_unique_ids": [],
           "platform": "sensor",
           "class_name": "Humidity",
@@ -396,7 +377,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "device_ieee": "00:15:8d:00:05:4b:9d:1f",
+          "device_ieee": "ab:cd:ef:12:23:cc:44:33",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -406,7 +387,7 @@
         "state": {
           "class_name": "Humidity",
           "available": true,
-          "state": 57.99
+          "state": 37.78
         }
       }
     ]

@@ -1,22 +1,22 @@
 {
   "version": 2,
   "ieee": "ab:cd:ef:12:44:63:a9:95",
-  "nwk": "0x12C0",
+  "nwk": "0x1835",
   "manufacturer": "_TZ3000_okaz9tjs",
   "model": "TS011F",
   "friendly_manufacturer": "_TZ3000_okaz9tjs",
   "friendly_model": "TS011F",
   "name": "_TZ3000_okaz9tjs TS011F",
   "quirk_applied": true,
-  "quirk_class": "zhaquirks.tuya.ts011f_plug:Plug_v5",
+  "quirk_class": "zhaquirks.tuya.ts011f_plug:Plug_v2_var_fc11",
   "exposes_features": [
     "tuya.plug_on_off_attributes"
   ],
   "manufacturer_code": 4660,
   "power_source": "Mains",
-  "lqi": null,
-  "rssi": null,
-  "last_seen": "2025-12-11T00:56:57.358054+00:00",
+  "lqi": 56,
+  "rssi": -97,
+  "last_seen": "2026-02-09T15:13:01.260309+00:00",
   "available": true,
   "device_type": "Router",
   "active_coordinator": false,
@@ -47,6 +47,12 @@
           "cluster_id": "0x0000",
           "endpoint_attribute": "basic",
           "attributes": [
+            {
+              "id": "0x0001",
+              "name": "app_version",
+              "zcl_type": "uint8",
+              "value": 100
+            },
             {
               "id": "0x0004",
               "name": "manufacturer",
@@ -81,35 +87,18 @@
           "endpoint_attribute": "on_off",
           "attributes": [
             {
-              "id": "0x4002",
-              "name": "off_wait_time",
-              "zcl_type": "uint16",
-              "value": 0
-            },
-            {
               "id": "0x0000",
               "name": "on_off",
               "zcl_type": "bool",
-              "value": 0
-            },
-            {
-              "id": "0x4001",
-              "name": "on_time",
-              "zcl_type": "uint16",
-              "value": 0
+              "value": 1
             },
             {
               "id": "0x4003",
               "name": "start_up_on_off",
               "zcl_type": "enum8",
-              "value": 255
+              "unsupported": true
             }
           ]
-        },
-        {
-          "cluster_id": "0x000a",
-          "endpoint_attribute": "time",
-          "attributes": []
         },
         {
           "cluster_id": "0x0702",
@@ -119,7 +108,13 @@
               "id": "0x0000",
               "name": "current_summ_delivered",
               "zcl_type": "uint48",
-              "value": 0
+              "value": 302
+            },
+            {
+              "id": "0x0001",
+              "name": "current_summ_received",
+              "zcl_type": "uint48",
+              "unsupported": true
             },
             {
               "id": "0x0100",
@@ -179,7 +174,7 @@
               "id": "0x0306",
               "name": "metering_device_type",
               "zcl_type": "map8",
-              "value": 0
+              "unsupported": true
             },
             {
               "id": "0x0301",
@@ -191,13 +186,13 @@
               "id": "0x0200",
               "name": "status",
               "zcl_type": "map8",
-              "value": 0
+              "unsupported": true
             },
             {
               "id": "0x0303",
               "name": "summation_formatting",
               "zcl_type": "map8",
-              "value": 0
+              "unsupported": true
             },
             {
               "id": "0x0300",
@@ -211,6 +206,12 @@
           "cluster_id": "0x0b04",
           "endpoint_attribute": "electrical_measurement",
           "attributes": [
+            {
+              "id": "0x0803",
+              "name": "ac_active_power_overload",
+              "zcl_type": "int16",
+              "unsupported": true
+            },
             {
               "id": "0x0603",
               "name": "ac_current_divisor",
@@ -251,25 +252,25 @@
               "id": "0x0605",
               "name": "ac_power_divisor",
               "zcl_type": "uint16",
-              "value": 1
+              "unsupported": true
             },
             {
               "id": "0x0604",
               "name": "ac_power_multiplier",
               "zcl_type": "uint16",
-              "value": 1
+              "unsupported": true
             },
             {
               "id": "0x0601",
               "name": "ac_voltage_divisor",
               "zcl_type": "uint16",
-              "value": 1
+              "unsupported": true
             },
             {
               "id": "0x0600",
               "name": "ac_voltage_multiplier",
               "zcl_type": "uint16",
-              "value": 1
+              "unsupported": true
             },
             {
               "id": "0x050b",
@@ -284,8 +285,86 @@
               "unsupported": true
             },
             {
+              "id": "0x090d",
+              "name": "active_power_max_ph_b",
+              "zcl_type": "int16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0a0d",
+              "name": "active_power_max_ph_c",
+              "zcl_type": "int16",
+              "unsupported": true
+            },
+            {
+              "id": "0x090b",
+              "name": "active_power_ph_b",
+              "zcl_type": "int16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0a0b",
+              "name": "active_power_ph_c",
+              "zcl_type": "int16",
+              "unsupported": true
+            },
+            {
               "id": "0x050f",
               "name": "apparent_power",
+              "zcl_type": "uint16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0103",
+              "name": "dc_current",
+              "zcl_type": "int16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0203",
+              "name": "dc_current_divisor",
+              "zcl_type": "uint16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0202",
+              "name": "dc_current_multiplier",
+              "zcl_type": "uint16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0106",
+              "name": "dc_power",
+              "zcl_type": "int16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0205",
+              "name": "dc_power_divisor",
+              "zcl_type": "uint16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0204",
+              "name": "dc_power_multiplier",
+              "zcl_type": "uint16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0100",
+              "name": "dc_voltage",
+              "zcl_type": "int16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0201",
+              "name": "dc_voltage_divisor",
+              "zcl_type": "uint16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0200",
+              "name": "dc_voltage_multiplier",
               "zcl_type": "uint16",
               "unsupported": true
             },
@@ -308,6 +387,18 @@
               "unsupported": true
             },
             {
+              "id": "0x0910",
+              "name": "power_factor_ph_b",
+              "zcl_type": "int8",
+              "unsupported": true
+            },
+            {
+              "id": "0x0a10",
+              "name": "power_factor_ph_c",
+              "zcl_type": "int8",
+              "unsupported": true
+            },
+            {
               "id": "0x0402",
               "name": "power_multiplier",
               "zcl_type": "uint32",
@@ -326,32 +417,81 @@
               "unsupported": true
             },
             {
+              "id": "0x090a",
+              "name": "rms_current_max_ph_b",
+              "zcl_type": "uint16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0a0a",
+              "name": "rms_current_max_ph_c",
+              "zcl_type": "uint16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0908",
+              "name": "rms_current_ph_b",
+              "zcl_type": "uint16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0a08",
+              "name": "rms_current_ph_c",
+              "zcl_type": "uint16",
+              "unsupported": true
+            },
+            {
               "id": "0x0505",
               "name": "rms_voltage",
               "zcl_type": "uint16",
-              "value": 239
+              "value": 240
             },
             {
               "id": "0x0507",
               "name": "rms_voltage_max",
               "zcl_type": "uint16",
               "unsupported": true
+            },
+            {
+              "id": "0x0907",
+              "name": "rms_voltage_max_ph_b",
+              "zcl_type": "uint16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0a07",
+              "name": "rms_voltage_max_ph_c",
+              "zcl_type": "uint16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0905",
+              "name": "rms_voltage_ph_b",
+              "zcl_type": "uint16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0a05",
+              "name": "rms_voltage_ph_c",
+              "zcl_type": "uint16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0304",
+              "name": "total_active_power",
+              "zcl_type": "int32",
+              "unsupported": true
             }
           ]
         },
         {
-          "cluster_id": "0x1000",
-          "endpoint_attribute": "lightlink",
-          "attributes": []
-        },
-        {
-          "cluster_id": "0xe000",
-          "endpoint_attribute": "tuya_manufacturer_specific_57344",
-          "attributes": []
-        },
-        {
           "cluster_id": "0xe001",
           "endpoint_attribute": "tuya_external_switch_type",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0xfc11",
+          "endpoint_attribute": "manufacturer_specific",
           "attributes": []
         }
       ],
@@ -379,19 +519,17 @@
     "endpoints": {
       "1": {
         "profile_id": "0x0104",
-        "device_type": "0x0100",
+        "device_type": "0x0051",
         "input_clusters": [
           "0x0000",
+          "0x0006",
           "0x0003",
           "0x0004",
           "0x0005",
-          "0x0006",
-          "0x000a",
-          "0x0702",
+          "0xe001",
           "0x0b04",
-          "0x1000",
-          "0xe000",
-          "0xe001"
+          "0x0702",
+          "0xfc11"
         ],
         "output_clusters": []
       }
@@ -430,41 +568,6 @@
         }
       }
     ],
-    "select": [
-      {
-        "info_object": {
-          "fallback_name": null,
-          "unique_id": "ab:cd:ef:12:44:63:a9:95-1-6-StartUpOnOff",
-          "migrate_unique_ids": [],
-          "platform": "select",
-          "class_name": "StartupOnOffSelectEntity",
-          "translation_key": "start_up_on_off",
-          "translation_placeholders": null,
-          "device_class": null,
-          "state_class": null,
-          "entity_category": "config",
-          "entity_registry_enabled_default": true,
-          "enabled": true,
-          "primary": false,
-          "device_ieee": "ab:cd:ef:12:44:63:a9:95",
-          "endpoint_id": 1,
-          "available": true,
-          "group_id": null,
-          "enum": "StartUpOnOff",
-          "options": [
-            "Off",
-            "On",
-            "Toggle",
-            "PreviousValue"
-          ]
-        },
-        "state": {
-          "class_name": "StartupOnOffSelectEntity",
-          "available": true,
-          "state": "PreviousValue"
-        }
-      }
-    ],
     "sensor": [
       {
         "info_object": {
@@ -491,7 +594,7 @@
         "state": {
           "class_name": "LQISensor",
           "available": true,
-          "state": null
+          "state": 56
         }
       },
       {
@@ -519,7 +622,7 @@
         "state": {
           "class_name": "RSSISensor",
           "available": true,
-          "state": null
+          "state": -97
         }
       },
       {
@@ -547,9 +650,7 @@
         "state": {
           "class_name": "SmartEnergySummation",
           "available": true,
-          "state": 0.0,
-          "device_type": "Electric Metering",
-          "status": "NO_ALARMS",
+          "state": 3.02,
           "zcl_unit_of_measurement": 0
         },
         "extra_state_attributes": [
@@ -647,7 +748,7 @@
         "state": {
           "class_name": "ElectricalMeasurementRMSVoltage",
           "available": true,
-          "state": 239.0
+          "state": 240.0
         },
         "extra_state_attributes": [
           "measurement_type",
@@ -678,7 +779,7 @@
         },
         "state": {
           "class_name": "Switch",
-          "state": 0,
+          "state": 1,
           "available": true
         }
       }

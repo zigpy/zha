@@ -79,7 +79,7 @@ async def test_device_override(
 
     zigpy_device = await zigpy_device_from_json(
         zha_gateway.application_controller,
-        "tests/data/devices/sonoff-basiczbr3.json",
+        "tests/data/devices/sonoff-s31-lite-zb.json",
     )
 
     zha_gateway.config.config.device_overrides = {
@@ -181,13 +181,13 @@ async def test_device_override_filter_bypassing(
 ) -> None:
     """Test that profile filtering is only bypassed for the override platform."""
 
-    # The sercomm device is an ON_OFF_LIGHT with a PowerConfiguration cluster.
-    # DeviceTracker matches PowerConfiguration but is restricted by profile_device_types
-    # to the SmartThings arrival sensor device type. A SWITCH override should not cause
-    # DeviceTracker to bypass that filter.
+    # The IKEA TRADFRI on/off switch is a battery remote with a PowerConfiguration
+    # cluster. DeviceTracker matches PowerConfiguration but is restricted by
+    # profile_device_types to the SmartThings arrival sensor device type. A SWITCH
+    # override should not cause DeviceTracker to bypass that filter.
     zigpy_device = await zigpy_device_from_json(
         zha_gateway.application_controller,
-        "tests/data/devices/sercomm-corp-sz-esw01-au.json",
+        "tests/data/devices/ikea-of-sweden-tradfri-on-off-switch.json",
     )
 
     zha_gateway.config.config.device_overrides = {
@@ -763,7 +763,9 @@ def pytest_generate_tests(metafunc):
     """Generate tests for all device files."""
     if "file_path" in metafunc.fixturenames:
         # use the filename as ID for better test names
-        file_paths = sorted(pathlib.Path("tests/data/devices").glob("**/*.json"))
+        file_paths = sorted(
+            pathlib.Path("tests/data/devices").glob("**/*.json")
+        ) + sorted(pathlib.Path("tests/data/legacy_devices").glob("**/*.json"))
         file_paths = [
             f for f in file_paths if f.name != "lumi-lumi-motion-agl04.json"
         ]  # TODO: fix lingering timer for `_Motion._turn_off` in quirks

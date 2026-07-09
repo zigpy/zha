@@ -1,7 +1,7 @@
 {
   "version": 2,
   "ieee": "ab:cd:ef:12:7d:e2:f1:42",
-  "nwk": "0x6827",
+  "nwk": "0xDFC8",
   "manufacturer": "LUMI",
   "model": "lumi.vibration.agl01",
   "friendly_manufacturer": "LUMI",
@@ -12,9 +12,9 @@
   "exposes_features": [],
   "manufacturer_code": 4447,
   "power_source": "Battery or Unknown",
-  "lqi": 108,
-  "rssi": -84,
-  "last_seen": "2025-10-27T14:31:15.191577+00:00",
+  "lqi": 192,
+  "rssi": -52,
+  "last_seen": "2026-03-08T19:34:46.786502+00:00",
   "available": true,
   "device_type": "EndDevice",
   "active_coordinator": false,
@@ -76,10 +76,22 @@
               "unsupported": true
             },
             {
+              "id": "0x0033",
+              "name": "battery_quantity",
+              "zcl_type": "uint8",
+              "value": 1
+            },
+            {
+              "id": "0x0031",
+              "name": "battery_size",
+              "zcl_type": "enum8",
+              "value": 7
+            },
+            {
               "id": "0x0020",
               "name": "battery_voltage",
               "zcl_type": "uint8",
-              "value": 30
+              "value": 31
             }
           ]
         },
@@ -111,7 +123,13 @@
               "id": "0x0000",
               "name": "zone_state",
               "zcl_type": "enum8",
-              "value": 1
+              "value": 0
+            },
+            {
+              "id": "0x0002",
+              "name": "zone_status",
+              "zcl_type": "map16",
+              "value": 0
             },
             {
               "id": "0x0001",
@@ -152,14 +170,7 @@
         {
           "cluster_id": "0x0012",
           "endpoint_attribute": "multistate_input",
-          "attributes": [
-            {
-              "id": "0x0055",
-              "name": "present_value",
-              "zcl_type": "uint16",
-              "value": 1
-            }
-          ]
+          "attributes": []
         },
         {
           "cluster_id": "0x0500",
@@ -210,8 +221,8 @@
         "device_type": "0x0402",
         "input_clusters": [
           "0x0000",
-          "0x0001",
           "0x0003",
+          "0x0001",
           "0x0500"
         ],
         "output_clusters": [
@@ -345,7 +356,7 @@
         "state": {
           "class_name": "LQISensor",
           "available": true,
-          "state": 108
+          "state": 192
         }
       },
       {
@@ -373,7 +384,7 @@
         "state": {
           "class_name": "RSSISensor",
           "available": true,
-          "state": -84
+          "state": -52
         }
       },
       {
@@ -402,7 +413,9 @@
           "class_name": "Battery",
           "available": true,
           "state": null,
-          "battery_voltage": 3.0
+          "battery_size": "CR2",
+          "battery_quantity": 1,
+          "battery_voltage": 3.1
         },
         "extra_state_attributes": [
           "battery_quantity",
