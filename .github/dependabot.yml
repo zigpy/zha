@@ -4,6 +4,16 @@ updates:
     directory: "/"
     schedule:
       interval: daily
+    open-pull-requests-limit: 10
+    groups:
+      python-dependencies:
+        patterns:
+          - "*"
+        # The Zigbee radio stack and zha-quirks stay as individual PRs.
+        exclude-patterns:
+          - "zigpy*"
+          - "bellows"
+          - "zha-quirks"
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:

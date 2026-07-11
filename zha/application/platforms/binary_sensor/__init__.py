@@ -111,7 +111,6 @@ class BinarySensor(BaseBinarySensor):
             )
 
         super().__init__(endpoint=endpoint, device=device, **kwargs)
-        self._state: bool = self.is_on
         self.recompute_capabilities()
 
     def _is_supported(self) -> bool:
@@ -145,7 +144,7 @@ class BinarySensor(BaseBinarySensor):
     @property
     def is_on(self) -> bool:
         """Return True if the switch is on based on the state machine."""
-        self._state = raw_state = self._cluster.get(self._attribute_name)
+        raw_state = self._cluster.get(self._attribute_name)
         if raw_state is None:
             return False
         if self._attribute_converter:
@@ -162,7 +161,6 @@ class BinarySensor(BaseBinarySensor):
         """Handle attribute updates from the cluster."""
         if self._attribute_name is None or self._attribute_name != event.attribute_name:
             return
-        self._state = bool(event.value)
         self.maybe_emit_state_changed_event()
 
     async def async_update(self) -> None:
@@ -177,7 +175,6 @@ class BinarySensor(BaseBinarySensor):
         )
         attr_value = result.get(attribute)
         if attr_value is not None:
-            self._state = attr_value
             self.maybe_emit_state_changed_event()
 
     @staticmethod
