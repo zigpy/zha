@@ -700,8 +700,7 @@ class AnalogInputSensor(Sensor):
             )
 
         # Resolution indicates the minimum change in value that can be detected.
-        # Some devices report a bogus resolution of 0 (e.g. ThirdReality
-        # 3RAP0149BZ), which must not abort device initialization.
+        # Guard against 0 resolution reported by some devices.
         self._attr_suggested_display_precision = None
         resolution = self._cluster.get(AnalogInput.AttributeDefs.resolution.name)
         if resolution is not None and math.isfinite(resolution) and resolution > 0:
