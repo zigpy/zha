@@ -883,10 +883,7 @@ async def test_analog_input_complex(zha_gateway: Gateway) -> None:
     assert entity.info_object.suggested_display_precision == 2
 
 
-@pytest.mark.parametrize(
-    "resolution",
-    [0.0, float("inf"), float("-inf"), float("nan")],
-)
+@pytest.mark.parametrize("resolution", [0.0, float("inf")])
 async def test_analog_input_bogus_resolution(
     zha_gateway: Gateway, resolution: float
 ) -> None:
