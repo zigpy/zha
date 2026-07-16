@@ -883,6 +883,32 @@ async def test_analog_input_complex(zha_gateway: Gateway) -> None:
     assert entity.info_object.suggested_display_precision == 2
 
 
+async def test_analog_input_zero_resolution(zha_gateway: Gateway) -> None:
+    """Test a device reporting a bogus `resolution` of 0 (issue #826)."""
+    zigpy_dev = await zigpy_device_from_json(
+        zha_gateway.application_controller,
+        "tests/data/devices/isilentllc-masterbed-light-controller.json",
+    )
+
+    analog_input = zigpy_dev.endpoints[2].analog_input
+    analog_input.update_attribute(
+        AnalogInput.AttributeDefs.description.id, "Some description"
+    )
+    # The ThirdReality 3RAP0149BZ answers reads of `resolution` with 0.0
+    analog_input.PLUGGED_ATTR_READS[AnalogInput.AttributeDefs.resolution.id] = 0.0
+
+    zha_dev = await join_zigpy_device(zha_gateway, zigpy_dev)
+    entity = get_entity(
+        zha_dev, platform=Platform.SENSOR, exact_entity_type=AnalogInputSensor
+    )
+    assert entity.info_object.suggested_display_precision is None
+
+    # The bogus resolution is cached in the zigpy database, so it must not
+    # abort the from-cache initialization on the next startup either
+    await zha_dev.async_initialize(from_cache=True)
+    get_entity(zha_dev, platform=Platform.SENSOR, exact_entity_type=AnalogInputSensor)
+
+
 def assert_state(entity: PlatformEntity, state: Any, unit_of_measurement: str) -> None:
     """Check that the state is what is expected.
 
