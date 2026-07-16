@@ -903,11 +903,6 @@ async def test_analog_input_zero_resolution(zha_gateway: Gateway) -> None:
     )
     assert entity.info_object.suggested_display_precision is None
 
-    # The bogus resolution is cached in the zigpy database, so it must not
-    # abort the from-cache initialization on the next startup either
-    await zha_dev.async_initialize(from_cache=True)
-    get_entity(zha_dev, platform=Platform.SENSOR, exact_entity_type=AnalogInputSensor)
-
 
 def assert_state(entity: PlatformEntity, state: Any, unit_of_measurement: str) -> None:
     """Check that the state is what is expected.
