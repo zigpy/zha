@@ -883,8 +883,14 @@ async def test_analog_input_complex(zha_gateway: Gateway) -> None:
     assert entity.info_object.suggested_display_precision == 2
 
 
-async def test_analog_input_zero_resolution(zha_gateway: Gateway) -> None:
-    """Test a device reporting a bogus `resolution` of 0 (issue #826)."""
+@pytest.mark.parametrize(
+    "resolution",
+    [0.0, float("inf"), float("-inf"), float("nan")],
+)
+async def test_analog_input_bogus_resolution(
+    zha_gateway: Gateway, resolution: float
+) -> None:
+    """Test a device reporting a bogus analog input resolution."""
     zigpy_dev = await zigpy_device_from_json(
         zha_gateway.application_controller,
         "tests/data/devices/isilentllc-masterbed-light-controller.json",
@@ -894,8 +900,9 @@ async def test_analog_input_zero_resolution(zha_gateway: Gateway) -> None:
     analog_input.update_attribute(
         AnalogInput.AttributeDefs.description.id, "Some description"
     )
-    # The ThirdReality 3RAP0149BZ answers reads of `resolution` with 0.0
-    analog_input.PLUGGED_ATTR_READS[AnalogInput.AttributeDefs.resolution.id] = 0.0
+    analog_input.PLUGGED_ATTR_READS[AnalogInput.AttributeDefs.resolution.id] = (
+        resolution
+    )
 
     zha_dev = await join_zigpy_device(zha_gateway, zigpy_dev)
     entity = get_entity(
