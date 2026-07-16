@@ -4095,15 +4095,15 @@ testing = [
 
 [[package]]
 name = "zha-quirks"
-version = "2.1.0"
+version = "2.1.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "zha" },
     { name = "zigpy" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/fe/87/e3121b6e3ae48f2214b9cff2d98c0cda2d2742eea7b1a09b655b9b111c58/zha_quirks-2.1.0.tar.gz", hash = "sha256:72f677db1597e77b72d688a4cc5cd9b98afb74f11e919d35e9112fe07522e51b", size = 470119, upload-time = "2026-06-24T16:16:04.444Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/e0/66/1445f5210e467a81be38f725819fa46ebd899934147c5d65a3658a0d8e3e/zha_quirks-2.1.1.tar.gz", hash = "sha256:58310f47ba56c9c8bcb0c13e71cd7fe456d9b9fc225a39dde5f29be9e1d1cdf1", size = 470597, upload-time = "2026-07-10T00:11:29.88Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/79/71/03a4cc0901b736a912f7ac02c4f588d0b89db91c4d1e3cb75e51b8fb2d08/zha_quirks-2.1.0-py3-none-any.whl", hash = "sha256:8b43efbc5dbf64a1658f218978b64a37a60e85aa3f0f4878439a4d28f88b8732", size = 575282, upload-time = "2026-06-24T16:16:02.916Z" },
+    { url = "https://files.pythonhosted.org/packages/50/e3/caf8ad9ab5232f78e07298a03ef460e291809efabaca0ecd669a211f0278/zha_quirks-2.1.1-py3-none-any.whl", hash = "sha256:4d8c6d28035dd55913d7eb04427609a130d3200c5bf382fbed2aba756a75dd00", size = 575775, upload-time = "2026-07-10T00:11:28.306Z" },
 ]
 
 [[package]]
