@@ -883,6 +883,31 @@ async def test_analog_input_complex(zha_gateway: Gateway) -> None:
     assert entity.info_object.suggested_display_precision == 2
 
 
+@pytest.mark.parametrize("resolution", [0.0, float("inf")])
+async def test_analog_input_bogus_resolution(
+    zha_gateway: Gateway, resolution: float
+) -> None:
+    """Test a device reporting a bogus analog input resolution."""
+    zigpy_dev = await zigpy_device_from_json(
+        zha_gateway.application_controller,
+        "tests/data/devices/isilentllc-masterbed-light-controller.json",
+    )
+
+    analog_input = zigpy_dev.endpoints[2].analog_input
+    analog_input.update_attribute(
+        AnalogInput.AttributeDefs.description.id, "Some description"
+    )
+    analog_input.PLUGGED_ATTR_READS[AnalogInput.AttributeDefs.resolution.id] = (
+        resolution
+    )
+
+    zha_dev = await join_zigpy_device(zha_gateway, zigpy_dev)
+    entity = get_entity(
+        zha_dev, platform=Platform.SENSOR, exact_entity_type=AnalogInputSensor
+    )
+    assert entity.info_object.suggested_display_precision is None
+
+
 def assert_state(entity: PlatformEntity, state: Any, unit_of_measurement: str) -> None:
     """Check that the state is what is expected.
 

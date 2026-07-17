@@ -699,9 +699,11 @@ class AnalogInputSensor(Sensor):
                 self._cluster.get(AnalogInput.AttributeDefs.engineering_units.name)
             )
 
-        # Resolution indicates the minimum change in value that can be detected
+        # Resolution indicates the minimum change in value that can be detected.
+        # Guard against 0 resolution reported by some devices.
+        self._attr_suggested_display_precision = None
         resolution = self._cluster.get(AnalogInput.AttributeDefs.resolution.name)
-        if resolution is not None:
+        if resolution is not None and math.isfinite(resolution) and resolution > 0:
             self._attr_suggested_display_precision = resolution_to_decimal_precision(
                 resolution
             )

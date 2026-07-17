@@ -725,6 +725,16 @@ class SonoffPresenceSenorTimeout(NumberConfigurationEntity):
         models=frozenset({"SNZB-06P", "SNZB-03P"}),
     )
 
+    _server_cluster_config = {
+        OccupancySensing.cluster_id: ClusterConfig(
+            attributes={
+                OccupancySensing.AttributeDefs.ultrasonic_o_to_u_delay: AttrConfig(
+                    read_on_startup=False,
+                ),
+            },
+        ),
+    }
+
 
 @register_entity(TUYA_MANUFACTURER_CLUSTER)
 class TimerDurationMinutes(NumberConfigurationEntity):
@@ -1542,6 +1552,12 @@ class DanfossExerciseTriggerTime(NumberConfigurationEntity):
         exposed_features=frozenset({DANFOSS_ALLY_THERMOSTAT}),
     )
 
+    _server_cluster_config = {
+        Thermostat.cluster_id: ClusterConfig(
+            attributes={"exercise_trigger_time": AttrConfig(read_on_startup=False)},
+        ),
+    }
+
 
 @register_entity(Thermostat.cluster_id)
 class DanfossExternalMeasuredRoomSensor(ZCLTemperatureEntity):
@@ -1558,6 +1574,14 @@ class DanfossExternalMeasuredRoomSensor(ZCLTemperatureEntity):
         server_clusters=frozenset({Thermostat.cluster_id}),
         exposed_features=frozenset({DANFOSS_ALLY_THERMOSTAT}),
     )
+
+    _server_cluster_config = {
+        Thermostat.cluster_id: ClusterConfig(
+            attributes={
+                "external_measured_room_sensor": AttrConfig(read_on_startup=True)
+            },
+        ),
+    }
 
 
 @register_entity(Thermostat.cluster_id)
@@ -1576,6 +1600,12 @@ class DanfossLoadRoomMean(NumberConfigurationEntity):
         server_clusters=frozenset({Thermostat.cluster_id}),
         exposed_features=frozenset({DANFOSS_ALLY_THERMOSTAT}),
     )
+
+    _server_cluster_config = {
+        Thermostat.cluster_id: ClusterConfig(
+            attributes={"load_room_mean": AttrConfig(read_on_startup=True)},
+        ),
+    }
 
 
 @register_entity(Thermostat.cluster_id)
@@ -1597,6 +1627,14 @@ class DanfossRegulationSetpointOffset(NumberConfigurationEntity):
         server_clusters=frozenset({Thermostat.cluster_id}),
         exposed_features=frozenset({DANFOSS_ALLY_THERMOSTAT}),
     )
+
+    _server_cluster_config = {
+        Thermostat.cluster_id: ClusterConfig(
+            attributes={
+                "regulation_setpoint_offset": AttrConfig(read_on_startup=False)
+            },
+        ),
+    }
 
 
 @register_entity(SINOPE_MANUFACTURER_CLUSTER)
