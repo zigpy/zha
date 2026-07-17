@@ -265,21 +265,18 @@ class BaseFirmwareUpdateEntity(PlatformEntity, ABC):
                 progress_callback=self._update_progress,
             )
         except Exception as ex:
-            self._attr_in_progress = False
-            self.maybe_emit_state_changed_event()
             raise ZHAException(
                 f"Update was not successful: {str(ex) or repr(ex)}"
             ) from ex
+        finally:
+            # Clear the progress state, regardless of the update's outcome
+            self._attr_in_progress = False
+            self._attr_update_percentage = None
+            self.maybe_emit_state_changed_event()
 
         # If the update finished but was not successful, we should also throw an error
         if result != Status.SUCCESS:
-            self._attr_in_progress = False
-            self.maybe_emit_state_changed_event()
             raise ZHAException(f"Update was not successful: {result}")
-
-        # Clear the state
-        self._attr_in_progress = False
-        self.maybe_emit_state_changed_event()
 
     async def on_remove(self) -> None:
         """Call when entity will be removed."""
