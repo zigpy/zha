@@ -142,16 +142,35 @@ class ClusterMatch:
                 )
 
 
-def register_entity[T: type[PlatformEntity]](
-    cluster_id: ClusterId | int,
-) -> Callable[[T], T]:
-    """Register an entity class for discovery."""
+def register_entity[T: type[PlatformEntity]](cls: T) -> T:
+    """Register an entity class for discovery.
 
-    def inner(cls: T) -> T:
-        ENTITY_REGISTRY[cluster_id].append(cls)
-        return cls
+    The registry is keyed by cluster ID purely to speed up discovery lookups
+    (see `discover_entities_for_endpoint`): for each cluster on an endpoint we
+    only evaluate the entities filed under that cluster. The actual matching is
+    done entirely by the class's `_cluster_match`.
 
-    return inner
+    The index key is therefore not independent information — it is derived from
+    the match. Every mandatory cluster (`server_clusters | client_clusters`)
+    must be present for a match to succeed, so any single one of them is a
+    sufficient discovery key: if the entity can match at all, that cluster is on
+    the endpoint and the lookup finds it. We index under exactly one mandatory
+    cluster (preferring a server cluster) to keep each class in a single bucket,
+    so discovery evaluates it at most once per endpoint.
+    """
+    match = cls._cluster_match
+    if match is None:
+        raise TypeError(f"{cls.__name__} has no `_cluster_match` to register")
+
+    mandatory = match.server_clusters or match.client_clusters
+    if not mandatory:
+        raise ValueError(
+            f"{cls.__name__} declares no mandatory clusters; it cannot be "
+            "discovered and must not use @register_entity"
+        )
+
+    ENTITY_REGISTRY[min(mandatory)].append(cls)
+    return cls
 
 
 def register_group_entity(cls: type[GroupEntity]) -> type[GroupEntity]:

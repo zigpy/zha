@@ -123,7 +123,7 @@ class Button(BaseButton):
         await command(*arguments, **kwargs)
 
 
-@register_entity(Identify.cluster_id)
+@register_entity
 class IdentifyButton(Button):
     """Defines a ZHA identify button."""
 
@@ -184,7 +184,7 @@ class WriteAttributeButton(BaseButton):
         )
 
 
-@register_entity(TUYA_MANUFACTURER_CLUSTER)
+@register_entity
 class FrostLockResetButton(WriteAttributeButton):
     """Defines a ZHA frost lock reset button."""
 
@@ -202,7 +202,7 @@ class FrostLockResetButton(WriteAttributeButton):
     )
 
 
-@register_entity(AQARA_OPPLE_CLUSTER)
+@register_entity
 class NoPresenceStatusResetButton(WriteAttributeButton):
     """Defines a ZHA no presence status reset button."""
 
@@ -220,7 +220,7 @@ class NoPresenceStatusResetButton(WriteAttributeButton):
     )
 
 
-@register_entity(AQARA_OPPLE_CLUSTER)
+@register_entity
 class AqaraPetFeederFeedButton(WriteAttributeButton):
     """Defines a feed button for the aqara c1 pet feeder."""
 
@@ -236,7 +236,7 @@ class AqaraPetFeederFeedButton(WriteAttributeButton):
     )
 
 
-@register_entity(AQARA_OPPLE_CLUSTER)
+@register_entity
 class AqaraSelfTestButton(WriteAttributeButton):
     """Defines a ZHA self-test button for Aqara smoke sensors."""
 

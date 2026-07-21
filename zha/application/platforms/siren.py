@@ -217,7 +217,7 @@ class BaseZclSiren(BaseSiren, ABC):
         self.maybe_emit_state_changed_event()
 
 
-@register_entity(IasWd.cluster_id)
+@register_entity
 class AdvancedSiren(BaseZclSiren):
     """Representation of a ZHA siren with full tone, level, and strobe support."""
 
@@ -328,7 +328,7 @@ class AdvancedSiren(BaseZclSiren):
         self.maybe_emit_state_changed_event()
 
 
-@register_entity(IasWd.cluster_id)
+@register_entity
 class BasicSiren(BaseZclSiren):
     """Representation of a basic ZHA siren with fixed tone, level, and strobe."""
 

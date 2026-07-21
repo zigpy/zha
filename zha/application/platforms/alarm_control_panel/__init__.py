@@ -122,7 +122,7 @@ class BaseAlarmControlPanel(PlatformEntity, ABC):
         """Send alarm trigger command."""
 
 
-@register_entity(AceCluster.cluster_id)
+@register_entity
 class AlarmControlPanel(BaseAlarmControlPanel):
     """Entity for ZHA alarm control devices."""
 

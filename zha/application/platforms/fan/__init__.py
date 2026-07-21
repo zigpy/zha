@@ -245,7 +245,7 @@ class BaseFan(BaseEntity, ABC):
         return percentage_to_ordered_list_item(LEGACY_SPEED_LIST, percentage)
 
 
-@register_entity(hvac.Fan.cluster_id)
+@register_entity
 class Fan(BaseFan, PlatformEntity):
     """Representation of a ZHA fan."""
 
@@ -394,7 +394,7 @@ class FanGroup(BaseFan, GroupEntity):
         self.maybe_emit_state_changed_event()
 
 
-@register_entity(IKEA_AIR_PURIFIER_CLUSTER)
+@register_entity
 class IkeaFan(BaseFan, PlatformEntity):
     """Representation of an Ikea fan."""
 
@@ -569,7 +569,7 @@ class IkeaFan(BaseFan, PlatformEntity):
         self.maybe_emit_state_changed_event()
 
 
-@register_entity(hvac.Fan.cluster_id)
+@register_entity
 class KofFan(Fan):
     """Representation of a fan made by King Of Fans."""
 

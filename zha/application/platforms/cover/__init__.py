@@ -24,7 +24,7 @@ from zigpy.zcl.clusters.closures import (
     WindowCovering,
     WindowCoveringType,
 )
-from zigpy.zcl.clusters.general import LevelControl, OnOff, OnOff as OnOffCluster
+from zigpy.zcl.clusters.general import LevelControl, OnOff
 from zigpy.zcl.foundation import Status
 
 from zha.application import Platform
@@ -126,7 +126,7 @@ class BaseCover(PlatformEntity, ABC):
         """Stop the cover."""
 
 
-@register_entity(WindowCovering.cluster_id)
+@register_entity
 class Cover(BaseCover):
     """Representation of a ZHA cover."""
 
@@ -746,7 +746,7 @@ class Cover(BaseCover):
         return 100 - position
 
 
-@register_entity(OnOffCluster.cluster_id)
+@register_entity
 class Shade(BaseCover):
     """ZHA Shade."""
 
@@ -1008,7 +1008,7 @@ class Shade(BaseCover):
         return round(level * 100 / 255)
 
 
-@register_entity(OnOff.cluster_id)
+@register_entity
 class KeenVent(Shade):
     """Keen vent cover."""
 

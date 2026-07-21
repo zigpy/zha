@@ -287,7 +287,7 @@ class BaseFirmwareUpdateEntity(PlatformEntity, ABC):
         await super().on_remove()
 
 
-@register_entity(Ota.cluster_id)
+@register_entity
 class FirmwareUpdateEntity(BaseFirmwareUpdateEntity):
     """Representation of a ZHA firmware update entity."""
 
@@ -357,7 +357,7 @@ class FirmwareUpdateEntity(BaseFirmwareUpdateEntity):
         return None
 
 
-@register_entity(Ota.cluster_id)
+@register_entity
 class FirmwareUpdateServerEntity(FirmwareUpdateEntity):
     """Representation of a ZHA firmware update entity for devices exposing OTA as a server cluster."""
 

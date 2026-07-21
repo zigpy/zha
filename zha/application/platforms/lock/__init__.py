@@ -61,7 +61,7 @@ class BaseLock(PlatformEntity, ABC):
         """Unlock the lock."""
 
 
-@register_entity(DoorLockCluster.cluster_id)
+@register_entity
 class DoorLock(BaseLock):
     """Representation of a ZHA lock."""
 

@@ -117,7 +117,7 @@ class VirtualEntity(PlatformEntity):
         )
 
 
-@register_entity(IasZone.cluster_id)
+@register_entity
 class IasZoneEnrollment(VirtualEntity):
     """Drives the IAS Zone enrollment handshake.
 
@@ -183,7 +183,7 @@ class IasZoneEnrollment(VirtualEntity):
             )
 
 
-@register_entity(LightLink.cluster_id)
+@register_entity
 class LightLinkGroupJoin(VirtualEntity):
     """Adds the coordinator to the device's LightLink groups."""
 
@@ -225,7 +225,7 @@ class LightLinkGroupJoin(VirtualEntity):
             await coordinator.add_to_group(0x0000, name="Lightlink Group")
 
 
-@register_entity(OnOff.cluster_id)
+@register_entity
 class OnOffClientCacheSync(VirtualEntity):
     """Mirrors incoming OnOff client commands to the server attribute cache.
 
@@ -366,7 +366,7 @@ class _ClientClusterZhaEventEmitter(VirtualEntity):
         )
 
 
-@register_entity(Scenes.cluster_id)
+@register_entity
 class ScenesClientBind(_ClientClusterZhaEventEmitter):
     """Bind the Scenes client cluster and emit zha_events for its commands."""
 
@@ -381,7 +381,7 @@ class ScenesClientBind(_ClientClusterZhaEventEmitter):
     }
 
 
-@register_entity(LevelControl.cluster_id)
+@register_entity
 class LevelControlClientBind(_ClientClusterZhaEventEmitter):
     """Bind LevelControl client cluster and emit zha_events for its commands."""
 
@@ -397,7 +397,7 @@ class LevelControlClientBind(_ClientClusterZhaEventEmitter):
     }
 
 
-@register_entity(Color.cluster_id)
+@register_entity
 class ColorClientBind(_ClientClusterZhaEventEmitter):
     """Bind the Color client cluster and emit zha_events for its commands."""
 
@@ -412,7 +412,7 @@ class ColorClientBind(_ClientClusterZhaEventEmitter):
     }
 
 
-@register_entity(WindowCovering.cluster_id)
+@register_entity
 class WindowCoveringClientBind(_ClientClusterZhaEventEmitter):
     """Bind WindowCovering client cluster and emit zha_events for its commands."""
 
@@ -427,7 +427,7 @@ class WindowCoveringClientBind(_ClientClusterZhaEventEmitter):
     }
 
 
-@register_entity(PHILIPS_REMOTE_CLUSTER)
+@register_entity
 class PhilipsRemoteBind(VirtualEntity):
     """Bind the Philips remote cluster on every device that exposes it."""
 
@@ -441,7 +441,7 @@ class PhilipsRemoteBind(VirtualEntity):
     }
 
 
-@register_entity(OSRAM_CLUSTER)
+@register_entity
 class OsramClusterBind(VirtualEntity):
     """Bind the Osram manufacturer cluster on every device that exposes it."""
 
@@ -455,7 +455,7 @@ class OsramClusterBind(VirtualEntity):
     }
 
 
-@register_entity(Ota.cluster_id)
+@register_entity
 class OtaCurrentFileVersionCache(VirtualEntity):
     """Updates `current_file_version` on every query_next_image from the device."""
 
@@ -480,7 +480,7 @@ class OtaCurrentFileVersionCache(VirtualEntity):
             )
 
 
-@register_entity(DoorLock.cluster_id)
+@register_entity
 class DoorLockOperationEvent(VirtualEntity):
     """Emits zha_event for DoorLock operation_event_notification commands."""
 
@@ -516,7 +516,7 @@ class DoorLockOperationEvent(VirtualEntity):
         )
 
 
-@register_entity(SMARTTHINGS_ACCELERATION_CLUSTER)
+@register_entity
 class SmartThingsAccelerationEvent(VirtualEntity):
     """Emits a zha_event for every attribute update on the SmartThings accel cluster."""
 
@@ -549,7 +549,7 @@ class SmartThingsAccelerationEvent(VirtualEntity):
         )
 
 
-@register_entity(Identify.cluster_id)
+@register_entity
 class IdentifyTriggerEffectEvent(VirtualEntity):
     """Emits a zha_event when the device sends `trigger_effect`."""
 
@@ -590,7 +590,7 @@ class _AqaraOppleInitBase(VirtualEntity):
     _unique_id_suffix = "aqara_opple_init"
 
 
-@register_entity(AQARA_OPPLE_CLUSTER)
+@register_entity
 class AqaraOppleBind(VirtualEntity):
     """Bind the Aqara Opple cluster on every device that exposes it."""
 
@@ -604,7 +604,7 @@ class AqaraOppleBind(VirtualEntity):
     }
 
 
-@register_entity(AQARA_OPPLE_CLUSTER)
+@register_entity
 class AqaraMotionAc02Init(_AqaraOppleInitBase):
     """Aqara P1 motion sensor attribute init."""
 
@@ -623,7 +623,7 @@ class AqaraMotionAc02Init(_AqaraOppleInitBase):
     }
 
 
-@register_entity(AQARA_OPPLE_CLUSTER)
+@register_entity
 class AqaraMotionAgl04Init(_AqaraOppleInitBase):
     """Aqara high-precision motion sensor attribute init."""
 
@@ -641,7 +641,7 @@ class AqaraMotionAgl04Init(_AqaraOppleInitBase):
     }
 
 
-@register_entity(AQARA_OPPLE_CLUSTER)
+@register_entity
 class AqaraMotionAc01Init(_AqaraOppleInitBase):
     """Aqara FP1 presence sensor attribute init."""
 
@@ -661,7 +661,7 @@ class AqaraMotionAc01Init(_AqaraOppleInitBase):
     }
 
 
-@register_entity(AQARA_OPPLE_CLUSTER)
+@register_entity
 class AqaraPlugInit(_AqaraOppleInitBase):
     """Aqara EU plug attribute init."""
 
@@ -679,7 +679,7 @@ class AqaraPlugInit(_AqaraOppleInitBase):
     }
 
 
-@register_entity(AQARA_OPPLE_CLUSTER)
+@register_entity
 class AqaraFeederInit(_AqaraOppleInitBase):
     """Aqara pet feeder attribute init."""
 
@@ -703,7 +703,7 @@ class AqaraFeederInit(_AqaraOppleInitBase):
     }
 
 
-@register_entity(AQARA_OPPLE_CLUSTER)
+@register_entity
 class AqaraThermostatAgl001Init(_AqaraOppleInitBase):
     """Aqara E1 radiator thermostat attribute init."""
 
@@ -730,7 +730,7 @@ class AqaraThermostatAgl001Init(_AqaraOppleInitBase):
     }
 
 
-@register_entity(AQARA_OPPLE_CLUSTER)
+@register_entity
 class AqaraSmokeAcn03Init(_AqaraOppleInitBase):
     """Aqara smoke sensor attribute init."""
 
@@ -752,7 +752,7 @@ class AqaraSmokeAcn03Init(_AqaraOppleInitBase):
     }
 
 
-@register_entity(AQARA_OPPLE_CLUSTER)
+@register_entity
 class AqaraMagnetAc01Init(_AqaraOppleInitBase):
     """Aqara P1 door sensor attribute init."""
 
@@ -769,7 +769,7 @@ class AqaraMagnetAc01Init(_AqaraOppleInitBase):
     }
 
 
-@register_entity(AQARA_OPPLE_CLUSTER)
+@register_entity
 class AqaraSwitchAcn047Init(_AqaraOppleInitBase):
     """Aqara H1M wall switch attribute init."""
 
@@ -789,7 +789,7 @@ class AqaraSwitchAcn047Init(_AqaraOppleInitBase):
     }
 
 
-@register_entity(AQARA_OPPLE_CLUSTER)
+@register_entity
 class AqaraCurtainAgl001Init(_AqaraOppleInitBase):
     """Aqara E1 curtain motor attribute init."""
 
@@ -810,7 +810,7 @@ class AqaraCurtainAgl001Init(_AqaraOppleInitBase):
     }
 
 
-@register_entity(AQARA_OPPLE_CLUSTER)
+@register_entity
 class AqaraMotionDetectionIntervalSync(_AqaraOppleInitBase):
     """Propagate the Aqara motion sensor's `detection_interval` to `ias_zone.reset_s`.
 
@@ -847,7 +847,7 @@ class AqaraMotionDetectionIntervalSync(_AqaraOppleInitBase):
 # === Other manufacturer-specific clusters ===
 
 
-@register_entity(SONOFF_CLUSTER)
+@register_entity
 class SonoffManufacturerBind(VirtualEntity):
     """Bind the Sonoff manufacturer cluster on every device that exposes it."""
 
@@ -861,7 +861,7 @@ class SonoffManufacturerBind(VirtualEntity):
     }
 
 
-@register_entity(SONOFF_CLUSTER)
+@register_entity
 class SonoffPresenceSensorInit(VirtualEntity):
     """Sonoff SNZB-06P presence sensor attribute init."""
 
@@ -880,7 +880,7 @@ class SonoffPresenceSensorInit(VirtualEntity):
     }
 
 
-@register_entity(TUYA_MANUFACTURER_CLUSTER)
+@register_entity
 class TuyaManufacturerBind(VirtualEntity):
     """Bind the Tuya manufacturer cluster on every device that exposes it."""
 
@@ -894,7 +894,7 @@ class TuyaManufacturerBind(VirtualEntity):
     }
 
 
-@register_entity(TUYA_MANUFACTURER_CLUSTER)
+@register_entity
 class TuyaPlugManufacturerInit(VirtualEntity):
     """Tuya plug manufacturer-cluster attribute init."""
 
@@ -914,7 +914,7 @@ class TuyaPlugManufacturerInit(VirtualEntity):
     }
 
 
-@register_entity(SINOPE_MANUFACTURER_CLUSTER)
+@register_entity
 class SinopeManufacturerBind(VirtualEntity):
     """Bind the Sinope manufacturer cluster on every device that exposes it."""
 
@@ -928,7 +928,7 @@ class SinopeManufacturerBind(VirtualEntity):
     }
 
 
-@register_entity(SINOPE_MANUFACTURER_CLUSTER)
+@register_entity
 class SinopeSwitchInit(VirtualEntity):
     """Sinope SW2500/DM2500/DM2550 manufacturer-cluster init + reporting."""
 
@@ -967,7 +967,7 @@ class SinopeSwitchInit(VirtualEntity):
     }
 
 
-@register_entity(SINOPE_MANUFACTURER_CLUSTER)
+@register_entity
 class SinopeDimmerInit(VirtualEntity):
     """Extra Sinope dimmer attribute (DM2500/DM2550 only)."""
 
@@ -986,7 +986,7 @@ class SinopeDimmerInit(VirtualEntity):
     }
 
 
-@register_entity(IKEA_REMOTE_CLUSTER)
+@register_entity
 class IkeaRemoteClientBind(VirtualEntity):
     """Bind the IKEA remote client cluster on every device that exposes it.
 
@@ -1005,7 +1005,7 @@ class IkeaRemoteClientBind(VirtualEntity):
     }
 
 
-@register_entity(IKEA_REMOTE_CLUSTER)
+@register_entity
 class IkeaRemoteServerBind(VirtualEntity):
     """Bind the IKEA remote server cluster on every device that exposes it."""
 
@@ -1020,7 +1020,7 @@ class IkeaRemoteServerBind(VirtualEntity):
     }
 
 
-@register_entity(IKEA_SHORTCUT_V1_CLUSTER)
+@register_entity
 class IkeaSymfoniskRemoteClientBind(VirtualEntity):
     """Bind the IKEA Symfonisk shortcut v1 client cluster."""
 
@@ -1035,7 +1035,7 @@ class IkeaSymfoniskRemoteClientBind(VirtualEntity):
     }
 
 
-@register_entity(INOVELLI_CLUSTER)
+@register_entity
 class InovelliBind(VirtualEntity):
     """Bind the Inovelli manufacturer cluster on every device that exposes it."""
 
@@ -1049,7 +1049,7 @@ class InovelliBind(VirtualEntity):
     }
 
 
-@register_entity(INOVELLI_CLUSTER)
+@register_entity
 class InovelliClientBind(VirtualEntity):
     """Bind the Inovelli manufacturer client cluster on every device that exposes it."""
 
@@ -1063,7 +1063,7 @@ class InovelliClientBind(VirtualEntity):
     }
 
 
-@register_entity(INOVELLI_CLUSTER)
+@register_entity
 class InovelliVzm30Init(VirtualEntity):
     """Inovelli VZM30-SN switch attribute init."""
 
@@ -1120,7 +1120,7 @@ class InovelliVzm30Init(VirtualEntity):
     }
 
 
-@register_entity(INOVELLI_CLUSTER)
+@register_entity
 class InovelliVzm31Init(VirtualEntity):
     """Inovelli VZM31-SN dimmer attribute init."""
 
@@ -1187,7 +1187,7 @@ class InovelliVzm31Init(VirtualEntity):
     }
 
 
-@register_entity(INOVELLI_CLUSTER)
+@register_entity
 class InovelliVzm35Init(VirtualEntity):
     """Inovelli VZM35-SN fan switch attribute init."""
 

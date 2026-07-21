@@ -94,7 +94,7 @@ class BaseSwitch(BaseEntity, ABC):
         """Turn the entity off."""
 
 
-@register_entity(OnOff.cluster_id)
+@register_entity
 class Switch(PlatformEntity, BaseSwitch):
     """ZHA switch."""
 
@@ -235,7 +235,7 @@ class Switch(PlatformEntity, BaseSwitch):
         self.maybe_emit_state_changed_event()
 
 
-@register_entity(BinaryOutput.cluster_id)
+@register_entity
 class BinaryOutputSwitch(PlatformEntity, BaseSwitch):
     """BinaryOutputCluster switch."""
 
@@ -563,7 +563,7 @@ class ConfigurableAttributeSwitch(PlatformEntity):
         self.maybe_emit_state_changed_event()
 
 
-@register_entity(TUYA_MANUFACTURER_CLUSTER)
+@register_entity
 class OnOffWindowDetectionFunctionConfigurationEntity(ConfigurableAttributeSwitch):
     """Representation of a ZHA window detection configuration entity."""
 
@@ -579,7 +579,7 @@ class OnOffWindowDetectionFunctionConfigurationEntity(ConfigurableAttributeSwitc
     )
 
 
-@register_entity(AQARA_OPPLE_CLUSTER)
+@register_entity
 class P1MotionTriggerIndicatorSwitch(ConfigurableAttributeSwitch):
     """Representation of a ZHA motion triggering configuration entity."""
 
@@ -594,7 +594,7 @@ class P1MotionTriggerIndicatorSwitch(ConfigurableAttributeSwitch):
     )
 
 
-@register_entity(AQARA_OPPLE_CLUSTER)
+@register_entity
 class XiaomiPlugPowerOutageMemorySwitch(ConfigurableAttributeSwitch):
     """Representation of a ZHA power outage memory configuration entity."""
 
@@ -609,7 +609,7 @@ class XiaomiPlugPowerOutageMemorySwitch(ConfigurableAttributeSwitch):
     )
 
 
-@register_entity(Basic.cluster_id)
+@register_entity
 class HueMotionTriggerIndicatorSwitch(ConfigurableAttributeSwitch):
     """Representation of a ZHA motion triggering configuration entity."""
 
@@ -633,7 +633,7 @@ class HueMotionTriggerIndicatorSwitch(ConfigurableAttributeSwitch):
     }
 
 
-@register_entity(IKEA_AIR_PURIFIER_CLUSTER)
+@register_entity
 class ChildLock(ConfigurableAttributeSwitch):
     """ZHA BinarySensor."""
 
@@ -648,7 +648,7 @@ class ChildLock(ConfigurableAttributeSwitch):
     )
 
 
-@register_entity(IKEA_AIR_PURIFIER_CLUSTER)
+@register_entity
 class DisableLed(ConfigurableAttributeSwitch):
     """ZHA BinarySensor."""
 
@@ -663,7 +663,7 @@ class DisableLed(ConfigurableAttributeSwitch):
     )
 
 
-@register_entity(INOVELLI_CLUSTER)
+@register_entity
 class InovelliInvertSwitch(ConfigurableAttributeSwitch):
     """Inovelli invert switch control."""
 
@@ -678,7 +678,7 @@ class InovelliInvertSwitch(ConfigurableAttributeSwitch):
     )
 
 
-@register_entity(INOVELLI_CLUSTER)
+@register_entity
 class InovelliSmartBulbMode(ConfigurableAttributeSwitch):
     """Inovelli smart bulb mode control."""
 
@@ -693,7 +693,7 @@ class InovelliSmartBulbMode(ConfigurableAttributeSwitch):
     )
 
 
-@register_entity(INOVELLI_CLUSTER)
+@register_entity
 class InovelliSmartFanMode(ConfigurableAttributeSwitch):
     """Inovelli smart fan mode control."""
 
@@ -709,7 +709,7 @@ class InovelliSmartFanMode(ConfigurableAttributeSwitch):
     )
 
 
-@register_entity(INOVELLI_CLUSTER)
+@register_entity
 class InovelliDoubleTapUpEnabled(ConfigurableAttributeSwitch):
     """Inovelli double tap up enabled."""
 
@@ -724,7 +724,7 @@ class InovelliDoubleTapUpEnabled(ConfigurableAttributeSwitch):
     )
 
 
-@register_entity(INOVELLI_CLUSTER)
+@register_entity
 class InovelliDoubleTapDownEnabled(ConfigurableAttributeSwitch):
     """Inovelli double tap down enabled."""
 
@@ -739,7 +739,7 @@ class InovelliDoubleTapDownEnabled(ConfigurableAttributeSwitch):
     )
 
 
-@register_entity(INOVELLI_CLUSTER)
+@register_entity
 class InovelliAuxSwitchScenes(ConfigurableAttributeSwitch):
     """Inovelli unique aux switch scenes."""
 
@@ -754,7 +754,7 @@ class InovelliAuxSwitchScenes(ConfigurableAttributeSwitch):
     )
 
 
-@register_entity(INOVELLI_CLUSTER)
+@register_entity
 class InovelliBindingOffToOnSyncLevel(ConfigurableAttributeSwitch):
     """Inovelli send move to level with on/off to bound devices."""
 
@@ -769,7 +769,7 @@ class InovelliBindingOffToOnSyncLevel(ConfigurableAttributeSwitch):
     )
 
 
-@register_entity(INOVELLI_CLUSTER)
+@register_entity
 class InovelliLocalProtection(ConfigurableAttributeSwitch):
     """Inovelli local protection control."""
 
@@ -784,7 +784,7 @@ class InovelliLocalProtection(ConfigurableAttributeSwitch):
     )
 
 
-@register_entity(INOVELLI_CLUSTER)
+@register_entity
 class InovelliOnOffLEDMode(ConfigurableAttributeSwitch):
     """Inovelli only 1 LED mode control."""
 
@@ -799,7 +799,7 @@ class InovelliOnOffLEDMode(ConfigurableAttributeSwitch):
     )
 
 
-@register_entity(INOVELLI_CLUSTER)
+@register_entity
 class InovelliFirmwareProgressLED(ConfigurableAttributeSwitch):
     """Inovelli firmware progress LED control."""
 
@@ -814,7 +814,7 @@ class InovelliFirmwareProgressLED(ConfigurableAttributeSwitch):
     )
 
 
-@register_entity(INOVELLI_CLUSTER)
+@register_entity
 class InovelliRelayClickInOnOffMode(ConfigurableAttributeSwitch):
     """Inovelli relay click in on off mode control."""
 
@@ -829,7 +829,7 @@ class InovelliRelayClickInOnOffMode(ConfigurableAttributeSwitch):
     )
 
 
-@register_entity(INOVELLI_CLUSTER)
+@register_entity
 class InovelliDisableDoubleTapClearNotificationsMode(ConfigurableAttributeSwitch):
     """Inovelli disable clear notifications double tap control."""
 
@@ -844,7 +844,7 @@ class InovelliDisableDoubleTapClearNotificationsMode(ConfigurableAttributeSwitch
     )
 
 
-@register_entity(AQARA_OPPLE_CLUSTER)
+@register_entity
 class AqaraPetFeederLEDIndicator(ConfigurableAttributeSwitch):
     """Representation of a LED indicator configuration entity."""
 
@@ -860,7 +860,7 @@ class AqaraPetFeederLEDIndicator(ConfigurableAttributeSwitch):
     )
 
 
-@register_entity(AQARA_OPPLE_CLUSTER)
+@register_entity
 class AqaraPetFeederChildLock(ConfigurableAttributeSwitch):
     """Representation of a child lock configuration entity."""
 
@@ -875,7 +875,7 @@ class AqaraPetFeederChildLock(ConfigurableAttributeSwitch):
     )
 
 
-@register_entity(OnOff.cluster_id)
+@register_entity
 class TuyaChildLockSwitch(ConfigurableAttributeSwitch):
     """Representation of a child lock configuration entity."""
 
@@ -899,7 +899,7 @@ class TuyaChildLockSwitch(ConfigurableAttributeSwitch):
     }
 
 
-@register_entity(AQARA_OPPLE_CLUSTER)
+@register_entity
 class AqaraThermostatWindowDetection(ConfigurableAttributeSwitch):
     """Representation of an Aqara thermostat window detection configuration entity."""
 
@@ -914,7 +914,7 @@ class AqaraThermostatWindowDetection(ConfigurableAttributeSwitch):
     )
 
 
-@register_entity(AQARA_OPPLE_CLUSTER)
+@register_entity
 class AqaraThermostatValveDetection(ConfigurableAttributeSwitch):
     """Representation of an Aqara thermostat valve detection configuration entity."""
 
@@ -929,7 +929,7 @@ class AqaraThermostatValveDetection(ConfigurableAttributeSwitch):
     )
 
 
-@register_entity(AQARA_OPPLE_CLUSTER)
+@register_entity
 class AqaraThermostatChildLock(ConfigurableAttributeSwitch):
     """Representation of an Aqara thermostat child lock configuration entity."""
 
@@ -944,7 +944,7 @@ class AqaraThermostatChildLock(ConfigurableAttributeSwitch):
     )
 
 
-@register_entity(AQARA_OPPLE_CLUSTER)
+@register_entity
 class AqaraHeartbeatIndicator(ConfigurableAttributeSwitch):
     """Representation of a heartbeat indicator configuration entity for Aqara smoke sensors."""
 
@@ -959,7 +959,7 @@ class AqaraHeartbeatIndicator(ConfigurableAttributeSwitch):
     )
 
 
-@register_entity(AQARA_OPPLE_CLUSTER)
+@register_entity
 class AqaraLinkageAlarm(ConfigurableAttributeSwitch):
     """Representation of a linkage alarm configuration entity for Aqara smoke sensors."""
 
@@ -974,7 +974,7 @@ class AqaraLinkageAlarm(ConfigurableAttributeSwitch):
     )
 
 
-@register_entity(AQARA_OPPLE_CLUSTER)
+@register_entity
 class AqaraBuzzerManualMute(ConfigurableAttributeSwitch):
     """Representation of a buzzer manual mute configuration entity for Aqara smoke sensors."""
 
@@ -989,7 +989,7 @@ class AqaraBuzzerManualMute(ConfigurableAttributeSwitch):
     )
 
 
-@register_entity(AQARA_OPPLE_CLUSTER)
+@register_entity
 class AqaraBuzzerManualAlarm(ConfigurableAttributeSwitch):
     """Representation of a buzzer manual mute configuration entity for Aqara smoke sensors."""
 
@@ -1004,7 +1004,7 @@ class AqaraBuzzerManualAlarm(ConfigurableAttributeSwitch):
     )
 
 
-@register_entity(WindowCovering.cluster_id)
+@register_entity
 class WindowCoveringInversionSwitch(ConfigurableAttributeSwitch):
     """Representation of a switch that controls inversion for window covering devices.
 
@@ -1098,7 +1098,7 @@ class WindowCoveringInversionSwitch(ConfigurableAttributeSwitch):
             await self.async_update()
 
 
-@register_entity(AQARA_OPPLE_CLUSTER)
+@register_entity
 class AqaraE1CurtainMotorHooksLockedSwitch(ConfigurableAttributeSwitch):
     """Representation of a switch that controls whether the curtain motor hooks are locked."""
 
@@ -1113,7 +1113,7 @@ class AqaraE1CurtainMotorHooksLockedSwitch(ConfigurableAttributeSwitch):
     )
 
 
-@register_entity(Thermostat.cluster_id)
+@register_entity
 class DanfossExternalOpenWindowDetected(ConfigurableAttributeSwitch):
     """Danfoss proprietary attribute for communicating an open window."""
 
@@ -1138,7 +1138,7 @@ class DanfossExternalOpenWindowDetected(ConfigurableAttributeSwitch):
     }
 
 
-@register_entity(Thermostat.cluster_id)
+@register_entity
 class DanfossWindowOpenFeature(ConfigurableAttributeSwitch):
     """Danfoss proprietary attribute enabling open window detection."""
 
@@ -1163,7 +1163,7 @@ class DanfossWindowOpenFeature(ConfigurableAttributeSwitch):
     }
 
 
-@register_entity(Thermostat.cluster_id)
+@register_entity
 class DanfossMountingModeControl(ConfigurableAttributeSwitch):
     """Danfoss proprietary attribute for switching to mounting mode."""
 
@@ -1188,7 +1188,7 @@ class DanfossMountingModeControl(ConfigurableAttributeSwitch):
     }
 
 
-@register_entity(Thermostat.cluster_id)
+@register_entity
 class DanfossRadiatorCovered(ConfigurableAttributeSwitch):
     """Danfoss proprietary attribute for communicating full usage of the external temperature sensor."""
 
@@ -1213,7 +1213,7 @@ class DanfossRadiatorCovered(ConfigurableAttributeSwitch):
     }
 
 
-@register_entity(Thermostat.cluster_id)
+@register_entity
 class DanfossHeatAvailable(ConfigurableAttributeSwitch):
     """Danfoss proprietary attribute for communicating available heat."""
 
@@ -1238,7 +1238,7 @@ class DanfossHeatAvailable(ConfigurableAttributeSwitch):
     }
 
 
-@register_entity(Thermostat.cluster_id)
+@register_entity
 class DanfossLoadBalancingEnable(ConfigurableAttributeSwitch):
     """Danfoss proprietary attribute for enabling load balancing."""
 
@@ -1263,7 +1263,7 @@ class DanfossLoadBalancingEnable(ConfigurableAttributeSwitch):
     }
 
 
-@register_entity(Thermostat.cluster_id)
+@register_entity
 class DanfossAdaptationRunSettings(ConfigurableAttributeSwitch):
     """Danfoss proprietary attribute for enabling daily adaptation run.
 
@@ -1291,7 +1291,7 @@ class DanfossAdaptationRunSettings(ConfigurableAttributeSwitch):
     }
 
 
-@register_entity(SINOPE_MANUFACTURER_CLUSTER)
+@register_entity
 class SinopeLightDoubleTapFullSwitch(ConfigurableAttributeSwitch):
     """Representation of a config option that controls whether Double Tap Full option is enabled on a Sinope light switch."""
 

@@ -81,7 +81,7 @@ class BaseDeviceTracker(PlatformEntity, ABC):
         """Return the source type, eg gps or router, of the device."""
 
 
-@register_entity(PowerConfiguration.cluster_id)
+@register_entity
 class DeviceScannerEntity(BaseDeviceTracker):
     """Represent a tracked device."""
 

@@ -195,7 +195,7 @@ class BaseThermostat(PlatformEntity, ABC):
         """Set new target temperature."""
 
 
-@register_entity(ThermostatCluster.cluster_id)
+@register_entity
 class Thermostat(BaseThermostat):
     """Representation of a ZHA Thermostat device."""
 
@@ -919,7 +919,7 @@ class Thermostat(BaseThermostat):
 SINOPE_MANUFACTURER_CLUSTER = 0xFF01
 
 
-@register_entity(ThermostatCluster.cluster_id)
+@register_entity
 class SinopeTechnologiesThermostat(Thermostat):
     """Sinope Technologies Thermostat."""
 
@@ -1034,7 +1034,7 @@ class SinopeTechnologiesThermostat(Thermostat):
         )
 
 
-@register_entity(ThermostatCluster.cluster_id)
+@register_entity
 class ZenWithinThermostat(Thermostat):
     """Zen Within Thermostat implementation."""
 
@@ -1046,7 +1046,7 @@ class ZenWithinThermostat(Thermostat):
     )
 
 
-@register_entity(ThermostatCluster.cluster_id)
+@register_entity
 class ZehnderThermostat(Thermostat):
     """Zehnder thermostat to adapt AUTO mode behavior."""
 
@@ -1118,7 +1118,7 @@ class ZehnderThermostat(Thermostat):
         return ZehnderThermostat.ZEHNDER_SYSTEM_MODE_2_HVAC.get(self._system_mode)
 
 
-@register_entity(ThermostatCluster.cluster_id)
+@register_entity
 class CentralitePearl(Thermostat):
     """Centralite Pearl Thermostat implementation."""
 
@@ -1150,7 +1150,7 @@ MOES_MANUFACTURERS = frozenset(
 )
 
 
-@register_entity(ThermostatCluster.cluster_id)
+@register_entity
 class MoesThermostat(Thermostat):
     """Moes Thermostat implementation."""
 
@@ -1237,7 +1237,7 @@ class MoesThermostat(Thermostat):
             )
 
 
-@register_entity(ThermostatCluster.cluster_id)
+@register_entity
 class BecaThermostat(Thermostat):
     """Beca Thermostat implementation."""
 
@@ -1317,7 +1317,7 @@ class BecaThermostat(Thermostat):
             )
 
 
-@register_entity(ThermostatCluster.cluster_id)
+@register_entity
 class StelproFanHeater(Thermostat):
     """Stelpro Fan Heater implementation."""
 
@@ -1348,7 +1348,7 @@ ZONNSMART_MANUFACTURERS = frozenset(
 )
 
 
-@register_entity(ThermostatCluster.cluster_id)
+@register_entity
 class ZONNSMARTThermostat(Thermostat):
     """ZONNSMART Thermostat implementation.
 
