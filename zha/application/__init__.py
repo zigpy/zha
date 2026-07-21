@@ -42,4 +42,5 @@ class EntityPlatform(StrEnum):
     NUMBER = "number"
     SENSOR = "sensor"
     SELECT = "select"
+    SIREN = "siren"
     SWITCH = "switch"

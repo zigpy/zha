@@ -11,6 +11,13 @@ import functools
 from typing import TYPE_CHECKING, Any, Final
 
 from zigpy.profiles import zha
+import zigpy.zcl
+from zigpy.zcl import (
+    AttributeReadEvent,
+    AttributeReportedEvent,
+    AttributeUpdatedEvent,
+    AttributeWrittenEvent,
+)
 from zigpy.zcl.clusters.security import (
     IasWd,
     SirenLevel,
@@ -23,6 +30,7 @@ from zigpy.zcl.clusters.security import (
 )
 
 from zha.application import Platform
+from zha.application.helpers import write_attributes_safe
 from zha.application.platforms import (
     BaseEntityInfo,
     ClusterConfig,
@@ -120,17 +128,6 @@ class BaseSiren(PlatformEntity, ABC):
     @abstractmethod
     async def async_turn_off(self) -> None:
         """Turn off siren."""
-
-    # This method is a ZHA extension to the base HA siren entity
-    @abstractmethod
-    async def async_squawk(
-        self,
-        *,
-        mode: SquawkMode,
-        strobe: int,
-        squawk_level: int,
-    ) -> None:
-        """Issue a brief squawk pulse."""
 
 
 class BaseZclSiren(BaseSiren, ABC):
@@ -386,4 +383,105 @@ class BasicSiren(BaseZclSiren):
             siren_duration, self._async_set_off
         )
         self._tracked_handles.append(self._off_listener)
+        self.maybe_emit_state_changed_event()
+
+
+class AttributeSiren(BaseSiren):
+    """Siren that is controlled by writing an enum attribute.
+
+    Unlike the IAS WD sirens, this entity does not issue ``start_warning``
+    commands. It turns on by writing a (tone) value to a manufacturer-specific
+    attribute and off by writing ``off_value``; the device keeps sounding until
+    it is turned off or the device itself reports the attribute back to
+    ``off_value``. State is derived from the cached attribute value, so a device
+    that resets the attribute on its own keeps the entity in sync.
+
+    This entity is only created from quirks v2 metadata (``.siren(...)``); it has
+    no default cluster match.
+    """
+
+    _attr_fallback_name: str = "Siren"
+
+    def __init__(
+        self,
+        endpoint: Endpoint,
+        device: Device,
+        *,
+        cluster: zigpy.zcl.Cluster,
+        attribute_name: str,
+        available_tones: dict[int, str] | None = None,
+        off_value: int = 0,
+        default_tone: int | None = None,
+        **kwargs: Any,
+    ) -> None:
+        """Init this attribute-controlled siren."""
+        self._attribute_name = attribute_name
+        self._off_value = off_value
+        self._attr_available_tones = dict(available_tones or {})
+        # Tone written when turned on without an explicit tone: the configured
+        # default, else the first available tone, else 1.
+        self._default_tone = (
+            default_tone
+            if default_tone is not None
+            else next(iter(self._attr_available_tones), 1)
+        )
+        super().__init__(endpoint=endpoint, device=device, cluster=cluster, **kwargs)
+        self._attr_supported_features = (
+            SirenEntityFeature.TURN_ON | SirenEntityFeature.TURN_OFF
+        )
+        if self._attr_available_tones:
+            self._attr_supported_features |= SirenEntityFeature.TONES
+
+    def on_add(self) -> None:
+        """Subscribe to attribute updates so device-driven changes update state."""
+        super().on_add()
+        for event_type in (
+            AttributeReadEvent,
+            AttributeReportedEvent,
+            AttributeUpdatedEvent,
+            AttributeWrittenEvent,
+        ):
+            self._on_remove_callbacks.append(
+                self._cluster.on_event(
+                    event_type.event_type, self.handle_attribute_updated
+                )
+            )
+
+    def handle_attribute_updated(
+        self,
+        event: AttributeReadEvent
+        | AttributeReportedEvent
+        | AttributeUpdatedEvent
+        | AttributeWrittenEvent,
+    ) -> None:
+        """Handle state update from the cluster."""
+        if event.attribute_name == self._attribute_name:
+            self.maybe_emit_state_changed_event()
+
+    @property
+    def is_on(self) -> bool:
+        """Return true if the siren is sounding."""
+        value = self._cluster.get(self._attribute_name)
+        return value is not None and value != self._off_value
+
+    async def async_turn_on(
+        self,
+        duration: int | None = None,
+        tone: int | None = None,
+        volume_level: int | None = None,
+        # These kwargs are ZHA extensions to the base HA entity signature
+        strobe: int | None = None,
+        strobe_duty_cycle: int | None = None,
+        strobe_intensity: int | None = None,
+    ) -> None:
+        """Turn on siren by writing the requested tone to the attribute."""
+        siren_tone = tone if tone is not None else self._default_tone
+        await write_attributes_safe(self._cluster, {self._attribute_name: siren_tone})
+        self.maybe_emit_state_changed_event()
+
+    async def async_turn_off(self) -> None:
+        """Turn off siren by writing the off value to the attribute."""
+        await write_attributes_safe(
+            self._cluster, {self._attribute_name: self._off_value}
+        )
         self.maybe_emit_state_changed_event()
