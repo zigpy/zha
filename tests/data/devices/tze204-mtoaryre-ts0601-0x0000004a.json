@@ -512,8 +512,8 @@
           "group_id": null,
           "enum": "TuyaBreakerMode",
           "options": [
-            "Standard",
-            "Local"
+            "standard",
+            "local"
           ]
         },
         "state": {
@@ -543,8 +543,8 @@
           "group_id": null,
           "enum": "TuyaBreakerPolarity",
           "options": [
-            "NC",
-            "NO"
+            "nc",
+            "no"
           ]
         },
         "state": {
@@ -574,8 +574,8 @@
           "group_id": null,
           "enum": "TuyaBreakerStatus",
           "options": [
-            "Off",
-            "On"
+            "off",
+            "on"
           ]
         },
         "state": {
@@ -605,10 +605,10 @@
           "group_id": null,
           "enum": "TuyaMotionSensorMode",
           "options": [
-            "On",
-            "Off",
-            "Occupied",
-            "Unoccupied"
+            "on",
+            "off",
+            "occupied",
+            "unoccupied"
           ]
         },
         "state": {
@@ -638,8 +638,8 @@
           "group_id": null,
           "enum": "TuyaStatusIndication",
           "options": [
-            "Off",
-            "On"
+            "off",
+            "on"
           ]
         },
         "state": {

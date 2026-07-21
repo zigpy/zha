@@ -550,15 +550,15 @@ class EnumSensor(Sensor):
             self._enum = enum
 
         super().__init__(endpoint=endpoint, device=device, **kwargs)
-        self._attr_options = [e.name for e in self._enum]
+        self._attr_options = [e.name.lower() for e in self._enum]
 
         # XXX: This class is not meant to be initialized directly, as `unique_id`
         # depends on the value of `_attribute_name`
 
     def formatter(self, value: int) -> str | None:
-        """Use name of enum."""
+        """Use the slugified name of the enum member (used as translation key)."""
         assert self._enum is not None
-        return self._enum(value).name
+        return self._enum(value).name.lower()
 
 
 @register_entity(AnalogInput.cluster_id)

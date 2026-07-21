@@ -758,7 +758,7 @@
         "state": {
           "class_name": "WindowCoveringTypeSensor",
           "available": true,
-          "state": "Rollershade"
+          "state": "rollershade"
         }
       },
       {
@@ -786,7 +786,7 @@
         "state": {
           "class_name": "WindowCoveringTypeSensor",
           "available": true,
-          "state": "Shutter"
+          "state": "shutter"
         }
       }
     ],

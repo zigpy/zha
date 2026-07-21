@@ -344,10 +344,10 @@
           "group_id": null,
           "enum": "TuyaSirenState",
           "options": [
-            "Sound",
-            "Light",
-            "Sound and light",
-            "Normal"
+            "sound",
+            "light",
+            "sound_and_light",
+            "normal"
           ]
         },
         "state": {
@@ -377,9 +377,9 @@
           "group_id": null,
           "enum": "TuyaSirenRingtone",
           "options": [
-            "Ringtone 01",
-            "Ringtone 02",
-            "Ringtone 03"
+            "ringtone_01",
+            "ringtone_02",
+            "ringtone_03"
           ]
         },
         "state": {

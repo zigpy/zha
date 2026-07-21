@@ -318,15 +318,15 @@
           "group_id": null,
           "enum": "FingerBotMode",
           "options": [
-            "CLICK",
-            "SWITCH",
-            "PROGRAM"
+            "click",
+            "switch",
+            "program"
           ]
         },
         "state": {
           "class_name": "ZCLEnumSelectEntity",
           "available": true,
-          "state": "SWITCH"
+          "state": "switch"
         }
       },
       {
@@ -350,8 +350,8 @@
           "group_id": null,
           "enum": "FingerBotReverse",
           "options": [
-            "UP ON",
-            "UP OFF"
+            "up_on",
+            "up_off"
           ]
         },
         "state": {

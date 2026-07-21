@@ -585,10 +585,10 @@
           "group_id": null,
           "enum": "SirenLevel",
           "options": [
-            "Low level sound",
-            "Medium level sound",
-            "High level sound",
-            "Very high level sound"
+            "low_level_sound",
+            "medium_level_sound",
+            "high_level_sound",
+            "very_high_level_sound"
           ]
         },
         "state": {
@@ -649,10 +649,10 @@
           "group_id": null,
           "enum": "StrobeLevel",
           "options": [
-            "Low level strobe",
-            "Medium level strobe",
-            "High level strobe",
-            "Very high level strobe"
+            "low_level_strobe",
+            "medium_level_strobe",
+            "high_level_strobe",
+            "very_high_level_strobe"
           ]
         },
         "state": {
@@ -682,13 +682,13 @@
           "group_id": null,
           "enum": "WarningMode",
           "options": [
-            "Stop",
-            "Burglar",
-            "Fire",
-            "Emergency",
-            "Police Panic",
-            "Fire Panic",
-            "Emergency Panic"
+            "stop",
+            "burglar",
+            "fire",
+            "emergency",
+            "police_panic",
+            "fire_panic",
+            "emergency_panic"
           ]
         },
         "state": {

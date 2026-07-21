@@ -360,9 +360,9 @@
           "group_id": null,
           "enum": "AqaraMotionSensitivity",
           "options": [
-            "Low",
-            "Medium",
-            "High"
+            "low",
+            "medium",
+            "high"
           ]
         },
         "state": {

@@ -709,14 +709,14 @@
           "group_id": null,
           "enum": "BoschControlSequenceOfOperation",
           "options": [
-            "Cooling",
-            "Heating"
+            "cooling",
+            "heating"
           ]
         },
         "state": {
           "class_name": "ZCLEnumSelectEntity",
           "available": true,
-          "state": "Heating"
+          "state": "heating"
         }
       },
       {
@@ -740,14 +740,14 @@
           "group_id": null,
           "enum": "BoschDisplayOrientation",
           "options": [
-            "Normal",
-            "Flipped"
+            "normal",
+            "flipped"
           ]
         },
         "state": {
           "class_name": "ZCLEnumSelectEntity",
           "available": true,
-          "state": "Normal"
+          "state": "normal"
         }
       },
       {
@@ -771,14 +771,14 @@
           "group_id": null,
           "enum": "BoschDisplayedTemperature",
           "options": [
-            "Target",
-            "Measured"
+            "target",
+            "measured"
           ]
         },
         "state": {
           "class_name": "ZCLEnumSelectEntity",
           "available": true,
-          "state": "Target"
+          "state": "target"
         }
       }
     ],
@@ -956,7 +956,7 @@
         "state": {
           "class_name": "SetpointChangeSource",
           "available": true,
-          "state": "External"
+          "state": "external"
         }
       },
       {
@@ -1012,7 +1012,7 @@
         "state": {
           "class_name": "EnumSensor",
           "available": true,
-          "state": "Manual"
+          "state": "manual"
         }
       },
       {

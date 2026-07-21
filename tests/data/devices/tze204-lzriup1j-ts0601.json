@@ -369,10 +369,10 @@
           "group_id": null,
           "enum": "BacklightMode",
           "options": [
-            "Off",
-            "Low",
-            "Medium",
-            "High"
+            "off",
+            "low",
+            "medium",
+            "high"
           ]
         },
         "state": {
@@ -402,9 +402,9 @@
           "group_id": null,
           "enum": "PresetModeV02",
           "options": [
-            "Manual",
-            "Auto",
-            "Temporary Manual"
+            "manual",
+            "auto",
+            "temporary_manual"
           ]
         },
         "state": {
@@ -434,9 +434,9 @@
           "group_id": null,
           "enum": "SensorMode",
           "options": [
-            "Air",
-            "Floor",
-            "Both"
+            "air",
+            "floor",
+            "both"
           ]
         },
         "state": {
@@ -466,10 +466,10 @@
           "group_id": null,
           "enum": "WorkingDayV02",
           "options": [
-            "Disabled",
-            "Five Two",
-            "Six One",
-            "Seven"
+            "disabled",
+            "five_two",
+            "six_one",
+            "seven"
           ]
         },
         "state": {

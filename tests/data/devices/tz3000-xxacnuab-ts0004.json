@@ -744,15 +744,15 @@
           "group_id": null,
           "enum": "TuyaPowerOnState",
           "options": [
-            "Off",
-            "On",
-            "LastState"
+            "off",
+            "on",
+            "laststate"
           ]
         },
         "state": {
           "class_name": "TuyaPowerOnStateSelectEntity",
           "available": true,
-          "state": "Off"
+          "state": "off"
         }
       }
     ],

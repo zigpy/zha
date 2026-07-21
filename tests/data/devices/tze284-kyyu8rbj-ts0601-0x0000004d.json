@@ -457,9 +457,9 @@
           "group_id": null,
           "enum": "TuyaLiquidState",
           "options": [
-            "Normal",
-            "Low",
-            "High"
+            "normal",
+            "low",
+            "high"
           ]
         },
         "state": {

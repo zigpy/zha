@@ -659,15 +659,15 @@
           "group_id": null,
           "enum": "TuyaDisplayBrightness",
           "options": [
-            "High",
-            "Medium",
-            "Low"
+            "high",
+            "medium",
+            "low"
           ]
         },
         "state": {
           "class_name": "ZCLEnumSelectEntity",
           "available": true,
-          "state": "High"
+          "state": "high"
         }
       },
       {
@@ -691,14 +691,14 @@
           "group_id": null,
           "enum": "TuyaDisplayOrientation",
           "options": [
-            "Up",
-            "Down"
+            "up",
+            "down"
           ]
         },
         "state": {
           "class_name": "ZCLEnumSelectEntity",
           "available": true,
-          "state": "Up"
+          "state": "up"
         }
       },
       {
@@ -722,14 +722,14 @@
           "group_id": null,
           "enum": "TuyaHysteresis",
           "options": [
-            "Comfort",
-            "Eco"
+            "comfort",
+            "eco"
           ]
         },
         "state": {
           "class_name": "ZCLEnumSelectEntity",
           "available": true,
-          "state": "Comfort"
+          "state": "comfort"
         }
       },
       {
@@ -753,15 +753,15 @@
           "group_id": null,
           "enum": "TuyaMotorThrust",
           "options": [
-            "Strong",
-            "Middle",
-            "Weak"
+            "strong",
+            "middle",
+            "weak"
           ]
         },
         "state": {
           "class_name": "ZCLEnumSelectEntity",
           "available": true,
-          "state": "Weak"
+          "state": "weak"
         }
       },
       {
@@ -785,16 +785,16 @@
           "group_id": null,
           "enum": "TuyaPresetMode",
           "options": [
-            "Eco",
-            "Auto",
-            "Off",
-            "Heat"
+            "eco",
+            "auto",
+            "off",
+            "heat"
           ]
         },
         "state": {
           "class_name": "ZCLEnumSelectEntity",
           "available": true,
-          "state": "Heat"
+          "state": "heat"
         }
       }
     ],

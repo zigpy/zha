@@ -1715,16 +1715,16 @@
           "group_id": null,
           "enum": "StartUpOnOff",
           "options": [
-            "Off",
-            "On",
-            "Toggle",
-            "PreviousValue"
+            "off",
+            "on",
+            "toggle",
+            "previousvalue"
           ]
         },
         "state": {
           "class_name": "StartupOnOffSelectEntity",
           "available": true,
-          "state": "PreviousValue"
+          "state": "previousvalue"
         }
       },
       {
@@ -1748,14 +1748,14 @@
           "group_id": null,
           "enum": "InovelliDimmingMode",
           "options": [
-            "LeadingEdge",
-            "TrailingEdge"
+            "leadingedge",
+            "trailingedge"
           ]
         },
         "state": {
           "class_name": "InovelliDimmingModeEntity",
           "available": true,
-          "state": "LeadingEdge"
+          "state": "leadingedge"
         }
       },
       {
@@ -1779,14 +1779,14 @@
           "group_id": null,
           "enum": "InovelliOutputMode",
           "options": [
-            "Dimmer",
-            "OnOff"
+            "dimmer",
+            "onoff"
           ]
         },
         "state": {
           "class_name": "InovelliOutputModeEntity",
           "available": true,
-          "state": "OnOff"
+          "state": "onoff"
         }
       },
       {
@@ -1810,16 +1810,16 @@
           "group_id": null,
           "enum": "InovelliSwitchType",
           "options": [
-            "Single Pole",
-            "Three Way Dumb",
-            "Three Way AUX",
-            "Single Pole Full Sine"
+            "single_pole",
+            "three_way_dumb",
+            "three_way_aux",
+            "single_pole_full_sine"
           ]
         },
         "state": {
           "class_name": "InovelliSwitchTypeEntity",
           "available": true,
-          "state": "Single Pole"
+          "state": "single_pole"
         }
       }
     ],
@@ -2001,7 +2001,7 @@
         "state": {
           "class_name": "InovelliOverheated",
           "available": true,
-          "state": "Normal"
+          "state": "normal"
         }
       }
     ],

@@ -897,15 +897,15 @@
           "group_id": null,
           "enum": "DanfossAdaptationRunControlEnum",
           "options": [
-            "Nothing",
-            "Initiate",
-            "Cancel"
+            "nothing",
+            "initiate",
+            "cancel"
           ]
         },
         "state": {
           "class_name": "DanfossAdaptationRunControl",
           "available": true,
-          "state": "Nothing"
+          "state": "nothing"
         }
       },
       {
@@ -929,23 +929,23 @@
           "group_id": null,
           "enum": "DanfossControlAlgorithmScaleFactorEnum",
           "options": [
-            "quick 5min",
-            "quick 10min",
-            "quick 15min",
-            "quick 25min",
-            "moderate 30min",
-            "moderate 40min",
-            "moderate 50min",
-            "moderate 60min",
-            "moderate 70min",
-            "slow 80min",
-            "quick open disabled"
+            "quick_5min",
+            "quick_10min",
+            "quick_15min",
+            "quick_25min",
+            "moderate_30min",
+            "moderate_40min",
+            "moderate_50min",
+            "moderate_60min",
+            "moderate_70min",
+            "slow_80min",
+            "quick_open_disabled"
           ]
         },
         "state": {
           "class_name": "DanfossControlAlgorithmScaleFactor",
           "available": true,
-          "state": "quick 5min"
+          "state": "quick_5min"
         }
       },
       {
@@ -969,20 +969,20 @@
           "group_id": null,
           "enum": "DanfossExerciseDayOfTheWeekEnum",
           "options": [
-            "Sunday",
-            "Monday",
-            "Tuesday",
-            "Wednesday",
-            "Thursday",
-            "Friday",
-            "Saturday",
-            "Undefined"
+            "sunday",
+            "monday",
+            "tuesday",
+            "wednesday",
+            "thursday",
+            "friday",
+            "saturday",
+            "undefined"
           ]
         },
         "state": {
           "class_name": "DanfossExerciseDayOfTheWeek",
           "available": true,
-          "state": "Thursday"
+          "state": "thursday"
         }
       },
       {
@@ -1006,14 +1006,14 @@
           "group_id": null,
           "enum": "DanfossOrientationEnum",
           "options": [
-            "Horizontal",
-            "Vertical"
+            "horizontal",
+            "vertical"
           ]
         },
         "state": {
           "class_name": "DanfossOrientation",
           "available": true,
-          "state": "Horizontal"
+          "state": "horizontal"
         }
       },
       {
@@ -1037,17 +1037,17 @@
           "group_id": null,
           "enum": "KeypadLockoutEnum",
           "options": [
-            "Unlock",
-            "Lock1",
-            "Lock2",
-            "Lock3",
-            "Lock4"
+            "unlock",
+            "lock1",
+            "lock2",
+            "lock3",
+            "lock4"
           ]
         },
         "state": {
           "class_name": "KeypadLockout",
           "available": true,
-          "state": "Unlock"
+          "state": "unlock"
         }
       },
       {
@@ -1071,14 +1071,14 @@
           "group_id": null,
           "enum": "DanfossViewingDirectionEnum",
           "options": [
-            "Default",
-            "Inverted"
+            "default",
+            "inverted"
           ]
         },
         "state": {
           "class_name": "DanfossViewingDirection",
           "available": true,
-          "state": "Default"
+          "state": "default"
         }
       }
     ],
@@ -1370,7 +1370,7 @@
         "state": {
           "class_name": "DanfossOpenWindowDetection",
           "available": true,
-          "state": "Closed"
+          "state": "closed"
         }
       },
       {
@@ -1454,7 +1454,7 @@
         "state": {
           "class_name": "SetpointChangeSource",
           "available": true,
-          "state": "External"
+          "state": "external"
         }
       },
       {

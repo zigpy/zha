@@ -459,7 +459,7 @@
         "state": {
           "class_name": "AqaraCurtainMotorPowerSourceSensor",
           "available": true,
-          "state": "Battery"
+          "state": "battery"
         }
       },
       {
@@ -579,7 +579,7 @@
         "state": {
           "class_name": "WindowCoveringTypeSensor",
           "available": true,
-          "state": "Drapery"
+          "state": "drapery"
         }
       },
       {
@@ -607,7 +607,7 @@
         "state": {
           "class_name": "AqaraCurtainHookStateSensor",
           "available": true,
-          "state": "Locked"
+          "state": "locked"
         }
       }
     ],

@@ -526,9 +526,9 @@
           "group_id": null,
           "enum": "TuyaDisplayBrightness",
           "options": [
-            "High",
-            "Medium",
-            "Low"
+            "high",
+            "medium",
+            "low"
           ]
         },
         "state": {
@@ -558,8 +558,8 @@
           "group_id": null,
           "enum": "TuyaDisplayOrientation",
           "options": [
-            "Up",
-            "Down"
+            "up",
+            "down"
           ]
         },
         "state": {
@@ -589,8 +589,8 @@
           "group_id": null,
           "enum": "TuyaHysteresis",
           "options": [
-            "Comfort",
-            "Eco"
+            "comfort",
+            "eco"
           ]
         },
         "state": {
@@ -620,9 +620,9 @@
           "group_id": null,
           "enum": "TuyaMotorThrust",
           "options": [
-            "Strong",
-            "Middle",
-            "Weak"
+            "strong",
+            "middle",
+            "weak"
           ]
         },
         "state": {
@@ -652,10 +652,10 @@
           "group_id": null,
           "enum": "TuyaPresetMode",
           "options": [
-            "Eco",
-            "Auto",
-            "Off",
-            "Heat"
+            "eco",
+            "auto",
+            "off",
+            "heat"
           ]
         },
         "state": {

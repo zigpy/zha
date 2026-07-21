@@ -559,14 +559,14 @@
           "group_id": null,
           "enum": "TuyaTempUnitConvert",
           "options": [
-            "Celsius",
-            "Fahrenheit"
+            "celsius",
+            "fahrenheit"
           ]
         },
         "state": {
           "class_name": "ZCLEnumSelectEntity",
           "available": true,
-          "state": "Celsius"
+          "state": "celsius"
         }
       }
     ],
@@ -743,7 +743,7 @@
         "state": {
           "class_name": "EnumSensor",
           "available": true,
-          "state": "Canceled"
+          "state": "canceled"
         }
       },
       {
@@ -771,7 +771,7 @@
         "state": {
           "class_name": "EnumSensor",
           "available": true,
-          "state": "Canceled"
+          "state": "canceled"
         }
       }
     ],

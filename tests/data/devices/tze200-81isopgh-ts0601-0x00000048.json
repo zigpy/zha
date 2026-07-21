@@ -314,10 +314,10 @@
           "group_id": null,
           "enum": "TuyaValveWeatherDelay",
           "options": [
-            "Disabled",
-            "Delayed 24h",
-            "Delayed 48h",
-            "Delayed 72h"
+            "disabled",
+            "delayed_24h",
+            "delayed_48h",
+            "delayed_72h"
           ]
         },
         "state": {

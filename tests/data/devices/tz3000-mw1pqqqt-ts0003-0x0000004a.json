@@ -888,15 +888,15 @@
           "group_id": null,
           "enum": "TuyaBacklightMode",
           "options": [
-            "Off",
-            "LightWhenOn",
-            "LightWhenOff"
+            "off",
+            "lightwhenon",
+            "lightwhenoff"
           ]
         },
         "state": {
           "class_name": "TuyaBacklightModeSelectEntity",
           "available": true,
-          "state": "LightWhenOn"
+          "state": "lightwhenon"
         }
       },
       {
@@ -920,15 +920,15 @@
           "group_id": null,
           "enum": "TuyaPowerOnState",
           "options": [
-            "Off",
-            "On",
-            "LastState"
+            "off",
+            "on",
+            "laststate"
           ]
         },
         "state": {
           "class_name": "TuyaPowerOnStateSelectEntity",
           "available": true,
-          "state": "LastState"
+          "state": "laststate"
         }
       }
     ],

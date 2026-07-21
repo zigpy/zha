@@ -638,15 +638,15 @@
           "group_id": null,
           "enum": "AqaraThermostatPresetMode",
           "options": [
-            "Manual",
-            "Auto",
-            "Away"
+            "manual",
+            "auto",
+            "away"
           ]
         },
         "state": {
           "class_name": "AqaraThermostatPreset",
           "available": true,
-          "state": "Manual"
+          "state": "manual"
         }
       }
     ],

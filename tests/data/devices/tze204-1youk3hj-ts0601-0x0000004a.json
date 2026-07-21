@@ -401,8 +401,8 @@
           "group_id": null,
           "enum": "TuyaMotionWorkMode",
           "options": [
-            "Manual",
-            "Auto"
+            "manual",
+            "auto"
           ]
         },
         "state": {

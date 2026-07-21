@@ -228,24 +228,24 @@
           "group_id": null,
           "enum": "NeoAlarmMelody18",
           "options": [
-            "Melody 01",
-            "Melody 02",
-            "Melody 03",
-            "Melody 04",
-            "Melody 05",
-            "Melody 06",
-            "Melody 07",
-            "Melody 08",
-            "Melody 09",
-            "Melody 10",
-            "Melody 11",
-            "Melody 12",
-            "Melody 13",
-            "Melody 14",
-            "Melody 15",
-            "Melody 16",
-            "Melody 17",
-            "Melody 18"
+            "melody_01",
+            "melody_02",
+            "melody_03",
+            "melody_04",
+            "melody_05",
+            "melody_06",
+            "melody_07",
+            "melody_08",
+            "melody_09",
+            "melody_10",
+            "melody_11",
+            "melody_12",
+            "melody_13",
+            "melody_14",
+            "melody_15",
+            "melody_16",
+            "melody_17",
+            "melody_18"
           ]
         },
         "state": {
@@ -275,9 +275,9 @@
           "group_id": null,
           "enum": "NeoAlarmVolume",
           "options": [
-            "Low",
-            "Medium",
-            "High"
+            "low",
+            "medium",
+            "high"
           ]
         },
         "state": {

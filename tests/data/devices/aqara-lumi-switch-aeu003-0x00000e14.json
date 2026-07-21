@@ -887,7 +887,7 @@
         "state": {
           "class_name": "WindowCoveringTypeSensor",
           "available": true,
-          "state": "Rollershade"
+          "state": "rollershade"
         }
       },
       {

@@ -125,12 +125,18 @@ class SirenDefaultSelectEntity(BaseSelectEntity, PlatformEntity):
         if self._option_overrides is not None:
             self._option_to_member: dict[str, Enum] = self._option_overrides
         else:
-            self._option_to_member = {
-                entry.name.replace("_", " "): entry for entry in self._enum
-            }
+            self._option_to_member = {entry.name.lower(): entry for entry in self._enum}
         self._member_to_option = {m: o for o, m in self._option_to_member.items()}
         self._attr_options = list(self._option_to_member)
         super().__init__(endpoint=endpoint, device=device, **kwargs)
+
+    def _member_for_option(self, option: str) -> Enum:
+        """Resolve an option string to its enum member, tolerating legacy names."""
+        try:
+            return self._option_to_member[option]
+        except KeyError:
+            # Backwards compatibility with the previous spaced option names
+            return self._option_to_member[option.replace(" ", "_").lower()]
 
     @functools.cached_property
     def info_object(self) -> EnumSelectInfo:
@@ -166,7 +172,7 @@ class SirenDefaultSelectEntity(BaseSelectEntity, PlatformEntity):
 
     async def async_select_option(self, option: str) -> None:
         """Change the selected option."""
-        self._siren().defaults[self._enum] = self._option_to_member[option]
+        self._siren().defaults[self._enum] = self._member_for_option(option)
         self.maybe_emit_state_changed_event()
 
     def restore_external_state_attributes(
@@ -175,7 +181,7 @@ class SirenDefaultSelectEntity(BaseSelectEntity, PlatformEntity):
         state: str,
     ) -> None:
         """Restore extra state attributes that are stored outside of the ZCL cache."""
-        self._siren().defaults[self._enum] = self._option_to_member[state]
+        self._siren().defaults[self._enum] = self._member_for_option(state)
 
 
 @register_entity(IasWd.cluster_id)
@@ -246,6 +252,7 @@ class ZCLEnumSelectEntity(BaseSelectEntity, PlatformEntity):
     _attribute_name: str
     _attr_entity_category = EntityCategory.CONFIG
     _enum: type[Enum]
+    _enum_member_by_option: dict[str, Enum]
 
     def __init__(
         self,
@@ -263,7 +270,12 @@ class ZCLEnumSelectEntity(BaseSelectEntity, PlatformEntity):
             self._enum = enum
 
         super().__init__(endpoint=endpoint, device=device, **kwargs)
-        self._attr_options = [entry.name.replace("_", " ") for entry in self._enum]
+        # Slugified enum member names are used as the (translatable) options.
+        # The mapping keeps a reference back to the actual enum member.
+        self._enum_member_by_option = {
+            entry.name.lower(): entry for entry in self._enum
+        }
+        self._attr_options = list(self._enum_member_by_option)
 
     def on_add(self) -> None:
         """Run when entity is added."""
@@ -310,14 +322,18 @@ class ZCLEnumSelectEntity(BaseSelectEntity, PlatformEntity):
         option = self._cluster.get(self._attribute_name)
         if option is None:
             return None
-        option = self._enum(option)
-        return option.name.replace("_", " ")
+        return self._enum(option).name.lower()
 
     async def async_select_option(self, option: str) -> None:
         """Change the selected option."""
+        try:
+            member = self._enum_member_by_option[option]
+        except KeyError:
+            # Backwards compatibility with the previous spaced option names
+            member = self._enum[option.replace(" ", "_")]
         await write_attributes_safe(
             self._cluster,
-            {self._attribute_name: self._enum[option.replace(" ", "_")]},
+            {self._attribute_name: member},
         )
         self.maybe_emit_state_changed_event()
 

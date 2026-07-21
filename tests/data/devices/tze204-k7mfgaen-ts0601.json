@@ -276,10 +276,10 @@
           "group_id": null,
           "enum": "TuyaSirenState",
           "options": [
-            "Sound",
-            "Light",
-            "Sound and light",
-            "Normal"
+            "sound",
+            "light",
+            "sound_and_light",
+            "normal"
           ]
         },
         "state": {
@@ -309,19 +309,19 @@
           "group_id": null,
           "enum": "TuyaSirenRingtoneV02",
           "options": [
-            "Ringtone 01",
-            "Ringtone 02",
-            "Ringtone 03",
-            "Ringtone 04",
-            "Ringtone 05",
-            "Ringtone 06",
-            "Ringtone 07",
-            "Ringtone 08",
-            "Door",
-            "Water",
-            "Temperature",
-            "Entered",
-            "Left"
+            "ringtone_01",
+            "ringtone_02",
+            "ringtone_03",
+            "ringtone_04",
+            "ringtone_05",
+            "ringtone_06",
+            "ringtone_07",
+            "ringtone_08",
+            "door",
+            "water",
+            "temperature",
+            "entered",
+            "left"
           ]
         },
         "state": {
@@ -351,10 +351,10 @@
           "group_id": null,
           "enum": "TuyaAlarmVolume",
           "options": [
-            "Low",
-            "Medium",
-            "High",
-            "Mute"
+            "low",
+            "medium",
+            "high",
+            "mute"
           ]
         },
         "state": {

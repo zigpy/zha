@@ -427,14 +427,14 @@
           "group_id": null,
           "enum": "GiexIrrigationMode",
           "options": [
-            "Duration",
-            "Capacity"
+            "duration",
+            "capacity"
           ]
         },
         "state": {
           "class_name": "ZCLEnumSelectEntity",
           "available": true,
-          "state": "Duration"
+          "state": "duration"
         }
       },
       {
@@ -458,10 +458,10 @@
           "group_id": null,
           "enum": "GiexIrrigationWeatherDelay",
           "options": [
-            "NoDelay",
-            "TwentyFourHourDelay",
-            "FortyEightHourDelay",
-            "SeventyTwoHourDelay"
+            "nodelay",
+            "twentyfourhourdelay",
+            "fortyeighthourdelay",
+            "seventytwohourdelay"
           ]
         },
         "state": {
