@@ -79,7 +79,7 @@
               "id": "0x0000",
               "name": "current_temperature",
               "zcl_type": "int16",
-              "value": 3500
+              "value": 35
             },
             {
               "id": "0x0010",

@@ -7,8 +7,8 @@
   "friendly_manufacturer": "Namron AS",
   "friendly_model": "4512785",
   "name": "Namron AS 4512785",
-  "quirk_applied": false,
-  "quirk_class": "zigpy.device.Device",
+  "quirk_applied": true,
+  "quirk_class": "zhaquirks.namron.switch:(Namron AS / 4512785)",
   "exposes_features": [],
   "manufacturer_code": 4714,
   "power_source": "Mains",
@@ -794,11 +794,11 @@
       },
       {
         "info_object": {
-          "fallback_name": null,
+          "fallback_name": "Device temperature",
           "unique_id": "ab:cd:ef:12:4c:9e:2b:64-1-2",
           "migrate_unique_ids": [],
           "platform": "sensor",
-          "class_name": "DeviceTemperature",
+          "class_name": "Sensor",
           "translation_key": "device_temperature",
           "translation_placeholders": null,
           "device_class": "temperature",
@@ -815,9 +815,9 @@
           "unit": "\u00b0C"
         },
         "state": {
-          "class_name": "DeviceTemperature",
+          "class_name": "Sensor",
           "available": true,
-          "state": 3.52
+          "state": 35.2
         }
       },
       {
