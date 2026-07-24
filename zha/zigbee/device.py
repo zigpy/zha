@@ -104,7 +104,7 @@ if TYPE_CHECKING:
 
 _LOGGER = logging.getLogger(__name__)
 _CHECKIN_GRACE_PERIODS = 2
-DIAGNOSTICS_JSON_VERSION = 2
+DIAGNOSTICS_JSON_VERSION = 3
 
 
 def get_cluster_attr_data(cluster: Cluster) -> list[dict]:

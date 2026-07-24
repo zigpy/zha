@@ -1745,6 +1745,8 @@ async def test_device_counter_sensors(zha_gateway: Gateway) -> None:
     )
 
     assert entity.state.native_value == 1
+    assert entity.state.available is True
+    assert entity.state.device_ieee == coordinator.ieee
 
     # simulate counter increment on application
     coordinator.device.application.state.counters["ezsp_counters"][
@@ -1907,6 +1909,9 @@ async def test_danfoss_thermostat_sw_error(zha_gateway: Gateway) -> None:
     assert entity.state.extra_state_attribute_names
     assert "Top_pcb_sensor_error" in entity.state.extra_state_attribute_names
     assert entity.state.bit_states["Top_pcb_sensor_error"]
+
+    # Consumers resolve the advertised names against `bit_states`
+    assert entity.state.extra_state_attribute_names == set(entity.state.bit_states)
 
 
 async def test_quirks_sensor_attr_converter(zha_gateway: Gateway) -> None:

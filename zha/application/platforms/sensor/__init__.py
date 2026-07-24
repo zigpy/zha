@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 import contextlib
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import date, datetime, timedelta
 import enum
 import functools
@@ -467,8 +467,14 @@ class DeviceCounterSensor(BaseEntity):
     @property
     def state(self) -> DeviceCounterSensorState:
         """Return the state for this sensor."""
+        # `BaseEntity.state` leaves the platform entity fields unset
+        base_state = replace(
+            super().state,
+            available=self.available,
+            device_ieee=self._device.ieee,
+        )
         return DeviceCounterSensorState(
-            **super().state.__dict__,
+            **base_state.__dict__,
             native_value=self._zigpy_counter.value,
             suggested_display_precision=self._attr_suggested_display_precision,
             counter=self._zigpy_counter.name,
@@ -3648,36 +3654,25 @@ class BitMapSensor(Sensor):
             bit.name for bit in list(self._bitmap)
         }
 
+    def _bit_states(self) -> dict[str, bool]:
+        """Return the state of every bit in the bitmap."""
+        value = self._cluster.get(self._attribute_name)
+        return {
+            bit.name: value is not None and bit in self._bitmap(value)
+            for bit in list(self._bitmap)
+        }
+
     @property
     def state(self) -> BitmapSensorState:
         """Return the state for this sensor."""
-        value = self._cluster.get(self._attribute_name)
-        bit_states = {}
-        for bit in list(self._bitmap):
-            if value is None:
-                bit_states[bit.name] = False
-            else:
-                bit_states[bit.name] = bit in self._bitmap(value)
         return BitmapSensorState(
             **super().state.__dict__,
-            bit_states=bit_states,
+            bit_states=self._bit_states(),
         )
 
     def formatter(self, _value: int) -> str:
         """Summary of all attributes."""
-
-        value = self._cluster.get(self._attribute_name)
-        state_attr = {}
-
-        for bit in list(self._bitmap):
-            if value is None:
-                state_attr[bit.name] = False
-            else:
-                state_attr[bit.name] = bit in self._bitmap(value)
-
-        binary_state_attributes = [key for (key, elem) in state_attr.items() if elem]
-
-        return "something" if binary_state_attributes else "nothing"
+        return "something" if any(self._bit_states().values()) else "nothing"
 
 
 @register_entity(Thermostat.cluster_id)
