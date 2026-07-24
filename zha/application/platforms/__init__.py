@@ -475,6 +475,22 @@ class BaseEntity(LogMixin, EventBase):
             )
             self.__previous_state = state
 
+    def subscribe_state(
+        self, callback: Callable[[EntityStateChangedEvent], None]
+    ) -> Callable[[], None]:
+        """Subscribe to state changes, receiving the full state as the first event."""
+        self.maybe_emit_state_changed_event()
+        unsub = self.on_event(STATE_CHANGED, callback)
+
+        callback(
+            EntityStateChangedEvent(
+                **self.identifiers.__dict__,
+                state_diff=compute_state_diff(None, self.__previous_state),
+            )
+        )
+
+        return unsub
+
     def log(self, level: int, msg: str, *args: Any, **kwargs: Any) -> None:
         """Log a message."""
         msg = f"%s: {msg}"
