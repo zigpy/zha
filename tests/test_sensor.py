@@ -908,7 +908,7 @@ async def test_analog_input_bogus_resolution(
     entity = get_entity(
         zha_dev, platform=Platform.SENSOR, exact_entity_type=AnalogInputSensor
     )
-    assert entity.info_object.suggested_display_precision is None
+    assert entity.state.suggested_display_precision is None
 
 
 def assert_state(entity: PlatformEntity, state: Any, unit_of_measurement: str) -> None:
