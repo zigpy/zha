@@ -356,6 +356,7 @@ class BaseSharedLight(BaseLight):
         """Return the state of the light."""
         return dataclasses.replace(
             super().state,
+            # XXX: for backwards compatibility
             supported_color_modes=self._internal_supported_color_modes,
         )
 
