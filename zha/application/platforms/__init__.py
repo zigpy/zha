@@ -487,12 +487,16 @@ class BaseEntity(LogMixin, EventBase):
         self.maybe_emit_state_changed_event()
         unsub = self.on_event(STATE_CHANGED, callback)
 
-        callback(
-            EntityStateChangedEvent(
-                **self.identifiers.__dict__,
-                state_diff=compute_state_diff(None, self.__previous_state),
+        try:
+            callback(
+                EntityStateChangedEvent(
+                    **self.identifiers.__dict__,
+                    state_diff=compute_state_diff(None, self.__previous_state),
+                )
             )
-        )
+        except Exception:
+            unsub()
+            raise
 
         return unsub
 
