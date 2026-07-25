@@ -817,6 +817,14 @@ class ElectricalMeasurementState(SensorState):
     max_value: float | int | None = None
     max_attribute_name: str | None = None
 
+    @property
+    def extra_state_attributes(self) -> dict[str, Any]:
+        """Return the extra state attributes as a name to value mapping."""
+        attributes: dict[str, Any] = {"measurement_type": self.measurement_type}
+        if self.max_attribute_name is not None:
+            attributes[self.max_attribute_name] = self.max_value
+        return attributes
+
 
 class BaseElectricalMeasurement(Sensor):
     """Base class for electrical measurement."""
@@ -3632,6 +3640,11 @@ class BitmapSensorState(SensorState):
     """State for bitmap sensor entities."""
 
     bit_states: dict[str, bool]
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any]:
+        """Return the extra state attributes as a name to value mapping."""
+        return dict(self.bit_states)
 
 
 class BitMapSensor(Sensor):

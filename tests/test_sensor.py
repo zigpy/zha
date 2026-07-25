@@ -314,6 +314,12 @@ async def async_test_electrical_measurement(
     assert entity.state.max_value == 8.8
     assert entity.state.max_attribute_name == "active_power_max"
 
+    # The max value is exposed under the ZCL attribute's name
+    assert entity.state.extra_state_attributes == {
+        "measurement_type": entity.state.measurement_type,
+        "active_power_max": 8.8,
+    }
+
 
 async def async_test_em_apparent_power(
     zha_gateway: Gateway, cluster: Cluster, entity: PlatformEntity
@@ -418,6 +424,11 @@ async def async_test_powerconfiguration(
     assert entity.state.battery_voltage == 2.9
     assert entity.state.battery_quantity == 3
     assert entity.state.battery_size == "AAA"
+    assert entity.state.extra_state_attributes == {
+        "battery_voltage": 2.9,
+        "battery_quantity": 3,
+        "battery_size": "AAA",
+    }
     await send_attributes_report(zha_gateway, cluster, {32: 20})
     assert entity.state.battery_voltage == 2.0
 
@@ -451,6 +462,7 @@ async def async_test_setpoint_change_source(
         {hvac.Thermostat.AttributeDefs.setpoint_change_source.id: 0x01},
     )
     assert entity.state.native_value == "Schedule"
+    assert entity.state.options == ["Manual", "Schedule", "External"]
 
 
 async def async_test_pi_heating_demand(
@@ -1913,6 +1925,7 @@ async def test_danfoss_thermostat_sw_error(zha_gateway: Gateway) -> None:
 
     # Consumers resolve the advertised names against `bit_states`
     assert entity.state.extra_state_attribute_names == set(entity.state.bit_states)
+    assert entity.state.extra_state_attributes == entity.state.bit_states
 
 
 async def test_quirks_sensor_attr_converter(zha_gateway: Gateway) -> None:

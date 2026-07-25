@@ -199,6 +199,11 @@ class BaseEntityState:
     # For group entities
     group_id: int | None
 
+    @property
+    def extra_state_attributes(self) -> dict[str, Any]:
+        """Return the extra state attributes as a name to value mapping."""
+        return {name: getattr(self, name) for name in self.extra_state_attribute_names}
+
 
 @dataclasses.dataclass(frozen=True, kw_only=True)
 class BaseIdentifiers:
