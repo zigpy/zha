@@ -521,10 +521,18 @@ class DeviceCounterSensor(BaseEntity):
             )
 
 
+@dataclass(frozen=True, kw_only=True)
+class EnumSensorState(SensorState):
+    """State for enum sensor entities."""
+
+    options: list[str]
+
+
 class EnumSensor(Sensor):
     """Sensor with value from enum."""
 
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.ENUM
+    _attr_options: list[str]
     _enum: type[enum.Enum]
 
     def __init__(
@@ -547,6 +555,19 @@ class EnumSensor(Sensor):
 
         # XXX: This class is not meant to be initialized directly, as `unique_id`
         # depends on the value of `_attribute_name`
+
+    @property
+    def options(self) -> list[str]:
+        """Return the list of possible enum value names."""
+        return self._attr_options
+
+    @property
+    def state(self) -> EnumSensorState:
+        """Return the state for this sensor."""
+        return EnumSensorState(
+            **super().state.__dict__,
+            options=self.options,
+        )
 
     def formatter(self, value: int) -> str | None:
         """Use name of enum."""
