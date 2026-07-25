@@ -312,6 +312,7 @@ async def async_test_electrical_measurement(
 
     await send_attributes_report(zha_gateway, cluster, {0: 1, 0x050D: 88})
     assert entity.state.max_value == 8.8
+    assert entity.state.max_attribute_name == "active_power_max"
 
 
 async def async_test_em_apparent_power(
