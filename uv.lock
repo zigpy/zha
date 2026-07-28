@@ -274,6 +274,18 @@ wheels = [
 ]
 
 [[package]]
+name = "aiospinel"
+version = "1.2.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "typing-extensions" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/c7/96/3ee10d7cc34f6b764b617714f9777a16a0b13ce4b63d832f06c93534432c/aiospinel-1.2.0.tar.gz", hash = "sha256:b71a771583a767cb57ff4f6cfa560f1ec22eef1496c790436daf80e808442075", size = 59890, upload-time = "2026-07-09T20:45:25.501Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/b8/9e/239584868623787832574d4530ee3a8e7af4b61ef42370934e6e034aeae2/aiospinel-1.2.0-py3-none-any.whl", hash = "sha256:84824074101bff1ea7186fc541fdd6d39c1a8cda354252f0b80289944f5ef5ca", size = 14424, upload-time = "2026-07-09T20:45:24.155Z" },
+]
+
+[[package]]
 name = "aiosqlite"
 version = "0.21.0"
 source = { registry = "https://pypi.org/simple" }
@@ -4046,7 +4058,7 @@ requires-dist = [
     { name = "zigpy-deconz", specifier = "==1.0.0" },
     { name = "zigpy-xbee", specifier = "==0.21.1" },
     { name = "zigpy-zigate", specifier = "==0.14.0" },
-    { name = "zigpy-ziggurat", specifier = "==1.0.1" },
+    { name = "zigpy-ziggurat", specifier = "==1.1.0" },
     { name = "zigpy-znp", specifier = "==1.1.0" },
 ]
 provides-extras = ["testing"]
@@ -4172,17 +4184,18 @@ wheels = [
 
 [[package]]
 name = "zigpy-ziggurat"
-version = "1.0.1"
+version = "1.1.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "aiohttp", version = "3.10.5", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.14.2'" },
     { name = "aiohttp", version = "3.14.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.14.2'" },
+    { name = "aiospinel" },
     { name = "mashumaro" },
     { name = "zigpy" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/23/da/3ac4eb47e278ca1e0825ccbb182fb9b0f8bda874164f378a3b7b918adedb/zigpy_ziggurat-1.0.1.tar.gz", hash = "sha256:9ffd74c03b332fcf3ebf0514a446f13eb402fb42b8efce42190fa89679c25488", size = 22727, upload-time = "2026-06-23T21:34:51.82Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/cb/78/729eccc3066af7f5f04b9a300072dffcd2526e717dfd39878ee208639742/zigpy_ziggurat-1.1.0.tar.gz", hash = "sha256:cba29ff4477961d2fbc744d3efd1f3b9275d692ad43026836f2a295d1ddda0f3", size = 54181, upload-time = "2026-07-28T18:41:22.354Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/a9/90/3b1e92e72e388f1022494c0c9cbcc0b7780ca7a6b2bcd1c05da58b7fa6f2/zigpy_ziggurat-1.0.1-py3-none-any.whl", hash = "sha256:62432bb4804cd98639d483545a5b550f4c2776fffa8facec58e654ff49698a18", size = 14636, upload-time = "2026-06-23T21:34:50.841Z" },
+    { url = "https://files.pythonhosted.org/packages/73/8b/bbba87316f75e4872e516cb55e8d097c09da48c39628dcf55a52bc6ca444/zigpy_ziggurat-1.1.0-py3-none-any.whl", hash = "sha256:b1839d480302318759a953bb1e6bc52240c0ee67d2d8b5c15cd42a9dfabcfd43", size = 33242, upload-time = "2026-07-28T18:41:21.566Z" },
 ]
 
 [[package]]
