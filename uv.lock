@@ -4042,7 +4042,7 @@ requires-dist = [
     { name = "homeassistant", marker = "python_full_version >= '3.14.2' and extra == 'testing'", specifier = ">=2026.7.0" },
     { name = "pytest", marker = "extra == 'testing'" },
     { name = "python-slugify", marker = "extra == 'testing'" },
-    { name = "zigpy", specifier = "==2.0.1" },
+    { name = "zigpy", specifier = "==2.1.0" },
     { name = "zigpy-deconz", specifier = "==0.25.5" },
     { name = "zigpy-xbee", specifier = "==0.21.1" },
     { name = "zigpy-zigate", specifier = "==0.14.0" },
@@ -4108,7 +4108,7 @@ wheels = [
 
 [[package]]
 name = "zigpy"
-version = "2.0.1"
+version = "2.1.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "aiohttp", version = "3.10.5", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.14.2'" },
@@ -4125,9 +4125,9 @@ dependencies = [
     { name = "typing-extensions" },
     { name = "voluptuous" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/68/e0/0509dd575e9728180be5756576df25d391ccf2e0e1d027bbea478b250259/zigpy-2.0.1.tar.gz", hash = "sha256:f720b4e56a626fabaa86b3a386038b483825f2c2668bb2e626c450ab483fec2e", size = 327196, upload-time = "2026-07-17T02:19:08.448Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/f8/f9/1d26fc086bcfb8142e621c51cfdd8a393a22b60b8ac4b8c2aec452b0d0de/zigpy-2.1.0.tar.gz", hash = "sha256:ccb73420c1be8825e32fe03634e496642dcaa7e6115a8b390a479b8877c9fcdd", size = 333257, upload-time = "2026-07-28T20:13:51.863Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/6a/69/9dba61955c10eaf0ecb185df5a053465451c14e05c70c557fb4f59c1e7ee/zigpy-2.0.1-py3-none-any.whl", hash = "sha256:d0d8a46f98addbfe25f8b7ce2658ecf3e76a0463ad7d056794389ade5225be7a", size = 245603, upload-time = "2026-07-17T02:19:06.894Z" },
+    { url = "https://files.pythonhosted.org/packages/4d/05/d0e72683d31f079508b4492cb7b9df5f2cf8423fc1cdaec9c89a2dab6910/zigpy-2.1.0-py3-none-any.whl", hash = "sha256:868f670bbf1e61c715893be4a996035d68918ebbc66c2f3e2c0475fe0dcce97a", size = 251969, upload-time = "2026-07-28T20:13:50.679Z" },
 ]
 
 [[package]]
