@@ -21,7 +21,7 @@ dependencies = [
     "zigpy-deconz==1.0.0",
     "zigpy-xbee==0.21.1",
     "zigpy-zigate==0.14.0",
-    "zigpy-ziggurat==1.0.1",
+    "zigpy-ziggurat==1.1.1",
     "zigpy==2.1.0",
 ]
 
