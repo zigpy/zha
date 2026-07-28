@@ -643,7 +643,7 @@
         "state": {
           "class_name": "DeviceTemperature",
           "available": true,
-          "state": 0.23
+          "state": 23.0
         }
       },
       {

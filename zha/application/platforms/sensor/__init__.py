@@ -2680,7 +2680,7 @@ class DeviceTemperature(Sensor):
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.TEMPERATURE
     _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
     _attr_translation_key: str = "device_temperature"
-    _divisor = 100
+    _divisor = 1
     _attr_native_unit_of_measurement = UnitOfTemperature.CELSIUS
     _attr_entity_category = EntityCategory.DIAGNOSTIC
     _attr_primary_weight = 1

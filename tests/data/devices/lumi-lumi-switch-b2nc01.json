@@ -939,7 +939,7 @@
         "state": {
           "class_name": "DeviceTemperature",
           "available": true,
-          "state": 0.24
+          "state": 24.0
         }
       }
     ],
