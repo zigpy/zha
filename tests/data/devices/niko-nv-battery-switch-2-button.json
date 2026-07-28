@@ -386,6 +386,7 @@
           "available": true,
           "installed_version": null,
           "in_progress": false,
+          "in_queue": false,
           "update_percentage": null,
           "latest_version": null,
           "release_summary": null,

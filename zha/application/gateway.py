@@ -188,6 +188,15 @@ class Gateway(AsyncUtilMixin, EventBase):
         self._device_availability_checker: DeviceAvailabilityChecker = (
             DeviceAvailabilityChecker(self)
         )
+
+        # A Zigbee network can only power so many OTA image transfers at once, so
+        # cap how many firmware updates run concurrently. Update entities acquire a
+        # slot before transferring; anything over the limit waits (FIFO) in the
+        # semaphore's queue until an in-flight update finishes and releases a slot.
+        self.ota_update_semaphore: asyncio.Semaphore = asyncio.Semaphore(
+            max(1, self.config.config.device_options.max_concurrent_ota_updates)
+        )
+
         self.config.gateway = self
 
     @property

@@ -1,5 +1,6 @@
 """Test ZHA firmware updates."""
 
+import asyncio
 from unittest.mock import ANY, AsyncMock, call, patch
 
 import pytest
@@ -28,6 +29,7 @@ from zha.application import Platform
 from zha.application.gateway import Gateway
 from zha.application.platforms.update import (
     ATTR_IN_PROGRESS,
+    ATTR_IN_QUEUE,
     ATTR_INSTALLED_VERSION,
     ATTR_LATEST_VERSION,
     ATTR_RELEASE_NOTES,
@@ -38,7 +40,7 @@ from zha.application.platforms.update import (
 from zha.exceptions import ZHAException
 
 
-def zigpy_device_mock(zha_gateway: Gateway):
+def zigpy_device_mock(zha_gateway: Gateway, ieee: str | None = None):
     """Device tracker zigpy device."""
     endpoints = {
         1: {
@@ -48,9 +50,11 @@ def zigpy_device_mock(zha_gateway: Gateway):
             SIG_EP_PROFILE: zha.PROFILE_ID,
         }
     }
+    extra: dict[str, str] = {"ieee": ieee} if ieee is not None else {}
     return create_mock_zigpy_device(
         zha_gateway,
         endpoints,
+        **extra,
         node_descriptor=zdo_t.NodeDescriptor(
             logical_type=zdo_t.LogicalType.EndDevice,
             complex_descriptor_available=0,
@@ -914,3 +918,151 @@ async def test_firmware_update_no_cached_query_on_startup(
     assert entity.state[ATTR_LATEST_VERSION] is None
     # get_ota_images should not have been called since there's no cached query
     zigpy_device.application.ota.get_ota_images.assert_not_called()
+
+
+async def _setup_update_entity(
+    zha_gateway: Gateway,
+    ieee: str,
+    fw_image: OtaImageWithMetadata,
+):
+    """Set up a device whose update entity has a pending upgrade ready to install."""
+    zigpy_device = zigpy_device_mock(zha_gateway, ieee=ieee)
+    zha_device, _ota_cluster, _fw_image, _installed = await setup_test_data(
+        zha_gateway, zigpy_device
+    )
+    entity = get_entity(zha_device, platform=Platform.UPDATE)
+
+    # Make an upgrade available to install without replaying the full OTA handshake
+    entity._compatible_images = OtaImagesResult(upgrades=(fw_image,), downgrades=())
+
+    return zigpy_device, entity
+
+
+async def test_firmware_update_concurrency_limit_from_config(
+    zha_gateway: Gateway,
+) -> None:
+    """The gateway sizes the OTA update semaphore from the configured limit."""
+    limit = zha_gateway.config.config.device_options.max_concurrent_ota_updates
+    semaphore = zha_gateway.ota_update_semaphore
+
+    # Exactly `limit` slots are available before the next acquire would block
+    for _ in range(limit):
+        assert not semaphore.locked()
+        await semaphore.acquire()
+    assert semaphore.locked()
+
+    for _ in range(limit):
+        semaphore.release()
+    assert not semaphore.locked()
+
+
+async def test_firmware_update_concurrency_limit_queues(zha_gateway: Gateway) -> None:
+    """Updates started beyond the concurrency limit wait in the OTA queue (FIFO)."""
+    # Only allow a single concurrent OTA update so the second one has to queue
+    zha_gateway.ota_update_semaphore = asyncio.Semaphore(1)
+
+    fw_image = create_fw_image(0x12345678 + 10)
+    zigpy_device_a, entity_a = await _setup_update_entity(
+        zha_gateway, "aa:aa:aa:aa:aa:aa:aa:aa", fw_image
+    )
+    zigpy_device_b, entity_b = await _setup_update_entity(
+        zha_gateway, "bb:bb:bb:bb:bb:bb:bb:bb", fw_image
+    )
+
+    started = {"a": asyncio.Event(), "b": asyncio.Event()}
+    release = {"a": asyncio.Event(), "b": asyncio.Event()}
+
+    def make_update_firmware(key: str):
+        async def _update_firmware(image, progress_callback):
+            # Signal that the image transfer has actually started, then block until
+            # the test releases it, holding the semaphore slot in the meantime.
+            started[key].set()
+            await release[key].wait()
+            return foundation.Status.SUCCESS
+
+        return _update_firmware
+
+    with (
+        patch.object(zigpy_device_a, "update_firmware", make_update_firmware("a")),
+        patch.object(zigpy_device_b, "update_firmware", make_update_firmware("b")),
+    ):
+        task_a = asyncio.create_task(entity_a.async_install(version=None))
+        task_b = asyncio.create_task(entity_b.async_install(version=None))
+
+        # A grabs the only slot and starts transferring
+        await asyncio.wait_for(started["a"].wait(), timeout=1)
+        await asyncio.sleep(0)  # let B run far enough to attempt to acquire a slot
+
+        assert entity_a.state[ATTR_IN_PROGRESS] is True
+        assert entity_a.state[ATTR_IN_QUEUE] is False
+
+        # B is queued: the install was requested (in_progress) but it is waiting
+        # for a slot and has not started transferring yet
+        assert entity_b.state[ATTR_IN_PROGRESS] is True
+        assert entity_b.state[ATTR_IN_QUEUE] is True
+        assert not started["b"].is_set()
+
+        # Finishing A frees the slot; B should then acquire it and start transferring
+        release["a"].set()
+        await asyncio.wait_for(started["b"].wait(), timeout=1)
+
+        assert entity_b.state[ATTR_IN_PROGRESS] is True
+        assert entity_b.state[ATTR_IN_QUEUE] is False
+
+        release["b"].set()
+        await asyncio.wait_for(asyncio.gather(task_a, task_b), timeout=1)
+
+    assert entity_a.state[ATTR_IN_PROGRESS] is False
+    assert entity_a.state[ATTR_IN_QUEUE] is False
+    assert entity_b.state[ATTR_IN_PROGRESS] is False
+    assert entity_b.state[ATTR_IN_QUEUE] is False
+
+
+async def test_firmware_update_queued_slot_released_on_failure(
+    zha_gateway: Gateway,
+) -> None:
+    """A failed update releases its slot so a queued update can proceed."""
+    zha_gateway.ota_update_semaphore = asyncio.Semaphore(1)
+
+    fw_image = create_fw_image(0x12345678 + 10)
+    zigpy_device_a, entity_a = await _setup_update_entity(
+        zha_gateway, "aa:aa:aa:aa:aa:aa:aa:aa", fw_image
+    )
+    zigpy_device_b, entity_b = await _setup_update_entity(
+        zha_gateway, "bb:bb:bb:bb:bb:bb:bb:bb", fw_image
+    )
+
+    started_a = asyncio.Event()
+    release_a = asyncio.Event()
+
+    async def failing_update_firmware(image, progress_callback):
+        started_a.set()
+        await release_a.wait()
+        raise DeliveryError("Device did not respond")
+
+    with (
+        patch.object(zigpy_device_a, "update_firmware", failing_update_firmware),
+        patch.object(
+            zigpy_device_b, "update_firmware", return_value=foundation.Status.SUCCESS
+        ) as mock_update_b,
+    ):
+        task_a = asyncio.create_task(entity_a.async_install(version=None))
+        task_b = asyncio.create_task(entity_b.async_install(version=None))
+
+        await asyncio.wait_for(started_a.wait(), timeout=1)
+        await asyncio.sleep(0)
+
+        assert entity_b.state[ATTR_IN_QUEUE] is True
+        mock_update_b.assert_not_called()
+
+        # A fails and releases its slot; B should acquire it and succeed
+        release_a.set()
+        with pytest.raises(ZHAException):
+            await asyncio.wait_for(task_a, timeout=1)
+        await asyncio.wait_for(task_b, timeout=1)
+
+    mock_update_b.assert_called_once()
+    assert entity_a.state[ATTR_IN_PROGRESS] is False
+    assert entity_a.state[ATTR_IN_QUEUE] is False
+    assert entity_b.state[ATTR_IN_PROGRESS] is False
+    assert entity_b.state[ATTR_IN_QUEUE] is False

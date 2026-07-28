@@ -463,6 +463,7 @@
           "available": true,
           "installed_version": "0x21046760",
           "in_progress": false,
+          "in_queue": false,
           "update_percentage": null,
           "latest_version": null,
           "release_summary": null,

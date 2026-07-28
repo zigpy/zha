@@ -59,6 +59,7 @@ class UpdateEntityFeature(IntFlag):
 
 ATTR_INSTALLED_VERSION: Final = "installed_version"
 ATTR_IN_PROGRESS: Final = "in_progress"
+ATTR_IN_QUEUE: Final = "in_queue"
 ATTR_UPDATE_PERCENTAGE: Final = "update_percentage"
 ATTR_LATEST_VERSION: Final = "latest_version"
 ATTR_RELEASE_SUMMARY: Final = "release_summary"
@@ -89,6 +90,7 @@ class BaseFirmwareUpdateEntity(PlatformEntity, ABC):
     )
     _attr_installed_version: str | None = None
     _attr_in_progress: bool = False
+    _attr_in_queue: bool = False
     _attr_update_percentage: float | None = None
     _attr_latest_version: str | None = None
     _attr_release_summary: str | None = None
@@ -112,6 +114,7 @@ class BaseFirmwareUpdateEntity(PlatformEntity, ABC):
 
         response[ATTR_INSTALLED_VERSION] = self.installed_version
         response[ATTR_IN_PROGRESS] = self.in_progress
+        response[ATTR_IN_QUEUE] = self.in_queue
         response[ATTR_UPDATE_PERCENTAGE] = self.update_percentage
         response[ATTR_LATEST_VERSION] = self.latest_version
         response[ATTR_RELEASE_SUMMARY] = release_summary
@@ -133,6 +136,17 @@ class BaseFirmwareUpdateEntity(PlatformEntity, ABC):
         Returns a boolean (True if in progress, False if not).
         """
         return self._attr_in_progress
+
+    @property
+    def in_queue(self) -> bool:
+        """Whether the update is waiting in the OTA update queue.
+
+        A Zigbee network can only run a limited number of firmware updates at
+        once. When that limit is reached, further updates are queued: they report
+        `in_progress` as True (the install has been requested) but sit here with
+        `in_queue` True until a slot frees up and the image transfer starts.
+        """
+        return self._attr_in_queue
 
     @property
     def update_percentage(self) -> float | None:
@@ -257,15 +271,33 @@ class BaseFirmwareUpdateEntity(PlatformEntity, ABC):
 
         self._attr_in_progress = True
         self._attr_update_percentage = None
+
+        # A Zigbee network can only carry a limited number of OTA image transfers
+        # at once. Acquire a slot from the gateway-wide semaphore before starting;
+        # if all slots are busy this update waits its turn (FIFO) in the queue.
+        semaphore = self.device.gateway.ota_update_semaphore
+        self._attr_in_queue = semaphore.locked()
+
+        if self._attr_in_queue:
+            _LOGGER.debug(
+                "%s: OTA update queued, waiting for a free update slot",
+                self.device.name,
+            )
+
         self.maybe_emit_state_changed_event()
 
         try:
-            result = await self.device.device.update_firmware(
-                image=firmware,
-                progress_callback=self._update_progress,
-            )
+            async with semaphore:
+                self._attr_in_queue = False
+                self.maybe_emit_state_changed_event()
+
+                result = await self.device.device.update_firmware(
+                    image=firmware,
+                    progress_callback=self._update_progress,
+                )
         except Exception as ex:
             self._attr_in_progress = False
+            self._attr_in_queue = False
             self.maybe_emit_state_changed_event()
             raise ZHAException(
                 f"Update was not successful: {str(ex) or repr(ex)}"
@@ -284,6 +316,7 @@ class BaseFirmwareUpdateEntity(PlatformEntity, ABC):
     async def on_remove(self) -> None:
         """Call when entity will be removed."""
         self._attr_in_progress = False
+        self._attr_in_queue = False
         await super().on_remove()
 
 

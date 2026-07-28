@@ -78,6 +78,14 @@ CONF_USE_THREAD = "use_thread"
 CONF_DEFAULT_CONSIDER_UNAVAILABLE_MAINS = 60 * 60 * 2  # 2 hours
 CONF_DEFAULT_CONSIDER_UNAVAILABLE_BATTERY = 60 * 60 * 6  # 6 hours
 
+# A Zigbee network only has so much airtime; running many OTA image transfers at
+# once saturates it and slows every update (and other traffic) down. Cap how many
+# firmware updates transfer concurrently and queue the rest. Z-Wave takes the same
+# low-bandwidth-mesh concern to its extreme and allows only one update at a time; we
+# keep some parallelism (Zigbee is faster and OTA block transfers are device-paced)
+# while staying conservative to leave the coordinator airtime for normal traffic.
+CONF_DEFAULT_MAX_CONCURRENT_OTA_UPDATES = 4
+
 POWER_MAINS_POWERED = "Mains"
 POWER_BATTERY_OR_UNKNOWN = "Battery or Unknown"
 

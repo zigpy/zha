@@ -35,6 +35,7 @@ from zha.application.const import (
     CLUSTER_TYPE_OUT,
     CONF_DEFAULT_CONSIDER_UNAVAILABLE_BATTERY,
     CONF_DEFAULT_CONSIDER_UNAVAILABLE_MAINS,
+    CONF_DEFAULT_MAX_CONCURRENT_OTA_UPDATES,
 )
 from zha.async_ import gather_with_limited_concurrency
 from zha.decorators import periodic
@@ -347,6 +348,9 @@ class DeviceOptions:
         default=CONF_DEFAULT_CONSIDER_UNAVAILABLE_BATTERY
     )
     enable_mains_startup_polling: bool = dataclasses.field(default=True)
+    max_concurrent_ota_updates: int = dataclasses.field(
+        default=CONF_DEFAULT_MAX_CONCURRENT_OTA_UPDATES
+    )
 
 
 @dataclass(kw_only=True, slots=True)

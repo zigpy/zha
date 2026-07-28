@@ -351,6 +351,7 @@
           "available": true,
           "installed_version": "0x00000048",
           "in_progress": false,
+          "in_queue": false,
           "update_percentage": null,
           "latest_version": null,
           "release_summary": null,

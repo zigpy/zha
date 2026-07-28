@@ -670,6 +670,7 @@
           "available": true,
           "installed_version": "0x74013001",
           "in_progress": false,
+          "in_queue": false,
           "update_percentage": null,
           "latest_version": null,
           "release_summary": null,
