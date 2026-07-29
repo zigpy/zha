@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from collections.abc import Callable
 from dataclasses import dataclass
 import functools
 import logging
@@ -259,6 +260,8 @@ class NumberConfigurationEntity(BaseNumber):
     _attr_native_step: float = 1.0
     _multiplier: float = 1
     _attribute_name: str
+    _attribute_converter: Callable[[Any], Any] | None = None
+    _value_converter: Callable[[Any], Any] | None = None
 
     def __init__(
         self,
@@ -266,6 +269,8 @@ class NumberConfigurationEntity(BaseNumber):
         device: Device,
         *,
         attribute_name: str | None = None,
+        attribute_converter: Callable[[Any], Any] | None = None,
+        value_converter: Callable[[Any], Any] | None = None,
         min_value: float | None = None,
         max_value: float | None = None,
         step: float | None = None,
@@ -278,6 +283,10 @@ class NumberConfigurationEntity(BaseNumber):
         """Init this number configuration entity."""
         if attribute_name is not None:
             self._attribute_name = attribute_name
+        if attribute_converter is not None:
+            self._attribute_converter = attribute_converter
+        if value_converter is not None:
+            self._value_converter = value_converter
         if min_value is not None:
             self._attr_native_min_value = min_value
         if max_value is not None:
@@ -344,13 +353,17 @@ class NumberConfigurationEntity(BaseNumber):
         value = self._cluster.get(self._attribute_name)
         if value is None:
             return None
+        if self._attribute_converter:
+            return self._attribute_converter(value)
         return value * self._multiplier
 
     async def async_set_native_value(self, value: float) -> None:
         """Update the current value from HA."""
-        await write_attributes_safe(
-            self._cluster, {self._attribute_name: int(value / self._multiplier)}
-        )
+        if self._value_converter:
+            attr_value = self._value_converter(value)
+        else:
+            attr_value = int(value / self._multiplier)
+        await write_attributes_safe(self._cluster, {self._attribute_name: attr_value})
         self.maybe_emit_state_changed_event()
 
     async def async_update(self) -> None:

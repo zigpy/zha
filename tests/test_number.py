@@ -25,6 +25,7 @@ from tests.common import (
 from zha.application import Platform
 from zha.application.gateway import Gateway
 from zha.application.platforms import EntityCategory, PlatformEntity
+from zha.application.platforms.number import NumberConfigurationEntity
 from zha.application.platforms.number.const import NumberMode
 
 ZIGPY_ANALOG_OUTPUT_DEVICE = {
@@ -430,3 +431,98 @@ async def test_color_number(
     )
     await zha_gateway.async_block_till_done()
     assert entity.state["state"] == initial_value
+
+
+@pytest.mark.parametrize(
+    (
+        "attribute_converter",
+        "value_converter",
+        "initial_value",
+        "expected_native",
+        "set_native",
+        "expected_written",
+    ),
+    (
+        # invert a 0..5 scale where 0 is the maximum (Schneider outlet brightness)
+        (lambda x: 5 - x, lambda x: 5 - int(x), 1, 4, 1, 4),
+        # non-symmetric converters are allowed: each direction is independent
+        (lambda x: x + 100, lambda x: int(x) - 100, 5, 105, 110, 10),
+    ),
+)
+async def test_number_attribute_converter(
+    zha_gateway: Gateway,
+    attribute_converter,
+    value_converter,
+    initial_value: int,
+    expected_native: int,
+    set_native: int,
+    expected_written: int,
+) -> None:
+    """Test number entity attribute_converter/value_converter round trip."""
+
+    light = await light_mock(zha_gateway)
+    cluster = light.endpoints[1].on_off
+    cluster.PLUGGED_ATTR_READS = {"on_time": initial_value}
+    update_attribute_cache(cluster)
+    zha_device = await join_zigpy_device(zha_gateway, light)
+
+    entity = NumberConfigurationEntity(
+        endpoint=zha_device.endpoints[1],
+        device=zha_device,
+        cluster=cluster,
+        from_quirk=True,
+        fallback_name="Test number",
+        translation_key="test_number",
+        attribute_name="on_time",
+        attribute_converter=attribute_converter,
+        value_converter=value_converter,
+        min_value=0,
+        max_value=255,
+    )
+
+    # the raw attribute value is converted for display
+    assert entity.native_value == expected_native
+    assert entity.state["state"] == expected_native
+
+    # the value from HA is converted back before it is written
+    cluster.write_attributes.reset_mock()
+    await entity.async_set_native_value(set_native)
+    assert cluster.write_attributes.mock_calls == [
+        call({"on_time": expected_written}, manufacturer=UNDEFINED),
+    ]
+
+
+async def test_number_attribute_converter_ignores_multiplier(
+    zha_gateway: Gateway,
+) -> None:
+    """Test that converters take precedence over the multiplier, as for sensors."""
+
+    light = await light_mock(zha_gateway)
+    cluster = light.endpoints[1].on_off
+    cluster.PLUGGED_ATTR_READS = {"on_time": 10}
+    update_attribute_cache(cluster)
+    zha_device = await join_zigpy_device(zha_gateway, light)
+
+    entity = NumberConfigurationEntity(
+        endpoint=zha_device.endpoints[1],
+        device=zha_device,
+        cluster=cluster,
+        from_quirk=True,
+        fallback_name="Test number",
+        translation_key="test_number",
+        attribute_name="on_time",
+        attribute_converter=lambda x: 5 - x,
+        value_converter=lambda x: 5 - int(x),
+        multiplier=0.1,
+        min_value=0,
+        max_value=255,
+    )
+
+    # 10 * 0.1 would be 1.0 if the multiplier applied, but the converter wins
+    assert entity.native_value == -5
+
+    cluster.write_attributes.reset_mock()
+    await entity.async_set_native_value(1)
+    assert cluster.write_attributes.mock_calls == [
+        call({"on_time": 4}, manufacturer=UNDEFINED),
+    ]
