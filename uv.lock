@@ -274,6 +274,18 @@ wheels = [
 ]
 
 [[package]]
+name = "aiospinel"
+version = "1.2.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "typing-extensions" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/c7/96/3ee10d7cc34f6b764b617714f9777a16a0b13ce4b63d832f06c93534432c/aiospinel-1.2.0.tar.gz", hash = "sha256:b71a771583a767cb57ff4f6cfa560f1ec22eef1496c790436daf80e808442075", size = 59890, upload-time = "2026-07-09T20:45:25.501Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/b8/9e/239584868623787832574d4530ee3a8e7af4b61ef42370934e6e034aeae2/aiospinel-1.2.0-py3-none-any.whl", hash = "sha256:84824074101bff1ea7186fc541fdd6d39c1a8cda354252f0b80289944f5ef5ca", size = 14424, upload-time = "2026-07-09T20:45:24.155Z" },
+]
+
+[[package]]
 name = "aiosqlite"
 version = "0.21.0"
 source = { registry = "https://pypi.org/simple" }
@@ -4042,11 +4054,11 @@ requires-dist = [
     { name = "homeassistant", marker = "python_full_version >= '3.14.2' and extra == 'testing'", specifier = ">=2026.7.0" },
     { name = "pytest", marker = "extra == 'testing'" },
     { name = "python-slugify", marker = "extra == 'testing'" },
-    { name = "zigpy", specifier = "==2.0.1" },
-    { name = "zigpy-deconz", specifier = "==0.25.5" },
+    { name = "zigpy", specifier = "==2.1.0" },
+    { name = "zigpy-deconz", specifier = "==1.0.0" },
     { name = "zigpy-xbee", specifier = "==0.21.1" },
     { name = "zigpy-zigate", specifier = "==0.14.0" },
-    { name = "zigpy-ziggurat", specifier = "==1.0.1" },
+    { name = "zigpy-ziggurat", specifier = "==1.1.1" },
     { name = "zigpy-znp", specifier = "==1.1.0" },
 ]
 provides-extras = ["testing"]
@@ -4108,7 +4120,7 @@ wheels = [
 
 [[package]]
 name = "zigpy"
-version = "2.0.1"
+version = "2.1.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "aiohttp", version = "3.10.5", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.14.2'" },
@@ -4125,22 +4137,22 @@ dependencies = [
     { name = "typing-extensions" },
     { name = "voluptuous" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/68/e0/0509dd575e9728180be5756576df25d391ccf2e0e1d027bbea478b250259/zigpy-2.0.1.tar.gz", hash = "sha256:f720b4e56a626fabaa86b3a386038b483825f2c2668bb2e626c450ab483fec2e", size = 327196, upload-time = "2026-07-17T02:19:08.448Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/f8/f9/1d26fc086bcfb8142e621c51cfdd8a393a22b60b8ac4b8c2aec452b0d0de/zigpy-2.1.0.tar.gz", hash = "sha256:ccb73420c1be8825e32fe03634e496642dcaa7e6115a8b390a479b8877c9fcdd", size = 333257, upload-time = "2026-07-28T20:13:51.863Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/6a/69/9dba61955c10eaf0ecb185df5a053465451c14e05c70c557fb4f59c1e7ee/zigpy-2.0.1-py3-none-any.whl", hash = "sha256:d0d8a46f98addbfe25f8b7ce2658ecf3e76a0463ad7d056794389ade5225be7a", size = 245603, upload-time = "2026-07-17T02:19:06.894Z" },
+    { url = "https://files.pythonhosted.org/packages/4d/05/d0e72683d31f079508b4492cb7b9df5f2cf8423fc1cdaec9c89a2dab6910/zigpy-2.1.0-py3-none-any.whl", hash = "sha256:868f670bbf1e61c715893be4a996035d68918ebbc66c2f3e2c0475fe0dcce97a", size = 251969, upload-time = "2026-07-28T20:13:50.679Z" },
 ]
 
 [[package]]
 name = "zigpy-deconz"
-version = "0.25.5"
+version = "1.0.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "voluptuous" },
     { name = "zigpy" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/69/8e/596923f63e2d03172b3f81e2f35385bb276a93e3fc333ad2cdce7975f192/zigpy_deconz-0.25.5.tar.gz", hash = "sha256:8105605f1f9fc84161d9dc617edf04343db4ca1ee59465a63b8c691616c69fe4", size = 48588, upload-time = "2025-11-02T19:08:29.783Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/d4/ed/5d34367a2dfa6131319c3edea842772a2b71b8b9c853430e7c3d7287d449/zigpy_deconz-1.0.0.tar.gz", hash = "sha256:28cb213eeecaf7929f2304de3c462ab39178fe9b6b1be2a525b16f86dff4015b", size = 48763, upload-time = "2026-07-28T19:56:44.693Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/83/2b/88a9da0ed212d62fa4fc0fbd7b9079d85cd791efd0da410423ae399876b6/zigpy_deconz-0.25.5-py3-none-any.whl", hash = "sha256:8fb1ec3da00aa9e5607a9e7499dc9ebabeb99b996e3bb7b2cd456fa62e1029e8", size = 33496, upload-time = "2025-11-02T19:08:28.519Z" },
+    { url = "https://files.pythonhosted.org/packages/6b/08/e0050af0252ce13bf5f403b66d1d268992bf4af40cbfb9758b276cf22256/zigpy_deconz-1.0.0-py3-none-any.whl", hash = "sha256:824ed1f7b7c4f6309296296ac4432a6874d4932e859436f285d3c52f90fc5af5", size = 33562, upload-time = "2026-07-28T19:56:43.493Z" },
 ]
 
 [[package]]
@@ -4172,17 +4184,18 @@ wheels = [
 
 [[package]]
 name = "zigpy-ziggurat"
-version = "1.0.1"
+version = "1.1.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "aiohttp", version = "3.10.5", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.14.2'" },
     { name = "aiohttp", version = "3.14.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.14.2'" },
+    { name = "aiospinel" },
     { name = "mashumaro" },
     { name = "zigpy" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/23/da/3ac4eb47e278ca1e0825ccbb182fb9b0f8bda874164f378a3b7b918adedb/zigpy_ziggurat-1.0.1.tar.gz", hash = "sha256:9ffd74c03b332fcf3ebf0514a446f13eb402fb42b8efce42190fa89679c25488", size = 22727, upload-time = "2026-06-23T21:34:51.82Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/6b/9b/d1f98bfd8a517db73021f36d8041583c0993e80878d6fd978664db8eac86/zigpy_ziggurat-1.1.1.tar.gz", hash = "sha256:d8bc0ef5a099a4207ccc3b0d41acc2b9f81e7b938cbee22d8fcd7d68a1b8e609", size = 54178, upload-time = "2026-07-28T23:11:49.48Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/a9/90/3b1e92e72e388f1022494c0c9cbcc0b7780ca7a6b2bcd1c05da58b7fa6f2/zigpy_ziggurat-1.0.1-py3-none-any.whl", hash = "sha256:62432bb4804cd98639d483545a5b550f4c2776fffa8facec58e654ff49698a18", size = 14636, upload-time = "2026-06-23T21:34:50.841Z" },
+    { url = "https://files.pythonhosted.org/packages/63/88/2fc708548c11ea8c2f07df910874b2b7a6a2ffeb1abcd6ccab9eabddee5c/zigpy_ziggurat-1.1.1-py3-none-any.whl", hash = "sha256:d839fcbc55a876ed3dfc0d17032efed1a5743fad30b8feb5fe0d67a646dd078e", size = 33261, upload-time = "2026-07-28T23:11:48.638Z" },
 ]
 
 [[package]]
