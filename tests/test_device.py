@@ -1135,7 +1135,7 @@ async def test_quirks_v2_translation_placeholders(zha_gateway: Gateway) -> None:
 
     assert (
         entity.translation_placeholders
-        == entity.info_object.translation_placeholders
+        == entity.state.translation_placeholders
         == {"sensor_index": "1"}
     )
 
@@ -1800,9 +1800,12 @@ async def test_gateway_reconfigure_with_swap(
     assert len(zha_device.platform_entities) > 0
 
     # Verify the group is subscribed to the NEW entity, not the old one.
-    # Emit a state change on the new entity and check the group got it.
+    # Cause a real state change on the new entity and check the group got it.
     new_switch = get_entity(zha_device, platform=Platform.SWITCH)
     mock_group_entity.debounced_update.reset_mock()
+    new_switch._cluster.update_attribute(
+        general.OnOff.AttributeDefs.on_off.id, zigpy.types.Bool.true
+    )
     new_switch.maybe_emit_state_changed_event()
     assert mock_group_entity.debounced_update.called
 

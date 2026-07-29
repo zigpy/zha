@@ -61,8 +61,8 @@ async def test_select(zha_gateway: Gateway) -> None:
     select_name = security.IasWd.Warning.WarningMode.__name__
 
     entity = get_entity(zha_device, platform=Platform.SELECT, qualifier=select_name)
-    assert entity.state["state"] is None  # unknown in HA
-    assert entity.info_object.options == [
+    assert entity.state.current_option is None  # unknown in HA
+    assert entity.state.options == [
         "Stop",
         "Burglar",
         "Fire",
@@ -76,7 +76,9 @@ async def test_select(zha_gateway: Gateway) -> None:
     # change value from client
     await entity.async_select_option(security.IasWd.Warning.WarningMode.Burglar.name)
     await zha_gateway.async_block_till_done()
-    assert entity.state["state"] == security.IasWd.Warning.WarningMode.Burglar.name
+    assert (
+        entity.state.current_option == security.IasWd.Warning.WarningMode.Burglar.name
+    )
 
 
 class MotionSensitivityQuirk(CustomDevice):
@@ -137,13 +139,13 @@ async def test_on_off_select_attribute_report(zha_gateway: Gateway) -> None:
     cluster = aqara_sensor.device.endpoints.get(1).opple_cluster
 
     entity = get_entity(aqara_sensor, platform=Platform.SELECT)
-    assert entity.state["state"] == AqaraMotionSensitivities.Medium.name
+    assert entity.state.current_option == AqaraMotionSensitivities.Medium.name
 
     # send attribute report from device
     await send_attributes_report(
         zha_gateway, cluster, {"motion_sensitivity": AqaraMotionSensitivities.Low}
     )
-    assert entity.state["state"] == AqaraMotionSensitivities.Low.name
+    assert entity.state.current_option == AqaraMotionSensitivities.Low.name
 
 
 (
@@ -206,17 +208,17 @@ async def test_on_off_select_attribute_report_v2(
     entity = get_entity(
         zha_device,
         platform=Platform.SELECT,
-        qualifier_func=lambda e: e.info_object.unique_id.endswith("motion_sensitivity"),
+        qualifier_func=lambda e: e.state.unique_id.endswith("motion_sensitivity"),
     )
 
     # test that the state is in default medium state
-    assert entity.state["state"] == AqaraMotionSensitivities.Medium.name
+    assert entity.state.current_option == AqaraMotionSensitivities.Medium.name
 
     # send attribute report from device
     await send_attributes_report(
         zha_gateway, cluster, {"motion_sensitivity": AqaraMotionSensitivities.Low}
     )
-    assert entity.state["state"] == AqaraMotionSensitivities.Low.name
+    assert entity.state.current_option == AqaraMotionSensitivities.Low.name
 
     assert entity._attr_entity_category == EntityCategory.CONFIG
     assert entity._attr_entity_registry_enabled_default is True
@@ -242,7 +244,7 @@ async def test_on_off_select_attribute_report_v2(
         await entity.async_select_option(AqaraMotionSensitivities.Medium.name)
 
         await zha_gateway.async_block_till_done()
-        assert entity.state["state"] == AqaraMotionSensitivities.Medium.name
+        assert entity.state.current_option == AqaraMotionSensitivities.Medium.name
         assert cluster.write_attributes.call_count == 1
         assert cluster.write_attributes.call_args == call(
             {"motion_sensitivity": AqaraMotionSensitivities.Medium},
@@ -268,17 +270,19 @@ async def test_non_zcl_select_state_restoration(zha_gateway: Gateway) -> None:
 
     entity = get_entity(zha_device, platform=Platform.SELECT, qualifier="WarningMode")
 
-    assert entity.state["state"] is None
+    assert entity.state.current_option is None
 
     entity.restore_external_state_attributes(
         state=security.IasWd.Warning.WarningMode.Burglar.name
     )
-    assert entity.state["state"] == security.IasWd.Warning.WarningMode.Burglar.name
+    assert (
+        entity.state.current_option == security.IasWd.Warning.WarningMode.Burglar.name
+    )
 
     entity.restore_external_state_attributes(
         state=security.IasWd.Warning.WarningMode.Fire.name
     )
-    assert entity.state["state"] == security.IasWd.Warning.WarningMode.Fire.name
+    assert entity.state.current_option == security.IasWd.Warning.WarningMode.Fire.name
 
 
 async def test_bega_color_temperature_channel_select(zha_gateway: Gateway) -> None:
@@ -296,8 +300,8 @@ async def test_bega_color_temperature_channel_select(zha_gateway: Gateway) -> No
         platform=Platform.SELECT,
         qualifier="switchable_white",
     )
-    assert entity.state["state"] == "Warm white"
-    assert entity.info_object.options == ["Warm white", "Cool white"]
+    assert entity.state.current_option == "Warm white"
+    assert entity.state.options == ["Warm white", "Cool white"]
 
     # send attribute report from device
     await send_attributes_report(
@@ -305,7 +309,7 @@ async def test_bega_color_temperature_channel_select(zha_gateway: Gateway) -> No
         cluster,
         {"switchable_white": BegaColorTemperatureChannel.Cool_white},
     )
-    assert entity.state["state"] == "Cool white"
+    assert entity.state.current_option == "Cool white"
 
     # test selecting an option
     Write_Attributes_rsp = foundation.GENERAL_COMMANDS[
@@ -327,7 +331,7 @@ async def test_bega_color_temperature_channel_select(zha_gateway: Gateway) -> No
     ):
         await entity.async_select_option("Warm white")
         await zha_gateway.async_block_till_done()
-        assert entity.state["state"] == "Warm white"
+        assert entity.state.current_option == "Warm white"
         assert cluster.write_attributes.call_count == 1
         assert cluster.write_attributes.call_args == call(
             {"switchable_white": BegaColorTemperatureChannel.Warm_white},

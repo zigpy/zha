@@ -7,7 +7,6 @@ import asyncio
 import contextlib
 from dataclasses import dataclass
 from enum import Enum, IntFlag
-import functools
 from typing import TYPE_CHECKING, Any, Final
 
 from zigpy.profiles import zha
@@ -15,6 +14,7 @@ from zigpy.zcl.clusters.security import (
     IasWd,
     SirenLevel,
     Squawk,
+    SquawkLevel,
     SquawkMode,
     Strobe,
     StrobeLevel,
@@ -24,7 +24,7 @@ from zigpy.zcl.clusters.security import (
 
 from zha.application import Platform
 from zha.application.platforms import (
-    BaseEntityInfo,
+    BaseEntityState,
     ClusterConfig,
     ClusterMatch,
     PlatformEntity,
@@ -57,9 +57,10 @@ class SirenEntityFeature(IntFlag):
 
 
 @dataclass(frozen=True, kw_only=True)
-class SirenEntityInfo(BaseEntityInfo):
-    """Siren entity info."""
+class SirenState(BaseEntityState):
+    """State for siren entities."""
 
+    is_on: bool
     available_tones: dict[int, str]
     supported_features: SirenEntityFeature
 
@@ -74,11 +75,14 @@ class BaseSiren(PlatformEntity, ABC):
     _attr_supported_features: SirenEntityFeature
 
     @property
-    def state(self) -> dict[str, Any]:
+    def state(self) -> SirenState:
         """Get the state of the siren."""
-        response = super().state
-        response["state"] = self.is_on
-        return response
+        return SirenState(
+            **super().state.__dict__,
+            is_on=self.is_on,
+            available_tones=self.available_tones,
+            supported_features=self.supported_features,
+        )
 
     @property
     def is_on(self) -> bool:
@@ -94,15 +98,6 @@ class BaseSiren(PlatformEntity, ABC):
     def supported_features(self) -> SirenEntityFeature:
         """Return supported features."""
         return self._attr_supported_features
-
-    @functools.cached_property
-    def info_object(self) -> SirenEntityInfo:
-        """Return representation of the siren."""
-        return SirenEntityInfo(
-            **super().info_object.__dict__,
-            available_tones=self.available_tones,
-            supported_features=self.supported_features,
-        )
 
     @abstractmethod
     async def async_turn_on(
@@ -206,8 +201,8 @@ class BaseZclSiren(BaseSiren, ABC):
         """Issue an IAS WD squawk command."""
         squawk = Squawk()
         squawk.mode = mode
-        squawk.strobe = strobe
-        squawk.level = squawk_level
+        squawk.strobe = Strobe(strobe)  # type:ignore[no-untyped-call]
+        squawk.level = SquawkLevel(squawk_level)  # type:ignore[no-untyped-call]
         await self._cluster.squawk(squawk=squawk)
 
     def _async_set_off(self) -> None:

@@ -157,7 +157,7 @@ async def async_test_temperature(
     zha_gateway: Gateway, cluster: Cluster, entity: PlatformEntity
 ) -> None:
     """Test temperature sensor."""
-    assert entity.extra_state_attribute_names is None
+    assert entity.state.extra_state_attribute_names == frozenset()
     await send_attributes_report(zha_gateway, cluster, {1: 1, 0: 2900, 2: 100})
     assert_state(entity, 29.0, "°C")
 
@@ -188,7 +188,7 @@ async def async_test_metering(
     zha_gateway: Gateway, cluster: Cluster, entity: PlatformEntity
 ) -> None:
     """Test Smart Energy metering sensor."""
-    assert entity.extra_state_attribute_names == {
+    assert entity.state.extra_state_attribute_names == {
         "status",
         "device_type",
         "zcl_unit_of_measurement",
@@ -197,12 +197,12 @@ async def async_test_metering(
         zha_gateway, cluster, {1025: 1, 1024: 12345, 1026: 100}
     )
     assert_state(entity, 12345.0, None)
-    assert entity.state["status"] == "NO_ALARMS"
-    assert entity.state["device_type"] == "Electric Metering"
+    assert entity.state.status == "NO_ALARMS"
+    assert entity.state.device_type == "Electric Metering"
 
     await send_attributes_report(zha_gateway, cluster, {1024: 12346, "status": 64 + 8})
     assert_state(entity, 12346.0, None)
-    assert entity.state["status"] in (
+    assert entity.state.status in (
         "SERVICE_DISCONNECT|POWER_FAILURE",
         "POWER_FAILURE|SERVICE_DISCONNECT",
     )
@@ -210,7 +210,7 @@ async def async_test_metering(
     await send_attributes_report(
         zha_gateway, cluster, {"status": 64 + 8, "metering_device_type": 1}
     )
-    assert entity.state["status"] in (
+    assert entity.state.status in (
         "SERVICE_DISCONNECT|NOT_DEFINED",
         "NOT_DEFINED|SERVICE_DISCONNECT",
     )
@@ -218,7 +218,7 @@ async def async_test_metering(
     await send_attributes_report(
         zha_gateway, cluster, {"status": 64 + 8, "metering_device_type": 2}
     )
-    assert entity.state["status"] in (
+    assert entity.state.status in (
         "SERVICE_DISCONNECT|PIPE_EMPTY",
         "PIPE_EMPTY|SERVICE_DISCONNECT",
     )
@@ -226,7 +226,7 @@ async def async_test_metering(
     await send_attributes_report(
         zha_gateway, cluster, {"status": 64 + 8, "metering_device_type": 5}
     )
-    assert entity.state["status"] in (
+    assert entity.state.status in (
         "SERVICE_DISCONNECT|TEMPERATURE_SENSOR",
         "TEMPERATURE_SENSOR|SERVICE_DISCONNECT",
     )
@@ -235,14 +235,14 @@ async def async_test_metering(
     await send_attributes_report(
         zha_gateway, cluster, {"status": 32, "metering_device_type": 4}
     )
-    assert entity.state["status"] in ("<bitmap8.32: 32>", "32")
+    assert entity.state.status in ("<bitmap8.32: 32>", "32")
 
 
 async def async_test_smart_energy_summation_delivered(
     zha_gateway: Gateway, cluster, entity
 ):
     """Test SmartEnergy Summation delivered sensor."""
-    assert entity.extra_state_attribute_names == {
+    assert entity.state.extra_state_attribute_names == {
         "status",
         "device_type",
         "zcl_unit_of_measurement",
@@ -251,9 +251,9 @@ async def async_test_smart_energy_summation_delivered(
         zha_gateway, cluster, {1025: 1, "current_summ_delivered": 12321, 1026: 100}
     )
     assert_state(entity, 12.321, UnitOfEnergy.KILO_WATT_HOUR)
-    assert entity.state["status"] == "NO_ALARMS"
-    assert entity.state["device_type"] == "Electric Metering"
-    assert entity.info_object.device_class == SensorDeviceClass.ENERGY
+    assert entity.state.status == "NO_ALARMS"
+    assert entity.state.device_type == "Electric Metering"
+    assert entity.state.device_class == SensorDeviceClass.ENERGY
 
 
 async def async_test_smart_energy_summation_received(
@@ -265,9 +265,9 @@ async def async_test_smart_energy_summation_received(
         zha_gateway, cluster, {1025: 1, "current_summ_received": 12321, 1026: 100}
     )
     assert_state(entity, 12.321, UnitOfEnergy.KILO_WATT_HOUR)
-    assert entity.state["status"] == "NO_ALARMS"
-    assert entity.state["device_type"] == "Electric Metering"
-    assert entity.info_object.device_class == SensorDeviceClass.ENERGY
+    assert entity.state.status == "NO_ALARMS"
+    assert entity.state.device_type == "Electric Metering"
+    assert entity.state.device_class == SensorDeviceClass.ENERGY
 
 
 async def async_test_smart_energy_summation(
@@ -279,8 +279,8 @@ async def async_test_smart_energy_summation(
         zha_gateway, cluster, {1025: 1, "current_summ_delivered": 12321, 1026: 100}
     )
     assert_state(entity, 12.32, "m³")
-    assert entity.state["status"] == "NO_ALARMS"
-    assert entity.state["device_type"] == "Electric Metering"
+    assert entity.state.status == "NO_ALARMS"
+    assert entity.state.device_type == "Electric Metering"
 
 
 async def async_test_electrical_measurement(
@@ -311,7 +311,14 @@ async def async_test_electrical_measurement(
     assert_state(entity, 9.9, "W")
 
     await send_attributes_report(zha_gateway, cluster, {0: 1, 0x050D: 88})
-    assert entity.state["active_power_max"] == 8.8
+    assert entity.state.max_value == 8.8
+    assert entity.state.max_attribute_name == "active_power_max"
+
+    # The max value is exposed under the ZCL attribute's name
+    assert entity.state.extra_state_attributes == {
+        "measurement_type": entity.state.measurement_type,
+        "active_power_max": 8.8,
+    }
 
 
 async def async_test_em_apparent_power(
@@ -338,7 +345,7 @@ async def async_test_em_power_factor(
     zha_gateway: Gateway, cluster: Cluster, entity: PlatformEntity
 ):
     """Test electrical measurement Power Factor sensor."""
-    assert entity.extra_state_attribute_names == {"measurement_type"}
+    assert entity.state.extra_state_attribute_names == {"measurement_type"}
 
     # update divisor cached value
     await send_attributes_report(zha_gateway, cluster, {"ac_power_divisor": 1})
@@ -377,14 +384,17 @@ async def async_test_em_rms_current(
     assert_state(entity, 123.6, "A")
 
     await send_attributes_report(zha_gateway, cluster, {0: 1, current_max_attrid: 88})
-    assert entity.state[current_max_attr_name] == 8.8
+    assert entity.state.max_value == 8.8
 
 
 async def async_test_em_rms_voltage(
     zha_gateway: Gateway, cluster: Cluster, entity: PlatformEntity
 ) -> None:
     """Test electrical measurement RMS Voltage sensor."""
-    assert entity.extra_state_attribute_names == {"measurement_type", "rms_voltage_max"}
+    assert entity.state.extra_state_attribute_names == {
+        "measurement_type",
+        "rms_voltage_max",
+    }
 
     await send_attributes_report(zha_gateway, cluster, {0: 1, 0x0505: 1234})
     assert_state(entity, 123.4, "V")
@@ -397,25 +407,30 @@ async def async_test_em_rms_voltage(
     assert_state(entity, 22.36, "V")
 
     await send_attributes_report(zha_gateway, cluster, {0: 1, 0x0507: 888})
-    assert entity.state["rms_voltage_max"] == 8.88
+    assert entity.state.max_value == 8.88
 
 
 async def async_test_powerconfiguration(
     zha_gateway: Gateway, cluster: Cluster, entity: PlatformEntity
 ) -> None:
     """Test powerconfiguration/battery sensor."""
-    assert entity.extra_state_attribute_names == {
+    assert entity.state.extra_state_attribute_names == {
         "battery_voltage",
         "battery_quantity",
         "battery_size",
     }
     await send_attributes_report(zha_gateway, cluster, {33: 98})
     assert_state(entity, 49, "%")
-    assert entity.state["battery_voltage"] == 2.9
-    assert entity.state["battery_quantity"] == 3
-    assert entity.state["battery_size"] == "AAA"
+    assert entity.state.battery_voltage == 2.9
+    assert entity.state.battery_quantity == 3
+    assert entity.state.battery_size == "AAA"
+    assert entity.state.extra_state_attributes == {
+        "battery_voltage": 2.9,
+        "battery_quantity": 3,
+        "battery_size": "AAA",
+    }
     await send_attributes_report(zha_gateway, cluster, {32: 20})
-    assert entity.state["battery_voltage"] == 2.0
+    assert entity.state.battery_voltage == 2.0
 
 
 async def async_test_powerconfiguration2(
@@ -446,7 +461,8 @@ async def async_test_setpoint_change_source(
         cluster,
         {hvac.Thermostat.AttributeDefs.setpoint_change_source.id: 0x01},
     )
-    assert entity.state["state"] == "Schedule"
+    assert entity.state.native_value == "Schedule"
+    assert entity.state.options == ["Manual", "Schedule", "External"]
 
 
 async def async_test_pi_heating_demand(
@@ -468,14 +484,14 @@ async def async_test_change_source_timestamp(
         cluster,
         {hvac.Thermostat.AttributeDefs.setpoint_change_source_timestamp.id: 781355715},
     )
-    assert entity.state["state"] == datetime(2024, 10, 4, 11, 15, 15, tzinfo=UTC)
+    assert entity.state.native_value == datetime(2024, 10, 4, 11, 15, 15, tzinfo=UTC)
 
 
 async def async_test_em_dc_voltage(
     zha_gateway: Gateway, cluster: Cluster, entity: PlatformEntity
 ) -> None:
     """Test electrical measurement DC Voltage sensor."""
-    assert entity.extra_state_attribute_names == {"measurement_type"}
+    assert entity.state.extra_state_attribute_names == {"measurement_type"}
 
     await send_attributes_report(zha_gateway, cluster, {0: 1, 0x0100: 1234})
     assert_state(entity, 123.4, "V")
@@ -799,13 +815,13 @@ async def test_analog_input_simple(zha_gateway: Gateway) -> None:
         zha_dev, platform=Platform.SENSOR, exact_entity_type=AnalogInputSensor
     )
 
-    assert entity.state["available"] is True
-    assert entity.state["state"] == 2.1322579383850098
-    assert entity.info_object.fallback_name == "Some description"
-    assert entity.info_object.translation_key is None
-    assert entity.info_object.unit == UnitOfElectricPotential.VOLT
-    assert entity.info_object.device_class is None
-    assert entity.info_object.suggested_display_precision is None
+    assert entity.state.available is True
+    assert entity.state.native_value == 2.1322579383850098
+    assert entity.state.fallback_name == "Some description"
+    assert entity.state.translation_key is None
+    assert entity.state.unit == UnitOfElectricPotential.VOLT
+    assert entity.state.device_class is None
+    assert entity.state.suggested_display_precision is None
 
 
 async def test_analog_input_ignored(zha_gateway: Gateway) -> None:
@@ -874,13 +890,13 @@ async def test_analog_input_complex(zha_gateway: Gateway) -> None:
         zha_dev, platform=Platform.SENSOR, exact_entity_type=AnalogInputSensor
     )
 
-    assert entity.state["available"] is True
-    assert entity.state["state"] == 2.1322579383850098
-    assert entity.info_object.fallback_name == "Some description"
-    assert entity.info_object.translation_key is None
-    assert entity.info_object.unit is PERCENTAGE  # overridden!
-    assert entity.info_object.device_class is SensorDeviceClass.HUMIDITY  # overridden!
-    assert entity.info_object.suggested_display_precision == 2
+    assert entity.state.available is True
+    assert entity.state.native_value == 2.1322579383850098
+    assert entity.state.fallback_name == "Some description"
+    assert entity.state.translation_key is None
+    assert entity.state.unit is PERCENTAGE  # overridden!
+    assert entity.state.device_class is SensorDeviceClass.HUMIDITY  # overridden!
+    assert entity.state.suggested_display_precision == 2
 
 
 @pytest.mark.parametrize("resolution", [0.0, float("inf")])
@@ -905,7 +921,7 @@ async def test_analog_input_bogus_resolution(
     entity = get_entity(
         zha_dev, platform=Platform.SENSOR, exact_entity_type=AnalogInputSensor
     )
-    assert entity.info_object.suggested_display_precision is None
+    assert entity.state.suggested_display_precision is None
 
 
 def assert_state(entity: PlatformEntity, state: Any, unit_of_measurement: str) -> None:
@@ -914,8 +930,8 @@ def assert_state(entity: PlatformEntity, state: Any, unit_of_measurement: str) -
     This is used to ensure that the logic in each sensor class handled the
     attribute report it received correctly.
     """
-    assert entity.state["state"] == state
-    assert entity.info_object.unit == unit_of_measurement
+    assert entity.state.native_value == state
+    assert entity.state.unit == unit_of_measurement
 
 
 async def test_electrical_measurement_init(zha_gateway: Gateway) -> None:
@@ -948,21 +964,21 @@ async def test_electrical_measurement_init(zha_gateway: Gateway) -> None:
         cluster,
         {EMAttrs.active_power.id: 100},
     )
-    assert entity.state["state"] == 100
+    assert entity.state.native_value == 100
 
     await send_attributes_report(
         zha_gateway,
         cluster,
         {EMAttrs.active_power.id: 30, EMAttrs.ac_power_divisor.id: 10},
     )
-    assert entity.state["state"] == 3.0
+    assert entity.state.native_value == 3.0
 
     await send_attributes_report(
         zha_gateway,
         cluster,
         {EMAttrs.active_power.id: 30, EMAttrs.ac_power_multiplier.id: 20},
     )
-    assert entity.state["state"] == 60.0
+    assert entity.state.native_value == 60.0
 
 
 @pytest.mark.parametrize(
@@ -1265,7 +1281,7 @@ async def test_elec_measurement_sensor_type(
         platform=Platform.SENSOR,
         entity_type=sensor.ElectricalMeasurementApparentPower,
     )
-    assert entity.state["measurement_type"] == expected_type
+    assert entity.state.measurement_type == expected_type
 
 
 async def test_elec_measurement_sensor_polling(zha_gateway: Gateway) -> None:
@@ -1284,7 +1300,7 @@ async def test_elec_measurement_sensor_polling(zha_gateway: Gateway) -> None:
         platform=Platform.SENSOR,
         exact_entity_type=sensor.ElectricalMeasurementActivePower,
     )
-    assert entity.state["state"] == 2.0
+    assert entity.state.native_value == 2.0
 
     # update the value for the power reading
     zigpy_dev.endpoints[1].electrical_measurement.PLUGGED_ATTR_READS["active_power"] = (
@@ -1292,14 +1308,14 @@ async def test_elec_measurement_sensor_polling(zha_gateway: Gateway) -> None:
     )
 
     # ensure the state is still 2.0
-    assert entity.state["state"] == 2.0
+    assert entity.state.native_value == 2.0
 
     # let the polling happen
     await asyncio.sleep(90)
     await zha_gateway.async_block_till_done(wait_background_tasks=True)
 
     # ensure the state has been updated to 6.0
-    assert entity.state["state"] == 6.0
+    assert entity.state.native_value == 6.0
 
 
 async def test_metering_sensor_polling(zha_gateway: Gateway) -> None:
@@ -1318,7 +1334,7 @@ async def test_metering_sensor_polling(zha_gateway: Gateway) -> None:
         platform=Platform.SENSOR,
         exact_entity_type=sensor.SmartEnergySummation,
     )
-    assert entity.state["state"] == 2.0
+    assert entity.state.native_value == 2.0
 
     # update the value for the power reading
     zigpy_dev.endpoints[1].smartenergy_metering.PLUGGED_ATTR_READS[
@@ -1326,14 +1342,14 @@ async def test_metering_sensor_polling(zha_gateway: Gateway) -> None:
     ] = 6000
 
     # ensure the state is still 2.0
-    assert entity.state["state"] == 2.0
+    assert entity.state.native_value == 2.0
 
     # let the polling happen
     await asyncio.sleep(90)
     await zha_gateway.async_block_till_done(wait_background_tasks=True)
 
     # ensure the state has been updated to 6.0
-    assert entity.state["state"] == 6.0
+    assert entity.state.native_value == 6.0
 
 
 @pytest.mark.parametrize(
@@ -1489,7 +1505,7 @@ async def test_timestamp_sensor_v2(zha_gateway: Gateway) -> None:
     entity = get_entity(zha_device, platform=Platform.SENSOR, qualifier="start_time")
 
     await send_attributes_report(zha_gateway, cluster, {"start_time": 781355715})
-    assert entity.state["state"] == datetime(2024, 10, 4, 11, 15, 15, tzinfo=UTC)
+    assert entity.state.native_value == datetime(2024, 10, 4, 11, 15, 15, tzinfo=UTC)
 
 
 class OppleCluster(CustomCluster, ManufacturerSpecificCluster):
@@ -1609,12 +1625,12 @@ async def test_state_class(
     power_entity = get_entity(
         zha_device,
         platform=Platform.SENSOR,
-        qualifier_func=lambda e: e.info_object.unique_id.endswith("power"),
+        qualifier_func=lambda e: e.state.unique_id.endswith("power"),
     )
     energy_entity = get_entity(
         zha_device,
         platform=Platform.SENSOR,
-        qualifier_func=lambda e: e.info_object.unique_id.endswith("energy"),
+        qualifier_func=lambda e: e.state.unique_id.endswith("energy"),
     )
     energy_delivered_entity = get_entity(
         zha_device, platform=Platform.SENSOR, qualifier="energy_delivered"
@@ -1738,12 +1754,12 @@ async def test_device_counter_sensors(zha_gateway: Gateway) -> None:
     entity = get_entity(
         coordinator,
         platform=Platform.SENSOR,
-        qualifier_func=lambda e: e.info_object.unique_id.endswith(
-            "ezsp_counters_counter_1"
-        ),
+        qualifier_func=lambda e: e.state.unique_id.endswith("ezsp_counters_counter_1"),
     )
 
-    assert entity.state["state"] == 1
+    assert entity.state.native_value == 1
+    assert entity.state.available is True
+    assert entity.state.device_ieee == coordinator.ieee
 
     # simulate counter increment on application
     coordinator.device.application.state.counters["ezsp_counters"][
@@ -1753,7 +1769,7 @@ async def test_device_counter_sensors(zha_gateway: Gateway) -> None:
     await asyncio.sleep(zha_gateway.global_updater.__polling_interval + 2)
     await zha_gateway.async_block_till_done(wait_background_tasks=True)
 
-    assert entity.state["state"] == 2
+    assert entity.state.native_value == 2
 
     # test disabling the entity disables it and removes it from the updater
     assert len(zha_gateway.global_updater._update_listeners) == 3
@@ -1794,14 +1810,14 @@ async def test_device_unavailable_or_disabled_skips_entity_polling(
         exact_entity_type=sensor.RSSISensor,
     )
 
-    assert entity.state["state"] is None
+    assert entity.state.native_value is None
 
     elec_measurement_zha_dev.device.rssi = 60
 
     await asyncio.sleep(zha_gateway.global_updater.__polling_interval + 2)
     await zha_gateway.async_block_till_done(wait_background_tasks=True)
 
-    assert entity.state["state"] == 60
+    assert entity.state.native_value == 60
     assert entity.enabled is True
     assert len(zha_gateway.global_updater._update_listeners) == 5
 
@@ -1902,10 +1918,14 @@ async def test_danfoss_thermostat_sw_error(zha_gateway: Gateway) -> None:
         },
     )
 
-    assert entity.state["state"] == "something"
-    assert entity.extra_state_attribute_names
-    assert "Top_pcb_sensor_error" in entity.extra_state_attribute_names
-    assert entity.state["Top_pcb_sensor_error"]
+    assert entity.state.native_value == "something"
+    assert entity.state.extra_state_attribute_names
+    assert "Top_pcb_sensor_error" in entity.state.extra_state_attribute_names
+    assert entity.state.bit_states["Top_pcb_sensor_error"]
+
+    # Consumers resolve the advertised names against `bit_states`
+    assert entity.state.extra_state_attribute_names == set(entity.state.bit_states)
+    assert entity.state.extra_state_attributes == entity.state.bit_states
 
 
 async def test_quirks_sensor_attr_converter(zha_gateway: Gateway) -> None:
@@ -1951,10 +1971,10 @@ async def test_quirks_sensor_attr_converter(zha_gateway: Gateway) -> None:
 
     # send updated value, check if the value is converted
     await send_attributes_report(zha_gateway, cluster, {"present_value": 100})
-    assert entity.state["state"] == 200.0
+    assert entity.state.native_value == 200.0
 
     await send_attributes_report(zha_gateway, cluster, {"present_value": 0})
-    assert entity.state["state"] == 100.0
+    assert entity.state.native_value == 100.0
 
 
 async def test_ignore_non_value(zha_gateway: Gateway) -> None:
@@ -1969,7 +1989,7 @@ async def test_ignore_non_value(zha_gateway: Gateway) -> None:
     cluster = zha_device.device.endpoints[1].temperature
     entity = get_entity(zha_device, platform=Platform.SENSOR, entity_type=Temperature)
 
-    assert entity.state["state"] == 22.3
+    assert entity.state.native_value == 22.3
 
     # Normal attribute report
     await send_attributes_report(
@@ -1977,7 +1997,7 @@ async def test_ignore_non_value(zha_gateway: Gateway) -> None:
         cluster,
         {measurement.TemperatureMeasurement.AttributeDefs.measured_value.id: 3000},
     )
-    assert entity.state["state"] == 30.0
+    assert entity.state.native_value == 30.0
 
     # Invalid attribute value, ignored
     await send_attributes_report(
@@ -1985,7 +2005,7 @@ async def test_ignore_non_value(zha_gateway: Gateway) -> None:
         cluster,
         {measurement.TemperatureMeasurement.AttributeDefs.measured_value.id: -0x8000},
     )
-    assert entity.state["state"] is None
+    assert entity.state.native_value is None
 
 
 async def test_ignore_non_value_quirks_v2(zha_gateway: Gateway) -> None:
@@ -2003,11 +2023,11 @@ async def test_ignore_non_value_quirks_v2(zha_gateway: Gateway) -> None:
 
     # Normal attribute report
     await send_attributes_report(zha_gateway, cluster, {"measured_value": 100})
-    assert entity.state["state"] == 100
+    assert entity.state.native_value == 100
 
     # Invalid attribute value (uint16 non_value), should be ignored
     await send_attributes_report(zha_gateway, cluster, {"measured_value": 0xFFFF})
-    assert entity.state["state"] is None
+    assert entity.state.native_value is None
 
 
 async def test_ignore_nan_value(zha_gateway: Gateway) -> None:
@@ -2027,7 +2047,7 @@ async def test_ignore_nan_value(zha_gateway: Gateway) -> None:
     )
 
     # Initial value from the diagnostics file (0.0 * 1e6 = 0.0 ppm)
-    assert entity.state["state"] == 0.0
+    assert entity.state.native_value == 0.0
 
     # Normal attribute report
     await send_attributes_report(
@@ -2037,7 +2057,7 @@ async def test_ignore_nan_value(zha_gateway: Gateway) -> None:
             measurement.CarbonMonoxideConcentration.AttributeDefs.measured_value.id: 0.001
         },
     )
-    assert entity.state["state"] == 1000.0
+    assert entity.state.native_value == 1000.0
 
     # NaN attribute value should result in None state
     await send_attributes_report(
@@ -2049,7 +2069,7 @@ async def test_ignore_nan_value(zha_gateway: Gateway) -> None:
             ),
         },
     )
-    assert entity.state["state"] is None
+    assert entity.state.native_value is None
 
 
 @pytest.mark.parametrize(
@@ -2127,14 +2147,14 @@ async def test_enum_sensor(zha_gateway: Gateway) -> None:
     zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
     entity = get_entity(zha_device, platform=Platform.SENSOR, qualifier="battery_size")
 
-    assert entity.state["state"] == "AAA"
+    assert entity.state.native_value == "AAA"
 
     zigpy_dev.endpoints[1].power.update_attribute(
         PowerConfiguration.AttributeDefs.battery_size.id,
         0xAB,  # unknown
     )
 
-    assert entity.state["state"] == "undefined_0xab"  # TODO: should this be `None`?
+    assert entity.state.native_value == "undefined_0xab"  # TODO: should this be `None`?
 
 
 async def test_em_poller_runs_independently_of_entity_enabled_state(

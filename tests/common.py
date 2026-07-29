@@ -254,7 +254,7 @@ def get_group_entity(
         if not isinstance(entity, entity_type):
             continue
 
-        if qualifier is not None and qualifier not in entity.info_object.unique_id:
+        if qualifier is not None and qualifier not in entity.state.unique_id:
             continue
 
         return entity
@@ -285,7 +285,7 @@ def get_entity(
         if exact_entity_type is not None and type(entity) is not exact_entity_type:
             continue
 
-        if qualifier is not None and qualifier not in entity.info_object.unique_id:
+        if qualifier is not None and qualifier not in entity.state.unique_id:
             continue
 
         if not qualifier_func(entity):
@@ -311,51 +311,51 @@ async def group_entity_availability_test(
 ):
     """Test group entity availability handling."""
 
-    assert entity.state["available"] is True
+    assert entity.state.available is True
 
     device_1.on_network = False
     await asyncio.sleep(0.1)
     await zha_gateway.async_block_till_done()
-    assert entity.state["available"] is True
+    assert entity.state.available is True
 
     device_2.on_network = False
     await asyncio.sleep(0.1)
     await zha_gateway.async_block_till_done()
 
-    assert entity.state["available"] is False
+    assert entity.state.available is False
 
     device_1.on_network = True
     await asyncio.sleep(0.1)
     await zha_gateway.async_block_till_done()
-    assert entity.state["available"] is True
+    assert entity.state.available is True
 
     device_2.on_network = True
     await asyncio.sleep(0.1)
     await zha_gateway.async_block_till_done()
 
-    assert entity.state["available"] is True
+    assert entity.state.available is True
 
     device_1.available = False
     await asyncio.sleep(0.1)
     await zha_gateway.async_block_till_done()
-    assert entity.state["available"] is True
+    assert entity.state.available is True
 
     device_2.available = False
     await asyncio.sleep(0.1)
     await zha_gateway.async_block_till_done()
 
-    assert entity.state["available"] is False
+    assert entity.state.available is False
 
     device_1.available = True
     await asyncio.sleep(0.1)
     await zha_gateway.async_block_till_done()
-    assert entity.state["available"] is True
+    assert entity.state.available is True
 
     device_2.available = True
     await asyncio.sleep(0.1)
     await zha_gateway.async_block_till_done()
 
-    assert entity.state["available"] is True
+    assert entity.state.available is True
 
 
 def zigpy_device_from_device_data(  # noqa: C901

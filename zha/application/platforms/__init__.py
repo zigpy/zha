@@ -172,8 +172,8 @@ class EntityCategory(StrEnum):
 
 
 @dataclasses.dataclass(frozen=True, kw_only=True)
-class BaseEntityInfo:
-    """Information about a base entity."""
+class BaseEntityState:
+    """State for the base entity."""
 
     fallback_name: str
     unique_id: str
@@ -189,6 +189,8 @@ class BaseEntityInfo:
     enabled: bool = True
     primary: bool
 
+    extra_state_attribute_names: frozenset[str]
+
     # For platform entities
     device_ieee: EUI64 | None
     endpoint_id: int | None
@@ -196,6 +198,11 @@ class BaseEntityInfo:
 
     # For group entities
     group_id: int | None
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any]:
+        """Return the extra state attributes as a name to value mapping."""
+        return {name: getattr(self, name) for name in self.extra_state_attribute_names}
 
 
 @dataclasses.dataclass(frozen=True, kw_only=True)
@@ -232,6 +239,22 @@ class EntityStateChangedEvent:
     device_ieee: EUI64 | None = None
     endpoint_id: int | None = None
     group_id: int | None = None
+    state_diff: dict[str, Any]
+
+
+def compute_state_diff(
+    old: BaseEntityState | None, new: BaseEntityState
+) -> dict[str, Any]:
+    """Return the fields of `new` that differ from `old`."""
+    new_values = new.__dict__
+
+    if old is None:
+        return dict(new_values)
+
+    old_values = old.__dict__
+    return {
+        name: value for name, value in new_values.items() if old_values[name] != value
+    }
 
 
 class BaseEntity(LogMixin, EventBase):
@@ -254,6 +277,7 @@ class BaseEntity(LogMixin, EventBase):
     _attr_device_class: str | None = None
     _attr_state_class: str | None = None
     _attr_enabled: bool = True
+    _attr_extra_state_attribute_names: set[str] | None = None
     _attr_always_supported: bool = False
     _attr_primary: bool | None = None
 
@@ -384,11 +408,10 @@ class BaseEntity(LogMixin, EventBase):
             platform=self.PLATFORM,
         )
 
-    @cached_property
-    def info_object(self) -> BaseEntityInfo:
-        """Return a representation of the platform entity."""
-
-        return BaseEntityInfo(
+    @property
+    def state(self) -> BaseEntityState:
+        """Return the state of this entity."""
+        return BaseEntityState(
             unique_id=self.unique_id,
             migrate_unique_ids=self.migrate_unique_ids,
             platform=self.PLATFORM,
@@ -402,6 +425,9 @@ class BaseEntity(LogMixin, EventBase):
             entity_registry_enabled_default=self.entity_registry_enabled_default,
             enabled=self.enabled,
             primary=self.primary,
+            extra_state_attribute_names=frozenset(
+                self._attr_extra_state_attribute_names or ()
+            ),
             # Set by platform entities
             device_ieee=None,
             endpoint_id=None,
@@ -409,24 +435,6 @@ class BaseEntity(LogMixin, EventBase):
             # Set by group entities
             group_id=None,
         )
-
-    @property
-    def state(self) -> dict[str, Any]:
-        """Return the arguments to use in the command."""
-        return {
-            "class_name": self.__class__.__name__,
-        }
-
-    @cached_property
-    def extra_state_attribute_names(self) -> set[str] | None:
-        """Return entity specific state attribute names.
-
-        Implemented by platform classes. Convention for attribute names
-        is lowercase snake_case.
-        """
-        if hasattr(self, "_attr_extra_state_attribute_names"):
-            return self._attr_extra_state_attribute_names
-        return None
 
     def enable(self) -> None:
         """Enable the entity."""
@@ -461,11 +469,36 @@ class BaseEntity(LogMixin, EventBase):
     def maybe_emit_state_changed_event(self) -> None:
         """Send the state of this platform entity."""
         state = self.state
-        if self.__previous_state != state:
+        previous_state = self.__previous_state
+        if previous_state != state:
             self.emit(
-                STATE_CHANGED, EntityStateChangedEvent(**self.identifiers.__dict__)
+                STATE_CHANGED,
+                EntityStateChangedEvent(
+                    **self.identifiers.__dict__,
+                    state_diff=compute_state_diff(previous_state, state),
+                ),
             )
             self.__previous_state = state
+
+    def subscribe_state(
+        self, callback: Callable[[EntityStateChangedEvent], None]
+    ) -> Callable[[], None]:
+        """Subscribe to state changes, receiving the full state as the first event."""
+        self.maybe_emit_state_changed_event()
+        unsub = self.on_event(STATE_CHANGED, callback)
+
+        try:
+            callback(
+                EntityStateChangedEvent(
+                    **self.identifiers.__dict__,
+                    state_diff=compute_state_diff(None, self.__previous_state),
+                )
+            )
+        except Exception:
+            unsub()
+            raise
+
+        return unsub
 
     def log(self, level: int, msg: str, *args: Any, **kwargs: Any) -> None:
         """Log a message."""
@@ -488,6 +521,7 @@ class PlatformEntity(BaseEntity):
 
     # Per-cluster configuration (keyed by cluster ID)
     _server_cluster_config: Mapping[int, ClusterConfig] = MappingProxyType({})
+
     _client_cluster_config: Mapping[int, ClusterConfig] = MappingProxyType({})
 
     def __init__(
@@ -594,16 +628,6 @@ class PlatformEntity(BaseEntity):
             endpoint_id=self.endpoint.id,
         )
 
-    @cached_property
-    def info_object(self) -> BaseEntityInfo:
-        """Return a representation of the platform entity."""
-        return dataclasses.replace(
-            super().info_object,
-            device_ieee=self._device.ieee,
-            endpoint_id=self._endpoint.id,
-            available=self.available,
-        )
-
     @property
     def device(self) -> Device:
         """Return the device."""
@@ -664,19 +688,22 @@ class PlatformEntity(BaseEntity):
         """Return true if the device this entity belongs to is available."""
         return self.device.available
 
-    @property
-    def state(self) -> dict[str, Any]:
-        """Return the arguments to use in the command."""
-        state = super().state
-        state["available"] = self.available
-        return state
-
     async def async_update(self) -> None:
         """Retrieve latest state.
 
         Default no-op: subclasses that need polling override this to read their
         own attributes directly from the relevant cluster(s).
         """
+
+    @property
+    def state(self) -> BaseEntityState:
+        """Return the state of this entity."""
+        return dataclasses.replace(
+            super().state,
+            device_ieee=self._device.ieee,
+            endpoint_id=self._endpoint.id,
+            available=self.available,
+        )
 
 
 class GroupEntity(BaseEntity):
@@ -708,20 +735,14 @@ class GroupEntity(BaseEntity):
             group_id=self.group_id,
         )
 
-    @cached_property
-    def info_object(self) -> BaseEntityInfo:
-        """Return a representation of the group."""
+    @property
+    def state(self) -> BaseEntityState:
+        """Return the state of this entity."""
         return dataclasses.replace(
-            super().info_object,
+            super().state,
+            available=self.available,
             group_id=self.group_id,
         )
-
-    @property
-    def state(self) -> dict[str, Any]:
-        """Return the arguments to use in the command."""
-        state = super().state
-        state["available"] = self.available
-        return state
 
     @property
     def available(self) -> bool:

@@ -280,7 +280,7 @@ async def test_gateway_group_methods(
     entity: GroupEntity | None = get_group_entity(zha_group, platform=Platform.LIGHT)
     assert entity is not None
 
-    info = entity.info_object
+    info = entity.state
     assert info.class_name == "LightGroup"
     assert info.platform == Platform.LIGHT
     assert info.unique_id == "light_zha_group_0x0002"

@@ -77,14 +77,14 @@ from zha.application.const import (
 from zha.application.helpers import convert_to_zcl_values, convert_zcl_value, safe_read
 from zha.application.platforms import (
     BaseEntity,
-    BaseEntityInfo,
+    BaseEntityState,
     EntityStateChangedEvent,
     PlatformEntity,
     sensor,
 )
 from zha.application.platforms.update import BaseFirmwareUpdateEntity
 from zha.const import STATE_CHANGED
-from zha.event import EventBase
+from zha.event import EventBase, suppress_events
 from zha.exceptions import ZHAException
 from zha.mixins import LogMixin
 from zha.quirks import (
@@ -104,7 +104,7 @@ if TYPE_CHECKING:
 
 _LOGGER = logging.getLogger(__name__)
 _CHECKIN_GRACE_PERIODS = 2
-DIAGNOSTICS_JSON_VERSION = 2
+DIAGNOSTICS_JSON_VERSION = 3
 
 
 def get_cluster_attr_data(cluster: Cluster) -> list[dict]:
@@ -323,7 +323,7 @@ class ExtendedDeviceInfo(DeviceInfo):
     """Describes a ZHA device."""
 
     active_coordinator: bool
-    entities: dict[str, BaseEntityInfo]
+    entities: dict[str, BaseEntityState]
     neighbors: list[NeighborInfo]
     routes: list[RouteInfo]
     endpoint_names: list[EndpointNameInfo]
@@ -963,7 +963,7 @@ class Device(LogMixin, EventBase):
             **self.device_info.__dict__,
             active_coordinator=self.is_active_coordinator,
             entities={
-                platform_entity.unique_id: platform_entity.info_object
+                platform_entity.unique_id: platform_entity.state
                 for platform_entity in self.platform_entities.values()
             },
             neighbors=[
@@ -1184,6 +1184,19 @@ class Device(LogMixin, EventBase):
         # Finally, add the new entities
         for entity in new_entities.values():
             self._add_entity(entity, emit_event=emit_event)
+
+        # New entities have no listener yet (consumers capture their initial state when
+        # the add event registers them), so silence their changes
+        with suppress_events():
+            for entity in new_entities.values():
+                entity.maybe_emit_state_changed_event()
+
+        # `_compute_primary_entity` above can flip `primary` on an existing entity, and
+        # the caller may have recomputed their capabilities beforehand; emit so those
+        # changes reach consumers.
+        for key, entity in all_entities.items():
+            if key not in new_entities:
+                entity.maybe_emit_state_changed_event()
 
     async def recompute_entities(self) -> None:
         """Recompute all entities for this device."""
@@ -1614,11 +1627,7 @@ class Device(LogMixin, EventBase):
 
         # For weight matching, only consider non-counter entities and entities which are
         # not explicitly marked as not primary
-        candidates = [
-            e
-            for e in entities
-            if e.enabled and hasattr(e, "info_object") and e._attr_primary is not False
-        ]
+        candidates = [e for e in entities if e.enabled and e._attr_primary is not False]
         candidates.sort(reverse=True, key=lambda e: e.primary_weight)
 
         if not candidates:
@@ -1630,11 +1639,9 @@ class Device(LogMixin, EventBase):
         # We have a clear winner
         if not others or winner.primary_weight > others[0].primary_weight:
             winner.primary = True
-            del winner.info_object
 
             for entity in others:
                 entity.primary = False
-                del entity.info_object
 
             return
 
@@ -1644,7 +1651,6 @@ class Device(LogMixin, EventBase):
 
         for entity in candidates:
             entity.primary = False
-            del entity.info_object
 
     def get_diagnostics_json(self):
         """Get ZHA device information."""
@@ -1768,21 +1774,14 @@ class Device(LogMixin, EventBase):
             if platform is Platform.VIRTUAL:
                 continue
 
-            info_object = dataclasses.asdict(platform_entity.info_object)
-            info_object["migrate_unique_ids"] = list(info_object["migrate_unique_ids"])
-            info_object["device_ieee"] = str(info_object["device_ieee"])
+            state_dict = dataclasses.asdict(platform_entity.state)
+            state_dict["migrate_unique_ids"] = list(state_dict["migrate_unique_ids"])
+            state_dict["device_ieee"] = str(state_dict["device_ieee"])
+            state_dict["extra_state_attribute_names"] = sorted(
+                state_dict["extra_state_attribute_names"]
+            )
 
-            obj: dict[str, Any] = {
-                "info_object": info_object,
-                "state": platform_entity.state,
-            }
-
-            if platform_entity.extra_state_attribute_names is not None:
-                obj["extra_state_attributes"] = sorted(
-                    platform_entity.extra_state_attribute_names
-                )
-
-            info["zha_lib_entities"][platform].append(obj)
+            info["zha_lib_entities"][platform].append(state_dict)
 
         topology = self.gateway.application_controller.topology
         info["neighbors"] = [
