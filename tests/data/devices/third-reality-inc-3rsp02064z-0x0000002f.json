@@ -8,7 +8,7 @@
   "friendly_model": "3RSP02064Z",
   "name": "Third Reality, Inc 3RSP02064Z",
   "quirk_applied": true,
-  "quirk_class": "zhaquirks.thirdreality.plug:(Third Reality, Inc / 3RSP02028BZ)",
+  "quirk_class": "zhaquirks.thirdreality.plug:(Third Reality, Inc / 3RSP02064Z)",
   "exposes_features": [],
   "manufacturer_code": 5127,
   "power_source": "Mains",
@@ -485,26 +485,7 @@
         {
           "cluster_id": "0xff03",
           "endpoint_attribute": null,
-          "attributes": [
-            {
-              "id": "0x0002",
-              "name": "off_to_on_delay",
-              "zcl_type": "uint16",
-              "unsupported": true
-            },
-            {
-              "id": "0x0001",
-              "name": "on_to_off_delay",
-              "zcl_type": "uint16",
-              "unsupported": true
-            },
-            {
-              "id": "0x0000",
-              "name": "reset_summation_delivered",
-              "zcl_type": "uint8",
-              "unsupported": true
-            }
-          ]
+          "attributes": []
         }
       ],
       "out_clusters": [
@@ -619,12 +600,12 @@
         "kwargs": {}
       },
       {
-        "fallback_name": "Reset summation delivered",
+        "fallback_name": "Reset total energy",
         "unique_id": "ab:cd:ef:12:bb:32:67:ac-1-reset_summation_delivered",
         "migrate_unique_ids": [],
         "platform": "button",
         "class_name": "WriteAttributeButton",
-        "translation_key": "reset_summation_delivered",
+        "translation_key": "reset_total_energy",
         "translation_placeholders": null,
         "device_class": null,
         "state_class": null,
@@ -637,18 +618,18 @@
         "endpoint_id": 1,
         "available": true,
         "group_id": null,
-        "attribute_name": "reset_summation_delivered",
+        "attribute_name": "reset_total_energy",
         "attribute_value": 1
       }
     ],
     "number": [
       {
-        "fallback_name": "Turn on delay",
+        "fallback_name": "Countdown to turn on",
         "unique_id": "ab:cd:ef:12:bb:32:67:ac-1-off_to_on_delay",
         "migrate_unique_ids": [],
         "platform": "number",
         "class_name": "NumberConfigurationEntity",
-        "translation_key": "turn_on_delay",
+        "translation_key": "countdown_to_turn_on",
         "translation_placeholders": null,
         "device_class": "duration",
         "state_class": null,
@@ -669,12 +650,12 @@
         "native_unit_of_measurement": "s"
       },
       {
-        "fallback_name": "Turn off delay",
+        "fallback_name": "Countdown to turn off",
         "unique_id": "ab:cd:ef:12:bb:32:67:ac-1-on_to_off_delay",
         "migrate_unique_ids": [],
         "platform": "number",
         "class_name": "NumberConfigurationEntity",
-        "translation_key": "turn_off_delay",
+        "translation_key": "countdown_to_turn_off",
         "translation_placeholders": null,
         "device_class": "duration",
         "state_class": null,
@@ -693,6 +674,84 @@
         "native_min_value": 0,
         "native_step": 1.0,
         "native_unit_of_measurement": "s"
+      },
+      {
+        "fallback_name": "Power drop threshold",
+        "unique_id": "ab:cd:ef:12:bb:32:67:ac-1-power_drop_threshold",
+        "migrate_unique_ids": [],
+        "platform": "number",
+        "class_name": "NumberConfigurationEntity",
+        "translation_key": "power_drop_threshold",
+        "translation_placeholders": null,
+        "device_class": "power",
+        "state_class": null,
+        "entity_category": "config",
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:bb:32:67:ac",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "native_value": null,
+        "mode": "box",
+        "native_max_value": 3277,
+        "native_min_value": 0,
+        "native_step": 1.0,
+        "native_unit_of_measurement": "W"
+      },
+      {
+        "fallback_name": "Power rise threshold",
+        "unique_id": "ab:cd:ef:12:bb:32:67:ac-1-power_rise_threshold",
+        "migrate_unique_ids": [],
+        "platform": "number",
+        "class_name": "NumberConfigurationEntity",
+        "translation_key": "power_rise_threshold",
+        "translation_placeholders": null,
+        "device_class": "power",
+        "state_class": null,
+        "entity_category": "config",
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:bb:32:67:ac",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "native_value": null,
+        "mode": "box",
+        "native_max_value": 3277,
+        "native_min_value": 0,
+        "native_step": 1.0,
+        "native_unit_of_measurement": "W"
+      },
+      {
+        "fallback_name": "Red LED brightness",
+        "unique_id": "ab:cd:ef:12:bb:32:67:ac-1-red_led_brightness",
+        "migrate_unique_ids": [],
+        "platform": "number",
+        "class_name": "NumberConfigurationEntity",
+        "translation_key": "red_led_brightness",
+        "translation_placeholders": null,
+        "device_class": null,
+        "state_class": null,
+        "entity_category": "config",
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:bb:32:67:ac",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "native_value": null,
+        "mode": "box",
+        "native_max_value": 100,
+        "native_min_value": 0,
+        "native_step": 1.0,
+        "native_unit_of_measurement": "%"
       }
     ],
     "select": [
@@ -968,6 +1027,33 @@
         "available": true,
         "group_id": null,
         "is_on": 0
+      },
+      {
+        "fallback_name": "Metering only mode",
+        "unique_id": "ab:cd:ef:12:bb:32:67:ac-1-metering_only_mode",
+        "migrate_unique_ids": [],
+        "platform": "switch",
+        "class_name": "ConfigurableAttributeSwitch",
+        "translation_key": "metering_only_mode",
+        "translation_placeholders": null,
+        "device_class": null,
+        "state_class": null,
+        "entity_category": "config",
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:bb:32:67:ac",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "is_on": false,
+        "inverted": false,
+        "attribute_name": "metering_only_mode",
+        "invert_attribute_name": null,
+        "force_inverted": false,
+        "off_value": 0,
+        "on_value": 1
       }
     ],
     "update": [

@@ -8,10 +8,8 @@
   "friendly_model": "TS0001",
   "name": "_TZ3000_wn65ixz9 TS0001",
   "quirk_applied": true,
-  "quirk_class": "zhaquirks.tuya.ts000x:Switch_1G_GPP",
-  "exposes_features": [
-    "tuya.plug_on_off_attributes"
-  ],
+  "quirk_class": "zhaquirks.tuya.tuya_repeater:(_TZ3000_wn65ixz9 / TS0001)",
+  "exposes_features": [],
   "manufacturer_code": 4098,
   "power_source": "Mains",
   "lqi": 120,
@@ -39,8 +37,8 @@
     "1": {
       "profile_id": 260,
       "device_type": {
-        "name": "ON_OFF_LIGHT",
-        "id": 256
+        "name": "RANGE_EXTENDER",
+        "id": 8
       },
       "in_clusters": [
         {
@@ -91,71 +89,13 @@
           "attributes": []
         },
         {
-          "cluster_id": "0x0004",
-          "endpoint_attribute": "groups",
-          "attributes": []
-        },
-        {
-          "cluster_id": "0x0005",
-          "endpoint_attribute": "scenes",
-          "attributes": []
-        },
-        {
-          "cluster_id": "0x0006",
-          "endpoint_attribute": "on_off",
-          "attributes": [
-            {
-              "id": "0x8001",
-              "name": "backlight_mode",
-              "zcl_type": "enum8",
-              "value": 1
-            },
-            {
-              "id": "0x8000",
-              "name": "child_lock",
-              "zcl_type": "bool",
-              "unsupported": true
-            },
-            {
-              "id": "0x4002",
-              "name": "off_wait_time",
-              "zcl_type": "uint16",
-              "value": 0
-            },
-            {
-              "id": "0x0000",
-              "name": "on_off",
-              "zcl_type": "bool",
-              "value": 1
-            },
-            {
-              "id": "0x4001",
-              "name": "on_time",
-              "zcl_type": "uint16",
-              "value": 0
-            },
-            {
-              "id": "0x8002",
-              "name": "power_on_state",
-              "zcl_type": "enum8",
-              "value": 1
-            },
-            {
-              "id": "0x4003",
-              "name": "start_up_on_off",
-              "zcl_type": "enum8",
-              "unsupported": true
-            }
-          ]
-        },
-        {
           "cluster_id": "0xe000",
-          "endpoint_attribute": "tuya_manufacturer_specific_57344",
+          "endpoint_attribute": null,
           "attributes": []
         },
         {
           "cluster_id": "0xe001",
-          "endpoint_attribute": "tuya_external_switch_type",
+          "endpoint_attribute": null,
           "attributes": []
         }
       ],
@@ -176,6 +116,21 @@
               "value": 81
             }
           ]
+        }
+      ]
+    },
+    "242": {
+      "profile_id": 41440,
+      "device_type": {
+        "name": "PROXY_BASIC",
+        "id": 97
+      },
+      "in_clusters": [],
+      "out_clusters": [
+        {
+          "cluster_id": "0x0021",
+          "endpoint_attribute": "green_power",
+          "attributes": []
         }
       ]
     }
@@ -252,101 +207,6 @@
           5
         ],
         "kwargs": {}
-      }
-    ],
-    "light": [
-      {
-        "fallback_name": null,
-        "unique_id": "ab:cd:ef:12:ab:82:5f:a1-1",
-        "migrate_unique_ids": [],
-        "platform": "light",
-        "class_name": "Light",
-        "translation_key": "light",
-        "translation_placeholders": null,
-        "device_class": null,
-        "state_class": null,
-        "entity_category": null,
-        "entity_registry_enabled_default": true,
-        "enabled": true,
-        "primary": true,
-        "extra_state_attribute_names": [],
-        "device_ieee": "ab:cd:ef:12:ab:82:5f:a1",
-        "endpoint_id": 1,
-        "available": true,
-        "group_id": null,
-        "on": true,
-        "brightness": null,
-        "xy_color": null,
-        "color_temp": null,
-        "effect_list": [
-          "off"
-        ],
-        "effect": "off",
-        "supported_features": 8,
-        "color_mode": "onoff",
-        "supported_color_modes": [
-          "onoff"
-        ],
-        "off_with_transition": false,
-        "off_brightness": null,
-        "min_mireds": 153,
-        "max_mireds": 500
-      }
-    ],
-    "select": [
-      {
-        "fallback_name": null,
-        "unique_id": "ab:cd:ef:12:ab:82:5f:a1-1-6-backlight_mode",
-        "migrate_unique_ids": [],
-        "platform": "select",
-        "class_name": "TuyaBacklightModeSelectEntity",
-        "translation_key": "backlight_mode",
-        "translation_placeholders": null,
-        "device_class": null,
-        "state_class": null,
-        "entity_category": "config",
-        "entity_registry_enabled_default": true,
-        "enabled": true,
-        "primary": false,
-        "extra_state_attribute_names": [],
-        "device_ieee": "ab:cd:ef:12:ab:82:5f:a1",
-        "endpoint_id": 1,
-        "available": true,
-        "group_id": null,
-        "current_option": "LightWhenOn",
-        "enum": "TuyaBacklightMode",
-        "options": [
-          "Off",
-          "LightWhenOn",
-          "LightWhenOff"
-        ]
-      },
-      {
-        "fallback_name": null,
-        "unique_id": "ab:cd:ef:12:ab:82:5f:a1-1-6-power_on_state",
-        "migrate_unique_ids": [],
-        "platform": "select",
-        "class_name": "TuyaPowerOnStateSelectEntity",
-        "translation_key": "power_on_state",
-        "translation_placeholders": null,
-        "device_class": null,
-        "state_class": null,
-        "entity_category": "config",
-        "entity_registry_enabled_default": true,
-        "enabled": true,
-        "primary": false,
-        "extra_state_attribute_names": [],
-        "device_ieee": "ab:cd:ef:12:ab:82:5f:a1",
-        "endpoint_id": 1,
-        "available": true,
-        "group_id": null,
-        "current_option": "On",
-        "enum": "TuyaPowerOnState",
-        "options": [
-          "Off",
-          "On",
-          "LastState"
-        ]
       }
     ],
     "sensor": [
