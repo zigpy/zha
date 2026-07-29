@@ -17,7 +17,7 @@ from zhaquirks.sinope.thermostat import SinopeTechnologiesThermostatCluster
 import zhaquirks.tuya.ts0601_trv
 import zigpy.profiles
 import zigpy.zcl.clusters
-from zigpy.zcl.clusters.hvac import Thermostat
+from zigpy.zcl.clusters.hvac import FanMode, FanModeSequence, Thermostat
 import zigpy.zcl.foundation as zcl_f
 
 from tests.common import (
@@ -46,7 +46,7 @@ from zha.application.platforms.climate import (
     Thermostat as ThermostatEntity,
     ZehnderThermostat,
 )
-from zha.application.platforms.climate.const import FanState, HVACMode
+from zha.application.platforms.climate.const import SEQ_FAN_MODES, FanState, HVACMode
 from zha.application.platforms.number import NumberConfigurationEntity
 from zha.application.platforms.sensor import (
     Sensor,
@@ -1376,6 +1376,204 @@ async def test_set_fan_mode(
     await zha_gateway.async_block_till_done()
     assert fan_cluster.write_attributes.await_count == 1
     assert fan_cluster.write_attributes.call_args[0][0] == {"fan_mode": 5}
+
+
+@pytest.mark.parametrize(
+    ("sequence", "expected_modes"),
+    (
+        (FanModeSequence.Low_Med_High, [FanState.LOW, FanState.MEDIUM, FanState.HIGH]),
+        (FanModeSequence.Low_High, [FanState.LOW, FanState.HIGH]),
+        (
+            FanModeSequence.Low_Med_High_Auto,
+            [FanState.LOW, FanState.MEDIUM, FanState.HIGH, FanState.AUTO],
+        ),
+        (FanModeSequence.Low_High_Auto, [FanState.LOW, FanState.HIGH, FanState.AUTO]),
+        (FanModeSequence.On_Auto, [FanState.ON, FanState.AUTO]),
+        (0xFF, [FanState.AUTO, FanState.ON]),  # unknown sequence → fallback
+    ),
+)
+async def test_fan_modes_from_fan_mode_sequence(
+    zha_gateway: Gateway,
+    sequence: int,
+    expected_modes: list[str],
+):
+    """fan_modes must be derived from the reported fan_mode_sequence."""
+    device_climate_fan = await device_climate_mock(zha_gateway, CLIMATE_FAN)
+    fan_cluster = device_climate_fan.device.endpoints[1].fan
+    entity: ThermostatEntity = get_entity(
+        device_climate_fan, platform=Platform.CLIMATE, entity_type=ThermostatEntity
+    )
+
+    await send_attributes_report(
+        zha_gateway, fan_cluster, {"fan_mode_sequence": sequence}
+    )
+    await zha_gateway.async_block_till_done(wait_background_tasks=True)
+
+    assert entity.fan_modes == expected_modes
+    # Sanity-check against the constant table for known sequences
+    if sequence in SEQ_FAN_MODES:
+        assert entity.fan_modes == SEQ_FAN_MODES[sequence]
+
+
+@pytest.mark.parametrize(
+    ("zcl_mode", "expected"),
+    (
+        (FanMode.Low, FanState.LOW),
+        (FanMode.Medium, FanState.MEDIUM),
+        (FanMode.High, FanState.HIGH),
+        (FanMode.Auto, FanState.AUTO),
+    ),
+)
+async def test_fan_mode_from_fan_cluster_report(
+    zha_gateway: Gateway,
+    zcl_mode: FanMode,
+    expected: str,
+):
+    """fan_mode must reflect the Fan cluster attribute after a report."""
+    device_climate_fan = await device_climate_mock(zha_gateway, CLIMATE_FAN)
+    fan_cluster = device_climate_fan.device.endpoints[1].fan
+    entity: ThermostatEntity = get_entity(
+        device_climate_fan, platform=Platform.CLIMATE, entity_type=ThermostatEntity
+    )
+
+    # Sequence that includes low/medium/high/auto so every tested value is in range
+    await send_attributes_report(
+        zha_gateway,
+        fan_cluster,
+        {"fan_mode_sequence": FanModeSequence.Low_Med_High_Auto},
+    )
+    await send_attributes_report(zha_gateway, fan_cluster, {"fan_mode": zcl_mode})
+    await zha_gateway.async_block_till_done(wait_background_tasks=True)
+
+    assert entity.state.fan_mode == expected
+
+
+@pytest.mark.parametrize(
+    ("mode", "zcl_value"),
+    (
+        (FanState.LOW, FanMode.Low),
+        (FanState.MEDIUM, FanMode.Medium),
+        (FanState.HIGH, FanMode.High),
+    ),
+)
+async def test_set_fan_mode_low_medium_high(
+    zha_gateway: Gateway,
+    mode: str,
+    zcl_value: FanMode,
+):
+    """Setting low/medium/high must write the corresponding FanMode ZCL value."""
+    device_climate_fan = await device_climate_mock(zha_gateway, CLIMATE_FAN)
+    fan_cluster = device_climate_fan.device.endpoints[1].fan
+    entity: ThermostatEntity = get_entity(
+        device_climate_fan, platform=Platform.CLIMATE, entity_type=ThermostatEntity
+    )
+
+    await send_attributes_report(
+        zha_gateway,
+        fan_cluster,
+        {"fan_mode_sequence": FanModeSequence.Low_Med_High_Auto},
+    )
+    await zha_gateway.async_block_till_done(wait_background_tasks=True)
+
+    await entity.async_set_fan_mode(mode)
+    await zha_gateway.async_block_till_done()
+
+    assert fan_cluster.write_attributes.await_count == 1
+    assert fan_cluster.write_attributes.call_args[0][0] == {"fan_mode": zcl_value}
+
+
+async def test_fan_mode_state_emission_on_fan_cluster_report(
+    zha_gateway: Gateway,
+):
+    """A fan_mode report on the Fan cluster must emit STATE_CHANGED."""
+    device_climate_fan = await device_climate_mock(zha_gateway, CLIMATE_FAN)
+    fan_cluster = device_climate_fan.device.endpoints[1].fan
+    entity: ThermostatEntity = get_entity(
+        device_climate_fan, platform=Platform.CLIMATE, entity_type=ThermostatEntity
+    )
+
+    await send_attributes_report(
+        zha_gateway,
+        fan_cluster,
+        {"fan_mode_sequence": FanModeSequence.Low_Med_High_Auto},
+    )
+    await zha_gateway.async_block_till_done(wait_background_tasks=True)
+
+    subscriber = MagicMock()
+    entity.on_event(STATE_CHANGED, subscriber)
+
+    await send_attributes_report(zha_gateway, fan_cluster, {"fan_mode": FanMode.High})
+    await zha_gateway.async_block_till_done(wait_background_tasks=True)
+
+    assert subscriber.call_count >= 1
+    assert entity.state.fan_mode == FanState.HIGH
+
+
+async def test_fan_mode_out_of_range_returns_none(
+    zha_gateway: Gateway,
+):
+    """A reported fan_mode outside fan_modes must return None, not an orphan value."""
+    device_climate_fan = await device_climate_mock(zha_gateway, CLIMATE_FAN)
+    fan_cluster = device_climate_fan.device.endpoints[1].fan
+    entity: ThermostatEntity = get_entity(
+        device_climate_fan, platform=Platform.CLIMATE, entity_type=ThermostatEntity
+    )
+
+    # Sequence without "on"; report FanMode.On (0x04) which is outside the list
+    await send_attributes_report(
+        zha_gateway,
+        fan_cluster,
+        {"fan_mode_sequence": FanModeSequence.Low_Med_High},
+    )
+    await send_attributes_report(zha_gateway, fan_cluster, {"fan_mode": FanMode.On})
+    await zha_gateway.async_block_till_done(wait_background_tasks=True)
+
+    assert entity.fan_modes == [FanState.LOW, FanState.MEDIUM, FanState.HIGH]
+    assert entity.state.fan_mode is None
+
+
+async def test_fan_mode_off_mapped_correctly(
+    zha_gateway: Gateway,
+):
+    """FanMode.Off must not fall through to 'auto'."""
+    device_climate_fan = await device_climate_mock(zha_gateway, CLIMATE_FAN)
+    fan_cluster = device_climate_fan.device.endpoints[1].fan
+    entity: ThermostatEntity = get_entity(
+        device_climate_fan, platform=Platform.CLIMATE, entity_type=ThermostatEntity
+    )
+
+    await send_attributes_report(
+        zha_gateway,
+        fan_cluster,
+        {"fan_mode_sequence": FanModeSequence.On_Auto},
+    )
+    await send_attributes_report(zha_gateway, fan_cluster, {"fan_mode": FanMode.Off})
+    await zha_gateway.async_block_till_done(wait_background_tasks=True)
+
+    # Off maps to FAN_OFF which is not in On_Auto sequence → None, never "auto"
+    assert entity.state.fan_mode is None
+    assert entity.state.fan_mode != FanState.AUTO
+
+
+async def test_fan_mode_smart_returns_none(
+    zha_gateway: Gateway,
+):
+    """FanMode.Smart has no HA equivalent and must return None."""
+    device_climate_fan = await device_climate_mock(zha_gateway, CLIMATE_FAN)
+    fan_cluster = device_climate_fan.device.endpoints[1].fan
+    entity: ThermostatEntity = get_entity(
+        device_climate_fan, platform=Platform.CLIMATE, entity_type=ThermostatEntity
+    )
+
+    await send_attributes_report(
+        zha_gateway,
+        fan_cluster,
+        {"fan_mode_sequence": FanModeSequence.Low_Med_High_Auto},
+    )
+    await send_attributes_report(zha_gateway, fan_cluster, {"fan_mode": FanMode.Smart})
+    await zha_gateway.async_block_till_done(wait_background_tasks=True)
+
+    assert entity.state.fan_mode is None
 
 
 async def test_set_moes_preset(zha_gateway: Gateway):

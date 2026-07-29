@@ -549,17 +549,21 @@ class Thermostat(BaseThermostat):
     def on_add(self) -> None:
         """Run when entity is added."""
         super().on_add()
-        for event_type in (
-            AttributeReadEvent,
-            AttributeReportedEvent,
-            AttributeUpdatedEvent,
-            AttributeWrittenEvent,
-        ):
-            self._on_remove_callbacks.append(
-                self._cluster.on_event(
-                    event_type.event_type, self.handle_attribute_updated
+        clusters = [self._cluster]
+        if self._fan_cluster is not None:
+            clusters.append(self._fan_cluster)
+        for cluster in clusters:
+            for event_type in (
+                AttributeReadEvent,
+                AttributeReportedEvent,
+                AttributeUpdatedEvent,
+                AttributeWrittenEvent,
+            ):
+                self._on_remove_callbacks.append(
+                    cluster.on_event(
+                        event_type.event_type, self.handle_attribute_updated
+                    )
                 )
-            )
 
     @property
     def state(self) -> ThermostatState:
@@ -604,7 +608,10 @@ class Thermostat(BaseThermostat):
         if self._fan_cluster is not None:
             current = self._fan_cluster.get(FanCluster.AttributeDefs.fan_mode.name)
             if current is not None:
-                return ZCL_TO_FAN_MODE.get(current, FAN_AUTO)
+                mode = ZCL_TO_FAN_MODE.get(current)
+                if mode is not None and mode in (self.fan_modes or ()):
+                    return mode
+                return None
 
         running_state = self._running_state
         if running_state is None:
@@ -624,7 +631,7 @@ class Thermostat(BaseThermostat):
         if self._fan_cluster is None:
             return None
         seq = self._fan_cluster.get(FanCluster.AttributeDefs.fan_mode_sequence.name)
-        return SEQ_FAN_MODES.get(seq, [FAN_ON, FAN_AUTO])
+        return SEQ_FAN_MODES.get(seq, [FAN_AUTO, FAN_ON])
 
     @property
     def hvac_action(self) -> HVACAction | None:

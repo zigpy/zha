@@ -163,7 +163,16 @@ FAN_MODE_TO_ZCL: dict[str, FanMode] = {
     FAN_AUTO: FanMode.Auto,
 }
 
-ZCL_TO_FAN_MODE: dict[int, str] = {v: k for k, v in FAN_MODE_TO_ZCL.items()}
+ZCL_TO_FAN_MODE: dict[int, str] = {
+    FanMode.Off: FAN_OFF,
+    FanMode.Low: FAN_LOW,
+    FanMode.Medium: FAN_MEDIUM,
+    FanMode.High: FAN_HIGH,
+    FanMode.On: FAN_ON,
+    FanMode.Auto: FAN_AUTO,
+    # FanMode.Smart (0x06) deliberately omitted — ZCL R8 s6.4.2.1.2 notes it
+    # resolves to another mode based on occupancy; no direct HA equivalent.
+}
 
 RUNNING_MODE = {
     RunningMode.Off: HVACMode.OFF,

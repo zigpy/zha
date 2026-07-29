@@ -454,8 +454,8 @@
         "min_temp": 7.0,
         "supported_features": 393,
         "fan_modes": [
-          "on",
-          "auto"
+          "auto",
+          "on"
         ],
         "preset_modes": [],
         "hvac_modes": [
