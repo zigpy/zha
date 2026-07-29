@@ -9,7 +9,6 @@ import datetime as dt
 import functools
 from typing import TYPE_CHECKING
 
-from zha.quirks import THERMOSTAT_FAN_ONLY_HVAC
 from zigpy.profiles import zha
 from zigpy.zcl import (
     AttributeReadEvent,
@@ -55,6 +54,7 @@ from zha.application.platforms.climate.const import (
     Preset,
 )
 from zha.decorators import periodic
+from zha.quirks import THERMOSTAT_FAN_ONLY_HVAC
 from zha.units import UnitOfTemperature
 
 if TYPE_CHECKING:

@@ -55,7 +55,7 @@ from zha.application.platforms.sensor import (
 )
 from zha.const import STATE_CHANGED
 from zha.exceptions import ZHAException
-from zha.quirks import DeviceMatch, DeviceRegistry, ModelInfo, THERMOSTAT_FAN_ONLY_HVAC
+from zha.quirks import THERMOSTAT_FAN_ONLY_HVAC, DeviceMatch, DeviceRegistry, ModelInfo
 from zha.zigbee.device import Device
 
 _LOGGER = logging.getLogger(__name__)
