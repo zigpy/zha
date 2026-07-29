@@ -72,7 +72,6 @@ from zha.application.platforms import (
 from zha.application.platforms.climate.const import HVACAction
 from zha.application.platforms.const import (
     IKEA_AIR_PURIFIER_CLUSTER,
-    INOVELLI_CLUSTER,
     SMARTTHINGS_HUMIDITY_CLUSTER,
     SONOFF_CLUSTER,
     TUYA_MANUFACTURER_CLUSTER,
@@ -2761,46 +2760,6 @@ class DeviceTemperature(Sensor):
             },
         ),
     }
-
-
-@register_entity(INOVELLI_CLUSTER)
-class InovelliInternalTemperature(Sensor):
-    """Switch Internal Temperature Sensor."""
-
-    _attribute_name = "internal_temp_monitor"
-    _attr_device_class: SensorDeviceClass = SensorDeviceClass.TEMPERATURE
-    _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
-    _attr_translation_key: str = "internal_temp_monitor"
-    _attr_native_unit_of_measurement = UnitOfTemperature.CELSIUS
-    _attr_entity_category = EntityCategory.DIAGNOSTIC
-    _cluster_id = INOVELLI_CLUSTER
-
-    _cluster_match = ClusterMatch(
-        server_clusters=frozenset({INOVELLI_CLUSTER}),
-    )
-
-
-class InovelliOverheatedState(types.enum8):
-    """Inovelli overheat protection state."""
-
-    Normal = 0x00
-    Overheated = 0x01
-
-
-@register_entity(INOVELLI_CLUSTER)
-class InovelliOverheated(EnumSensor):
-    """Sensor that displays the overheat protection state."""
-
-    _attribute_name = "overheated"
-    _unique_id_suffix = "overheated"
-    _attr_translation_key: str = "overheated"
-    _enum = InovelliOverheatedState
-    _attr_entity_category = EntityCategory.DIAGNOSTIC
-    _cluster_id = INOVELLI_CLUSTER
-
-    _cluster_match = ClusterMatch(
-        server_clusters=frozenset({INOVELLI_CLUSTER}),
-    )
 
 
 @register_entity(CarbonDioxideConcentrationCluster.cluster_id)
