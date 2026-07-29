@@ -91,6 +91,7 @@ class BaseFirmwareUpdateEntity(PlatformEntity, ABC):
         UpdateEntityFeature.INSTALL
         | UpdateEntityFeature.PROGRESS
         | UpdateEntityFeature.SPECIFIC_VERSION
+        | UpdateEntityFeature.RELEASE_NOTES
     )
     _attr_installed_version: str | None = None
     _attr_in_progress: bool = False
