@@ -482,7 +482,7 @@
         "release_summary": null,
         "release_notes": null,
         "release_url": null,
-        "supported_features": 7
+        "supported_features": 23
       },
       {
         "fallback_name": null,
@@ -510,7 +510,7 @@
         "release_summary": null,
         "release_notes": null,
         "release_url": null,
-        "supported_features": 7
+        "supported_features": 23
       }
     ]
   },
