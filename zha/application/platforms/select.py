@@ -5,7 +5,6 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from enum import Enum
-import functools
 import logging
 from typing import TYPE_CHECKING, Any, cast
 
@@ -33,7 +32,7 @@ from zha.application.helpers import write_attributes_safe
 from zha.application.platforms import (
     AttrConfig,
     BaseEntity,
-    BaseEntityInfo,
+    BaseEntityState,
     ClusterConfig,
     ClusterMatch,
     EntityCategory,
@@ -69,8 +68,15 @@ _LOGGER = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True, kw_only=True)
-class EnumSelectInfo(BaseEntityInfo):
-    """Enum select entity info."""
+class SelectState(BaseEntityState):
+    """State for select entities."""
+
+    current_option: str | None
+
+
+@dataclass(frozen=True, kw_only=True)
+class EnumSelectState(SelectState):
+    """State for enum select entities."""
 
     enum: str
     options: list[str]
@@ -89,11 +95,12 @@ class BaseSelectEntity(BaseEntity, ABC):
         return self._attr_options
 
     @property
-    def state(self) -> dict[str, Any]:
+    def state(self) -> SelectState:
         """Return the state of the select."""
-        response = super().state
-        response["state"] = self.current_option
-        return response
+        return SelectState(
+            **super().state.__dict__,
+            current_option=self.current_option,
+        )
 
     @property
     @abstractmethod
@@ -131,11 +138,11 @@ class SirenDefaultSelectEntity(BaseSelectEntity, PlatformEntity):
         self._attr_options = list(self._option_to_member)
         super().__init__(endpoint=endpoint, device=device, **kwargs)
 
-    @functools.cached_property
-    def info_object(self) -> EnumSelectInfo:
-        """Return a representation of the select."""
-        return EnumSelectInfo(
-            **super().info_object.__dict__,
+    @property
+    def state(self) -> EnumSelectState:
+        """Return the state of the select."""
+        return EnumSelectState(
+            **super().state.__dict__,
             enum=self._enum.__name__,
             options=self.options,
         )
@@ -294,11 +301,11 @@ class ZCLEnumSelectEntity(BaseSelectEntity, PlatformEntity):
 
         return super()._is_supported()
 
-    @functools.cached_property
-    def info_object(self) -> EnumSelectInfo:
-        """Return a representation of the select."""
-        return EnumSelectInfo(
-            **super().info_object.__dict__,
+    @property
+    def state(self) -> EnumSelectState:
+        """Return the state of the select."""
+        return EnumSelectState(
+            **super().state.__dict__,
             enum=self._enum.__name__,
             options=self.options,
         )
@@ -541,6 +548,7 @@ class HueV1MotionSensitivity(ZCLEnumSelectEntity):
                 OccupancySensing.AttributeDefs.pir_u_to_o_delay: AttrConfig(
                     read_on_startup=False,
                 ),
+                "sensitivity": AttrConfig(read_on_startup=False),
             },
         ),
     }
@@ -571,6 +579,14 @@ class HueV2MotionSensitivity(ZCLEnumSelectEntity):
         manufacturers=frozenset({"Philips", "Signify Netherlands B.V."}),
         models=frozenset({"SML002", "SML003", "SML004"}),
     )
+
+    _server_cluster_config = {
+        OccupancySensing.cluster_id: ClusterConfig(
+            attributes={
+                "sensitivity": AttrConfig(read_on_startup=False),
+            },
+        ),
+    }
 
 
 class AqaraMonitoringModess(types.enum8):
@@ -770,6 +786,16 @@ class SonoffPresenceDetectionSensitivity(ZCLEnumSelectEntity):
         models=frozenset({"SNZB-06P", "SNZB-03P"}),
     )
 
+    _server_cluster_config = {
+        OccupancySensing.cluster_id: ClusterConfig(
+            attributes={
+                OccupancySensing.AttributeDefs.ultrasonic_u_to_o_threshold: AttrConfig(
+                    read_on_startup=False,
+                ),
+            },
+        ),
+    }
+
 
 class KeypadLockoutEnum(types.enum8):
     """Keypad lockout options."""
@@ -932,6 +958,7 @@ class DanfossExerciseDayOfTheWeek(ZCLEnumSelectEntity):
                 Thermostat.AttributeDefs.setpoint_change_source_timestamp: AttrConfig(
                     read_on_startup=False,
                 ),
+                "exercise_day_of_week": AttrConfig(read_on_startup=False),
             },
         ),
     }
@@ -963,6 +990,12 @@ class DanfossOrientation(ZCLEnumSelectEntity):
         exposed_features=frozenset({DANFOSS_ALLY_THERMOSTAT}),
     )
 
+    _server_cluster_config = {
+        Thermostat.cluster_id: ClusterConfig(
+            attributes={"orientation": AttrConfig(read_on_startup=False)},
+        ),
+    }
+
 
 @register_entity(Thermostat.cluster_id)
 class DanfossAdaptationRunControl(ZCLEnumSelectEntity):
@@ -978,6 +1011,12 @@ class DanfossAdaptationRunControl(ZCLEnumSelectEntity):
         server_clusters=frozenset({Thermostat.cluster_id}),
         exposed_features=frozenset({DANFOSS_ALLY_THERMOSTAT}),
     )
+
+    _server_cluster_config = {
+        Thermostat.cluster_id: ClusterConfig(
+            attributes={"adaptation_run_control": AttrConfig(read_on_startup=False)},
+        ),
+    }
 
 
 class DanfossControlAlgorithmScaleFactorEnum(types.enum8):
@@ -1019,6 +1058,14 @@ class DanfossControlAlgorithmScaleFactor(ZCLEnumSelectEntity):
         server_clusters=frozenset({Thermostat.cluster_id}),
         exposed_features=frozenset({DANFOSS_ALLY_THERMOSTAT}),
     )
+
+    _server_cluster_config = {
+        Thermostat.cluster_id: ClusterConfig(
+            attributes={
+                "control_algorithm_scale_factor": AttrConfig(read_on_startup=False)
+            },
+        ),
+    }
 
 
 @register_entity(UserInterface.cluster_id)

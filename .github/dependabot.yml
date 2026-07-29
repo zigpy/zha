@@ -4,6 +4,23 @@ updates:
     directory: "/"
     schedule:
       interval: daily
+    open-pull-requests-limit: 10
+    cooldown:
+      default-days: 3
+      # The Zigbee radio stack and zha-quirks skip the cooldown (updated immediately).
+      exclude:
+        - "zigpy*"
+        - "bellows"
+        - "zha-quirks"
+    groups:
+      python-dependencies:
+        patterns:
+          - "*"
+        # The Zigbee radio stack and zha-quirks stay as individual PRs.
+        exclude-patterns:
+          - "zigpy*"
+          - "bellows"
+          - "zha-quirks"
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:

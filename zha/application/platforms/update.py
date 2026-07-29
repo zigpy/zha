@@ -5,7 +5,6 @@ from __future__ import annotations
 from abc import ABC
 from dataclasses import dataclass
 from enum import IntFlag, StrEnum
-import functools
 import itertools
 import logging
 from typing import TYPE_CHECKING, Any, Final
@@ -24,7 +23,7 @@ from zigpy.zcl.foundation import Status
 from zha.application import Platform
 from zha.application.platforms import (
     AttrConfig,
-    BaseEntityInfo,
+    BaseEntityState,
     ClusterConfig,
     ClusterMatch,
     EntityCategory,
@@ -68,11 +67,17 @@ ATTR_VERSION: Final = "version"
 
 
 @dataclass(frozen=True, kw_only=True)
-class UpdateEntityInfo(BaseEntityInfo):
-    """Update entity info."""
+class UpdateState(BaseEntityState):
+    """State for update entities."""
 
+    installed_version: str | None
+    in_progress: bool | None
+    update_percentage: float | None
+    latest_version: str | None
+    release_summary: str | None
+    release_notes: str | None
+    release_url: str | None
     supported_features: UpdateEntityFeature
-    device_class: UpdateDeviceClass
 
 
 class BaseFirmwareUpdateEntity(PlatformEntity, ABC):
@@ -86,6 +91,7 @@ class BaseFirmwareUpdateEntity(PlatformEntity, ABC):
         UpdateEntityFeature.INSTALL
         | UpdateEntityFeature.PROGRESS
         | UpdateEntityFeature.SPECIFIC_VERSION
+        | UpdateEntityFeature.RELEASE_NOTES
     )
     _attr_installed_version: str | None = None
     _attr_in_progress: bool = False
@@ -95,29 +101,24 @@ class BaseFirmwareUpdateEntity(PlatformEntity, ABC):
     _attr_release_notes: str | None = None
     _attr_release_url: str | None = None
 
-    @functools.cached_property
-    def info_object(self) -> UpdateEntityInfo:
-        """Return a representation of the entity."""
-        return UpdateEntityInfo(
-            **super().info_object.__dict__,
-            supported_features=self.supported_features,
-        )
-
     @property
-    def state(self) -> dict[str, Any]:
+    def state(self) -> UpdateState:
         """Get the state for the entity."""
-        response = super().state
-        if (release_summary := self.release_summary) is not None:
+        release_summary = self.release_summary
+        if release_summary is not None:
             release_summary = release_summary[:255]
 
-        response[ATTR_INSTALLED_VERSION] = self.installed_version
-        response[ATTR_IN_PROGRESS] = self.in_progress
-        response[ATTR_UPDATE_PERCENTAGE] = self.update_percentage
-        response[ATTR_LATEST_VERSION] = self.latest_version
-        response[ATTR_RELEASE_SUMMARY] = release_summary
-        response[ATTR_RELEASE_NOTES] = self.release_notes
-        response[ATTR_RELEASE_URL] = self.release_url
-        return response
+        return UpdateState(
+            **super().state.__dict__,
+            installed_version=self.installed_version,
+            in_progress=self.in_progress,
+            update_percentage=self.update_percentage,
+            latest_version=self.latest_version,
+            release_summary=release_summary,
+            release_notes=self.release_notes,
+            release_url=self.release_url,
+            supported_features=self.supported_features,
+        )
 
     @property
     def installed_version(self) -> str | None:
@@ -307,6 +308,8 @@ class FirmwareUpdateEntity(BaseFirmwareUpdateEntity):
             },
         ),
     }
+
+    _cluster: Ota
 
     def __init__(
         self,

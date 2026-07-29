@@ -45,7 +45,7 @@ async def test_alarm_control_panel(
     assert isinstance(alarm_entity, AlarmControlPanel)
 
     # test that the state is STATE_ALARM_DISARMED
-    assert alarm_entity.state["state"] == AlarmState.DISARMED
+    assert alarm_entity.state.alarm_state == AlarmState.DISARMED
 
     # arm_away
     cluster.client_command.reset_mock()
@@ -60,7 +60,7 @@ async def test_alarm_control_panel(
         security.IasAce.AudibleNotification.Default_Sound,
         security.IasAce.AlarmStatus.No_Alarm,
     )
-    assert alarm_entity.state["state"] == AlarmState.ARMED_AWAY
+    assert alarm_entity.state.alarm_state == AlarmState.ARMED_AWAY  # type: ignore[comparison-overlap]
 
     # disarm
     await reset_alarm_panel(zha_gateway, cluster, alarm_entity)
@@ -69,7 +69,7 @@ async def test_alarm_control_panel(
     cluster.client_command.reset_mock()
     await alarm_entity.async_alarm_arm_away("4321")
     await zha_gateway.async_block_till_done()
-    assert alarm_entity.state["state"] == AlarmState.ARMED_AWAY
+    assert alarm_entity.state.alarm_state == AlarmState.ARMED_AWAY
     cluster.client_command.reset_mock()
 
     # now simulate a faulty code entry sequence
@@ -78,7 +78,7 @@ async def test_alarm_control_panel(
     await alarm_entity.async_alarm_disarm("0000")
     await zha_gateway.async_block_till_done()
 
-    assert alarm_entity.state["state"] == AlarmState.TRIGGERED
+    assert alarm_entity.state.alarm_state == AlarmState.TRIGGERED
     assert cluster.client_command.call_count == 6
     assert cluster.client_command.await_count == 6
     assert cluster.client_command.call_args == call(
@@ -95,7 +95,7 @@ async def test_alarm_control_panel(
     # arm_home
     await alarm_entity.async_alarm_arm_home("4321")
     await zha_gateway.async_block_till_done()
-    assert alarm_entity.state["state"] == AlarmState.ARMED_HOME
+    assert alarm_entity.state.alarm_state == AlarmState.ARMED_HOME
     assert cluster.client_command.call_count == 2
     assert cluster.client_command.await_count == 2
     assert cluster.client_command.call_args == call(
@@ -112,7 +112,7 @@ async def test_alarm_control_panel(
     # arm_night
     await alarm_entity.async_alarm_arm_night("4321")
     await zha_gateway.async_block_till_done()
-    assert alarm_entity.state["state"] == AlarmState.ARMED_NIGHT
+    assert alarm_entity.state.alarm_state == AlarmState.ARMED_NIGHT
     assert cluster.client_command.call_count == 2
     assert cluster.client_command.await_count == 2
     assert cluster.client_command.call_args == call(
@@ -131,7 +131,7 @@ async def test_alarm_control_panel(
         "cluster_command", 1, 0, [security.IasAce.ArmMode.Arm_All_Zones, "", 0]
     )
     await zha_gateway.async_block_till_done()
-    assert alarm_entity.state["state"] == AlarmState.ARMED_AWAY
+    assert alarm_entity.state.alarm_state == AlarmState.ARMED_AWAY
 
     # reset the panel
     await reset_alarm_panel(zha_gateway, cluster, alarm_entity)
@@ -141,7 +141,7 @@ async def test_alarm_control_panel(
         "cluster_command", 1, 0, [security.IasAce.ArmMode.Arm_Day_Home_Only, "", 0]
     )
     await zha_gateway.async_block_till_done()
-    assert alarm_entity.state["state"] == AlarmState.ARMED_HOME
+    assert alarm_entity.state.alarm_state == AlarmState.ARMED_HOME
 
     # reset the panel
     await reset_alarm_panel(zha_gateway, cluster, alarm_entity)
@@ -151,41 +151,41 @@ async def test_alarm_control_panel(
         "cluster_command", 1, 0, [security.IasAce.ArmMode.Arm_Night_Sleep_Only, "", 0]
     )
     await zha_gateway.async_block_till_done()
-    assert alarm_entity.state["state"] == AlarmState.ARMED_NIGHT
+    assert alarm_entity.state.alarm_state == AlarmState.ARMED_NIGHT
 
     # disarm from panel with bad code
     cluster.listener_event(
         "cluster_command", 1, 0, [security.IasAce.ArmMode.Disarm, "", 0]
     )
     await zha_gateway.async_block_till_done()
-    assert alarm_entity.state["state"] == AlarmState.ARMED_NIGHT
+    assert alarm_entity.state.alarm_state == AlarmState.ARMED_NIGHT
 
     # disarm from panel with bad code for 2nd time still armed
     cluster.listener_event(
         "cluster_command", 1, 0, [security.IasAce.ArmMode.Disarm, "", 0]
     )
     await zha_gateway.async_block_till_done()
-    assert alarm_entity.state["state"] == AlarmState.TRIGGERED
+    assert alarm_entity.state.alarm_state == AlarmState.TRIGGERED
 
     # disarm from panel with good code
     cluster.listener_event(
         "cluster_command", 1, 0, [security.IasAce.ArmMode.Disarm, "4321", 0]
     )
     await zha_gateway.async_block_till_done()
-    assert alarm_entity.state["state"] == AlarmState.DISARMED
+    assert alarm_entity.state.alarm_state == AlarmState.DISARMED
 
     # disarm when already disarmed
     cluster.listener_event(
         "cluster_command", 1, 0, [security.IasAce.ArmMode.Disarm, "4321", 0]
     )
     await zha_gateway.async_block_till_done()
-    assert alarm_entity.state["state"] == AlarmState.DISARMED
+    assert alarm_entity.state.alarm_state == AlarmState.DISARMED
     assert "IAS ACE already disarmed" in caplog.text
 
     # panic from panel
     cluster.listener_event("cluster_command", 1, 4, [])
     await zha_gateway.async_block_till_done()
-    assert alarm_entity.state["state"] == AlarmState.TRIGGERED
+    assert alarm_entity.state.alarm_state == AlarmState.TRIGGERED
 
     # reset the panel
     await reset_alarm_panel(zha_gateway, cluster, alarm_entity)
@@ -193,7 +193,7 @@ async def test_alarm_control_panel(
     # fire from panel
     cluster.listener_event("cluster_command", 1, 3, [])
     await zha_gateway.async_block_till_done()
-    assert alarm_entity.state["state"] == AlarmState.TRIGGERED
+    assert alarm_entity.state.alarm_state == AlarmState.TRIGGERED
 
     # reset the panel
     await reset_alarm_panel(zha_gateway, cluster, alarm_entity)
@@ -201,24 +201,24 @@ async def test_alarm_control_panel(
     # emergency from panel
     cluster.listener_event("cluster_command", 1, 2, [])
     await zha_gateway.async_block_till_done()
-    assert alarm_entity.state["state"] == AlarmState.TRIGGERED
+    assert alarm_entity.state.alarm_state == AlarmState.TRIGGERED
 
     # reset the panel
     await reset_alarm_panel(zha_gateway, cluster, alarm_entity)
-    assert alarm_entity.state["state"] == AlarmState.DISARMED
+    assert alarm_entity.state.alarm_state == AlarmState.DISARMED
 
     await alarm_entity.async_alarm_trigger()
     await zha_gateway.async_block_till_done()
-    assert alarm_entity.state["state"] == AlarmState.TRIGGERED
+    assert alarm_entity.state.alarm_state == AlarmState.TRIGGERED
 
     # reset the panel
     await reset_alarm_panel(zha_gateway, cluster, alarm_entity)
-    assert alarm_entity.state["state"] == AlarmState.DISARMED
+    assert alarm_entity.state.alarm_state == AlarmState.DISARMED
 
     alarm_entity.code_required_arm_actions = True
     await alarm_entity.async_alarm_arm_away()
     await zha_gateway.async_block_till_done()
-    assert alarm_entity.state["state"] == AlarmState.DISARMED
+    assert alarm_entity.state.alarm_state == AlarmState.DISARMED
     assert "Invalid code supplied to IAS ACE" in caplog.text
 
 
@@ -231,7 +231,7 @@ async def reset_alarm_panel(
     cluster.client_command.reset_mock()
     await entity.async_alarm_disarm("4321")
     await zha_gateway.async_block_till_done()
-    assert entity.state["state"] == AlarmState.DISARMED
+    assert entity.state.alarm_state == AlarmState.DISARMED
     assert cluster.client_command.call_count == 2
     assert cluster.client_command.await_count == 2
     assert cluster.client_command.call_args == call(

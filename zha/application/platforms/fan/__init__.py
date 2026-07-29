@@ -6,7 +6,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 import functools
 import math
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 
 from zigpy.zcl import (
     AttributeReadEvent,
@@ -22,7 +22,7 @@ from zha.application.helpers import safe_read, write_attributes_safe
 from zha.application.platforms import (
     AttrConfig,
     BaseEntity,
-    BaseEntityInfo,
+    BaseEntityState,
     ClusterConfig,
     ClusterMatch,
     GroupEntity,
@@ -33,8 +33,6 @@ from zha.application.platforms import (
 )
 from zha.application.platforms.const import IKEA_AIR_PURIFIER_CLUSTER
 from zha.application.platforms.fan.const import (
-    ATTR_PERCENTAGE,
-    ATTR_PRESET_MODE,
     DEFAULT_ON_PERCENTAGE,
     LEGACY_SPEED_LIST,
     OFF_SPEED_VALUES,
@@ -61,13 +59,19 @@ if TYPE_CHECKING:
 
 
 @dataclass(frozen=True, kw_only=True)
-class FanEntityInfo(BaseEntityInfo):
-    """Fan entity info."""
+class FanState(BaseEntityState):
+    """State for fan entities."""
 
+    preset_mode: str | None
+    percentage: int | None
+    is_on: bool
+    speed: str | None
     preset_modes: list[str]
     supported_features: FanEntityFeature
     speed_count: int
     speed_list: list[str]
+    speed_range: tuple[int, int]
+    default_on_percentage: int
 
 
 class BaseFan(BaseEntity, ABC):
@@ -155,30 +159,22 @@ class BaseFan(BaseEntity, ABC):
             return None
         return self.percentage_to_speed(percentage)
 
-    @functools.cached_property
-    def info_object(self) -> FanEntityInfo:
-        """Return a representation of the binary sensor."""
-        return FanEntityInfo(
-            **super().info_object.__dict__,
+    @property
+    def state(self) -> FanState:
+        """Return the state of the fan."""
+        return FanState(
+            **super().state.__dict__,
+            preset_mode=self.preset_mode,
+            percentage=self.percentage,
+            is_on=self.is_on,
+            speed=self.speed,
             preset_modes=self.preset_modes,
             supported_features=self.supported_features,
             speed_count=self.speed_count,
             speed_list=self.speed_list,
+            speed_range=self.speed_range,
+            default_on_percentage=self.default_on_percentage,
         )
-
-    @property
-    def state(self) -> dict[str, Any]:
-        """Return the state of the fan."""
-        response = super().state
-        response.update(
-            {
-                "preset_mode": self.preset_mode,
-                "percentage": self.percentage,
-                "is_on": self.is_on,
-                "speed": self.speed,
-            }
-        )
-        return response
 
     async def async_turn_on(
         self,
@@ -344,10 +340,8 @@ class FanGroup(BaseFan, GroupEntity):
         """Initialize a fan group."""
         self._cluster = group.endpoint[hvac.Fan.cluster_id]
         super().__init__(group)
-        self._percentage = None
-        self._preset_mode = None
-        if hasattr(self, "info_object"):
-            delattr(self, "info_object")
+        self._percentage: int | None = None
+        self._preset_mode: str | None = None
         self.update()
 
     @property
@@ -369,23 +363,19 @@ class FanGroup(BaseFan, GroupEntity):
         """Query all members and determine the fan group state."""
         self.debug("Updating fan group entity state")
         platform_entities = self._group.get_platform_entities(self.PLATFORM)
-        all_states = [entity.state for entity in platform_entities]
+        all_states = [cast(FanState, entity.state) for entity in platform_entities]
         self.debug(
             "All platform entity states for group entity members: %s", all_states
         )
 
-        percentage_states: list[dict] = [
-            state for state in all_states if state.get(ATTR_PERCENTAGE)
-        ]
-        preset_mode_states: list[dict] = [
-            state for state in all_states if state.get(ATTR_PRESET_MODE)
-        ]
+        percentage_states = [state for state in all_states if state.percentage]
+        preset_mode_states = [state for state in all_states if state.preset_mode]
 
         if percentage_states:
-            self._percentage = percentage_states[0][ATTR_PERCENTAGE]
+            self._percentage = percentage_states[0].percentage
             self._preset_mode = None
         elif preset_mode_states:
-            self._preset_mode = preset_mode_states[0][ATTR_PRESET_MODE]
+            self._preset_mode = preset_mode_states[0].preset_mode
             self._percentage = None
         else:
             self._percentage = None

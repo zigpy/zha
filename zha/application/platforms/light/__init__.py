@@ -9,8 +9,6 @@ import asyncio
 from collections import Counter
 import contextlib
 import dataclasses
-from dataclasses import dataclass
-import functools
 import itertools
 import logging
 from typing import TYPE_CHECKING, Any
@@ -32,7 +30,7 @@ from zha.application.platforms import (
     DEFAULT_UPDATE_GROUP_FROM_CHILD_DELAY,
     AttrConfig,
     BaseEntity,
-    BaseEntityInfo,
+    BaseEntityState,
     ClusterConfig,
     ClusterMatch,
     GroupEntity,
@@ -88,24 +86,29 @@ if TYPE_CHECKING:
 _LOGGER = logging.getLogger(__name__)
 
 
-@dataclass(frozen=True, kw_only=True)
-class LightEntityInfo(BaseEntityInfo):
-    """Light entity info."""
+@dataclasses.dataclass(frozen=True, kw_only=True)
+class LightState(BaseEntityState):
+    """State for light entities."""
 
-    effect_list: list[str] | None = dataclasses.field(default=None)
+    on: bool | None
+    brightness: int | None
+    xy_color: tuple[float, float] | None
+    color_temp: int | None
+    effect_list: list[str] | None
+    effect: str
     supported_features: LightEntityFeature
-    min_mireds: int
-    max_mireds: int
+    color_mode: ColorMode | None
+    supported_color_modes: set[ColorMode]
+    off_with_transition: bool
+    off_brightness: int | None
+    min_mireds: int | None
+    max_mireds: int | None
 
 
 class BaseLight(BaseEntity, ABC):
     """Operations common to all light entities."""
 
     PLATFORM = Platform.LIGHT
-    _attr_extra_state_attribute_names: set[str] = {
-        "off_with_transition",
-        "off_brightness",
-    }
     _attr_primary_weight = 10
 
     def __init__(self, *args, **kwargs):
@@ -126,29 +129,21 @@ class BaseLight(BaseEntity, ABC):
         self._supported_color_modes: set[ColorMode] = set()
 
     @property
-    def state(self) -> dict[str, Any]:
+    def state(self) -> LightState:
         """Return the state of the light."""
-        response = super().state
-        response["on"] = self.is_on
-        response["brightness"] = self.brightness
-        response["xy_color"] = self.xy_color
-        response["color_temp"] = self.color_temp
-        response["effect_list"] = self.effect_list
-        response["effect"] = self.effect
-        response["supported_features"] = self.supported_features
-        response["color_mode"] = self.color_mode
-        response["supported_color_modes"] = self.supported_color_modes
-        response["off_with_transition"] = self._off_with_transition
-        response["off_brightness"] = self._off_brightness
-        return response
-
-    @functools.cached_property
-    def info_object(self) -> LightEntityInfo:
-        """Return a representation of the select."""
-        return LightEntityInfo(
-            **super().info_object.__dict__,
+        return LightState(
+            **super().state.__dict__,
+            on=self.is_on,
+            brightness=self.brightness,
+            xy_color=self.xy_color,
+            color_temp=self.color_temp,
             effect_list=self.effect_list,
+            effect=self.effect,
             supported_features=self.supported_features,
+            color_mode=self.color_mode,
+            supported_color_modes=self.supported_color_modes,
+            off_with_transition=self._off_with_transition,
+            off_brightness=self._off_brightness,
             min_mireds=self.min_mireds,
             max_mireds=self.max_mireds,
         )
@@ -357,12 +352,13 @@ class BaseSharedLight(BaseLight):
         """Return the gateway."""
 
     @property
-    def state(self) -> dict[str, Any]:
+    def state(self) -> LightState:
         """Return the state of the light."""
-        response = super().state
-        # XXX: for backwards compatibility
-        response["supported_color_modes"] = self._internal_supported_color_modes
-        return response
+        return dataclasses.replace(
+            super().state,
+            # XXX: for backwards compatibility
+            supported_color_modes=self._internal_supported_color_modes,
+        )
 
     def recompute_capabilities(self) -> None:
         """Recompute supported features and color modes."""
@@ -1431,8 +1427,6 @@ class LightGroup(BaseSharedLight, GroupEntity):
         self._color_mode = ColorMode.UNKNOWN
         self._internal_supported_color_modes = {ColorMode.ONOFF}
 
-        if hasattr(self, "info_object"):
-            delattr(self, "info_object")
         self.update()
 
     async def on_remove(self) -> None:
@@ -1476,7 +1470,7 @@ class LightGroup(BaseSharedLight, GroupEntity):
         self.debug(
             "All platform entity states for group entity members: %s", all_states
         )
-        on_states = [state for state in states if state["on"]]
+        on_states = [state for state in states if state.on]
 
         self._state = len(on_states) > 0
 

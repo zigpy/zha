@@ -387,7 +387,7 @@ async def test_quirks_v2_entity_discovery_e1_curtain(
         qualifier_func=lambda e: e._enum == BasicCluster.PowerSource,
     )
     assert (
-        power_source_entity.state["state"]
+        power_source_entity.state.native_value
         == BasicCluster.PowerSource.Mains_single_phase.name
     )
 
@@ -397,7 +397,7 @@ async def test_quirks_v2_entity_discovery_e1_curtain(
         exact_entity_type=sensor.EnumSensor,
         qualifier_func=lambda e: e._enum == AqaraE1HookState,
     )
-    assert hook_state_entity.state["state"] == AqaraE1HookState.Unlocked.name
+    assert hook_state_entity.state.native_value == AqaraE1HookState.Unlocked.name
 
     error_detected_entity = get_entity(
         zha_device,
@@ -405,7 +405,7 @@ async def test_quirks_v2_entity_discovery_e1_curtain(
         exact_entity_type=binary_sensor.BinarySensor,
         qualifier_func=lambda e: e._attribute_name == "error_detected",
     )
-    assert error_detected_entity.state["state"] is False
+    assert error_detected_entity.state.is_on is False
 
 
 def _get_test_device(

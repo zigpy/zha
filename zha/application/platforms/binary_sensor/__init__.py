@@ -4,8 +4,7 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from collections.abc import Callable
-from dataclasses import dataclass
-import functools
+import dataclasses
 import logging
 from typing import TYPE_CHECKING, Any
 
@@ -26,7 +25,7 @@ from zha.application import Platform
 from zha.application.helpers import safe_read
 from zha.application.platforms import (
     AttrConfig,
-    BaseEntityInfo,
+    BaseEntityState,
     ClusterConfig,
     ClusterMatch,
     EntityCategory,
@@ -54,25 +53,18 @@ if TYPE_CHECKING:
 _LOGGER = logging.getLogger(__name__)
 
 
-@dataclass(frozen=True, kw_only=True)
-class BinarySensorEntityInfo(BaseEntityInfo):
-    """Binary sensor entity info."""
+@dataclasses.dataclass(frozen=True, kw_only=True)
+class BinarySensorState(BaseEntityState):
+    """State for binary sensor entities."""
 
+    is_on: bool
     attribute_name: str
-    device_class: BinarySensorDeviceClass | None
 
 
 class BaseBinarySensor(PlatformEntity, ABC):
     """Abstract base class for ZHA binary sensors."""
 
     PLATFORM: Platform = Platform.BINARY_SENSOR
-
-    @property
-    def state(self) -> dict:
-        """Return the state of the binary sensor."""
-        response = super().state
-        response["state"] = self.is_on
-        return response
 
     @property
     @abstractmethod
@@ -86,6 +78,15 @@ class BinarySensor(BaseBinarySensor):
     _attr_device_class: BinarySensorDeviceClass | None
     _attribute_name: str
     _attribute_converter: Callable[[Any], Any] | None = None
+
+    @property
+    def state(self) -> BinarySensorState:
+        """Return the state of the binary sensor."""
+        return BinarySensorState(
+            **super().state.__dict__,
+            is_on=self.is_on,
+            attribute_name=self._attribute_name,
+        )
 
     def __init__(
         self,
@@ -111,7 +112,6 @@ class BinarySensor(BaseBinarySensor):
             )
 
         super().__init__(endpoint=endpoint, device=device, **kwargs)
-        self._state: bool = self.is_on
         self.recompute_capabilities()
 
     def _is_supported(self) -> bool:
@@ -134,18 +134,10 @@ class BinarySensor(BaseBinarySensor):
                 )
             )
 
-    @functools.cached_property
-    def info_object(self) -> BinarySensorEntityInfo:
-        """Return a representation of the binary sensor."""
-        return BinarySensorEntityInfo(
-            **super().info_object.__dict__,
-            attribute_name=self._attribute_name,
-        )
-
     @property
     def is_on(self) -> bool:
-        """Return True if the switch is on based on the state machine."""
-        self._state = raw_state = self._cluster.get(self._attribute_name)
+        """Return True if the binary sensor is on based on the state machine."""
+        raw_state = self._cluster.get(self._attribute_name)
         if raw_state is None:
             return False
         if self._attribute_converter:
@@ -162,7 +154,6 @@ class BinarySensor(BaseBinarySensor):
         """Handle attribute updates from the cluster."""
         if self._attribute_name is None or self._attribute_name != event.attribute_name:
             return
-        self._state = bool(event.value)
         self.maybe_emit_state_changed_event()
 
     async def async_update(self) -> None:
@@ -177,7 +168,6 @@ class BinarySensor(BaseBinarySensor):
         )
         attr_value = result.get(attribute)
         if attr_value is not None:
-            self._state = attr_value
             self.maybe_emit_state_changed_event()
 
     @staticmethod

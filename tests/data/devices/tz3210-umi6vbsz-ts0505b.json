@@ -1,5 +1,5 @@
 {
-  "version": 2,
+  "version": 3,
   "ieee": "ab:cd:ef:12:bf:34:ff:9a",
   "nwk": "0xA08A",
   "manufacturer": "_TZ3210_umi6vbsz",
@@ -322,218 +322,180 @@
   "zha_lib_entities": {
     "button": [
       {
-        "info_object": {
-          "fallback_name": null,
-          "unique_id": "ab:cd:ef:12:bf:34:ff:9a-1-3",
-          "migrate_unique_ids": [],
-          "platform": "button",
-          "class_name": "IdentifyButton",
-          "translation_key": null,
-          "translation_placeholders": null,
-          "device_class": "identify",
-          "state_class": null,
-          "entity_category": "diagnostic",
-          "entity_registry_enabled_default": true,
-          "enabled": true,
-          "primary": false,
-          "device_ieee": "ab:cd:ef:12:bf:34:ff:9a",
-          "endpoint_id": 1,
-          "available": true,
-          "group_id": null,
-          "command": "identify",
-          "args": [
-            5
-          ],
-          "kwargs": {}
-        },
-        "state": {
-          "class_name": "IdentifyButton",
-          "available": true
-        }
+        "fallback_name": null,
+        "unique_id": "ab:cd:ef:12:bf:34:ff:9a-1-3",
+        "migrate_unique_ids": [],
+        "platform": "button",
+        "class_name": "IdentifyButton",
+        "translation_key": null,
+        "translation_placeholders": null,
+        "device_class": "identify",
+        "state_class": null,
+        "entity_category": "diagnostic",
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:bf:34:ff:9a",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "command": "identify",
+        "args": [
+          5
+        ],
+        "kwargs": {}
       }
     ],
     "light": [
       {
-        "info_object": {
-          "fallback_name": null,
-          "unique_id": "ab:cd:ef:12:bf:34:ff:9a-1",
-          "migrate_unique_ids": [],
-          "platform": "light",
-          "class_name": "Light",
-          "translation_key": "light",
-          "translation_placeholders": null,
-          "device_class": null,
-          "state_class": null,
-          "entity_category": null,
-          "entity_registry_enabled_default": true,
-          "enabled": true,
-          "primary": true,
-          "device_ieee": "ab:cd:ef:12:bf:34:ff:9a",
-          "endpoint_id": 1,
-          "available": true,
-          "group_id": null,
-          "effect_list": [
-            "off"
-          ],
-          "supported_features": 40,
-          "min_mireds": 153,
-          "max_mireds": 500
-        },
-        "state": {
-          "class_name": "Light",
-          "available": true,
-          "on": false,
-          "brightness": 1,
-          "xy_color": [
-            0.0,
-            0.0
-          ],
-          "color_temp": 469,
-          "effect_list": [
-            "off"
-          ],
-          "effect": "off",
-          "supported_features": 40,
-          "color_mode": "color_temp",
-          "supported_color_modes": [
-            "brightness",
-            "color_temp",
-            "onoff",
-            "xy"
-          ],
-          "off_with_transition": false,
-          "off_brightness": null
-        },
-        "extra_state_attributes": [
-          "off_brightness",
-          "off_with_transition"
-        ]
+        "fallback_name": null,
+        "unique_id": "ab:cd:ef:12:bf:34:ff:9a-1",
+        "migrate_unique_ids": [],
+        "platform": "light",
+        "class_name": "Light",
+        "translation_key": "light",
+        "translation_placeholders": null,
+        "device_class": null,
+        "state_class": null,
+        "entity_category": null,
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": true,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:bf:34:ff:9a",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "on": false,
+        "brightness": 1,
+        "xy_color": [
+          0.0,
+          0.0
+        ],
+        "color_temp": 469,
+        "effect_list": [
+          "off"
+        ],
+        "effect": "off",
+        "supported_features": 40,
+        "color_mode": "color_temp",
+        "supported_color_modes": [
+          "brightness",
+          "color_temp",
+          "onoff",
+          "xy"
+        ],
+        "off_with_transition": false,
+        "off_brightness": null,
+        "min_mireds": 153,
+        "max_mireds": 500
       }
     ],
     "number": [
       {
-        "info_object": {
-          "fallback_name": null,
-          "unique_id": "ab:cd:ef:12:bf:34:ff:9a-1-768-start_up_color_temperature",
-          "migrate_unique_ids": [],
-          "platform": "number",
-          "class_name": "StartUpColorTemperatureConfigurationEntity",
-          "translation_key": "start_up_color_temperature",
-          "translation_placeholders": null,
-          "device_class": null,
-          "state_class": null,
-          "entity_category": "config",
-          "entity_registry_enabled_default": true,
-          "enabled": true,
-          "primary": false,
-          "device_ieee": "ab:cd:ef:12:bf:34:ff:9a",
-          "endpoint_id": 1,
-          "available": true,
-          "group_id": null,
-          "mode": "auto",
-          "native_max_value": 500,
-          "native_min_value": 153,
-          "native_step": 1.0,
-          "native_unit_of_measurement": null
-        },
-        "state": {
-          "class_name": "StartUpColorTemperatureConfigurationEntity",
-          "available": true,
-          "state": 450
-        }
+        "fallback_name": null,
+        "unique_id": "ab:cd:ef:12:bf:34:ff:9a-1-768-start_up_color_temperature",
+        "migrate_unique_ids": [],
+        "platform": "number",
+        "class_name": "StartUpColorTemperatureConfigurationEntity",
+        "translation_key": "start_up_color_temperature",
+        "translation_placeholders": null,
+        "device_class": null,
+        "state_class": null,
+        "entity_category": "config",
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:bf:34:ff:9a",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "native_value": 450,
+        "mode": "auto",
+        "native_max_value": 500,
+        "native_min_value": 153,
+        "native_step": 1.0,
+        "native_unit_of_measurement": null
       }
     ],
     "sensor": [
       {
-        "info_object": {
-          "fallback_name": null,
-          "unique_id": "ab:cd:ef:12:bf:34:ff:9a-1-0-lqi",
-          "migrate_unique_ids": [],
-          "platform": "sensor",
-          "class_name": "LQISensor",
-          "translation_key": "lqi",
-          "translation_placeholders": null,
-          "device_class": null,
-          "state_class": "measurement",
-          "entity_category": "diagnostic",
-          "entity_registry_enabled_default": false,
-          "enabled": true,
-          "primary": false,
-          "device_ieee": "ab:cd:ef:12:bf:34:ff:9a",
-          "endpoint_id": 1,
-          "available": true,
-          "group_id": null,
-          "suggested_display_precision": null,
-          "unit": null
-        },
-        "state": {
-          "class_name": "LQISensor",
-          "available": true,
-          "state": null
-        }
+        "fallback_name": null,
+        "unique_id": "ab:cd:ef:12:bf:34:ff:9a-1-0-lqi",
+        "migrate_unique_ids": [],
+        "platform": "sensor",
+        "class_name": "LQISensor",
+        "translation_key": "lqi",
+        "translation_placeholders": null,
+        "device_class": null,
+        "state_class": "measurement",
+        "entity_category": "diagnostic",
+        "entity_registry_enabled_default": false,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:bf:34:ff:9a",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "native_value": null,
+        "suggested_display_precision": null,
+        "unit": null
       },
       {
-        "info_object": {
-          "fallback_name": null,
-          "unique_id": "ab:cd:ef:12:bf:34:ff:9a-1-0-rssi",
-          "migrate_unique_ids": [],
-          "platform": "sensor",
-          "class_name": "RSSISensor",
-          "translation_key": "rssi",
-          "translation_placeholders": null,
-          "device_class": "signal_strength",
-          "state_class": "measurement",
-          "entity_category": "diagnostic",
-          "entity_registry_enabled_default": false,
-          "enabled": true,
-          "primary": false,
-          "device_ieee": "ab:cd:ef:12:bf:34:ff:9a",
-          "endpoint_id": 1,
-          "available": true,
-          "group_id": null,
-          "suggested_display_precision": null,
-          "unit": "dBm"
-        },
-        "state": {
-          "class_name": "RSSISensor",
-          "available": true,
-          "state": null
-        }
+        "fallback_name": null,
+        "unique_id": "ab:cd:ef:12:bf:34:ff:9a-1-0-rssi",
+        "migrate_unique_ids": [],
+        "platform": "sensor",
+        "class_name": "RSSISensor",
+        "translation_key": "rssi",
+        "translation_placeholders": null,
+        "device_class": "signal_strength",
+        "state_class": "measurement",
+        "entity_category": "diagnostic",
+        "entity_registry_enabled_default": false,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:bf:34:ff:9a",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "native_value": null,
+        "suggested_display_precision": null,
+        "unit": "dBm"
       }
     ],
     "update": [
       {
-        "info_object": {
-          "fallback_name": null,
-          "unique_id": "ab:cd:ef:12:bf:34:ff:9a-1-25-firmware_update",
-          "migrate_unique_ids": [],
-          "platform": "update",
-          "class_name": "FirmwareUpdateEntity",
-          "translation_key": null,
-          "translation_placeholders": null,
-          "device_class": "firmware",
-          "state_class": null,
-          "entity_category": "config",
-          "entity_registry_enabled_default": true,
-          "enabled": true,
-          "primary": false,
-          "device_ieee": "ab:cd:ef:12:bf:34:ff:9a",
-          "endpoint_id": 1,
-          "available": true,
-          "group_id": null,
-          "supported_features": 7
-        },
-        "state": {
-          "class_name": "FirmwareUpdateEntity",
-          "available": true,
-          "installed_version": null,
-          "in_progress": false,
-          "update_percentage": null,
-          "latest_version": null,
-          "release_summary": null,
-          "release_notes": null,
-          "release_url": null
-        }
+        "fallback_name": null,
+        "unique_id": "ab:cd:ef:12:bf:34:ff:9a-1-25-firmware_update",
+        "migrate_unique_ids": [],
+        "platform": "update",
+        "class_name": "FirmwareUpdateEntity",
+        "translation_key": null,
+        "translation_placeholders": null,
+        "device_class": "firmware",
+        "state_class": null,
+        "entity_category": "config",
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:bf:34:ff:9a",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "installed_version": null,
+        "in_progress": false,
+        "update_percentage": null,
+        "latest_version": null,
+        "release_summary": null,
+        "release_notes": null,
+        "release_url": null,
+        "supported_features": 23
       }
     ]
   },

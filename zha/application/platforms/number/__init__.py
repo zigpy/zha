@@ -24,7 +24,7 @@ from zha.application import Platform
 from zha.application.helpers import safe_read, write_attributes_safe
 from zha.application.platforms import (
     AttrConfig,
-    BaseEntityInfo,
+    BaseEntityState,
     ClusterConfig,
     ClusterMatch,
     EntityCategory,
@@ -52,9 +52,10 @@ _LOGGER = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True, kw_only=True)
-class NumberEntityInfo(BaseEntityInfo):
-    """Number entity info."""
+class NumberState(BaseEntityState):
+    """State for number entities."""
 
+    native_value: float | None
     mode: NumberMode
     native_max_value: float
     native_min_value: float
@@ -81,24 +82,18 @@ class BaseNumber(PlatformEntity, ABC):
     def native_value(self) -> float | None:
         """Return the current value."""
 
-    @functools.cached_property
-    def info_object(self) -> NumberEntityInfo:
-        """Return a representation of the number entity."""
-        return NumberEntityInfo(
-            **super().info_object.__dict__,
+    @property
+    def state(self) -> NumberState:
+        """Return the state of the entity."""
+        return NumberState(
+            **super().state.__dict__,
+            native_value=self.native_value,
             mode=self.mode,
             native_max_value=self.native_max_value,
             native_min_value=self.native_min_value,
             native_step=self.native_step,
             native_unit_of_measurement=self.native_unit_of_measurement,
         )
-
-    @property
-    def state(self) -> dict[str, Any]:
-        """Return the state of the entity."""
-        response = super().state
-        response["state"] = self.native_value
-        return response
 
     @property
     def native_min_value(self) -> float:
@@ -329,13 +324,6 @@ class NumberConfigurationEntity(BaseNumber):
                     event_type.event_type, self.handle_attribute_updated
                 )
             )
-
-    @property
-    def state(self) -> dict[str, Any]:
-        """Return the state of the entity."""
-        response = super().state
-        response["state"] = self.native_value
-        return response
 
     @property
     def native_value(self) -> float | None:
@@ -723,6 +711,16 @@ class SonoffPresenceSenorTimeout(NumberConfigurationEntity):
         server_clusters=frozenset({OccupancySensing.cluster_id}),
         models=frozenset({"SNZB-06P", "SNZB-03P"}),
     )
+
+    _server_cluster_config = {
+        OccupancySensing.cluster_id: ClusterConfig(
+            attributes={
+                OccupancySensing.AttributeDefs.ultrasonic_o_to_u_delay: AttrConfig(
+                    read_on_startup=False,
+                ),
+            },
+        ),
+    }
 
 
 @register_entity(TUYA_MANUFACTURER_CLUSTER)
@@ -1126,6 +1124,12 @@ class DanfossExerciseTriggerTime(NumberConfigurationEntity):
         exposed_features=frozenset({DANFOSS_ALLY_THERMOSTAT}),
     )
 
+    _server_cluster_config = {
+        Thermostat.cluster_id: ClusterConfig(
+            attributes={"exercise_trigger_time": AttrConfig(read_on_startup=False)},
+        ),
+    }
+
 
 @register_entity(Thermostat.cluster_id)
 class DanfossExternalMeasuredRoomSensor(ZCLTemperatureEntity):
@@ -1142,6 +1146,14 @@ class DanfossExternalMeasuredRoomSensor(ZCLTemperatureEntity):
         server_clusters=frozenset({Thermostat.cluster_id}),
         exposed_features=frozenset({DANFOSS_ALLY_THERMOSTAT}),
     )
+
+    _server_cluster_config = {
+        Thermostat.cluster_id: ClusterConfig(
+            attributes={
+                "external_measured_room_sensor": AttrConfig(read_on_startup=True)
+            },
+        ),
+    }
 
 
 @register_entity(Thermostat.cluster_id)
@@ -1160,6 +1172,12 @@ class DanfossLoadRoomMean(NumberConfigurationEntity):
         server_clusters=frozenset({Thermostat.cluster_id}),
         exposed_features=frozenset({DANFOSS_ALLY_THERMOSTAT}),
     )
+
+    _server_cluster_config = {
+        Thermostat.cluster_id: ClusterConfig(
+            attributes={"load_room_mean": AttrConfig(read_on_startup=True)},
+        ),
+    }
 
 
 @register_entity(Thermostat.cluster_id)
@@ -1181,6 +1199,14 @@ class DanfossRegulationSetpointOffset(NumberConfigurationEntity):
         server_clusters=frozenset({Thermostat.cluster_id}),
         exposed_features=frozenset({DANFOSS_ALLY_THERMOSTAT}),
     )
+
+    _server_cluster_config = {
+        Thermostat.cluster_id: ClusterConfig(
+            attributes={
+                "regulation_setpoint_offset": AttrConfig(read_on_startup=False)
+            },
+        ),
+    }
 
 
 @register_entity(SINOPE_MANUFACTURER_CLUSTER)

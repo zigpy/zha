@@ -3,7 +3,8 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, Any, Literal
+import dataclasses
+from typing import TYPE_CHECKING, Any, Literal, cast
 
 from zigpy.zcl import (
     AttributeReadEvent,
@@ -12,13 +13,17 @@ from zigpy.zcl import (
     AttributeWrittenEvent,
     ReportingConfig,
 )
-from zigpy.zcl.clusters.closures import DoorLock as DoorLockCluster
+from zigpy.zcl.clusters.closures import (
+    DoorLock as DoorLockCluster,
+    LockState as ZclLockState,
+)
 from zigpy.zcl.foundation import Status
 
 from zha.application import Platform
 from zha.application.helpers import safe_read
 from zha.application.platforms import (
     AttrConfig,
+    BaseEntityState,
     ClusterConfig,
     ClusterMatch,
     PlatformEntity,
@@ -35,17 +40,25 @@ if TYPE_CHECKING:
     from zha.zigbee.endpoint import Endpoint
 
 
+@dataclasses.dataclass(frozen=True, kw_only=True)
+class LockState(BaseEntityState):
+    """State for lock entities."""
+
+    is_locked: bool
+
+
 class BaseLock(PlatformEntity, ABC):
     """Abstract base class for ZHA lock entities."""
 
     PLATFORM = Platform.LOCK
 
     @property
-    def state(self) -> dict[str, Any]:
+    def state(self) -> LockState:
         """Get the state of the lock."""
-        response = super().state
-        response["is_locked"] = self.is_locked
-        return response
+        return LockState(
+            **super().state.__dict__,
+            is_locked=self.is_locked,
+        )
 
     @property
     @abstractmethod
@@ -90,7 +103,7 @@ class DoorLock(BaseLock):
         self,
         endpoint: Endpoint,
         device: Device,
-        **kwargs,
+        **kwargs: Any,
     ) -> None:
         """Initialize the lock."""
         super().__init__(endpoint=endpoint, device=device, **kwargs)
@@ -179,7 +192,9 @@ class DoorLock(BaseLock):
         """Handle state update from the door-lock cluster."""
         if event.attribute_id != DoorLockCluster.AttributeDefs.lock_state.id:
             return
-        self._state = VALUE_TO_STATE.get(event.value, self._state)
+
+        value = cast(ZclLockState, event.value)
+        self._state = VALUE_TO_STATE.get(value, self._state)
         self.maybe_emit_state_changed_event()
 
     async def async_update(self) -> None:
