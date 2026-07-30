@@ -590,10 +590,15 @@ class KofFan(Fan):
 class InovelliFan(Fan):
     """Representation of an Inovelli fan."""
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_FAN}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({hvac.Fan.cluster_id}),
         manufacturers=frozenset({"Inovelli"}),
-        models=frozenset({"VZM35-SN","VZM36",}),
+        models=frozenset(
+            {
+                "VZM35-SN",
+                "VZM36",
+            }
+        ),
         feature_priority=(PlatformFeatureGroup.THERMOSTAT_FAN, 1),
     )
 
