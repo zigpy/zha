@@ -15,7 +15,7 @@ from zigpy.zcl import (
     AttributeWrittenEvent,
     ReportingConfig,
 )
-from zigpy.zcl.clusters import hvac
+from zigpy.zcl.clusters import general, hvac
 
 from zha.application import Platform
 from zha.application.helpers import safe_read, write_attributes_safe
@@ -585,3 +585,34 @@ class KofFan(Fan):
     def preset_modes_to_name(self) -> dict[int, str]:
         """Return a dict from preset mode to name."""
         return {6: PRESET_MODE_SMART}
+
+@register_entity(hvac.Fan.cluster_id)
+class InovelliFan(Fan):
+    """Representation of an Inovelli fan."""
+
+    _cluster_handler_match = ClusterHandlerMatch(
+        cluster_handlers=frozenset({CLUSTER_HANDLER_FAN}),
+        manufacturers=frozenset({"Inovelli"}),
+        models=frozenset({"VZM35-SN","VZM36",}),
+        feature_priority=(PlatformFeatureGroup.THERMOSTAT_FAN, 1),
+    )
+
+    async def async_turn_on(
+        self,
+        speed: str | None = None,
+        percentage: int | None = None,
+        preset_mode: str | None = None,
+    ) -> None:
+        """Turn the entity on."""
+        if speed is None and percentage is None and preset_mode is None:
+            on_off_cluster = self.endpoint.zigpy_endpoint.in_clusters[
+                general.OnOff.cluster_id
+            ]
+            await on_off_cluster.on()
+            return
+
+        await super().async_turn_on(
+            speed=speed,
+            percentage=percentage,
+            preset_mode=preset_mode,
+        )
