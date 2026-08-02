@@ -21,6 +21,7 @@ from zhaquirks.builder.metadata import (
     NumberMetadata,
     ZCLSensorMetadata,
 )
+from zhaquirks.clusters import CustomCluster
 from zhaquirks.ikea import PowerConfig1CRCluster, ScenesCluster
 from zhaquirks.xiaomi import (
     BasicCluster,
@@ -38,6 +39,7 @@ from zigpy.zcl import ClusterType
 import zigpy.zcl.clusters.closures
 import zigpy.zcl.clusters.general
 from zigpy.zcl.clusters.general import Ota, QueryNextImageCommand
+from zigpy.zcl.clusters.manufacturer_specific import ManufacturerSpecificCluster
 import zigpy.zcl.clusters.security
 import zigpy.zcl.foundation as zcl_f
 
@@ -929,6 +931,84 @@ async def test_get_diagnostics_json_repeated_calls(zha_gateway: Gateway) -> None
         json.dumps(zha_device.get_diagnostics_json(), cls=ZhaJsonEncoder)
     )
     assert first == second
+
+
+async def test_get_diagnostics_json_bytes_entity_info(zha_gateway: Gateway) -> None:
+    """Test that `bytes` in quirk entity info can be serialized."""
+
+    class FakeCluster(CustomCluster, ManufacturerSpecificCluster):
+        """Fake manufacturer cluster with an octet string attribute and command."""
+
+        cluster_id = 0xFC11
+        ep_attribute = "fake_cluster"
+
+        class AttributeDefs(zcl_f.BaseAttributeDefs):
+            """Attribute definitions."""
+
+            raw_attr = zcl_f.ZCLAttributeDef(id=0x0000, type=zigpy.types.LVBytes)
+
+        class ServerCommandDefs(zcl_f.BaseCommandDefs):
+            """Server command definitions."""
+
+            raw_command = zcl_f.ZCLCommandDef(
+                id=0x00, schema={"payload": zigpy.types.LVBytes}
+            )
+
+    registry = DeviceRegistry()
+    zigpy_device = create_mock_zigpy_device(
+        zha_gateway,
+        {
+            1: {
+                SIG_EP_INPUT: [
+                    zigpy.zcl.clusters.general.Basic.cluster_id,
+                    FakeCluster.cluster_id,
+                ],
+                SIG_EP_OUTPUT: [],
+                SIG_EP_TYPE: zigpy.profiles.zha.DeviceType.REMOTE_CONTROL,
+                SIG_EP_PROFILE: zigpy.profiles.zha.PROFILE_ID,
+            }
+        },
+        manufacturer="Fake_Manufacturer",
+        model="Fake_Model",
+        registry=registry,
+    )
+
+    (
+        QuirkBuilder("Fake_Manufacturer", "Fake_Model")
+        .replaces(FakeCluster)
+        .command_button(
+            FakeCluster.ServerCommandDefs.raw_command.name,
+            FakeCluster.cluster_id,
+            command_args=(b"\x00",),
+            translation_key="raw_command",
+            fallback_name="Raw command",
+        )
+        .write_attr_button(
+            FakeCluster.AttributeDefs.raw_attr.name,
+            b"\x00",
+            FakeCluster.cluster_id,
+            translation_key="raw_attr",
+            fallback_name="Raw attr",
+        )
+        .add_to_registry(registry)
+    )
+
+    zigpy_device = registry.resolve(zigpy_device)
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
+
+    # what tools/import_diagnostics.py and tools/regenerate_diagnostics.py do
+    diag = json.loads(json.dumps(zha_device.get_diagnostics_json(), cls=ZhaJsonEncoder))
+
+    buttons = diag["zha_lib_entities"][Platform.BUTTON]
+    expected = {"__type": "<class 'bytes'>", "repr": "b'\\x00'"}
+
+    args = next(e["args"] for e in buttons if "args" in e)
+    assert args == [expected]
+
+    attribute_value = next(
+        e["attribute_value"] for e in buttons if "attribute_value" in e
+    )
+    assert attribute_value == expected
 
 
 async def test_diagnostics_includes_ota_last_query_cmd(zha_gateway: Gateway) -> None:
