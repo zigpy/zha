@@ -586,6 +586,7 @@ class KofFan(Fan):
         """Return a dict from preset mode to name."""
         return {6: PRESET_MODE_SMART}
 
+
 @register_entity(hvac.Fan.cluster_id)
 class InovelliFan(Fan):
     """Representation of an Inovelli fan."""
