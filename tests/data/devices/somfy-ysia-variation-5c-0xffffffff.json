@@ -1,0 +1,708 @@
+{
+  "version": 3,
+  "ieee": "ab:cd:ef:12:ec:84:26:cd",
+  "nwk": "0xCF2D",
+  "manufacturer": "SOMFY",
+  "model": "Ysia Variation 5C",
+  "friendly_manufacturer": "SOMFY",
+  "friendly_model": "Ysia Variation 5C",
+  "name": "SOMFY Ysia Variation 5C",
+  "quirk_applied": false,
+  "quirk_class": "zigpy.device.Device",
+  "exposes_features": [],
+  "manufacturer_code": 4640,
+  "power_source": "Battery or Unknown",
+  "lqi": 252,
+  "rssi": -37,
+  "last_seen": "2026-07-20T12:47:07.571183+00:00",
+  "available": true,
+  "device_type": "EndDevice",
+  "active_coordinator": false,
+  "node_descriptor": {
+    "logical_type": "EndDevice",
+    "complex_descriptor_available": false,
+    "user_descriptor_available": false,
+    "reserved": 0,
+    "aps_flags": 0,
+    "frequency_band": 8,
+    "mac_capability_flags": 128,
+    "manufacturer_code": 4640,
+    "maximum_buffer_size": 82,
+    "maximum_incoming_transfer_size": 82,
+    "server_mask": 11264,
+    "maximum_outgoing_transfer_size": 82,
+    "descriptor_capability_field": 0
+  },
+  "endpoints": {
+    "1": {
+      "profile_id": 260,
+      "device_type": {
+        "name": "WINDOW_COVERING_CONTROLLER",
+        "id": 515
+      },
+      "in_clusters": [
+        {
+          "cluster_id": "0x0000",
+          "endpoint_attribute": "basic",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0003",
+          "endpoint_attribute": "identify",
+          "attributes": []
+        }
+      ],
+      "out_clusters": [
+        {
+          "cluster_id": "0x0003",
+          "endpoint_attribute": "identify",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0005",
+          "endpoint_attribute": "scenes",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0006",
+          "endpoint_attribute": "on_off",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0008",
+          "endpoint_attribute": "level",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0102",
+          "endpoint_attribute": "window_covering",
+          "attributes": []
+        }
+      ]
+    },
+    "2": {
+      "profile_id": 260,
+      "device_type": {
+        "name": "WINDOW_COVERING_CONTROLLER",
+        "id": 515
+      },
+      "in_clusters": [
+        {
+          "cluster_id": "0x0000",
+          "endpoint_attribute": "basic",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0003",
+          "endpoint_attribute": "identify",
+          "attributes": []
+        }
+      ],
+      "out_clusters": [
+        {
+          "cluster_id": "0x0003",
+          "endpoint_attribute": "identify",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0005",
+          "endpoint_attribute": "scenes",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0006",
+          "endpoint_attribute": "on_off",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0008",
+          "endpoint_attribute": "level",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0102",
+          "endpoint_attribute": "window_covering",
+          "attributes": []
+        }
+      ]
+    },
+    "3": {
+      "profile_id": 260,
+      "device_type": {
+        "name": "WINDOW_COVERING_CONTROLLER",
+        "id": 515
+      },
+      "in_clusters": [
+        {
+          "cluster_id": "0x0000",
+          "endpoint_attribute": "basic",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0003",
+          "endpoint_attribute": "identify",
+          "attributes": []
+        }
+      ],
+      "out_clusters": [
+        {
+          "cluster_id": "0x0003",
+          "endpoint_attribute": "identify",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0005",
+          "endpoint_attribute": "scenes",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0006",
+          "endpoint_attribute": "on_off",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0008",
+          "endpoint_attribute": "level",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0102",
+          "endpoint_attribute": "window_covering",
+          "attributes": []
+        }
+      ]
+    },
+    "4": {
+      "profile_id": 260,
+      "device_type": {
+        "name": "WINDOW_COVERING_CONTROLLER",
+        "id": 515
+      },
+      "in_clusters": [
+        {
+          "cluster_id": "0x0000",
+          "endpoint_attribute": "basic",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0003",
+          "endpoint_attribute": "identify",
+          "attributes": []
+        }
+      ],
+      "out_clusters": [
+        {
+          "cluster_id": "0x0003",
+          "endpoint_attribute": "identify",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0005",
+          "endpoint_attribute": "scenes",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0006",
+          "endpoint_attribute": "on_off",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0008",
+          "endpoint_attribute": "level",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0102",
+          "endpoint_attribute": "window_covering",
+          "attributes": []
+        }
+      ]
+    },
+    "5": {
+      "profile_id": 260,
+      "device_type": {
+        "name": "WINDOW_COVERING_CONTROLLER",
+        "id": 515
+      },
+      "in_clusters": [
+        {
+          "cluster_id": "0x0000",
+          "endpoint_attribute": "basic",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0003",
+          "endpoint_attribute": "identify",
+          "attributes": []
+        }
+      ],
+      "out_clusters": [
+        {
+          "cluster_id": "0x0003",
+          "endpoint_attribute": "identify",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0005",
+          "endpoint_attribute": "scenes",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0006",
+          "endpoint_attribute": "on_off",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0008",
+          "endpoint_attribute": "level",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0102",
+          "endpoint_attribute": "window_covering",
+          "attributes": []
+        }
+      ]
+    },
+    "232": {
+      "profile_id": 260,
+      "device_type": {
+        "name": "CONFIGURATION_TOOL",
+        "id": 5
+      },
+      "in_clusters": [
+        {
+          "cluster_id": "0x0000",
+          "endpoint_attribute": "basic",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0001",
+          "endpoint_attribute": "power",
+          "attributes": [
+            {
+              "id": "0x0021",
+              "name": "battery_percentage_remaining",
+              "zcl_type": "uint8",
+              "value": 94
+            },
+            {
+              "id": "0x0033",
+              "name": "battery_quantity",
+              "zcl_type": "uint8",
+              "unsupported": true
+            },
+            {
+              "id": "0x0031",
+              "name": "battery_size",
+              "zcl_type": "enum8",
+              "unsupported": true
+            },
+            {
+              "id": "0x0020",
+              "name": "battery_voltage",
+              "zcl_type": "uint8",
+              "unsupported": true
+            }
+          ]
+        },
+        {
+          "cluster_id": "0x0003",
+          "endpoint_attribute": "identify",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0020",
+          "endpoint_attribute": "poll_control",
+          "attributes": []
+        }
+      ],
+      "out_clusters": [
+        {
+          "cluster_id": "0x0000",
+          "endpoint_attribute": "basic",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0001",
+          "endpoint_attribute": "power",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0019",
+          "endpoint_attribute": "ota",
+          "attributes": [
+            {
+              "id": "0x0002",
+              "name": "current_file_version",
+              "zcl_type": "uint32",
+              "value": 4294967295
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "original_signature": {
+    "manufacturer": "SOMFY",
+    "model": "Ysia Variation 5C",
+    "node_desc": {
+      "logical_type": 2,
+      "complex_descriptor_available": 0,
+      "user_descriptor_available": 0,
+      "reserved": 0,
+      "aps_flags": 0,
+      "frequency_band": 8,
+      "mac_capability_flags": 128,
+      "manufacturer_code": 4640,
+      "maximum_buffer_size": 82,
+      "maximum_incoming_transfer_size": 82,
+      "server_mask": 11264,
+      "maximum_outgoing_transfer_size": 82,
+      "descriptor_capability_field": 0
+    },
+    "endpoints": {
+      "1": {
+        "profile_id": "0x0104",
+        "device_type": "0x0203",
+        "input_clusters": [
+          "0x0000",
+          "0x0003"
+        ],
+        "output_clusters": [
+          "0x0003",
+          "0x0005",
+          "0x0006",
+          "0x0008",
+          "0x0102"
+        ]
+      },
+      "2": {
+        "profile_id": "0x0104",
+        "device_type": "0x0203",
+        "input_clusters": [
+          "0x0000",
+          "0x0003"
+        ],
+        "output_clusters": [
+          "0x0003",
+          "0x0005",
+          "0x0006",
+          "0x0008",
+          "0x0102"
+        ]
+      },
+      "3": {
+        "profile_id": "0x0104",
+        "device_type": "0x0203",
+        "input_clusters": [
+          "0x0000",
+          "0x0003"
+        ],
+        "output_clusters": [
+          "0x0003",
+          "0x0005",
+          "0x0006",
+          "0x0008",
+          "0x0102"
+        ]
+      },
+      "4": {
+        "profile_id": "0x0104",
+        "device_type": "0x0203",
+        "input_clusters": [
+          "0x0000",
+          "0x0003"
+        ],
+        "output_clusters": [
+          "0x0003",
+          "0x0005",
+          "0x0006",
+          "0x0008",
+          "0x0102"
+        ]
+      },
+      "5": {
+        "profile_id": "0x0104",
+        "device_type": "0x0203",
+        "input_clusters": [
+          "0x0000",
+          "0x0003"
+        ],
+        "output_clusters": [
+          "0x0003",
+          "0x0005",
+          "0x0006",
+          "0x0008",
+          "0x0102"
+        ]
+      },
+      "232": {
+        "profile_id": "0x0104",
+        "device_type": "0x0005",
+        "input_clusters": [
+          "0x0000",
+          "0x0001",
+          "0x0003",
+          "0x0020"
+        ],
+        "output_clusters": [
+          "0x0000",
+          "0x0001",
+          "0x0019"
+        ]
+      }
+    }
+  },
+  "zha_lib_entities": {
+    "binary_sensor": [
+      {
+        "fallback_name": null,
+        "unique_id": "ab:cd:ef:12:ec:84:26:cd-1-6",
+        "migrate_unique_ids": [],
+        "platform": "binary_sensor",
+        "class_name": "Opening",
+        "translation_key": null,
+        "translation_placeholders": null,
+        "device_class": "opening",
+        "state_class": null,
+        "entity_category": null,
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:ec:84:26:cd",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "is_on": false,
+        "attribute_name": "on_off"
+      },
+      {
+        "fallback_name": null,
+        "unique_id": "ab:cd:ef:12:ec:84:26:cd-2-6",
+        "migrate_unique_ids": [],
+        "platform": "binary_sensor",
+        "class_name": "Opening",
+        "translation_key": null,
+        "translation_placeholders": null,
+        "device_class": "opening",
+        "state_class": null,
+        "entity_category": null,
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:ec:84:26:cd",
+        "endpoint_id": 2,
+        "available": true,
+        "group_id": null,
+        "is_on": false,
+        "attribute_name": "on_off"
+      },
+      {
+        "fallback_name": null,
+        "unique_id": "ab:cd:ef:12:ec:84:26:cd-3-6",
+        "migrate_unique_ids": [],
+        "platform": "binary_sensor",
+        "class_name": "Opening",
+        "translation_key": null,
+        "translation_placeholders": null,
+        "device_class": "opening",
+        "state_class": null,
+        "entity_category": null,
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:ec:84:26:cd",
+        "endpoint_id": 3,
+        "available": true,
+        "group_id": null,
+        "is_on": false,
+        "attribute_name": "on_off"
+      },
+      {
+        "fallback_name": null,
+        "unique_id": "ab:cd:ef:12:ec:84:26:cd-4-6",
+        "migrate_unique_ids": [],
+        "platform": "binary_sensor",
+        "class_name": "Opening",
+        "translation_key": null,
+        "translation_placeholders": null,
+        "device_class": "opening",
+        "state_class": null,
+        "entity_category": null,
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:ec:84:26:cd",
+        "endpoint_id": 4,
+        "available": true,
+        "group_id": null,
+        "is_on": false,
+        "attribute_name": "on_off"
+      },
+      {
+        "fallback_name": null,
+        "unique_id": "ab:cd:ef:12:ec:84:26:cd-5-6",
+        "migrate_unique_ids": [],
+        "platform": "binary_sensor",
+        "class_name": "Opening",
+        "translation_key": null,
+        "translation_placeholders": null,
+        "device_class": "opening",
+        "state_class": null,
+        "entity_category": null,
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:ec:84:26:cd",
+        "endpoint_id": 5,
+        "available": true,
+        "group_id": null,
+        "is_on": false,
+        "attribute_name": "on_off"
+      }
+    ],
+    "button": [
+      {
+        "fallback_name": null,
+        "unique_id": "ab:cd:ef:12:ec:84:26:cd-1-3",
+        "migrate_unique_ids": [],
+        "platform": "button",
+        "class_name": "IdentifyButton",
+        "translation_key": null,
+        "translation_placeholders": null,
+        "device_class": "identify",
+        "state_class": null,
+        "entity_category": "diagnostic",
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:ec:84:26:cd",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "command": "identify",
+        "args": [
+          5
+        ],
+        "kwargs": {}
+      }
+    ],
+    "sensor": [
+      {
+        "fallback_name": null,
+        "unique_id": "ab:cd:ef:12:ec:84:26:cd-1-0-lqi",
+        "migrate_unique_ids": [],
+        "platform": "sensor",
+        "class_name": "LQISensor",
+        "translation_key": "lqi",
+        "translation_placeholders": null,
+        "device_class": null,
+        "state_class": "measurement",
+        "entity_category": "diagnostic",
+        "entity_registry_enabled_default": false,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:ec:84:26:cd",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "native_value": 252,
+        "suggested_display_precision": null,
+        "unit": null
+      },
+      {
+        "fallback_name": null,
+        "unique_id": "ab:cd:ef:12:ec:84:26:cd-1-0-rssi",
+        "migrate_unique_ids": [],
+        "platform": "sensor",
+        "class_name": "RSSISensor",
+        "translation_key": "rssi",
+        "translation_placeholders": null,
+        "device_class": "signal_strength",
+        "state_class": "measurement",
+        "entity_category": "diagnostic",
+        "entity_registry_enabled_default": false,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:ec:84:26:cd",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "native_value": -37,
+        "suggested_display_precision": null,
+        "unit": "dBm"
+      },
+      {
+        "fallback_name": null,
+        "unique_id": "ab:cd:ef:12:ec:84:26:cd-232-1",
+        "migrate_unique_ids": [],
+        "platform": "sensor",
+        "class_name": "Battery",
+        "translation_key": null,
+        "translation_placeholders": null,
+        "device_class": "battery",
+        "state_class": "measurement",
+        "entity_category": "diagnostic",
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [
+          "battery_quantity",
+          "battery_size",
+          "battery_voltage"
+        ],
+        "device_ieee": "ab:cd:ef:12:ec:84:26:cd",
+        "endpoint_id": 232,
+        "available": true,
+        "group_id": null,
+        "native_value": 47.0,
+        "suggested_display_precision": 0,
+        "unit": "%",
+        "battery_size": null,
+        "battery_quantity": null,
+        "battery_voltage": null
+      }
+    ],
+    "update": [
+      {
+        "fallback_name": null,
+        "unique_id": "ab:cd:ef:12:ec:84:26:cd-232-25-firmware_update",
+        "migrate_unique_ids": [],
+        "platform": "update",
+        "class_name": "FirmwareUpdateEntity",
+        "translation_key": null,
+        "translation_placeholders": null,
+        "device_class": "firmware",
+        "state_class": null,
+        "entity_category": "config",
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:ec:84:26:cd",
+        "endpoint_id": 232,
+        "available": true,
+        "group_id": null,
+        "installed_version": "0xffffffff",
+        "in_progress": false,
+        "update_percentage": null,
+        "latest_version": null,
+        "release_summary": null,
+        "release_notes": null,
+        "release_url": null,
+        "supported_features": 23
+      }
+    ]
+  },
+  "neighbors": [],
+  "routes": []
+}

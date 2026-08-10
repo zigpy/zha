@@ -2740,7 +2740,6 @@ class DeviceTemperature(Sensor):
     _divisor = 100
     _attr_native_unit_of_measurement = UnitOfTemperature.CELSIUS
     _attr_entity_category = EntityCategory.DIAGNOSTIC
-    _attr_primary_weight = 1
     _cluster_id = DeviceTemperatureCluster.cluster_id
 
     _cluster_match = ClusterMatch(
