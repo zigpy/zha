@@ -1388,7 +1388,7 @@ async def test_set_fan_mode(
             [FanState.LOW, FanState.MEDIUM, FanState.HIGH, FanState.AUTO],
         ),
         (FanModeSequence.Low_High_Auto, [FanState.LOW, FanState.HIGH, FanState.AUTO]),
-        (FanModeSequence.On_Auto, [FanState.ON, FanState.AUTO]),
+        (FanModeSequence.On_Auto, [FanState.AUTO, FanState.ON]),
         (0xFF, [FanState.AUTO, FanState.ON]),  # unknown sequence → fallback
     ),
 )
@@ -1528,6 +1528,30 @@ async def test_fan_mode_out_of_range_returns_none(
     await send_attributes_report(zha_gateway, fan_cluster, {"fan_mode": FanMode.On})
     await zha_gateway.async_block_till_done(wait_background_tasks=True)
 
+    assert entity.fan_modes == [FanState.LOW, FanState.MEDIUM, FanState.HIGH]
+    assert entity.state.fan_mode is None
+
+
+async def test_fan_mode_running_state_fallback_clamped(
+    zha_gateway: Gateway,
+):
+    """Uncached fan_mode must not return auto/on outside fan_modes via running_state."""
+    device_climate_fan = await device_climate_mock(zha_gateway, CLIMATE_FAN)
+    fan_cluster = device_climate_fan.device.endpoints[1].fan
+    entity: ThermostatEntity = get_entity(
+        device_climate_fan, platform=Platform.CLIMATE, entity_type=ThermostatEntity
+    )
+
+    # Sequence with no auto/on; leave fan_mode uncached so the running_state
+    # heuristic would otherwise return FAN_AUTO.
+    await send_attributes_report(
+        zha_gateway,
+        fan_cluster,
+        {"fan_mode_sequence": FanModeSequence.Low_Med_High},
+    )
+    await zha_gateway.async_block_till_done(wait_background_tasks=True)
+
+    assert fan_cluster.get("fan_mode") is None
     assert entity.fan_modes == [FanState.LOW, FanState.MEDIUM, FanState.HIGH]
     assert entity.state.fan_mode is None
 

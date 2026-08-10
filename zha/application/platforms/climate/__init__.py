@@ -615,15 +615,22 @@ class Thermostat(BaseThermostat):
 
         running_state = self._running_state
         if running_state is None:
-            return FAN_AUTO
-
-        if running_state & (
+            mode = FAN_AUTO
+        elif running_state & (
             RunningState.Fan_State_On
             | RunningState.Fan_2nd_Stage_On
             | RunningState.Fan_3rd_Stage_On
         ):
-            return FAN_ON
-        return FAN_AUTO
+            mode = FAN_ON
+        else:
+            mode = FAN_AUTO
+
+        # Only clamp when the device exposes a concrete fan_modes list. Devices
+        # without a Fan cluster keep the historical running_state heuristic.
+        fan_modes = self.fan_modes
+        if fan_modes is None or mode in fan_modes:
+            return mode
+        return None
 
     @property
     def fan_modes(self) -> list[str] | None:
