@@ -253,7 +253,7 @@
         "entity_category": "diagnostic",
         "entity_registry_enabled_default": true,
         "enabled": true,
-        "primary": true,
+        "primary": false,
         "extra_state_attribute_names": [],
         "device_ieee": "00:15:8d:00:02:b0:e5:91",
         "endpoint_id": 1,

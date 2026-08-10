@@ -49,7 +49,7 @@ from zha.application.gateway import Gateway
 from zha.application.platforms import PlatformEntity
 from zha.application.platforms.binary_sensor import IASZone
 from zha.application.platforms.light import Light
-from zha.application.platforms.sensor import LQISensor, RSSISensor
+from zha.application.platforms.sensor import Battery, LQISensor, RSSISensor
 from zha.application.platforms.sensor.device_class import (
     SensorDeviceClass,
     SensorStateClass,
@@ -946,6 +946,31 @@ async def test_primary_entity_computation(
         assert primary == [
             get_entity(zha_device, primary_platform, entity_type=primary_entity_type)
         ]
+
+
+async def test_primary_entity_weight_0_not_elected(zha_gateway: Gateway) -> None:
+    """Test a weight-0 entity is not elected primary, even as the sole candidate."""
+
+    # Without the `Basic` cluster, no LQI/RSSI entities are created, so the
+    # battery entity is the only entity of this device
+    zigpy_dev = create_mock_zigpy_device(
+        zha_gateway,
+        {
+            1: {
+                SIG_EP_INPUT: [general.PowerConfiguration.cluster_id],
+                SIG_EP_OUTPUT: [],
+                SIG_EP_TYPE: zigpy.profiles.zha.DeviceType.SIMPLE_SENSOR,
+                SIG_EP_PROFILE: zigpy.profiles.zha.PROFILE_ID,
+            }
+        },
+    )
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
+
+    battery = get_entity(zha_device, Platform.SENSOR, entity_type=Battery)
+    assert list(zha_device.platform_entities.values()) == [battery]
+
+    # The weight-0 battery entity is not elected as the primary entity
+    assert not battery.primary
 
 
 async def test_quirks_v2_primary_entity(zha_gateway: Gateway) -> None:

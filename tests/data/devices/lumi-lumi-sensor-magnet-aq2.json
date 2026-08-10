@@ -194,7 +194,7 @@
         "entity_category": null,
         "entity_registry_enabled_default": true,
         "enabled": true,
-        "primary": false,
+        "primary": true,
         "extra_state_attribute_names": [],
         "device_ieee": "00:15:8d:00:01:ab:40:52",
         "endpoint_id": 1,

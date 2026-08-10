@@ -1,20 +1,20 @@
 {
   "version": 3,
-  "ieee": "00:15:8d:00:02:13:91:38",
-  "nwk": "0xE14A",
-  "manufacturer": "LUMI",
-  "model": "lumi.sensor_switch.aq2",
-  "friendly_manufacturer": "LUMI",
-  "friendly_model": "lumi.sensor_switch.aq2",
-  "name": "LUMI lumi.sensor_switch.aq2",
+  "ieee": "ab:cd:ef:12:e5:92:c2:0e",
+  "nwk": "0x93B2",
+  "manufacturer": "Signify Netherlands B.V.",
+  "model": "RWL022",
+  "friendly_manufacturer": "Signify Netherlands B.V.",
+  "friendly_model": "RWL022",
+  "name": "Signify Netherlands B.V. RWL022",
   "quirk_applied": true,
-  "quirk_class": "zhaquirks.xiaomi.aqara.switch_aq2:SwitchAQ2",
+  "quirk_class": "zhaquirks.philips.rwl022:PhilipsRWL022",
   "exposes_features": [],
-  "manufacturer_code": 4151,
+  "manufacturer_code": 4107,
   "power_source": "Battery or Unknown",
-  "lqi": null,
-  "rssi": null,
-  "last_seen": "2025-04-24T17:34:08.445260+00:00",
+  "lqi": 28,
+  "rssi": -93,
+  "last_seen": "2026-07-24T10:08:41.559587+00:00",
   "available": true,
   "device_type": "EndDevice",
   "active_coordinator": false,
@@ -26,19 +26,19 @@
     "aps_flags": 0,
     "frequency_band": 8,
     "mac_capability_flags": 128,
-    "manufacturer_code": 4151,
-    "maximum_buffer_size": 127,
-    "maximum_incoming_transfer_size": 100,
-    "server_mask": 0,
-    "maximum_outgoing_transfer_size": 100,
+    "manufacturer_code": 4107,
+    "maximum_buffer_size": 82,
+    "maximum_incoming_transfer_size": 128,
+    "server_mask": 11264,
+    "maximum_outgoing_transfer_size": 128,
     "descriptor_capability_field": 0
   },
   "endpoints": {
     "1": {
       "profile_id": 260,
       "device_type": {
-        "name": "REMOTE_CONTROL",
-        "id": 6
+        "name": "NON_COLOR_SCENE_CONTROLLER",
+        "id": 2096
       },
       "in_clusters": [
         {
@@ -46,22 +46,22 @@
           "endpoint_attribute": "basic",
           "attributes": [
             {
-              "id": "0x0001",
-              "name": "app_version",
-              "zcl_type": "uint8",
-              "value": 3
-            },
-            {
               "id": "0x0004",
               "name": "manufacturer",
               "zcl_type": "string",
-              "value": "LUMI"
+              "value": "Signify Netherlands B.V."
             },
             {
               "id": "0x0005",
               "name": "model",
               "zcl_type": "string",
-              "value": "lumi.sensor_switch.aq2"
+              "value": "RWL022"
+            },
+            {
+              "id": "0x0031",
+              "name": "philips",
+              "zcl_type": "map16",
+              "value": 11
             }
           ]
         },
@@ -73,43 +73,41 @@
               "id": "0x0021",
               "name": "battery_percentage_remaining",
               "zcl_type": "uint8",
-              "value": 154
+              "value": 200
             },
             {
               "id": "0x0033",
               "name": "battery_quantity",
               "zcl_type": "uint8",
-              "value": 1
+              "unsupported": true
             },
             {
               "id": "0x0031",
               "name": "battery_size",
               "zcl_type": "enum8",
-              "value": 10
+              "unsupported": true
             },
             {
               "id": "0x0020",
               "name": "battery_voltage",
               "zcl_type": "uint8",
-              "value": 30.4
+              "value": 31
             }
           ]
         },
         {
-          "cluster_id": "0x0002",
-          "endpoint_attribute": "device_temperature",
-          "attributes": [
-            {
-              "id": "0x0000",
-              "name": "current_temperature",
-              "zcl_type": "int16",
-              "value": 2900
-            }
-          ]
+          "cluster_id": "0x0003",
+          "endpoint_attribute": "identify",
+          "attributes": []
         },
         {
-          "cluster_id": "0xffff",
-          "endpoint_attribute": "manufacturer_specific",
+          "cluster_id": "0x1000",
+          "endpoint_attribute": "lightlink",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0xfc00",
+          "endpoint_attribute": "philips_remote_cluster",
           "attributes": []
         }
       ],
@@ -120,8 +118,18 @@
           "attributes": []
         },
         {
+          "cluster_id": "0x0003",
+          "endpoint_attribute": "identify",
+          "attributes": []
+        },
+        {
           "cluster_id": "0x0004",
           "endpoint_attribute": "groups",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0005",
+          "endpoint_attribute": "scenes",
           "attributes": []
         },
         {
@@ -137,16 +145,33 @@
           ]
         },
         {
-          "cluster_id": "0xffff",
-          "endpoint_attribute": "manufacturer_specific",
+          "cluster_id": "0x0008",
+          "endpoint_attribute": "level",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0019",
+          "endpoint_attribute": "ota",
+          "attributes": [
+            {
+              "id": "0x0002",
+              "name": "current_file_version",
+              "zcl_type": "uint32",
+              "value": 33576193
+            }
+          ]
+        },
+        {
+          "cluster_id": "0x1000",
+          "endpoint_attribute": "lightlink",
           "attributes": []
         }
       ]
     }
   },
   "original_signature": {
-    "manufacturer": "LUMI",
-    "model": "lumi.sensor_switch.aq2",
+    "manufacturer": "Signify Netherlands B.V.",
+    "model": "RWL022",
     "node_desc": {
       "logical_type": 2,
       "complex_descriptor_available": 0,
@@ -155,35 +180,69 @@
       "aps_flags": 0,
       "frequency_band": 8,
       "mac_capability_flags": 128,
-      "manufacturer_code": 4151,
-      "maximum_buffer_size": 127,
-      "maximum_incoming_transfer_size": 100,
-      "server_mask": 0,
-      "maximum_outgoing_transfer_size": 100,
+      "manufacturer_code": 4107,
+      "maximum_buffer_size": 82,
+      "maximum_incoming_transfer_size": 128,
+      "server_mask": 11264,
+      "maximum_outgoing_transfer_size": 128,
       "descriptor_capability_field": 0
     },
     "endpoints": {
       "1": {
         "profile_id": "0x0104",
-        "device_type": "0x5f01",
+        "device_type": "0x0830",
         "input_clusters": [
           "0x0000",
-          "0x0006",
-          "0xffff"
+          "0x0001",
+          "0x0003",
+          "0xfc00",
+          "0x1000"
         ],
         "output_clusters": [
+          "0x0019",
           "0x0000",
+          "0x0003",
           "0x0004",
-          "0xffff"
+          "0x0006",
+          "0x0008",
+          "0x0005",
+          "0x1000"
         ]
       }
     }
   },
   "zha_lib_entities": {
+    "button": [
+      {
+        "fallback_name": null,
+        "unique_id": "ab:cd:ef:12:e5:92:c2:0e-1-3",
+        "migrate_unique_ids": [],
+        "platform": "button",
+        "class_name": "IdentifyButton",
+        "translation_key": null,
+        "translation_placeholders": null,
+        "device_class": "identify",
+        "state_class": null,
+        "entity_category": "diagnostic",
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:e5:92:c2:0e",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "command": "identify",
+        "args": [
+          5
+        ],
+        "kwargs": {}
+      }
+    ],
     "sensor": [
       {
         "fallback_name": null,
-        "unique_id": "00:15:8d:00:02:13:91:38-1-0-lqi",
+        "unique_id": "ab:cd:ef:12:e5:92:c2:0e-1-0-lqi",
         "migrate_unique_ids": [],
         "platform": "sensor",
         "class_name": "LQISensor",
@@ -196,17 +255,17 @@
         "enabled": true,
         "primary": false,
         "extra_state_attribute_names": [],
-        "device_ieee": "00:15:8d:00:02:13:91:38",
+        "device_ieee": "ab:cd:ef:12:e5:92:c2:0e",
         "endpoint_id": 1,
         "available": true,
         "group_id": null,
-        "native_value": null,
+        "native_value": 28,
         "suggested_display_precision": null,
         "unit": null
       },
       {
         "fallback_name": null,
-        "unique_id": "00:15:8d:00:02:13:91:38-1-0-rssi",
+        "unique_id": "ab:cd:ef:12:e5:92:c2:0e-1-0-rssi",
         "migrate_unique_ids": [],
         "platform": "sensor",
         "class_name": "RSSISensor",
@@ -219,17 +278,17 @@
         "enabled": true,
         "primary": false,
         "extra_state_attribute_names": [],
-        "device_ieee": "00:15:8d:00:02:13:91:38",
+        "device_ieee": "ab:cd:ef:12:e5:92:c2:0e",
         "endpoint_id": 1,
         "available": true,
         "group_id": null,
-        "native_value": null,
+        "native_value": -93,
         "suggested_display_precision": null,
         "unit": "dBm"
       },
       {
         "fallback_name": null,
-        "unique_id": "00:15:8d:00:02:13:91:38-1-1",
+        "unique_id": "ab:cd:ef:12:e5:92:c2:0e-1-1",
         "migrate_unique_ids": [],
         "platform": "sensor",
         "class_name": "Battery",
@@ -246,39 +305,46 @@
           "battery_size",
           "battery_voltage"
         ],
-        "device_ieee": "00:15:8d:00:02:13:91:38",
+        "device_ieee": "ab:cd:ef:12:e5:92:c2:0e",
         "endpoint_id": 1,
         "available": true,
         "group_id": null,
-        "native_value": 77.0,
+        "native_value": 100.0,
         "suggested_display_precision": 0,
         "unit": "%",
-        "battery_size": "CR2032",
-        "battery_quantity": 1,
-        "battery_voltage": 3.04
-      },
+        "battery_size": null,
+        "battery_quantity": null,
+        "battery_voltage": 3.1
+      }
+    ],
+    "update": [
       {
         "fallback_name": null,
-        "unique_id": "00:15:8d:00:02:13:91:38-1-2",
+        "unique_id": "ab:cd:ef:12:e5:92:c2:0e-1-25-firmware_update",
         "migrate_unique_ids": [],
-        "platform": "sensor",
-        "class_name": "DeviceTemperature",
-        "translation_key": "device_temperature",
+        "platform": "update",
+        "class_name": "FirmwareUpdateEntity",
+        "translation_key": null,
         "translation_placeholders": null,
-        "device_class": "temperature",
-        "state_class": "measurement",
-        "entity_category": "diagnostic",
+        "device_class": "firmware",
+        "state_class": null,
+        "entity_category": "config",
         "entity_registry_enabled_default": true,
         "enabled": true,
         "primary": false,
         "extra_state_attribute_names": [],
-        "device_ieee": "00:15:8d:00:02:13:91:38",
+        "device_ieee": "ab:cd:ef:12:e5:92:c2:0e",
         "endpoint_id": 1,
         "available": true,
         "group_id": null,
-        "native_value": 29.0,
-        "suggested_display_precision": null,
-        "unit": "\u00b0C"
+        "installed_version": "0x02005501",
+        "in_progress": false,
+        "update_percentage": null,
+        "latest_version": null,
+        "release_summary": null,
+        "release_notes": null,
+        "release_url": null,
+        "supported_features": 23
       }
     ]
   },
