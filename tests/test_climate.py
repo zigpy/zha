@@ -1509,10 +1509,10 @@ async def test_fan_mode_state_emission_on_fan_cluster_report(
     assert entity.state.fan_mode == FanState.HIGH
 
 
-async def test_fan_mode_out_of_range_returns_none(
+async def test_fan_mode_outside_sequence_is_unioned(
     zha_gateway: Gateway,
 ):
-    """A reported fan_mode outside fan_modes must return None, not an orphan value."""
+    """A reported fan_mode outside the sequence must be appended to fan_modes."""
     device_climate_fan = await device_climate_mock(zha_gateway, CLIMATE_FAN)
     fan_cluster = device_climate_fan.device.endpoints[1].fan
     entity: ThermostatEntity = get_entity(
@@ -1528,8 +1528,13 @@ async def test_fan_mode_out_of_range_returns_none(
     await send_attributes_report(zha_gateway, fan_cluster, {"fan_mode": FanMode.On})
     await zha_gateway.async_block_till_done(wait_background_tasks=True)
 
-    assert entity.fan_modes == [FanState.LOW, FanState.MEDIUM, FanState.HIGH]
-    assert entity.state.fan_mode is None
+    assert entity.fan_modes == [
+        FanState.LOW,
+        FanState.MEDIUM,
+        FanState.HIGH,
+        FanState.ON,
+    ]
+    assert entity.state.fan_mode == FanState.ON
 
 
 async def test_fan_mode_running_state_fallback_clamped(
@@ -1559,7 +1564,7 @@ async def test_fan_mode_running_state_fallback_clamped(
 async def test_fan_mode_off_mapped_correctly(
     zha_gateway: Gateway,
 ):
-    """FanMode.Off must not fall through to 'auto'."""
+    """FanMode.Off must map to off (unioned into fan_modes), never auto."""
     device_climate_fan = await device_climate_mock(zha_gateway, CLIMATE_FAN)
     fan_cluster = device_climate_fan.device.endpoints[1].fan
     entity: ThermostatEntity = get_entity(
@@ -1574,8 +1579,8 @@ async def test_fan_mode_off_mapped_correctly(
     await send_attributes_report(zha_gateway, fan_cluster, {"fan_mode": FanMode.Off})
     await zha_gateway.async_block_till_done(wait_background_tasks=True)
 
-    # Off maps to FAN_OFF which is not in On_Auto sequence → None, never "auto"
-    assert entity.state.fan_mode is None
+    assert FanState.OFF in entity.fan_modes
+    assert entity.state.fan_mode == FanState.OFF
     assert entity.state.fan_mode != FanState.AUTO
 
 

@@ -388,7 +388,7 @@
         "hvac_action": null,
         "hvac_mode": "off",
         "preset_mode": "none",
-        "fan_mode": null,
+        "fan_mode": "on",
         "max_temp": 30.0,
         "min_temp": 16.0,
         "supported_features": 395,
@@ -396,7 +396,8 @@
           "low",
           "medium",
           "high",
-          "auto"
+          "auto",
+          "on"
         ],
         "preset_modes": [],
         "hvac_modes": [

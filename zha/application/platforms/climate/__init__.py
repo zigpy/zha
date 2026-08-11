@@ -638,7 +638,16 @@ class Thermostat(BaseThermostat):
         if self._fan_cluster is None:
             return None
         seq = self._fan_cluster.get(FanCluster.AttributeDefs.fan_mode_sequence.name)
-        return SEQ_FAN_MODES.get(seq, [FAN_AUTO, FAN_ON])
+        modes = list(SEQ_FAN_MODES.get(seq, [FAN_AUTO, FAN_ON]))
+        # Devices may report a FanMode outside their advertised sequence
+        # (e.g. On with Low_Med_High_Auto). Union it in so fan_mode stays
+        # selectable and the fan_mode-in-fan_modes invariant holds.
+        current = ZCL_TO_FAN_MODE.get(
+            self._fan_cluster.get(FanCluster.AttributeDefs.fan_mode.name)
+        )
+        if current is not None and current not in modes:
+            modes.append(current)
+        return modes
 
     @property
     def hvac_action(self) -> HVACAction | None:
