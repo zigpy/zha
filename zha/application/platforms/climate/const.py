@@ -156,6 +156,7 @@ SEQ_FAN_MODES: dict[int, list[str]] = {
 }
 
 FAN_MODE_TO_ZCL: dict[str, FanMode] = {
+    FAN_OFF: FanMode.Off,
     FAN_LOW: FanMode.Low,
     FAN_MEDIUM: FanMode.Medium,
     FAN_HIGH: FanMode.High,

@@ -1564,7 +1564,7 @@ async def test_fan_mode_running_state_fallback_clamped(
 async def test_fan_mode_off_mapped_correctly(
     zha_gateway: Gateway,
 ):
-    """FanMode.Off must map to off (unioned into fan_modes), never auto."""
+    """FanMode.Off must map to off (unioned into fan_modes) and be writable."""
     device_climate_fan = await device_climate_mock(zha_gateway, CLIMATE_FAN)
     fan_cluster = device_climate_fan.device.endpoints[1].fan
     entity: ThermostatEntity = get_entity(
@@ -1582,6 +1582,13 @@ async def test_fan_mode_off_mapped_correctly(
     assert FanState.OFF in entity.fan_modes
     assert entity.state.fan_mode == FanState.OFF
     assert entity.state.fan_mode != FanState.AUTO
+
+    fan_cluster.write_attributes.reset_mock()
+    await entity.async_set_fan_mode(FanState.OFF)
+    await zha_gateway.async_block_till_done()
+
+    assert fan_cluster.write_attributes.await_count == 1
+    assert fan_cluster.write_attributes.call_args[0][0] == {"fan_mode": FanMode.Off}
 
 
 async def test_fan_mode_smart_returns_none(
