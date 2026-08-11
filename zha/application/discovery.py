@@ -27,6 +27,7 @@ from zha.application.platforms import (  # noqa: F401 pylint: disable=unused-imp
     climate,
     cover,
     device_tracker,
+    event,
     fan,
     light,
     lock,
