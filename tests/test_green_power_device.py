@@ -3,11 +3,17 @@
 from __future__ import annotations
 
 from zigpy.device import GreenPowerDevice as ZigpyGreenPowerDevice
+from zigpy.types import EUI64
 from zigpy.zgp.types import ApplicationID, DeviceID, GPDCommandID, SrcID
 
 from zha.application.const import UNKNOWN_MANUFACTURER, UNKNOWN_MODEL
 from zha.application.gateway import Gateway
-from zha.quirks import DEVICE_REGISTRY
+from zha.quirks import (
+    DEVICE_REGISTRY,
+    QUIRK_REGISTRY_ENTRY_ATTR,
+    GreenPowerDeviceMatch,
+    GreenPowerQuirkRegistryEntry,
+)
 from zha.zigbee.device import GreenPowerDevice
 
 
@@ -114,3 +120,92 @@ async def test_green_power_device_initialize(zha_gateway: Gateway) -> None:
 
     await zha_device.async_initialize(from_cache=True)
     assert zha_device.platform_entities == {}
+
+
+async def test_green_power_device_match(zha_gateway: Gateway) -> None:
+    """Test the Green Power quirk matching criteria."""
+    zigpy_gpd = make_zigpy_gpd(zha_gateway)
+    zigpy_gpd.gpd_manufacturer_id = 0x1234
+
+    assert GreenPowerDeviceMatch().matches(zigpy_gpd)
+    assert GreenPowerDeviceMatch(device_id=DeviceID.OnOffSwitch).matches(zigpy_gpd)
+    assert not GreenPowerDeviceMatch(device_id=DeviceID.GenericSwitch).matches(
+        zigpy_gpd
+    )
+    assert GreenPowerDeviceMatch(manufacturer_id=0x1234).matches(zigpy_gpd)
+    assert not GreenPowerDeviceMatch(manufacturer_id=0x5678).matches(zigpy_gpd)
+    assert not GreenPowerDeviceMatch(model_id=0x0001).matches(zigpy_gpd)
+
+    assert GreenPowerDeviceMatch(src_id_ranges=((0x12000000, 0x12FFFFFF),)).matches(
+        zigpy_gpd
+    )
+    assert not GreenPowerDeviceMatch(src_id_ranges=((0x00, 0xFF),)).matches(zigpy_gpd)
+
+    # The synthetic IEEE of a SrcID-addressed GPD carries no vendor prefix
+    assert not GreenPowerDeviceMatch(ieee_prefixes=(bytes([0x04, 0xCD]),)).matches(
+        zigpy_gpd
+    )
+
+    assert GreenPowerDeviceMatch(
+        filters=(lambda device: GPDCommandID.Toggle in device.commands,)
+    ).matches(zigpy_gpd)
+    assert not GreenPowerDeviceMatch(
+        filters=(lambda device: GPDCommandID.Off in device.commands,)
+    ).matches(zigpy_gpd)
+
+
+async def test_green_power_device_match_ieee(zha_gateway: Gateway) -> None:
+    """Test matching an IEEE-addressed GPD by address prefix."""
+    zigpy_gpd = ZigpyGreenPowerDevice(
+        zha_gateway.application_controller,
+        application_id=ApplicationID.IEEE,
+        ieee=EUI64.convert("04:cd:15:00:11:22:33:44"),
+        endpoint=1,
+    )
+
+    assert GreenPowerDeviceMatch(ieee_prefixes=(bytes([0x04, 0xCD, 0x15]),)).matches(
+        zigpy_gpd
+    )
+    assert not GreenPowerDeviceMatch(
+        ieee_prefixes=(bytes([0x04, 0xCD, 0x16]),)
+    ).matches(zigpy_gpd)
+
+    # Either identity criterion is sufficient when both are declared
+    assert GreenPowerDeviceMatch(
+        src_id_ranges=((0x00, 0xFF),),
+        ieee_prefixes=(bytes([0x04, 0xCD, 0x15]),),
+    ).matches(zigpy_gpd)
+
+
+async def test_green_power_quirk_resolution(zha_gateway: Gateway) -> None:
+    """Test that a registered Green Power quirk resolves and builds the ZHA device."""
+    zigpy_gpd = make_zigpy_gpd(zha_gateway)
+
+    class QuirkedGreenPowerDevice(GreenPowerDevice):
+        """Quirk-supplied device class."""
+
+    generic_entry = GreenPowerQuirkRegistryEntry(
+        device_match=GreenPowerDeviceMatch(device_id=DeviceID.OnOffSwitch),
+    )
+    entry = GreenPowerQuirkRegistryEntry(
+        device_match=GreenPowerDeviceMatch(
+            device_id=DeviceID.OnOffSwitch,
+            src_id_ranges=((0x12000000, 0x12FFFFFF),),
+        ),
+        zha_device_factory=QuirkedGreenPowerDevice,
+    )
+
+    with DEVICE_REGISTRY.preserve_state():
+        DEVICE_REGISTRY.register(generic_entry)
+        DEVICE_REGISTRY.register(entry)
+
+        # The most recently registered matching entry wins
+        assert DEVICE_REGISTRY.match_green_power_entry(zigpy_gpd) is entry
+
+        resolved = DEVICE_REGISTRY.resolve(zigpy_gpd)
+        assert resolved is zigpy_gpd
+        assert getattr(resolved, QUIRK_REGISTRY_ENTRY_ATTR) is entry
+
+        zha_device = zha_gateway.get_or_create_device(resolved)
+        assert isinstance(zha_device, QuirkedGreenPowerDevice)
+        assert zha_device.quirk_applied
