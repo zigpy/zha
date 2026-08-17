@@ -17,7 +17,11 @@ import logging
 import time
 from typing import TYPE_CHECKING, Any, Final
 
-from zigpy.device import BaseDevice as ZigpyBaseDevice, Device as ZigpyDevice
+from zigpy.device import (
+    BaseDevice as ZigpyBaseDevice,
+    Device as ZigpyDevice,
+    GreenPowerDevice as ZigpyGreenPowerDevice,
+)
 import zigpy.exceptions
 from zigpy.profiles import PROFILES
 from zigpy.types import uint1_t, uint8_t, uint16_t
@@ -80,6 +84,7 @@ from zha.application.platforms import (
     BaseEntityState,
     EntityStateChangedEvent,
     PlatformEntity,
+    ZclPlatformEntity,
     sensor,
 )
 from zha.application.platforms.update import BaseFirmwareUpdateEntity
@@ -438,6 +443,25 @@ class BaseDevice(LogMixin, EventBase):
             f"exposes_features: {self.exposes_features}"
         )
 
+    @classmethod
+    def new(
+        cls,
+        zigpy_dev: zigpy.device.BaseDevice,
+        gateway: Gateway,
+    ) -> BaseDevice:
+        """Create new device, dispatching to the factory matched during resolution."""
+        if zigpy_dev.ieee == gateway.state.node_info.ieee:
+            return CoordinatorDevice(zigpy_dev, gateway)
+
+        entry = getattr(zigpy_dev, QUIRK_REGISTRY_ENTRY_ATTR, None)
+        if entry is not None and entry.zha_device_factory is not None:
+            return entry.zha_device_factory(zigpy_dev, gateway)
+
+        if isinstance(zigpy_dev, ZigpyGreenPowerDevice):
+            return GreenPowerDevice(zigpy_dev, gateway)
+
+        return ZigbeeDevice(zigpy_dev, gateway)
+
     @property
     def device(self) -> zigpy.device.BaseDevice:
         """Return underlying Zigpy device."""
@@ -645,10 +669,13 @@ class BaseDevice(LogMixin, EventBase):
         for entity in self._platform_entities.values():
             if platform != entity.PLATFORM:
                 continue
-            if endpoint_id is not None and entity.endpoint.id != endpoint_id:
-                continue
-            if cluster_id is not None and entity.cluster.cluster_id != cluster_id:
-                continue
+            if endpoint_id is not None or cluster_id is not None:
+                if not isinstance(entity, ZclPlatformEntity):
+                    continue
+                if endpoint_id is not None and entity.endpoint.id != endpoint_id:
+                    continue
+                if cluster_id is not None and entity.cluster.cluster_id != cluster_id:
+                    continue
             matches.append(entity)
         if not matches or (not pick_first and len(matches) != 1):
             raise LookupError(
@@ -1256,22 +1283,6 @@ class ZigbeeDevice(BaseDevice):
     def signature(self) -> dict[str, Any]:
         """Return the device signature reported in the device info."""
         return self.zigbee_signature
-
-    @classmethod
-    def new(
-        cls,
-        zigpy_dev: zigpy.device.Device,
-        gateway: Gateway,
-    ) -> Device:
-        """Create new device, dispatching to the factory matched during resolution."""
-        if zigpy_dev.ieee == gateway.state.node_info.ieee:
-            return CoordinatorDevice(zigpy_dev, gateway)
-
-        entry = getattr(zigpy_dev, QUIRK_REGISTRY_ENTRY_ATTR, None)
-        if entry is not None and entry.zha_device_factory is not None:
-            return entry.zha_device_factory(zigpy_dev, gateway)
-
-        return cls(zigpy_dev, gateway)
 
     async def _check_available(self, *_: Any) -> None:
         # don't flip the availability state of the coordinator
@@ -1930,6 +1941,123 @@ class CoordinatorDevice(ZigbeeDevice):
                         sensor.DeviceCounterSensor.__name__,
                         f"counter groups[{counter_groups}] counter group[{counter_group}] counter[{counter}]",
                     )
+
+
+class GreenPowerDevice(BaseDevice):
+    """ZHA Green Power device object."""
+
+    _zigpy_device: ZigpyGreenPowerDevice
+
+    def _init_from_zigpy_device(self, zigpy_device: ZigpyGreenPowerDevice) -> None:
+        super()._init_from_zigpy_device(zigpy_device)
+
+        # A GPD has no heartbeat to age against: it is available until removed
+        self._available = True
+
+    @property
+    def device(self) -> ZigpyGreenPowerDevice:
+        """Return underlying Zigpy device."""
+        return self._zigpy_device
+
+    def _resolve_manufacturer(self) -> str:
+        """Resolve the manufacturer name (declarative quirks override this)."""
+        if self._zigpy_device.gpd_manufacturer_id is not None:
+            return f"0x{self._zigpy_device.gpd_manufacturer_id:04X}"
+
+        return UNKNOWN_MANUFACTURER
+
+    def _resolve_model(self) -> str:
+        """Resolve the model name (declarative quirks override this)."""
+        if self._zigpy_device.gpd_model_id is not None:
+            return f"0x{self._zigpy_device.gpd_model_id:04X}"
+
+        return UNKNOWN_MODEL
+
+    @property
+    def manufacturer_code(self) -> int | None:
+        """Return the manufacturer code for the device."""
+        return self._zigpy_device.gpd_manufacturer_id
+
+    @property
+    def is_mains_powered(self) -> bool | None:
+        """Return true if device is mains powered."""
+        return False
+
+    @property
+    def device_type(self) -> str:
+        """Return the logical device type for the device."""
+        return "GreenPower"
+
+    @property
+    def signature(self) -> dict[str, Any]:
+        """Return the device signature reported in the device info."""
+        return self._zigpy_device.get_signature()
+
+    async def _check_available(self, *_: Any) -> None:
+        """Do nothing: a GPD has no heartbeat and nothing to ping."""
+
+    def discover_entities(self) -> Iterator[BaseEntity]:
+        """Yield the entities for this device.
+
+        GP quirks contribute event entities by overriding this; an unquirked GPD
+        exposes nothing yet.
+        """
+        yield from ()
+
+    @property
+    def extended_device_info(self) -> ExtendedDeviceInfo:
+        """Get extended device information."""
+        return ExtendedDeviceInfo(
+            **self.device_info.__dict__,
+            active_coordinator=False,
+            entities={
+                platform_entity.unique_id: platform_entity.state
+                for platform_entity in self.platform_entities.values()
+            },
+            neighbors=[],
+            routes=[],
+            endpoint_names=[],
+        )
+
+    def get_diagnostics_json(self) -> dict[str, Any]:
+        """Get ZHA device information."""
+        info: dict[str, Any] = {}
+        info["version"] = DIAGNOSTICS_JSON_VERSION
+        info["ieee"] = str(self.ieee)
+        info["nwk"] = str(self.nwk)
+        info["friendly_manufacturer"] = self.manufacturer
+        info["friendly_model"] = self.model
+        info["name"] = self.name
+        info["quirk_applied"] = self.quirk_applied
+        info["quirk_class"] = self.quirk_class
+        info["exposes_features"] = self.exposes_features
+        info["manufacturer_code"] = self.manufacturer_code
+        info["power_source"] = self.power_source
+        info["lqi"] = self.lqi
+        info["rssi"] = self.rssi
+        info["last_seen"] = self.last_seen
+        info["available"] = self.available
+        info["device_type"] = self.device_type
+        info["signature"] = self.signature
+
+        info["zha_lib_entities"] = defaultdict(list)
+
+        for (platform, _unique_id), platform_entity in sorted(
+            self.platform_entities.items()
+        ):
+            if platform is Platform.VIRTUAL:
+                continue
+
+            state_dict = dataclasses.asdict(platform_entity.state)
+            state_dict["migrate_unique_ids"] = list(state_dict["migrate_unique_ids"])
+            state_dict["device_ieee"] = str(state_dict["device_ieee"])
+            state_dict["extra_state_attribute_names"] = sorted(
+                state_dict["extra_state_attribute_names"]
+            )
+
+            info["zha_lib_entities"][platform].append(state_dict)
+
+        return info
 
 
 # Backwards-compatible alias

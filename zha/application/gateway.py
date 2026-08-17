@@ -54,7 +54,13 @@ from zha.async_ import (
 )
 from zha.event import EventBase
 from zha.quirks import DEVICE_REGISTRY, QUIRK_REGISTRY_ENTRY_ATTR
-from zha.zigbee.device import Device, DeviceInfo, DeviceStatus, ExtendedDeviceInfo
+from zha.zigbee.device import (
+    BaseDevice,
+    Device,
+    DeviceInfo,
+    DeviceStatus,
+    ExtendedDeviceInfo,
+)
 from zha.zigbee.group import Group, GroupInfo, GroupMemberReference
 
 BLOCK_LOG_TIMEOUT: Final[int] = 60
@@ -176,7 +182,7 @@ class Gateway(AsyncUtilMixin, EventBase):
         """Initialize the gateway."""
         super().__init__()
         self.config: ZHAData = config
-        self._devices: dict[EUI64, Device] = {}
+        self._devices: dict[EUI64, BaseDevice] = {}
         self._groups: dict[int, Group] = {}
         self.application_controller: ControllerApplication = None
         self.coordinator_zha_device: Device | None = None
@@ -488,6 +494,9 @@ class Gateway(AsyncUtilMixin, EventBase):
             )
             return
 
+        # Only Zigbee devices can be re-interviewed
+        assert isinstance(zha_device, Device)
+
         old_entry = getattr(zha_device.device, QUIRK_REGISTRY_ENTRY_ATTR, None)
         old_factory = (
             old_entry.zha_device_factory
@@ -521,6 +530,7 @@ class Gateway(AsyncUtilMixin, EventBase):
             await zha_device.async_teardown(emit_entity_events=True)
 
             zha_device = Device.new(new_zigpy_device, self)
+            assert isinstance(zha_device, Device)
             self._devices[new_zigpy_device.ieee] = zha_device
 
             zha_device.available = True
@@ -701,7 +711,7 @@ class Gateway(AsyncUtilMixin, EventBase):
         return self.application_controller.state
 
     @property
-    def devices(self) -> dict[EUI64, Device]:
+    def devices(self) -> dict[EUI64, BaseDevice]:
         """Return devices."""
         return self._devices
 
@@ -710,7 +720,13 @@ class Gateway(AsyncUtilMixin, EventBase):
         """Return groups."""
         return self._groups
 
-    def get_or_create_device(self, zigpy_device: zigpy.device.Device) -> Device:
+    def get_zigbee_device(self, ieee: EUI64) -> Device:
+        """Look up a Zigbee device by IEEE address."""
+        device = self._devices[ieee]
+        assert isinstance(device, Device)
+        return device
+
+    def get_or_create_device(self, zigpy_device: zigpy.device.BaseDevice) -> BaseDevice:
         """Get or create a ZHA device."""
         if (zha_device := self._devices.get(zigpy_device.ieee)) is None:
             zha_device = Device.new(zigpy_device, self)
@@ -847,8 +863,10 @@ class Gateway(AsyncUtilMixin, EventBase):
                         name,
                         group_id,
                     )
+                    member_device = self.devices[member.ieee]
+                    assert isinstance(member_device, Device)
                     tasks.append(
-                        self.devices[member.ieee].async_add_endpoint_to_group(
+                        member_device.async_add_endpoint_to_group(
                             member.endpoint_id, group_id
                         )
                     )
@@ -866,6 +884,8 @@ class Gateway(AsyncUtilMixin, EventBase):
         for group_id, group in self.groups.items():
             for member_ieee_endpoint_id in list(group.zigpy_group.members.keys()):
                 if member_ieee_endpoint_id[0] == ieee:
+                    # Only Zigbee devices can be group members
+                    assert isinstance(device, Device)
                     await device.async_remove_from_group(group_id)
 
         await self.application_controller.remove(ieee)

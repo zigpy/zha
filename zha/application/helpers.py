@@ -548,7 +548,7 @@ class DeviceAvailabilityChecker:
                 *(
                     dev._check_available()
                     for dev in self._gateway.devices.values()
-                    if not dev.is_coordinator
+                    if not dev.is_active_coordinator
                 ),
             )
             _LOGGER.debug("Device availability checker interval finished")
