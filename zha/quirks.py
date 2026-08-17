@@ -233,12 +233,16 @@ class DeviceRegistry:
         return None
 
     def resolve(
-        self, zigpy_device: zigpy.device.ZigbeeDevice
-    ) -> zigpy.device.ZigbeeDevice:
+        self, zigpy_device: zigpy.device.BaseDevice
+    ) -> zigpy.device.BaseDevice:
         """Apply the quirk transforms registered for `zigpy_device` and return the result."""
 
         # Resolution is idempotent: an already-quirked device is returned as-is
         if hasattr(zigpy_device, QUIRK_REGISTRY_ENTRY_ATTR):
+            return zigpy_device
+
+        # Green Power devices will resolve through their own registry
+        if not isinstance(zigpy_device, zigpy.device.ZigbeeDevice):
             return zigpy_device
 
         entry = self.match_entry(zigpy_device)
