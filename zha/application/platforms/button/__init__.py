@@ -17,7 +17,7 @@ from zha.application.platforms import (
     BaseEntityState,
     ClusterMatch,
     EntityCategory,
-    PlatformEntity,
+    ZclPlatformEntity,
     register_entity,
 )
 from zha.application.platforms.button.const import DEFAULT_DURATION, ButtonDeviceClass
@@ -55,7 +55,7 @@ class WriteAttributeButtonState(ButtonState):
     attribute_value: Any
 
 
-class BaseButton(PlatformEntity, ABC):
+class BaseButton(ZclPlatformEntity, ABC):
     """Base representation of a ZHA button."""
 
     PLATFORM = Platform.BUTTON
