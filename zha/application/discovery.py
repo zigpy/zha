@@ -19,8 +19,8 @@ from zha.application.platforms import (  # noqa: F401 pylint: disable=unused-imp
     BaseEntity,
     ClusterConfig,
     ClusterMatch,
-    PlatformEntity,
     PlatformFeatureGroup,
+    ZclPlatformEntity,
     alarm_control_panel,
     binary_sensor,
     button,
@@ -159,7 +159,7 @@ def _is_renamed_cluster(cluster: Cluster) -> bool:
     return cluster.ep_attribute != standard.ep_attribute
 
 
-def discover_entities_for_endpoint(endpoint: Endpoint) -> Iterator[PlatformEntity]:  # noqa: C901
+def discover_entities_for_endpoint(endpoint: Endpoint) -> Iterator[ZclPlatformEntity]:  # noqa: C901
     """Discover entities for an endpoint using the new registry-based discovery."""
     device = endpoint.device
 
@@ -178,7 +178,7 @@ def discover_entities_for_endpoint(endpoint: Endpoint) -> Iterator[PlatformEntit
         PlatformFeatureGroup | None,
         defaultdict[
             int,  # Weight
-            list[tuple[ClusterMatch, type[PlatformEntity]]],
+            list[tuple[ClusterMatch, type[ZclPlatformEntity]]],
         ],
     ] = defaultdict(lambda: defaultdict(list))
 
@@ -290,7 +290,7 @@ def discover_entities_for_endpoint(endpoint: Endpoint) -> Iterator[PlatformEntit
         if platform_override is not None and feature is not None:
             override_by_priority: defaultdict[
                 int,
-                list[tuple[ClusterMatch, type[PlatformEntity]]],
+                list[tuple[ClusterMatch, type[ZclPlatformEntity]]],
             ] = defaultdict(list)
 
             for priority, priority_matches in matches_by_priority.items():

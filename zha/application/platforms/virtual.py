@@ -35,7 +35,7 @@ from zha.application.platforms import (
     AttrConfig,
     ClusterConfig,
     ClusterMatch,
-    PlatformEntity,
+    ZclPlatformEntity,
     register_entity,
 )
 from zha.application.platforms.const import (
@@ -67,7 +67,7 @@ if TYPE_CHECKING:
     from zha.zigbee.endpoint import Endpoint
 
 
-class VirtualEntity(PlatformEntity):
+class VirtualEntity(ZclPlatformEntity):
     """Cluster-level background driver that isn't registered as a HA entity.
 
     Virtual entities participate in discovery and cluster-config aggregation

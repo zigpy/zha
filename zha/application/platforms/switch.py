@@ -32,8 +32,8 @@ from zha.application.platforms import (
     ClusterMatch,
     EntityCategory,
     GroupEntity,
-    PlatformEntity,
     PlatformFeatureGroup,
+    ZclPlatformEntity,
     register_entity,
     register_group_entity,
 )
@@ -102,7 +102,7 @@ class BaseSwitch(BaseEntity, ABC):
 
 
 @register_entity(OnOff.cluster_id)
-class Switch(PlatformEntity, BaseSwitch):  # type: ignore[misc]
+class Switch(ZclPlatformEntity, BaseSwitch):  # type: ignore[misc]
     """ZHA switch."""
 
     _attr_translation_key = "switch"
@@ -243,7 +243,7 @@ class Switch(PlatformEntity, BaseSwitch):  # type: ignore[misc]
 
 
 @register_entity(BinaryOutput.cluster_id)
-class BinaryOutputSwitch(PlatformEntity, BaseSwitch):  # type: ignore[misc]
+class BinaryOutputSwitch(ZclPlatformEntity, BaseSwitch):  # type: ignore[misc]
     """BinaryOutputCluster switch."""
 
     _attr_primary_weight = 10
@@ -390,7 +390,7 @@ class SwitchGroup(GroupEntity, BaseSwitch):  # type: ignore[misc]
         self.maybe_emit_state_changed_event()
 
 
-class ConfigurableAttributeSwitch(PlatformEntity):
+class ConfigurableAttributeSwitch(ZclPlatformEntity):
     """Representation of a ZHA switch configuration entity."""
 
     PLATFORM = Platform.SWITCH

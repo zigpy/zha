@@ -34,8 +34,8 @@ from zha.application.platforms import (
     ClusterConfig,
     ClusterMatch,
     GroupEntity,
-    PlatformEntity,
     PlatformFeatureGroup,
+    ZclPlatformEntity,
     register_entity,
     register_group_entity,
 )
@@ -873,7 +873,7 @@ class BaseSharedLight(BaseLight):
 
 
 @register_entity(OnOff.cluster_id)
-class Light(BaseSharedLight, PlatformEntity):
+class Light(BaseSharedLight, ZclPlatformEntity):
     """Representation of a ZHA or ZLL light."""
 
     _attr_translation_key: str = "light"
