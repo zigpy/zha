@@ -21,7 +21,7 @@ from zha.application.platforms import (
     BaseEntityState,
     ClusterConfig,
     ClusterMatch,
-    PlatformEntity,
+    ZclPlatformEntity,
     register_entity,
 )
 from zha.application.platforms.alarm_control_panel.const import (
@@ -55,7 +55,7 @@ class AlarmControlPanelState(BaseEntityState):
     supported_features: int
 
 
-class BaseAlarmControlPanel(PlatformEntity, ABC):
+class BaseAlarmControlPanel(ZclPlatformEntity, ABC):
     """Abstract base class for ZHA alarm control panel entities."""
 
     PLATFORM = Platform.ALARM_CONTROL_PANEL
