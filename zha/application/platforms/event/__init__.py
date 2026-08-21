@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING, Any, Final
 
 from zigpy.types.named import EUI64
 from zigpy.zcl.clusters.general import LevelControl, OnOff
+from zigpy.zcl.clusters.lighting import Color
 from zigpy.zcl.foundation import CommandSchema
 
 from zha.application import Platform
@@ -159,4 +160,35 @@ class OnOffEvent(ClusterCommandEvent):
     ]
     _cluster_match = ClusterMatch(
         client_clusters=frozenset({OnOff.cluster_id}),
+    )
+
+
+@register_entity(Color.cluster_id)
+class ColorEvent(ClusterCommandEvent):
+    """Representation of a ZHA entity with color cluster events."""
+
+    _attr_translation_key = "color"
+    _attr_event_types = [
+        "move_to_hue",
+        "move_hue",
+        "step_hue",
+        "move_to_saturation",
+        "move_saturation",
+        "step_saturation",
+        "move_to_hue_and_saturation",
+        "move_to_color",
+        "move_color",
+        "step_color",
+        "move_to_color_temp",
+        "enhanced_move_to_hue",
+        "enhanced_move_hue",
+        "enhanced_step_hue",
+        "enhanced_move_to_hue_and_saturation",
+        "color_loop_set",
+        "stop_move_step",
+        "move_color_temp",
+        "step_color_temp",
+    ]
+    _cluster_match = ClusterMatch(
+        client_clusters=frozenset({Color.cluster_id}),
     )
