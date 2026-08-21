@@ -920,6 +920,37 @@
         "kwargs": {}
       }
     ],
+    "event": [
+      {
+        "fallback_name": null,
+        "unique_id": "ab:cd:ef:12:dc:41:3c:40-2-8",
+        "migrate_unique_ids": [],
+        "platform": "event",
+        "class_name": "LevelControlEvent",
+        "translation_key": "level_control",
+        "translation_placeholders": null,
+        "device_class": null,
+        "state_class": null,
+        "entity_category": null,
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:dc:41:3c:40",
+        "endpoint_id": 2,
+        "available": true,
+        "group_id": null,
+        "event_types": [
+          "step",
+          "step_with_on_off",
+          "stop",
+          "move",
+          "move_with_on_off",
+          "move_to_level",
+          "move_to_level_with_on_off"
+        ]
+      }
+    ],
     "light": [
       {
         "fallback_name": null,

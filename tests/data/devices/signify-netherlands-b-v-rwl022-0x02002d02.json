@@ -232,6 +232,37 @@
         "kwargs": {}
       }
     ],
+    "event": [
+      {
+        "fallback_name": null,
+        "unique_id": "00:17:88:01:0c:26:42:ec-1-8",
+        "migrate_unique_ids": [],
+        "platform": "event",
+        "class_name": "LevelControlEvent",
+        "translation_key": "level_control",
+        "translation_placeholders": null,
+        "device_class": null,
+        "state_class": null,
+        "entity_category": null,
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "00:17:88:01:0c:26:42:ec",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "event_types": [
+          "step",
+          "step_with_on_off",
+          "stop",
+          "move",
+          "move_with_on_off",
+          "move_to_level",
+          "move_to_level_with_on_off"
+        ]
+      }
+    ],
     "sensor": [
       {
         "fallback_name": null,
