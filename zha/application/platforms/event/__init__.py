@@ -6,7 +6,7 @@ import dataclasses
 from typing import TYPE_CHECKING, Any, Final
 
 from zigpy.types.named import EUI64
-from zigpy.zcl.clusters.general import LevelControl
+from zigpy.zcl.clusters.general import LevelControl, OnOff
 from zigpy.zcl.foundation import CommandSchema
 
 from zha.application import Platform
@@ -141,4 +141,22 @@ class LevelControlEvent(ClusterCommandEvent):
     ]
     _cluster_match = ClusterMatch(
         client_clusters=frozenset({LevelControl.cluster_id}),
+    )
+
+
+@register_entity(OnOff.cluster_id)
+class OnOffEvent(ClusterCommandEvent):
+    """Representation of a ZHA entity with on/off events."""
+
+    _attr_translation_key = "on_off"
+    _attr_event_types = [
+        "off",
+        "on",
+        "toggle",
+        "off_with_effect",
+        "on_with_recall_global_scene",
+        "on_with_timed_off",
+    ]
+    _cluster_match = ClusterMatch(
+        client_clusters=frozenset({OnOff.cluster_id}),
     )

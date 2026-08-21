@@ -24,6 +24,7 @@ from zha.application.platforms.event import (
     EntityEventTriggeredEvent,
     EventState,
     LevelControlEvent,
+    OnOffEvent,
     TriggeredEvent,
 )
 from zha.application.platforms.event.const import (
@@ -214,6 +215,57 @@ async def test_level_control_event(zha_gateway: Gateway) -> None:
             triggered=TriggeredEvent(
                 event_type="move_to_level_with_on_off",
                 event_attributes={"level": 100, "transition_time": 5},
+            ),
+        )
+    ]
+
+
+async def test_on_off_event(zha_gateway: Gateway) -> None:
+    """Test the OnOff client cluster event entity."""
+    zigpy_device = create_mock_zigpy_device(
+        zha_gateway,
+        {
+            1: {
+                SIG_EP_INPUT: [],
+                SIG_EP_OUTPUT: [general.OnOff.cluster_id],
+                SIG_EP_TYPE: zha.DeviceType.ON_OFF_SWITCH,
+                SIG_EP_PROFILE: zha.PROFILE_ID,
+            }
+        },
+    )
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
+    cluster = zigpy_device.endpoints[1].out_clusters[general.OnOff.cluster_id]
+
+    entity = get_entity(
+        zha_device, platform=Platform.EVENT, exact_entity_type=OnOffEvent
+    )
+    assert isinstance(entity, BaseEvent)
+    assert entity.event_types == [
+        "off",
+        "on",
+        "toggle",
+        "off_with_effect",
+        "on_with_recall_global_scene",
+        "on_with_timed_off",
+    ]
+
+    events: list[EntityEventTriggeredEvent] = []
+    entity.on_event(EntityEventTriggeredEvent.event, events.append)
+
+    cmd = cluster.ServerCommandDefs.toggle
+    hdr = make_zcl_header(cmd.id, global_command=False, tsn=1)
+    msg = cmd.schema()
+    cluster.handle_message(hdr, msg)
+
+    assert events == [
+        EntityEventTriggeredEvent(
+            platform=Platform.EVENT,
+            unique_id=entity.unique_id,
+            device_ieee=entity.device.ieee,
+            endpoint_id=1,
+            triggered=TriggeredEvent(
+                event_type="toggle",
+                event_attributes={},
             ),
         )
     ]

@@ -550,6 +550,34 @@
     "event": [
       {
         "fallback_name": null,
+        "unique_id": "ab:cd:ef:12:28:80:01:79-21-6",
+        "migrate_unique_ids": [],
+        "platform": "event",
+        "class_name": "OnOffEvent",
+        "translation_key": "on_off",
+        "translation_placeholders": null,
+        "device_class": null,
+        "state_class": null,
+        "entity_category": null,
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:28:80:01:79",
+        "endpoint_id": 21,
+        "available": true,
+        "group_id": null,
+        "event_types": [
+          "off",
+          "on",
+          "toggle",
+          "off_with_effect",
+          "on_with_recall_global_scene",
+          "on_with_timed_off"
+        ]
+      },
+      {
+        "fallback_name": null,
         "unique_id": "ab:cd:ef:12:28:80:01:79-21-8",
         "migrate_unique_ids": [],
         "platform": "event",
@@ -575,6 +603,34 @@
           "move_with_on_off",
           "move_to_level",
           "move_to_level_with_on_off"
+        ]
+      },
+      {
+        "fallback_name": null,
+        "unique_id": "ab:cd:ef:12:28:80:01:79-22-6",
+        "migrate_unique_ids": [],
+        "platform": "event",
+        "class_name": "OnOffEvent",
+        "translation_key": "on_off",
+        "translation_placeholders": null,
+        "device_class": null,
+        "state_class": null,
+        "entity_category": null,
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:28:80:01:79",
+        "endpoint_id": 22,
+        "available": true,
+        "group_id": null,
+        "event_types": [
+          "off",
+          "on",
+          "toggle",
+          "off_with_effect",
+          "on_with_recall_global_scene",
+          "on_with_timed_off"
         ]
       },
       {
@@ -608,6 +664,34 @@
       },
       {
         "fallback_name": null,
+        "unique_id": "ab:cd:ef:12:28:80:01:79-23-6",
+        "migrate_unique_ids": [],
+        "platform": "event",
+        "class_name": "OnOffEvent",
+        "translation_key": "on_off",
+        "translation_placeholders": null,
+        "device_class": null,
+        "state_class": null,
+        "entity_category": null,
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:28:80:01:79",
+        "endpoint_id": 23,
+        "available": true,
+        "group_id": null,
+        "event_types": [
+          "off",
+          "on",
+          "toggle",
+          "off_with_effect",
+          "on_with_recall_global_scene",
+          "on_with_timed_off"
+        ]
+      },
+      {
+        "fallback_name": null,
         "unique_id": "ab:cd:ef:12:28:80:01:79-23-8",
         "migrate_unique_ids": [],
         "platform": "event",
@@ -633,6 +717,34 @@
           "move_with_on_off",
           "move_to_level",
           "move_to_level_with_on_off"
+        ]
+      },
+      {
+        "fallback_name": null,
+        "unique_id": "ab:cd:ef:12:28:80:01:79-24-6",
+        "migrate_unique_ids": [],
+        "platform": "event",
+        "class_name": "OnOffEvent",
+        "translation_key": "on_off",
+        "translation_placeholders": null,
+        "device_class": null,
+        "state_class": null,
+        "entity_category": null,
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:28:80:01:79",
+        "endpoint_id": 24,
+        "available": true,
+        "group_id": null,
+        "event_types": [
+          "off",
+          "on",
+          "toggle",
+          "off_with_effect",
+          "on_with_recall_global_scene",
+          "on_with_timed_off"
         ]
       },
       {
