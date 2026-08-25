@@ -1474,6 +1474,9 @@ class Device(LogMixin, EventBase):
             return  # client commands don't return a response
         if isinstance(response, Exception):
             raise ZHAException("Failed to issue cluster command") from response
+        if not isinstance(response, tuple) or len(response) < 2:
+            _LOGGER.warning("Received unknown/unsupported response: %s", response)
+            return  # ignore this response instead of failing
         if response[1] is not ZclStatus.SUCCESS:
             raise ZHAException(
                 f"Failed to issue cluster command with status: {response[1]}"
