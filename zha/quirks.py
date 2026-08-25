@@ -9,7 +9,7 @@ from dataclasses import dataclass, field
 import inspect
 import logging
 from pathlib import Path
-from typing import TYPE_CHECKING, NamedTuple
+from typing import TYPE_CHECKING, NamedTuple, TypeVar, overload
 
 from zigpy.application import ControllerApplication
 import zigpy.device
@@ -19,12 +19,15 @@ from zigpy.zcl import ClusterType
 from zigpy.zcl.clusters.general import Ota
 
 if TYPE_CHECKING:
-    from zha.zigbee.device import Device
+    from zha.zigbee.device import Device, GreenPowerDevice
 
 _LOGGER = logging.getLogger(__name__)
 
 QUIRK_REGISTRY_ENTRY_ATTR = "_quirk_registry_entry"
 FilterType = Callable[[zigpy.device.Device], bool]
+GreenPowerFilterType = Callable[[zigpy.device.GreenPowerDevice], bool]
+
+_EntryT = TypeVar("_EntryT", "QuirkRegistryEntry", "GreenPowerQuirkRegistryEntry")
 
 DEVICE_REGISTRY: DeviceRegistry
 
@@ -154,8 +157,71 @@ class QuirkRegistryEntry:
     source: QuirkSource | None = field(default=None, compare=False)
 
 
+@dataclass(frozen=True)
+class GreenPowerDeviceMatch:
+    """Criteria matching a Green Power quirk to a GPD's commissioning signature.
+
+    Every specified field must match. `src_id_ranges` and `ieee_prefixes`
+    together form the identity criterion: when either is present, the device's
+    SrcID must fall within one of the ranges or its IEEE address must begin
+    with one of the prefixes.
+    """
+
+    device_id: int | None = None
+    manufacturer_id: int | None = None
+    model_id: int | None = None
+    src_id_ranges: tuple[tuple[int, int], ...] = ()  # inclusive bounds
+    ieee_prefixes: tuple[bytes, ...] = ()  # most-significant-byte first
+    filters: tuple[GreenPowerFilterType, ...] = ()
+
+    def matches(self, device: zigpy.device.GreenPowerDevice) -> bool:
+        """Return True if `device` satisfies all criteria."""
+        if self.device_id is not None and device.device_id != self.device_id:
+            return False
+
+        if (
+            self.manufacturer_id is not None
+            and device.gpd_manufacturer_id != self.manufacturer_id
+        ):
+            return False
+
+        if self.model_id is not None and device.gpd_model_id != self.model_id:
+            return False
+
+        if self.src_id_ranges or self.ieee_prefixes:
+            in_range = device.src_id is not None and any(
+                lower <= device.src_id <= upper for lower, upper in self.src_id_ranges
+            )
+            # An EUI64 serializes least-significant-byte first
+            ieee = bytes(reversed(device.ieee.serialize()))
+            has_prefix = any(ieee.startswith(prefix) for prefix in self.ieee_prefixes)
+
+            if not in_range and not has_prefix:
+                return False
+
+        return all(matcher(device) for matcher in self.filters)
+
+
+@dataclass(frozen=True)
+class GreenPowerQuirkRegistryEntry:
+    """A registered Green Power quirk: how to match, mutate, and build a device."""
+
+    device_match: GreenPowerDeviceMatch
+    zigpy_transforms: tuple[
+        Callable[[zigpy.device.GreenPowerDevice], zigpy.device.GreenPowerDevice], ...
+    ] = ()
+    zha_device_factory: Callable[..., GreenPowerDevice] | None = None
+    # Excluded from equality so identical quirks registered at different sites still
+    # deduplicate.
+    source: QuirkSource | None = field(default=None, compare=False)
+
+
 class DeviceRegistry:
-    """Registry of quirk entries, keyed by (manufacturer, model)."""
+    """Registry of quirk entries for all device types.
+
+    Zigbee entries are indexed by (manufacturer, model); Green Power entries
+    are kept in a flat list matched in registration order.
+    """
 
     def __init__(self) -> None:
         """Initialize the registry."""
@@ -167,9 +233,26 @@ class DeviceRegistry:
         # Matched against every device by their filters alone, used mostly for legacy v1
         # quirks without model/manufacturer filters.
         self._wildcard_registry: list[QuirkRegistryEntry] = []
+        # Green Power entries, matched in registration order.
+        self._gp_registry: list[GreenPowerQuirkRegistryEntry] = []
 
-    def register(self, entry: QuirkRegistryEntry) -> QuirkRegistryEntry:
+    @overload
+    def register(self, entry: QuirkRegistryEntry) -> QuirkRegistryEntry: ...
+
+    @overload
+    def register(
+        self, entry: GreenPowerQuirkRegistryEntry
+    ) -> GreenPowerQuirkRegistryEntry: ...
+
+    def register(
+        self, entry: QuirkRegistryEntry | GreenPowerQuirkRegistryEntry
+    ) -> QuirkRegistryEntry | GreenPowerQuirkRegistryEntry:
         """Add a quirk entry to the registry, ignoring exact duplicates."""
+        if isinstance(entry, GreenPowerQuirkRegistryEntry):
+            if entry not in self._gp_registry:
+                self._gp_registry.insert(0, entry)
+            return entry
+
         if not entry.device_match.applies_to:
             if entry not in self._wildcard_registry:
                 self._wildcard_registry.insert(0, entry)
@@ -227,24 +310,35 @@ class DeviceRegistry:
 
         return None
 
-    def resolve(self, zigpy_device: zigpy.device.Device) -> zigpy.device.Device:
+    def match_green_power_entry(
+        self, zigpy_device: zigpy.device.GreenPowerDevice
+    ) -> GreenPowerQuirkRegistryEntry | None:
+        """Return the first registered entry matching the Green Power device."""
+        for entry in self._gp_registry:
+            if entry.device_match.matches(zigpy_device):
+                return entry
+
+        return None
+
+    def resolve(self, zigpy_device: zigpy.device.BaseDevice) -> zigpy.device.BaseDevice:
         """Apply the quirk transforms registered for `zigpy_device` and return the result."""
 
         # Resolution is idempotent: an already-quirked device is returned as-is
         if hasattr(zigpy_device, QUIRK_REGISTRY_ENTRY_ATTR):
             return zigpy_device
 
-        entry = self.match_entry(zigpy_device)
+        entry: QuirkRegistryEntry | GreenPowerQuirkRegistryEntry | None
+        if isinstance(zigpy_device, zigpy.device.GreenPowerDevice):
+            entry = self.match_green_power_entry(zigpy_device)
+        elif isinstance(zigpy_device, zigpy.device.ZigbeeDevice):
+            entry = self.match_entry(zigpy_device)
+        else:
+            return zigpy_device
+
         if entry is None:
             return zigpy_device
 
-        _LOGGER.debug(
-            "Resolved %s/%s (%s) to quirk %s",
-            zigpy_device.manufacturer,
-            zigpy_device.model,
-            zigpy_device.ieee,
-            entry,
-        )
+        _LOGGER.debug("Resolved %s to quirk %s", zigpy_device, entry)
 
         # A failing quirk must not prevent the device from loading: log and fall
         # back to the bare device rather than letting the exception propagate.
@@ -260,7 +354,9 @@ class DeviceRegistry:
 
         return resolved_device
 
-    def __iter__(self) -> Iterator[QuirkRegistryEntry]:
+    def __iter__(
+        self,
+    ) -> Iterator[QuirkRegistryEntry | GreenPowerQuirkRegistryEntry]:
         """Yield every registered entry once (deduplicated across model keys)."""
         seen: set[int] = set()
         for entries in (*self._registry.values(), self._wildcard_registry):
@@ -269,8 +365,14 @@ class DeviceRegistry:
                     seen.add(id(entry))
                     yield entry
 
-    def remove(self, entry: QuirkRegistryEntry) -> None:
+        yield from self._gp_registry
+
+    def remove(self, entry: QuirkRegistryEntry | GreenPowerQuirkRegistryEntry) -> None:
         """Remove a quirk entry from the registry."""
+        if isinstance(entry, GreenPowerQuirkRegistryEntry):
+            self._gp_registry.remove(entry)
+            return
+
         if not entry.device_match.applies_to:
             self._wildcard_registry.remove(entry)
             return
@@ -278,29 +380,38 @@ class DeviceRegistry:
         for manufacturer, model in entry.device_match.applies_to:
             self._registry[ModelInfo(manufacturer, model)].remove(entry)
 
+    @staticmethod
+    def _purge_custom_entries(entries: list[_EntryT], custom_quirks_root: Path) -> None:
+        """Remove entries defined within `custom_quirks_root` from `entries`."""
+        for entry in list(entries):
+            if entry.source is None or entry.source.file is None:
+                continue
+            if Path(entry.source.file).is_relative_to(custom_quirks_root):
+                _LOGGER.debug("Removing stale custom quirk: %s", entry)
+                entries.remove(entry)
+
     def purge_custom_quirks(self, custom_quirks_root: Path) -> None:
         """Remove quirks loaded from the custom quirks directory."""
 
         # Prefer the explicit registry to the wildcard registry
         for entries in (*self._registry.values(), self._wildcard_registry):
-            for entry in list(entries):
-                if entry.source is None or entry.source.file is None:
-                    continue
-                if Path(entry.source.file).is_relative_to(custom_quirks_root):
-                    _LOGGER.debug("Removing stale custom quirk: %s", entry)
-                    entries.remove(entry)
+            self._purge_custom_entries(entries, custom_quirks_root)
+
+        self._purge_custom_entries(self._gp_registry, custom_quirks_root)
 
     @contextlib.contextmanager
     def preserve_state(self) -> Iterator[None]:
         """Snapshot the registry and restore it on exit."""
         saved = {key: list(entries) for key, entries in self._registry.items()}
         saved_wildcard = list(self._wildcard_registry)
+        saved_gp = list(self._gp_registry)
         try:
             yield
         finally:
             self._registry.clear()
             self._registry.update(saved)
             self._wildcard_registry[:] = saved_wildcard
+            self._gp_registry[:] = saved_gp
 
 
 DEVICE_REGISTRY = DeviceRegistry()

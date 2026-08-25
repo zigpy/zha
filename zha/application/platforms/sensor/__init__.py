@@ -65,8 +65,8 @@ from zha.application.platforms import (
     ClusterConfig,
     ClusterMatch,
     EntityCategory,
-    PlatformEntity,
     PlatformFeatureGroup,
+    ZclPlatformEntity,
     register_entity,
 )
 from zha.application.platforms.climate.const import HVACAction
@@ -190,7 +190,7 @@ class DeviceCounterSensorIdentifiers(BaseIdentifiers):
     device_ieee: str
 
 
-class BaseSensor(PlatformEntity, ABC):
+class BaseSensor(ZclPlatformEntity, ABC):
     """Abstract base class for ZHA sensor entities."""
 
     PLATFORM = Platform.SENSOR
@@ -795,7 +795,9 @@ class Battery(Sensor):
 
     def _is_supported(self) -> bool:
         # XXX: We intentionally ignore the presence of this attribute
-        return PlatformEntity._is_supported(self) and not self.device.is_mains_powered
+        return (
+            ZclPlatformEntity._is_supported(self) and not self.device.is_mains_powered
+        )
 
     @staticmethod
     def formatter(value: int) -> float | None:  # pylint: disable=arguments-differ
@@ -3088,7 +3090,7 @@ class ThermostatHVACAction(Sensor):
     }
 
     def _is_supported(self) -> bool:
-        return PlatformEntity._is_supported(self)
+        return ZclPlatformEntity._is_supported(self)
 
     @property
     def _pi_heating_demand(self) -> int | None:
@@ -3207,7 +3209,7 @@ class SinopeHVACAction(ThermostatHVACAction):
 class RSSISensor(Sensor):
     """RSSI sensor for a device."""
 
-    # TODO: migrate this away from `PlatformEntity`
+    # TODO: migrate this away from `ZclPlatformEntity`
     _unique_id_suffix: str = "rssi"
     _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
     _attr_device_class: SensorDeviceClass | None = SensorDeviceClass.SIGNAL_STRENGTH
@@ -3282,7 +3284,7 @@ class RSSISensor(Sensor):
 class LQISensor(RSSISensor):
     """LQI sensor for a device."""
 
-    # TODO: migrate this away from `PlatformEntity`
+    # TODO: migrate this away from `ZclPlatformEntity`
     _unique_id_suffix: str = "lqi"
     _attr_device_class = None
     _attr_native_unit_of_measurement = None

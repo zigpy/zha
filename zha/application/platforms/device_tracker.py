@@ -25,7 +25,7 @@ from zha.application.platforms import (
     BaseEntityState,
     ClusterConfig,
     ClusterMatch,
-    PlatformEntity,
+    ZclPlatformEntity,
     register_entity,
 )
 from zha.application.platforms.sensor import Battery
@@ -58,7 +58,7 @@ class DeviceTrackerState(BaseEntityState):
     battery_level: float | None
 
 
-class BaseDeviceTracker(PlatformEntity, ABC):
+class BaseDeviceTracker(ZclPlatformEntity, ABC):
     """Abstract base class for ZHA device tracker entities."""
 
     PLATFORM = Platform.DEVICE_TRACKER

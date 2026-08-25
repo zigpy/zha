@@ -32,8 +32,8 @@ from zha.application.platforms import (
     BaseEntityState,
     ClusterConfig,
     ClusterMatch,
-    PlatformEntity,
     PlatformFeatureGroup,
+    ZclPlatformEntity,
     register_entity,
 )
 from zha.application.platforms.climate.const import (
@@ -94,7 +94,7 @@ class ThermostatState(ClimateState):
     unoccupied_heating_setpoint: int | None = None
 
 
-class BaseThermostat(PlatformEntity, ABC):
+class BaseThermostat(ZclPlatformEntity, ABC):
     """Abstract base class for climate entities."""
 
     PLATFORM = Platform.CLIMATE
