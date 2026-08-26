@@ -506,7 +506,7 @@
         "translation_key": null,
         "translation_placeholders": null,
         "device_class": "wind_direction",
-        "state_class": "measurement",
+        "state_class": "measurement_angle",
         "entity_category": null,
         "entity_registry_enabled_default": true,
         "enabled": true,
