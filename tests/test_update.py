@@ -595,9 +595,10 @@ async def test_firmware_update_downgrade(zha_gateway: Gateway) -> None:
         )
         await zha_gateway.async_block_till_done()
 
-    # The downgrade image was used
+    # The downgrade image was used, with downgrades explicitly allowed since the
+    # user selected a specific version
     assert mock_update.mock_calls == [
-        call(image=fw_image_downgrade, progress_callback=ANY)
+        call(image=fw_image_downgrade, progress_callback=ANY, allow_downgrade=True)
     ]
 
     assert (

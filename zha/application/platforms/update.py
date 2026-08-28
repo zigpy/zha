@@ -264,6 +264,10 @@ class BaseFirmwareUpdateEntity(PlatformEntity, ABC):
             result = await self.device.device.update_firmware(
                 image=firmware,
                 progress_callback=self._update_progress,
+                # An explicitly selected version (not the automatic "install
+                # latest") authorizes installing an image older than the running
+                # firmware. The auto path only ever picks an upgrade.
+                allow_downgrade=(version is not None),
             )
         except Exception as ex:
             self._attr_in_progress = False
