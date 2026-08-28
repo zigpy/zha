@@ -45,6 +45,11 @@ COUNTER_NAMES = ["counter_1", "counter_2", "counter_3"]
 INSTANCES: list[Gateway] = []
 _LOGGER = logging.getLogger(__name__)
 
+EXPECTED_WARNING_FILTERS = (
+    r"ignore:Attribute '.*' has `is_manufacturer_specific` without an explicit `manufacturer_code`\. Please set `manufacturer_code=0x[0-9A-Fa-f]+`\.:DeprecationWarning",
+    r"ignore:Unique IDs are unique only with platform prefix.*:UserWarning",
+)
+
 
 class _FakeApp(ControllerApplication):
     async def add_endpoint(self, descriptor: zdo_t.SimpleDescriptor):
@@ -375,7 +380,9 @@ def globally_load_quirks():
 
 
 def pytest_collection_modifyitems(config, items):
-    """Add the looptime marker to all tests except the test_async.py file."""
+    """Add shared markers to tests."""
     for item in items:
         if "test_async_.py" not in item.nodeid:
             item.add_marker(pytest.mark.looptime)
+        for warning_filter in EXPECTED_WARNING_FILTERS:
+            item.add_marker(pytest.mark.filterwarnings(warning_filter))
