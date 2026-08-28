@@ -401,6 +401,7 @@ class ConfigurableAttributeSwitch(PlatformEntity):
     _force_inverted: bool = False
     _off_value: int = 0
     _on_value: int = 1
+    _mask: int | None = None
 
     def __init__(
         self,
@@ -414,6 +415,7 @@ class ConfigurableAttributeSwitch(PlatformEntity):
         force_inverted: bool = False,
         off_value: int = 0,
         on_value: int = 1,
+        mask: int | None = None,
         legacy_discovery_unique_id: str | None = None,
         **kwargs: Any,
     ) -> None:
@@ -442,6 +444,13 @@ class ConfigurableAttributeSwitch(PlatformEntity):
             self._force_inverted = force_inverted
         self._off_value = off_value
         self._on_value = on_value
+        if mask is not None:
+            if not mask:
+                raise ValueError(
+                    "mask must be a non-zero bitmask; a zero mask would make the "
+                    "switch a no-op that is always off"
+                )
+            self._mask = mask
 
         super().__init__(
             endpoint=endpoint,
@@ -506,7 +515,9 @@ class ConfigurableAttributeSwitch(PlatformEntity):
     @property
     def is_on(self) -> bool:
         """Return if the switch is on based on the statemachine."""
-        if self._on_value != 1:
+        if self._mask is not None:
+            val = bool((self._cluster.get(self._attribute_name) or 0) & self._mask)
+        elif self._on_value != 1:
             val = self._cluster.get(self._attribute_name)
             val = val == self._on_value
         else:
@@ -528,7 +539,17 @@ class ConfigurableAttributeSwitch(PlatformEntity):
         """Turn the entity on or off."""
         if self.inverted:
             state = not state
-        if state:
+        if self._mask is not None:
+            # Toggle only the masked bit(s) of the bitmap attribute, preserving the
+            # other bits by reading the current (shared) cluster cache value first.
+            # Sibling switches on the same bitmap share this cluster cache, so their
+            # bits accumulate correctly across sequential writes.
+            current = self._cluster.get(self._attribute_name) or 0
+            new_value = (current | self._mask) if state else (current & ~self._mask)
+            await write_attributes_safe(
+                self._cluster, {self._attribute_name: new_value}
+            )
+        elif state:
             await write_attributes_safe(
                 self._cluster, {self._attribute_name: self._on_value}
             )
@@ -1085,11 +1106,13 @@ class DanfossLoadBalancingEnable(ConfigurableAttributeSwitch):
 class DanfossAdaptationRunSettings(ConfigurableAttributeSwitch):
     """Danfoss proprietary attribute for enabling daily adaptation run.
 
-    Actually a bitmap, but only the first bit is used.
+    The attribute is a bitmap; only the first bit is used. ``_mask`` makes the
+    switch toggle just that bit, preserving any other bits the device may set.
     """
 
     _unique_id_suffix = "adaptation_run_settings"
     _attribute_name: str = "adaptation_run_settings"
+    _mask: int = 0x01
     _attr_translation_key: str = "adaptation_run_enabled"
 
     _cluster_id = Thermostat.cluster_id
