@@ -788,47 +788,6 @@ class TiRouterTransmitPower(NumberConfigurationEntity):
 
 
 @register_entity(AQARA_OPPLE_CLUSTER)
-class AqaraPetFeederServingSize(NumberConfigurationEntity):
-    """Aqara pet feeder serving size configuration entity."""
-
-    _unique_id_suffix = "serving_size"
-    _attr_entity_category = EntityCategory.CONFIG
-    _attr_native_min_value: float = 1
-    _attr_native_max_value: float = 10
-    _attribute_name = "serving_size"
-    _attr_translation_key: str = "serving_size"
-    _cluster_id = AQARA_OPPLE_CLUSTER
-
-    _attr_mode: NumberMode = NumberMode.BOX
-
-    _cluster_match = ClusterMatch(
-        server_clusters=frozenset({AQARA_OPPLE_CLUSTER}),
-        models=frozenset({"aqara.feeder.acn001"}),
-    )
-
-
-@register_entity(AQARA_OPPLE_CLUSTER)
-class AqaraPetFeederPortionWeight(NumberConfigurationEntity):
-    """Aqara pet feeder portion weight configuration entity."""
-
-    _unique_id_suffix = "portion_weight"
-    _attr_entity_category = EntityCategory.CONFIG
-    _attr_native_min_value: float = 1
-    _attr_native_max_value: float = 100
-    _attribute_name = "portion_weight"
-    _attr_translation_key: str = "portion_weight"
-    _cluster_id = AQARA_OPPLE_CLUSTER
-
-    _attr_mode: NumberMode = NumberMode.BOX
-    _attr_native_unit_of_measurement: str = UnitOfMass.GRAMS
-
-    _cluster_match = ClusterMatch(
-        server_clusters=frozenset({AQARA_OPPLE_CLUSTER}),
-        models=frozenset({"aqara.feeder.acn001"}),
-    )
-
-
-@register_entity(AQARA_OPPLE_CLUSTER)
 class AqaraThermostatAwayTemp(NumberConfigurationEntity):
     """Aqara away preset temperature configuration entity."""
 
