@@ -123,7 +123,6 @@ from zha.units import (
     UnitOfElectricPotential,
     UnitOfEnergy,
     UnitOfFrequency,
-    UnitOfMass,
     UnitOfPower,
     UnitOfPressure,
     UnitOfSpeed,

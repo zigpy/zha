@@ -42,7 +42,7 @@ from zha.application.platforms.legacy_quirks import AQARA_OPPLE_CLUSTER
 from zha.application.platforms.number.bacnet import BACNET_UNITS_TO_HA_UNITS
 from zha.application.platforms.number.const import ICONS, NumberDeviceClass, NumberMode
 from zha.quirks import DANFOSS_ALLY_THERMOSTAT
-from zha.units import UnitOfMass, UnitOfTemperature, UnitOfTime
+from zha.units import UnitOfTemperature, UnitOfTime
 
 if TYPE_CHECKING:
     from zha.zigbee.device import Device
