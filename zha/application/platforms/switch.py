@@ -209,6 +209,7 @@ class Switch(PlatformEntity, BaseSwitch):  # type: ignore[misc]
             )
 
     def _is_supported(self) -> bool:
+        # `_is_valid` has already established that the attribute exists
         if self._cluster.is_attribute_unsupported(self._attribute_name):
             _LOGGER.debug(
                 "%s is not supported - skipping %s entity creation",
@@ -468,9 +469,9 @@ class ConfigurableAttributeSwitch(PlatformEntity):
             )
 
     def _is_supported(self) -> bool:
+        # `_is_valid` has already established that the attribute exists
         if (
-            self._attribute_name not in self._cluster.attributes_by_name
-            or self._cluster.is_attribute_unsupported(self._attribute_name)
+            self._cluster.is_attribute_unsupported(self._attribute_name)
             or self._cluster.get(self._attribute_name) is None
         ):
             _LOGGER.debug(
@@ -857,10 +858,12 @@ class WindowCoveringInversionSwitch(ConfigurableAttributeSwitch):
             WindowCovering.AttributeDefs.window_covering_mode.name
         )
 
-        # this entity needs a second attribute to function
+        # this entity needs a second attribute to function. `_is_valid` only covers
+        # `_attribute_name`, so this one needs its own existence check - and it has
+        # to come first, as the other two raise `KeyError` without a definition.
         if (
-            self._cluster.is_attribute_unsupported(window_covering_mode_attr)
-            or window_covering_mode_attr not in self._cluster.attributes_by_name
+            window_covering_mode_attr not in self._cluster.attributes_by_name
+            or self._cluster.is_attribute_unsupported(window_covering_mode_attr)
             or self._cluster.get(window_covering_mode_attr) is None
         ):
             _LOGGER.debug(

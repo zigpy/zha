@@ -298,9 +298,8 @@ class Sensor(BaseSensor):
             )
 
     def _is_supported(self) -> bool:
-        if (
-            self._attribute_name not in self._cluster.attributes_by_name
-        ) or self._cluster.is_attribute_unsupported(self._attribute_name):
+        # `_is_valid` has already established that the attribute exists
+        if self._cluster.is_attribute_unsupported(self._attribute_name):
             _LOGGER.debug(
                 "%s is not supported - skipping %s entity creation",
                 self._attribute_name,
@@ -957,6 +956,15 @@ class AggregatedClusterPoller(VirtualEntity):
             return
         await self.async_update()
 
+    def _is_attribute_unusable(
+        self, attr: int | str | foundation.ZCLAttributeDef
+    ) -> bool:
+        """Return whether an attribute is unsupported or undefined on the cluster."""
+        try:
+            return self._cluster.is_attribute_unsupported(attr)
+        except KeyError:
+            return True
+
     async def async_update(self) -> None:
         """Poll the union of attrs read by enabled sibling entities."""
         attrs: set[str] = set()
@@ -967,7 +975,9 @@ class AggregatedClusterPoller(VirtualEntity):
                 continue
             if not entity.enabled:
                 continue
-            if entity._attribute_name and self._cluster.is_attribute_unsupported(
+            # `is_attribute_unsupported` raises `KeyError` for attributes the
+            # cluster does not define, so treat those as unsupported too
+            if entity._attribute_name and self._is_attribute_unusable(
                 entity._attribute_name
             ):
                 continue
@@ -977,7 +987,7 @@ class AggregatedClusterPoller(VirtualEntity):
             for attr_def, attr_cfg in cfg.attributes.items():
                 if attr_cfg.reporting is None:
                     continue
-                if self._cluster.is_attribute_unsupported(attr_def):
+                if self._is_attribute_unusable(attr_def):
                     continue
 
                 attrs.add(attr_def if isinstance(attr_def, str) else attr_def.name)

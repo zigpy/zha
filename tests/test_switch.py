@@ -2,6 +2,7 @@
 
 import asyncio
 import logging
+from typing import Final
 from unittest.mock import call, patch
 
 import pytest
@@ -14,6 +15,7 @@ from zhaquirks.const import (
     OUTPUT_CLUSTERS,
     PROFILE_ID,
 )
+from zhaquirks.device import CustomZigpyDevice
 from zhaquirks.legacy import CustomDevice
 from zigpy.exceptions import ZigbeeException
 from zigpy.profiles import zha
@@ -904,3 +906,178 @@ async def test_binary_output_cluster(zha_gateway: Gateway) -> None:
             manufacturer=UNDEFINED,
         )
     ]
+
+
+class MissingOnOffAttributesCluster(CustomCluster, general.OnOff):
+    """OnOff cluster without the standard attribute definitions.
+
+    Mimics broken custom quirks that fully replace the attribute definitions of
+    a standard cluster, e.g. with `attributes = LocalDataCluster.attributes.copy()`
+    or an `AttributeDefs` class not inheriting the standard cluster's definitions.
+    """
+
+    class AttributeDefs(zcl_f.BaseAttributeDefs):
+        """Attribute definitions not inheriting from `OnOff.AttributeDefs`."""
+
+        window_detection_temperature: Final = zcl_f.ZCLAttributeDef(
+            id=0x6000, type=t.int16s, is_manufacturer_specific=True
+        )
+        window_detection_timeout_minutes: Final = zcl_f.ZCLAttributeDef(
+            id=0x6001, type=t.uint8_t, is_manufacturer_specific=True
+        )
+
+
+async def test_switch_missing_standard_attribute_definitions(
+    zha_gateway: Gateway,
+) -> None:
+    """Test quirk-replaced OnOff cluster without standard attribute definitions.
+
+    Device initialization must not fail and no switch entity is created.
+    """
+    registry = DeviceRegistry()
+    zigpy_device = create_mock_zigpy_device(
+        zha_gateway,
+        ZIGPY_DEVICE,
+        manufacturer="_TZE200_ckud7u2l",
+        model="TS0601",
+    )
+
+    (
+        QuirkBuilder(zigpy_device.manufacturer, zigpy_device.model)
+        .replaces(MissingOnOffAttributesCluster)
+        .add_to_registry(registry)
+    )
+
+    zigpy_device_ = registry.resolve(zigpy_device)
+    assert isinstance(zigpy_device_, CustomZigpyDevice)
+    assert isinstance(zigpy_device_.endpoints[1].on_off, MissingOnOffAttributesCluster)
+
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device_)
+
+    assert not [
+        entity
+        for entity in zha_device.platform_entities.values()
+        if entity.PLATFORM == Platform.SWITCH
+    ]
+
+
+async def test_quirk_switch_attribute_missing_from_cluster(
+    zha_gateway: Gateway, caplog: pytest.LogCaptureFixture
+) -> None:
+    """A quirk switch naming an attribute the cluster lacks is skipped, not fatal.
+
+    Quirk entities are `always_supported`, so nothing used to stop such an entity
+    from being created; reading its state then raised `KeyError` out of device
+    initialization and failed the whole ZHA setup.
+    """
+
+    zigpy_dev = create_mock_zigpy_device(
+        zha_gateway,
+        ZIGPY_DEVICE,
+        manufacturer="manufacturer",
+        model="model",
+    )
+
+    registry = DeviceRegistry()
+    (
+        QuirkBuilder(zigpy_dev.manufacturer, zigpy_dev.model)
+        .switch(
+            "attribute_that_does_not_exist",
+            general.OnOff.cluster_id,
+            translation_key="nonexistent",
+            fallback_name="Nonexistent",
+        )
+        .add_to_registry(registry)
+    )
+
+    zha_device = await join_zigpy_device(zha_gateway, registry.resolve(zigpy_dev))
+
+    # The device still initializes and its regular on/off switch works
+    switch_entity = get_entity(zha_device, platform=Platform.SWITCH)
+    assert switch_entity._attribute_name == general.OnOff.AttributeDefs.on_off.name
+
+    # ...but no entity was created for the attribute the cluster does not have
+    assert not [
+        entity
+        for entity in zha_device.platform_entities.values()
+        if getattr(entity, "_attribute_name", None) == "attribute_that_does_not_exist"
+    ]
+    assert "which cluster 0x0006 does not have" in caplog.text
+
+
+async def test_quirk_switch_inverter_attribute_missing_from_cluster(
+    zha_gateway: Gateway, caplog: pytest.LogCaptureFixture
+) -> None:
+    """A quirk switch whose *inverter* attribute is missing is skipped, not fatal.
+
+    `inverted` reads the inverter attribute on every state computation, so a
+    missing definition there is just as fatal as a missing primary attribute.
+    """
+
+    zigpy_dev = create_mock_zigpy_device(
+        zha_gateway,
+        ZIGPY_DEVICE,
+        manufacturer="manufacturer_inv",
+        model="model_inv",
+    )
+
+    registry = DeviceRegistry()
+    (
+        QuirkBuilder(zigpy_dev.manufacturer, zigpy_dev.model)
+        .switch(
+            general.OnOff.AttributeDefs.start_up_on_off.name,
+            general.OnOff.cluster_id,
+            invert_attribute_name="inverter_that_does_not_exist",
+            translation_key="inverted",
+            fallback_name="Inverted",
+        )
+        .add_to_registry(registry)
+    )
+
+    zha_device = await join_zigpy_device(zha_gateway, registry.resolve(zigpy_dev))
+
+    assert not [
+        entity
+        for entity in zha_device.platform_entities.values()
+        if getattr(entity, "_inverter_attribute_name", None)
+        == "inverter_that_does_not_exist"
+    ]
+    assert "which cluster 0x0006 does not have" in caplog.text
+
+
+async def test_undefined_attribute_does_not_poison_initial_read(
+    zha_gateway: Gateway, caplog: pytest.LogCaptureFixture
+) -> None:
+    """One undefined attribute must not stop its valid siblings from being read.
+
+    `read_attributes()` resolves every name up front, so leaving an undefined
+    attribute in the batch used to fail the read for all of them.
+    """
+
+    zigpy_dev = create_mock_zigpy_device(
+        zha_gateway,
+        ZIGPY_DEVICE,
+        manufacturer="manufacturer_read",
+        model="model_read",
+    )
+
+    registry = DeviceRegistry()
+    (
+        QuirkBuilder(zigpy_dev.manufacturer, zigpy_dev.model)
+        .switch(
+            "attribute_that_does_not_exist",
+            general.OnOff.cluster_id,
+            translation_key="nonexistent",
+            fallback_name="Nonexistent",
+        )
+        .add_to_registry(registry)
+    )
+
+    zha_device = await join_zigpy_device(zha_gateway, registry.resolve(zigpy_dev))
+
+    assert "Failed to read attributes" not in caplog.text
+    assert "skipping their initial read" in caplog.text
+
+    # the standard on/off switch, whose attribute shares the read batch, still works
+    switch_entity = get_entity(zha_device, platform=Platform.SWITCH)
+    assert switch_entity._attribute_name == general.OnOff.AttributeDefs.on_off.name

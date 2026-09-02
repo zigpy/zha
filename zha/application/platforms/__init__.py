@@ -316,10 +316,22 @@ class BaseEntity(LogMixin, EventBase):
 
     def is_supported(self) -> bool:
         """Return if the entity is supported for the device."""
+        if not self._is_valid():
+            return False
+
         if self._attr_always_supported:
             return True
 
         return self._is_supported()
+
+    def _is_valid(self) -> bool:
+        """Return if the entity is able to work at all, internal.
+
+        Unlike `_is_supported`, this is *not* bypassed by
+        `_attr_always_supported`: an entity failing it can never produce a
+        state, so creating it would only raise on every state read.
+        """
+        return True
 
     def _is_supported(self) -> bool:
         """Return if the entity is supported for the device, internal."""
@@ -586,6 +598,50 @@ class PlatformEntity(BaseEntity):
         self._device: Device = device
         self._endpoint = endpoint
         self._cluster: zigpy.zcl.Cluster = cluster
+        self._from_quirk: bool = from_quirk
+
+    def _is_valid(self) -> bool:
+        """Return False if a backing attribute is absent from the cluster.
+
+        Reading an attribute the cluster does not define raises `KeyError`, so
+        such an entity can never work. Default discovery hits this routinely
+        (optional attributes a quirk removed), but a quirk naming a missing
+        attribute is an authoring error, so that case is logged loudly.
+        """
+        for attribute_name in (
+            getattr(self, "_attribute_name", None),
+            # An inverter attribute is read on every state computation too
+            getattr(self, "_inverter_attribute_name", None),
+        ):
+            if attribute_name is None:
+                continue
+
+            try:
+                # Resolves both attribute names and IDs, as quirks may use either
+                self._cluster.find_attribute(attribute_name)
+            except KeyError:
+                self._log_missing_attribute(attribute_name)
+                return False
+
+        return super()._is_valid()
+
+    def _log_missing_attribute(self, attribute_name: str | int) -> None:
+        """Log that the cluster has no definition for an attribute we need."""
+        if self._from_quirk:
+            _LOGGER.warning(
+                "Quirk for %s defines a %s entity for attribute %r, which cluster"
+                " 0x%04X does not have - skipping entity creation",
+                self._device.model,
+                self.__class__.__name__,
+                attribute_name,
+                self._cluster.cluster_id,
+            )
+        else:
+            _LOGGER.debug(
+                "%s is not supported - skipping %s entity creation",
+                attribute_name,
+                self.__class__.__name__,
+            )
 
     def _apply_quirk_entity_config(
         self,

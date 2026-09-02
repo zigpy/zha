@@ -3,12 +3,15 @@
 from unittest.mock import call
 
 import pytest
+from zhaquirks.builder import QuirkBuilder
+from zhaquirks.clusters import CustomCluster
 from zigpy.device import Device as ZigpyDevice
 from zigpy.exceptions import ZigbeeException
 from zigpy.profiles import zha
 import zigpy.types
 from zigpy.typing import UNDEFINED
 from zigpy.zcl.clusters import general, lighting
+import zigpy.zcl.foundation as zcl_f
 import zigpy.zdo.types as zdo_t
 
 from tests.common import (
@@ -26,6 +29,7 @@ from zha.application import Platform
 from zha.application.gateway import Gateway
 from zha.application.platforms import EntityCategory, PlatformEntity
 from zha.application.platforms.number.const import NumberMode
+from zha.quirks import DeviceRegistry
 
 ZIGPY_ANALOG_OUTPUT_DEVICE = {
     1: {
@@ -430,3 +434,49 @@ async def test_color_number(
     )
     await zha_gateway.async_block_till_done()
     assert entity.state.native_value == initial_value
+
+
+async def test_quirk_gutting_cluster_does_not_break_device_init(
+    zha_gateway: Gateway, caplog: pytest.LogCaptureFixture
+) -> None:
+    """A quirk-gutted cluster must not abort device initialization.
+
+    `recompute_capabilities()` reads attributes that are not the entity's own
+    `_attribute_name`, so it raises `KeyError` on a cluster whose definitions a
+    quirk replaced. It runs before `is_supported()`, so an unguarded raise took
+    the whole ZHA setup down with it.
+    """
+
+    class GuttedAnalogOutput(CustomCluster, general.AnalogOutput):
+        """`AnalogOutput` that defines none of the standard attributes."""
+
+        class AttributeDefs(zcl_f.BaseAttributeDefs):
+            """Only a manufacturer-specific attribute."""
+
+            some_custom_attribute = zcl_f.ZCLAttributeDef(
+                id=0x6000, type=zigpy.types.uint8_t, is_manufacturer_specific=True
+            )
+
+    zigpy_dev = create_mock_zigpy_device(
+        zha_gateway,
+        ZIGPY_ANALOG_OUTPUT_DEVICE,
+        manufacturer="gutted_mfg",
+        model="gutted_model",
+    )
+
+    registry = DeviceRegistry()
+    (
+        QuirkBuilder(zigpy_dev.manufacturer, zigpy_dev.model)
+        .replaces(GuttedAnalogOutput)
+        .add_to_registry(registry)
+    )
+
+    # Device initialization succeeds and the entity that cannot work is dropped
+    zha_device = await join_zigpy_device(zha_gateway, registry.resolve(zigpy_dev))
+
+    assert not [
+        entity
+        for entity in zha_device.platform_entities.values()
+        if entity.PLATFORM == Platform.NUMBER
+    ]
+    assert "Failed to determine whether" in caplog.text

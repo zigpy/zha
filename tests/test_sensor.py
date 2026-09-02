@@ -4,7 +4,7 @@ import asyncio
 from collections.abc import Awaitable, Callable
 from datetime import UTC, datetime
 from functools import partial
-from typing import Any
+from typing import Any, Final
 from unittest.mock import MagicMock, call, patch
 
 import pytest
@@ -18,7 +18,7 @@ from zigpy.device import Device as ZigpyDevice
 from zigpy.profiles import zha
 import zigpy.profiles.zha
 import zigpy.types as t
-from zigpy.zcl import Cluster, ReportingConfig
+from zigpy.zcl import Cluster, ReportingConfig, foundation as zcl_f
 from zigpy.zcl.clusters import general, homeautomation, hvac, measurement, smartenergy
 from zigpy.zcl.clusters.general import AnalogInput, PowerConfiguration
 from zigpy.zcl.clusters.general_const import AnalogInputType, ApplicationType
@@ -1515,6 +1515,10 @@ class OppleCluster(CustomCluster, ManufacturerSpecificCluster):
     ep_attribute = "opple_cluster"
     attributes = {
         0x010C: ("last_feeding_size", t.uint16_t, True),
+        0x010D: ("power", t.uint16_t, True),
+        0x010E: ("energy", t.uint16_t, True),
+        0x010F: ("energy_delivered", t.uint16_t, True),
+        0x0110: ("energy_invalid_state_class", t.uint16_t, True),
     }
 
     def __init__(self, *args, **kwargs) -> None:
@@ -2190,3 +2194,130 @@ async def test_em_poller_runs_independently_of_entity_enabled_state(
     active_power.enable()
     assert active_power.enabled is True
     assert not poll_task.done()
+
+
+class TrimmedElectricalMeasurementCluster(
+    CustomCluster, homeautomation.ElectricalMeasurement
+):
+    """EM cluster declaring only the attributes its device actually implements.
+
+    Mimics a quirk that replaces the standard attribute definitions with a
+    narrower set: `active_power` and the AC multiplier/divisor pair survive, the
+    deprecated `power_multiplier`/`power_divisor` fallbacks do not — even though
+    `ElectricalMeasurementActivePower` names them in its cluster config.
+    """
+
+    class AttributeDefs(zcl_f.BaseAttributeDefs):
+        """Attribute definitions not inheriting the standard cluster's."""
+
+        measurement_type: Final = EMAttrs.measurement_type
+        active_power: Final = EMAttrs.active_power
+        active_power_max: Final = EMAttrs.active_power_max
+        ac_power_multiplier: Final = EMAttrs.ac_power_multiplier
+        ac_power_divisor: Final = EMAttrs.ac_power_divisor
+
+
+async def test_em_poller_skips_disabled_entity_attributes(
+    zha_gateway: Gateway,
+) -> None:
+    """Disabling an entity drops its attributes from the next poll."""
+
+    zigpy_dev = elec_measurement_zigpy_device_mock(zha_gateway)
+    zha_dev = await join_zigpy_device(zha_gateway, zigpy_dev)
+    cluster = zha_dev.device.endpoints[1].electrical_measurement
+
+    poller = get_entity(
+        zha_dev,
+        platform=Platform.VIRTUAL,
+        exact_entity_type=sensor.ElectricalMeasurementPoller,
+    )
+    active_power = get_entity(
+        zha_dev,
+        platform=Platform.SENSOR,
+        exact_entity_type=sensor.ElectricalMeasurementActivePower,
+    )
+
+    async def poll() -> set[str]:
+        cluster.read_attributes.reset_mock()
+        await poller.async_update()
+        await zha_dev.gateway.async_block_till_done()
+        return {
+            a for call in cluster.read_attributes.call_args_list for a in call[0][0]
+        }
+
+    assert EMAttrs.active_power.name in await poll()
+
+    # the poller keeps running, but stops polling the disabled entity's attribute
+    active_power.disable()
+    polled_while_disabled = await poll()
+    assert EMAttrs.active_power.name not in polled_while_disabled
+    # ...while its siblings' attributes are still polled
+    assert EMAttrs.rms_voltage.name in polled_while_disabled
+
+    active_power.enable()
+    assert EMAttrs.active_power.name in await poll()
+
+
+async def test_em_poller_skips_attributes_missing_from_quirk_cluster(
+    zha_gateway: Gateway,
+) -> None:
+    """Attributes the cluster does not define are skipped, not fatal.
+
+    `is_attribute_unsupported()` raises `KeyError` for an undefined attribute, so
+    a cluster config naming one used to abort the whole poll — including the
+    valid attributes batched with it.
+    """
+
+    zigpy_dev = elec_measurement_zigpy_device_mock(zha_gateway)
+
+    registry = DeviceRegistry()
+    (
+        QuirkBuilder(zigpy_dev.manufacturer, zigpy_dev.model)
+        .replaces(TrimmedElectricalMeasurementCluster)
+        .add_to_registry(registry)
+    )
+
+    zigpy_dev = registry.resolve(zigpy_dev)
+    assert isinstance(zigpy_dev, CustomZigpyDevice)
+    cluster = zigpy_dev.endpoints[1].electrical_measurement
+    assert isinstance(cluster, TrimmedElectricalMeasurementCluster)
+    # `registry.resolve` swaps in the replaced cluster instance; patch its
+    # network methods so the poll can be observed
+    patch_cluster_for_testing(cluster)
+    cluster.PLUGGED_ATTR_READS = {
+        EMAttrs.ac_power_divisor.name: 10,
+        EMAttrs.ac_power_multiplier.name: 1,
+    }
+
+    zha_dev = await join_zigpy_device(zha_gateway, zigpy_dev)
+
+    # the entity exists: its own attribute is defined, only its config's are not
+    active_power = get_entity(
+        zha_dev,
+        platform=Platform.SENSOR,
+        exact_entity_type=sensor.ElectricalMeasurementActivePower,
+    )
+    assert active_power._attribute_name == EMAttrs.active_power.name
+    assert EMAttrs.power_divisor.name in (
+        attr_def.name
+        for attr_def in active_power._server_cluster_config[
+            homeautomation.ElectricalMeasurement.cluster_id
+        ].attributes
+    )
+
+    poller = get_entity(
+        zha_dev,
+        platform=Platform.VIRTUAL,
+        exact_entity_type=sensor.ElectricalMeasurementPoller,
+    )
+    cluster.read_attributes.reset_mock()
+    await poller.async_update()
+    await zha_dev.gateway.async_block_till_done()
+
+    polled = {a for call in cluster.read_attributes.call_args_list for a in call[0][0]}
+    # `power_multiplier` and `power_divisor` are silently dropped...
+    assert polled == {
+        EMAttrs.active_power.name,
+        EMAttrs.ac_power_multiplier.name,
+        EMAttrs.ac_power_divisor.name,
+    }

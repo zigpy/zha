@@ -296,9 +296,9 @@ class NumberConfigurationEntity(BaseNumber):
 
     def _is_supported(self) -> bool:
         """Return if the entity is supported for the device, internal."""
+        # `_is_valid` has already established that the attribute exists
         if (
-            self._attribute_name not in self._cluster.attributes_by_name
-            or self._cluster.is_attribute_unsupported(self._attribute_name)
+            self._cluster.is_attribute_unsupported(self._attribute_name)
             or self._cluster.get(self._attribute_name) is None
         ):
             _LOGGER.debug(

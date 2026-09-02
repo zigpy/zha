@@ -81,6 +81,21 @@ class AggregatedClusterConfig:
     entities: list[BaseEntity] = field(default_factory=list)
 
 
+def _cluster_defines(cluster: zigpy.zcl.Cluster, attr_name: str) -> bool:
+    """Return whether the cluster has a definition for the attribute.
+
+    Cluster configs are aggregated from entities that have not been filtered by
+    `is_supported()` yet, so an attribute the cluster does not define (e.g. one
+    a quirk named or removed) can still reach the reads below - where zigpy
+    raises `KeyError` for it.
+    """
+    try:
+        cluster.find_attribute(attr_name)
+    except KeyError:
+        return False
+    return True
+
+
 def aggregate_cluster_configs(
     entities: Iterable[BaseEntity],
 ) -> dict[tuple[int, int, bool], AggregatedClusterConfig]:
@@ -193,6 +208,15 @@ async def configure_cluster_configs(
         for attr_name, attr_config in agg.attributes.items():
             if attr_config.reporting is None:
                 continue
+            if not _cluster_defines(agg.cluster, attr_name):
+                _LOGGER.debug(
+                    "[%s] Cluster %s has no attribute %r,"
+                    " skipping reporting configuration",
+                    agg.cluster.endpoint.device.ieee,
+                    agg.cluster.ep_attribute,
+                    attr_name,
+                )
+                continue
             attr_def = agg.cluster.find_attribute(attr_name)
             reporting_attrs[attr_def] = attr_config.reporting
 
@@ -263,14 +287,31 @@ async def initialize_cluster_configs(
 ) -> None:
     """Read initial attribute values from aggregated configs."""
     for agg in configs.values():
+        # `read_attributes` resolves every name up front, so a single undefined
+        # attribute would fail the whole batch and stop its valid siblings from
+        # ever being read.
+        known_attrs = {
+            attr_name: attr_config
+            for attr_name, attr_config in agg.attributes.items()
+            if _cluster_defines(agg.cluster, attr_name)
+        }
+        if len(known_attrs) != len(agg.attributes):
+            _LOGGER.debug(
+                "[%s] Cluster %s has no definition for attributes %s,"
+                " skipping their initial read",
+                agg.cluster.endpoint.device.ieee,
+                agg.cluster.ep_attribute,
+                sorted(set(agg.attributes) - set(known_attrs)),
+            )
+
         cached_attrs = [
             attr_name
-            for attr_name, attr_config in agg.attributes.items()
+            for attr_name, attr_config in known_attrs.items()
             if not attr_config.read_on_startup
         ]
         fresh_attrs = [
             attr_name
-            for attr_name, attr_config in agg.attributes.items()
+            for attr_name, attr_config in known_attrs.items()
             if attr_config.read_on_startup
         ]
 
