@@ -326,7 +326,10 @@ class BaseEntity(LogMixin, EventBase):
         return True
 
     def is_supported_in_list(self, entities: list[BaseEntity]) -> bool:
-        """Return if the entity is supported given all other entities."""
+        """Return if the entity is supported given all other entities.
+
+        Callers never include the entity itself in `entities`.
+        """
         return True
 
     def recompute_capabilities(self) -> None:
