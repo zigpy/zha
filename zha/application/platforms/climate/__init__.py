@@ -7,7 +7,7 @@ from asyncio import Task
 from dataclasses import dataclass
 import datetime as dt
 import functools
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from zigpy.profiles import zha
 from zigpy.zcl import (
@@ -884,23 +884,23 @@ class Thermostat(BaseThermostat):
         if self.hvac_mode == HVACMode.HEAT_COOL:
             if target_temp_low is not None:
                 await self._async_set_heating_setpoint(
-                    temperature=int(target_temp_low * ZCL_TEMP),
+                    temperature=round(target_temp_low * ZCL_TEMP),
                     is_away=is_away,
                 )
             if target_temp_high is not None:
                 await self._async_set_cooling_setpoint(
-                    temperature=int(target_temp_high * ZCL_TEMP),
+                    temperature=round(target_temp_high * ZCL_TEMP),
                     is_away=is_away,
                 )
         elif temperature is not None:
             if self.hvac_mode == HVACMode.COOL:
                 await self._async_set_cooling_setpoint(
-                    temperature=int(temperature * ZCL_TEMP),
+                    temperature=round(temperature * ZCL_TEMP),
                     is_away=is_away,
                 )
             elif self.hvac_mode == HVACMode.HEAT:
                 await self._async_set_heating_setpoint(
-                    temperature=int(temperature * ZCL_TEMP),
+                    temperature=round(temperature * ZCL_TEMP),
                     is_away=is_away,
                 )
             else:
@@ -948,7 +948,8 @@ class SinopeTechnologiesThermostat(Thermostat):
         self._sinope_cluster = endpoint.zigpy_endpoint.in_clusters[
             SINOPE_MANUFACTURER_CLUSTER
         ]
-        self._time_update_task: Task | None = None
+        self._time_update_task: Task[Any] | None = None
+        self._time_update_removed = False
 
     def recompute_capabilities(self) -> None:
         """Recompute capabilities and feature flags."""
@@ -960,8 +961,21 @@ class SinopeTechnologiesThermostat(Thermostat):
         super().on_add()
         self.start_polling()
 
+    def _time_update_task_done(self, task: Task[Any]) -> None:
+        """Release the updater task and restart it if the entity was re-enabled."""
+        self._tracked_tasks.remove(task)
+        self._time_update_task = None
+        self.start_polling()
+
     def start_polling(self) -> None:
         """Start polling."""
+        if (
+            self._time_update_removed
+            or not self.enabled
+            or self._time_update_task is not None
+        ):
+            return
+
         self._time_update_task = self.device.gateway.async_create_background_task(
             self._update_time(),
             name=f"sinope_time_updater_{self.unique_id}",
@@ -969,6 +983,7 @@ class SinopeTechnologiesThermostat(Thermostat):
             untracked=True,
         )
         self._tracked_tasks.append(self._time_update_task)
+        self._time_update_task.add_done_callback(self._time_update_task_done)
         self.debug(
             "started time updating interval of %s",
             getattr(self, "__polling_interval"),
@@ -976,16 +991,23 @@ class SinopeTechnologiesThermostat(Thermostat):
 
     def enable(self) -> None:
         """Enable the entity."""
+        if self._time_update_removed:
+            return
         super().enable()
         self.start_polling()
 
     def disable(self) -> None:
         """Disable the entity."""
         super().disable()
-        if self._time_update_task:
-            self._tracked_tasks.remove(self._time_update_task)
-            self._time_update_task.cancel()
-            self._time_update_task = None
+        time_update_task = self._time_update_task
+        if time_update_task is not None and not time_update_task.cancelling():
+            time_update_task.cancel()
+
+    async def on_remove(self) -> None:
+        """Stop time updates before removing the entity."""
+        self._time_update_removed = True
+        super().disable()
+        await super().on_remove()
 
     @periodic((2700, 4500))
     async def _update_time(self) -> None:
