@@ -340,16 +340,15 @@
         "on": false,
         "brightness": 143,
         "xy_color": null,
-        "color_temp": 158,
+        "color_temp": null,
         "effect_list": [
           "off"
         ],
         "effect": "off",
         "supported_features": 40,
-        "color_mode": "color_temp",
+        "color_mode": "brightness",
         "supported_color_modes": [
           "brightness",
-          "color_temp",
           "onoff"
         ],
         "off_with_transition": false,
