@@ -400,48 +400,13 @@ class IkeaFan(BaseFan, PlatformEntity):
         models=frozenset({"STARKVIND Air purifier", "STARKVIND Air purifier table"}),
     )
 
-    # Aggregated reporting/bind config for the whole STARKVIND manufacturer
-    # cluster; sibling ChildLock/DisableLed switches don't need their own.
+    # Bind and reporting config for the attributes this entity uses. The quirk
+    # declares its own config for the other attributes of the manufacturer
+    # specific cluster; both are merged before the device is configured.
     _server_cluster_config = {
         IKEA_AIR_PURIFIER_CLUSTER: ClusterConfig(
             bind=True,
             attributes={
-                "filter_run_time": AttrConfig(
-                    read_on_startup=False,
-                    reporting=ReportingConfig(
-                        min_interval=30, max_interval=900, reportable_change=1
-                    ),
-                ),
-                "replace_filter": AttrConfig(
-                    read_on_startup=False,
-                    reporting=ReportingConfig(
-                        min_interval=0, max_interval=900, reportable_change=1
-                    ),
-                ),
-                "filter_life_time": AttrConfig(
-                    read_on_startup=False,
-                    reporting=ReportingConfig(
-                        min_interval=30, max_interval=900, reportable_change=1
-                    ),
-                ),
-                "disable_led": AttrConfig(
-                    read_on_startup=False,
-                    reporting=ReportingConfig(
-                        min_interval=0, max_interval=900, reportable_change=1
-                    ),
-                ),
-                "air_quality_25pm": AttrConfig(
-                    read_on_startup=False,
-                    reporting=ReportingConfig(
-                        min_interval=0, max_interval=900, reportable_change=1
-                    ),
-                ),
-                "child_lock": AttrConfig(
-                    read_on_startup=False,
-                    reporting=ReportingConfig(
-                        min_interval=0, max_interval=900, reportable_change=1
-                    ),
-                ),
                 "fan_mode": AttrConfig(
                     read_on_startup=False,
                     reporting=ReportingConfig(
@@ -452,12 +417,6 @@ class IkeaFan(BaseFan, PlatformEntity):
                     read_on_startup=False,
                     reporting=ReportingConfig(
                         min_interval=0, max_interval=900, reportable_change=1
-                    ),
-                ),
-                "device_run_time": AttrConfig(
-                    read_on_startup=False,
-                    reporting=ReportingConfig(
-                        min_interval=30, max_interval=900, reportable_change=1
                     ),
                 ),
             },

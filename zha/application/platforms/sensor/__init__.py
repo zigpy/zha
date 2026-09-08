@@ -71,7 +71,6 @@ from zha.application.platforms import (
 )
 from zha.application.platforms.climate.const import HVACAction
 from zha.application.platforms.const import (
-    IKEA_AIR_PURIFIER_CLUSTER,
     SMARTTHINGS_HUMIDITY_CLUSTER,
     SONOFF_CLUSTER,
     TUYA_MANUFACTURER_CLUSTER,
@@ -3313,40 +3312,6 @@ class TimeLeft(Sensor):
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({TUYA_MANUFACTURER_CLUSTER}),
         manufacturers=frozenset({"_TZE200_htnnfasr"}),
-    )
-
-
-@register_entity(IKEA_AIR_PURIFIER_CLUSTER)
-class IkeaDeviceRunTime(Sensor):
-    """Sensor that displays device run time (in minutes)."""
-
-    _attribute_name = "device_run_time"
-    _unique_id_suffix = "device_run_time"
-    _attr_device_class: SensorDeviceClass = SensorDeviceClass.DURATION
-    _attr_translation_key: str = "device_run_time"
-    _attr_native_unit_of_measurement = UnitOfTime.MINUTES
-    _attr_entity_category: EntityCategory = EntityCategory.DIAGNOSTIC
-    _cluster_id = IKEA_AIR_PURIFIER_CLUSTER
-
-    _cluster_match = ClusterMatch(
-        server_clusters=frozenset({IKEA_AIR_PURIFIER_CLUSTER}),
-    )
-
-
-@register_entity(IKEA_AIR_PURIFIER_CLUSTER)
-class IkeaFilterRunTime(Sensor):
-    """Sensor that displays run time of the current filter (in minutes)."""
-
-    _attribute_name = "filter_run_time"
-    _unique_id_suffix = "filter_run_time"
-    _attr_device_class: SensorDeviceClass = SensorDeviceClass.DURATION
-    _attr_translation_key: str = "filter_run_time"
-    _attr_native_unit_of_measurement = UnitOfTime.MINUTES
-    _attr_entity_category: EntityCategory = EntityCategory.DIAGNOSTIC
-    _cluster_id = IKEA_AIR_PURIFIER_CLUSTER
-
-    _cluster_match = ClusterMatch(
-        server_clusters=frozenset({IKEA_AIR_PURIFIER_CLUSTER}),
     )
 
 

@@ -506,6 +506,7 @@ def zigpy_device_ikea_mock(zha_gateway: Gateway) -> ZigpyDevice:
                 general.Identify.cluster_id,
                 general.Groups.cluster_id,
                 general.Scenes.cluster_id,
+                hvac.Fan.cluster_id,
                 64637,
             ],
             SIG_EP_OUTPUT: [],
@@ -513,12 +514,12 @@ def zigpy_device_ikea_mock(zha_gateway: Gateway) -> ZigpyDevice:
             SIG_EP_PROFILE: zha.PROFILE_ID,
         },
     }
+    # the quirk is a v2 quirk, so it is resolved from the manufacturer and model
     return create_mock_zigpy_device(
         zha_gateway,
         endpoints,
         manufacturer="IKEA of Sweden",
         model="STARKVIND Air purifier",
-        quirk=zhaquirks.ikea.starkvind.IkeaSTARKVIND,
         node_descriptor=zdo_t.NodeDescriptor(
             logical_type=zdo_t.LogicalType.EndDevice,
             complex_descriptor_available=0,

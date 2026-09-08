@@ -8,7 +8,7 @@
   "friendly_model": "STARKVIND Air purifier table",
   "name": "IKEA of Sweden STARKVIND Air purifier table",
   "quirk_applied": true,
-  "quirk_class": "zhaquirks.ikea.starkvind:IkeaSTARKVIND_v2",
+  "quirk_class": "zhaquirks.ikea.starkvind:(IKEA of Sweden / STARKVIND Air purifier)",
   "exposes_features": [],
   "manufacturer_code": 4476,
   "power_source": "Mains",
@@ -91,48 +91,6 @@
           "cluster_id": "0x0005",
           "endpoint_attribute": "scenes",
           "attributes": []
-        },
-        {
-          "cluster_id": "0x042a",
-          "endpoint_attribute": "pm25",
-          "attributes": [
-            {
-              "id": "0xfffd",
-              "name": "cluster_revision",
-              "zcl_type": "uint16",
-              "unsupported": true
-            },
-            {
-              "id": "0x0002",
-              "name": "max_measured_value",
-              "zcl_type": "single",
-              "unsupported": true
-            },
-            {
-              "id": "0x0000",
-              "name": "measured_value",
-              "zcl_type": "single",
-              "value": 0
-            },
-            {
-              "id": "0x0001",
-              "name": "min_measured_value",
-              "zcl_type": "single",
-              "unsupported": true
-            },
-            {
-              "id": "0xfffe",
-              "name": "reporting_status",
-              "zcl_type": "enum8",
-              "unsupported": true
-            },
-            {
-              "id": "0x0003",
-              "name": "tolerance",
-              "zcl_type": "single",
-              "unsupported": true
-            }
-          ]
         },
         {
           "cluster_id": "0xfc57",
@@ -240,6 +198,11 @@
           "cluster_id": "0x0400",
           "endpoint_attribute": "illuminance",
           "attributes": []
+        },
+        {
+          "cluster_id": "0x042a",
+          "endpoint_attribute": "pm25",
+          "attributes": []
         }
       ]
     },
@@ -310,11 +273,11 @@
   "zha_lib_entities": {
     "binary_sensor": [
       {
-        "fallback_name": null,
+        "fallback_name": "Replace filter",
         "unique_id": "ab:cd:ef:12:e0:99:45:a5-1-64637-replace_filter",
         "migrate_unique_ids": [],
         "platform": "binary_sensor",
-        "class_name": "ReplaceFilter",
+        "class_name": "BinarySensor",
         "translation_key": "replace_filter",
         "translation_placeholders": null,
         "device_class": "problem",
@@ -404,11 +367,11 @@
     ],
     "number": [
       {
-        "fallback_name": null,
+        "fallback_name": "Filter life time",
         "unique_id": "ab:cd:ef:12:e0:99:45:a5-1-64637-filter_life_time",
         "migrate_unique_ids": [],
         "platform": "number",
-        "class_name": "FilterLifeTime",
+        "class_name": "NumberConfigurationEntity",
         "translation_key": "filter_life_time",
         "translation_placeholders": null,
         "device_class": null,
@@ -478,11 +441,11 @@
         "unit": "dBm"
       },
       {
-        "fallback_name": null,
+        "fallback_name": "PM2.5",
         "unique_id": "ab:cd:ef:12:e0:99:45:a5-1-1066",
         "migrate_unique_ids": [],
         "platform": "sensor",
-        "class_name": "PM25",
+        "class_name": "Sensor",
         "translation_key": null,
         "translation_placeholders": null,
         "device_class": "pm25",
@@ -496,16 +459,16 @@
         "endpoint_id": 1,
         "available": true,
         "group_id": null,
-        "native_value": 0,
+        "native_value": null,
         "suggested_display_precision": null,
         "unit": "\u03bcg/m\u00b3"
       },
       {
-        "fallback_name": null,
+        "fallback_name": "Device run time",
         "unique_id": "ab:cd:ef:12:e0:99:45:a5-1-64637-device_run_time",
         "migrate_unique_ids": [],
         "platform": "sensor",
-        "class_name": "IkeaDeviceRunTime",
+        "class_name": "Sensor",
         "translation_key": "device_run_time",
         "translation_placeholders": null,
         "device_class": "duration",
@@ -524,11 +487,11 @@
         "unit": "min"
       },
       {
-        "fallback_name": null,
+        "fallback_name": "Filter run time",
         "unique_id": "ab:cd:ef:12:e0:99:45:a5-1-64637-filter_run_time",
         "migrate_unique_ids": [],
         "platform": "sensor",
-        "class_name": "IkeaFilterRunTime",
+        "class_name": "Sensor",
         "translation_key": "filter_run_time",
         "translation_placeholders": null,
         "device_class": "duration",
@@ -549,11 +512,11 @@
     ],
     "switch": [
       {
-        "fallback_name": null,
+        "fallback_name": "Child lock",
         "unique_id": "ab:cd:ef:12:e0:99:45:a5-1-64637-child_lock",
         "migrate_unique_ids": [],
         "platform": "switch",
-        "class_name": "ChildLock",
+        "class_name": "ConfigurableAttributeSwitch",
         "translation_key": "child_lock",
         "translation_placeholders": null,
         "device_class": null,
@@ -576,11 +539,11 @@
         "on_value": 1
       },
       {
-        "fallback_name": null,
+        "fallback_name": "Disable LED",
         "unique_id": "ab:cd:ef:12:e0:99:45:a5-1-64637-disable_led",
         "migrate_unique_ids": [],
         "platform": "switch",
-        "class_name": "DisableLed",
+        "class_name": "ConfigurableAttributeSwitch",
         "translation_key": "disable_led",
         "translation_placeholders": null,
         "device_class": null,
