@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import asyncio
-from collections.abc import AsyncGenerator
+from collections.abc import AsyncGenerator, Awaitable, Callable
 from contextlib import asynccontextmanager, suppress
 from dataclasses import dataclass
 from datetime import timedelta
@@ -11,6 +11,7 @@ from enum import Enum
 import logging
 import time
 from typing import Any, Final, Self, TypeVar, cast
+from weakref import WeakValueDictionary
 
 from zigpy.application import ControllerApplication
 from zigpy.config import (
@@ -47,11 +48,7 @@ from zha.application.const import (
     RadioType,
 )
 from zha.application.helpers import DeviceAvailabilityChecker, GlobalUpdater, ZHAData
-from zha.async_ import (
-    AsyncUtilMixin,
-    create_eager_task,
-    gather_with_limited_concurrency,
-)
+from zha.async_ import AsyncUtilMixin, gather_with_limited_concurrency
 from zha.event import EventBase
 from zha.quirks import DEVICE_REGISTRY, QUIRK_REGISTRY_ENTRY_ATTR
 from zha.zigbee.device import Device, DeviceInfo, DeviceStatus, ExtendedDeviceInfo
@@ -183,6 +180,15 @@ class Gateway(AsyncUtilMixin, EventBase):
 
         self.shutting_down: bool = False
         self._reload_task: asyncio.Task | None = None
+        # Keep lifecycle generations and locks for one gateway run so delayed
+        # callbacks cannot reuse old ownership state. Track zigpy identities
+        # weakly so stale-callback detection does not retain removed devices.
+        self._device_lifecycle_generations: dict[EUI64, int] = {}
+        self._device_lifecycle_locks: dict[EUI64, asyncio.Lock] = {}
+        self._device_lifecycle_zigpy_devices: WeakValueDictionary[
+            EUI64, zigpy.device.Device
+        ] = WeakValueDictionary()
+        self._device_removal_tasks: dict[EUI64, asyncio.Task[None]] = {}
 
         self.global_updater: GlobalUpdater = GlobalUpdater(self)
         self._device_availability_checker: DeviceAvailabilityChecker = (
@@ -242,6 +248,12 @@ class Gateway(AsyncUtilMixin, EventBase):
 
     async def _async_initialize(self) -> None:
         """Initialize controller and connect radio."""
+        # Shutdown quiesces all lifecycle work. A reused Gateway must bind
+        # removal identity checks to devices from the new controller instance.
+        self._device_lifecycle_generations.clear()
+        self._device_lifecycle_locks.clear()
+        self._device_lifecycle_zigpy_devices.clear()
+        self._device_removal_tasks.clear()
         self.shutting_down = False
 
         app_controller_cls, app_config = self.get_application_controller_data()
@@ -432,63 +444,174 @@ class Gateway(AsyncUtilMixin, EventBase):
             ),
         )
 
+    def _next_device_lifecycle_generation(self, ieee: EUI64) -> int:
+        """Return a new lifecycle generation for a device."""
+        generation = self._device_lifecycle_generations.get(ieee, 0) + 1
+        self._device_lifecycle_generations[ieee] = generation
+        return generation
+
+    def _get_device_lifecycle_lock(self, ieee: EUI64) -> asyncio.Lock:
+        """Return the lock serializing lifecycle changes for a device."""
+        if (lifecycle_lock := self._device_lifecycle_locks.get(ieee)) is None:
+            lifecycle_lock = self._device_lifecycle_locks[ieee] = asyncio.Lock()
+        return lifecycle_lock
+
+    def _invalidate_all_device_lifecycles(self) -> None:
+        """Prevent work from the active device lifecycles from committing."""
+        for ieee in tuple(self._device_lifecycle_generations):
+            self._next_device_lifecycle_generation(ieee)
+
+    async def _async_quiesce_device_lifecycles(self) -> None:
+        """Cancel and await all device lifecycle work before gateway teardown."""
+        initialization_tasks = tuple(self._device_init_tasks.values())
+        for initialization_task in initialization_tasks:
+            initialization_task.cancel()
+        await asyncio.gather(*initialization_tasks, return_exceptions=True)
+
+        removal_tasks = tuple(self._device_removal_tasks.values())
+        await asyncio.gather(*removal_tasks, return_exceptions=True)
+
+        # A superseded or directly awaited operation may no longer be in the
+        # task maps, but it still owns this lock until all mutation has stopped.
+        for lifecycle_lock in tuple(self._device_lifecycle_locks.values()):
+            async with lifecycle_lock:
+                pass
+
+    def _is_current_device_lifecycle(
+        self,
+        *,
+        ieee: EUI64,
+        lifecycle_generation: int,
+        expected_device: Device | None = None,
+    ) -> bool:
+        """Return whether an operation still owns the device lifecycle."""
+        removal_task = self._device_removal_tasks.get(ieee)
+        if self.shutting_down or (removal_task is not None and not removal_task.done()):
+            return False
+        if self._device_lifecycle_generations.get(ieee) != lifecycle_generation:
+            return False
+        return expected_device is None or self._devices.get(ieee) is expected_device
+
+    async def _async_run_device_lifecycle_operation(
+        self,
+        *,
+        zigpy_device: zigpy.device.Device,
+        lifecycle_generation: int,
+        previous_removal_task: asyncio.Task[None] | None,
+        operation: Callable[[zigpy.device.Device, int], Awaitable[None]],
+    ) -> None:
+        """Run a device lifecycle operation after any prior removal."""
+        if previous_removal_task is not None:
+            # A previous removal is an ordering barrier, not a success
+            # dependency. Consume its outcome so failure cannot poison the
+            # replacement, and shield the wait so replacement cancellation
+            # cannot cancel the removal.
+            await asyncio.shield(
+                asyncio.gather(previous_removal_task, return_exceptions=True)
+            )
+
+        async with self._get_device_lifecycle_lock(zigpy_device.ieee):
+            if not self._is_current_device_lifecycle(
+                ieee=zigpy_device.ieee,
+                lifecycle_generation=lifecycle_generation,
+            ):
+                return
+            await operation(zigpy_device, lifecycle_generation)
+
+    def _schedule_device_lifecycle_operation(
+        self,
+        *,
+        zigpy_device: zigpy.device.Device,
+        operation: Callable[[zigpy.device.Device, int], Awaitable[None]],
+        task_name: str,
+    ) -> None:
+        """Schedule an initialization or reinterview operation."""
+        lifecycle_generation = self._next_device_lifecycle_generation(zigpy_device.ieee)
+        self._device_lifecycle_zigpy_devices[zigpy_device.ieee] = zigpy_device
+        previous_removal_task = self._device_removal_tasks.get(zigpy_device.ieee)
+
+        if previous_initialization_task := self._device_init_tasks.get(
+            zigpy_device.ieee
+        ):
+            previous_initialization_task.cancel()
+
+        # Store the task before lifecycle code can run. Eager execution could
+        # re-enter removal before the gateway owns the task handle.
+        initialization_task = self.async_create_task(
+            self._async_run_device_lifecycle_operation(
+                zigpy_device=zigpy_device,
+                lifecycle_generation=lifecycle_generation,
+                previous_removal_task=previous_removal_task,
+                operation=operation,
+            ),
+            name=task_name,
+        )
+        self._device_init_tasks[zigpy_device.ieee] = initialization_task
+
+        def remove_completed_initialization_task(
+            completed_task: asyncio.Task,
+        ) -> None:
+            # A superseded task must not clear its replacement's bookkeeping.
+            if self._device_init_tasks.get(zigpy_device.ieee) is completed_task:
+                del self._device_init_tasks[zigpy_device.ieee]
+
+        initialization_task.add_done_callback(remove_completed_initialization_task)
+
     def device_initialized(self, device: zigpy.device.Device) -> None:
         """Handle device joined and basic information discovered."""
+        if self.shutting_down:
+            _LOGGER.debug(
+                "Ignoring initialization of device %s during shutdown", device.ieee
+            )
+            return
         if device.ieee in self._device_init_tasks:
             _LOGGER.warning(
                 "Cancelling previous initialization task for device %s",
                 str(device.ieee),
             )
-            self._device_init_tasks[device.ieee].cancel()
-        self._device_init_tasks[device.ieee] = init_task = self.async_create_task(
-            self.async_device_initialized(device),
-            name=f"device_initialized_task_{str(device.ieee)}:0x{device.nwk:04x}",
-            eager_start=True,
+        self._schedule_device_lifecycle_operation(
+            zigpy_device=device,
+            operation=self._async_device_initialized,
+            task_name=(
+                f"device_initialized_task_{str(device.ieee)}:0x{device.nwk:04x}"
+            ),
         )
-
-        def _remove_init_task(task: asyncio.Task) -> None:
-            # Only remove the entry if it still points at this task; a cancelled
-            # task's done-callback must not pop the replacement task's entry.
-            if self._device_init_tasks.get(device.ieee) is task:
-                del self._device_init_tasks[device.ieee]
-
-        init_task.add_done_callback(_remove_init_task)
 
     def device_reinterviewed(self, device: zigpy.device.Device) -> None:
         """Handle zigpy device_reinterviewed event (e.g. after OTA or reconfigure)."""
+        if self.shutting_down:
+            _LOGGER.debug(
+                "Ignoring reinterview of device %s during shutdown", device.ieee
+            )
+            return
         if device.ieee in self._device_init_tasks:
             _LOGGER.debug(
                 "Cancelling previous initialization task for reinterviewed device %s",
                 str(device.ieee),
             )
-            self._device_init_tasks[device.ieee].cancel()
-        self._device_init_tasks[device.ieee] = init_task = self.async_create_task(
-            self._async_device_reinterviewed(device),
-            name=f"device_reinterviewed_task_{str(device.ieee)}:0x{device.nwk:04x}",
-            eager_start=True,
+        self._schedule_device_lifecycle_operation(
+            zigpy_device=device,
+            operation=self._async_device_reinterviewed,
+            task_name=(
+                f"device_reinterviewed_task_{str(device.ieee)}:0x{device.nwk:04x}"
+            ),
         )
 
-        def _remove_init_task(task: asyncio.Task) -> None:
-            # Only remove the entry if it still points at this task; a cancelled
-            # task's done-callback must not pop the replacement task's entry.
-            if self._device_init_tasks.get(device.ieee) is task:
-                del self._device_init_tasks[device.ieee]
-
-        init_task.add_done_callback(_remove_init_task)
-
     async def _async_device_reinterviewed(
-        self, new_zigpy_device: zigpy.device.Device
+        self,
+        new_zigpy_device: zigpy.device.Device,
+        lifecycle_generation: int,
     ) -> None:
         """Rebuild a ZHA device after zigpy swapped the underlying device."""
-        zha_device = self._devices.get(new_zigpy_device.ieee)
-        if zha_device is None:
+        original_zha_device = self._devices.get(new_zigpy_device.ieee)
+        if original_zha_device is None:
             _LOGGER.warning(
                 "Reinterviewed device %s not found in ZHA",
                 new_zigpy_device.ieee,
             )
             return
 
-        old_entry = getattr(zha_device.device, QUIRK_REGISTRY_ENTRY_ATTR, None)
+        old_entry = getattr(original_zha_device.device, QUIRK_REGISTRY_ENTRY_ATTR, None)
         old_factory = (
             old_entry.zha_device_factory
             if old_entry is not None and old_entry.zha_device_factory
@@ -509,7 +632,14 @@ class Gateway(AsyncUtilMixin, EventBase):
                 new_zigpy_device.nwk,
                 new_zigpy_device.ieee,
             )
-            await zha_device.async_rebuild_from_zigpy_device(new_zigpy_device)
+            await original_zha_device.async_rebuild_from_zigpy_device(new_zigpy_device)
+            if not self._is_current_device_lifecycle(
+                ieee=new_zigpy_device.ieee,
+                lifecycle_generation=lifecycle_generation,
+                expected_device=original_zha_device,
+            ):
+                return
+            active_zha_device = original_zha_device
         else:
             # A different quirk now matches. Replace the object with one dispatched by
             # `Device.new` against the freshly-resolved registry entry.
@@ -518,21 +648,42 @@ class Gateway(AsyncUtilMixin, EventBase):
                 new_zigpy_device.nwk,
                 new_zigpy_device.ieee,
             )
-            await zha_device.async_teardown(emit_entity_events=True)
+            await original_zha_device.async_teardown(emit_entity_events=True)
 
-            zha_device = Device.new(new_zigpy_device, self)
-            self._devices[new_zigpy_device.ieee] = zha_device
+            # Removal or a newer lifecycle may have won while teardown awaited.
+            # Check both the generation and exact wrapper before replacing it.
+            if not self._is_current_device_lifecycle(
+                ieee=new_zigpy_device.ieee,
+                lifecycle_generation=lifecycle_generation,
+                expected_device=original_zha_device,
+            ):
+                return
 
-            zha_device.available = True
-            zha_device.on_network = True
+            active_zha_device = Device.new(new_zigpy_device, self)
+            self._devices[new_zigpy_device.ieee] = active_zha_device
+
+            active_zha_device.available = True
+            active_zha_device.on_network = True
 
         configure_succeeded = False
         all_succeeded = False
         try:
-            await zha_device.async_configure()
+            await active_zha_device.async_configure()
+            if not self._is_current_device_lifecycle(
+                ieee=new_zigpy_device.ieee,
+                lifecycle_generation=lifecycle_generation,
+                expected_device=active_zha_device,
+            ):
+                return
             # `async_configure()` reached its own `emit_reconfigure_done()`.
             configure_succeeded = True
-            await zha_device.async_initialize()
+            await active_zha_device.async_initialize()
+            if not self._is_current_device_lifecycle(
+                ieee=new_zigpy_device.ieee,
+                lifecycle_generation=lifecycle_generation,
+                expected_device=active_zha_device,
+            ):
+                return
             all_succeeded = True
         except Exception:  # noqa: BLE001
             _LOGGER.warning(
@@ -541,18 +692,32 @@ class Gateway(AsyncUtilMixin, EventBase):
                 exc_info=True,
             )
 
+        if not self._is_current_device_lifecycle(
+            ieee=new_zigpy_device.ieee,
+            lifecycle_generation=lifecycle_generation,
+            expected_device=active_zha_device,
+        ):
+            return
+
         # Refresh group subscriptions so groups drop stale references to
         # torn-down entities and re-subscribe to whatever new entities exist.
         # Run this even on partial rebuild — old subscriptions are always dead.
         for group in self._groups.values():
             group.update_entity_subscriptions()
 
+        if not self._is_current_device_lifecycle(
+            ieee=new_zigpy_device.ieee,
+            lifecycle_generation=lifecycle_generation,
+            expected_device=active_zha_device,
+        ):
+            return
+
         if not configure_succeeded:
             # `async_configure()` didn't reach its own emit; emit explicitly so
             # the HA reconfigure dialog unsticks.  Skipped when configure
             # already emitted (avoids a duplicate signal even if `initialize`
             # raised afterwards).
-            zha_device.emit_reconfigure_done()
+            active_zha_device.emit_reconfigure_done()
 
         if not all_succeeded:
             # Don't emit `DeviceFullInitEvent(CONFIGURED)` — entities are
@@ -564,7 +729,7 @@ class Gateway(AsyncUtilMixin, EventBase):
             DeviceFullInitEvent(
                 device_info=ExtendedDeviceInfoWithPairingStatus(
                     pairing_status=DevicePairingStatus.CONFIGURED,
-                    **zha_device.extended_device_info.__dict__,
+                    **active_zha_device.extended_device_info.__dict__,
                 ),
             ),
         )
@@ -668,19 +833,95 @@ class Gateway(AsyncUtilMixin, EventBase):
     def device_removed(self, device: zigpy.device.Device) -> None:
         """Handle device being removed from the network."""
         _LOGGER.info("Removing device %s - %s", device.ieee, f"0x{device.nwk:04x}")
-        zha_device = self._devices.pop(device.ieee, None)
-        if zha_device is not None:
-            device_info = zha_device.extended_device_info
-            self.track_task(
-                create_eager_task(
-                    zha_device.on_remove(), name="Gateway._async_remove_device"
-                )
+
+        removed_zha_device = self._devices.get(device.ieee)
+        lifecycle_zigpy_device = self._device_lifecycle_zigpy_devices.get(device.ieee)
+        removal_is_stale = (
+            lifecycle_zigpy_device is not None and lifecycle_zigpy_device is not device
+        ) or (
+            lifecycle_zigpy_device is None
+            and removed_zha_device is not None
+            and removed_zha_device.device is not device
+        )
+        if removal_is_stale:
+            _LOGGER.debug(
+                "Ignoring stale removal of device %s from an older lifecycle",
+                device.ieee,
             )
-            if device_info is not None:
-                self.emit(
-                    ZHA_GW_MSG_DEVICE_REMOVED,
-                    DeviceRemovedEvent(device_info=device_info),
-                )
+            return
+
+        # Advance the generation before cancellation so cancellation-resistant
+        # work loses permission to commit immediately.
+        self._next_device_lifecycle_generation(device.ieee)
+
+        if self.shutting_down:
+            return
+
+        superseded_initialization_task = self._device_init_tasks.pop(device.ieee, None)
+        if superseded_initialization_task is not None:
+            superseded_initialization_task.cancel()
+
+        previous_removal_task = self._device_removal_tasks.get(device.ieee)
+        removal_task = self.async_create_task(
+            self._async_remove_device(
+                ieee=device.ieee,
+                removed_zha_device=removed_zha_device,
+                superseded_initialization_task=superseded_initialization_task,
+                previous_removal_task=previous_removal_task,
+            ),
+            name=f"device_removed_task_{str(device.ieee)}:0x{device.nwk:04x}",
+        )
+        self._device_removal_tasks[device.ieee] = removal_task
+
+        def remove_completed_removal_task(completed_task: asyncio.Task) -> None:
+            # Duplicate removals may already have installed a newer barrier.
+            if self._device_removal_tasks.get(device.ieee) is completed_task:
+                del self._device_removal_tasks[device.ieee]
+
+        removal_task.add_done_callback(remove_completed_removal_task)
+
+    async def _async_remove_device(
+        self,
+        *,
+        ieee: EUI64,
+        removed_zha_device: Device | None,
+        superseded_initialization_task: asyncio.Task | None,
+        previous_removal_task: asyncio.Task[None] | None,
+    ) -> None:
+        """Quiesce the old device lifecycle before publishing removal."""
+        if previous_removal_task is not None:
+            # Unlike lifecycle operations, removal tasks are not superseded or
+            # cancelled by another lifecycle callback, so this needs no shield.
+            await asyncio.gather(previous_removal_task, return_exceptions=True)
+        if superseded_initialization_task is not None:
+            await asyncio.gather(superseded_initialization_task, return_exceptions=True)
+
+        async with self._get_device_lifecycle_lock(ieee):
+            if (
+                removed_zha_device is None
+                or self._devices.get(ieee) is not removed_zha_device
+            ):
+                return
+
+            device_info = removed_zha_device.extended_device_info
+            # Remove only the wrapper captured by the synchronous callback. A
+            # later lifecycle must never be deleted by an old teardown.
+            del self._devices[ieee]
+
+            try:
+                if device_info is not None:
+                    self.emit(
+                        ZHA_GW_MSG_DEVICE_REMOVED,
+                        DeviceRemovedEvent(device_info=device_info),
+                    )
+            finally:
+                # A failing event listener must not bypass wrapper teardown.
+                try:
+                    await removed_zha_device.on_remove()
+                except Exception:  # noqa: BLE001
+                    _LOGGER.warning(
+                        "Failed to remove device %s", removed_zha_device, exc_info=True
+                    )
 
     def get_device(self, ieee: EUI64) -> Device | None:
         """Return Device for given ieee."""
@@ -740,6 +981,21 @@ class Gateway(AsyncUtilMixin, EventBase):
 
     async def async_device_initialized(self, device: zigpy.device.Device) -> None:
         """Handle device joined and basic information discovered (async)."""
+        lifecycle_generation = self._next_device_lifecycle_generation(device.ieee)
+        self._device_lifecycle_zigpy_devices[device.ieee] = device
+        await self._async_run_device_lifecycle_operation(
+            zigpy_device=device,
+            lifecycle_generation=lifecycle_generation,
+            previous_removal_task=self._device_removal_tasks.get(device.ieee),
+            operation=self._async_device_initialized,
+        )
+
+    async def _async_device_initialized(
+        self,
+        device: zigpy.device.Device,
+        lifecycle_generation: int,
+    ) -> None:
+        """Initialize a device while its lifecycle generation remains current."""
         zha_device = self.get_or_create_device(device)
         _LOGGER.debug(
             "device - %s:%s entering async_device_initialized - is_new_join: %s",
@@ -756,14 +1012,25 @@ class Gateway(AsyncUtilMixin, EventBase):
                 device.nwk,
                 device.ieee,
             )
-            await self._async_device_rejoined(zha_device)
+            initialization_succeeded = await self._async_device_rejoined(
+                zha_device, lifecycle_generation
+            )
         else:
             _LOGGER.debug(
                 "device - %s:%s has joined the ZHA zigbee network",
                 device.nwk,
                 device.ieee,
             )
-            await self._async_device_joined(zha_device)
+            initialization_succeeded = await self._async_device_joined(
+                zha_device, lifecycle_generation
+            )
+
+        if not initialization_succeeded or not self._is_current_device_lifecycle(
+            ieee=device.ieee,
+            lifecycle_generation=lifecycle_generation,
+            expected_device=zha_device,
+        ):
+            return
 
         device_info = ExtendedDeviceInfoWithPairingStatus(
             pairing_status=DevicePairingStatus.INITIALIZED,
@@ -774,13 +1041,29 @@ class Gateway(AsyncUtilMixin, EventBase):
             DeviceFullInitEvent(device_info=device_info),
         )
 
-    async def _async_device_joined(self, zha_device: Device) -> None:
+    async def _async_device_joined(
+        self, zha_device: Device, lifecycle_generation: int
+    ) -> bool:
+        """Configure and initialize a newly joined device."""
         zha_device.available = True
         zha_device.on_network = True
 
         async with self.request_priority(t.PacketPriority.HIGH):
             await zha_device.async_configure()
+            if not self._is_current_device_lifecycle(
+                ieee=zha_device.ieee,
+                lifecycle_generation=lifecycle_generation,
+                expected_device=zha_device,
+            ):
+                return False
             await zha_device.async_initialize()
+
+        if not self._is_current_device_lifecycle(
+            ieee=zha_device.ieee,
+            lifecycle_generation=lifecycle_generation,
+            expected_device=zha_device,
+        ):
+            return False
 
         self.emit(
             ZHA_GW_MSG_DEVICE_FULL_INIT,
@@ -792,8 +1075,12 @@ class Gateway(AsyncUtilMixin, EventBase):
                 new_join=True,
             ),
         )
+        return True
 
-    async def _async_device_rejoined(self, zha_device: Device) -> None:
+    async def _async_device_rejoined(
+        self, zha_device: Device, lifecycle_generation: int
+    ) -> bool:
+        """Reconfigure a device that joined an existing lifecycle."""
         _LOGGER.debug(
             "skipping discovery for previously discovered device - %s:%s",
             zha_device.nwk,
@@ -802,6 +1089,13 @@ class Gateway(AsyncUtilMixin, EventBase):
         # we don't have to do this on a nwk swap
         # but we don't have a way to tell currently
         await zha_device.async_configure()
+
+        if not self._is_current_device_lifecycle(
+            ieee=zha_device.ieee,
+            lifecycle_generation=lifecycle_generation,
+            expected_device=zha_device,
+        ):
+            return False
 
         self.emit(
             ZHA_GW_MSG_DEVICE_FULL_INIT,
@@ -812,9 +1106,16 @@ class Gateway(AsyncUtilMixin, EventBase):
                 )
             ),
         )
+        if not self._is_current_device_lifecycle(
+            ieee=zha_device.ieee,
+            lifecycle_generation=lifecycle_generation,
+            expected_device=zha_device,
+        ):
+            return False
         # Mark the device as unavailable, `async_initialize` will be called later
         zha_device.available = False
         zha_device.on_network = True
+        return True
 
     async def async_create_zigpy_group(
         self,
@@ -890,9 +1191,11 @@ class Gateway(AsyncUtilMixin, EventBase):
             return
 
         self.shutting_down = True
+        self._invalidate_all_device_lifecycles()
 
         self.global_updater.stop()
         self._device_availability_checker.stop()
+        await self._async_quiesce_device_lifecycles()
 
         for device in self._devices.values():
             try:
