@@ -1303,6 +1303,38 @@ async def test_quirks_v2_primary_entity(zha_gateway: Gateway) -> None:
     assert primary.translation_key == "battery_quantity"
 
 
+async def test_multiple_explicit_primary_entities(
+    zha_gateway: Gateway, caplog: pytest.LogCaptureFixture
+) -> None:
+    """Test multiple explicitly primary entities elect no primary entity."""
+
+    # Night light with a bulb and a motion sensor
+    zigpy_dev = await zigpy_device_from_json(
+        zha_gateway.application_controller,
+        "tests/data/devices/third-reality-inc-3rsnl02043z-0x0000003c.json",
+    )
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
+
+    light = get_entity(zha_device, Platform.LIGHT, entity_type=Light)
+    motion = get_entity(zha_device, Platform.BINARY_SENSOR, entity_type=IASZone)
+
+    # Mark both as explicitly primary, like a buggy hand-written quirk would
+    # (the quirks v2 builder validates against multiple primary entities)
+    light._attr_primary = True
+    motion._attr_primary = True
+
+    # The election does not crash on the quirk bug
+    await zha_device.recompute_entities()
+
+    assert "multiple explicitly primary entities" in caplog.text
+
+    # No primary entity is elected, but both explicitly primary entities still
+    # report primary themselves, as the explicit marking takes precedence
+    assert zha_device.primary_entity is None
+    primary = [e for e in zha_device.platform_entities.values() if e.primary]
+    assert set(primary) == {light, motion}
+
+
 async def test_quirks_v2_prevent_default_entities(zha_gateway: Gateway) -> None:
     """Test quirks v2 can prevent creating default entities."""
     registry = DeviceRegistry()
