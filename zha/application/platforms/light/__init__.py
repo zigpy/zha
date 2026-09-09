@@ -1470,7 +1470,11 @@ class LightGroup(BaseSharedLight, GroupEntity):
         self.debug(
             "All platform entity states for group entity members: %s", all_states
         )
-        on_states = [state for state in states if state.on]
+        # A member that is unavailable still reports the state it had when it was
+        # last seen, so it would keep the group on long after every reachable
+        # member has been turned off. Capabilities are still merged from every
+        # member, so they do not change while one is unreachable.
+        on_states = [state for state in states if state.on and state.available]
 
         self._state = len(on_states) > 0
 
