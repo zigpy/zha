@@ -17,7 +17,7 @@ dependencies = [
     "attrs",
     "frozendict",
     "bellows==1.0.1",
-    "zigpy-znp==1.1.0",
+    "zigpy-znp==1.1.1",
     "zigpy-deconz==1.0.0",
     "zigpy-xbee==0.22.0",
     "zigpy-zigate==0.14.0",
