@@ -3,7 +3,13 @@
 from enum import IntFlag, StrEnum
 from typing import Final
 
-from zigpy.zcl.clusters.hvac import ControlSequenceOfOperation, RunningMode, SystemMode
+from zigpy.zcl.clusters.hvac import (
+    ControlSequenceOfOperation,
+    FanMode,
+    FanModeSequence,
+    RunningMode,
+    SystemMode,
+)
 
 ATTR_SYS_MODE: Final[str] = "system_mode"
 ATTR_FAN_MODE: Final[str] = "fan_mode"
@@ -140,6 +146,34 @@ class HVACAction(StrEnum):
     OFF = "off"
     PREHEATING = "preheating"
 
+
+SEQ_FAN_MODES: dict[int, list[str]] = {
+    FanModeSequence.Low_Med_High: [FAN_LOW, FAN_MEDIUM, FAN_HIGH],
+    FanModeSequence.Low_High: [FAN_LOW, FAN_HIGH],
+    FanModeSequence.Low_Med_High_Auto: [FAN_LOW, FAN_MEDIUM, FAN_HIGH, FAN_AUTO],
+    FanModeSequence.Low_High_Auto: [FAN_LOW, FAN_HIGH, FAN_AUTO],
+    FanModeSequence.On_Auto: [FAN_AUTO, FAN_ON],
+}
+
+FAN_MODE_TO_ZCL: dict[str, FanMode] = {
+    FAN_OFF: FanMode.Off,
+    FAN_LOW: FanMode.Low,
+    FAN_MEDIUM: FanMode.Medium,
+    FAN_HIGH: FanMode.High,
+    FAN_ON: FanMode.On,
+    FAN_AUTO: FanMode.Auto,
+}
+
+ZCL_TO_FAN_MODE: dict[int, str] = {
+    FanMode.Off: FAN_OFF,
+    FanMode.Low: FAN_LOW,
+    FanMode.Medium: FAN_MEDIUM,
+    FanMode.High: FAN_HIGH,
+    FanMode.On: FAN_ON,
+    FanMode.Auto: FAN_AUTO,
+    # FanMode.Smart (0x06) deliberately omitted — ZCL R8 s6.4.2.1.2 notes it
+    # resolves to another mode based on occupancy; no direct HA equivalent.
+}
 
 RUNNING_MODE = {
     RunningMode.Off: HVACMode.OFF,
