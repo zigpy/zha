@@ -48,7 +48,7 @@ testing = [
     "mypy==2.1.0",
     "pre-commit==4.6.0",
     "pytest",
-    "pytest-asyncio<1.0",
+    "pytest-asyncio<2.0",
     "pytest-cov",
     "pytest-sugar",
     "pytest-timeout",
