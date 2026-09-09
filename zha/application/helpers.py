@@ -333,6 +333,7 @@ class LightOptions:
     enable_light_transitioning_flag: bool = dataclasses.field(default=True)
     always_prefer_xy_color_mode: bool = dataclasses.field(default=True)
     group_members_assume_state: bool = dataclasses.field(default=True)
+    group_adjust_only_lit_members: bool = dataclasses.field(default=False)
 
 
 @dataclass(kw_only=True, slots=True)

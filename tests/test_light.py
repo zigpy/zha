@@ -2324,3 +2324,154 @@ async def test_turn_off_cancellation_cleans_up_transition_flag(
         await task
 
     assert entity.is_transitioning is False
+
+
+async def test_group_adjust_only_lit_members(zha_gateway: Gateway) -> None:
+    """Test the opt-in group_adjust_only_lit_members option."""
+
+    # Read once by recompute_capabilities() when the group entity is created, so
+    # it must be set before the group exists; toggling it afterwards has no
+    # effect without an explicit recompute_capabilities() call.
+    zha_gateway.config.config.light_options.group_adjust_only_lit_members = True
+
+    await coordinator_mock(zha_gateway)
+    device_light_1 = await device_light_1_mock(zha_gateway)
+    device_light_2 = await device_light_2_mock(zha_gateway)
+
+    members = [
+        GroupMemberReference(ieee=device_light_1.ieee, endpoint_id=1),
+        GroupMemberReference(ieee=device_light_2.ieee, endpoint_id=1),
+    ]
+    zha_group: Group = await zha_gateway.async_create_zigpy_group("Test Group", members)
+    await zha_gateway.async_block_till_done()
+
+    entity: GroupEntity = get_group_entity(zha_group, platform=Platform.LIGHT)
+
+    dev1_cluster_on_off = device_light_1.device.endpoints[1].on_off
+    group_cluster_on_off = zha_group.zigpy_group.endpoint[general.OnOff.cluster_id]
+    group_cluster_level = zha_group.zigpy_group.endpoint[
+        general.LevelControl.cluster_id
+    ]
+    group_cluster_color = zha_group.zigpy_group.endpoint[lighting.Color.cluster_id]
+
+    # Group cluster proxies are not built via create_mock_zigpy_device, so
+    # patch_cluster_for_testing never runs on them; wrap .request directly so
+    # calls can be inspected the same way as for a device's own clusters.
+    group_cluster_on_off.request = AsyncMock(wraps=group_cluster_on_off.request)
+    group_cluster_level.request = AsyncMock(wraps=group_cluster_level.request)
+    group_cluster_color.request = AsyncMock(wraps=group_cluster_color.request)
+
+    # with the whole group off, the option changes nothing: brightness still
+    # turns the group, and every member, on
+    await entity.async_turn_on(brightness=50)
+    await zha_gateway.async_block_till_done()
+    assert group_cluster_on_off.request.call_count == 0
+    assert group_cluster_level.request.call_count == 1
+    assert (
+        group_cluster_level.request.call_args.args[1]
+        == group_cluster_level.commands_by_name["move_to_level_with_on_off"].id
+    )
+
+    # one member turns on outside of the group entity
+    await send_attributes_report(zha_gateway, dev1_cluster_on_off, {0: 1})
+    await _async_shift_time(zha_gateway)
+    assert bool(entity.state.on) is True
+
+    group_cluster_level.request.reset_mock()
+    group_cluster_on_off.request.reset_mock()
+
+    # a lit member exists, so brightness only adjusts it: no On command, and
+    # move_to_level rather than move_to_level_with_on_off
+    await entity.async_turn_on(brightness=30)
+    await zha_gateway.async_block_till_done()
+    assert group_cluster_on_off.request.call_count == 0
+    assert group_cluster_level.request.call_count == 1
+    assert (
+        group_cluster_level.request.call_args.args[1]
+        == group_cluster_level.commands_by_name["move_to_level"].id
+    )
+    assert group_cluster_level.request.call_args.kwargs["level"] == 30
+    assert entity.state.brightness == 30
+
+    group_cluster_level.request.reset_mock()
+
+    # brightness=0 is the exception: move_to_level_with_on_off is sent even
+    # under only_if_on, since it is a no-op for members that are already off
+    # and correctly extinguishes the lit one, rather than leaving it "on" at
+    # 0% brightness
+    await entity.async_turn_on(brightness=0)
+    await zha_gateway.async_block_till_done()
+    assert (
+        group_cluster_level.request.call_args.args[1]
+        == group_cluster_level.commands_by_name["move_to_level_with_on_off"].id
+    )
+    assert group_cluster_level.request.call_args.kwargs["level"] == 0
+    assert bool(entity.state.on) is False
+
+    # The group cast above never reaches dev1's own tracked state in this test
+    # harness (no simulated per-device response), so it is still reporting
+    # on_off=1 from earlier; report it off first, matching what the command
+    # actually did, then back on so the remaining only_if_on scenarios below
+    # have a lit member to adjust again.
+    await send_attributes_report(zha_gateway, dev1_cluster_on_off, {0: 0})
+    await send_attributes_report(zha_gateway, dev1_cluster_on_off, {0: 1})
+    await zha_gateway.async_block_till_done()
+    entity.update()
+    assert bool(entity.state.on) is True
+
+    group_cluster_color.request.reset_mock()
+    group_cluster_on_off.request.reset_mock()
+
+    # same for color temperature
+    await entity.async_turn_on(color_temp=300)
+    await zha_gateway.async_block_till_done()
+    assert group_cluster_on_off.request.call_count == 0
+    assert group_cluster_color.request.call_count == 1
+    assert (
+        group_cluster_color.request.call_args.args[1]
+        == group_cluster_color.commands_by_name["move_to_color_temp"].id
+    )
+    assert group_cluster_color.request.call_args.kwargs["color_temp_mireds"] == 300
+    assert entity.state.color_temp == 300
+
+    group_cluster_on_off.request.reset_mock()
+    group_cluster_color.request.reset_mock()
+
+    # same for XY color
+    await entity.async_turn_on(xy_color=(0.1, 0.2))
+    await zha_gateway.async_block_till_done()
+    assert group_cluster_on_off.request.call_count == 0
+    assert group_cluster_color.request.call_count == 1
+    assert (
+        group_cluster_color.request.call_args.args[1]
+        == group_cluster_color.commands_by_name["move_to_color"].id
+    )
+    assert group_cluster_color.request.call_args.kwargs["color_x"] == int(0.1 * 65535)
+    assert group_cluster_color.request.call_args.kwargs["color_y"] == int(0.2 * 65535)
+    assert entity.state.xy_color == (0.1, 0.2)
+
+    group_cluster_on_off.request.reset_mock()
+    group_cluster_level.request.reset_mock()
+
+    # disabling the option restores the default behavior even with a lit member
+    zha_gateway.config.config.light_options.group_adjust_only_lit_members = False
+    entity.recompute_capabilities()
+    await entity.async_turn_on(brightness=80)
+    await zha_gateway.async_block_till_done()
+    assert (
+        group_cluster_level.request.call_args.args[1]
+        == group_cluster_level.commands_by_name["move_to_level_with_on_off"].id
+    )
+
+    group_cluster_level.request.reset_mock()
+
+    # `only_if_on` isn't part of the public API; a caller passing it anyway
+    # must not collide with the entity's own computed value (which is
+    # `False` here, since the option was just disabled above) or blow up
+    # `_make_members_assume_group_state`, which has no `**kwargs` to absorb it.
+    await entity.async_turn_on(brightness=90, only_if_on=True)
+    await zha_gateway.async_block_till_done()
+    assert (
+        group_cluster_level.request.call_args.args[1]
+        == group_cluster_level.commands_by_name["move_to_level_with_on_off"].id
+    )
