@@ -662,37 +662,6 @@ class DisableLed(ConfigurableAttributeSwitch):
     )
 
 
-@register_entity(AQARA_OPPLE_CLUSTER)
-class AqaraPetFeederLEDIndicator(ConfigurableAttributeSwitch):
-    """Representation of a LED indicator configuration entity."""
-
-    _unique_id_suffix = "disable_led_indicator"
-    _attribute_name = "disable_led_indicator"
-    _attr_translation_key = "led_indicator"
-    _force_inverted = True
-    _cluster_id = AQARA_OPPLE_CLUSTER
-
-    _cluster_match = ClusterMatch(
-        server_clusters=frozenset({AQARA_OPPLE_CLUSTER}),
-        models=frozenset({"aqara.feeder.acn001"}),
-    )
-
-
-@register_entity(AQARA_OPPLE_CLUSTER)
-class AqaraPetFeederChildLock(ConfigurableAttributeSwitch):
-    """Representation of a child lock configuration entity."""
-
-    _unique_id_suffix = "child_lock"
-    _attribute_name = "child_lock"
-    _attr_translation_key = "child_lock"
-    _cluster_id = AQARA_OPPLE_CLUSTER
-
-    _cluster_match = ClusterMatch(
-        server_clusters=frozenset({AQARA_OPPLE_CLUSTER}),
-        models=frozenset({"aqara.feeder.acn001"}),
-    )
-
-
 @register_entity(OnOff.cluster_id)
 class TuyaChildLockSwitch(ConfigurableAttributeSwitch):
     """Representation of a child lock configuration entity."""

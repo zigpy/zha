@@ -516,21 +516,6 @@ class ReplaceFilter(BinarySensor):
 
 
 @register_entity(AQARA_OPPLE_CLUSTER)
-class AqaraPetFeederErrorDetected(BinarySensor):
-    """ZHA aqara pet feeder error detected binary sensor."""
-
-    _attribute_name = "error_detected"
-    _unique_id_suffix = "error_detected"
-    _attr_device_class: BinarySensorDeviceClass = BinarySensorDeviceClass.PROBLEM
-    _cluster_id = AQARA_OPPLE_CLUSTER
-
-    _cluster_match = ClusterMatch(
-        server_clusters=frozenset({AQARA_OPPLE_CLUSTER}),
-        models=frozenset({"aqara.feeder.acn001"}),
-    )
-
-
-@register_entity(AQARA_OPPLE_CLUSTER)
 class XiaomiPlugConsumerConnected(BinarySensor):
     """ZHA Xiaomi plug consumer connected binary sensor."""
 
