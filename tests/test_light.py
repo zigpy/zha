@@ -1838,6 +1838,213 @@ async def test_on_with_off_color(zha_gateway: Gateway) -> None:
     assert entity.state.color_mode == ColorMode.COLOR_TEMP
 
 
+def _restore_colorloop_test_state(
+    entity: Any,
+    *,
+    state: bool,
+    effect: str = "colorloop",
+    off_with_transition: bool = False,
+    off_brightness: int | None = None,
+) -> None:
+    """Restore a light to a known colorloop test state."""
+    entity.restore_external_state_attributes(
+        state=state,
+        off_with_transition=off_with_transition,
+        off_brightness=off_brightness,
+        brightness=100,
+        color_temp=None,
+        xy_color=(0.5, 0.5),
+        color_mode=ColorMode.XY,
+        effect=effect,
+    )
+
+
+def _color_command_ids(cluster: Any) -> list[int]:
+    """Return sent color-cluster command IDs."""
+    return [request.args[1] for request in cluster.request.await_args_list]
+
+
+@pytest.mark.parametrize(
+    ("initial_state", "initial_effect", "color_kwargs", "expected_commands"),
+    [
+        (
+            True,
+            "colorloop",
+            {"color_temp": 235},
+            ("color_loop_set", "move_to_color_temp"),
+        ),
+        (
+            True,
+            "colorloop",
+            {"xy_color": (0.25, 0.5)},
+            ("color_loop_set", "move_to_color"),
+        ),
+        (True, "off", {"color_temp": 235}, ("move_to_color_temp",)),
+        (
+            False,
+            "colorloop",
+            {"color_temp": 235},
+            ("move_to_color_temp", "color_loop_set"),
+        ),
+    ],
+)
+@patch(
+    "zigpy.zcl.clusters.lighting.Color.request",
+    new=AsyncMock(return_value=[sentinel.data, zcl_f.Status.SUCCESS]),
+)
+@patch(
+    "zigpy.zcl.clusters.general.LevelControl.request",
+    new=AsyncMock(return_value=[sentinel.data, zcl_f.Status.SUCCESS]),
+)
+@patch(
+    "zigpy.zcl.clusters.general.OnOff.request",
+    new=AsyncMock(return_value=[sentinel.data, zcl_f.Status.SUCCESS]),
+)
+async def test_turn_on_colorloop_deactivation_order_and_guard(
+    zha_gateway: Gateway,
+    initial_state: bool,
+    initial_effect: str,
+    color_kwargs: dict[str, Any],
+    expected_commands: tuple[str, ...],
+) -> None:
+    """Test colorloop deactivation ordering and the inactive guard."""
+    device_light = await device_light_3_mock(zha_gateway)
+    entity = get_entity(device_light, platform=Platform.LIGHT)
+    cluster_color = device_light.device.endpoints[1].light_color
+
+    _restore_colorloop_test_state(
+        entity,
+        state=initial_state,
+        effect=initial_effect,
+        off_with_transition=not initial_state,
+        off_brightness=80 if not initial_state else None,
+    )
+    cluster_color.request.reset_mock()
+
+    await entity.async_turn_on(**color_kwargs)
+
+    if "color_loop_set" in expected_commands:
+        command_index = expected_commands.index("color_loop_set")
+        assert (
+            cluster_color.request.await_args_list[command_index].kwargs["action"]
+            is lighting.Color.ColorLoopAction.Deactivate
+        )
+    assert _color_command_ids(cluster_color) == [
+        cluster_color.commands_by_name[command].id for command in expected_commands
+    ]
+    assert entity.state.effect == "off"
+    assert entity.state.off_with_transition is False
+    assert entity.state.off_brightness is None
+    entity.async_transition_complete()
+    assert not entity.is_transitioning
+
+
+@pytest.mark.parametrize(
+    "execute_if_off",
+    [False, True],
+)
+@patch(
+    "zigpy.zcl.clusters.lighting.Color.request",
+    new=AsyncMock(return_value=[sentinel.data, zcl_f.Status.SUCCESS]),
+)
+@patch(
+    "zigpy.zcl.clusters.general.LevelControl.request",
+    new=AsyncMock(return_value=[sentinel.data, zcl_f.Status.SUCCESS]),
+)
+@patch(
+    "zigpy.zcl.clusters.general.OnOff.request",
+    new=AsyncMock(return_value=[sentinel.data, zcl_f.Status.SUCCESS]),
+)
+async def test_colorloop_deactivation_failure_preserves_independent_commands(
+    zha_gateway: Gateway,
+    execute_if_off: bool,
+) -> None:
+    """Test deactivation failure blocks only the dependent color command."""
+    device_light = await device_light_3_mock(zha_gateway)
+    entity = get_entity(device_light, platform=Platform.LIGHT)
+    cluster_color = device_light.device.endpoints[1].light_color
+    cluster_level = device_light.device.endpoints[1].level
+    cluster_color.PLUGGED_ATTR_READS = {
+        "options": (lighting.Color.Options.Execute_if_off if execute_if_off else 0)
+    }
+    update_attribute_cache(cluster_color)
+
+    _restore_colorloop_test_state(
+        entity,
+        state=True,
+        off_with_transition=True,
+        off_brightness=80,
+    )
+    cluster_color.request.reset_mock()
+    cluster_level.request.reset_mock()
+    cluster_color.request.return_value = [sentinel.data, zcl_f.Status.FAILURE]
+
+    await entity.async_turn_on(brightness=150, color_temp=235, effect="off")
+
+    assert _color_command_ids(cluster_color) == [
+        cluster_color.commands_by_name["color_loop_set"].id
+    ]
+    assert cluster_level.request.await_count == 1
+    assert entity.state.on is True
+    assert entity.state.brightness == 150
+    assert entity.state.effect == "colorloop"
+    assert entity.state.color_mode == ColorMode.XY
+    assert entity.state.color_temp is None
+    assert entity.state.xy_color == (0.5, 0.5)
+    assert entity.state.off_with_transition is False
+    assert entity.state.off_brightness is None
+    assert entity.is_transitioning
+    entity.async_transition_complete()
+    assert not entity.is_transitioning
+
+
+@pytest.mark.parametrize(
+    ("status", "expected_effect"),
+    [
+        (zcl_f.Status.SUCCESS, "colorloop"),
+        (zcl_f.Status.FAILURE, "off"),
+        (zcl_f.Status.UNSUP_CLUSTER_COMMAND, "off"),
+    ],
+)
+@patch(
+    "zigpy.zcl.clusters.lighting.Color.request",
+    new=AsyncMock(return_value=[sentinel.data, zcl_f.Status.SUCCESS]),
+)
+@patch(
+    "zigpy.zcl.clusters.general.OnOff.request",
+    new=AsyncMock(return_value=[sentinel.data, zcl_f.Status.SUCCESS]),
+)
+async def test_requested_colorloop_activation_policy(
+    zha_gateway: Gateway,
+    status: zcl_f.Status,
+    expected_effect: str,
+) -> None:
+    """Test activation updates the effect only after a successful response."""
+    device_light = await device_light_3_mock(zha_gateway)
+    entity = get_entity(device_light, platform=Platform.LIGHT)
+    cluster_color = device_light.device.endpoints[1].light_color
+
+    _restore_colorloop_test_state(
+        entity,
+        state=True,
+        effect="off",
+    )
+    assert entity.state.effect == "off"
+    cluster_color.request.reset_mock()
+    cluster_color.request.return_value = [sentinel.data, status]
+
+    await entity.async_turn_on(effect="colorloop")
+
+    assert _color_command_ids(cluster_color) == [
+        cluster_color.commands_by_name["color_loop_set"].id
+    ]
+    assert (
+        cluster_color.request.await_args.kwargs["action"]
+        is lighting.Color.ColorLoopAction.Activate_from_current_hue
+    )
+    assert entity.state.effect == expected_effect
+
+
 @patch(
     "zigpy.zcl.clusters.general.OnOff.request",
     new=AsyncMock(return_value=[sentinel.data, zcl_f.Status.SUCCESS]),
