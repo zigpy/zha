@@ -1227,8 +1227,13 @@ class Device(LogMixin, EventBase):
         self._discover_new_entities()
         await self._add_pending_entities()
 
-    async def async_initialize(self, from_cache: bool = False) -> None:
-        """Initialize cluster handlers."""
+    async def async_initialize(
+        self,
+        from_cache: bool = False,
+        *,
+        request_priority: int | None = None,
+    ) -> None:
+        """Initialize cluster handlers with an optional request priority."""
         self.debug("started initialization")
 
         # We discover prospective entities before initialization
@@ -1237,7 +1242,11 @@ class Device(LogMixin, EventBase):
         # Read initial attributes from entity-level cluster configs
         aggregated = aggregate_cluster_configs(self._discovered_entities)
         if aggregated and not self.skip_configuration:
-            await initialize_cluster_configs(aggregated, from_cache)
+            await initialize_cluster_configs(
+                aggregated,
+                from_cache,
+                request_priority=request_priority,
+            )
 
         # And add them after. Emit events only on re-initialization, not the first.
         await self._add_pending_entities(emit_event=self._initialized)
