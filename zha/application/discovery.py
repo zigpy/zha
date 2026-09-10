@@ -39,6 +39,7 @@ from zha.application.platforms import (  # noqa: F401 pylint: disable=unused-imp
     update,
     virtual,
 )
+from zha.async_ import create_eager_task
 from zha.zigbee.group import Group
 
 if TYPE_CHECKING:
@@ -109,6 +110,21 @@ def ignore_exceptions_during_iteration[**P, T](
     return inner
 
 
+def _remove_stale_group_entities(
+    group: Group, stale_entities: list[GroupEntity]
+) -> None:
+    """Unregister stale group entities and schedule their removal."""
+    for entity in stale_entities:
+        _LOGGER.info("Removing stale group entity %s from group %s", entity, group.name)
+        group.unregister_group_entity(entity)
+        group.gateway.track_task(
+            create_eager_task(
+                entity.on_remove(), name=f"remove_group_entity_{entity.unique_id}"
+            )
+        )
+    group.update_entity_subscriptions()
+
+
 @ignore_exceptions_during_iteration
 def discover_group_entities(group: Group) -> Iterator[GroupEntity]:
     """Process a group and create any entities that are needed."""
@@ -119,7 +135,8 @@ def discover_group_entities(group: Group) -> Iterator[GroupEntity]:
             group.name,
             group.group_id,
         )
-        group.group_entities.clear()
+        if group.group_entities:
+            _remove_stale_group_entities(group, list(group.group_entities.values()))
         return
 
     # We only create groups with two or more devices
@@ -132,10 +149,20 @@ def discover_group_entities(group: Group) -> Iterator[GroupEntity]:
         for entity in member.associated_entities:
             platform_counts[entity.PLATFORM] += 1
 
-    for platform, count in platform_counts.items():
-        if count < 2:
-            continue
+    # A list (not a set) so group entity creation order stays deterministic
+    eligible_platforms = [
+        platform for platform, count in platform_counts.items() if count >= 2
+    ]
 
+    # Remove group entities for platforms that no longer have enough members
+    if stale_entities := [
+        entity
+        for entity in group.group_entities.values()
+        if entity.PLATFORM not in eligible_platforms
+    ]:
+        _remove_stale_group_entities(group, stale_entities)
+
+    for platform in eligible_platforms:
         for group_entity_class in GROUP_ENTITY_REGISTRY:
             if platform != group_entity_class.PLATFORM:
                 continue
