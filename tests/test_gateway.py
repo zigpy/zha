@@ -546,6 +546,9 @@ async def test_gateway_fetch_updated_state_mains_device_failure(
         await asyncio.sleep(0)
         if self is devices[0]:
             raise ValueError("Cannot add entity")
+        if self is devices[1]:
+            # e.g. zigpy cancelling the request on a radio disconnect
+            raise asyncio.CancelledError()
         initialized.append(self)
 
     zha_gateway.config.allow_polling = False
@@ -554,8 +557,9 @@ async def test_gateway_fetch_updated_state_mains_device_failure(
         await zha_gateway.async_initialize_devices_and_entities()
         await zha_gateway.async_block_till_done(wait_background_tasks=True)
 
-    assert set(initialized) == set(devices[1:])
+    assert initialized == [devices[2]]
     assert "Failed to fetch updated state for device" in caplog.text
+    assert "was cancelled" in caplog.text
     assert zha_gateway.config.allow_polling is True
 
 
