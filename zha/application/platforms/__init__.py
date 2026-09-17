@@ -6,7 +6,6 @@ from abc import abstractmethod
 import asyncio
 from collections import defaultdict
 from collections.abc import Callable, Mapping
-from contextlib import suppress
 import dataclasses
 from dataclasses import dataclass, field
 from enum import StrEnum
@@ -472,8 +471,10 @@ class BaseEntity(LogMixin, EventBase):
         for task in tasks:
             self.debug("Cancelling task: %s", task)
             task.cancel()
-        with suppress(asyncio.CancelledError):
-            await asyncio.gather(*tasks, return_exceptions=True)
+        # `return_exceptions=True` keeps the cancelled children from raising here;
+        # a `CancelledError` at this point is the caller's own cancellation (e.g. a
+        # device teardown cancelling an initialization round) and must propagate.
+        await asyncio.gather(*tasks, return_exceptions=True)
 
     def maybe_emit_state_changed_event(self) -> None:
         """Send the state of this platform entity."""
