@@ -1066,7 +1066,11 @@ class InovelliClientBind(VirtualEntity):
 
 @register_entity(INOVELLI_CLUSTER)
 class InovelliVzm30Init(VirtualEntity):
-    """Inovelli VZM30-SN switch attribute init."""
+    """Inovelli VZM30-SN switch attribute init.
+
+    Only attributes the quirk does not already read on startup. See
+    `InovelliVzm31Init` for what still has to live here.
+    """
 
     _unique_id_suffix = "inovelli_vzm30_init"
 
@@ -1079,42 +1083,17 @@ class InovelliVzm30Init(VirtualEntity):
             attributes={
                 name: AttrConfig(read_on_startup=fresh)
                 for name, fresh in {
-                    "dimming_speed_up_remote": False,
-                    "dimming_speed_up_local": False,
-                    "ramp_rate_off_to_on_remote": False,
-                    "ramp_rate_off_to_on_local": False,
-                    "dimming_speed_down_remote": False,
-                    "dimming_speed_down_local": False,
-                    "ramp_rate_on_to_off_remote": False,
-                    "ramp_rate_on_to_off_local": False,
-                    "minimum_level": False,
-                    "maximum_level": False,
-                    "invert_switch": False,
-                    "auto_off_timer": False,
-                    "default_level_local": False,
-                    "default_level_remote": False,
-                    "state_after_power_restored": False,
-                    "load_level_indicator_timeout": False,
+                    # no quirk entity
                     "active_power_reports": False,
                     "periodic_power_and_energy_reports": False,
                     "active_energy_reports": False,
                     "power_type": True,
                     "switch_type": True,
-                    "internal_temp_monitor": False,
-                    "overheated": False,
+                    # quirk entity initializes from cache, we want a fresh read
                     "button_delay": True,
                     "smart_bulb_mode": True,
-                    "led_color_when_on": False,
-                    "led_color_when_off": False,
-                    "led_intensity_when_on": False,
-                    "led_intensity_when_off": False,
-                    "led_scaling_mode": False,
-                    "aux_switch_scenes": False,
-                    "binding_off_to_on_sync_level": False,
                     "local_protection": True,
                     "output_mode": True,
-                    "firmware_progress_led": False,
-                    "disable_clear_notifications_double_tap": False,
                 }.items()
             },
         ),
@@ -1123,7 +1102,16 @@ class InovelliVzm30Init(VirtualEntity):
 
 @register_entity(INOVELLI_CLUSTER)
 class InovelliVzm31Init(VirtualEntity):
-    """Inovelli VZM31-SN dimmer attribute init."""
+    """Inovelli VZM31-SN dimmer attribute init.
+
+    Most of what this used to read is now covered by the quirk, whose entities
+    each declare their own startup read (zha-quirks #5122, ported out of ZHA in
+    #802). Two groups still have to be read here:
+
+    - attributes with no quirk entity at all, and
+    - attributes whose quirk entity initializes from the cache (the
+      `QuirkBuilder` default) where ZHA wants a fresh read from the device.
+    """
 
     _unique_id_suffix = "inovelli_vzm31_init"
 
@@ -1136,52 +1124,19 @@ class InovelliVzm31Init(VirtualEntity):
             attributes={
                 name: AttrConfig(read_on_startup=fresh)
                 for name, fresh in {
-                    "dimming_speed_up_remote": False,
-                    "dimming_speed_up_local": False,
-                    "ramp_rate_off_to_on_remote": False,
-                    "ramp_rate_off_to_on_local": False,
-                    "dimming_speed_down_remote": False,
-                    "dimming_speed_down_local": False,
-                    "ramp_rate_on_to_off_remote": False,
-                    "ramp_rate_on_to_off_local": False,
-                    "minimum_level": False,
-                    "maximum_level": False,
-                    "invert_switch": False,
-                    "auto_off_timer": False,
-                    "default_level_local": False,
-                    "default_level_remote": False,
-                    "state_after_power_restored": False,
-                    "load_level_indicator_timeout": False,
+                    # no quirk entity
                     "active_power_reports": False,
                     "periodic_power_and_energy_reports": False,
                     "active_energy_reports": False,
-                    "power_type": True,
-                    "switch_type": True,
                     "quick_start_time": False,
                     "quick_start_level": False,
-                    "increased_non_neutral_output": False,
-                    "leading_or_trailing_edge": False,
-                    "internal_temp_monitor": False,
-                    "overheated": False,
+                    "power_type": True,
+                    # quirk entity initializes from cache, we want a fresh read
+                    "switch_type": True,
                     "button_delay": True,
                     "smart_bulb_mode": True,
-                    "double_tap_up_enabled": False,
-                    "double_tap_down_enabled": False,
-                    "double_tap_up_level": False,
-                    "double_tap_down_level": False,
-                    "led_color_when_on": False,
-                    "led_color_when_off": False,
-                    "led_intensity_when_on": False,
-                    "led_intensity_when_off": False,
-                    "led_scaling_mode": False,
-                    "aux_switch_scenes": False,
-                    "binding_off_to_on_sync_level": False,
                     "local_protection": True,
                     "output_mode": True,
-                    "on_off_led_mode": False,
-                    "firmware_progress_led": False,
-                    "relay_click_in_on_off_mode": False,
-                    "disable_clear_notifications_double_tap": False,
                 }.items()
             },
         ),
@@ -1190,7 +1145,11 @@ class InovelliVzm31Init(VirtualEntity):
 
 @register_entity(INOVELLI_CLUSTER)
 class InovelliVzm35Init(VirtualEntity):
-    """Inovelli VZM35-SN fan switch attribute init."""
+    """Inovelli VZM35-SN fan switch attribute init.
+
+    Only attributes the quirk does not already read on startup. See
+    `InovelliVzm31Init` for what still has to live here.
+    """
 
     _unique_id_suffix = "inovelli_vzm35_init"
 
@@ -1203,43 +1162,17 @@ class InovelliVzm35Init(VirtualEntity):
             attributes={
                 name: AttrConfig(read_on_startup=fresh)
                 for name, fresh in {
-                    "dimming_speed_up_remote": False,
-                    "dimming_speed_up_local": False,
-                    "ramp_rate_off_to_on_local": False,
-                    "ramp_rate_off_to_on_remote": False,
-                    "dimming_speed_down_remote": False,
-                    "dimming_speed_down_local": False,
-                    "ramp_rate_on_to_off_local": False,
-                    "ramp_rate_on_to_off_remote": False,
-                    "minimum_level": False,
-                    "maximum_level": False,
-                    "invert_switch": False,
-                    "auto_off_timer": False,
-                    "default_level_local": False,
-                    "default_level_remote": False,
-                    "state_after_power_restored": False,
-                    "load_level_indicator_timeout": False,
-                    "power_type": True,
-                    "switch_type": True,
+                    # no quirk entity
                     "non_neutral_aux_med_gear_learn_value": False,
                     "non_neutral_aux_low_gear_learn_value": False,
+                    "power_type": True,
+                    # quirk entity initializes from cache, we want a fresh read
+                    "switch_type": True,
                     "quick_start_time": True,
                     "button_delay": True,
                     "smart_fan_mode": True,
-                    "double_tap_up_enabled": False,
-                    "double_tap_down_enabled": False,
-                    "double_tap_up_level": False,
-                    "double_tap_down_level": False,
-                    "led_color_when_on": False,
-                    "led_color_when_off": False,
-                    "led_intensity_when_on": False,
-                    "led_intensity_when_off": False,
-                    "aux_switch_scenes": False,
                     "local_protection": True,
                     "output_mode": True,
-                    "on_off_led_mode": False,
-                    "firmware_progress_led": False,
-                    "smart_fan_led_display_levels": False,
                 }.items()
             },
         ),
