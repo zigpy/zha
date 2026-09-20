@@ -381,6 +381,10 @@ class BaseSharedLight(BaseLight):
         flash: FlashMode | None = None,
         color_temp: int | None = None,
         xy_color: tuple[float, float] | None = None,
+        # `LightGroup` only: adjust members already on rather than also turning
+        # on ones that are off. See `_async_turn_on_impl` for where this changes
+        # command selection.
+        only_if_on: bool = False,
     ) -> None:
         """Turn the entity on."""
         duration = (
@@ -445,6 +449,7 @@ class BaseSharedLight(BaseLight):
                 brightness_supported=brightness_supported,
                 set_transition_flag=set_transition_flag,
                 transition_time=transition_time,
+                only_if_on=only_if_on,
             )
         finally:
             # If the task was cancelled (e.g. by a mode: restart automation) before
@@ -466,6 +471,7 @@ class BaseSharedLight(BaseLight):
         brightness_supported: bool,
         set_transition_flag: bool,
         transition_time: float,
+        only_if_on: bool,
     ) -> None:
         """Implement the turn on logic."""
         # If the light is currently off but a turn_on call with a color/temperature is
@@ -561,11 +567,22 @@ class BaseSharedLight(BaseLight):
         ):
             assert self._level_cluster is not None
 
-            result = await self._level_cluster.move_to_level_with_on_off(
+            # `only_if_on` (LightGroup only) sends the plain command instead: it
+            # is what a group-bound wall dimmer sends, and it leaves members
+            # that are off alone rather than turning them on. `level == 0` is
+            # the exception: `move_to_level_with_on_off` is safe there too,
+            # since it executes regardless of a member's current on/off state
+            # and, at level 0, drives an "off" transition. That is a no-op for
+            # a member that is already off, and the correct way to actually
+            # extinguish one that is lit.
+            level_command_name = (
+                "move_to_level" if only_if_on and level else "move_to_level_with_on_off"
+            )
+            result = await getattr(self._level_cluster, level_command_name)(
                 level=level,
                 transition_time=int(10 * duration),
             )
-            t_log["move_to_level_with_on_off"] = result
+            t_log[level_command_name] = result
             if result[1] is not Status.SUCCESS:
                 # First 'move to level' call failed, so if the transitioning delay
                 # isn't running from a previous call, the flag can be unset immediately
@@ -573,11 +590,16 @@ class BaseSharedLight(BaseLight):
                     self.async_transition_complete()
                 self.debug("turned on: %s", t_log)
                 return
+            # `move_to_level` (only_if_on, level > 0) never changes on/off,
+            # unlike `move_to_level_with_on_off`, but this stays correct either
+            # way: that command is only used when `level` is nonzero, and
+            # `only_if_on` guarantees `_state` was already `True`, so this
+            # assigns `True` to something already `True` in that case.
             self._state = bool(level)
             if level:
                 self._brightness = level
 
-        if (
+        if not only_if_on and (
             (brightness is None and transition is None)
             and not new_color_provided_while_off
             or (self._FORCE_ON and brightness != 0)
@@ -1387,6 +1409,9 @@ class LightGroup(BaseSharedLight, GroupEntity):
         self._zha_config_group_members_assume_state = (
             light_options.group_members_assume_state
         )
+        self._zha_config_group_adjust_only_lit_members = (
+            light_options.group_adjust_only_lit_members
+        )
 
         self._zha_config_enhanced_light_transition = False
         self._GROUP_SUPPORTS_EXECUTE_IF_OFF: bool = True
@@ -1437,12 +1462,43 @@ class LightGroup(BaseSharedLight, GroupEntity):
 
     async def async_turn_on(self, **kwargs: Any) -> None:
         """Turn the entity on."""
+        # `only_if_on` isn't part of the public `light.turn_on` API; this
+        # method's own computed value below is authoritative. Without this,
+        # a caller-supplied `only_if_on` in `kwargs` would collide with the
+        # explicit one passed to `super().async_turn_on()` (`TypeError: got
+        # multiple values`) and, separately, `_make_members_assume_group_state`
+        # has no `**kwargs` to absorb it at all.
+        kwargs.pop("only_if_on", None)
+
+        only_if_on = (
+            self._zha_config_group_adjust_only_lit_members
+            # "At least one member on": with the group fully off there is
+            # nothing to adjust, so the call keeps its normal turn-on semantics.
+            and self._state
+            # `effect`/`flash` have no group-cast equivalent, so a call carrying
+            # either keeps its normal turn-on semantics too.
+            and kwargs.get("effect") is None
+            and kwargs.get("flash") is None
+            and (
+                kwargs.get("brightness") is not None
+                # Mirrors the level gating `_async_turn_on_impl` applies on its
+                # own, minus that method's `self._level_cluster is not None`
+                # check: `LightGroup.__init__` always sets it from the group's
+                # own synthetic endpoint, so for a group it is never `None`.
+                and is_brightness_supported(self._internal_supported_color_modes)
+                or kwargs.get("color_temp") is not None
+                or kwargs.get("xy_color") is not None
+            )
+        )
+
         # "off with transition" and "off brightness" will get overridden when
         # turning on the group, but they are needed for setting the assumed
         # member state correctly, so save them here
         off_brightness = self._off_brightness if self._off_with_transition else None
-        await super().async_turn_on(**kwargs)
-        if self._zha_config_group_members_assume_state:
+        await super().async_turn_on(**kwargs, only_if_on=only_if_on)
+        # `_make_members_assume_group_state(state=True, ...)` marks every member
+        # on; that is exactly what `only_if_on` exists to avoid, so skip it there.
+        if self._zha_config_group_members_assume_state and not only_if_on:
             self._make_members_assume_group_state(
                 state=True, off_brightness=off_brightness, **kwargs
             )
