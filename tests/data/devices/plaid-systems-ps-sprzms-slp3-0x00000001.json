@@ -1,0 +1,376 @@
+{
+  "version": 3,
+  "ieee": "00:0d:6f:00:0e:6e:82:87",
+  "nwk": "0x256B",
+  "manufacturer": "PLAID SYSTEMS",
+  "model": "PS-SPRZMS-SLP3",
+  "friendly_manufacturer": "PLAID SYSTEMS",
+  "friendly_model": "PS-SPRZMS-SLP3",
+  "name": "PLAID SYSTEMS PS-SPRZMS-SLP3",
+  "quirk_applied": true,
+  "quirk_class": "zhaquirks.plaid.soil:(PLAID SYSTEMS / PS-SPRZMS-SLP3)",
+  "exposes_features": [],
+  "manufacturer_code": 4098,
+  "power_source": "Battery or Unknown",
+  "lqi": null,
+  "rssi": null,
+  "last_seen": "2025-04-24T17:34:08.314584+00:00",
+  "available": true,
+  "device_type": "EndDevice",
+  "active_coordinator": false,
+  "node_descriptor": {
+    "logical_type": "EndDevice",
+    "complex_descriptor_available": false,
+    "user_descriptor_available": false,
+    "reserved": 0,
+    "aps_flags": 0,
+    "frequency_band": 8,
+    "mac_capability_flags": 128,
+    "manufacturer_code": 4098,
+    "maximum_buffer_size": 82,
+    "maximum_incoming_transfer_size": 82,
+    "server_mask": 0,
+    "maximum_outgoing_transfer_size": 82,
+    "descriptor_capability_field": 0
+  },
+  "endpoints": {
+    "1": {
+      "profile_id": 260,
+      "device_type": {
+        "name": "undefined_0x0405",
+        "id": 1029
+      },
+      "in_clusters": [
+        {
+          "cluster_id": "0x0000",
+          "endpoint_attribute": "basic",
+          "attributes": [
+            {
+              "id": "0x0004",
+              "name": "manufacturer",
+              "zcl_type": "string",
+              "value": "PLAID SYSTEMS"
+            },
+            {
+              "id": "0x0005",
+              "name": "model",
+              "zcl_type": "string",
+              "value": "PS-SPRZMS-SLP3"
+            },
+            {
+              "id": "0x0007",
+              "name": "power_source",
+              "zcl_type": "enum8",
+              "value": 0
+            }
+          ]
+        },
+        {
+          "cluster_id": "0x0001",
+          "endpoint_attribute": "power",
+          "attributes": [
+            {
+              "id": "0x0021",
+              "name": "battery_percentage_remaining",
+              "zcl_type": "uint8",
+              "value": 200
+            },
+            {
+              "id": "0x0033",
+              "name": "battery_quantity",
+              "zcl_type": "uint8",
+              "value": 1
+            },
+            {
+              "id": "0x0031",
+              "name": "battery_size",
+              "zcl_type": "enum8",
+              "value": 8
+            },
+            {
+              "id": "0x0020",
+              "name": "battery_voltage",
+              "zcl_type": "uint8",
+              "value": 30
+            },
+            {
+              "id": "0x0000",
+              "name": "mains_voltage",
+              "zcl_type": "uint16",
+              "value": 2990
+            }
+          ]
+        },
+        {
+          "cluster_id": "0x0003",
+          "endpoint_attribute": "identify",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0402",
+          "endpoint_attribute": "temperature",
+          "attributes": [
+            {
+              "id": "0x0000",
+              "name": "measured_value",
+              "zcl_type": "int16",
+              "value": 1964
+            }
+          ]
+        },
+        {
+          "cluster_id": "0x0405",
+          "endpoint_attribute": "humidity",
+          "attributes": [
+            {
+              "id": "0x0000",
+              "name": "measured_value",
+              "zcl_type": "uint16",
+              "value": 4593
+            }
+          ]
+        }
+      ],
+      "out_clusters": [
+        {
+          "cluster_id": "0x0003",
+          "endpoint_attribute": "identify",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0019",
+          "endpoint_attribute": "ota",
+          "attributes": [
+            {
+              "id": "0x0002",
+              "name": "current_file_version",
+              "zcl_type": "uint32",
+              "value": 1
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "original_signature": {
+    "manufacturer": "PLAID SYSTEMS",
+    "model": "PS-SPRZMS-SLP3",
+    "node_desc": {
+      "logical_type": 2,
+      "complex_descriptor_available": 0,
+      "user_descriptor_available": 0,
+      "reserved": 0,
+      "aps_flags": 0,
+      "frequency_band": 8,
+      "mac_capability_flags": 128,
+      "manufacturer_code": 4098,
+      "maximum_buffer_size": 82,
+      "maximum_incoming_transfer_size": 82,
+      "server_mask": 0,
+      "maximum_outgoing_transfer_size": 82,
+      "descriptor_capability_field": 0
+    },
+    "endpoints": {
+      "1": {
+        "profile_id": "0x0104",
+        "device_type": "0x0405",
+        "input_clusters": [
+          "0x0000",
+          "0x0001",
+          "0x0003",
+          "0x0402",
+          "0x0405"
+        ],
+        "output_clusters": [
+          "0x0003",
+          "0x0019"
+        ]
+      }
+    }
+  },
+  "zha_lib_entities": {
+    "button": [
+      {
+        "fallback_name": null,
+        "unique_id": "00:0d:6f:00:0e:6e:82:87-1-3",
+        "migrate_unique_ids": [],
+        "platform": "button",
+        "class_name": "IdentifyButton",
+        "translation_key": null,
+        "translation_placeholders": null,
+        "device_class": "identify",
+        "state_class": null,
+        "entity_category": "diagnostic",
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "00:0d:6f:00:0e:6e:82:87",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "command": "identify",
+        "args": [
+          5
+        ],
+        "kwargs": {}
+      }
+    ],
+    "sensor": [
+      {
+        "fallback_name": null,
+        "unique_id": "00:0d:6f:00:0e:6e:82:87-1-0-lqi",
+        "migrate_unique_ids": [],
+        "platform": "sensor",
+        "class_name": "LQISensor",
+        "translation_key": "lqi",
+        "translation_placeholders": null,
+        "device_class": null,
+        "state_class": "measurement",
+        "entity_category": "diagnostic",
+        "entity_registry_enabled_default": false,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "00:0d:6f:00:0e:6e:82:87",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "native_value": null,
+        "suggested_display_precision": null,
+        "unit": null
+      },
+      {
+        "fallback_name": null,
+        "unique_id": "00:0d:6f:00:0e:6e:82:87-1-0-rssi",
+        "migrate_unique_ids": [],
+        "platform": "sensor",
+        "class_name": "RSSISensor",
+        "translation_key": "rssi",
+        "translation_placeholders": null,
+        "device_class": "signal_strength",
+        "state_class": "measurement",
+        "entity_category": "diagnostic",
+        "entity_registry_enabled_default": false,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "00:0d:6f:00:0e:6e:82:87",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "native_value": null,
+        "suggested_display_precision": null,
+        "unit": "dBm"
+      },
+      {
+        "fallback_name": null,
+        "unique_id": "00:0d:6f:00:0e:6e:82:87-1-1",
+        "migrate_unique_ids": [],
+        "platform": "sensor",
+        "class_name": "Battery",
+        "translation_key": null,
+        "translation_placeholders": null,
+        "device_class": "battery",
+        "state_class": "measurement",
+        "entity_category": "diagnostic",
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [
+          "battery_quantity",
+          "battery_size",
+          "battery_voltage"
+        ],
+        "device_ieee": "00:0d:6f:00:0e:6e:82:87",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "native_value": 100.0,
+        "suggested_display_precision": 0,
+        "unit": "%",
+        "battery_size": "CR123A",
+        "battery_quantity": 1,
+        "battery_voltage": 3.0
+      },
+      {
+        "fallback_name": null,
+        "unique_id": "00:0d:6f:00:0e:6e:82:87-1-1026",
+        "migrate_unique_ids": [],
+        "platform": "sensor",
+        "class_name": "Temperature",
+        "translation_key": null,
+        "translation_placeholders": null,
+        "device_class": "temperature",
+        "state_class": "measurement",
+        "entity_category": null,
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "00:0d:6f:00:0e:6e:82:87",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "native_value": 19.64,
+        "suggested_display_precision": null,
+        "unit": "\u00b0C"
+      },
+      {
+        "fallback_name": null,
+        "unique_id": "00:0d:6f:00:0e:6e:82:87-1-1029",
+        "migrate_unique_ids": [],
+        "platform": "sensor",
+        "class_name": "Humidity",
+        "translation_key": null,
+        "translation_placeholders": null,
+        "device_class": "humidity",
+        "state_class": "measurement",
+        "entity_category": null,
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "00:0d:6f:00:0e:6e:82:87",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "native_value": 45.93,
+        "suggested_display_precision": null,
+        "unit": "%"
+      }
+    ],
+    "update": [
+      {
+        "fallback_name": null,
+        "unique_id": "00:0d:6f:00:0e:6e:82:87-1-25-firmware_update",
+        "migrate_unique_ids": [],
+        "platform": "update",
+        "class_name": "FirmwareUpdateEntity",
+        "translation_key": null,
+        "translation_placeholders": null,
+        "device_class": "firmware",
+        "state_class": null,
+        "entity_category": "config",
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "00:0d:6f:00:0e:6e:82:87",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "installed_version": "0x00000001",
+        "in_progress": false,
+        "update_percentage": null,
+        "latest_version": null,
+        "release_summary": null,
+        "release_notes": null,
+        "release_url": null,
+        "supported_features": 23
+      }
+    ]
+  },
+  "neighbors": [],
+  "routes": []
+}

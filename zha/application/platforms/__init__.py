@@ -5,29 +5,32 @@ from __future__ import annotations
 from abc import abstractmethod
 import asyncio
 from collections import defaultdict
-from collections.abc import Callable
+from collections.abc import Callable, Mapping
 from contextlib import suppress
 import dataclasses
+from dataclasses import dataclass, field
 from enum import StrEnum
 from functools import cached_property
 import logging
-from typing import TYPE_CHECKING, Any, Final, Literal, final
+from types import MappingProxyType
+from typing import TYPE_CHECKING, Any, Final, final
 
-from zigpy.profiles import zha, zll
-from zigpy.quirks.v2 import EntityMetadata, EntityType
+from zigpy.profiles.zha import PROFILE_ID as ZHA_PROFILE_ID
+from zigpy.profiles.zll import PROFILE_ID as ZLL_PROFILE_ID
 from zigpy.types import ClusterId
 from zigpy.types.named import EUI64
+import zigpy.zcl
+from zigpy.zcl import ReportingConfig
+from zigpy.zcl.foundation import ZCLAttributeDef
 
-from zha.application import Platform
+from zha.application import EntityType, Platform
 from zha.application.const import UniqueIdMigration
 from zha.const import STATE_CHANGED
 from zha.debounce import Debouncer
 from zha.event import EventBase
 from zha.mixins import LogMixin
-from zha.zigbee.cluster_handlers import ClusterHandlerInfo
 
 if TYPE_CHECKING:
-    from zha.zigbee.cluster_handlers import ClusterHandler
     from zha.zigbee.device import Device
     from zha.zigbee.endpoint import Endpoint
     from zha.zigbee.group import Group
@@ -37,7 +40,7 @@ _LOGGER = logging.getLogger(__name__)
 
 DEFAULT_UPDATE_GROUP_FROM_CHILD_DELAY: float = 0.5
 
-ENTITY_REGISTRY: dict[ClusterId, list[type[PlatformEntity]]] = defaultdict(list)
+ENTITY_REGISTRY: dict[ClusterId | int, list[type[PlatformEntity]]] = defaultdict(list)
 GROUP_ENTITY_REGISTRY: list[type[GroupEntity]] = []
 
 
@@ -63,53 +66,98 @@ class PlatformFeatureGroup(StrEnum):
     # Manufacturer-specific overrides for EM active power polling
     EM_ACTIVE_POWER = "em_active_power"
 
-    # Model-specific overrides for Smart Energy Summation
-    SMART_ENERGY_SUMMATION = "smart_energy_summation"
-
-    # Overrides for Smart Energy Summation Received
-    SMART_ENERGY_SUMMATION_RECEIVED = "smart_energy_summation_received"
+    # Suppress EM cluster polling for devices known to report reliably
+    EM_POLLING = "em_polling"
 
     # Model-specific overrides for local temperature calibration
     LOCAL_TEMPERATURE_CALIBRATION = "local_temperature_calibration"
 
+    # Prefer OTA client update entities over OTA server update entities
+    OTA_UPDATE = "ota_update"
 
-@dataclasses.dataclass(frozen=True)
-class ClusterHandlerMatch:
-    """Declares cluster handler requirements for an entity class."""
+    # IAS WD siren entity selection
+    SIREN = "siren"
 
-    cluster_handlers: frozenset[str] = frozenset()
-    client_cluster_handlers: frozenset[str] = frozenset()
-    optional_cluster_handlers: frozenset[str] = frozenset()
+
+@dataclass(frozen=True)
+class AttrConfig:
+    """Per-attribute configuration for cluster setup."""
+
+    read_on_startup: bool
+    reporting: ReportingConfig | None = None
+
+    # Whether `reporting` replaces the non-overriding reporting configs other
+    # entities declare for the same attribute, instead of being merged with them.
+    # By default the tightest config wins, which means a config can only ever make
+    # reporting more frequent. Device specific configs (e.g. from quirks) set this to
+    # relax ZHA's built-in defaults, such as for devices reporting with a high
+    # divisor. Multiple overriding configs are still merged with each other.
+    reporting_override: bool = False
+
+    def __post_init__(self) -> None:
+        """Validate the configuration."""
+        if self.reporting_override and self.reporting is None:
+            raise ValueError("reporting_override requires a reporting config")
+
+
+@dataclass(frozen=True)
+class ClusterConfig:
+    """Per-cluster configuration."""
+
+    # Whether to bind this cluster to the coordinator.
+    bind: bool = False
+
+    # Per-attribute configuration keyed by ZCL attribute definition or name.
+    attributes: dict[ZCLAttributeDef | str, AttrConfig] = field(default_factory=dict)
+
+
+@dataclass(frozen=True)
+class ClusterMatch:
+    """Declares which clusters an entity requires for discovery."""
+
+    server_clusters: frozenset[int] = frozenset()
+    client_clusters: frozenset[int] = frozenset()
+    optional_server_clusters: frozenset[int] = frozenset()
+    optional_client_clusters: frozenset[int] = frozenset()
 
     # Strict filters: if present, device info must match
     manufacturers: frozenset[str] | None = None
     models: frozenset[str] | None = None
     exposed_features: frozenset[str] | None = None
+    not_exposed_features: frozenset[str] | None = None
 
-    # If present, device must match one of the given profile and device type combinations.
-    # This will be ignored if `platform_override` is used.
-    profile_device_types: (  # type:ignore[valid-type]
-        frozenset[
-            tuple[Literal[zha.PROFILE_ID], zha.DeviceType]
-            | tuple[Literal[zll.PROFILE_ID], zll.DeviceType]
-            | tuple[int, int]
-        ]
-        | None
-    ) = None
-    not_profile_device_types: (  # type:ignore[valid-type]
-        frozenset[
-            tuple[Literal[zha.PROFILE_ID], zha.DeviceType]
-            | tuple[Literal[zll.PROFILE_ID], zll.DeviceType]
-            | tuple[int, int]
-        ]
-        | None
-    ) = None
+    # `None` matches any profile.
+    profile_ids: frozenset[int] | None = frozenset({ZHA_PROFILE_ID, ZLL_PROFILE_ID})
+
+    # Profile and device type filters
+    profile_device_types: frozenset[tuple[int, int]] | None = None
+    not_profile_device_types: frozenset[tuple[int, int]] | None = None
 
     # For a given feature, only entities with the highest priority will be considered
     feature_priority: tuple[PlatformFeatureGroup, int] | None = None
 
+    # By default ClusterMatch skips clusters whose ep_attribute was renamed by
+    # a quirk (so a Switch entity doesn't auto-attach to a Tuya-renamed OnOff
+    # cluster). Bind-only virtual entities can opt back in via this flag, since
+    # they don't care about cluster semantics — only that the cluster_id is
+    # what they target.
+    match_renamed_clusters: bool = False
 
-def register_entity[T: type[PlatformEntity]](cluster_id: ClusterId) -> Callable[[T], T]:
+    def __post_init__(self) -> None:
+        """Validate the ClusterMatch."""
+        if self.profile_device_types is not None and self.profile_ids is not None:
+            profile_device_type_profiles = {p for p, _ in self.profile_device_types}
+
+            if not profile_device_type_profiles <= self.profile_ids:
+                raise ValueError(
+                    "profile_device_types contain profiles not in profile_ids: "
+                    f"{profile_device_type_profiles - self.profile_ids}"
+                )
+
+
+def register_entity[T: type[PlatformEntity]](
+    cluster_id: ClusterId | int,
+) -> Callable[[T], T]:
     """Register an entity class for discovery."""
 
     def inner(cls: T) -> T:
@@ -137,8 +185,8 @@ class EntityCategory(StrEnum):
 
 
 @dataclasses.dataclass(frozen=True, kw_only=True)
-class BaseEntityInfo:
-    """Information about a base entity."""
+class BaseEntityState:
+    """State for the base entity."""
 
     fallback_name: str
     unique_id: str
@@ -154,14 +202,20 @@ class BaseEntityInfo:
     enabled: bool = True
     primary: bool
 
+    extra_state_attribute_names: frozenset[str]
+
     # For platform entities
-    cluster_handlers: list[ClusterHandlerInfo]
     device_ieee: EUI64 | None
     endpoint_id: int | None
     available: bool | None
 
     # For group entities
     group_id: int | None
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any]:
+        """Return the extra state attributes as a name to value mapping."""
+        return {name: getattr(self, name) for name in self.extra_state_attribute_names}
 
 
 @dataclasses.dataclass(frozen=True, kw_only=True)
@@ -198,12 +252,34 @@ class EntityStateChangedEvent:
     device_ieee: EUI64 | None = None
     endpoint_id: int | None = None
     group_id: int | None = None
+    state_diff: dict[str, Any]
+
+
+def compute_state_diff(
+    old: BaseEntityState | None, new: BaseEntityState
+) -> dict[str, Any]:
+    """Return the fields of `new` that differ from `old`."""
+    new_values = new.__dict__
+
+    if old is None:
+        return dict(new_values)
+
+    old_values = old.__dict__
+    return {
+        name: value for name, value in new_values.items() if old_values[name] != value
+    }
 
 
 class BaseEntity(LogMixin, EventBase):
     """Base class for entities."""
 
-    PLATFORM: Platform = Platform.UNKNOWN
+    PLATFORM: Platform
+
+    async def async_configure_cluster(self, cluster: Any) -> None:
+        """Run post-bind cluster-level setup (override in subclasses)."""
+
+    async def async_initialize_cluster(self, cluster: Any) -> None:
+        """Run post-initialize cluster-level work (override in subclasses)."""
 
     _attr_fallback_name: str | None = None
     _attr_icon: str | None = None
@@ -214,7 +290,12 @@ class BaseEntity(LogMixin, EventBase):
     _attr_device_class: str | None = None
     _attr_state_class: str | None = None
     _attr_enabled: bool = True
+    _attr_extra_state_attribute_names: set[str] | None = None
     _attr_always_supported: bool = False
+
+    # Explicitly marks the entity as (not) primary, set by entity classes and quirks.
+    # It takes precedence over (and is never overwritten by) the weight-based primary
+    # entity election, whose result is held by the device.
     _attr_primary: bool | None = None
 
     # When two entities both want to be primary, the one with the higher weight will be
@@ -265,15 +346,7 @@ class BaseEntity(LogMixin, EventBase):
     @property
     def primary(self) -> bool:
         """Return if the entity is the primary device control."""
-        if self._attr_primary is None:
-            return False
-
-        return self._attr_primary
-
-    @primary.setter
-    def primary(self, value: bool | None) -> None:
-        """Set the entity as the primary device control."""
-        self._attr_primary = value
+        return bool(self._attr_primary)
 
     @property
     def primary_weight(self) -> int:
@@ -344,11 +417,10 @@ class BaseEntity(LogMixin, EventBase):
             platform=self.PLATFORM,
         )
 
-    @cached_property
-    def info_object(self) -> BaseEntityInfo:
-        """Return a representation of the platform entity."""
-
-        return BaseEntityInfo(
+    @property
+    def state(self) -> BaseEntityState:
+        """Return the state of this entity."""
+        return BaseEntityState(
             unique_id=self.unique_id,
             migrate_unique_ids=self.migrate_unique_ids,
             platform=self.PLATFORM,
@@ -362,32 +434,16 @@ class BaseEntity(LogMixin, EventBase):
             entity_registry_enabled_default=self.entity_registry_enabled_default,
             enabled=self.enabled,
             primary=self.primary,
+            extra_state_attribute_names=frozenset(
+                self._attr_extra_state_attribute_names or ()
+            ),
             # Set by platform entities
-            cluster_handlers=[],
             device_ieee=None,
             endpoint_id=None,
             available=None,
             # Set by group entities
             group_id=None,
         )
-
-    @property
-    def state(self) -> dict[str, Any]:
-        """Return the arguments to use in the command."""
-        return {
-            "class_name": self.__class__.__name__,
-        }
-
-    @cached_property
-    def extra_state_attribute_names(self) -> set[str] | None:
-        """Return entity specific state attribute names.
-
-        Implemented by platform classes. Convention for attribute names
-        is lowercase snake_case.
-        """
-        if hasattr(self, "_attr_extra_state_attribute_names"):
-            return self._attr_extra_state_attribute_names
-        return None
 
     def enable(self) -> None:
         """Enable the entity."""
@@ -422,11 +478,36 @@ class BaseEntity(LogMixin, EventBase):
     def maybe_emit_state_changed_event(self) -> None:
         """Send the state of this platform entity."""
         state = self.state
-        if self.__previous_state != state:
+        previous_state = self.__previous_state
+        if previous_state != state:
             self.emit(
-                STATE_CHANGED, EntityStateChangedEvent(**self.identifiers.__dict__)
+                STATE_CHANGED,
+                EntityStateChangedEvent(
+                    **self.identifiers.__dict__,
+                    state_diff=compute_state_diff(previous_state, state),
+                ),
             )
             self.__previous_state = state
+
+    def subscribe_state(
+        self, callback: Callable[[EntityStateChangedEvent], None]
+    ) -> Callable[[], None]:
+        """Subscribe to state changes, receiving the full state as the first event."""
+        self.maybe_emit_state_changed_event()
+        unsub = self.on_event(STATE_CHANGED, callback)
+
+        try:
+            callback(
+                EntityStateChangedEvent(
+                    **self.identifiers.__dict__,
+                    state_diff=compute_state_diff(None, self.__previous_state),
+                )
+            )
+        except Exception:
+            unsub()
+            raise
+
+        return unsub
 
     def log(self, level: int, msg: str, *args: Any, **kwargs: Any) -> None:
         """Log a message."""
@@ -444,27 +525,56 @@ class PlatformEntity(BaseEntity):
 
     _migrate_platform_unique_ids: tuple[tuple[UniqueIdMigration, str]] | None = None
 
-    # Auto-discovery for the entity
-    _cluster_handler_match: ClusterHandlerMatch | None
+    # Direct cluster matching for discovery
+    _cluster_match: ClusterMatch | None = None
+
+    # Per-cluster configuration (keyed by cluster ID)
+    _server_cluster_config: Mapping[int, ClusterConfig] = MappingProxyType({})
+
+    _client_cluster_config: Mapping[int, ClusterConfig] = MappingProxyType({})
 
     def __init__(
         self,
-        cluster_handlers: list[ClusterHandler],
         endpoint: Endpoint,
         device: Device,
         *,
-        entity_metadata: EntityMetadata | None = None,
+        cluster: zigpy.zcl.Cluster,
+        from_quirk: bool = False,
+        fallback_name: str | None = None,
+        translation_key: str | None = None,
+        translation_placeholders: Mapping[str, str] | None = None,
+        unique_id_suffix: str | None = None,
+        entity_type: EntityType | None = None,
+        primary: bool | None = None,
+        initially_disabled: bool = False,
         legacy_discovery_unique_id: str | None = None,
         **kwargs: Any,
     ):
-        """Initialize the platform entity."""
-        if entity_metadata is not None:
-            self._init_from_quirks_metadata(entity_metadata)
+        """Initialize the platform entity.
+
+        Quirk entities are constructed with `from_quirk=True` and the generic
+        config keywords (`fallback_name`, `translation_key`, `entity_type`, etc.);
+        the platform subclasses add their own keywords. Default-discovery
+        entities pass none of these.
+        """
+        if from_quirk:
+            self._apply_quirk_entity_config(
+                fallback_name=fallback_name,
+                translation_key=translation_key,
+                translation_placeholders=translation_placeholders,
+                unique_id_suffix=unique_id_suffix,
+                entity_type=entity_type,
+                primary=primary,
+                initially_disabled=initially_disabled,
+            )
 
         if legacy_discovery_unique_id is None:
-            legacy_discovery_unique_id = (
-                f"{device.ieee}-{endpoint.id}-{cluster_handlers[0].cluster.cluster_id}"
-            )
+            if from_quirk:
+                legacy_discovery_unique_id = f"{device.ieee}-{endpoint.id}"
+            else:
+                legacy_discovery_unique_id = (
+                    f"{device.ieee}-{endpoint.id}-{cluster.cluster_id}"
+                )
 
         if self._unique_id_suffix is not None:
             unique_id = f"{legacy_discovery_unique_id}-{self._unique_id_suffix}"
@@ -473,54 +583,49 @@ class PlatformEntity(BaseEntity):
 
         super().__init__(unique_id=unique_id, **kwargs)
 
-        self._cluster_handlers: list[ClusterHandler] = cluster_handlers
-        self.cluster_handlers: dict[str, ClusterHandler] = {}
-
-        for cluster_handler in cluster_handlers:
-            self.cluster_handlers[cluster_handler.name] = cluster_handler
-
         self._device: Device = device
         self._endpoint = endpoint
+        self._cluster: zigpy.zcl.Cluster = cluster
 
-    def _init_from_quirks_metadata(self, entity_metadata: EntityMetadata) -> None:
-        """Init this entity from the quirks metadata."""
-        if entity_metadata.initially_disabled:
+    def _apply_quirk_entity_config(
+        self,
+        *,
+        fallback_name: str | None,
+        translation_key: str | None,
+        translation_placeholders: Mapping[str, str] | None,
+        unique_id_suffix: str | None,
+        entity_type: EntityType | None,
+        primary: bool | None,
+        initially_disabled: bool,
+    ) -> None:
+        """Apply the generic quirk entity configuration keywords."""
+        if initially_disabled:
             self._attr_entity_registry_enabled_default = False
 
-        # v2 quirks entities are assumed to always be supported
+        # quirk entities are assumed to always be supported
         self._attr_always_supported = True
 
-        has_attribute_name = hasattr(entity_metadata, "attribute_name")
-        has_command_name = hasattr(entity_metadata, "command_name")
-        has_fallback_name = hasattr(entity_metadata, "fallback_name")
+        if fallback_name:
+            self._attr_fallback_name = fallback_name
 
-        if has_fallback_name:
-            self._attr_fallback_name = entity_metadata.fallback_name
+        if translation_key:
+            self._attr_translation_key = translation_key
 
-        if entity_metadata.translation_key:
-            self._attr_translation_key = entity_metadata.translation_key
+        if translation_placeholders:
+            self._attr_translation_placeholders = translation_placeholders
 
-        if entity_metadata.translation_placeholders:
-            self._attr_translation_placeholders = (
-                entity_metadata.translation_placeholders
-            )
-
-        if unique_id_suffix := entity_metadata.unique_id_suffix:
+        if unique_id_suffix is not None:
             self._unique_id_suffix = unique_id_suffix
-        elif has_attribute_name:
-            self._unique_id_suffix = entity_metadata.attribute_name
-        elif has_command_name:
-            self._unique_id_suffix = entity_metadata.command_name
 
-        if entity_metadata.entity_type is EntityType.CONFIG:
+        if entity_type == EntityType.CONFIG:
             self._attr_entity_category = EntityCategory.CONFIG
-        elif entity_metadata.entity_type is EntityType.DIAGNOSTIC:
+        elif entity_type == EntityType.DIAGNOSTIC:
             self._attr_entity_category = EntityCategory.DIAGNOSTIC
         else:
             self._attr_entity_category = None
 
-        if entity_metadata.primary is not None:
-            self._attr_primary = entity_metadata.primary
+        if primary is not None:
+            self._attr_primary = primary
 
     @cached_property
     def identifiers(self) -> PlatformEntityIdentifiers:
@@ -532,26 +637,63 @@ class PlatformEntity(BaseEntity):
             endpoint_id=self.endpoint.id,
         )
 
-    @cached_property
-    def info_object(self) -> BaseEntityInfo:
-        """Return a representation of the platform entity."""
-        return dataclasses.replace(
-            super().info_object,
-            cluster_handlers=[ch.info_object for ch in self._cluster_handlers],
-            device_ieee=self._device.ieee,
-            endpoint_id=self._endpoint.id,
-            available=self.available,
-        )
-
     @property
     def device(self) -> Device:
         """Return the device."""
         return self._device
 
     @property
+    def primary(self) -> bool:
+        """Return if the entity is the primary device control."""
+        if self._attr_primary is not None:
+            return self._attr_primary
+
+        return self._device.primary_entity is self
+
+    @property
     def endpoint(self) -> Endpoint:
         """Return the endpoint."""
         return self._endpoint
+
+    @property
+    def cluster(self) -> zigpy.zcl.Cluster:
+        """Return the ZCL cluster backing this entity."""
+        return self._cluster
+
+    def targets_cluster(
+        self,
+        cluster_id: int,
+        cluster_type: zigpy.zcl.ClusterType | None = None,
+    ) -> bool:
+        """Return True if this entity targets the given cluster."""
+        match = self._cluster_match
+        if match is None:
+            # Generated quirks-v2 entities have no class-level `_cluster_match`
+            # but do have a concrete backing cluster; match against it directly.
+            cluster = self.cluster
+            if cluster.cluster_id != cluster_id:
+                return False
+            actual_type = (
+                zigpy.zcl.ClusterType.Client
+                if cluster.is_client
+                else zigpy.zcl.ClusterType.Server
+            )
+            return cluster_type is None or cluster_type == actual_type
+
+        in_server = (
+            cluster_id in match.server_clusters
+            or cluster_id in match.optional_server_clusters
+        )
+        in_client = (
+            cluster_id in match.client_clusters
+            or cluster_id in match.optional_client_clusters
+        )
+
+        if cluster_type == zigpy.zcl.ClusterType.Server:
+            return in_server
+        if cluster_type == zigpy.zcl.ClusterType.Client:
+            return in_client
+        return in_server or in_client
 
     @property
     def should_poll(self) -> bool:
@@ -563,24 +705,22 @@ class PlatformEntity(BaseEntity):
         """Return true if the device this entity belongs to is available."""
         return self.device.available
 
-    @property
-    def state(self) -> dict[str, Any]:
-        """Return the arguments to use in the command."""
-        state = super().state
-        state["available"] = self.available
-        return state
-
     async def async_update(self) -> None:
-        """Retrieve latest state."""
-        self.debug("polling current state")
-        tasks = [
-            cluster_handler.async_update()
-            for cluster_handler in self.cluster_handlers.values()
-            if hasattr(cluster_handler, "async_update")
-        ]
-        if tasks:
-            await asyncio.gather(*tasks)
-            self.maybe_emit_state_changed_event()
+        """Retrieve latest state.
+
+        Default no-op: subclasses that need polling override this to read their
+        own attributes directly from the relevant cluster(s).
+        """
+
+    @property
+    def state(self) -> BaseEntityState:
+        """Return the state of this entity."""
+        return dataclasses.replace(
+            super().state,
+            device_ieee=self._device.ieee,
+            endpoint_id=self._endpoint.id,
+            available=self.available,
+        )
 
 
 class GroupEntity(BaseEntity):
@@ -612,20 +752,14 @@ class GroupEntity(BaseEntity):
             group_id=self.group_id,
         )
 
-    @cached_property
-    def info_object(self) -> BaseEntityInfo:
-        """Return a representation of the group."""
+    @property
+    def state(self) -> BaseEntityState:
+        """Return the state of this entity."""
         return dataclasses.replace(
-            super().info_object,
+            super().state,
+            available=self.available,
             group_id=self.group_id,
         )
-
-    @property
-    def state(self) -> dict[str, Any]:
-        """Return the arguments to use in the command."""
-        state = super().state
-        state["available"] = self.available
-        return state
 
     @property
     def available(self) -> bool:

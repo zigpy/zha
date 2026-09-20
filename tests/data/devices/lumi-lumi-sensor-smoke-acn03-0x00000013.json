@@ -1,0 +1,407 @@
+{
+  "version": 3,
+  "ieee": "ab:cd:ef:12:41:b2:02:30",
+  "nwk": "0xD924",
+  "manufacturer": "LUMI",
+  "model": "lumi.sensor_smoke.acn03",
+  "friendly_manufacturer": "LUMI",
+  "friendly_model": "lumi.sensor_smoke.acn03",
+  "name": "LUMI lumi.sensor_smoke.acn03",
+  "quirk_applied": true,
+  "quirk_class": "zhaquirks.xiaomi.aqara.smoke:LumiSensorSmokeAcn03",
+  "exposes_features": [],
+  "manufacturer_code": 4447,
+  "power_source": "Battery or Unknown",
+  "lqi": 189,
+  "rssi": null,
+  "last_seen": "2026-07-25T12:44:53.474497+00:00",
+  "available": true,
+  "device_type": "EndDevice",
+  "active_coordinator": false,
+  "node_descriptor": {
+    "logical_type": "EndDevice",
+    "complex_descriptor_available": false,
+    "user_descriptor_available": false,
+    "reserved": 0,
+    "aps_flags": 0,
+    "frequency_band": 8,
+    "mac_capability_flags": 128,
+    "manufacturer_code": 4447,
+    "maximum_buffer_size": 127,
+    "maximum_incoming_transfer_size": 100,
+    "server_mask": 11264,
+    "maximum_outgoing_transfer_size": 100,
+    "descriptor_capability_field": 0
+  },
+  "endpoints": {
+    "1": {
+      "profile_id": 260,
+      "device_type": {
+        "name": "IAS_ZONE",
+        "id": 1026
+      },
+      "in_clusters": [
+        {
+          "cluster_id": "0x0000",
+          "endpoint_attribute": "basic",
+          "attributes": [
+            {
+              "id": "0x0004",
+              "name": "manufacturer",
+              "zcl_type": "string",
+              "value": "LUMI"
+            },
+            {
+              "id": "0x0005",
+              "name": "model",
+              "zcl_type": "string",
+              "value": "lumi.sensor_smoke.acn03"
+            }
+          ]
+        },
+        {
+          "cluster_id": "0x0001",
+          "endpoint_attribute": "power",
+          "attributes": [
+            {
+              "id": "0x0021",
+              "name": "battery_percentage_remaining",
+              "zcl_type": "uint8",
+              "unsupported": true
+            },
+            {
+              "id": "0x0033",
+              "name": "battery_quantity",
+              "zcl_type": "uint8",
+              "value": 1
+            },
+            {
+              "id": "0x0031",
+              "name": "battery_size",
+              "zcl_type": "enum8",
+              "value": 255
+            },
+            {
+              "id": "0x0020",
+              "name": "battery_voltage",
+              "zcl_type": "uint8",
+              "unsupported": true
+            }
+          ]
+        },
+        {
+          "cluster_id": "0x0003",
+          "endpoint_attribute": "identify",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0500",
+          "endpoint_attribute": "ias_zone",
+          "attributes": [
+            {
+              "id": "0x0010",
+              "name": "cie_addr",
+              "zcl_type": "EUI64",
+              "value": "00:12:4b:00:2a:2e:8e:b0"
+            },
+            {
+              "id": "0x0002",
+              "name": "zone_status",
+              "zcl_type": "map16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0001",
+              "name": "zone_type",
+              "zcl_type": "enum16",
+              "value": 40
+            }
+          ]
+        },
+        {
+          "cluster_id": "0xfcc0",
+          "endpoint_attribute": "opple_cluster",
+          "attributes": []
+        }
+      ],
+      "out_clusters": [
+        {
+          "cluster_id": "0x0019",
+          "endpoint_attribute": "ota",
+          "attributes": [
+            {
+              "id": "0x0002",
+              "name": "current_file_version",
+              "zcl_type": "uint32",
+              "value": 19
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "original_signature": {
+    "manufacturer": "LUMI",
+    "model": "lumi.sensor_smoke.acn03",
+    "node_desc": {
+      "logical_type": 2,
+      "complex_descriptor_available": 0,
+      "user_descriptor_available": 0,
+      "reserved": 0,
+      "aps_flags": 0,
+      "frequency_band": 8,
+      "mac_capability_flags": 128,
+      "manufacturer_code": 4447,
+      "maximum_buffer_size": 127,
+      "maximum_incoming_transfer_size": 100,
+      "server_mask": 11264,
+      "maximum_outgoing_transfer_size": 100,
+      "descriptor_capability_field": 0
+    },
+    "endpoints": {
+      "1": {
+        "profile_id": "0x0104",
+        "device_type": "0x0402",
+        "input_clusters": [
+          "0x0000",
+          "0x0500",
+          "0x0003",
+          "0x0001"
+        ],
+        "output_clusters": [
+          "0x0019"
+        ]
+      }
+    }
+  },
+  "zha_lib_entities": {
+    "binary_sensor": [
+      {
+        "fallback_name": null,
+        "unique_id": "ab:cd:ef:12:41:b2:02:30-1-1280",
+        "migrate_unique_ids": [],
+        "platform": "binary_sensor",
+        "class_name": "IASZone",
+        "translation_key": null,
+        "translation_placeholders": null,
+        "device_class": "smoke",
+        "state_class": null,
+        "entity_category": null,
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": true,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:41:b2:02:30",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "is_on": false,
+        "attribute_name": "zone_status"
+      },
+      {
+        "fallback_name": null,
+        "unique_id": "ab:cd:ef:12:41:b2:02:30-1-64704-linkage_alarm_state",
+        "migrate_unique_ids": [],
+        "platform": "binary_sensor",
+        "class_name": "AqaraLinkageAlarmState",
+        "translation_key": "linkage_alarm_state",
+        "translation_placeholders": null,
+        "device_class": "smoke",
+        "state_class": null,
+        "entity_category": null,
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:41:b2:02:30",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "is_on": false,
+        "attribute_name": "linkage_alarm_state"
+      }
+    ],
+    "button": [
+      {
+        "fallback_name": null,
+        "unique_id": "ab:cd:ef:12:41:b2:02:30-1-3",
+        "migrate_unique_ids": [],
+        "platform": "button",
+        "class_name": "IdentifyButton",
+        "translation_key": null,
+        "translation_placeholders": null,
+        "device_class": "identify",
+        "state_class": null,
+        "entity_category": "diagnostic",
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:41:b2:02:30",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "command": "identify",
+        "args": [
+          5
+        ],
+        "kwargs": {}
+      },
+      {
+        "fallback_name": null,
+        "unique_id": "ab:cd:ef:12:41:b2:02:30-1-64704-self_test",
+        "migrate_unique_ids": [],
+        "platform": "button",
+        "class_name": "AqaraSelfTestButton",
+        "translation_key": "self_test",
+        "translation_placeholders": null,
+        "device_class": null,
+        "state_class": null,
+        "entity_category": "config",
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:41:b2:02:30",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "attribute_name": "self_test",
+        "attribute_value": 1
+      }
+    ],
+    "sensor": [
+      {
+        "fallback_name": null,
+        "unique_id": "ab:cd:ef:12:41:b2:02:30-1-0-lqi",
+        "migrate_unique_ids": [],
+        "platform": "sensor",
+        "class_name": "LQISensor",
+        "translation_key": "lqi",
+        "translation_placeholders": null,
+        "device_class": null,
+        "state_class": "measurement",
+        "entity_category": "diagnostic",
+        "entity_registry_enabled_default": false,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:41:b2:02:30",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "native_value": 189,
+        "suggested_display_precision": null,
+        "unit": null
+      },
+      {
+        "fallback_name": null,
+        "unique_id": "ab:cd:ef:12:41:b2:02:30-1-0-rssi",
+        "migrate_unique_ids": [],
+        "platform": "sensor",
+        "class_name": "RSSISensor",
+        "translation_key": "rssi",
+        "translation_placeholders": null,
+        "device_class": "signal_strength",
+        "state_class": "measurement",
+        "entity_category": "diagnostic",
+        "entity_registry_enabled_default": false,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:41:b2:02:30",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "native_value": null,
+        "suggested_display_precision": null,
+        "unit": "dBm"
+      },
+      {
+        "fallback_name": null,
+        "unique_id": "ab:cd:ef:12:41:b2:02:30-1-1",
+        "migrate_unique_ids": [],
+        "platform": "sensor",
+        "class_name": "Battery",
+        "translation_key": null,
+        "translation_placeholders": null,
+        "device_class": "battery",
+        "state_class": "measurement",
+        "entity_category": "diagnostic",
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [
+          "battery_quantity",
+          "battery_size",
+          "battery_voltage"
+        ],
+        "device_ieee": "ab:cd:ef:12:41:b2:02:30",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "native_value": null,
+        "suggested_display_precision": 0,
+        "unit": "%",
+        "battery_size": "Unknown",
+        "battery_quantity": 1,
+        "battery_voltage": null
+      },
+      {
+        "fallback_name": null,
+        "unique_id": "ab:cd:ef:12:41:b2:02:30-1-64704-smoke_density_dbm",
+        "migrate_unique_ids": [],
+        "platform": "sensor",
+        "class_name": "AqaraSmokeDensityDbm",
+        "translation_key": "smoke_density",
+        "translation_placeholders": null,
+        "device_class": null,
+        "state_class": "measurement",
+        "entity_category": null,
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:41:b2:02:30",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "native_value": null,
+        "suggested_display_precision": 3,
+        "unit": "dB/m"
+      }
+    ],
+    "update": [
+      {
+        "fallback_name": null,
+        "unique_id": "ab:cd:ef:12:41:b2:02:30-1-25-firmware_update",
+        "migrate_unique_ids": [],
+        "platform": "update",
+        "class_name": "FirmwareUpdateEntity",
+        "translation_key": null,
+        "translation_placeholders": null,
+        "device_class": "firmware",
+        "state_class": null,
+        "entity_category": "config",
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:41:b2:02:30",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "installed_version": "0x00000013",
+        "in_progress": false,
+        "update_percentage": null,
+        "latest_version": null,
+        "release_summary": null,
+        "release_notes": null,
+        "release_url": null,
+        "supported_features": 23
+      }
+    ]
+  },
+  "neighbors": [],
+  "routes": []
+}

@@ -1,18 +1,20 @@
 """Test configuration for the ZHA component."""
 
 import asyncio
-from collections.abc import AsyncGenerator, Callable, Generator
+from collections.abc import AsyncGenerator, Generator
 from contextlib import contextmanager
 import logging
 import os
 import reprlib
 import threading
 from types import TracebackType
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import patch
 
 import looptime
 import pytest
 import pytest_asyncio
+import zhaquirks
+import zhaquirks.legacy
 import zigpy
 from zigpy.application import ControllerApplication
 import zigpy.config
@@ -31,10 +33,12 @@ from zha.application.helpers import (
     AlarmControlPanelOptions,
     CoordinatorConfiguration,
     LightOptions,
+    QuirksConfiguration,
     ZHAConfiguration,
     ZHAData,
 )
 from zha.async_ import ZHAJob
+from zha.quirks import DEVICE_REGISTRY
 
 FIXTURE_GRP_ID = 0x1001
 FIXTURE_GRP_NAME = "fixture group"
@@ -118,6 +122,13 @@ def long_repr_strings() -> Generator[None, None, None]:
     finally:
         arepr.maxstring = original_maxstring
         arepr.maxother = original_maxother
+
+
+@pytest.fixture(autouse=True)
+def preserve_quirk_registry() -> Generator[None, None, None]:
+    """Roll back any quirks a test registers so they don't leak into later tests."""
+    with DEVICE_REGISTRY.preserve_state():
+        yield
 
 
 @pytest.fixture(autouse=True)
@@ -284,6 +295,13 @@ def make_zha_data() -> ZHAData:
                 master_code="4321",
                 failed_tries=2,
             ),
+            quirks_configuration=QuirksConfiguration(
+                enabled=True,
+                setup_function=zhaquirks.setup,
+                uninitialized_packet_handler=(
+                    zhaquirks.legacy.handle_message_from_uninitialized_sender
+                ),
+            ),
         )
     )
 
@@ -347,17 +365,6 @@ async def zha_gateway(
 
 
 @pytest.fixture(scope="session", autouse=True)
-def disable_request_retry_delay():
-    """Disable ZHA request retrying delay to speed up failures."""
-
-    with patch(
-        "zha.zigbee.cluster_handlers.RETRYABLE_REQUEST_DECORATOR",
-        zigpy.util.retryable_request(tries=3, delay=0),
-    ):
-        yield
-
-
-@pytest.fixture(scope="session", autouse=True)
 def globally_load_quirks():
     """Load quirks automatically so that ZHA tests run deterministically in isolation.
 
@@ -370,27 +377,7 @@ def globally_load_quirks():
 
     zhaquirks.setup()
 
-    # Disable gateway built in quirks loading
-    with patch("zha.application.gateway.setup_quirks"):
-        yield
-
-
-@pytest.fixture
-def cluster_handler() -> Callable:
-    """Clueter handler mock factory fixture."""
-
-    def cluster_handler_factory(
-        name: str, cluster_id: int, endpoint_id: int = 1
-    ) -> MagicMock:
-        ch = MagicMock()
-        ch.name = name
-        ch.generic_id = f"cluster_handler_0x{cluster_id:04x}"
-        ch.id = f"{endpoint_id}:0x{cluster_id:04x}"
-        ch.async_configure = AsyncMock()
-        ch.async_initialize = AsyncMock()
-        return ch
-
-    return cluster_handler_factory
+    yield
 
 
 def pytest_collection_modifyitems(config, items):

@@ -12,7 +12,6 @@ import logging
 import time
 from typing import Any, Final, Self, TypeVar, cast
 
-from zhaquirks import setup as setup_quirks
 from zigpy.application import ControllerApplication
 from zigpy.config import (
     CONF_DEVICE,
@@ -26,7 +25,6 @@ from zigpy.config import (
 import zigpy.device
 import zigpy.endpoint
 import zigpy.group
-from zigpy.quirks.v2 import UNBUILT_QUIRK_BUILDERS
 from zigpy.state import State
 import zigpy.types as t
 from zigpy.types.named import EUI64
@@ -55,6 +53,7 @@ from zha.async_ import (
     gather_with_limited_concurrency,
 )
 from zha.event import EventBase
+from zha.quirks import DEVICE_REGISTRY, QUIRK_REGISTRY_ENTRY_ATTR
 from zha.zigbee.device import Device, DeviceInfo, DeviceStatus, ExtendedDeviceInfo
 from zha.zigbee.group import Group, GroupInfo, GroupMemberReference
 
@@ -222,23 +221,22 @@ class Gateway(AsyncUtilMixin, EventBase):
         """Create an instance of a gateway from config objects."""
         instance = cls(config)
 
-        if config.config.quirks_configuration.enabled:
-            for quirk in UNBUILT_QUIRK_BUILDERS:
-                # v2 quirks with no manufacturer model metadata explicitly do not call
-                # add_to_registry. They are used to share code between v2 quirks.
-                if quirk.manufacturer_model_metadata:
-                    _LOGGER.warning(
-                        "Found a v2 quirk that was not added to the registry: %s",
-                        quirk,
-                    )
-                    quirk.add_to_registry()
-
-            UNBUILT_QUIRK_BUILDERS.clear()
-
-            await instance.async_add_executor_job(
-                setup_quirks,
-                instance.config.config.quirks_configuration.custom_quirks_path,
-            )
+        # Load quirks via the injected provider (e.g. `zhaquirks.setup`). ZHA
+        # never imports a quirks package itself; the consumer supplies it. The
+        # provider owns registry population, the custom-quirks purge and the
+        # unbuilt-builder flush — see `zhaquirks.setup`.
+        quirks_config = config.config.quirks_configuration
+        if quirks_config.enabled:
+            if quirks_config.setup_function is None:
+                _LOGGER.warning(
+                    "Quirks are enabled but no setup function was provided; "
+                    "no quirks will be loaded"
+                )
+            else:
+                await instance.async_add_executor_job(
+                    quirks_config.setup_function,
+                    quirks_config.custom_quirks_path,
+                )
 
         return instance
 
@@ -251,6 +249,10 @@ class Gateway(AsyncUtilMixin, EventBase):
             config=app_config,
             auto_form=False,
             start_radio=False,
+            device_resolver=DEVICE_REGISTRY.resolve,
+            uninitialized_packet_handler=(
+                self.config.config.quirks_configuration.uninitialized_packet_handler
+            ),
         )
 
         await self.application_controller.startup(auto_form=True)
@@ -443,7 +445,157 @@ class Gateway(AsyncUtilMixin, EventBase):
             name=f"device_initialized_task_{str(device.ieee)}:0x{device.nwk:04x}",
             eager_start=True,
         )
-        init_task.add_done_callback(lambda _: self._device_init_tasks.pop(device.ieee))
+
+        def _remove_init_task(task: asyncio.Task) -> None:
+            # Only remove the entry if it still points at this task; a cancelled
+            # task's done-callback must not pop the replacement task's entry.
+            if self._device_init_tasks.get(device.ieee) is task:
+                del self._device_init_tasks[device.ieee]
+
+        init_task.add_done_callback(_remove_init_task)
+
+    def device_reinterviewed(self, device: zigpy.device.Device) -> None:
+        """Handle zigpy device_reinterviewed event (e.g. after OTA or reconfigure)."""
+        if device.ieee in self._device_init_tasks:
+            _LOGGER.debug(
+                "Cancelling previous initialization task for reinterviewed device %s",
+                str(device.ieee),
+            )
+            self._device_init_tasks[device.ieee].cancel()
+        self._device_init_tasks[device.ieee] = init_task = self.async_create_task(
+            self._async_device_reinterviewed(device),
+            name=f"device_reinterviewed_task_{str(device.ieee)}:0x{device.nwk:04x}",
+            eager_start=True,
+        )
+
+        def _remove_init_task(task: asyncio.Task) -> None:
+            # Only remove the entry if it still points at this task; a cancelled
+            # task's done-callback must not pop the replacement task's entry.
+            if self._device_init_tasks.get(device.ieee) is task:
+                del self._device_init_tasks[device.ieee]
+
+        init_task.add_done_callback(_remove_init_task)
+
+    async def _async_device_reinterviewed(
+        self, new_zigpy_device: zigpy.device.Device
+    ) -> None:
+        """Rebuild a ZHA device after zigpy swapped the underlying device."""
+        zha_device = self._devices.get(new_zigpy_device.ieee)
+        if zha_device is None:
+            _LOGGER.warning(
+                "Reinterviewed device %s not found in ZHA",
+                new_zigpy_device.ieee,
+            )
+            return
+
+        old_entry = getattr(zha_device.device, QUIRK_REGISTRY_ENTRY_ATTR, None)
+        old_factory = (
+            old_entry.zha_device_factory
+            if old_entry is not None and old_entry.zha_device_factory
+            else Device
+        )
+
+        new_entry = getattr(new_zigpy_device, QUIRK_REGISTRY_ENTRY_ATTR, None)
+        new_factory = (
+            new_entry.zha_device_factory
+            if new_entry is not None and new_entry.zha_device_factory
+            else Device
+        )
+
+        # Only a `Device` swap requires a new object
+        if new_factory is old_factory:
+            _LOGGER.debug(
+                "Rebuilding device %s:%s after reinterview",
+                new_zigpy_device.nwk,
+                new_zigpy_device.ieee,
+            )
+            await zha_device.async_rebuild_from_zigpy_device(new_zigpy_device)
+        else:
+            # A different quirk now matches. Replace the object with one dispatched by
+            # `Device.new` against the freshly-resolved registry entry.
+            _LOGGER.debug(
+                "Replacing device %s:%s after reinterview: resolved quirk changed",
+                new_zigpy_device.nwk,
+                new_zigpy_device.ieee,
+            )
+            await zha_device.async_teardown(emit_entity_events=True)
+
+            zha_device = Device.new(new_zigpy_device, self)
+            self._devices[new_zigpy_device.ieee] = zha_device
+
+            zha_device.available = True
+            zha_device.on_network = True
+
+        configure_succeeded = False
+        all_succeeded = False
+        try:
+            await zha_device.async_configure()
+            # `async_configure()` reached its own `emit_reconfigure_done()`.
+            configure_succeeded = True
+            await zha_device.async_initialize()
+            all_succeeded = True
+        except Exception:  # noqa: BLE001
+            _LOGGER.warning(
+                "Failed to configure/initialize device %s after reinterview",
+                new_zigpy_device.ieee,
+                exc_info=True,
+            )
+
+        # Refresh group subscriptions so groups drop stale references to
+        # torn-down entities and re-subscribe to whatever new entities exist.
+        # Run this even on partial rebuild — old subscriptions are always dead.
+        for group in self._groups.values():
+            group.update_entity_subscriptions()
+
+        if not configure_succeeded:
+            # `async_configure()` didn't reach its own emit; emit explicitly so
+            # the HA reconfigure dialog unsticks.  Skipped when configure
+            # already emitted (avoids a duplicate signal even if `initialize`
+            # raised afterwards).
+            zha_device.emit_reconfigure_done()
+
+        if not all_succeeded:
+            # Don't emit `DeviceFullInitEvent(CONFIGURED)` — entities are
+            # partial after a failed rebuild.
+            return
+
+        self.emit(
+            ZHA_GW_MSG_DEVICE_FULL_INIT,
+            DeviceFullInitEvent(
+                device_info=ExtendedDeviceInfoWithPairingStatus(
+                    pairing_status=DevicePairingStatus.CONFIGURED,
+                    **zha_device.extended_device_info.__dict__,
+                ),
+            ),
+        )
+
+    async def async_reinterview_device(self, ieee: EUI64) -> None:
+        """Re-interview a device.
+
+        Called by HA when the user triggers a device reconfigure.  If the
+        re-interview succeeds, the ``device_reinterviewed`` listener handles
+        the full rebuild.  If it fails, zigpy preserves the old device.
+        """
+        zha_device = self._devices.get(ieee)
+        if zha_device is None:
+            _LOGGER.warning("Device %s not found for reinterview", ieee)
+            return
+
+        if zha_device.is_active_coordinator:
+            _LOGGER.debug("Skipping reinterview for active coordinator %s", ieee)
+            return
+
+        old_zigpy_device = zha_device.device
+        try:
+            await old_zigpy_device.reinterview()
+        finally:
+            # On swap success, zigpy fires `device_reinterviewed` and the
+            # resulting rebuild calls `async_configure()` which emits its own
+            # reconfigure-done signal.  Only emit here when no swap occurred
+            # (no-op, internal failure, or `reinterview()` raising) so the HA
+            # frontend unsticks without a duplicate signal.
+            if self.application_controller.devices.get(ieee) is old_zigpy_device:
+                zha_device.emit_reconfigure_done()
 
     def device_left(self, device: zigpy.device.Device) -> None:
         """Handle device leaving the network."""
@@ -509,7 +661,7 @@ class Gateway(AsyncUtilMixin, EventBase):
                 gateway_message_type,
                 GroupEvent(
                     event=gateway_message_type,
-                    group_info=zha_group.info_object,
+                    group_info=zha_group.state,
                 ),
             )
 

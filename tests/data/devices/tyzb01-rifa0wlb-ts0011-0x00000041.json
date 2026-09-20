@@ -1,0 +1,322 @@
+{
+  "version": 3,
+  "ieee": "ec:1b:bd:ff:fe:d0:ef:d2",
+  "nwk": "0x8481",
+  "manufacturer": "_TYZB01_rifa0wlb",
+  "model": "TS0011",
+  "friendly_manufacturer": "_TYZB01_rifa0wlb",
+  "friendly_model": "TS0011",
+  "name": "_TYZB01_rifa0wlb TS0011",
+  "quirk_applied": false,
+  "quirk_class": "zigpy.device.Device",
+  "exposes_features": [],
+  "manufacturer_code": 4098,
+  "power_source": "Battery or Unknown",
+  "lqi": null,
+  "rssi": null,
+  "last_seen": "2025-04-24T17:34:07.346278+00:00",
+  "available": true,
+  "device_type": "EndDevice",
+  "active_coordinator": false,
+  "node_descriptor": {
+    "logical_type": "EndDevice",
+    "complex_descriptor_available": false,
+    "user_descriptor_available": false,
+    "reserved": 0,
+    "aps_flags": 0,
+    "frequency_band": 8,
+    "mac_capability_flags": 128,
+    "manufacturer_code": 4098,
+    "maximum_buffer_size": 82,
+    "maximum_incoming_transfer_size": 512,
+    "server_mask": 11264,
+    "maximum_outgoing_transfer_size": 512,
+    "descriptor_capability_field": 0
+  },
+  "endpoints": {
+    "1": {
+      "profile_id": 260,
+      "device_type": {
+        "name": "ON_OFF_LIGHT",
+        "id": 256
+      },
+      "in_clusters": [
+        {
+          "cluster_id": "0x0000",
+          "endpoint_attribute": "basic",
+          "attributes": [
+            {
+              "id": "0x0001",
+              "name": "app_version",
+              "zcl_type": "uint8",
+              "value": 65
+            },
+            {
+              "id": "0x0006",
+              "name": "date_code",
+              "zcl_type": "string",
+              "value": ""
+            },
+            {
+              "id": "0x0003",
+              "name": "hw_version",
+              "zcl_type": "uint8",
+              "value": 1
+            },
+            {
+              "id": "0x0004",
+              "name": "manufacturer",
+              "zcl_type": "string",
+              "value": "_TYZB01_rifa0wlb"
+            },
+            {
+              "id": "0x0005",
+              "name": "model",
+              "zcl_type": "string",
+              "value": "TS0011"
+            },
+            {
+              "id": "0x0007",
+              "name": "power_source",
+              "zcl_type": "enum8",
+              "value": 3
+            },
+            {
+              "id": "0x000d",
+              "name": "serial_number",
+              "zcl_type": "string",
+              "unsupported": true
+            },
+            {
+              "id": "0x0002",
+              "name": "stack_version",
+              "zcl_type": "uint8",
+              "value": 0
+            },
+            {
+              "id": "0x4000",
+              "name": "sw_build_id",
+              "zcl_type": "string",
+              "unsupported": true
+            },
+            {
+              "id": "0x0000",
+              "name": "zcl_version",
+              "zcl_type": "uint8",
+              "value": 3
+            }
+          ]
+        },
+        {
+          "cluster_id": "0x0004",
+          "endpoint_attribute": "groups",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0005",
+          "endpoint_attribute": "scenes",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0006",
+          "endpoint_attribute": "on_off",
+          "attributes": [
+            {
+              "id": "0x4002",
+              "name": "off_wait_time",
+              "zcl_type": "uint16",
+              "value": 0
+            },
+            {
+              "id": "0x0000",
+              "name": "on_off",
+              "zcl_type": "bool",
+              "value": 0
+            },
+            {
+              "id": "0x4001",
+              "name": "on_time",
+              "zcl_type": "uint16",
+              "value": 0
+            },
+            {
+              "id": "0x4003",
+              "name": "start_up_on_off",
+              "zcl_type": "enum8",
+              "unsupported": true
+            }
+          ]
+        }
+      ],
+      "out_clusters": [
+        {
+          "cluster_id": "0x0019",
+          "endpoint_attribute": "ota",
+          "attributes": [
+            {
+              "id": "0x0002",
+              "name": "current_file_version",
+              "zcl_type": "uint32",
+              "value": 65
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "original_signature": {
+    "manufacturer": "_TYZB01_rifa0wlb",
+    "model": "TS0011",
+    "node_desc": {
+      "logical_type": 2,
+      "complex_descriptor_available": 0,
+      "user_descriptor_available": 0,
+      "reserved": 0,
+      "aps_flags": 0,
+      "frequency_band": 8,
+      "mac_capability_flags": 128,
+      "manufacturer_code": 4098,
+      "maximum_buffer_size": 82,
+      "maximum_incoming_transfer_size": 512,
+      "server_mask": 11264,
+      "maximum_outgoing_transfer_size": 512,
+      "descriptor_capability_field": 0
+    },
+    "endpoints": {
+      "1": {
+        "profile_id": "0x0104",
+        "device_type": "0x0100",
+        "input_clusters": [
+          "0x0000",
+          "0x0004",
+          "0x0005",
+          "0x0006"
+        ],
+        "output_clusters": [
+          "0x0019"
+        ]
+      }
+    }
+  },
+  "zha_lib_entities": {
+    "light": [
+      {
+        "fallback_name": null,
+        "unique_id": "ec:1b:bd:ff:fe:d0:ef:d2-1",
+        "migrate_unique_ids": [],
+        "platform": "light",
+        "class_name": "Light",
+        "translation_key": "light",
+        "translation_placeholders": null,
+        "device_class": null,
+        "state_class": null,
+        "entity_category": null,
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": true,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ec:1b:bd:ff:fe:d0:ef:d2",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "on": false,
+        "brightness": null,
+        "xy_color": null,
+        "color_temp": null,
+        "effect_list": [
+          "off"
+        ],
+        "effect": "off",
+        "supported_features": 0,
+        "color_mode": "onoff",
+        "supported_color_modes": [
+          "onoff"
+        ],
+        "off_with_transition": false,
+        "off_brightness": null,
+        "min_mireds": 153,
+        "max_mireds": 500
+      }
+    ],
+    "sensor": [
+      {
+        "fallback_name": null,
+        "unique_id": "ec:1b:bd:ff:fe:d0:ef:d2-1-0-lqi",
+        "migrate_unique_ids": [],
+        "platform": "sensor",
+        "class_name": "LQISensor",
+        "translation_key": "lqi",
+        "translation_placeholders": null,
+        "device_class": null,
+        "state_class": "measurement",
+        "entity_category": "diagnostic",
+        "entity_registry_enabled_default": false,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ec:1b:bd:ff:fe:d0:ef:d2",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "native_value": null,
+        "suggested_display_precision": null,
+        "unit": null
+      },
+      {
+        "fallback_name": null,
+        "unique_id": "ec:1b:bd:ff:fe:d0:ef:d2-1-0-rssi",
+        "migrate_unique_ids": [],
+        "platform": "sensor",
+        "class_name": "RSSISensor",
+        "translation_key": "rssi",
+        "translation_placeholders": null,
+        "device_class": "signal_strength",
+        "state_class": "measurement",
+        "entity_category": "diagnostic",
+        "entity_registry_enabled_default": false,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ec:1b:bd:ff:fe:d0:ef:d2",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "native_value": null,
+        "suggested_display_precision": null,
+        "unit": "dBm"
+      }
+    ],
+    "update": [
+      {
+        "fallback_name": null,
+        "unique_id": "ec:1b:bd:ff:fe:d0:ef:d2-1-25-firmware_update",
+        "migrate_unique_ids": [],
+        "platform": "update",
+        "class_name": "FirmwareUpdateEntity",
+        "translation_key": null,
+        "translation_placeholders": null,
+        "device_class": "firmware",
+        "state_class": null,
+        "entity_category": "config",
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ec:1b:bd:ff:fe:d0:ef:d2",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "installed_version": "0x00000041",
+        "in_progress": false,
+        "update_percentage": null,
+        "latest_version": null,
+        "release_summary": null,
+        "release_notes": null,
+        "release_url": null,
+        "supported_features": 23
+      }
+    ]
+  },
+  "neighbors": [],
+  "routes": []
+}

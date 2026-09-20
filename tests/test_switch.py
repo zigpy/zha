@@ -5,6 +5,8 @@ import logging
 from unittest.mock import call, patch
 
 import pytest
+from zhaquirks.builder import QuirkBuilder
+from zhaquirks.clusters import CustomCluster
 from zhaquirks.const import (
     DEVICE_TYPE,
     ENDPOINTS,
@@ -12,10 +14,9 @@ from zhaquirks.const import (
     OUTPUT_CLUSTERS,
     PROFILE_ID,
 )
+from zhaquirks.legacy import CustomDevice
 from zigpy.exceptions import ZigbeeException
 from zigpy.profiles import zha
-from zigpy.quirks import DEVICE_REGISTRY, CustomCluster, CustomDevice
-from zigpy.quirks.v2 import CustomDeviceV2, QuirkBuilder
 import zigpy.types as t
 from zigpy.typing import UNDEFINED
 from zigpy.zcl.clusters import closures, general
@@ -41,6 +42,7 @@ from zha.application import Platform
 from zha.application.gateway import Gateway
 from zha.application.platforms import GroupEntity, PlatformEntity
 from zha.exceptions import ZHAException
+from zha.quirks import QUIRK_REGISTRY_ENTRY_ATTR, DeviceRegistry
 from zha.zigbee.device import Device
 from zha.zigbee.group import Group, GroupMemberReference
 
@@ -122,15 +124,15 @@ async def test_switch(zha_gateway: Gateway) -> None:
     cluster = zigpy_device.endpoints.get(1).on_off
     entity: PlatformEntity = get_entity(zha_device, Platform.SWITCH)
 
-    assert bool(bool(entity.state["state"])) is False
+    assert bool(bool(entity.state.is_on)) is False
 
     # turn on at switch
     await send_attributes_report(zha_gateway, cluster, {1: 0, 0: 1, 2: 2})
-    assert bool(entity.state["state"]) is True
+    assert bool(entity.state.is_on) is True
 
     # turn off at switch
     await send_attributes_report(zha_gateway, cluster, {1: 1, 0: 0, 2: 2})
-    assert bool(entity.state["state"]) is False
+    assert bool(entity.state.is_on) is False
 
     # turn on from client
     with patch(
@@ -139,7 +141,7 @@ async def test_switch(zha_gateway: Gateway) -> None:
     ):
         await entity.async_turn_on()
         await zha_gateway.async_block_till_done()
-        assert bool(entity.state["state"]) is True
+        assert bool(entity.state.is_on) is True
         assert len(cluster.request.mock_calls) == 1
         assert cluster.request.call_args == call(
             False,
@@ -159,7 +161,7 @@ async def test_switch(zha_gateway: Gateway) -> None:
     ):
         await entity.async_turn_off()
         await zha_gateway.async_block_till_done()
-        assert bool(entity.state["state"]) is True
+        assert bool(entity.state.is_on) is True
         assert len(cluster.request.mock_calls) == 1
         assert cluster.request.call_args == call(
             False,
@@ -176,7 +178,7 @@ async def test_switch(zha_gateway: Gateway) -> None:
     ):
         await entity.async_turn_off()
         await zha_gateway.async_block_till_done()
-        assert bool(entity.state["state"]) is False
+        assert bool(entity.state.is_on) is False
         assert len(cluster.request.mock_calls) == 1
         assert cluster.request.call_args == call(
             False,
@@ -196,7 +198,7 @@ async def test_switch(zha_gateway: Gateway) -> None:
     ):
         await entity.async_turn_on()
         await zha_gateway.async_block_till_done()
-        assert bool(entity.state["state"]) is False
+        assert bool(entity.state.is_on) is False
         assert len(cluster.request.mock_calls) == 1
         assert cluster.request.call_args == call(
             False,
@@ -208,7 +210,7 @@ async def test_switch(zha_gateway: Gateway) -> None:
 
     # test updating entity state from client
     cluster.read_attributes.reset_mock()
-    assert bool(entity.state["state"]) is False
+    assert bool(entity.state.is_on) is False
     cluster.PLUGGED_ATTR_READS = {"on_off": True}
     await entity.async_update()
     await zha_gateway.async_block_till_done()
@@ -216,7 +218,7 @@ async def test_switch(zha_gateway: Gateway) -> None:
     assert cluster.read_attributes.await_args == call(
         ["on_off"], allow_cache=False, only_cache=False, manufacturer=UNDEFINED
     )
-    assert bool(entity.state["state"]) is True
+    assert bool(entity.state.is_on) is True
 
 
 async def test_zha_group_switch_entity(zha_gateway: Gateway) -> None:
@@ -242,14 +244,14 @@ async def test_zha_group_switch_entity(zha_gateway: Gateway) -> None:
 
     entity: GroupEntity = get_group_entity(zha_group, platform=Platform.SWITCH)
     assert entity.group_id == zha_group.group_id
-    assert entity.info_object.fallback_name == zha_group.name
+    assert entity.state.fallback_name == zha_group.name
 
     group_cluster_on_off = zha_group.zigpy_group.endpoint[general.OnOff.cluster_id]
     dev1_cluster_on_off = device_switch_1.device.endpoints[1].on_off
     dev2_cluster_on_off = device_switch_2.device.endpoints[1].on_off
 
     # test that the lights were created and are off
-    assert bool(entity.state["state"]) is False
+    assert bool(entity.state.is_on) is False
 
     # turn on from HA
     with patch(
@@ -267,7 +269,7 @@ async def test_zha_group_switch_entity(zha_gateway: Gateway) -> None:
             expect_reply=True,
             manufacturer=None,
         )
-    assert bool(entity.state["state"]) is True
+    assert bool(entity.state.is_on) is True
 
     # turn off from HA
     with patch(
@@ -285,7 +287,7 @@ async def test_zha_group_switch_entity(zha_gateway: Gateway) -> None:
             expect_reply=True,
             manufacturer=None,
         )
-    assert bool(entity.state["state"]) is False
+    assert bool(entity.state.is_on) is False
 
     # test some of the group logic to make sure we key off states correctly
     await send_attributes_report(zha_gateway, dev1_cluster_on_off, {0: 1})
@@ -293,40 +295,40 @@ async def test_zha_group_switch_entity(zha_gateway: Gateway) -> None:
     await zha_gateway.async_block_till_done()
 
     # group member updates are debounced
-    assert bool(entity.state["state"]) is False
+    assert bool(entity.state.is_on) is False
     await asyncio.sleep(1)
     await zha_gateway.async_block_till_done()
 
     # test that group light is on
-    assert bool(entity.state["state"]) is True
+    assert bool(entity.state.is_on) is True
 
     await send_attributes_report(zha_gateway, dev1_cluster_on_off, {0: 0})
     await zha_gateway.async_block_till_done()
 
     # test that group light is still on
-    assert bool(entity.state["state"]) is True
+    assert bool(entity.state.is_on) is True
 
     await send_attributes_report(zha_gateway, dev2_cluster_on_off, {0: 0})
     await zha_gateway.async_block_till_done()
 
     # group member updates are debounced
-    assert bool(entity.state["state"]) is True
+    assert bool(entity.state.is_on) is True
     await asyncio.sleep(1)
     await zha_gateway.async_block_till_done()
 
     # test that group light is now off
-    assert bool(entity.state["state"]) is False
+    assert bool(entity.state.is_on) is False
 
     await send_attributes_report(zha_gateway, dev1_cluster_on_off, {0: 1})
     await zha_gateway.async_block_till_done()
 
     # group member updates are debounced
-    assert bool(entity.state["state"]) is False
+    assert bool(entity.state.is_on) is False
     await asyncio.sleep(1)
     await zha_gateway.async_block_till_done()
 
     # test that group light is now back on
-    assert bool(entity.state["state"]) is True
+    assert bool(entity.state.is_on) is True
 
     await group_entity_availability_test(
         zha_gateway, device_switch_1, device_switch_2, entity
@@ -390,19 +392,19 @@ async def test_switch_configurable(
     entity = get_entity(zha_device, platform=Platform.SWITCH)
 
     # test that the state has changed from unavailable to off
-    assert bool(entity.state["state"]) is False
+    assert bool(entity.state.is_on) is False
 
     # turn on at switch
     await send_attributes_report(
         zha_gateway, cluster, {"window_detection_function": True}
     )
-    assert bool(entity.state["state"]) is True
+    assert bool(entity.state.is_on) is True
 
     # turn off at switch
     await send_attributes_report(
         zha_gateway, cluster, {"window_detection_function": False}
     )
-    assert bool(entity.state["state"]) is False
+    assert bool(entity.state.is_on) is False
 
     # turn on from HA
     with patch(
@@ -450,13 +452,11 @@ async def test_switch_configurable(
     cluster.write_attributes.reset_mock()
     cluster.write_attributes.side_effect = ZigbeeException
 
-    with pytest.raises(ZHAException):
+    with pytest.raises(ZigbeeException):
         await entity.async_turn_off()
         await zha_gateway.async_block_till_done()
 
     assert cluster.write_attributes.mock_calls == [
-        call({"window_detection_function": False}, manufacturer=UNDEFINED),
-        call({"window_detection_function": False}, manufacturer=UNDEFINED),
         call({"window_detection_function": False}, manufacturer=UNDEFINED),
     ]
 
@@ -497,6 +497,7 @@ async def test_switch_configurable_custom_on_off_values(zha_gateway: Gateway) ->
         model="model",
     )
 
+    registry = DeviceRegistry()
     (
         QuirkBuilder(zigpy_dev.manufacturer, zigpy_dev.model)
         .adds(WindowDetectionFunctionQuirk.TuyaManufCluster)
@@ -508,12 +509,12 @@ async def test_switch_configurable_custom_on_off_values(zha_gateway: Gateway) ->
             translation_key="window_detection_function",
             fallback_name="Window detection function",
         )
-        .add_to_registry()
+        .add_to_registry(registry)
     )
 
-    zigpy_device_ = DEVICE_REGISTRY.get_device(zigpy_dev)
+    zigpy_device_ = registry.resolve(zigpy_dev)
 
-    assert isinstance(zigpy_device_, CustomDeviceV2)
+    assert getattr(zigpy_device_, QUIRK_REGISTRY_ENTRY_ATTR, None) is not None
     cluster = zigpy_device_.endpoints[1].tuya_manufacturer
     cluster.PLUGGED_ATTR_READS = {"window_detection_function": 5}
     update_attribute_cache(cluster)
@@ -522,15 +523,15 @@ async def test_switch_configurable_custom_on_off_values(zha_gateway: Gateway) ->
 
     entity = get_entity(zha_device, platform=Platform.SWITCH)
 
-    assert bool(entity.state["state"]) is False
+    assert bool(entity.state.is_on) is False
 
     # turn on at switch
     await send_attributes_report(zha_gateway, cluster, {"window_detection_function": 3})
-    assert bool(entity.state["state"]) is True
+    assert bool(entity.state.is_on) is True
 
     # turn off at switch
     await send_attributes_report(zha_gateway, cluster, {"window_detection_function": 5})
-    assert bool(entity.state["state"]) is False
+    assert bool(entity.state.is_on) is False
 
     # turn on from HA
     with patch(
@@ -577,6 +578,7 @@ async def test_switch_configurable_custom_on_off_values_force_inverted(
         model="model2",
     )
 
+    registry = DeviceRegistry()
     (
         QuirkBuilder(zigpy_dev.manufacturer, zigpy_dev.model)
         .adds(WindowDetectionFunctionQuirk.TuyaManufCluster)
@@ -589,12 +591,12 @@ async def test_switch_configurable_custom_on_off_values_force_inverted(
             translation_key="window_detection_function",
             fallback_name="Window detection function",
         )
-        .add_to_registry()
+        .add_to_registry(registry)
     )
 
-    zigpy_device_ = DEVICE_REGISTRY.get_device(zigpy_dev)
+    zigpy_device_ = registry.resolve(zigpy_dev)
 
-    assert isinstance(zigpy_device_, CustomDeviceV2)
+    assert getattr(zigpy_device_, QUIRK_REGISTRY_ENTRY_ATTR, None) is not None
     cluster = zigpy_device_.endpoints[1].tuya_manufacturer
     cluster.PLUGGED_ATTR_READS = {"window_detection_function": 5}
     update_attribute_cache(cluster)
@@ -603,15 +605,15 @@ async def test_switch_configurable_custom_on_off_values_force_inverted(
 
     entity = get_entity(zha_device, platform=Platform.SWITCH)
 
-    assert bool(entity.state["state"]) is True
+    assert bool(entity.state.is_on) is True
 
     # turn on at switch
     await send_attributes_report(zha_gateway, cluster, {"window_detection_function": 3})
-    assert bool(entity.state["state"]) is False
+    assert bool(entity.state.is_on) is False
 
     # turn off at switch
     await send_attributes_report(zha_gateway, cluster, {"window_detection_function": 5})
-    assert bool(entity.state["state"]) is True
+    assert bool(entity.state.is_on) is True
 
     # turn on from HA
     with patch(
@@ -658,6 +660,7 @@ async def test_switch_configurable_custom_on_off_values_inverter_attribute(
         model="model3",
     )
 
+    registry = DeviceRegistry()
     (
         QuirkBuilder(zigpy_dev.manufacturer, zigpy_dev.model)
         .adds(WindowDetectionFunctionQuirk.TuyaManufCluster)
@@ -670,12 +673,12 @@ async def test_switch_configurable_custom_on_off_values_inverter_attribute(
             translation_key="window_detection_function",
             fallback_name="Window detection function",
         )
-        .add_to_registry()
+        .add_to_registry(registry)
     )
 
-    zigpy_device_ = DEVICE_REGISTRY.get_device(zigpy_dev)
+    zigpy_device_ = registry.resolve(zigpy_dev)
 
-    assert isinstance(zigpy_device_, CustomDeviceV2)
+    assert getattr(zigpy_device_, QUIRK_REGISTRY_ENTRY_ATTR, None) is not None
     cluster = zigpy_device_.endpoints[1].tuya_manufacturer
     cluster.PLUGGED_ATTR_READS = {
         "window_detection_function": 5,
@@ -687,15 +690,15 @@ async def test_switch_configurable_custom_on_off_values_inverter_attribute(
 
     entity = get_entity(zha_device, platform=Platform.SWITCH)
 
-    assert bool(entity.state["state"]) is True
+    assert bool(entity.state.is_on) is True
 
     # turn on at switch
     await send_attributes_report(zha_gateway, cluster, {"window_detection_function": 3})
-    assert bool(entity.state["state"]) is False
+    assert bool(entity.state.is_on) is False
 
     # turn off at switch
     await send_attributes_report(zha_gateway, cluster, {"window_detection_function": 5})
-    assert bool(entity.state["state"]) is True
+    assert bool(entity.state.is_on) is True
 
     # turn on from HA
     with patch(
@@ -744,12 +747,9 @@ async def test_cover_inversion_switch(zha_gateway: Gateway) -> None:
     }
     update_attribute_cache(cluster)
     zha_device = await join_zigpy_device(zha_gateway, zigpy_cover_device)
-    assert (
-        not zha_device.endpoints[1]
-        .all_cluster_handlers[f"1:0x{cluster.cluster_id:04x}"]
-        .inverted
-    )
-    assert cluster.read_attributes.call_count == 3
+    entity = get_entity(zha_device, platform=Platform.SWITCH)
+    assert not entity.is_on
+    assert cluster.read_attributes.call_count == 2
     assert (
         WCAttrs.current_position_lift_percentage.name
         in cluster.read_attributes.call_args[0][0]
@@ -759,20 +759,18 @@ async def test_cover_inversion_switch(zha_gateway: Gateway) -> None:
         in cluster.read_attributes.call_args[0][0]
     )
 
-    entity = get_entity(zha_device, platform=Platform.SWITCH)
-
     # test update
     prev_call_count = cluster.read_attributes.call_count
     await entity.async_update()
     await zha_gateway.async_block_till_done()
     assert cluster.read_attributes.call_count == prev_call_count + 1
-    assert bool(entity.state["state"]) is False
+    assert bool(entity.state.is_on) is False
 
     # test to see the state remains after tilting to 0%
     await send_attributes_report(
         zha_gateway, cluster, {WCAttrs.current_position_tilt_percentage.id: 0}
     )
-    assert bool(entity.state["state"]) is False
+    assert bool(entity.state.is_on) is False
 
     with patch(
         "zigpy.zcl.Cluster.write_attributes", return_value=[0x1, zcl_f.Status.SUCCESS]
@@ -793,7 +791,7 @@ async def test_cover_inversion_switch(zha_gateway: Gateway) -> None:
             manufacturer=UNDEFINED,
         )
 
-        assert bool(entity.state["state"]) is True
+        assert bool(entity.state.is_on) is True
 
         cluster.write_attributes.reset_mock()
 
@@ -809,7 +807,7 @@ async def test_cover_inversion_switch(zha_gateway: Gateway) -> None:
             manufacturer=UNDEFINED,
         )
 
-        assert bool(entity.state["state"]) is False
+        assert bool(entity.state.is_on) is False
 
         cluster.write_attributes.reset_mock()
 
@@ -818,7 +816,7 @@ async def test_cover_inversion_switch(zha_gateway: Gateway) -> None:
         await zha_gateway.async_block_till_done()
         assert cluster.write_attributes.call_count == 0
 
-        assert bool(entity.state["state"]) is False
+        assert bool(entity.state.is_on) is False
 
 
 async def test_cover_inversion_switch_not_created(zha_gateway: Gateway) -> None:
@@ -835,7 +833,7 @@ async def test_cover_inversion_switch_not_created(zha_gateway: Gateway) -> None:
     update_attribute_cache(cluster)
     zha_device = await join_zigpy_device(zha_gateway, zigpy_cover_device)
 
-    assert cluster.read_attributes.call_count == 3
+    assert cluster.read_attributes.call_count == 2
     assert (
         WCAttrs.current_position_lift_percentage.name
         in cluster.read_attributes.call_args[0][0]
@@ -855,7 +853,7 @@ async def test_binary_output_cluster(zha_gateway: Gateway) -> None:
 
     zigpy_device = await zigpy_device_from_json(
         zha_gateway.application_controller,
-        "tests/data/devices/espressif-zigbeebinaryoutputdevice.json",
+        "tests/data/devices/espressif-zigbeebinaryanalogdevice.json",
     )
     cluster = zigpy_device.endpoints[1].binary_output
     zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
@@ -864,8 +862,8 @@ async def test_binary_output_cluster(zha_gateway: Gateway) -> None:
     # Clear out the attribute first, to test handling of the missing state
     cluster.update_attribute(BinaryOutput.AttributeDefs.present_value.id, None)
 
-    assert switch_entity.info_object.fallback_name == "Entity Description"
-    assert switch_entity.state["state"] is False
+    assert switch_entity.state.fallback_name == "Entity Description"
+    assert switch_entity.state.is_on is False
 
     # Turn it on
     cluster.write_attributes.reset_mock()
@@ -873,7 +871,7 @@ async def test_binary_output_cluster(zha_gateway: Gateway) -> None:
     assert cluster.write_attributes.mock_calls == [
         call({"present_value": True}, manufacturer=UNDEFINED)
     ]
-    assert switch_entity.state["state"] is True
+    assert switch_entity.state.is_on is True
 
     # Turn it off
     cluster.write_attributes.reset_mock()
@@ -881,7 +879,7 @@ async def test_binary_output_cluster(zha_gateway: Gateway) -> None:
     assert cluster.write_attributes.mock_calls == [
         call({"present_value": False}, manufacturer=UNDEFINED)
     ]
-    assert switch_entity.state["state"] is False
+    assert switch_entity.state.is_on is False
 
     # Report an attribute change
     await send_attributes_report(
@@ -889,14 +887,14 @@ async def test_binary_output_cluster(zha_gateway: Gateway) -> None:
         cluster,
         {BinaryOutput.AttributeDefs.present_value.id: t.Bool(False)},
     )
-    assert switch_entity.state["state"] is False
+    assert switch_entity.state.is_on is False
 
     # Force an update
     cluster.read_attributes.reset_mock()
     cluster.PLUGGED_ATTR_READS = {BinaryOutput.AttributeDefs.present_value.name: True}
 
     await switch_entity.async_update()
-    assert switch_entity.state["state"] is True
+    assert switch_entity.state.is_on is True
 
     assert cluster.read_attributes.mock_calls == [
         call(

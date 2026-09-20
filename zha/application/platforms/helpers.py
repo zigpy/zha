@@ -3,20 +3,17 @@
 from __future__ import annotations
 
 from collections.abc import Callable, Iterator
-import enum
+from enum import StrEnum
 import logging
-from typing import TYPE_CHECKING, Any, overload
+from typing import Any
 
-if TYPE_CHECKING:
-    from zha.application.platforms.binary_sensor.const import BinarySensorDeviceClass
-    from zha.application.platforms.number.const import NumberDeviceClass
-    from zha.application.platforms.sensor.const import SensorDeviceClass
+from zha.application.platforms import BaseEntityState
 
 
-def find_state_attributes(states: list[dict], key: str) -> Iterator[Any]:
+def find_state_attributes(states: list[BaseEntityState], key: str) -> Iterator[Any]:
     """Find attributes with matching key from states."""
     for state in states:
-        if (value := state.get(key)) is not None:
+        if (value := getattr(state, key, None)) is not None:
             yield value
 
 
@@ -31,7 +28,7 @@ def mean_tuple(*args: Any) -> tuple:
 
 
 def reduce_attribute(
-    states: list[dict],
+    states: list[BaseEntityState],
     key: str,
     default: Any | None = None,
     reduce: Callable[..., Any] = mean_int,
@@ -51,46 +48,15 @@ def reduce_attribute(
     return reduce(*attrs)
 
 
-@overload
-def validate_device_class(
-    device_class_enum: type[BinarySensorDeviceClass],
-    metadata_value: enum.Enum,
+def validate_device_class[DeviceClassT: StrEnum](
+    device_class_enum: type[DeviceClassT],
+    metadata_value: StrEnum,
     platform: str,
     logger: logging.Logger,
-) -> BinarySensorDeviceClass | None: ...
-
-
-@overload
-def validate_device_class(
-    device_class_enum: type[SensorDeviceClass],
-    metadata_value: enum.Enum,
-    platform: str,
-    logger: logging.Logger,
-) -> SensorDeviceClass | None: ...
-
-
-@overload
-def validate_device_class(
-    device_class_enum: type[NumberDeviceClass],
-    metadata_value: enum.Enum,
-    platform: str,
-    logger: logging.Logger,
-) -> NumberDeviceClass | None: ...
-
-
-def validate_device_class(
-    device_class_enum: (
-        type[BinarySensorDeviceClass]
-        | type[SensorDeviceClass]
-        | type[NumberDeviceClass]
-    ),
-    metadata_value: enum.Enum,
-    platform: str,
-    logger: logging.Logger,
-) -> BinarySensorDeviceClass | SensorDeviceClass | NumberDeviceClass | None:
+) -> DeviceClassT | None:
     """Validate and return a device class."""
     try:
-        return device_class_enum(metadata_value.value)
+        return device_class_enum(metadata_value)
     except ValueError as ex:
         logger.warning(
             "Quirks provided an invalid device class: %s for platform %s: %s",

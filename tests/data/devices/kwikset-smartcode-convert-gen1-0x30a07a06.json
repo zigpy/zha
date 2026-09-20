@@ -1,0 +1,443 @@
+{
+  "version": 3,
+  "ieee": "00:24:46:ff:fd:03:83:d9",
+  "nwk": "0x80A9",
+  "manufacturer": "Kwikset",
+  "model": "SMARTCODE_CONVERT_GEN1",
+  "friendly_manufacturer": "Kwikset",
+  "friendly_model": "SMARTCODE_CONVERT_GEN1",
+  "name": "Kwikset SMARTCODE_CONVERT_GEN1",
+  "quirk_applied": false,
+  "quirk_class": "zigpy.device.Device",
+  "exposes_features": [],
+  "manufacturer_code": 4242,
+  "power_source": "Battery or Unknown",
+  "lqi": null,
+  "rssi": null,
+  "last_seen": "2025-04-24T17:34:08.999092+00:00",
+  "available": true,
+  "device_type": "EndDevice",
+  "active_coordinator": false,
+  "node_descriptor": {
+    "logical_type": "EndDevice",
+    "complex_descriptor_available": false,
+    "user_descriptor_available": false,
+    "reserved": 0,
+    "aps_flags": 0,
+    "frequency_band": 8,
+    "mac_capability_flags": 128,
+    "manufacturer_code": 4242,
+    "maximum_buffer_size": 82,
+    "maximum_incoming_transfer_size": 128,
+    "server_mask": 0,
+    "maximum_outgoing_transfer_size": 128,
+    "descriptor_capability_field": 0
+  },
+  "endpoints": {
+    "2": {
+      "profile_id": 260,
+      "device_type": {
+        "name": "DOOR_LOCK",
+        "id": 10
+      },
+      "in_clusters": [
+        {
+          "cluster_id": "0x0000",
+          "endpoint_attribute": "basic",
+          "attributes": [
+            {
+              "id": "0x0004",
+              "name": "manufacturer",
+              "zcl_type": "string",
+              "value": "Kwikset"
+            },
+            {
+              "id": "0x0005",
+              "name": "model",
+              "zcl_type": "string",
+              "value": "SMARTCODE_CONVERT_GEN1"
+            },
+            {
+              "id": "0x0000",
+              "name": "zcl_version",
+              "zcl_type": "uint8",
+              "value": 1
+            }
+          ]
+        },
+        {
+          "cluster_id": "0x0001",
+          "endpoint_attribute": "power",
+          "attributes": [
+            {
+              "id": "0x0021",
+              "name": "battery_percentage_remaining",
+              "zcl_type": "uint8",
+              "value": 200
+            },
+            {
+              "id": "0x0033",
+              "name": "battery_quantity",
+              "zcl_type": "uint8",
+              "value": 4
+            },
+            {
+              "id": "0x0031",
+              "name": "battery_size",
+              "zcl_type": "enum8",
+              "value": 3
+            },
+            {
+              "id": "0x0020",
+              "name": "battery_voltage",
+              "zcl_type": "uint8",
+              "value": 62
+            }
+          ]
+        },
+        {
+          "cluster_id": "0x0003",
+          "endpoint_attribute": "identify",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0004",
+          "endpoint_attribute": "groups",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0005",
+          "endpoint_attribute": "scenes",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0009",
+          "endpoint_attribute": "alarms",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0020",
+          "endpoint_attribute": "poll_control",
+          "attributes": [
+            {
+              "id": "0x0000",
+              "name": "checkin_interval",
+              "zcl_type": "uint32",
+              "value": 13200
+            }
+          ]
+        },
+        {
+          "cluster_id": "0x0101",
+          "endpoint_attribute": "door_lock",
+          "attributes": [
+            {
+              "id": "0x0004",
+              "name": "door_open_events",
+              "zcl_type": "uint32",
+              "unsupported": true
+            },
+            {
+              "id": "0x0003",
+              "name": "door_state",
+              "zcl_type": "enum8",
+              "unsupported": true
+            },
+            {
+              "id": "0x0041",
+              "name": "keypad_operation_event_mask",
+              "zcl_type": "map16",
+              "value": 65535
+            },
+            {
+              "id": "0x0045",
+              "name": "keypad_programming_event_mask",
+              "zcl_type": "map16",
+              "value": 65535
+            },
+            {
+              "id": "0x0000",
+              "name": "lock_state",
+              "zcl_type": "enum8",
+              "value": 1
+            },
+            {
+              "id": "0x0001",
+              "name": "lock_type",
+              "zcl_type": "enum8",
+              "value": 2
+            }
+          ]
+        },
+        {
+          "cluster_id": "0x0402",
+          "endpoint_attribute": "temperature",
+          "attributes": [
+            {
+              "id": "0x0000",
+              "name": "measured_value",
+              "zcl_type": "int16",
+              "value": 2500
+            }
+          ]
+        },
+        {
+          "cluster_id": "0x0b05",
+          "endpoint_attribute": "diagnostic",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0xfdbd",
+          "endpoint_attribute": "manufacturer_specific",
+          "attributes": []
+        }
+      ],
+      "out_clusters": [
+        {
+          "cluster_id": "0x000a",
+          "endpoint_attribute": "time",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0019",
+          "endpoint_attribute": "ota",
+          "attributes": [
+            {
+              "id": "0x0002",
+              "name": "current_file_version",
+              "zcl_type": "uint32",
+              "value": 815823366
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "original_signature": {
+    "manufacturer": "Kwikset",
+    "model": "SMARTCODE_CONVERT_GEN1",
+    "node_desc": {
+      "logical_type": 2,
+      "complex_descriptor_available": 0,
+      "user_descriptor_available": 0,
+      "reserved": 0,
+      "aps_flags": 0,
+      "frequency_band": 8,
+      "mac_capability_flags": 128,
+      "manufacturer_code": 4242,
+      "maximum_buffer_size": 82,
+      "maximum_incoming_transfer_size": 128,
+      "server_mask": 0,
+      "maximum_outgoing_transfer_size": 128,
+      "descriptor_capability_field": 0
+    },
+    "endpoints": {
+      "2": {
+        "profile_id": "0x0104",
+        "device_type": "0x000a",
+        "input_clusters": [
+          "0x0000",
+          "0x0001",
+          "0x0003",
+          "0x0004",
+          "0x0005",
+          "0x0009",
+          "0x0020",
+          "0x0101",
+          "0x0402",
+          "0x0b05",
+          "0xfdbd"
+        ],
+        "output_clusters": [
+          "0x000a",
+          "0x0019"
+        ]
+      }
+    }
+  },
+  "zha_lib_entities": {
+    "button": [
+      {
+        "fallback_name": null,
+        "unique_id": "00:24:46:ff:fd:03:83:d9-2-3",
+        "migrate_unique_ids": [],
+        "platform": "button",
+        "class_name": "IdentifyButton",
+        "translation_key": null,
+        "translation_placeholders": null,
+        "device_class": "identify",
+        "state_class": null,
+        "entity_category": "diagnostic",
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "00:24:46:ff:fd:03:83:d9",
+        "endpoint_id": 2,
+        "available": true,
+        "group_id": null,
+        "command": "identify",
+        "args": [
+          5
+        ],
+        "kwargs": {}
+      }
+    ],
+    "lock": [
+      {
+        "fallback_name": null,
+        "unique_id": "00:24:46:ff:fd:03:83:d9-2-257",
+        "migrate_unique_ids": [],
+        "platform": "lock",
+        "class_name": "DoorLock",
+        "translation_key": "door_lock",
+        "translation_placeholders": null,
+        "device_class": null,
+        "state_class": null,
+        "entity_category": null,
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": true,
+        "extra_state_attribute_names": [],
+        "device_ieee": "00:24:46:ff:fd:03:83:d9",
+        "endpoint_id": 2,
+        "available": true,
+        "group_id": null,
+        "is_locked": true
+      }
+    ],
+    "sensor": [
+      {
+        "fallback_name": null,
+        "unique_id": "00:24:46:ff:fd:03:83:d9-2-0-lqi",
+        "migrate_unique_ids": [],
+        "platform": "sensor",
+        "class_name": "LQISensor",
+        "translation_key": "lqi",
+        "translation_placeholders": null,
+        "device_class": null,
+        "state_class": "measurement",
+        "entity_category": "diagnostic",
+        "entity_registry_enabled_default": false,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "00:24:46:ff:fd:03:83:d9",
+        "endpoint_id": 2,
+        "available": true,
+        "group_id": null,
+        "native_value": null,
+        "suggested_display_precision": null,
+        "unit": null
+      },
+      {
+        "fallback_name": null,
+        "unique_id": "00:24:46:ff:fd:03:83:d9-2-0-rssi",
+        "migrate_unique_ids": [],
+        "platform": "sensor",
+        "class_name": "RSSISensor",
+        "translation_key": "rssi",
+        "translation_placeholders": null,
+        "device_class": "signal_strength",
+        "state_class": "measurement",
+        "entity_category": "diagnostic",
+        "entity_registry_enabled_default": false,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "00:24:46:ff:fd:03:83:d9",
+        "endpoint_id": 2,
+        "available": true,
+        "group_id": null,
+        "native_value": null,
+        "suggested_display_precision": null,
+        "unit": "dBm"
+      },
+      {
+        "fallback_name": null,
+        "unique_id": "00:24:46:ff:fd:03:83:d9-2-1",
+        "migrate_unique_ids": [],
+        "platform": "sensor",
+        "class_name": "Battery",
+        "translation_key": null,
+        "translation_placeholders": null,
+        "device_class": "battery",
+        "state_class": "measurement",
+        "entity_category": "diagnostic",
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [
+          "battery_quantity",
+          "battery_size",
+          "battery_voltage"
+        ],
+        "device_ieee": "00:24:46:ff:fd:03:83:d9",
+        "endpoint_id": 2,
+        "available": true,
+        "group_id": null,
+        "native_value": 100.0,
+        "suggested_display_precision": 0,
+        "unit": "%",
+        "battery_size": "AA",
+        "battery_quantity": 4,
+        "battery_voltage": 6.2
+      },
+      {
+        "fallback_name": null,
+        "unique_id": "00:24:46:ff:fd:03:83:d9-2-1026",
+        "migrate_unique_ids": [],
+        "platform": "sensor",
+        "class_name": "Temperature",
+        "translation_key": null,
+        "translation_placeholders": null,
+        "device_class": "temperature",
+        "state_class": "measurement",
+        "entity_category": null,
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "00:24:46:ff:fd:03:83:d9",
+        "endpoint_id": 2,
+        "available": true,
+        "group_id": null,
+        "native_value": 25.0,
+        "suggested_display_precision": null,
+        "unit": "\u00b0C"
+      }
+    ],
+    "update": [
+      {
+        "fallback_name": null,
+        "unique_id": "00:24:46:ff:fd:03:83:d9-2-25-firmware_update",
+        "migrate_unique_ids": [],
+        "platform": "update",
+        "class_name": "FirmwareUpdateEntity",
+        "translation_key": null,
+        "translation_placeholders": null,
+        "device_class": "firmware",
+        "state_class": null,
+        "entity_category": "config",
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "00:24:46:ff:fd:03:83:d9",
+        "endpoint_id": 2,
+        "available": true,
+        "group_id": null,
+        "installed_version": "0x30a07a06",
+        "in_progress": false,
+        "update_percentage": null,
+        "latest_version": null,
+        "release_summary": null,
+        "release_notes": null,
+        "release_url": null,
+        "supported_features": 23
+      }
+    ]
+  },
+  "neighbors": [],
+  "routes": []
+}

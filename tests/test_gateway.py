@@ -1,14 +1,16 @@
 """Test ZHA Gateway."""
 
 import asyncio
+from contextlib import suppress
 from unittest.mock import AsyncMock, MagicMock, PropertyMock, call, patch
 
 import pytest
+from zhaquirks.builder import QuirkBuilder
 from zigpy.application import ControllerApplication
 from zigpy.config import CONF_NWK, CONF_NWK_COUNTRY_CODE
 from zigpy.profiles import zha
 import zigpy.types
-from zigpy.zcl.clusters import general, lighting
+from zigpy.zcl.clusters import general, lighting, measurement
 import zigpy.zdo.types
 import zigpy.zdo.types as zdo_t
 from zigpy.zdo.types import LogicalType, NodeDescriptor
@@ -28,6 +30,7 @@ from zha.application import Platform
 from zha.application.const import ZHA_GW_MSG, ZHA_GW_MSG_CONNECTION_LOST, RadioType
 from zha.application.gateway import (
     ConnectionLostEvent,
+    DeviceFullInitEvent,
     DeviceJoinedDeviceInfo,
     DeviceJoinedEvent,
     DevicePairingStatus,
@@ -38,7 +41,8 @@ from zha.application.gateway import (
 from zha.application.helpers import ZHAData
 from zha.application.platforms import GroupEntity
 from zha.application.platforms.light.const import EFFECT_OFF, LightEntityFeature
-from zha.zigbee.device import Device
+from zha.quirks import DeviceMatch, DeviceRegistry, ModelInfo, QuirkRegistryEntry
+from zha.zigbee.device import Device, DeviceEntityAddedEvent, DeviceEntityRemovedEvent
 from zha.zigbee.group import Group, GroupMemberReference
 
 IEEE_GROUPABLE_DEVICE = "01:2d:6f:00:0a:90:69:e8"
@@ -276,7 +280,7 @@ async def test_gateway_group_methods(
     entity: GroupEntity | None = get_group_entity(zha_group, platform=Platform.LIGHT)
     assert entity is not None
 
-    info = entity.info_object
+    info = entity.state
     assert info.class_name == "LightGroup"
     assert info.platform == Platform.LIGHT
     assert info.unique_id == "light_zha_group_0x0002"
@@ -557,6 +561,336 @@ async def test_gateway_device_initialized(
     )
 
 
+async def test_gateway_device_initialized_no_keyerror_on_rapid_rejoin(
+    zha_gateway: Gateway,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    """Regression test for #748.
+
+    When a device sends a second join announcement before the first
+    initialization task completes, the cancelled task's done-callback
+    must not pop the dict entry that now belongs to the replacement
+    task — otherwise the replacement's own done-callback raises KeyError.
+    """
+    zigpy_dev_basic = create_mock_zigpy_device(zha_gateway, ZIGPY_DEVICE_BASIC)
+
+    loop = asyncio.get_running_loop()
+    captured_exceptions: list[BaseException] = []
+    original_handler = loop.get_exception_handler()
+
+    def capture_exception(loop_, context):
+        if (exc := context.get("exception")) is not None:
+            captured_exceptions.append(exc)
+        if original_handler is not None:
+            original_handler(loop_, context)
+
+    loop.set_exception_handler(capture_exception)
+    try:
+        zha_gateway.device_initialized(zigpy_dev_basic)
+        zha_gateway.device_initialized(zigpy_dev_basic)
+        await zha_gateway.async_block_till_done()
+    finally:
+        loop.set_exception_handler(original_handler)
+
+    assert (
+        f"Cancelling previous initialization task for device {zigpy_dev_basic.ieee}"
+        in caplog.text
+    )
+    keyerrors = [e for e in captured_exceptions if isinstance(e, KeyError)]
+    assert not keyerrors, f"done-callback raised KeyError(s): {keyerrors}"
+    assert zigpy_dev_basic.ieee not in zha_gateway._device_init_tasks
+
+
+async def test_gateway_device_reinterviewed_no_bookkeeping_loss_on_rapid_event(
+    zha_gateway: Gateway,
+) -> None:
+    """Regression test for the `_device_init_tasks` bookkeeping race.
+
+    Cancelled task's done-callback must not clear the replacement task's
+    entry.  Same race as #748/#749 but in `device_reinterviewed`.  The
+    previous `pop(..., None)` pattern silently dropped the replacement
+    task's entry, which meant a third event would fail to cancel the
+    in-flight task.
+    """
+    zigpy_dev = create_mock_zigpy_device(zha_gateway, ZIGPY_DEVICE_BASIC)
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
+
+    # Keep the replacement task in-flight by stalling configure on an event
+    # we control. Without this, the reinterview task completes synchronously
+    # under eager_start and exits the dict before we get to assert.
+    proceed = asyncio.Event()
+    original_configure = zha_device.async_configure
+
+    async def stalled_configure() -> None:
+        await proceed.wait()
+        await original_configure()
+
+    with patch.object(zha_device, "async_configure", side_effect=stalled_configure):
+        zha_gateway.device_reinterviewed(zigpy_dev)
+        task_1 = zha_gateway._device_init_tasks[zigpy_dev.ieee]
+
+        zha_gateway.device_reinterviewed(zigpy_dev)
+        task_2 = zha_gateway._device_init_tasks[zigpy_dev.ieee]
+        assert task_2 is not task_1
+
+        # Let task_1's cancellation propagate and its done-callback run.
+        with suppress(asyncio.CancelledError):
+            await task_1
+        await asyncio.sleep(0)
+
+        # The cancelled task's done-callback must not have cleared the dict;
+        # the replacement task is still in flight.
+        assert zha_gateway._device_init_tasks.get(zigpy_dev.ieee) is task_2
+
+        proceed.set()
+
+    await zha_gateway.async_block_till_done()
+    assert zigpy_dev.ieee not in zha_gateway._device_init_tasks
+
+
+async def test_reinterview_replaces_device_when_quirk_changes(
+    zha_gateway: Gateway,
+) -> None:
+    """A re-interview resolving a different quirk replaces the device object."""
+    registry = DeviceRegistry()
+    (
+        QuirkBuilder("Fake_Manufacturer", "Model_A")
+        .friendly_name(model="Quirk A", manufacturer="Fake_Manufacturer")
+        .add_to_registry(registry)
+    )
+    (
+        QuirkBuilder("Fake_Manufacturer", "Model_B")
+        .friendly_name(model="Quirk B", manufacturer="Fake_Manufacturer")
+        .add_to_registry(registry)
+    )
+
+    zigpy_device = create_mock_zigpy_device(
+        zha_gateway,
+        ZIGPY_DEVICE_BASIC,
+        manufacturer="Fake_Manufacturer",
+        model="Model_A",
+        registry=registry,
+    )
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
+    assert zha_device.quirk_applied
+    assert zha_device.model == "Quirk A"
+
+    reinterviewed = create_mock_zigpy_device(
+        zha_gateway,
+        ZIGPY_DEVICE_BASIC,
+        manufacturer="Fake_Manufacturer",
+        model="Model_B",
+        registry=registry,
+    )
+    zha_gateway.device_reinterviewed(reinterviewed)
+    await zha_gateway.async_block_till_done()
+
+    new_zha_device = zha_gateway.get_device(zigpy_device.ieee)
+    assert new_zha_device is not zha_device
+    assert new_zha_device.quirk_applied
+    assert new_zha_device.model == "Quirk B"
+
+
+async def test_reinterview_swap_emits_full_init_configured(
+    zha_gateway: Gateway,
+) -> None:
+    """A re-interview that replaces the device emits a CONFIGURED full-init event.
+
+    HA repoints its (IEEE-keyed) device proxy off this event, so the swap must
+    still surface it with `CONFIGURED` status and `new_join=False`.
+    """
+    registry = DeviceRegistry()
+    (
+        QuirkBuilder("Fake_Manufacturer", "Model_A")
+        .friendly_name(model="Quirk A", manufacturer="Fake_Manufacturer")
+        .add_to_registry(registry)
+    )
+    (
+        QuirkBuilder("Fake_Manufacturer", "Model_B")
+        .friendly_name(model="Quirk B", manufacturer="Fake_Manufacturer")
+        .add_to_registry(registry)
+    )
+
+    zigpy_device = create_mock_zigpy_device(
+        zha_gateway,
+        ZIGPY_DEVICE_BASIC,
+        manufacturer="Fake_Manufacturer",
+        model="Model_A",
+        registry=registry,
+    )
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
+
+    events = []
+    zha_gateway.on_all_events(events.append)
+
+    reinterviewed = create_mock_zigpy_device(
+        zha_gateway,
+        ZIGPY_DEVICE_BASIC,
+        manufacturer="Fake_Manufacturer",
+        model="Model_B",
+        registry=registry,
+    )
+    zha_gateway.device_reinterviewed(reinterviewed)
+    await zha_gateway.async_block_till_done()
+
+    assert zha_gateway.get_device(zigpy_device.ieee) is not zha_device
+
+    full_inits = [e for e in events if isinstance(e, DeviceFullInitEvent)]
+    assert len(full_inits) == 1
+    assert full_inits[0].device_info.pairing_status is DevicePairingStatus.CONFIGURED
+    assert full_inits[0].new_join is False
+
+
+async def test_reinterview_rebuilds_in_place_when_quirk_unchanged(
+    zha_gateway: Gateway,
+) -> None:
+    """A re-interview resolving the same quirk rebuilds in place, preserving identity."""
+    registry = DeviceRegistry()
+    (
+        QuirkBuilder("Fake_Manufacturer", "Model_A")
+        .friendly_name(model="Quirk A", manufacturer="Fake_Manufacturer")
+        .add_to_registry(registry)
+    )
+
+    zigpy_device = create_mock_zigpy_device(
+        zha_gateway,
+        ZIGPY_DEVICE_BASIC,
+        manufacturer="Fake_Manufacturer",
+        model="Model_A",
+        registry=registry,
+    )
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
+
+    reinterviewed = create_mock_zigpy_device(
+        zha_gateway,
+        ZIGPY_DEVICE_BASIC,
+        manufacturer="Fake_Manufacturer",
+        model="Model_A",
+        registry=registry,
+    )
+    zha_gateway.device_reinterviewed(reinterviewed)
+    await zha_gateway.async_block_till_done()
+
+    assert zha_gateway.get_device(zigpy_device.ieee) is zha_device
+
+
+async def test_reinterview_in_place_events(zha_gateway: Gateway) -> None:
+    """An in-place reinterview that changes the entity set emits add/remove events."""
+
+    # For simplicity, assume the device changes its model during a reinterview
+    registry = DeviceRegistry()
+    registry.register(
+        QuirkRegistryEntry(
+            device_match=DeviceMatch(
+                applies_to=(ModelInfo("Fake_Manufacturer", "Model_A"),)
+            )
+        )
+    )
+    registry.register(
+        QuirkRegistryEntry(
+            device_match=DeviceMatch(
+                applies_to=(ModelInfo("Fake_Manufacturer", "Model_B"),)
+            )
+        )
+    )
+
+    zigpy_device = create_mock_zigpy_device(
+        zha_gateway,
+        {
+            1: {
+                SIG_EP_INPUT: [
+                    general.Basic.cluster_id,
+                    general.OnOff.cluster_id,
+                    measurement.TemperatureMeasurement.cluster_id,
+                ],
+                SIG_EP_OUTPUT: [],
+                SIG_EP_TYPE: zha.DeviceType.ON_OFF_SWITCH,
+                SIG_EP_PROFILE: zha.PROFILE_ID,
+            }
+        },
+        manufacturer="Fake_Manufacturer",
+        model="Model_A",
+        registry=registry,
+    )
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
+    assert zha_device._initialized is True
+
+    ieee = zigpy_device.ieee
+
+    before = {e.unique_id for e in zha_device.platform_entities.values()}
+    assert "00:0d:6f:00:0a:90:69:e7-1-1026" in before
+    assert "00:0d:6f:00:0a:90:69:e7-1-1029" not in before
+
+    events = []
+    zha_device.on_all_events(events.append)
+
+    # Re-interview into a device that drops the temperature sensor and adds a humidity
+    # sensor (the OnOff switch is unchanged).
+    reinterviewed = create_mock_zigpy_device(
+        zha_gateway,
+        {
+            1: {
+                SIG_EP_INPUT: [
+                    general.Basic.cluster_id,
+                    general.OnOff.cluster_id,
+                    measurement.RelativeHumidity.cluster_id,
+                ],
+                SIG_EP_OUTPUT: [],
+                SIG_EP_TYPE: zha.DeviceType.ON_OFF_SWITCH,
+                SIG_EP_PROFILE: zha.PROFILE_ID,
+            }
+        },
+        manufacturer="Fake_Manufacturer",
+        model="Model_B",
+        registry=registry,
+    )
+    zha_gateway.device_reinterviewed(reinterviewed)
+    await zha_gateway.async_block_till_done()
+
+    # Rebuilt in place: same object, still initialized, new zigpy device bound.
+    assert zha_gateway.get_device(ieee) is zha_device
+    assert zha_device.device is reinterviewed
+    assert zha_device._initialized is True
+
+    after = {e.unique_id for e in zha_device.platform_entities.values()}
+    assert "00:0d:6f:00:0a:90:69:e7-1-1029" in after
+    assert "00:0d:6f:00:0a:90:69:e7-1-1026" not in after
+
+    entity_events = [
+        e
+        for e in events
+        if isinstance(e, (DeviceEntityAddedEvent, DeviceEntityRemovedEvent))
+    ]
+    assert entity_events == [
+        # Old ones were removed
+        DeviceEntityRemovedEvent(
+            platform=Platform.SENSOR, unique_id="00:0d:6f:00:0a:90:69:e7-1-0-rssi"
+        ),
+        DeviceEntityRemovedEvent(
+            platform=Platform.SENSOR, unique_id="00:0d:6f:00:0a:90:69:e7-1-0-lqi"
+        ),
+        DeviceEntityRemovedEvent(
+            platform=Platform.SENSOR, unique_id="00:0d:6f:00:0a:90:69:e7-1-1026"
+        ),
+        DeviceEntityRemovedEvent(
+            platform=Platform.SWITCH, unique_id="00:0d:6f:00:0a:90:69:e7-1-6"
+        ),
+        # And new ones added
+        DeviceEntityAddedEvent(
+            platform=Platform.SENSOR, unique_id="00:0d:6f:00:0a:90:69:e7-1-0-rssi"
+        ),
+        DeviceEntityAddedEvent(
+            platform=Platform.SENSOR, unique_id="00:0d:6f:00:0a:90:69:e7-1-0-lqi"
+        ),
+        DeviceEntityAddedEvent(
+            platform=Platform.SENSOR, unique_id="00:0d:6f:00:0a:90:69:e7-1-1029"
+        ),
+        DeviceEntityAddedEvent(
+            platform=Platform.SWITCH, unique_id="00:0d:6f:00:0a:90:69:e7-1-6"
+        ),
+    ]
+
+
 def test_gateway_raw_device_initialized(
     zha_gateway: Gateway,
 ) -> None:
@@ -745,6 +1079,7 @@ def test_radio_type():
         "EZSP = Silicon Labs EmberZNet protocol: Elelabs, HUSBZB-1, Telegesis",
         "ZNP = Texas Instruments Z-Stack ZNP protocol: CC253x, CC26x2, CC13x2",
         "deCONZ = dresden elektronik deCONZ protocol: ConBee I/II, RaspBee I/II",
+        "Ziggurat = Open source host-side Zigbee stack in Rust",
         "ZiGate = ZiGate Zigbee radios: PiZiGate, ZiGate USB-TTL, ZiGate WiFi",
         "XBee = Digi XBee Zigbee radios: Digi XBee Series 2, 2C, 3",
     ]
@@ -897,7 +1232,7 @@ async def test_gateway_shutdown_group_on_remove_failure(
     """Test that gateway shutdown continues when group.on_remove fails."""
     zigpy_dev_1 = await zigpy_device_from_json(
         zha_gateway.application_controller,
-        "tests/data/devices/ikea-of-sweden-tradfri-bulb-gu10-ws-400lm.json",
+        "tests/data/devices/ikea-of-sweden-tradfri-bulb-gu10-ws-400lm-0x23095631.json",
     )
     zha_device_1 = await join_zigpy_device(zha_gateway, zigpy_dev_1)
 
@@ -924,11 +1259,11 @@ async def test_group_on_remove_entity_failure(
     """Test that group.on_remove continues when group entity removal fails."""
     zigpy_dev_1 = await zigpy_device_from_json(
         zha_gateway.application_controller,
-        "tests/data/devices/ikea-of-sweden-tradfri-bulb-gu10-ws-400lm.json",
+        "tests/data/devices/ikea-of-sweden-tradfri-bulb-gu10-ws-400lm-0x23095631.json",
     )
     zigpy_dev_2 = await zigpy_device_from_json(
         zha_gateway.application_controller,
-        "tests/data/devices/ikea-of-sweden-tradfri-bulb-e26-opal-1000lm.json",
+        "tests/data/devices/ikea-of-sweden-tradfri-bulb-e26-opal-1000lm-0x23094631.json",
     )
     zha_device_1 = await join_zigpy_device(zha_gateway, zigpy_dev_1)
     zha_device_2 = await join_zigpy_device(zha_gateway, zigpy_dev_2)

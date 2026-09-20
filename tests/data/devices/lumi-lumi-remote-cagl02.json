@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 3,
   "ieee": "54:ef:44:10:00:14:f3:e7",
   "nwk": "0x67CE",
   "manufacturer": "LUMI",
@@ -8,7 +8,7 @@
   "friendly_model": "lumi.remote.cagl02",
   "name": "LUMI lumi.remote.cagl02",
   "quirk_applied": true,
-  "quirk_class": "zhaquirks.xiaomi.aqara.cube_aqgl01.CubeCAGL02",
+  "quirk_class": "zhaquirks.xiaomi.aqara.cube_aqgl01:CubeCAGL02",
   "exposes_features": [],
   "manufacturer_code": 4447,
   "power_source": "Battery or Unknown",
@@ -246,243 +246,137 @@
   "zha_lib_entities": {
     "button": [
       {
-        "info_object": {
-          "fallback_name": null,
-          "unique_id": "54:ef:44:10:00:14:f3:e7-1-3",
-          "migrate_unique_ids": [],
-          "platform": "button",
-          "class_name": "IdentifyButton",
-          "translation_key": null,
-          "translation_placeholders": null,
-          "device_class": "identify",
-          "state_class": null,
-          "entity_category": "diagnostic",
-          "entity_registry_enabled_default": true,
-          "enabled": true,
-          "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "IdentifyClusterHandler",
-              "generic_id": "cluster_handler_0x0003",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 3,
-                "name": "Identify",
-                "type": "server"
-              },
-              "id": "1:0x0003",
-              "unique_id": "54:ef:44:10:00:14:f3:e7:1:0x0003",
-              "status": "INITIALIZED",
-              "value_attribute": null
-            }
-          ],
-          "device_ieee": "54:ef:44:10:00:14:f3:e7",
-          "endpoint_id": 1,
-          "available": true,
-          "group_id": null,
-          "command": "identify",
-          "args": [
-            5
-          ],
-          "kwargs": {}
-        },
-        "state": {
-          "class_name": "IdentifyButton",
-          "available": true
-        }
+        "fallback_name": null,
+        "unique_id": "54:ef:44:10:00:14:f3:e7-1-3",
+        "migrate_unique_ids": [],
+        "platform": "button",
+        "class_name": "IdentifyButton",
+        "translation_key": null,
+        "translation_placeholders": null,
+        "device_class": "identify",
+        "state_class": null,
+        "entity_category": "diagnostic",
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "54:ef:44:10:00:14:f3:e7",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "command": "identify",
+        "args": [
+          5
+        ],
+        "kwargs": {}
       }
     ],
     "sensor": [
       {
-        "info_object": {
-          "fallback_name": null,
-          "unique_id": "54:ef:44:10:00:14:f3:e7-1-0-lqi",
-          "migrate_unique_ids": [],
-          "platform": "sensor",
-          "class_name": "LQISensor",
-          "translation_key": "lqi",
-          "translation_placeholders": null,
-          "device_class": null,
-          "state_class": "measurement",
-          "entity_category": "diagnostic",
-          "entity_registry_enabled_default": false,
-          "enabled": true,
-          "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "BasicClusterHandler",
-              "generic_id": "cluster_handler_0x0000",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 0,
-                "name": "BasicCluster",
-                "type": "server"
-              },
-              "id": "1:0x0000",
-              "unique_id": "54:ef:44:10:00:14:f3:e7:1:0x0000",
-              "status": "INITIALIZED",
-              "value_attribute": null
-            }
-          ],
-          "device_ieee": "54:ef:44:10:00:14:f3:e7",
-          "endpoint_id": 1,
-          "available": true,
-          "group_id": null,
-          "suggested_display_precision": null,
-          "unit": null
-        },
-        "state": {
-          "class_name": "LQISensor",
-          "available": true,
-          "state": null
-        }
+        "fallback_name": null,
+        "unique_id": "54:ef:44:10:00:14:f3:e7-1-0-lqi",
+        "migrate_unique_ids": [],
+        "platform": "sensor",
+        "class_name": "LQISensor",
+        "translation_key": "lqi",
+        "translation_placeholders": null,
+        "device_class": null,
+        "state_class": "measurement",
+        "entity_category": "diagnostic",
+        "entity_registry_enabled_default": false,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "54:ef:44:10:00:14:f3:e7",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "native_value": null,
+        "suggested_display_precision": null,
+        "unit": null
       },
       {
-        "info_object": {
-          "fallback_name": null,
-          "unique_id": "54:ef:44:10:00:14:f3:e7-1-0-rssi",
-          "migrate_unique_ids": [],
-          "platform": "sensor",
-          "class_name": "RSSISensor",
-          "translation_key": "rssi",
-          "translation_placeholders": null,
-          "device_class": "signal_strength",
-          "state_class": "measurement",
-          "entity_category": "diagnostic",
-          "entity_registry_enabled_default": false,
-          "enabled": true,
-          "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "BasicClusterHandler",
-              "generic_id": "cluster_handler_0x0000",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 0,
-                "name": "BasicCluster",
-                "type": "server"
-              },
-              "id": "1:0x0000",
-              "unique_id": "54:ef:44:10:00:14:f3:e7:1:0x0000",
-              "status": "INITIALIZED",
-              "value_attribute": null
-            }
-          ],
-          "device_ieee": "54:ef:44:10:00:14:f3:e7",
-          "endpoint_id": 1,
-          "available": true,
-          "group_id": null,
-          "suggested_display_precision": null,
-          "unit": "dBm"
-        },
-        "state": {
-          "class_name": "RSSISensor",
-          "available": true,
-          "state": null
-        }
+        "fallback_name": null,
+        "unique_id": "54:ef:44:10:00:14:f3:e7-1-0-rssi",
+        "migrate_unique_ids": [],
+        "platform": "sensor",
+        "class_name": "RSSISensor",
+        "translation_key": "rssi",
+        "translation_placeholders": null,
+        "device_class": "signal_strength",
+        "state_class": "measurement",
+        "entity_category": "diagnostic",
+        "entity_registry_enabled_default": false,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "54:ef:44:10:00:14:f3:e7",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "native_value": null,
+        "suggested_display_precision": null,
+        "unit": "dBm"
       },
       {
-        "info_object": {
-          "fallback_name": null,
-          "unique_id": "54:ef:44:10:00:14:f3:e7-1-1",
-          "migrate_unique_ids": [],
-          "platform": "sensor",
-          "class_name": "Battery",
-          "translation_key": null,
-          "translation_placeholders": null,
-          "device_class": "battery",
-          "state_class": "measurement",
-          "entity_category": "diagnostic",
-          "entity_registry_enabled_default": true,
-          "enabled": true,
-          "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "PowerConfigurationClusterHandler",
-              "generic_id": "cluster_handler_0x0001",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 1,
-                "name": "Power Configuration",
-                "type": "server"
-              },
-              "id": "1:0x0001",
-              "unique_id": "54:ef:44:10:00:14:f3:e7:1:0x0001",
-              "status": "INITIALIZED",
-              "value_attribute": "battery_voltage"
-            }
-          ],
-          "device_ieee": "54:ef:44:10:00:14:f3:e7",
-          "endpoint_id": 1,
-          "available": true,
-          "group_id": null,
-          "suggested_display_precision": 0,
-          "unit": "%"
-        },
-        "state": {
-          "class_name": "Battery",
-          "available": true,
-          "state": null,
-          "battery_size": "CR2450",
-          "battery_quantity": 1,
-          "battery_voltage": 2.8
-        },
-        "extra_state_attributes": [
+        "fallback_name": null,
+        "unique_id": "54:ef:44:10:00:14:f3:e7-1-1",
+        "migrate_unique_ids": [],
+        "platform": "sensor",
+        "class_name": "Battery",
+        "translation_key": null,
+        "translation_placeholders": null,
+        "device_class": "battery",
+        "state_class": "measurement",
+        "entity_category": "diagnostic",
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [
           "battery_quantity",
           "battery_size",
           "battery_voltage"
-        ]
+        ],
+        "device_ieee": "54:ef:44:10:00:14:f3:e7",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "native_value": null,
+        "suggested_display_precision": 0,
+        "unit": "%",
+        "battery_size": "CR2450",
+        "battery_quantity": 1,
+        "battery_voltage": 2.8
       }
     ],
     "update": [
       {
-        "info_object": {
-          "fallback_name": null,
-          "unique_id": "54:ef:44:10:00:14:f3:e7-1-25-firmware_update",
-          "migrate_unique_ids": [],
-          "platform": "update",
-          "class_name": "FirmwareUpdateEntity",
-          "translation_key": null,
-          "translation_placeholders": null,
-          "device_class": "firmware",
-          "state_class": null,
-          "entity_category": "config",
-          "entity_registry_enabled_default": true,
-          "enabled": true,
-          "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "OtaClientClusterHandler",
-              "generic_id": "cluster_handler_0x0019_client",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 25,
-                "name": "Ota",
-                "type": "client"
-              },
-              "id": "1:0x0019_client",
-              "unique_id": "54:ef:44:10:00:14:f3:e7:1:0x0019_CLIENT",
-              "status": "INITIALIZED",
-              "value_attribute": null
-            }
-          ],
-          "device_ieee": "54:ef:44:10:00:14:f3:e7",
-          "endpoint_id": 1,
-          "available": true,
-          "group_id": null,
-          "supported_features": 7
-        },
-        "state": {
-          "class_name": "FirmwareUpdateEntity",
-          "available": true,
-          "installed_version": null,
-          "in_progress": false,
-          "update_percentage": null,
-          "latest_version": null,
-          "release_summary": null,
-          "release_notes": null,
-          "release_url": null
-        }
+        "fallback_name": null,
+        "unique_id": "54:ef:44:10:00:14:f3:e7-1-25-firmware_update",
+        "migrate_unique_ids": [],
+        "platform": "update",
+        "class_name": "FirmwareUpdateEntity",
+        "translation_key": null,
+        "translation_placeholders": null,
+        "device_class": "firmware",
+        "state_class": null,
+        "entity_category": "config",
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "54:ef:44:10:00:14:f3:e7",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "installed_version": null,
+        "in_progress": false,
+        "update_percentage": null,
+        "latest_version": null,
+        "release_summary": null,
+        "release_notes": null,
+        "release_url": null,
+        "supported_features": 23
       }
     ]
   },

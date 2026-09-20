@@ -13,7 +13,6 @@ from unittest.mock import AsyncMock
 
 from zigpy.application import ControllerApplication
 from zigpy.const import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_PROFILE, SIG_EP_TYPE
-from zigpy.quirks import get_device as quirks_get_device
 import zigpy.types as t
 import zigpy.zcl
 import zigpy.zcl.foundation as zcl_f
@@ -22,6 +21,7 @@ import zigpy.zdo.types as zdo_t
 from zha.application import Platform
 from zha.application.gateway import Gateway
 from zha.application.platforms import BaseEntity, GroupEntity, PlatformEntity
+from zha.quirks import DEVICE_REGISTRY, DeviceRegistry
 from zha.zigbee.device import Device
 from zha.zigbee.group import Group
 
@@ -55,12 +55,10 @@ def patch_cluster_for_testing(cluster: zigpy.zcl.Cluster) -> None:
 
     cluster.bind = AsyncMock(return_value=[0])
     cluster.configure_reporting = AsyncMock(
-        return_value=[
-            [zcl_f.ConfigureReportingResponseRecord(zcl_f.Status.SUCCESS, 0x00, 0xAABB)]
-        ]
+        side_effect=lambda config: dict.fromkeys(config, zcl_f.Status.SUCCESS)
     )
     cluster.configure_reporting_multiple = AsyncMock(
-        return_value=zcl_f.ConfigureReportingResponse.deserialize(b"\x00")[0]
+        side_effect=lambda config: dict.fromkeys(config, zcl_f.Status.SUCCESS)
     )
     cluster.read_attributes = AsyncMock(wraps=cluster.read_attributes)
     cluster.read_attributes_raw = AsyncMock(side_effect=_read_attribute_raw)
@@ -256,7 +254,7 @@ def get_group_entity(
         if not isinstance(entity, entity_type):
             continue
 
-        if qualifier is not None and qualifier not in entity.info_object.unique_id:
+        if qualifier is not None and qualifier not in entity.state.unique_id:
             continue
 
         return entity
@@ -287,7 +285,7 @@ def get_entity(
         if exact_entity_type is not None and type(entity) is not exact_entity_type:
             continue
 
-        if qualifier is not None and qualifier not in entity.info_object.unique_id:
+        if qualifier is not None and qualifier not in entity.state.unique_id:
             continue
 
         if not qualifier_func(entity):
@@ -313,58 +311,59 @@ async def group_entity_availability_test(
 ):
     """Test group entity availability handling."""
 
-    assert entity.state["available"] is True
+    assert entity.state.available is True
 
     device_1.on_network = False
     await asyncio.sleep(0.1)
     await zha_gateway.async_block_till_done()
-    assert entity.state["available"] is True
+    assert entity.state.available is True
 
     device_2.on_network = False
     await asyncio.sleep(0.1)
     await zha_gateway.async_block_till_done()
 
-    assert entity.state["available"] is False
+    assert entity.state.available is False
 
     device_1.on_network = True
     await asyncio.sleep(0.1)
     await zha_gateway.async_block_till_done()
-    assert entity.state["available"] is True
+    assert entity.state.available is True
 
     device_2.on_network = True
     await asyncio.sleep(0.1)
     await zha_gateway.async_block_till_done()
 
-    assert entity.state["available"] is True
+    assert entity.state.available is True
 
     device_1.available = False
     await asyncio.sleep(0.1)
     await zha_gateway.async_block_till_done()
-    assert entity.state["available"] is True
+    assert entity.state.available is True
 
     device_2.available = False
     await asyncio.sleep(0.1)
     await zha_gateway.async_block_till_done()
 
-    assert entity.state["available"] is False
+    assert entity.state.available is False
 
     device_1.available = True
     await asyncio.sleep(0.1)
     await zha_gateway.async_block_till_done()
-    assert entity.state["available"] is True
+    assert entity.state.available is True
 
     device_2.available = True
     await asyncio.sleep(0.1)
     await zha_gateway.async_block_till_done()
 
-    assert entity.state["available"] is True
+    assert entity.state.available is True
 
 
-def zigpy_device_from_device_data(
+def zigpy_device_from_device_data(  # noqa: C901
     app: ControllerApplication,
     device_data: dict,
     patch_cluster: bool = True,
     quirk: Callable | None = None,
+    registry: DeviceRegistry = DEVICE_REGISTRY,
 ) -> zigpy.device.Device:
     """Make a fake device using the specified cluster classes."""
 
@@ -425,7 +424,7 @@ def zigpy_device_from_device_data(
     if quirk:
         device = quirk(app, device.ieee, device.nwk, device)
     else:
-        device = quirks_get_device(device)
+        device = registry.resolve(device)
 
     for epid, ep in device_data["endpoints"].items():
         try:
@@ -465,11 +464,24 @@ def zigpy_device_from_device_data(
                     attr_name = attr.get("name")
 
                     # Look up by name to avoid ambiguity with manufacturer-specific attrs
-                    if attr_name is not None:
-                        attr_def = real_cluster.find_attribute(attr_name)
-                        assert attr_def.id == attrid
-                    else:
-                        attr_def = real_cluster.find_attribute(attrid)
+                    try:
+                        if attr_name is not None:
+                            attr_def = real_cluster.find_attribute(attr_name)
+                        else:
+                            attr_def = real_cluster.find_attribute(attrid)
+                    except KeyError:
+                        attr_def = None
+
+                    # The attribute may not be defined on the cluster, or a quirk may
+                    # have moved its name to a different id. Cache it as a legacy value
+                    # so the device still loads.
+                    if attr_def is None or attr_def.id != attrid:
+                        if attr.get("value", None) is not None:
+                            real_cluster._attr_cache.set_legacy_value(
+                                attrid, attr["value"]
+                            )
+                            real_cluster.PLUGGED_ATTR_READS[attrid] = attr["value"]
+                        continue
 
                     # Quirks can mark attributes as unsupported during cluster init so
                     # the attribute both has a cached value and is unsupported. We need
@@ -559,6 +571,7 @@ def create_mock_zigpy_device(
     patch_cluster: bool = True,
     quirk: Callable | None = None,
     attributes: dict[int, dict[str, dict[str, Any]]] = None,
+    registry: DeviceRegistry = DEVICE_REGISTRY,
 ) -> zigpy.device.Device:
     """Make a fake device using the specified cluster classes."""
     zigpy_app_controller = zha_gateway.application_controller
@@ -603,7 +616,7 @@ def create_mock_zigpy_device(
     if quirk:
         device = quirk(zigpy_app_controller, device.ieee, device.nwk, device)
     else:
-        device = quirks_get_device(device)
+        device = registry.resolve(device)
 
     if patch_cluster:
         for endpoint in (ep for epid, ep in device.endpoints.items() if epid):

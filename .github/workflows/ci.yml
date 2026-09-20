@@ -12,9 +12,9 @@ jobs:
     with:
       CODE_FOLDER: zha
       CACHE_VERSION: 2
-      PYTHON_VERSION_DEFAULT: "3.12.10"
+      PYTHON_VERSION_DEFAULT: "3.12"
       PRE_COMMIT_CACHE_PATH: ~/.cache/pre-commit
       MINIMUM_COVERAGE_PERCENTAGE: 95
-      PYTHON_MATRIX: '"3.12.10", "3.13.3"'
+      PYTHON_MATRIX: '"3.12", "3.13", "3.14"'
     secrets:
       CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}

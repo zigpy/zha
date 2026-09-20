@@ -4,6 +4,8 @@ from typing import Final
 from unittest.mock import call, patch
 
 import pytest
+from zhaquirks.builder import QuirkBuilder
+from zhaquirks.clusters import CustomCluster
 from zhaquirks.const import (
     DEVICE_TYPE,
     ENDPOINTS,
@@ -11,12 +13,12 @@ from zhaquirks.const import (
     OUTPUT_CLUSTERS,
     PROFILE_ID,
 )
+from zhaquirks.device import CustomZigpyDevice
+from zhaquirks.legacy import CustomDevice
 from zhaquirks.tuya.tuya_valve import ParksideTuyaValveManufCluster
 import zigpy
 from zigpy.exceptions import ZigbeeException
 from zigpy.profiles import zha
-from zigpy.quirks import CustomCluster, CustomDevice, DeviceRegistry
-from zigpy.quirks.v2 import CustomDeviceV2, QuirkBuilder
 import zigpy.types as t
 from zigpy.typing import UNDEFINED
 from zigpy.zcl.clusters import general, security
@@ -36,7 +38,6 @@ from tests.common import (
     update_attribute_cache,
 )
 from zha.application import Platform
-from zha.application.const import ZCL_INIT_ATTRS
 from zha.application.gateway import Gateway
 from zha.application.platforms import EntityCategory, PlatformEntity
 from zha.application.platforms.button import (
@@ -45,8 +46,7 @@ from zha.application.platforms.button import (
     WriteAttributeButton,
 )
 from zha.application.platforms.button.const import ButtonDeviceClass
-from zha.exceptions import ZHAException
-from zha.zigbee.cluster_handlers.manufacturerspecific import OppleRemoteClusterHandler
+from zha.quirks import DeviceRegistry
 from zha.zigbee.device import Device
 
 ZIGPY_DEVICE = {
@@ -162,15 +162,12 @@ async def test_frost_unlock(
     cluster.write_attributes.reset_mock()
     cluster.write_attributes.side_effect = ZigbeeException
 
-    with pytest.raises(ZHAException):
+    with pytest.raises(ZigbeeException):
         await entity.async_press()
         await zha_gateway.async_block_till_done()
 
-    # There are three retries
     assert cluster.write_attributes.mock_calls == [
-        call({"frost_lock_reset": 0}, manufacturer=UNDEFINED),
-        call({"frost_lock_reset": 0}, manufacturer=UNDEFINED),
-        call({"frost_lock_reset": 0}, manufacturer=UNDEFINED),
+        call({"frost_lock_reset": 0}, manufacturer=UNDEFINED)
     ]
 
 
@@ -217,7 +214,7 @@ async def custom_button_device(zha_gateway: Gateway):
     )
 
     (
-        QuirkBuilder("Fake_Model", "Fake_Manufacturer", registry=registry)
+        QuirkBuilder("Fake_Model", "Fake_Manufacturer")
         .replaces(FakeManufacturerCluster)
         .command_button(
             FakeManufacturerCluster.ServerCommandDefs.self_test.name,
@@ -233,12 +230,12 @@ async def custom_button_device(zha_gateway: Gateway):
             translation_key="feed",
             fallback_name="Feed",
         )
-        .add_to_registry()
+        .add_to_registry(registry)
     )
 
-    zigpy_device = registry.get_device(zigpy_device)
+    zigpy_device = registry.resolve(zigpy_device)
 
-    assert isinstance(zigpy_device, CustomDeviceV2)
+    assert isinstance(zigpy_device, CustomZigpyDevice)
     # XXX: this should be handled automatically, patch quirks added cluster
     patch_cluster_for_testing(zigpy_device.endpoints[1].mfg_identify)
 
@@ -319,7 +316,7 @@ async def test_quirks_write_attr_buttons_uid(zha_gateway: Gateway) -> None:
     )
 
     (
-        QuirkBuilder("Fake_Model", "Fake_Manufacturer", registry=registry)
+        QuirkBuilder("Fake_Model", "Fake_Manufacturer")
         .replaces(FakeManufacturerCluster)
         .write_attr_button(
             FakeManufacturerCluster.AttributeDefs.feed.name,
@@ -337,12 +334,12 @@ async def test_quirks_write_attr_buttons_uid(zha_gateway: Gateway) -> None:
             translation_key="btn_2",
             fallback_name="Button 2",
         )
-        .add_to_registry()
+        .add_to_registry(registry)
     )
 
-    zigpy_device_ = registry.get_device(zigpy_dev)
+    zigpy_device_ = registry.resolve(zigpy_dev)
 
-    assert isinstance(zigpy_device_, CustomDeviceV2)
+    assert isinstance(zigpy_device_, CustomZigpyDevice)
     zha_device = await join_zigpy_device(zha_gateway, zigpy_device_)
 
     entity_btn_1 = get_entity(zha_device, platform=Platform.BUTTON, qualifier="btn_1")
@@ -374,16 +371,14 @@ class OppleCluster(CustomCluster, ManufacturerSpecificCluster):
         )
 
 
-async def test_cluster_handler_quirks_unnecessary_claiming(
+async def test_quirks_v2_button_only_cluster_is_not_configured(
     zha_gateway: Gateway,
 ) -> None:
-    """Test quirks button doesn't claim cluster handlers unnecessarily."""
+    """A quirks v2 command button alone shouldn't trigger bind/reporting/reads."""
 
     registry = DeviceRegistry()
     (
-        QuirkBuilder(
-            "Fake_Manufacturer_sensor_2", "Fake_Model_sensor_2", registry=registry
-        )
+        QuirkBuilder("Fake_Manufacturer_sensor_2", "Fake_Model_sensor_2")
         .replaces(OppleCluster)
         .command_button(
             OppleCluster.ServerCommandDefs.self_test.name,
@@ -392,7 +387,7 @@ async def test_cluster_handler_quirks_unnecessary_claiming(
             translation_key="self_test",
             fallback_name="Self test",
         )
-        .add_to_registry()
+        .add_to_registry(registry)
     )
 
     zigpy_device = create_mock_zigpy_device(
@@ -411,37 +406,27 @@ async def test_cluster_handler_quirks_unnecessary_claiming(
         manufacturer="Fake_Manufacturer_sensor_2",
         model="Fake_Model_sensor_2",
     )
-    zigpy_device = registry.get_device(zigpy_device)
+    zigpy_device = registry.resolve(zigpy_device)
+    # `registry.resolve` swaps in the replaced OppleCluster instance; patch its
+    # network methods so we can assert bind/reporting/reading didn't happen.
+    opple_cluster = zigpy_device.endpoints[1].opple_cluster
+    patch_cluster_for_testing(opple_cluster)
 
-    # Suppress normal endpoint probing, as this will claim the Opple cluster handler
-    # already due to it being in the "CLUSTER_HANDLER_ONLY_CLUSTERS" registry.
-    # We want to test the handler also gets claimed via quirks v2 attributes init.
+    # Suppress normal endpoint probing, so virtual entities for the Opple cluster
+    # (e.g. AqaraOppleBind) don't trigger a bind themselves — we want to verify
+    # the quirks v2 button path alone does no cluster setup work.
     with patch("zha.application.discovery.discover_entities_for_endpoint"):
         zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
 
-    assert isinstance(zha_device.device, CustomDeviceV2)
+    assert isinstance(zha_device.device, CustomZigpyDevice)
 
-    # get cluster handler of OppleCluster
-    opple_ch = zha_device.endpoints[1].all_cluster_handlers["1:0xfcc0"]
-    assert isinstance(opple_ch, OppleRemoteClusterHandler)
+    # The quirks v2 button entity is created and usable
+    entity = get_entity(zha_device, platform=Platform.BUTTON, entity_type=Button)
+    assert entity is not None
 
-    # make sure the cluster handler was not claimed,
-    # as no reporting is configured and no attributes are to be read
-    assert opple_ch not in zha_device.endpoints[1].claimed_cluster_handlers.values()
-
-    # check that BIND is left at default of True, though ZHA will ignore it
-    assert opple_ch.BIND is True
-
-    # check ZCL_INIT_ATTRS is empty
-    assert opple_ch.ZCL_INIT_ATTRS == {}
-
-    # check that no ZCL_INIT_ATTRS instance variable was created
-    assert opple_ch.__dict__.get(ZCL_INIT_ATTRS) is None
-    assert opple_ch.ZCL_INIT_ATTRS is OppleRemoteClusterHandler.ZCL_INIT_ATTRS
-
-    # double check we didn't modify the class variable
-    assert OppleRemoteClusterHandler.ZCL_INIT_ATTRS == {}
-
-    # check if REPORT_CONFIG is empty, both instance and class variable
-    assert opple_ch.REPORT_CONFIG == ()
-    assert OppleRemoteClusterHandler.REPORT_CONFIG == ()
+    # No bind / configure_reporting / read_attributes happened on the Opple cluster:
+    # the button declares neither reporting nor an attribute init, so there's
+    # nothing for ZHA to configure.
+    assert len(opple_cluster.bind.mock_calls) == 0
+    assert len(opple_cluster.configure_reporting_multiple.mock_calls) == 0
+    assert len(opple_cluster.read_attributes.mock_calls) == 0
