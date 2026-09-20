@@ -3,10 +3,12 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+import asyncio
 from collections.abc import Callable
 import dataclasses
 import logging
-from typing import TYPE_CHECKING, Any
+import math
+from typing import TYPE_CHECKING, Any, Final, Literal
 
 from zigpy.zcl.clusters.security import (
     AlarmStatus,
@@ -43,6 +45,24 @@ _LOGGER = logging.getLogger(__name__)
 
 SIGNAL_ARMED_STATE_CHANGED = "zha_armed_state_changed"
 SIGNAL_ALARM_TRIGGERED = "zha_armed_triggered"
+
+_EXIT_DELAY_TARGET_PANEL_STATUS: Final[dict[str, PanelStatus]] = {
+    "away": AceCluster.PanelStatus.Armed_Away,
+    "home": AceCluster.PanelStatus.Armed_Stay,
+    "night": AceCluster.PanelStatus.Armed_Night,
+}
+
+_ARM_NOTIFICATION_MAP: Final[dict[str, ArmNotification]] = {
+    "away": AceCluster.ArmNotification.All_Zones_Armed,
+    "home": AceCluster.ArmNotification.Only_Day_Home_Zones_Armed,
+    "night": AceCluster.ArmNotification.Only_Night_Sleep_Zones_Armed,
+}
+
+_ARM_EXIT_DELAY_LOG_LABELS: Final[dict[PanelStatus, str]] = {
+    AceCluster.PanelStatus.Armed_Away: "all IAS ACE zones",
+    AceCluster.PanelStatus.Armed_Stay: "day/home IAS ACE zones",
+    AceCluster.PanelStatus.Armed_Night: "night/sleep IAS ACE zones",
+}
 
 
 @dataclasses.dataclass(frozen=True, kw_only=True)
@@ -162,10 +182,19 @@ class AlarmControlPanel(BaseAlarmControlPanel):
         self.panel_code: str = alarm_options.master_code
         self.code_required_arm_actions: bool = alarm_options.arm_requires_code
         self.max_invalid_tries: int = alarm_options.failed_tries
+        self.exit_delay_away: int = alarm_options.exit_delay_away
+        self.exit_delay_home: int = alarm_options.exit_delay_home
+        self.exit_delay_night: int = alarm_options.exit_delay_night
 
         self.armed_state: PanelStatus = AceCluster.PanelStatus.Panel_Disarmed
         self.alarm_status: AlarmStatus = AceCluster.AlarmStatus.No_Alarm
         self.invalid_tries: int = 0
+
+        self._exit_delay_task: asyncio.Task | None = None
+        self._exit_delay_end_time: float | None = None
+        self._pending_arm_mode: PanelStatus | None = None
+        self._entry_delay_task: asyncio.Task | None = None
+        self._entry_delay_end_time: float | None = None
 
         self._command_map: dict[int, Callable[..., Any]] = {
             AceCluster.ServerCommandDefs.arm.id: self._cmd_arm,
@@ -229,6 +258,7 @@ class AlarmControlPanel(BaseAlarmControlPanel):
         self._device.gateway.async_create_task(zigbee_reply)
 
         if self.invalid_tries >= self.max_invalid_tries:
+            self._cancel_all_timers()
             self.alarm_status = AceCluster.AlarmStatus.Emergency
             self.armed_state = AceCluster.PanelStatus.In_Alarm
             self._emit_zha_event(
@@ -252,6 +282,7 @@ class AlarmControlPanel(BaseAlarmControlPanel):
                 AceCluster.ArmNotification.Invalid_Arm_Disarm_Code
             )
         else:
+            self._cancel_all_timers()
             self.invalid_tries = 0
             if (
                 self.armed_state == AceCluster.PanelStatus.Panel_Disarmed
@@ -275,6 +306,7 @@ class AlarmControlPanel(BaseAlarmControlPanel):
         """Arm the panel for day / home zones."""
         return self._handle_arm(
             code,
+            self.exit_delay_home,
             AceCluster.PanelStatus.Armed_Stay,
             AceCluster.ArmNotification.Only_Day_Home_Zones_Armed,
         )
@@ -283,6 +315,7 @@ class AlarmControlPanel(BaseAlarmControlPanel):
         """Arm the panel for night / sleep zones."""
         return self._handle_arm(
             code,
+            self.exit_delay_night,
             AceCluster.PanelStatus.Armed_Night,
             AceCluster.ArmNotification.Only_Night_Sleep_Zones_Armed,
         )
@@ -291,6 +324,7 @@ class AlarmControlPanel(BaseAlarmControlPanel):
         """Arm the panel for away mode."""
         return self._handle_arm(
             code,
+            self.exit_delay_away,
             AceCluster.PanelStatus.Armed_Away,
             AceCluster.ArmNotification.All_Zones_Armed,
         )
@@ -298,6 +332,7 @@ class AlarmControlPanel(BaseAlarmControlPanel):
     def _handle_arm(
         self,
         code: str,
+        exit_delay: int,
         panel_status: PanelStatus,
         armed_type: ArmNotification,
     ):
@@ -308,8 +343,12 @@ class AlarmControlPanel(BaseAlarmControlPanel):
                 AceCluster.ArmNotification.Invalid_Arm_Disarm_Code
             )
         else:
-            self.debug("Arming all IAS ACE zones")
-            self.armed_state = panel_status
+            self.debug(
+                "Arming %s with %d second exit delay (configured in ZHA options)",
+                _ARM_EXIT_DELAY_LOG_LABELS[panel_status],
+                exit_delay,
+            )
+            self.start_exit_delay(exit_delay, panel_status, emit_panel_status=False)
             zigbee_reply = self._cluster.arm_response(armed_type)
         return zigbee_reply
 
@@ -338,6 +377,109 @@ class AlarmControlPanel(BaseAlarmControlPanel):
         self.armed_state = AceCluster.PanelStatus.In_Alarm
         self._emit_panel_status_changed()
 
+    def _cancel_all_timers(self) -> None:
+        """Cancel all active timers and clear timer state."""
+        if self._exit_delay_task and not self._exit_delay_task.done():
+            self._exit_delay_task.cancel()
+        self._exit_delay_task = None
+        self._exit_delay_end_time = None
+        self._pending_arm_mode = None
+
+        if self._entry_delay_task and not self._entry_delay_task.done():
+            self._entry_delay_task.cancel()
+        self._entry_delay_task = None
+        self._entry_delay_end_time = None
+
+    def _get_seconds_remaining(self) -> int:
+        """Get seconds remaining in exit or entry delay."""
+        loop = asyncio.get_running_loop()
+        current_time = loop.time()
+
+        if self._entry_delay_end_time is not None:
+            remaining = math.ceil(self._entry_delay_end_time - current_time)
+            return max(0, remaining)
+
+        if self._exit_delay_end_time is not None:
+            remaining = math.ceil(self._exit_delay_end_time - current_time)
+            return max(0, remaining)
+
+        return 0
+
+    async def _exit_delay_complete(self) -> None:
+        """Handle exit delay timer completion."""
+        if self._pending_arm_mode:
+            self.armed_state = self._pending_arm_mode
+            self._pending_arm_mode = None
+        self._exit_delay_end_time = None
+        self._emit_panel_status_changed()
+
+    def start_exit_delay(
+        self,
+        delay_seconds: int,
+        target_panel_status: PanelStatus,
+        *,
+        emit_panel_status: bool = True,
+    ) -> None:
+        """Start exit delay timer."""
+        self._cancel_all_timers()
+
+        if delay_seconds > 0:
+            self.armed_state = AceCluster.PanelStatus.Exit_Delay
+            loop = asyncio.get_running_loop()
+            self._exit_delay_end_time = loop.time() + delay_seconds
+            self._pending_arm_mode = target_panel_status
+
+            self._exit_delay_task = self._device.gateway.async_create_background_task(
+                self._exit_delay_timer(delay_seconds),
+                name=f"exit_delay_{self._cluster_event_unique_id}",
+            )
+
+            if emit_panel_status:
+                self._emit_panel_status_changed()
+        else:
+            self.armed_state = target_panel_status
+
+    async def _exit_delay_timer(self, delay_seconds: int) -> None:
+        """Timer that transitions from exit delay to armed state."""
+        try:
+            await asyncio.sleep(delay_seconds)
+            await self._exit_delay_complete()
+        except asyncio.CancelledError:
+            pass
+
+    def start_entry_delay(self, delay_seconds: int) -> None:
+        """Start entry delay timer."""
+        self._cancel_all_timers()
+
+        if delay_seconds > 0:
+            self.armed_state = AceCluster.PanelStatus.Entry_Delay
+            loop = asyncio.get_running_loop()
+            self._entry_delay_end_time = loop.time() + delay_seconds
+
+            self._entry_delay_task = self._device.gateway.async_create_background_task(
+                self._entry_delay_timer(delay_seconds),
+                name=f"entry_delay_{self._cluster_event_unique_id}",
+            )
+            self._emit_panel_status_changed()
+        else:
+            self.info("Entry delay called with 0 seconds, skipping")
+
+    async def _entry_delay_timer(self, delay_seconds: int) -> None:
+        """Timer for entry delay countdown."""
+        try:
+            await asyncio.sleep(delay_seconds)
+            await self._entry_delay_complete()
+        except asyncio.CancelledError:
+            pass
+
+    async def _entry_delay_complete(self) -> None:
+        """Handle entry delay timer completion - alarm should trigger."""
+        self.armed_state = AceCluster.PanelStatus.In_Alarm
+        self.alarm_status = AceCluster.AlarmStatus.Burglar
+        self._entry_delay_end_time = None
+        self._emit_panel_status_changed()
+        self.info("Entry delay expired - alarm triggered")
+
     def _get_zone_id_map(self):
         """Handle the IAS ACE zone id map command."""
 
@@ -346,9 +488,10 @@ class AlarmControlPanel(BaseAlarmControlPanel):
 
     def _send_panel_status_response(self) -> None:
         """Handle the IAS ACE panel status response command."""
+        seconds_remaining = self._get_seconds_remaining()
         response = self._cluster.panel_status_response(
             self.armed_state,
-            0x00,
+            seconds_remaining,
             AceCluster.AudibleNotification.Default_Sound,
             self.alarm_status,
         )
@@ -356,9 +499,10 @@ class AlarmControlPanel(BaseAlarmControlPanel):
 
     def _emit_panel_status_changed(self) -> None:
         """Handle the IAS ACE panel status changed command."""
+        seconds_remaining = self._get_seconds_remaining()
         response = self._cluster.panel_status_changed(
             self.armed_state,
-            0x00,
+            seconds_remaining,
             AceCluster.AudibleNotification.Default_Sound,
             self.alarm_status,
         )
@@ -407,3 +551,19 @@ class AlarmControlPanel(BaseAlarmControlPanel):
         """Send alarm trigger command."""
         self._panic_cmd()
         self.maybe_emit_state_changed_event()
+
+    async def async_start_entry_delay(self, delay_seconds: int) -> None:
+        """Start entry delay countdown on the keypad."""
+        self.start_entry_delay(delay_seconds)
+        self.maybe_emit_state_changed_event()
+
+    async def async_start_exit_delay(
+        self,
+        delay_seconds: int,
+        arm_mode: Literal["away", "home", "night"] = "away",
+    ) -> None:
+        """Start exit delay countdown on the keypad."""
+        target_panel_status = _EXIT_DELAY_TARGET_PANEL_STATUS[arm_mode]
+        self.start_exit_delay(delay_seconds, target_panel_status)
+        self.maybe_emit_state_changed_event()
+        await self._cluster.arm_response(_ARM_NOTIFICATION_MAP[arm_mode])
