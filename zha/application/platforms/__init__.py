@@ -462,7 +462,14 @@ class BaseEntity(LogMixin, EventBase):
         while self._on_remove_callbacks:
             callback = self._on_remove_callbacks.pop()
             self.debug("Running remove callback: %s", callback)
-            callback()
+            try:
+                callback()
+            except Exception:
+                self.warning(
+                    "Failed to execute on_remove callback %s",
+                    callback,
+                    exc_info=True,
+                )
 
         for handle in self._tracked_handles:
             self.debug("Cancelling handle: %s", handle)
