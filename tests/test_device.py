@@ -129,6 +129,28 @@ def zigpy_device_mains(zha_gateway: Gateway, with_basic_cluster: bool = True):
     )
 
 
+def test_discover_entities_continues_after_endpoint_exception() -> None:
+    """Test discovery preserves partial results and continues after an exception."""
+    zha_device = mock.Mock(ieee="00:0d:6f:00:0a:90:69:e7", is_coordinator=False)
+    endpoint_1 = mock.Mock(id=1, device=zha_device)
+    endpoint_2 = mock.Mock(id=2, device=zha_device)
+    zha_device.endpoints = {1: endpoint_1, 2: endpoint_2}
+
+    def discover_endpoint(endpoint):
+        if endpoint.id == 1:
+            yield mock.sentinel.partial_entity
+            raise RuntimeError("endpoint discovery failed")
+        yield mock.sentinel.later_entity
+
+    with mock.patch(
+        "zha.application.discovery.discover_entities_for_endpoint",
+        side_effect=discover_endpoint,
+    ):
+        entities = list(Device.discover_entities(zha_device))
+
+    assert entities == [mock.sentinel.partial_entity, mock.sentinel.later_entity]
+
+
 async def _send_time_changed(zha_gateway: Gateway, seconds: int):
     """Send a time changed event."""
     await asyncio.sleep(seconds)
