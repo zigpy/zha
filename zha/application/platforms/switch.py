@@ -38,7 +38,6 @@ from zha.application.platforms import (
     register_group_entity,
 )
 from zha.application.platforms.const import (
-    IKEA_AIR_PURIFIER_CLUSTER,
     SINOPE_MANUFACTURER_CLUSTER,
     TUYA_MANUFACTURER_CLUSTER,
 )
@@ -630,36 +629,6 @@ class HueMotionTriggerIndicatorSwitch(ConfigurableAttributeSwitch):
             },
         ),
     }
-
-
-@register_entity(IKEA_AIR_PURIFIER_CLUSTER)
-class ChildLock(ConfigurableAttributeSwitch):
-    """ZHA BinarySensor."""
-
-    _unique_id_suffix = "child_lock"
-    _attribute_name = "child_lock"
-    _attr_translation_key = "child_lock"
-    _cluster_id = IKEA_AIR_PURIFIER_CLUSTER
-
-    _cluster_match = ClusterMatch(
-        server_clusters=frozenset({IKEA_AIR_PURIFIER_CLUSTER}),
-        models=frozenset({"STARKVIND Air purifier", "STARKVIND Air purifier table"}),
-    )
-
-
-@register_entity(IKEA_AIR_PURIFIER_CLUSTER)
-class DisableLed(ConfigurableAttributeSwitch):
-    """ZHA BinarySensor."""
-
-    _unique_id_suffix = "disable_led"
-    _attribute_name = "disable_led"
-    _attr_translation_key = "disable_led"
-    _cluster_id = IKEA_AIR_PURIFIER_CLUSTER
-
-    _cluster_match = ClusterMatch(
-        server_clusters=frozenset({IKEA_AIR_PURIFIER_CLUSTER}),
-        models=frozenset({"STARKVIND Air purifier", "STARKVIND Air purifier table"}),
-    )
 
 
 @register_entity(AQARA_OPPLE_CLUSTER)

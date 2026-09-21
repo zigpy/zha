@@ -33,7 +33,6 @@ from zha.application.platforms import (
     register_entity,
 )
 from zha.application.platforms.const import (
-    IKEA_AIR_PURIFIER_CLUSTER,
     SINOPE_MANUFACTURER_CLUSTER,
     TUYA_MANUFACTURER_CLUSTER,
 )
@@ -739,24 +738,6 @@ class TimerDurationMinutes(NumberConfigurationEntity):
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({TUYA_MANUFACTURER_CLUSTER}),
         manufacturers=frozenset({"_TZE200_htnnfasr"}),
-    )
-
-
-@register_entity(IKEA_AIR_PURIFIER_CLUSTER)
-class FilterLifeTime(NumberConfigurationEntity):
-    """Representation of a ZHA filter lifetime configuration entity."""
-
-    _unique_id_suffix = "filter_life_time"
-    _attr_entity_category = EntityCategory.CONFIG
-    _attr_native_min_value: float = 0x00
-    _attr_native_max_value: float = 0xFFFFFFFF
-    _attr_native_unit_of_measurement: str = UnitOfTime.MINUTES
-    _attribute_name = "filter_life_time"
-    _attr_translation_key: str = "filter_life_time"
-    _cluster_id = IKEA_AIR_PURIFIER_CLUSTER
-
-    _cluster_match = ClusterMatch(
-        server_clusters=frozenset({IKEA_AIR_PURIFIER_CLUSTER}),
     )
 
 
