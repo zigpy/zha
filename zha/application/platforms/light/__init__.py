@@ -822,11 +822,12 @@ class BaseSharedLight(BaseLight):
     def _async_unsub_transition_listener(self) -> None:
         """Unsubscribe transition listener."""
         if self._transition_listener:
-            self._transition_listener.cancel()
+            transition_listener = self._transition_listener
+            transition_listener.cancel()
             self._transition_listener = None
 
             with contextlib.suppress(ValueError):
-                self._tracked_handles.remove(self._transition_listener)
+                self._tracked_handles.remove(transition_listener)
 
     def _async_cleanup_transition_if_stuck(self, guarded: bool) -> None:
         """Call async_transition_complete if the flag is set but no timer is running.
@@ -1127,6 +1128,13 @@ class Light(BaseSharedLight, PlatformEntity):
 
     def start_polling(self) -> None:
         """Start polling."""
+        if self._refresh_task and not self._refresh_task.done():
+            return
+
+        if self._refresh_task and self._refresh_task.done():
+            with contextlib.suppress(ValueError):
+                self._tracked_tasks.remove(self._refresh_task)
+
         self._refresh_task = self.device.gateway.async_create_background_task(
             self._refresh(),
             name=f"light_refresh_{self.unique_id}",
@@ -1148,7 +1156,8 @@ class Light(BaseSharedLight, PlatformEntity):
         """Disable the entity."""
         super().disable()
         if self._refresh_task:
-            self._tracked_tasks.remove(self._refresh_task)
+            with contextlib.suppress(ValueError):
+                self._tracked_tasks.remove(self._refresh_task)
             self._refresh_task.cancel()
             self._refresh_task = None
 
