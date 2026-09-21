@@ -188,6 +188,97 @@ async def test_event_emit_with_context():
     async_callback.assert_awaited_once_with("test", "data")
 
 
+async def test_event_base_once_async_multiple_emits_same_tick() -> None:
+    """Test an async once listener runs once for back-to-back emits."""
+    event = EventGenerator()
+    callback = AsyncMock()
+
+    event.once("test", callback)
+    event.emit("test", "first")
+    event.emit("test", "second")
+
+    assert event._listeners == {"test": []}
+    assert len(event._event_tasks) == 1
+
+    await asyncio.gather(*event._event_tasks)
+
+    assert callback.await_args_list == [call("first")]
+    assert not event._event_tasks
+
+
+def test_event_base_once_reentrant_emit() -> None:
+    """Test a once listener runs once when an earlier listener re-emits."""
+    event = EventGenerator()
+    reentered = False
+
+    def reentrant_listener(data: str) -> None:
+        nonlocal reentered
+        if not reentered:
+            reentered = True
+            event.emit("test", "inner")
+
+    event.on_event("test", reentrant_listener)
+    callback = MagicMock()
+    event.once("test", callback)
+
+    event.emit("test", "outer")
+
+    callback.assert_called_once_with("inner")
+
+
+async def test_event_base_emit_async_callable_object() -> None:
+    """Test an async callable listener is scheduled and tracked."""
+
+    class AsyncCallable:
+        def __init__(self) -> None:
+            self.calls: list[str] = []
+
+        async def __call__(self, data: str) -> None:
+            self.calls.append(data)
+
+    event = EventGenerator()
+    callback = AsyncCallable()
+    event.on_event("test", callback)
+
+    event.emit("test", "payload")
+
+    assert len(event._event_tasks) == 1
+    await asyncio.gather(*event._event_tasks)
+
+    assert callback.calls == ["payload"]
+    assert not event._event_tasks
+
+
+@pytest.mark.parametrize("use_task", [False, True], ids=["future", "task"])
+async def test_event_base_emit_sync_listener_returning_future(
+    use_task: bool,
+) -> None:
+    """Test a Future returned by a sync listener is tracked unchanged."""
+    event = EventGenerator()
+    release = asyncio.Event()
+    if use_task:
+        future: asyncio.Future[None] = asyncio.create_task(release.wait())
+    else:
+        future = asyncio.get_running_loop().create_future()
+    callback = MagicMock(return_value=future)
+    event.on_event("test", callback)
+
+    event.emit("test", "payload")
+
+    try:
+        callback.assert_called_once_with("payload")
+        assert event._event_tasks == [future]
+    finally:
+        if use_task:
+            release.set()
+            await future
+        else:
+            future.set_result(None)
+        await asyncio.sleep(0)
+
+    assert not event._event_tasks
+
+
 def test_handle_event_protocol():
     """Test event base class."""
 
