@@ -2324,3 +2324,64 @@ async def test_turn_off_cancellation_cleans_up_transition_flag(
         await task
 
     assert entity.is_transitioning is False
+
+
+async def test_group_state_ignores_unavailable_members(zha_gateway: Gateway) -> None:
+    """Test that an unavailable member does not keep the group on."""
+
+    coordinator = await coordinator_mock(zha_gateway)
+    device_light_1 = await device_light_1_mock(zha_gateway)
+    device_light_2 = await device_light_2_mock(zha_gateway)
+
+    zha_gateway.coordinator_zha_device = coordinator
+    coordinator._zha_gateway = zha_gateway
+    device_light_1._zha_gateway = zha_gateway
+    device_light_2._zha_gateway = zha_gateway
+
+    members = [
+        GroupMemberReference(ieee=device_light_1.ieee, endpoint_id=1),
+        GroupMemberReference(ieee=device_light_2.ieee, endpoint_id=1),
+    ]
+    zha_group: Group = await zha_gateway.async_create_zigpy_group("Test Group", members)
+    await zha_gateway.async_block_till_done()
+
+    entity: GroupEntity = get_group_entity(zha_group, platform=Platform.LIGHT)
+    device_1_entity = get_entity(device_light_1, platform=Platform.LIGHT)
+    device_2_entity = get_entity(device_light_2, platform=Platform.LIGHT)
+
+    dev1_cluster_on_off = device_light_1.device.endpoints[1].on_off
+    dev2_cluster_on_off = device_light_2.device.endpoints[1].on_off
+
+    # both members on, so the group is on
+    await send_attributes_report(zha_gateway, dev1_cluster_on_off, {0: 1})
+    await send_attributes_report(zha_gateway, dev2_cluster_on_off, {0: 1})
+    await zha_gateway.async_block_till_done()
+    assert device_1_entity.state.on is True
+    assert device_2_entity.state.on is True
+    # group member updates are debounced
+    await asyncio.sleep(0.1)
+    await zha_gateway.async_block_till_done()
+    assert bool(entity.state.on) is True
+
+    # the second member drops off the network while it is still on
+    device_light_2.on_network = False
+    await asyncio.sleep(0.1)
+    await zha_gateway.async_block_till_done()
+    assert device_2_entity.state.available is False
+    assert device_2_entity.state.on is True
+
+    # turning the reachable member off turns the group off: the unavailable
+    # member's last known state must not keep the group on
+    await send_attributes_report(zha_gateway, dev1_cluster_on_off, {0: 0})
+    await zha_gateway.async_block_till_done()
+    assert device_1_entity.state.on is False
+    # group member updates are debounced
+    await asyncio.sleep(0.1)
+    await zha_gateway.async_block_till_done()
+    assert bool(entity.state.on) is False
+
+    # once it is reachable again its state counts, and the group is on
+    device_light_2.on_network = True
+    await asyncio.sleep(0.1)
+    await zha_gateway.async_block_till_done()
+    assert bool(entity.state.on) is True
