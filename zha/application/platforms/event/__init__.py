@@ -6,9 +6,17 @@ import dataclasses
 from typing import TYPE_CHECKING, Any, Final
 
 from zigpy.types.named import EUI64
+from zigpy.zcl.clusters.general import LevelControl, OnOff
+from zigpy.zcl.clusters.lighting import Color
+from zigpy.zcl.foundation import CommandSchema
 
 from zha.application import Platform
-from zha.application.platforms import BaseEntityState, PlatformEntity
+from zha.application.platforms import (
+    BaseEntityState,
+    ClusterMatch,
+    PlatformEntity,
+    register_entity,
+)
 from zha.application.platforms.event.const import DoorbellEventType, EventDeviceClass
 
 if TYPE_CHECKING:
@@ -94,3 +102,93 @@ class BaseEvent(PlatformEntity):
                 ),
             ),
         )
+
+
+class ClusterCommandEvent(BaseEvent):
+    """Event entity driven by commands received on its bound client cluster."""
+
+    def on_add(self) -> None:
+        """Listen for commands on the bound client cluster."""
+        super().on_add()
+        self._cluster.add_listener(self)
+        self._on_remove_callbacks.append(lambda: self._cluster.remove_listener(self))
+
+    def cluster_command(self, tsn: int, command_id: int, args: Any) -> None:
+        """Trigger an event for an incoming client cluster command."""
+        if (command := self._cluster.server_commands.get(command_id)) is None:
+            return
+
+        event_attributes = (
+            args.as_dict(skip_missing=True, recursive=True)
+            if isinstance(args, CommandSchema)
+            else {}
+        )
+        self._trigger_event(command.name, event_attributes)
+
+
+@register_entity(LevelControl.cluster_id)
+class LevelControlEvent(ClusterCommandEvent):
+    """Representation of a ZHA entity with level control events."""
+
+    _attr_translation_key = "level_control"
+    _attr_event_types = [
+        "step",
+        "step_with_on_off",
+        "stop",
+        "move",
+        "move_with_on_off",
+        "move_to_level",
+        "move_to_level_with_on_off",
+    ]
+    _cluster_match = ClusterMatch(
+        client_clusters=frozenset({LevelControl.cluster_id}),
+    )
+
+
+@register_entity(OnOff.cluster_id)
+class OnOffEvent(ClusterCommandEvent):
+    """Representation of a ZHA entity with on/off events."""
+
+    _attr_translation_key = "on_off"
+    _attr_event_types = [
+        "off",
+        "on",
+        "toggle",
+        "off_with_effect",
+        "on_with_recall_global_scene",
+        "on_with_timed_off",
+    ]
+    _cluster_match = ClusterMatch(
+        client_clusters=frozenset({OnOff.cluster_id}),
+    )
+
+
+@register_entity(Color.cluster_id)
+class ColorEvent(ClusterCommandEvent):
+    """Representation of a ZHA entity with color cluster events."""
+
+    _attr_translation_key = "color"
+    _attr_event_types = [
+        "move_to_hue",
+        "move_hue",
+        "step_hue",
+        "move_to_saturation",
+        "move_saturation",
+        "step_saturation",
+        "move_to_hue_and_saturation",
+        "move_to_color",
+        "move_color",
+        "step_color",
+        "move_to_color_temp",
+        "enhanced_move_to_hue",
+        "enhanced_move_hue",
+        "enhanced_step_hue",
+        "enhanced_move_to_hue_and_saturation",
+        "color_loop_set",
+        "stop_move_step",
+        "move_color_temp",
+        "step_color_temp",
+    ]
+    _cluster_match = ClusterMatch(
+        client_clusters=frozenset({Color.cluster_id}),
+    )
