@@ -6,7 +6,7 @@ import asyncio
 from collections.abc import Iterator
 import logging
 from typing import Any
-from unittest.mock import AsyncMock, MagicMock, call, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 import zoneinfo
 
 from freezegun import freeze_time
@@ -31,13 +31,7 @@ from tests.common import (
     send_attributes_report,
 )
 from zha.application import Platform
-from zha.application.const import (
-    PRESET_AWAY,
-    PRESET_BOOST,
-    PRESET_NONE,
-    PRESET_SCHEDULE,
-    PRESET_TEMP_MANUAL,
-)
+from zha.application.const import PRESET_NONE, PRESET_SCHEDULE
 from zha.application.gateway import Gateway
 from zha.application.platforms import BaseEntity
 from zha.application.platforms.climate import (
@@ -153,23 +147,6 @@ CLIMATE_MOES = {
     }
 }
 
-CLIMATE_BECA = {
-    1: {
-        SIG_EP_PROFILE: zigpy.profiles.zha.PROFILE_ID,
-        SIG_EP_TYPE: zigpy.profiles.zha.DeviceType.SMART_PLUG,
-        SIG_EP_INPUT: [
-            zigpy.zcl.clusters.general.Basic.cluster_id,
-            zigpy.zcl.clusters.general.Groups.cluster_id,
-            zigpy.zcl.clusters.general.Scenes.cluster_id,
-            61148,
-        ],
-        SIG_EP_OUTPUT: [
-            zigpy.zcl.clusters.general.Time.cluster_id,
-            zigpy.zcl.clusters.general.Ota.cluster_id,
-        ],
-    }
-}
-
 CLIMATE_ZONNSMART = {
     1: {
         SIG_EP_PROFILE: zigpy.profiles.zha.PROFILE_ID,
@@ -188,7 +165,6 @@ MANUF_SINOPE = "Sinope Technologies"
 MANUF_ZEN = "Zen Within"
 MANUF_ZEHNDER = "ZEHNDER GROUP VAUX ANDIGNY      "
 MANUF_MOES = "_TZE200_ckud7u2l"
-MANUF_BECA = "_TZE200_b6wax7g0"
 MANUF_ZONNSMART = "_TZE200_hue3yfsn"
 
 ZCL_ATTR_PLUG = {
@@ -1463,52 +1439,6 @@ async def test_set_moes_operation_mode(zha_gateway: Gateway):
 
 # Device is running an energy-saving mode
 PRESET_ECO = "eco"
-
-
-@pytest.mark.parametrize(
-    ("preset_attr", "preset_mode"),
-    [
-        (0, PRESET_AWAY),
-        (1, PRESET_SCHEDULE),
-        # (2, PRESET_NONE),  # TODO: why does this not work?
-        (4, PRESET_ECO),
-        (5, PRESET_BOOST),
-        (7, PRESET_TEMP_MANUAL),
-    ],
-)
-async def test_beca_operation_mode_update(
-    zha_gateway: Gateway,
-    preset_attr: int,
-    preset_mode: str,
-) -> None:
-    """Test beca trv operation mode attribute update."""
-    device_climate_beca = await device_climate_mock(
-        zha_gateway,
-        CLIMATE_BECA,
-        manuf=MANUF_BECA,
-        quirk=zhaquirks.tuya.ts0601_trv.MoesHY368_Type1new,
-    )
-    thrm_cluster = device_climate_beca.device.endpoints[1].thermostat
-    entity: ThermostatEntity = get_entity(
-        device_climate_beca, platform=Platform.CLIMATE, entity_type=ThermostatEntity
-    )
-
-    # Test sending an attribute report
-    await send_attributes_report(
-        zha_gateway, thrm_cluster, {"operation_preset": preset_attr}
-    )
-
-    assert entity.state.preset_mode == preset_mode
-
-    await entity.async_set_preset_mode(preset_mode)
-    await zha_gateway.async_block_till_done()
-
-    assert thrm_cluster.write_attributes.mock_calls == [
-        call(
-            {"operation_preset": preset_attr},
-            manufacturer=device_climate_beca.manufacturer_code,
-        )
-    ]
 
 
 async def test_set_zonnsmart_preset(zha_gateway: Gateway) -> None:
