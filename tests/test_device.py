@@ -1,7 +1,9 @@
 """Test ZHA device switch."""
 
 import asyncio
+import json
 import logging
+import pathlib
 import time
 from unittest import mock
 from unittest.mock import AsyncMock, call, patch
@@ -39,6 +41,7 @@ from tests.common import (
     create_mock_zigpy_device,
     get_entity,
     join_zigpy_device,
+    zigpy_device_from_device_data,
     zigpy_device_from_json,
 )
 from zha.application import EntityType, Platform
@@ -2038,6 +2041,55 @@ async def test_add_entity_duplicate(zha_gateway: Gateway) -> None:
 
     with pytest.raises(ValueError, match="unique ID already taken"):
         zha_device._add_entity(existing_entity)
+
+
+async def test_concurrent_initialize_does_not_add_entities_twice(
+    zha_gateway: Gateway,
+) -> None:
+    """Test that two overlapping `async_initialize` calls add each entity once.
+
+    Startup mains polling, a device join / re-interview and a device becoming
+    available again can all initialize the same device at the same time. Both
+    calls used to drain the shared pending-entity list and the loser then hit
+    `_add_entity`'s "unique ID already taken" check with the winner's own entity.
+
+    This mirrors the startup mains poll landing in the middle of a join: the
+    bulb's polling light entity owns a task, so dropping a duplicate of it in
+    `_add_pending_entities` really suspends and lets the two calls interleave.
+    """
+    zigpy_dev = await zigpy_device_from_json(
+        zha_gateway.application_controller,
+        "tests/data/devices/ikea-of-sweden-tradfri-bulb-gu10-ws-400lm-0x23095631.json",
+    )
+    zha_gateway.application_controller.devices[zigpy_dev.ieee] = zigpy_dev
+    zha_device = zha_gateway.get_or_create_device(zigpy_dev)
+
+    async def join() -> None:
+        await zha_device.async_configure()
+        await zha_device.async_initialize()
+
+    await asyncio.gather(join(), zha_device.async_initialize(from_cache=False))
+
+    # Same entity set as a plain join of the same device
+    device_data = json.loads(
+        pathlib.Path(
+            "tests/data/devices/ikea-of-sweden-tradfri-bulb-gu10-ws-400lm-0x23095631.json"
+        ).read_text()
+    )
+    reference_dev = zigpy_device_from_device_data(
+        zha_gateway.application_controller,
+        {**device_data, "ieee": "00:11:22:33:44:55:66:77", "nwk": "0x1234"},
+    )
+    reference_device = await join_zigpy_device(zha_gateway, reference_dev)
+
+    def entity_ids(device: Device) -> set[str]:
+        return {
+            unique_id.replace(str(device.ieee), "IEEE")
+            for (_platform, unique_id) in device.platform_entities
+        }
+
+    assert entity_ids(zha_device) == entity_ids(reference_device)
+    assert not zha_device._pending_entities
 
 
 async def test_remove_entity_nonexistent(zha_gateway: Gateway) -> None:
