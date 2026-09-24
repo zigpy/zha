@@ -1650,9 +1650,11 @@ class Device(LogMixin, EventBase):
         # entity describes the main feature of the device, which does not change when
         # its entity is disabled.
         candidates = [
-            e for e in entities if e._attr_primary is not False and e.primary_weight > 0
+            e
+            for e in entities
+            if e._attr_primary is not False and e._attr_primary_weight > 0
         ]
-        candidates.sort(reverse=True, key=lambda e: e.primary_weight)
+        candidates.sort(reverse=True, key=lambda e: e._attr_primary_weight)
 
         if not candidates:
             return
@@ -1661,7 +1663,7 @@ class Device(LogMixin, EventBase):
         others = candidates[1:]
 
         # We have a clear winner
-        if not others or winner.primary_weight > others[0].primary_weight:
+        if not others or winner._attr_primary_weight > others[0]._attr_primary_weight:
             self._primary_entity = winner
             return
 

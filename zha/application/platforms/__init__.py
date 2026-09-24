@@ -349,11 +349,6 @@ class BaseEntity(LogMixin, EventBase):
         return bool(self._attr_primary)
 
     @property
-    def primary_weight(self) -> int:
-        """Return the primary weight of the entity."""
-        return self._attr_primary_weight
-
-    @property
     def fallback_name(self) -> str | None:
         """Return the entity fallback name for when a translation key is unavailable."""
         return self._attr_fallback_name
