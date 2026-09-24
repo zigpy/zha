@@ -681,30 +681,6 @@ class AqaraPlugInit(_AqaraOppleInitBase):
 
 
 @register_entity(AQARA_OPPLE_CLUSTER)
-class AqaraFeederInit(_AqaraOppleInitBase):
-    """Aqara pet feeder attribute init."""
-
-    _cluster_match = ClusterMatch(
-        server_clusters=frozenset({AQARA_OPPLE_CLUSTER}),
-        models=frozenset({"aqara.feeder.acn001"}),
-    )
-    _server_cluster_config = {
-        AQARA_OPPLE_CLUSTER: ClusterConfig(
-            attributes={
-                "portions_dispensed": AttrConfig(read_on_startup=False),
-                "weight_dispensed": AttrConfig(read_on_startup=False),
-                "error_detected": AttrConfig(read_on_startup=False),
-                "disable_led_indicator": AttrConfig(read_on_startup=False),
-                "child_lock": AttrConfig(read_on_startup=False),
-                "feeding_mode": AttrConfig(read_on_startup=False),
-                "serving_size": AttrConfig(read_on_startup=False),
-                "portion_weight": AttrConfig(read_on_startup=False),
-            },
-        ),
-    }
-
-
-@register_entity(AQARA_OPPLE_CLUSTER)
 class AqaraThermostatAgl001Init(_AqaraOppleInitBase):
     """Aqara E1 radiator thermostat attribute init."""
 

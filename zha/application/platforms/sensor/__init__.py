@@ -123,7 +123,6 @@ from zha.units import (
     UnitOfElectricPotential,
     UnitOfEnergy,
     UnitOfFrequency,
-    UnitOfMass,
     UnitOfPower,
     UnitOfPressure,
     UnitOfSpeed,
@@ -3347,77 +3346,6 @@ class IkeaFilterRunTime(Sensor):
 
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({IKEA_AIR_PURIFIER_CLUSTER}),
-    )
-
-
-class AqaraFeedingSource(types.enum8):
-    """Aqara pet feeder feeding source."""
-
-    Feeder = 0x01
-    HomeAssistant = 0x02
-
-
-@register_entity(AQARA_OPPLE_CLUSTER)
-class AqaraPetFeederLastFeedingSource(EnumSensor):
-    """Sensor that displays the last feeding source of pet feeder."""
-
-    _attribute_name = "last_feeding_source"
-    _unique_id_suffix = "last_feeding_source"
-    _attr_translation_key: str = "last_feeding_source"
-    _enum = AqaraFeedingSource
-    _cluster_id = AQARA_OPPLE_CLUSTER
-
-    _cluster_match = ClusterMatch(
-        server_clusters=frozenset({AQARA_OPPLE_CLUSTER}),
-        models=frozenset({"aqara.feeder.acn001"}),
-    )
-
-
-@register_entity(AQARA_OPPLE_CLUSTER)
-class AqaraPetFeederLastFeedingSize(Sensor):
-    """Sensor that displays the last feeding size of the pet feeder."""
-
-    _attribute_name = "last_feeding_size"
-    _unique_id_suffix = "last_feeding_size"
-    _attr_translation_key: str = "last_feeding_size"
-    _cluster_id = AQARA_OPPLE_CLUSTER
-
-    _cluster_match = ClusterMatch(
-        server_clusters=frozenset({AQARA_OPPLE_CLUSTER}),
-        models=frozenset({"aqara.feeder.acn001"}),
-    )
-
-
-@register_entity(AQARA_OPPLE_CLUSTER)
-class AqaraPetFeederPortionsDispensed(Sensor):
-    """Sensor that displays the number of portions dispensed by the pet feeder."""
-
-    _attribute_name = "portions_dispensed"
-    _unique_id_suffix = "portions_dispensed"
-    _attr_translation_key: str = "portions_dispensed_today"
-    _attr_state_class: SensorStateClass = SensorStateClass.TOTAL_INCREASING
-    _cluster_id = AQARA_OPPLE_CLUSTER
-
-    _cluster_match = ClusterMatch(
-        server_clusters=frozenset({AQARA_OPPLE_CLUSTER}),
-        models=frozenset({"aqara.feeder.acn001"}),
-    )
-
-
-@register_entity(AQARA_OPPLE_CLUSTER)
-class AqaraPetFeederWeightDispensed(Sensor):
-    """Sensor that displays the weight dispensed by the pet feeder."""
-
-    _attribute_name = "weight_dispensed"
-    _unique_id_suffix = "weight_dispensed"
-    _attr_translation_key: str = "weight_dispensed_today"
-    _attr_native_unit_of_measurement = UnitOfMass.GRAMS
-    _attr_state_class: SensorStateClass = SensorStateClass.TOTAL_INCREASING
-    _cluster_id = AQARA_OPPLE_CLUSTER
-
-    _cluster_match = ClusterMatch(
-        server_clusters=frozenset({AQARA_OPPLE_CLUSTER}),
-        models=frozenset({"aqara.feeder.acn001"}),
     )
 
 
