@@ -2026,6 +2026,39 @@ async def test_entity_recomputation(zha_gateway: Gateway) -> None:
     ]
 
 
+async def test_async_configure_does_not_queue_entities(zha_gateway: Gateway) -> None:
+    """Test a reconfigure does not leave half-added entities behind."""
+    zigpy_dev = await zigpy_device_from_json(
+        zha_gateway.application_controller,
+        "tests/data/devices/ikea-of-sweden-tradfri-bulb-gu10-ws-400lm-0x23095631.json",
+    )
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
+
+    entities_before = dict(zha_device.platform_entities)
+
+    await zha_device.async_configure()
+
+    # Discovery ran for the cluster config aggregation, but no entities were
+    # activated via `on_add()` and queued (nothing would ever flush them here)
+    assert zha_device._discovered_entities
+    assert not zha_device._pending_entities
+    assert zha_device.platform_entities == entities_before
+
+    # After a rebuild (same-quirk re-interview), the device has no live entities
+    # anymore, so configuration must activate and queue the entities again (e.g.
+    # the IAS zone enrollment entity has to listen during CIE configuration)
+    await zha_device.async_rebuild_from_zigpy_device(zigpy_dev)
+    await zha_device.async_configure()
+
+    assert zha_device._pending_entities
+
+    # The following initialization adds them, like on the initial join
+    await zha_device.async_initialize(from_cache=True)
+
+    assert not zha_device._pending_entities
+    assert set(zha_device.platform_entities) == set(entities_before)
+
+
 async def test_add_entity_duplicate(zha_gateway: Gateway) -> None:
     """Test that adding a duplicate entity raises an error."""
     zigpy_dev = await zigpy_device_from_json(
