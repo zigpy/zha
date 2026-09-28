@@ -129,6 +129,11 @@ async def test_emitter(emitter: FakeEmitter) -> None:
     signal = InfraredSignal(timings=[9000, -4500, 560, -1690], modulation=38000)
     await emitter.async_send_command(signal)
     assert emitter.sent == [signal]
+    assert signal.repeat_count == 0
+
+    repeated = InfraredSignal(timings=[9000, -4500], modulation=38000, repeat_count=3)
+    await emitter.async_send_command(repeated)
+    assert emitter.sent == [signal, repeated]
 
 
 async def test_receiver_state(receiver: FakeReceiver) -> None:

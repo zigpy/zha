@@ -22,7 +22,8 @@ class InfraredSignal:
     """A raw infrared signal, sent by an emitter or captured by a receiver."""
 
     timings: list[int]
-    modulation: int
+    modulation: int | None = None
+    repeat_count: int = 0
 
 
 @dataclasses.dataclass(frozen=True, kw_only=True)
