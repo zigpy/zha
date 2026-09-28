@@ -9,7 +9,7 @@ from typing import Final
 from zigpy.types.named import EUI64
 
 from zha.application import Platform
-from zha.application.platforms import BaseEntityState, PlatformEntity
+from zha.application.platforms import PlatformEntity
 from zha.application.platforms.infrared.const import InfraredDeviceClass
 
 
@@ -20,13 +20,6 @@ class InfraredSignal:
     timings: list[int]
     modulation: int | None = None
     repeat_count: int = 0
-
-
-@dataclasses.dataclass(frozen=True, kw_only=True)
-class InfraredReceiverState(BaseEntityState):
-    """State for infrared receiver entities."""
-
-    receiving: bool
 
 
 @dataclasses.dataclass(frozen=True, kw_only=True)
@@ -61,29 +54,6 @@ class BaseInfraredReceiver(PlatformEntity):
     PLATFORM = Platform.INFRARED
 
     _attr_device_class: InfraredDeviceClass = InfraredDeviceClass.RECEIVER
-
-    _receiving: bool = False
-
-    @property
-    def receiving(self) -> bool:
-        """Return whether the device is currently in receive mode."""
-        return self._receiving
-
-    @property
-    def state(self) -> InfraredReceiverState:
-        """Return the state of the infrared receiver entity."""
-        return InfraredReceiverState(
-            **super().state.__dict__,
-            receiving=self.receiving,
-        )
-
-    @abstractmethod
-    async def async_start_receiving(self) -> None:
-        """Put the device into receive mode."""
-
-    @abstractmethod
-    async def async_stop_receiving(self) -> None:
-        """Take the device out of receive mode."""
 
     def _handle_received_signal(self, signal: InfraredSignal) -> None:
         """Handle a captured signal, to be called by subclasses."""

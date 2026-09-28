@@ -21,7 +21,6 @@ from zha.application.platforms.infrared import (
     BaseInfraredEmitter,
     BaseInfraredReceiver,
     EntityInfraredSignalReceivedEvent,
-    InfraredReceiverState,
     InfraredSignal,
 )
 from zha.application.platforms.infrared.const import InfraredDeviceClass
@@ -44,44 +43,13 @@ class FakeEmitter(BaseInfraredEmitter):
 
 
 class FakeReceiver(BaseInfraredReceiver):
-    """Receiver that records the receive mode requests it was given."""
+    """Receiver that captures signals on demand."""
 
     _unique_id_suffix = "fake_receiver"
-
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
-        """Initialize the fake receiver."""
-        super().__init__(*args, **kwargs)
-        self.requests: list[str] = []
-
-    async def async_start_receiving(self) -> None:
-        """Record the request to enter receive mode."""
-        self.requests.append("start")
-        self._receiving = True
-        self.maybe_emit_state_changed_event()
-
-    async def async_stop_receiving(self) -> None:
-        """Record the request to leave receive mode."""
-        self.requests.append("stop")
-        self._receiving = False
-        self.maybe_emit_state_changed_event()
 
     def receive(self, signal: InfraredSignal) -> None:
         """Capture a signal, as a concrete subclass would."""
         self._handle_received_signal(signal)
-
-    def time_out(self) -> None:
-        """Report the device's own receive timeout lapsing."""
-        self._receiving = False
-        self.maybe_emit_state_changed_event()
-
-
-class FakeOneShotReceiver(FakeReceiver):
-    """Receiver whose device leaves receive mode as soon as it captures a signal."""
-
-    def receive(self, signal: InfraredSignal) -> None:
-        """Capture a signal and leave receive mode."""
-        super().receive(signal)
-        self.time_out()
 
 
 @pytest.fixture
@@ -142,41 +110,10 @@ async def test_emitter(emitter: FakeEmitter) -> None:
 
 
 async def test_receiver_state(receiver: FakeReceiver) -> None:
-    """Test the state of a receiver entity."""
+    """Test that the state of a receiver only describes its capabilities."""
     assert receiver.PLATFORM == Platform.INFRARED
     assert receiver.device_class == InfraredDeviceClass.RECEIVER
-
-    state = receiver.state
-    assert isinstance(state, InfraredReceiverState)
-    assert state.receiving is False
-
-
-async def test_start_and_stop_receiving(receiver: FakeReceiver) -> None:
-    """Test entering and leaving receive mode."""
-    state_changes: list[EntityStateChangedEvent] = []
-    receiver.subscribe_state(state_changes.append)
-    assert len(state_changes) == 1
-
-    await receiver.async_start_receiving()
-    assert receiver.requests == ["start"]
-    assert receiver.receiving is True
-    assert state_changes[-1].state_diff == {"receiving": True}
-
-    await receiver.async_stop_receiving()
-    assert receiver.requests == ["start", "stop"]
-    assert receiver.receiving is False
-    assert state_changes[-1].state_diff == {"receiving": False}
-
-
-async def test_receive_mode_ended_by_device(receiver: FakeReceiver) -> None:
-    """Test the device leaving receive mode on its own timeout."""
-    await receiver.async_start_receiving()
-
-    receiver.time_out()
-    assert receiver.receiving is False
-
-    # The device stopped on its own, so it is not asked to
-    assert receiver.requests == ["start"]
+    assert receiver.state.device_class == "receiver"
 
 
 async def test_received_signal(receiver: FakeReceiver) -> None:
@@ -187,7 +124,6 @@ async def test_received_signal(receiver: FakeReceiver) -> None:
     # Nothing is delivered until a signal is actually captured
     assert signals == []
 
-    await receiver.async_start_receiving()
     receiver.receive(InfraredSignal(timings=[9000, -4500], modulation=38000))
     assert signals == [
         EntityInfraredSignalReceivedEvent(
@@ -215,26 +151,9 @@ async def test_received_signal(receiver: FakeReceiver) -> None:
 
 async def test_capturing_signal_does_not_change_state(receiver: FakeReceiver) -> None:
     """Test that capturing a signal is not a state change."""
-    await receiver.async_start_receiving()
-
     state_changes: list[EntityStateChangedEvent] = []
     receiver.subscribe_state(state_changes.append)
     assert len(state_changes) == 1
 
     receiver.receive(InfraredSignal(timings=[9000, -4500]))
     assert len(state_changes) == 1
-
-
-async def test_receive_mode_ends_on_capture(zha_device: Device) -> None:
-    """Test a device that leaves receive mode once it captures a signal."""
-    receiver = create_infrared_entity(zha_device, FakeOneShotReceiver)
-
-    signals: list[EntityInfraredSignalReceivedEvent] = []
-    receiver.on_event(EntityInfraredSignalReceivedEvent.event, signals.append)
-
-    await receiver.async_start_receiving()
-    receiver.receive(InfraredSignal(timings=[9000, -4500]))
-
-    assert len(signals) == 1
-    assert receiver.receiving is False
-    assert receiver.requests == ["start"]
