@@ -24,6 +24,7 @@ from zigpy.zcl import (
 )
 from zigpy.zcl.clusters.closures import DoorLock, WindowCovering
 from zigpy.zcl.clusters.general import Identify, LevelControl, OnOff, Ota, Scenes
+from zigpy.zcl.clusters.homeautomation import ElectricalMeasurement
 from zigpy.zcl.clusters.lighting import Color
 from zigpy.zcl.clusters.lightlink import LightLink
 from zigpy.zcl.clusters.security import IasZone
@@ -1240,6 +1241,53 @@ class InovelliVzm35Init(VirtualEntity):
                     "firmware_progress_led": False,
                     "smart_fan_led_display_levels": False,
                 }.items()
+            },
+        ),
+    }
+
+
+# === Model-specific reporting overrides on standard clusters ===
+
+
+@register_entity(ElectricalMeasurement.cluster_id)
+class SonoffS60RelaxedElectricalMeasurementReporting(VirtualEntity):
+    """Relaxed voltage/current reporting for the SONOFF S60 plugs.
+
+    These plugs report `rms_voltage` and `rms_current` with `ac_voltage_divisor` and
+    `ac_current_divisor` of 100 (verified on S60ZBTPG firmware 0x00001002), so the
+    default raw reportable change of 1 is 0.01 V / 0.01 A and the device reports at
+    the 5-second minimum interval. Override with 1 V / 0.05 A.
+
+    Temporary workaround. Overriding configs are merged with each other (tightest
+    wins), so this must be removed in the same release the S60 quirk starts
+    declaring its own reporting override; it becomes redundant once reportable
+    changes are divisor-aware for all devices.
+    """
+
+    _unique_id_suffix = "sonoff_s60_em_reporting"
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({ElectricalMeasurement.cluster_id}),
+        manufacturers=frozenset({"SONOFF"}),
+        models=frozenset({"S60ZBTPF", "S60ZBTPG"}),
+    )
+    _server_cluster_config = {
+        ElectricalMeasurement.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                ElectricalMeasurement.AttributeDefs.rms_voltage: AttrConfig(
+                    read_on_startup=False,
+                    reporting=ReportingConfig(
+                        min_interval=5, max_interval=900, reportable_change=100
+                    ),
+                    reporting_override=True,
+                ),
+                ElectricalMeasurement.AttributeDefs.rms_current: AttrConfig(
+                    read_on_startup=False,
+                    reporting=ReportingConfig(
+                        min_interval=5, max_interval=900, reportable_change=5
+                    ),
+                    reporting_override=True,
+                ),
             },
         ),
     }

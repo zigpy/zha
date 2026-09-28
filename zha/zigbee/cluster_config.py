@@ -33,27 +33,42 @@ class AggregatedAttrConfig:
 
     read_on_startup: bool = False
     reporting: ReportingConfig | None = None
+    reporting_override: bool = False
 
     def merge(self, config: AttrConfig) -> None:
-        """Merge another attribute config (fresh read and tightest reporting win)."""
+        """Merge another attribute config.
+
+        A fresh read wins over a cached one. For reporting, the tightest config wins,
+        except that overriding configs (`AttrConfig.reporting_override`) replace
+        non-overriding ones entirely and are only merged with other overriding configs.
+        """
         self.read_on_startup = self.read_on_startup or config.read_on_startup
 
-        if config.reporting is not None:
-            if self.reporting is None:
-                self.reporting = config.reporting
-            else:
-                self.reporting = ReportingConfig(
-                    min_interval=min(
-                        self.reporting.min_interval, config.reporting.min_interval
-                    ),
-                    max_interval=min(
-                        self.reporting.max_interval, config.reporting.max_interval
-                    ),
-                    reportable_change=min(
-                        self.reporting.reportable_change,
-                        config.reporting.reportable_change,
-                    ),
-                )
+        if config.reporting is None:
+            return
+
+        if config.reporting_override and not self.reporting_override:
+            # First overriding config: discard whatever the defaults merged to
+            self.reporting = config.reporting
+            self.reporting_override = True
+        elif self.reporting_override and not config.reporting_override:
+            # Non-overriding configs cannot tighten an override
+            return
+        elif self.reporting is None:
+            self.reporting = config.reporting
+        else:
+            self.reporting = ReportingConfig(
+                min_interval=min(
+                    self.reporting.min_interval, config.reporting.min_interval
+                ),
+                max_interval=min(
+                    self.reporting.max_interval, config.reporting.max_interval
+                ),
+                reportable_change=min(
+                    self.reporting.reportable_change,
+                    config.reporting.reportable_change,
+                ),
+            )
 
 
 @dataclass
