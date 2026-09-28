@@ -105,7 +105,7 @@ def create_infrared_entity[T: BaseInfraredEmitter | BaseInfraredReceiver](
     return entity_class(
         endpoint=endpoint,
         device=zha_device,
-        cluster=endpoint.zigpy_endpoint.on_off,
+        cluster=endpoint.zigpy_endpoint.out_clusters[general.OnOff.cluster_id],
     )
 
 
