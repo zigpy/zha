@@ -27,6 +27,7 @@ class BaseValve(PlatformEntity, ABC):
 
     PLATFORM = Platform.VALVE
 
+    _attr_primary_weight = 10
     _attr_device_class: ValveDeviceClass | None = None
     _attr_reports_position: bool = False
     _attr_supported_features: ValveEntityFeature = (

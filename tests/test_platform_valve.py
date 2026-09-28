@@ -102,6 +102,7 @@ async def test_valve_state(zha_device: Device) -> None:
     entity.subscribe_state(state_changes.append)
 
     assert entity.PLATFORM == Platform.VALVE
+    assert entity.primary_weight == 10
     assert entity.device_class == ValveDeviceClass.WATER
     assert entity.supported_features == (
         ValveEntityFeature.OPEN | ValveEntityFeature.CLOSE
