@@ -4,17 +4,13 @@ from __future__ import annotations
 
 from abc import abstractmethod
 import dataclasses
-from typing import TYPE_CHECKING, Any, Final
+from typing import Final
 
 from zigpy.types.named import EUI64
 
 from zha.application import Platform
 from zha.application.platforms import BaseEntityState, PlatformEntity
 from zha.application.platforms.infrared.const import InfraredDeviceClass
-
-if TYPE_CHECKING:
-    from zha.zigbee.device import Device
-    from zha.zigbee.endpoint import Endpoint
 
 
 @dataclasses.dataclass(frozen=True, kw_only=True)
@@ -66,11 +62,7 @@ class BaseInfraredReceiver(PlatformEntity):
 
     _attr_device_class: InfraredDeviceClass = InfraredDeviceClass.RECEIVER
 
-    def __init__(self, endpoint: Endpoint, device: Device, **kwargs: Any) -> None:
-        """Initialize the infrared receiver entity."""
-        super().__init__(endpoint=endpoint, device=device, **kwargs)
-
-        self._receiving = False
+    _receiving: bool = False
 
     @property
     def receiving(self) -> bool:
@@ -85,25 +77,13 @@ class BaseInfraredReceiver(PlatformEntity):
             receiving=self.receiving,
         )
 
+    @abstractmethod
     async def async_start_receiving(self) -> None:
         """Put the device into receive mode."""
-        await self._async_start_receiving()
-        self._receiving = True
-        self.maybe_emit_state_changed_event()
 
+    @abstractmethod
     async def async_stop_receiving(self) -> None:
         """Take the device out of receive mode."""
-        if not self._receiving:
-            return
-
-        await self._async_stop_receiving()
-        self._receiving = False
-        self.maybe_emit_state_changed_event()
-
-    def _handle_receive_mode_ended(self) -> None:
-        """Handle the device leaving receive mode, to be called by subclasses."""
-        self._receiving = False
-        self.maybe_emit_state_changed_event()
 
     def _handle_received_signal(self, signal: InfraredSignal) -> None:
         """Handle a captured signal, to be called by subclasses."""
@@ -114,11 +94,3 @@ class BaseInfraredReceiver(PlatformEntity):
                 signal=signal,
             ),
         )
-
-    @abstractmethod
-    async def _async_start_receiving(self) -> None:
-        """Ask the device to enter receive mode."""
-
-    @abstractmethod
-    async def _async_stop_receiving(self) -> None:
-        """Ask the device to leave receive mode."""

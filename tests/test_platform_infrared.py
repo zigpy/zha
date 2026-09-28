@@ -53,13 +53,17 @@ class FakeReceiver(BaseInfraredReceiver):
         super().__init__(*args, **kwargs)
         self.requests: list[str] = []
 
-    async def _async_start_receiving(self) -> None:
+    async def async_start_receiving(self) -> None:
         """Record the request to enter receive mode."""
         self.requests.append("start")
+        self._receiving = True
+        self.maybe_emit_state_changed_event()
 
-    async def _async_stop_receiving(self) -> None:
+    async def async_stop_receiving(self) -> None:
         """Record the request to leave receive mode."""
         self.requests.append("stop")
+        self._receiving = False
+        self.maybe_emit_state_changed_event()
 
     def receive(self, signal: InfraredSignal) -> None:
         """Capture a signal, as a concrete subclass would."""
@@ -67,7 +71,8 @@ class FakeReceiver(BaseInfraredReceiver):
 
     def time_out(self) -> None:
         """Report the device's own receive timeout lapsing."""
-        self._handle_receive_mode_ended()
+        self._receiving = False
+        self.maybe_emit_state_changed_event()
 
 
 class FakeOneShotReceiver(FakeReceiver):
@@ -76,7 +81,7 @@ class FakeOneShotReceiver(FakeReceiver):
     def receive(self, signal: InfraredSignal) -> None:
         """Capture a signal and leave receive mode."""
         super().receive(signal)
-        self._handle_receive_mode_ended()
+        self.time_out()
 
 
 @pytest.fixture
@@ -161,13 +166,6 @@ async def test_start_and_stop_receiving(receiver: FakeReceiver) -> None:
     assert receiver.requests == ["start", "stop"]
     assert receiver.receiving is False
     assert state_changes[-1].state_diff == {"receiving": False}
-
-
-async def test_stop_receiving_when_idle(receiver: FakeReceiver) -> None:
-    """Test that stopping when not receiving does not reach the device."""
-    await receiver.async_stop_receiving()
-    assert receiver.requests == []
-    assert receiver.receiving is False
 
 
 async def test_receive_mode_ended_by_device(receiver: FakeReceiver) -> None:
