@@ -17,3 +17,5 @@ class ValveEntityFeature(IntFlag):
     CLOSE = 2
     SET_POSITION = 4
     STOP = 8
+    # Not yet in HA
+    OPEN_TIMED = 16
