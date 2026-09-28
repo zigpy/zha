@@ -11,7 +11,7 @@ from zha.application.platforms.valve.const import ValveDeviceClass, ValveEntityF
 
 
 @dataclasses.dataclass(frozen=True, kw_only=True)
-class ValveState(BaseEntityState):
+class ValveEntityState(BaseEntityState):
     """State for valve entities."""
 
     reports_position: bool
@@ -34,9 +34,9 @@ class BaseValve(PlatformEntity, ABC):
     )
 
     @property
-    def state(self) -> ValveState:
+    def state(self) -> ValveEntityState:
         """Return the state of the valve."""
-        return ValveState(
+        return ValveEntityState(
             **super().state.__dict__,
             reports_position=self.reports_position,
             current_position=self.current_valve_position,

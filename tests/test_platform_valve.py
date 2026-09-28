@@ -15,7 +15,7 @@ from tests.common import (
 from zha.application import Platform
 from zha.application.gateway import Gateway
 from zha.application.platforms import EntityStateChangedEvent
-from zha.application.platforms.valve import BaseValve, ValveState
+from zha.application.platforms.valve import BaseValve, ValveEntityState
 from zha.application.platforms.valve.const import ValveDeviceClass, ValveEntityFeature
 from zha.zigbee.device import Device
 
@@ -108,7 +108,7 @@ async def test_valve_state(zha_device: Device) -> None:
     )
 
     state = entity.state
-    assert isinstance(state, ValveState)
+    assert isinstance(state, ValveEntityState)
     assert state.device_class == "water"
     assert state.reports_position is False
     assert state.current_position is None
