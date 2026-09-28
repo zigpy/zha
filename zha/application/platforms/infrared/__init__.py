@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from abc import abstractmethod
+from abc import ABC, abstractmethod
 import dataclasses
 from typing import Final
 
@@ -19,7 +19,6 @@ class InfraredSignal:
 
     timings: list[int]
     modulation: int | None = None
-    repeat_count: int = 0
 
 
 @dataclasses.dataclass(frozen=True, kw_only=True)
@@ -36,7 +35,7 @@ class EntityInfraredSignalReceivedEvent:
     signal: InfraredSignal
 
 
-class BaseInfraredEmitter(PlatformEntity):
+class BaseInfraredEmitter(PlatformEntity, ABC):
     """Base representation of a ZHA infrared emitter entity."""
 
     PLATFORM = Platform.INFRARED
@@ -48,7 +47,7 @@ class BaseInfraredEmitter(PlatformEntity):
         """Transmit an infrared signal."""
 
 
-class BaseInfraredReceiver(PlatformEntity):
+class BaseInfraredReceiver(PlatformEntity, ABC):
     """Base representation of a ZHA infrared receiver entity."""
 
     PLATFORM = Platform.INFRARED
