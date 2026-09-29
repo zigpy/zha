@@ -2,12 +2,15 @@
 
 import asyncio
 from contextlib import suppress
+import gc
 from unittest.mock import AsyncMock, MagicMock, PropertyMock, call, patch
+import weakref
 
 import pytest
 from zhaquirks.builder import QuirkBuilder
 from zigpy.application import ControllerApplication
 from zigpy.config import CONF_NWK, CONF_NWK_COUNTRY_CODE
+import zigpy.device
 from zigpy.profiles import zha
 import zigpy.types
 from zigpy.zcl.clusters import general, lighting, measurement
@@ -27,13 +30,20 @@ from tests.common import (
     zigpy_device_from_json,
 )
 from zha.application import Platform
-from zha.application.const import ZHA_GW_MSG, ZHA_GW_MSG_CONNECTION_LOST, RadioType
+from zha.application.const import (
+    ZHA_GW_MSG,
+    ZHA_GW_MSG_CONNECTION_LOST,
+    ZHA_GW_MSG_DEVICE_FULL_INIT,
+    ZHA_GW_MSG_DEVICE_REMOVED,
+    RadioType,
+)
 from zha.application.gateway import (
     ConnectionLostEvent,
     DeviceFullInitEvent,
     DeviceJoinedDeviceInfo,
     DeviceJoinedEvent,
     DevicePairingStatus,
+    DeviceRemovedEvent,
     Gateway,
     RawDeviceInitializedDeviceInfo,
     RawDeviceInitializedEvent,
@@ -530,35 +540,35 @@ async def test_gateway_device_initialized(
     """Test ZHA device initialization."""
 
     zigpy_dev_basic = create_mock_zigpy_device(zha_gateway, ZIGPY_DEVICE_BASIC)
-    zha_gateway.async_device_initialized = AsyncMock(
-        wraps=zha_gateway.async_device_initialized
-    )
-    zha_gateway.device_initialized(zigpy_dev_basic)
-    await zha_gateway.async_block_till_done()
+    initialization_mock = AsyncMock(wraps=zha_gateway._async_device_initialized)
+    with patch.object(zha_gateway, "_async_device_initialized", initialization_mock):
+        zha_gateway.device_initialized(zigpy_dev_basic)
+        await zha_gateway.async_block_till_done()
 
-    assert (
-        "Cancelling previous initialization task for device 00:0d:6f:00:0a:90:69:e7"
-        not in caplog.text
-    )
+        assert (
+            "Cancelling previous initialization task for device "
+            "00:0d:6f:00:0a:90:69:e7" not in caplog.text
+        )
 
-    assert zha_gateway.async_device_initialized.await_count == 1
-    assert zha_gateway.async_device_initialized.await_args == call(zigpy_dev_basic)
+        assert initialization_mock.await_count == 1
+        assert initialization_mock.await_args.args[0] is zigpy_dev_basic
+        assert isinstance(initialization_mock.await_args.args[1], int)
 
-    zha_gateway.async_device_initialized.reset_mock()
+        initialization_mock.reset_mock()
 
-    # call 2x to make sure cancellation of the task happens
-    zha_gateway.device_initialized(zigpy_dev_basic)
-    assert (
-        "Cancelling previous initialization task for device 00:0d:6f:00:0a:90:69:e7"
-        not in caplog.text
-    )
-    zha_gateway.device_initialized(zigpy_dev_basic)
-    await zha_gateway.async_block_till_done()
+        # call 2x to make sure cancellation of the task happens
+        zha_gateway.device_initialized(zigpy_dev_basic)
+        assert (
+            "Cancelling previous initialization task for device "
+            "00:0d:6f:00:0a:90:69:e7" not in caplog.text
+        )
+        zha_gateway.device_initialized(zigpy_dev_basic)
+        await zha_gateway.async_block_till_done()
 
-    assert (
-        "Cancelling previous initialization task for device 00:0d:6f:00:0a:90:69:e7"
-        in caplog.text
-    )
+        assert (
+            "Cancelling previous initialization task for device "
+            "00:0d:6f:00:0a:90:69:e7" in caplog.text
+        )
 
 
 async def test_gateway_device_initialized_no_keyerror_on_rapid_rejoin(
@@ -1285,3 +1295,823 @@ async def test_group_on_remove_entity_failure(
 
     assert "Failed to remove group entity" in caplog.text
     assert "Group entity removal failed" in caplog.text
+
+
+async def _finish_device_lifecycle_test(
+    zha_gateway: Gateway,
+    *release_events: asyncio.Event,
+) -> None:
+    """Release and drain lifecycle tasks after an assertion or test failure."""
+    for release_event in release_events:
+        release_event.set()
+
+    initialization_tasks = tuple(zha_gateway._device_init_tasks.values())
+    for initialization_task in initialization_tasks:
+        initialization_task.cancel()
+
+    await asyncio.gather(
+        *initialization_tasks,
+        *tuple(zha_gateway._device_removal_tasks.values()),
+        return_exceptions=True,
+    )
+    await zha_gateway.async_block_till_done()
+
+
+async def _wait_for_device_lifecycle_test_event(event: asyncio.Event) -> None:
+    """Wait for a controlled lifecycle transition without hanging the test."""
+    async with asyncio.timeout(5):
+        await event.wait()
+
+
+def test_device_lifecycle_identity_does_not_retain_zigpy_device(
+    zha_gateway: Gateway,
+) -> None:
+    """Lifecycle identity tracking must not retain an otherwise unused device."""
+    zigpy_device = zigpy.device.Device(
+        zha_gateway.application_controller,
+        zigpy.types.EUI64.convert("00:0d:6f:00:0a:90:69:e7"),
+        0xB79C,
+    )
+    zigpy_device.on_remove()
+    ieee = zigpy_device.ieee
+    device_reference = weakref.ref(zigpy_device)
+    zha_gateway._device_lifecycle_zigpy_devices[ieee] = zigpy_device
+
+    del zigpy_device
+    gc.collect()
+
+    assert device_reference() is None
+    assert ieee not in zha_gateway._device_lifecycle_zigpy_devices
+
+
+async def test_device_lifecycle_operation_revalidates_after_lock_wait(
+    zha_gateway: Gateway,
+) -> None:
+    """A queued lifecycle operation cannot run after losing its generation."""
+    zigpy_device = create_mock_zigpy_device(zha_gateway, ZIGPY_DEVICE_BASIC)
+    lifecycle_generation = zha_gateway._next_device_lifecycle_generation(
+        zigpy_device.ieee
+    )
+    lifecycle_operation = AsyncMock()
+    lifecycle_lock = zha_gateway._get_device_lifecycle_lock(zigpy_device.ieee)
+
+    async with lifecycle_lock:
+        lifecycle_task = asyncio.create_task(
+            zha_gateway._async_run_device_lifecycle_operation(
+                zigpy_device=zigpy_device,
+                lifecycle_generation=lifecycle_generation,
+                previous_removal_task=None,
+                operation=lifecycle_operation,
+            )
+        )
+        await asyncio.sleep(0)
+        zha_gateway._next_device_lifecycle_generation(zigpy_device.ieee)
+
+    await lifecycle_task
+
+    lifecycle_operation.assert_not_awaited()
+
+
+async def test_device_lifecycle_callbacks_ignored_during_shutdown(
+    zha_gateway: Gateway,
+) -> None:
+    """Lifecycle callbacks cannot schedule or remove devices during shutdown."""
+    zigpy_device = create_mock_zigpy_device(zha_gateway, ZIGPY_DEVICE_BASIC)
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
+    lifecycle_generation = zha_gateway._device_lifecycle_generations[zigpy_device.ieee]
+
+    with patch.object(zha_gateway, "shutting_down", True):
+        zha_gateway.device_initialized(zigpy_device)
+        zha_gateway.device_reinterviewed(zigpy_device)
+        zha_gateway.device_removed(zigpy_device)
+
+    assert zha_gateway.devices[zigpy_device.ieee] is zha_device
+    assert (
+        zha_gateway._device_lifecycle_generations[zigpy_device.ieee]
+        == lifecycle_generation + 1
+    )
+    assert zigpy_device.ieee not in zha_gateway._device_init_tasks
+    assert zigpy_device.ieee not in zha_gateway._device_removal_tasks
+
+
+@pytest.mark.parametrize(
+    "invalidation_point",
+    ["rebuild", "configure", "initialize"],
+)
+async def test_removal_during_reinterview_stops_lifecycle_commit(
+    zha_gateway: Gateway,
+    invalidation_point: str,
+) -> None:
+    """Removal wins at every awaited in-place reinterview boundary."""
+    old_zigpy_device = create_mock_zigpy_device(zha_gateway, ZIGPY_DEVICE_BASIC)
+    zha_device = await join_zigpy_device(zha_gateway, old_zigpy_device)
+    reinterviewed_zigpy_device = create_mock_zigpy_device(
+        zha_gateway,
+        ZIGPY_DEVICE_BASIC,
+        ieee=str(old_zigpy_device.ieee),
+        model="ReinterviewedModel",
+        nwk=0x1234,
+    )
+    operation_started = asyncio.Event()
+    cancellation_observed = asyncio.Event()
+    finish_cancelled_operation = asyncio.Event()
+    events: list[object] = []
+    zha_gateway.on_all_events(events.append)
+
+    async def cancellation_resistant_operation(
+        *_operation_arguments: object,
+        **_operation_keyword_arguments: object,
+    ) -> None:
+        operation_started.set()
+        try:
+            await asyncio.Event().wait()
+        except asyncio.CancelledError:
+            cancellation_observed.set()
+            await finish_cancelled_operation.wait()
+
+    method_name = {
+        "rebuild": "async_rebuild_from_zigpy_device",
+        "configure": "async_configure",
+        "initialize": "async_initialize",
+    }[invalidation_point]
+    lifecycle_operation = AsyncMock(side_effect=cancellation_resistant_operation)
+
+    with patch.object(zha_device, method_name, lifecycle_operation):
+        try:
+            zha_gateway.device_reinterviewed(reinterviewed_zigpy_device)
+            await _wait_for_device_lifecycle_test_event(operation_started)
+
+            zha_gateway.device_removed(reinterviewed_zigpy_device)
+            removal_task = zha_gateway._device_removal_tasks[old_zigpy_device.ieee]
+            await _wait_for_device_lifecycle_test_event(cancellation_observed)
+            assert not removal_task.done()
+
+            finish_cancelled_operation.set()
+            await removal_task
+        finally:
+            await _finish_device_lifecycle_test(
+                zha_gateway,
+                finish_cancelled_operation,
+            )
+
+    lifecycle_operation.assert_awaited_once()
+    assert old_zigpy_device.ieee not in zha_gateway.devices
+    assert not any(isinstance(event, DeviceFullInitEvent) for event in events)
+    assert sum(isinstance(event, DeviceRemovedEvent) for event in events) == 1
+    assert old_zigpy_device.ieee not in zha_gateway._device_init_tasks
+    assert old_zigpy_device.ieee not in zha_gateway._device_removal_tasks
+
+
+async def test_removal_during_reinterview_error_stops_lifecycle_commit(
+    zha_gateway: Gateway,
+) -> None:
+    """A reinterview failure cannot commit after synchronous removal."""
+    old_zigpy_device = create_mock_zigpy_device(zha_gateway, ZIGPY_DEVICE_BASIC)
+    zha_device = await join_zigpy_device(zha_gateway, old_zigpy_device)
+    reinterviewed_zigpy_device = create_mock_zigpy_device(
+        zha_gateway,
+        ZIGPY_DEVICE_BASIC,
+        ieee=str(old_zigpy_device.ieee),
+        model="ReinterviewedModel",
+        nwk=0x1234,
+    )
+    events: list[object] = []
+    zha_gateway.on_all_events(events.append)
+
+    async def remove_device_then_fail() -> None:
+        zha_gateway.device_removed(reinterviewed_zigpy_device)
+        raise RuntimeError("reinterview configure failed")
+
+    with patch.object(
+        zha_device,
+        "async_configure",
+        side_effect=remove_device_then_fail,
+    ):
+        zha_gateway.device_reinterviewed(reinterviewed_zigpy_device)
+        await zha_gateway.async_block_till_done()
+
+    assert old_zigpy_device.ieee not in zha_gateway.devices
+    assert not any(isinstance(event, DeviceFullInitEvent) for event in events)
+    assert sum(isinstance(event, DeviceRemovedEvent) for event in events) == 1
+    assert old_zigpy_device.ieee not in zha_gateway._device_init_tasks
+    assert old_zigpy_device.ieee not in zha_gateway._device_removal_tasks
+
+
+async def test_removal_during_group_subscription_refresh_stops_reinterview_commit(
+    zha_gateway: Gateway,
+) -> None:
+    """A group refresh callback can remove a device without a stale commit."""
+    old_zigpy_device = create_mock_zigpy_device(zha_gateway, ZIGPY_DEVICE_BASIC)
+    await join_zigpy_device(zha_gateway, old_zigpy_device)
+    reinterviewed_zigpy_device = create_mock_zigpy_device(
+        zha_gateway,
+        ZIGPY_DEVICE_BASIC,
+        ieee=str(old_zigpy_device.ieee),
+        model="ReinterviewedModel",
+        nwk=0x1234,
+    )
+    events: list[object] = []
+    zha_gateway.on_all_events(events.append)
+    zha_group = MagicMock()
+
+    def remove_device_during_group_refresh() -> None:
+        zha_gateway.device_removed(reinterviewed_zigpy_device)
+
+    zha_group.update_entity_subscriptions.side_effect = (
+        remove_device_during_group_refresh
+    )
+
+    with patch.dict(zha_gateway._groups, {1: zha_group}):
+        zha_gateway.device_reinterviewed(reinterviewed_zigpy_device)
+        await zha_gateway.async_block_till_done()
+
+    zha_group.update_entity_subscriptions.assert_called_once_with()
+    assert old_zigpy_device.ieee not in zha_gateway.devices
+    assert not any(isinstance(event, DeviceFullInitEvent) for event in events)
+    assert sum(isinstance(event, DeviceRemovedEvent) for event in events) == 1
+    assert old_zigpy_device.ieee not in zha_gateway._device_init_tasks
+    assert old_zigpy_device.ieee not in zha_gateway._device_removal_tasks
+
+
+async def test_duplicate_device_removal_waits_for_previous_teardown(
+    zha_gateway: Gateway,
+) -> None:
+    """Duplicate removal waits for teardown and does not publish twice."""
+    zigpy_device = create_mock_zigpy_device(zha_gateway, ZIGPY_DEVICE_BASIC)
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
+    teardown_started = asyncio.Event()
+    finish_teardown = asyncio.Event()
+    events: list[object] = []
+    zha_gateway.on_all_events(events.append)
+
+    async def controlled_teardown() -> None:
+        teardown_started.set()
+        await finish_teardown.wait()
+
+    with patch.object(
+        zha_device, "on_remove", side_effect=controlled_teardown
+    ) as remove:
+        try:
+            zha_gateway.device_removed(zigpy_device)
+            await _wait_for_device_lifecycle_test_event(teardown_started)
+            first_removal_task = zha_gateway._device_removal_tasks[zigpy_device.ieee]
+
+            zha_gateway.device_removed(zigpy_device)
+            second_removal_task = zha_gateway._device_removal_tasks[zigpy_device.ieee]
+            await asyncio.sleep(0)
+
+            assert second_removal_task is not first_removal_task
+            assert not second_removal_task.done()
+
+            finish_teardown.set()
+            await zha_gateway.async_block_till_done()
+        finally:
+            await _finish_device_lifecycle_test(zha_gateway, finish_teardown)
+
+    remove.assert_awaited_once_with()
+    assert zigpy_device.ieee not in zha_gateway.devices
+    assert sum(isinstance(event, DeviceRemovedEvent) for event in events) == 1
+    assert zigpy_device.ieee not in zha_gateway._device_removal_tasks
+
+
+async def test_gateway_device_removed_on_remove_failure(
+    zha_gateway: Gateway,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    """Device removal completes and logs when device teardown fails."""
+    zigpy_device = create_mock_zigpy_device(zha_gateway, ZIGPY_DEVICE_BASIC)
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
+    events: list[object] = []
+    zha_gateway.on_all_events(events.append)
+
+    with patch.object(
+        zha_device,
+        "on_remove",
+        side_effect=RuntimeError("device teardown failed"),
+    ):
+        zha_gateway.device_removed(zigpy_device)
+        await zha_gateway.async_block_till_done()
+
+    assert zigpy_device.ieee not in zha_gateway.devices
+    assert sum(isinstance(event, DeviceRemovedEvent) for event in events) == 1
+    assert "Failed to remove device" in caplog.text
+    assert "device teardown failed" in caplog.text
+    assert zigpy_device.ieee not in zha_gateway._device_removal_tasks
+
+
+async def test_device_rejoin_stops_after_full_init_listener_removes_device(
+    zha_gateway: Gateway,
+) -> None:
+    """A reentrant CONFIGURED listener can remove a rejoining device safely."""
+    zigpy_device = create_mock_zigpy_device(zha_gateway, ZIGPY_DEVICE_BASIC)
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
+    full_initialization_events: list[DeviceFullInitEvent] = []
+
+    def remove_rejoining_device(event: DeviceFullInitEvent) -> None:
+        full_initialization_events.append(event)
+        zha_gateway.device_removed(zigpy_device)
+
+    unsubscribe = zha_gateway.on_event(
+        ZHA_GW_MSG_DEVICE_FULL_INIT,
+        remove_rejoining_device,
+    )
+    try:
+        zha_gateway.device_initialized(zigpy_device)
+        await zha_gateway.async_block_till_done()
+    finally:
+        unsubscribe()
+
+    assert len(full_initialization_events) == 1
+    assert (
+        full_initialization_events[0].device_info.pairing_status
+        is DevicePairingStatus.CONFIGURED
+    )
+    assert zha_device.available
+    assert zigpy_device.ieee not in zha_gateway.devices
+    assert zigpy_device.ieee not in zha_gateway._device_init_tasks
+    assert zigpy_device.ieee not in zha_gateway._device_removal_tasks
+
+
+async def test_device_initialized_continues_after_previous_removal_failure(
+    zha_gateway: Gateway,
+) -> None:
+    """A failed removal barrier does not poison the next device lifecycle."""
+    old_zigpy_device = create_mock_zigpy_device(zha_gateway, ZIGPY_DEVICE_BASIC)
+    old_zha_device = await join_zigpy_device(zha_gateway, old_zigpy_device)
+    new_zigpy_device = create_mock_zigpy_device(
+        zha_gateway,
+        ZIGPY_DEVICE_BASIC,
+        ieee=str(old_zigpy_device.ieee),
+        model="ReplacementModel",
+        nwk=0x1234,
+    )
+    events: list[object] = []
+    zha_gateway.on_all_events(events.append)
+
+    def fail_removal_event(_event: DeviceRemovedEvent) -> None:
+        raise RuntimeError("removal event listener failed")
+
+    unsubscribe = zha_gateway.on_event(
+        ZHA_GW_MSG_DEVICE_REMOVED,
+        fail_removal_event,
+    )
+    try:
+        zha_gateway.device_removed(old_zigpy_device)
+        failed_removal_task = zha_gateway._device_removal_tasks[old_zigpy_device.ieee]
+        zha_gateway.device_initialized(new_zigpy_device)
+        replacement_initialization_task = zha_gateway._device_init_tasks[
+            new_zigpy_device.ieee
+        ]
+        await zha_gateway.async_block_till_done()
+    finally:
+        unsubscribe()
+
+    assert not old_zha_device.platform_entities
+    assert isinstance(failed_removal_task.exception(), RuntimeError)
+    assert replacement_initialization_task.done()
+    assert not replacement_initialization_task.cancelled()
+    assert replacement_initialization_task.exception() is None
+    assert zha_gateway.devices[new_zigpy_device.ieee].device is new_zigpy_device
+    full_initialization_events = [
+        event for event in events if isinstance(event, DeviceFullInitEvent)
+    ]
+    assert [
+        event.device_info.pairing_status for event in full_initialization_events
+    ] == [
+        DevicePairingStatus.CONFIGURED,
+        DevicePairingStatus.INITIALIZED,
+    ]
+    assert new_zigpy_device.ieee not in zha_gateway._device_init_tasks
+    assert new_zigpy_device.ieee not in zha_gateway._device_removal_tasks
+
+
+@pytest.mark.parametrize(
+    ("device_is_initialized", "lifecycle_method"),
+    [
+        (False, "async_configure"),
+        (False, "async_initialize"),
+        (True, "async_configure"),
+    ],
+    ids=["join-configure", "join-initialize", "rejoin-configure"],
+)
+async def test_device_removed_waits_for_cancellation_resistant_lifecycle_operation(
+    zha_gateway: Gateway,
+    device_is_initialized: bool,
+    lifecycle_method: str,
+) -> None:
+    """Removal waits for the exact join or rejoin operation to stop."""
+    zigpy_dev_basic = create_mock_zigpy_device(zha_gateway, ZIGPY_DEVICE_BASIC)
+    if device_is_initialized:
+        zha_device = await join_zigpy_device(zha_gateway, zigpy_dev_basic)
+    else:
+        zha_device = zha_gateway.get_or_create_device(zigpy_dev_basic)
+    lifecycle_operation_started = asyncio.Event()
+    cancellation_observed = asyncio.Event()
+    finish_cancelled_operation = asyncio.Event()
+    events: list[object] = []
+    zha_gateway.on_all_events(events.append)
+
+    async def cancellation_resistant_lifecycle_operation() -> None:
+        lifecycle_operation_started.set()
+        try:
+            await asyncio.Event().wait()
+        except asyncio.CancelledError:
+            cancellation_observed.set()
+            await finish_cancelled_operation.wait()
+
+    lifecycle_operation = AsyncMock(
+        side_effect=cancellation_resistant_lifecycle_operation
+    )
+    with patch.object(zha_device, lifecycle_method, lifecycle_operation):
+        try:
+            zha_gateway.device_initialized(zigpy_dev_basic)
+            await _wait_for_device_lifecycle_test_event(lifecycle_operation_started)
+            initialization_task = zha_gateway._device_init_tasks[zigpy_dev_basic.ieee]
+
+            zha_gateway.device_removed(zigpy_dev_basic)
+            removal_task = zha_gateway._device_removal_tasks[zigpy_dev_basic.ieee]
+            await _wait_for_device_lifecycle_test_event(cancellation_observed)
+            await asyncio.sleep(0)
+
+            assert not initialization_task.done()
+            assert not removal_task.done()
+            assert not any(isinstance(event, DeviceRemovedEvent) for event in events)
+
+            finish_cancelled_operation.set()
+            await removal_task
+        finally:
+            await _finish_device_lifecycle_test(
+                zha_gateway,
+                finish_cancelled_operation,
+            )
+
+    lifecycle_operation.assert_awaited_once_with()
+    assert initialization_task.done()
+    assert zigpy_dev_basic.ieee not in zha_gateway.devices
+    assert zigpy_dev_basic.ieee not in zha_gateway._device_init_tasks
+    assert zigpy_dev_basic.ieee not in zha_gateway._device_removal_tasks
+    assert not any(isinstance(event, DeviceFullInitEvent) for event in events)
+    assert sum(isinstance(event, DeviceRemovedEvent) for event in events) == 1
+
+
+async def test_remove_then_immediate_rejoin_serializes_device_lifecycles(
+    zha_gateway: Gateway,
+) -> None:
+    """A same-IEEE rejoin waits for the old lifecycle to finish removal."""
+    old_zigpy_device = create_mock_zigpy_device(zha_gateway, ZIGPY_DEVICE_BASIC)
+    old_zha_device = zha_gateway.get_or_create_device(old_zigpy_device)
+    new_zigpy_device = create_mock_zigpy_device(
+        zha_gateway,
+        ZIGPY_DEVICE_BASIC,
+        ieee=str(old_zigpy_device.ieee),
+        model="RejoinedModel",
+        nwk=0x1234,
+    )
+
+    old_initialization_started = asyncio.Event()
+    old_initialization_cancelled = asyncio.Event()
+    finish_old_initialization = asyncio.Event()
+    old_removal_finished = asyncio.Event()
+    new_initialization_started = asyncio.Event()
+    events: list[object] = []
+    zha_gateway.on_all_events(events.append)
+    original_initialize_device = zha_gateway._async_device_initialized
+
+    async def controlled_initialize_device(
+        zigpy_device: zigpy.device.Device,
+        lifecycle_generation: int,
+    ) -> None:
+        if zigpy_device is old_zigpy_device:
+            old_initialization_started.set()
+            try:
+                await asyncio.Event().wait()
+            except asyncio.CancelledError:
+                old_initialization_cancelled.set()
+                await finish_old_initialization.wait()
+            return
+
+        assert old_removal_finished.is_set()
+        new_initialization_started.set()
+        await original_initialize_device(zigpy_device, lifecycle_generation)
+
+    async def record_old_removal() -> None:
+        old_removal_finished.set()
+
+    with (
+        patch.object(
+            zha_gateway,
+            "_async_device_initialized",
+            side_effect=controlled_initialize_device,
+        ),
+        patch.object(
+            old_zha_device,
+            "on_remove",
+            side_effect=record_old_removal,
+        ),
+    ):
+        try:
+            zha_gateway.device_initialized(old_zigpy_device)
+            await _wait_for_device_lifecycle_test_event(old_initialization_started)
+
+            zha_gateway.device_removed(old_zigpy_device)
+            removal_task = zha_gateway._device_removal_tasks[old_zigpy_device.ieee]
+            zha_gateway.device_initialized(new_zigpy_device)
+            await _wait_for_device_lifecycle_test_event(old_initialization_cancelled)
+            await asyncio.sleep(0)
+
+            assert not removal_task.done()
+            assert not new_initialization_started.is_set()
+
+            finish_old_initialization.set()
+            await zha_gateway.async_block_till_done()
+        finally:
+            await _finish_device_lifecycle_test(
+                zha_gateway,
+                finish_old_initialization,
+            )
+
+    assert old_removal_finished.is_set()
+    assert new_initialization_started.is_set()
+    assert zha_gateway.devices[old_zigpy_device.ieee].device is new_zigpy_device
+    removal_event_index = next(
+        index
+        for index, event in enumerate(events)
+        if isinstance(event, DeviceRemovedEvent)
+    )
+    full_initialization_indices = [
+        index
+        for index, event in enumerate(events)
+        if isinstance(event, DeviceFullInitEvent)
+    ]
+    assert full_initialization_indices
+    assert all(index > removal_event_index for index in full_initialization_indices)
+    assert old_zigpy_device.ieee not in zha_gateway._device_init_tasks
+    assert old_zigpy_device.ieee not in zha_gateway._device_removal_tasks
+
+
+async def test_removal_prevents_factory_changing_reinterview_commit(
+    zha_gateway: Gateway,
+) -> None:
+    """A stale reinterview cannot install a replacement device after removal."""
+    registry = DeviceRegistry()
+    (
+        QuirkBuilder("Fake_Manufacturer", "Model_A")
+        .friendly_name(model="Quirk A", manufacturer="Fake_Manufacturer")
+        .add_to_registry(registry)
+    )
+    (
+        QuirkBuilder("Fake_Manufacturer", "Model_B")
+        .friendly_name(model="Quirk B", manufacturer="Fake_Manufacturer")
+        .add_to_registry(registry)
+    )
+    old_zigpy_device = create_mock_zigpy_device(
+        zha_gateway,
+        ZIGPY_DEVICE_BASIC,
+        manufacturer="Fake_Manufacturer",
+        model="Model_A",
+        registry=registry,
+    )
+    old_zha_device = await join_zigpy_device(zha_gateway, old_zigpy_device)
+    reinterviewed_zigpy_device = create_mock_zigpy_device(
+        zha_gateway,
+        ZIGPY_DEVICE_BASIC,
+        manufacturer="Fake_Manufacturer",
+        model="Model_B",
+        registry=registry,
+    )
+
+    teardown_started = asyncio.Event()
+    teardown_cancelled = asyncio.Event()
+    finish_cancelled_teardown = asyncio.Event()
+    events: list[object] = []
+    zha_gateway.on_all_events(events.append)
+    original_teardown = old_zha_device.async_teardown
+
+    async def cancellation_resistant_teardown(*, emit_entity_events: bool) -> None:
+        if not emit_entity_events:
+            await original_teardown(emit_entity_events=False)
+            return
+
+        teardown_started.set()
+        try:
+            await asyncio.Event().wait()
+        except asyncio.CancelledError:
+            teardown_cancelled.set()
+            await finish_cancelled_teardown.wait()
+
+    with (
+        patch.object(
+            old_zha_device,
+            "async_teardown",
+            side_effect=cancellation_resistant_teardown,
+        ),
+        patch(
+            "zha.application.gateway.Device.new",
+            side_effect=AssertionError("stale reinterview installed a replacement"),
+        ) as device_factory,
+    ):
+        try:
+            zha_gateway.device_reinterviewed(reinterviewed_zigpy_device)
+            await _wait_for_device_lifecycle_test_event(teardown_started)
+
+            zha_gateway.device_removed(reinterviewed_zigpy_device)
+            removal_task = zha_gateway._device_removal_tasks[old_zigpy_device.ieee]
+            await _wait_for_device_lifecycle_test_event(teardown_cancelled)
+            assert not removal_task.done()
+
+            finish_cancelled_teardown.set()
+            await removal_task
+        finally:
+            await _finish_device_lifecycle_test(
+                zha_gateway,
+                finish_cancelled_teardown,
+            )
+
+    device_factory.assert_not_called()
+    assert old_zigpy_device.ieee not in zha_gateway.devices
+    assert not any(isinstance(event, DeviceFullInitEvent) for event in events)
+    assert sum(isinstance(event, DeviceRemovedEvent) for event in events) == 1
+    assert old_zigpy_device.ieee not in zha_gateway._device_init_tasks
+    assert old_zigpy_device.ieee not in zha_gateway._device_removal_tasks
+
+
+async def test_stale_removal_does_not_remove_new_same_ieee_lifecycle(
+    zha_gateway: Gateway,
+) -> None:
+    """A delayed old removal cannot disturb an in-flight replacement lifecycle."""
+    old_zigpy_device = create_mock_zigpy_device(zha_gateway, ZIGPY_DEVICE_BASIC)
+    await join_zigpy_device(zha_gateway, old_zigpy_device)
+    zha_gateway.device_removed(old_zigpy_device)
+    await zha_gateway.async_block_till_done()
+
+    new_zigpy_device = create_mock_zigpy_device(
+        zha_gateway,
+        ZIGPY_DEVICE_BASIC,
+        ieee=str(old_zigpy_device.ieee),
+        model="ReplacementModel",
+        nwk=0x1234,
+    )
+    new_zha_device = zha_gateway.get_or_create_device(new_zigpy_device)
+    configure_started = asyncio.Event()
+    finish_configure = asyncio.Event()
+    events: list[object] = []
+    zha_gateway.on_all_events(events.append)
+
+    async def controlled_configure() -> None:
+        configure_started.set()
+        await finish_configure.wait()
+
+    with (
+        patch.object(
+            new_zha_device,
+            "async_configure",
+            side_effect=controlled_configure,
+        ),
+        patch.object(
+            new_zha_device,
+            "on_remove",
+            new_callable=AsyncMock,
+        ) as new_device_remove,
+    ):
+        try:
+            zha_gateway.device_initialized(new_zigpy_device)
+            await _wait_for_device_lifecycle_test_event(configure_started)
+            new_initialization_task = zha_gateway._device_init_tasks[
+                old_zigpy_device.ieee
+            ]
+            lifecycle_generation = zha_gateway._device_lifecycle_generations[
+                old_zigpy_device.ieee
+            ]
+
+            zha_gateway.device_removed(old_zigpy_device)
+            await asyncio.sleep(0)
+
+            assert zha_gateway.devices[old_zigpy_device.ieee] is new_zha_device
+            assert (
+                zha_gateway._device_lifecycle_generations[old_zigpy_device.ieee]
+                == lifecycle_generation
+            )
+            assert (
+                zha_gateway._device_init_tasks[old_zigpy_device.ieee]
+                is new_initialization_task
+            )
+            assert not new_initialization_task.done()
+            assert old_zigpy_device.ieee not in zha_gateway._device_removal_tasks
+            new_device_remove.assert_not_awaited()
+
+            finish_configure.set()
+            await zha_gateway.async_block_till_done()
+        finally:
+            await _finish_device_lifecycle_test(zha_gateway, finish_configure)
+
+    assert new_initialization_task.done()
+    assert not new_initialization_task.cancelled()
+    assert zha_gateway.devices[old_zigpy_device.ieee] is new_zha_device
+    assert not any(isinstance(event, DeviceRemovedEvent) for event in events)
+    assert any(isinstance(event, DeviceFullInitEvent) for event in events)
+
+
+async def test_shutdown_quiesces_cancellation_resistant_device_initialization(
+    zha_gateway: Gateway,
+) -> None:
+    """Shutdown waits for device initialization before tearing down wrappers."""
+    zigpy_device = create_mock_zigpy_device(zha_gateway, ZIGPY_DEVICE_BASIC)
+    zha_device = zha_gateway.get_or_create_device(zigpy_device)
+    configure_started = asyncio.Event()
+    cancellation_observed = asyncio.Event()
+    finish_cancelled_configure = asyncio.Event()
+    events: list[object] = []
+    zha_gateway.on_all_events(events.append)
+    shutdown_task: asyncio.Task[None] | None = None
+    assert zha_gateway.application_controller is not None
+    original_controller_shutdown = zha_gateway.application_controller.shutdown
+
+    async def cancellation_resistant_configure() -> None:
+        configure_started.set()
+        try:
+            await asyncio.Event().wait()
+        except asyncio.CancelledError:
+            cancellation_observed.set()
+            await finish_cancelled_configure.wait()
+
+    with (
+        patch.object(
+            zha_device,
+            "async_configure",
+            side_effect=cancellation_resistant_configure,
+        ),
+        patch.object(
+            zha_device,
+            "on_remove",
+            new_callable=AsyncMock,
+        ) as device_remove,
+        patch.object(
+            zha_gateway.application_controller,
+            "shutdown",
+            new_callable=AsyncMock,
+            wraps=original_controller_shutdown,
+        ) as controller_shutdown,
+    ):
+        try:
+            zha_gateway.device_initialized(zigpy_device)
+            await _wait_for_device_lifecycle_test_event(configure_started)
+
+            shutdown_task = asyncio.create_task(zha_gateway.shutdown())
+            await _wait_for_device_lifecycle_test_event(cancellation_observed)
+            await asyncio.sleep(0)
+
+            assert not shutdown_task.done()
+            device_remove.assert_not_awaited()
+            controller_shutdown.assert_not_awaited()
+            assert not any(isinstance(event, DeviceFullInitEvent) for event in events)
+
+            finish_cancelled_configure.set()
+            await shutdown_task
+        finally:
+            finish_cancelled_configure.set()
+            if shutdown_task is None:
+                await _finish_device_lifecycle_test(zha_gateway)
+            else:
+                await asyncio.gather(shutdown_task, return_exceptions=True)
+
+    device_remove.assert_awaited_once_with()
+    controller_shutdown.assert_awaited_once_with()
+    assert not any(isinstance(event, DeviceFullInitEvent) for event in events)
+    assert not zha_gateway.devices
+    assert not zha_gateway._device_init_tasks
+    assert not zha_gateway._device_removal_tasks
+
+
+async def test_removal_is_last_device_lifecycle_event(zha_gateway: Gateway) -> None:
+    """In-flight pairing cannot publish initialization after device removal."""
+    zigpy_device = create_mock_zigpy_device(zha_gateway, ZIGPY_DEVICE_BASIC)
+    device = zha_gateway.get_or_create_device(zigpy_device)
+    started = asyncio.Event()
+    release = asyncio.Event()
+    events: list[object] = []
+    zha_gateway.on_all_events(events.append)
+
+    async def configure() -> None:
+        started.set()
+        try:
+            await release.wait()
+        except asyncio.CancelledError:
+            # A device-specific hook may finish asynchronous cleanup on cancellation.
+            await release.wait()
+
+    with patch.object(device, "async_configure", side_effect=configure):
+        zha_gateway.device_initialized(zigpy_device)
+        await started.wait()
+        zha_gateway.device_removed(zigpy_device)
+        await asyncio.sleep(0)
+        release.set()
+        await zha_gateway.async_block_till_done()
+
+    lifecycle_events = [
+        event
+        for event in events
+        if isinstance(event, (DeviceRemovedEvent, DeviceFullInitEvent))
+    ]
+    assert len(lifecycle_events) == 1
+    assert isinstance(lifecycle_events[0], DeviceRemovedEvent)
+    assert zha_gateway.get_device(zigpy_device.ieee) is None
