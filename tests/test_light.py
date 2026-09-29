@@ -2324,3 +2324,104 @@ async def test_turn_off_cancellation_cleans_up_transition_flag(
         await task
 
     assert entity.is_transitioning is False
+
+
+async def test_light_enable_second_pass_is_idempotent_for_polling_tasks(
+    zha_gateway: Gateway,
+) -> None:
+    """Test that enabling a light twice does not orphan the first poll task."""
+    device = await device_light_1_mock(zha_gateway)
+    entity = get_entity(device, platform=Platform.LIGHT)
+
+    # Reset to a known baseline by cancelling the task started during entity setup.
+    entity.disable()
+    await asyncio.sleep(0)
+
+    entity.enable()
+    first_refresh_task = entity._refresh_task
+    assert first_refresh_task is not None
+
+    second_refresh_task = None
+    try:
+        entity.enable()
+        second_refresh_task = entity._refresh_task
+        assert second_refresh_task is not None
+        assert second_refresh_task is first_refresh_task
+
+        entity.disable()
+        await asyncio.sleep(0)
+
+        assert first_refresh_task.cancelled()
+        assert first_refresh_task not in entity._tracked_tasks
+    finally:
+        for task in (first_refresh_task, second_refresh_task):
+            if task is None:
+                continue
+            if not task.done():
+                task.cancel()
+            with contextlib.suppress(ValueError):
+                entity._tracked_tasks.remove(task)
+        with contextlib.suppress(asyncio.CancelledError):
+            await asyncio.gather(
+                *(
+                    t
+                    for t in (first_refresh_task, second_refresh_task)
+                    if t is not None
+                ),
+                return_exceptions=True,
+            )
+
+
+async def test_light_start_polling_replaces_completed_refresh_task(
+    zha_gateway: Gateway,
+) -> None:
+    """Test completed refresh task handles are replaced cleanly."""
+    device = await device_light_1_mock(zha_gateway)
+    entity = get_entity(device, platform=Platform.LIGHT)
+
+    # Reset baseline from entity setup.
+    entity.disable()
+    await asyncio.sleep(0)
+
+    completed_task = asyncio.create_task(asyncio.sleep(0))
+    await completed_task
+    entity._refresh_task = completed_task
+    entity._tracked_tasks.append(completed_task)
+
+    replacement_task = None
+    try:
+        entity.start_polling()
+        replacement_task = entity._refresh_task
+
+        assert replacement_task is not None
+        assert replacement_task is not completed_task
+        assert completed_task not in entity._tracked_tasks
+        assert replacement_task in entity._tracked_tasks
+    finally:
+        entity.disable()
+        await asyncio.sleep(0)
+        if replacement_task and replacement_task in entity._tracked_tasks:
+            entity._tracked_tasks.remove(replacement_task)
+
+
+async def test_async_unsub_transition_listener_second_pass_removes_old_handle(
+    zha_gateway: Gateway,
+) -> None:
+    """Test transition unsubscription removes the original tracked handle."""
+    device = await device_light_1_mock(zha_gateway)
+    entity = get_entity(device, platform=Platform.LIGHT)
+
+    entity.async_transition_start_timer(transition_time=30)
+    original_listener = entity._transition_listener
+    assert original_listener is not None
+    assert original_listener in entity._tracked_handles
+
+    try:
+        entity._async_unsub_transition_listener()
+
+        assert entity._transition_listener is None
+        assert original_listener not in entity._tracked_handles
+    finally:
+        original_listener.cancel()
+        with contextlib.suppress(ValueError):
+            entity._tracked_handles.remove(original_listener)
