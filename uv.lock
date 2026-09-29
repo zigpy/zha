@@ -597,7 +597,7 @@ wheels = [
 
 [[package]]
 name = "bellows"
-version = "1.0.2"
+version = "1.1.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "click" },
@@ -605,9 +605,9 @@ dependencies = [
     { name = "voluptuous" },
     { name = "zigpy" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/f9/d2/b5db99029a5241b8ece06043d67178f1d8f8cd9acefb4e7493894d5dab10/bellows-1.0.2.tar.gz", hash = "sha256:8a17162dce3275b18da8bffb5cc374fdbf43416203584438f66d6938fb47e4eb", size = 189919, upload-time = "2026-09-18T17:31:23.987Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/69/cf/90aa6f6a67033adcde4e84e888be6013745abe61d532b33811b2b43784f3/bellows-1.1.0.tar.gz", hash = "sha256:1104d2cdeb2ed269cb279c4eb0f90e2fb7f0a6e1b8f9804c4a1798f79a2ae995", size = 196193, upload-time = "2026-09-29T17:17:18.279Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/cb/a7/ce15f122f9a54bac93dcee8e31e4680b25e7e514f52e2970fbe80b0d2982/bellows-1.0.2-py3-none-any.whl", hash = "sha256:4a0047b942aca1105da3b069a5037e74a321972f03e0646de32cf05b379df824", size = 161677, upload-time = "2026-09-18T17:31:22.941Z" },
+    { url = "https://files.pythonhosted.org/packages/f2/8a/ed13a6652c5ce29312463c2f0e2f296ab40ac9a9eac28cc0be50e2987725/bellows-1.1.0-py3-none-any.whl", hash = "sha256:77a077ea50f1f9b0bf9a75bbf06be978f4bd49272da1264f9c2a2ae5363a2e00", size = 163671, upload-time = "2026-09-29T17:17:17.134Z" },
 ]
 
 [[package]]
@@ -4049,7 +4049,7 @@ testing = [
 [package.metadata]
 requires-dist = [
     { name = "attrs" },
-    { name = "bellows", specifier = "==1.0.2" },
+    { name = "bellows", specifier = "==1.1.0" },
     { name = "coloredlogs", marker = "extra == 'testing'" },
     { name = "frozendict" },
     { name = "homeassistant", marker = "python_full_version >= '3.14.2' and extra == 'testing'", specifier = ">=2026.7.0" },
