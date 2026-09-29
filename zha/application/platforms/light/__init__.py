@@ -1470,7 +1470,8 @@ class LightGroup(BaseSharedLight, GroupEntity):
         self.debug(
             "All platform entity states for group entity members: %s", all_states
         )
-        on_states = [state for state in states if state.on]
+        # Unavailable members keep their last state, don't let them keep the group on
+        on_states = [state for state in states if state.on and state.available]
 
         self._state = len(on_states) > 0
 
