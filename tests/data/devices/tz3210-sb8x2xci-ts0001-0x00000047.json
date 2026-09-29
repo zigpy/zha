@@ -8,7 +8,7 @@
   "friendly_model": "TS0001",
   "name": "_TZ3210_sb8x2xci TS0001",
   "quirk_applied": false,
-  "quirk_class": "zigpy.device.Device",
+  "quirk_class": "zigpy.device.ZigbeeDevice",
   "exposes_features": [],
   "manufacturer_code": 4417,
   "power_source": "Mains",

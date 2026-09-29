@@ -57,7 +57,7 @@ class _FakeApp(ControllerApplication):
     async def disconnect(self):
         pass
 
-    async def force_remove(self, dev: zigpy.device.Device):
+    async def force_remove(self, dev: zigpy.device.ZigbeeDevice):
         pass
 
     async def load_network_info(self, *, load_devices: bool = False):
@@ -87,7 +87,7 @@ class _FakeApp(ControllerApplication):
 
     async def request(
         self,
-        device: zigpy.device.Device,
+        device: zigpy.device.ZigbeeDevice,
         profile: zigpy.types.uint16_t,
         cluster: zigpy.types.uint16_t,
         src_ep: zigpy.types.uint8_t,
@@ -260,7 +260,7 @@ def make_zigpy_app_controller():
     ep.add_input_cluster(Groups.cluster_id)
     ep.profile_id = ZHA_PROFILE_ID
 
-    with patch("zigpy.device.Device.request", return_value=[Status.SUCCESS]):
+    with patch("zigpy.device.ZigbeeDevice.request", return_value=[Status.SUCCESS]):
         yield app
 
 

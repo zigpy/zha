@@ -8,7 +8,7 @@
   "friendly_model": "Z3-1BRL",
   "name": "Lutron Z3-1BRL",
   "quirk_applied": false,
-  "quirk_class": "zigpy.device.Device",
+  "quirk_class": "zigpy.device.ZigbeeDevice",
   "exposes_features": [],
   "manufacturer_code": 4420,
   "power_source": "Battery or Unknown",

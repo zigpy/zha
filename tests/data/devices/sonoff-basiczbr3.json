@@ -8,7 +8,7 @@
   "friendly_model": "BASICZBR3",
   "name": "SONOFF BASICZBR3",
   "quirk_applied": false,
-  "quirk_class": "zigpy.device.Device",
+  "quirk_class": "zigpy.device.ZigbeeDevice",
   "exposes_features": [],
   "manufacturer_code": 0,
   "power_source": "Mains",

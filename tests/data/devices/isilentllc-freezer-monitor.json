@@ -8,7 +8,7 @@
   "friendly_model": "Freezer Monitor",
   "name": "iSilentLLC Freezer Monitor",
   "quirk_applied": false,
-  "quirk_class": "zigpy.device.Device",
+  "quirk_class": "zigpy.device.ZigbeeDevice",
   "exposes_features": [],
   "manufacturer_code": 4660,
   "power_source": "Mains",

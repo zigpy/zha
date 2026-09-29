@@ -8,7 +8,7 @@
   "friendly_model": "SNZB-04PR2",
   "name": "SONOFF SNZB-04PR2",
   "quirk_applied": false,
-  "quirk_class": "zigpy.device.Device",
+  "quirk_class": "zigpy.device.ZigbeeDevice",
   "exposes_features": [],
   "manufacturer_code": 4742,
   "power_source": "Battery or Unknown",

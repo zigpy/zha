@@ -12,6 +12,7 @@ from __future__ import annotations
 import asyncio
 from typing import TYPE_CHECKING, Any
 
+from zigpy.device import ZigbeeDevice
 import zigpy.exceptions
 import zigpy.types as t
 import zigpy.zcl
@@ -206,6 +207,8 @@ class LightLinkGroupJoin(VirtualEntity):
         except KeyError:
             self.warning("Aborting - unable to locate required coordinator device.")
             return
+
+        assert isinstance(coordinator, ZigbeeDevice)
 
         try:
             rsp = await cluster.get_group_identifiers(0)

@@ -8,7 +8,7 @@
   "friendly_model": "ALCANTARA2 D1.00P1.02Z1.00",
   "name": "ZEHNDER GROUP VAUX ANDIGNY       ALCANTARA2 D1.00P1.02Z1.00",
   "quirk_applied": false,
-  "quirk_class": "zigpy.device.Device",
+  "quirk_class": "zigpy.device.ZigbeeDevice",
   "exposes_features": [],
   "manufacturer_code": 4098,
   "power_source": "Mains",

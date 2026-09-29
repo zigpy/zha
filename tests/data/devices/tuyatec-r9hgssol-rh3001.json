@@ -8,7 +8,7 @@
   "friendly_model": "RH3001",
   "name": "TUYATEC-r9hgssol RH3001",
   "quirk_applied": false,
-  "quirk_class": "zigpy.device.Device",
+  "quirk_class": "zigpy.device.ZigbeeDevice",
   "exposes_features": [],
   "manufacturer_code": 0,
   "power_source": "Battery or Unknown",

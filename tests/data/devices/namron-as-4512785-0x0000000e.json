@@ -8,7 +8,7 @@
   "friendly_model": "4512785",
   "name": "Namron AS 4512785",
   "quirk_applied": false,
-  "quirk_class": "zigpy.device.Device",
+  "quirk_class": "zigpy.device.ZigbeeDevice",
   "exposes_features": [],
   "manufacturer_code": 4714,
   "power_source": "Mains",

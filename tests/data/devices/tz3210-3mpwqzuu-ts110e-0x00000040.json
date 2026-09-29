@@ -8,7 +8,7 @@
   "friendly_model": "TS110E",
   "name": "_TZ3210_3mpwqzuu TS110E",
   "quirk_applied": false,
-  "quirk_class": "zigpy.device.Device",
+  "quirk_class": "zigpy.device.ZigbeeDevice",
   "exposes_features": [],
   "manufacturer_code": 4417,
   "power_source": "Mains",

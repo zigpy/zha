@@ -8,7 +8,7 @@
   "friendly_model": "lumi.switch.b1lacn02",
   "name": "LUMI lumi.switch.b1lacn02",
   "quirk_applied": false,
-  "quirk_class": "zigpy.device.Device",
+  "quirk_class": "zigpy.device.ZigbeeDevice",
   "exposes_features": [],
   "manufacturer_code": 4151,
   "power_source": "Mains",

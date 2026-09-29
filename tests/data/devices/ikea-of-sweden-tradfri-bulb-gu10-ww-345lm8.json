@@ -8,7 +8,7 @@
   "friendly_model": "\u001aTRADFRI bulb GU10 WW 345lm8",
   "name": "IKEA of Sweden \u001aTRADFRI bulb GU10 WW 345lm8",
   "quirk_applied": false,
-  "quirk_class": "zigpy.device.Device",
+  "quirk_class": "zigpy.device.ZigbeeDevice",
   "exposes_features": [],
   "manufacturer_code": 4476,
   "power_source": "Mains",

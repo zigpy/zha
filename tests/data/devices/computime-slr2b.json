@@ -8,7 +8,7 @@
   "friendly_model": "SLR2b",
   "name": "Computime SLR2b",
   "quirk_applied": false,
-  "quirk_class": "zigpy.device.Device",
+  "quirk_class": "zigpy.device.ZigbeeDevice",
   "exposes_features": [],
   "manufacturer_code": 4153,
   "power_source": "Mains",

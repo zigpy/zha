@@ -8,7 +8,7 @@
   "friendly_model": "RB01",
   "name": "Busch-Jaeger RB01",
   "quirk_applied": false,
-  "quirk_class": "zigpy.device.Device",
+  "quirk_class": "zigpy.device.ZigbeeDevice",
   "exposes_features": [],
   "manufacturer_code": 4398,
   "power_source": "Battery or Unknown",

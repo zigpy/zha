@@ -8,7 +8,7 @@
   "friendly_model": "FZB56-ZCW27LX1.0",
   "name": "Feibit Inc co.   FZB56-ZCW27LX1.0",
   "quirk_applied": false,
-  "quirk_class": "zigpy.device.Device",
+  "quirk_class": "zigpy.device.ZigbeeDevice",
   "exposes_features": [],
   "manufacturer_code": 0,
   "power_source": "Mains",

@@ -8,7 +8,7 @@
   "friendly_model": "RBSH-US4BTN-ZB-EU",
   "name": "Bosch RBSH-US4BTN-ZB-EU",
   "quirk_applied": false,
-  "quirk_class": "zigpy.device.Device",
+  "quirk_class": "zigpy.device.ZigbeeDevice",
   "exposes_features": [],
   "manufacturer_code": 4617,
   "power_source": "Battery or Unknown",

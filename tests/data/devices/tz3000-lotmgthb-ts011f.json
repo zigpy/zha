@@ -8,7 +8,7 @@
   "friendly_model": "TS011F",
   "name": "_TZ3000_lotmgthb TS011F",
   "quirk_applied": false,
-  "quirk_class": "zigpy.device.Device",
+  "quirk_class": "zigpy.device.ZigbeeDevice",
   "exposes_features": [],
   "manufacturer_code": 4417,
   "power_source": "Mains",

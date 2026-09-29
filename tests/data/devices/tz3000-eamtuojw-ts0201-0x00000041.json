@@ -8,7 +8,7 @@
   "friendly_model": "TS0201",
   "name": "_TZ3000_eamtuojw TS0201",
   "quirk_applied": false,
-  "quirk_class": "zigpy.device.Device",
+  "quirk_class": "zigpy.device.ZigbeeDevice",
   "exposes_features": [],
   "manufacturer_code": 4151,
   "power_source": "Battery or Unknown",

@@ -8,7 +8,7 @@
   "friendly_model": "TS0601",
   "name": "_TZE204_xu4a5rhj TS0601",
   "quirk_applied": false,
-  "quirk_class": "zigpy.device.Device",
+  "quirk_class": "zigpy.device.ZigbeeDevice",
   "exposes_features": [],
   "manufacturer_code": 4417,
   "power_source": "Mains",

@@ -8,7 +8,7 @@
   "friendly_model": "250bccf66c41421b91b5e3242942c164",
   "name": "ORVIBO 250bccf66c41421b91b5e3242942c164",
   "quirk_applied": false,
-  "quirk_class": "zigpy.device.Device",
+  "quirk_class": "zigpy.device.ZigbeeDevice",
   "exposes_features": [],
   "manufacturer_code": 4098,
   "power_source": "Mains",

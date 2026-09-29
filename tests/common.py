@@ -364,10 +364,10 @@ def zigpy_device_from_device_data(  # noqa: C901
     patch_cluster: bool = True,
     quirk: Callable | None = None,
     registry: DeviceRegistry = DEVICE_REGISTRY,
-) -> zigpy.device.Device:
+) -> zigpy.device.ZigbeeDevice:
     """Make a fake device using the specified cluster classes."""
 
-    device = zigpy.device.Device(
+    device = zigpy.device.ZigbeeDevice(
         application=app,
         ieee=zigpy.types.EUI64.convert(device_data["ieee"]),
         nwk=zigpy.types.NWK.convert(device_data["nwk"][2:]),
@@ -532,7 +532,7 @@ async def zigpy_device_from_json(
     json_file: str,
     patch_cluster: bool = True,
     quirk: Callable | None = None,
-) -> zigpy.device.Device:
+) -> zigpy.device.ZigbeeDevice:
     """Make a fake device using the specified cluster classes."""
     device_data = await asyncio.get_running_loop().run_in_executor(
         None, pathlib.Path(json_file).read_text
@@ -547,7 +547,7 @@ async def zigpy_device_from_json(
 
 
 async def join_zigpy_device(
-    zha_gateway: Gateway, zigpy_dev: zigpy.device.Device
+    zha_gateway: Gateway, zigpy_dev: zigpy.device.ZigbeeDevice
 ) -> Device:
     """Return a newly joined ZHA device."""
 
@@ -572,10 +572,10 @@ def create_mock_zigpy_device(
     quirk: Callable | None = None,
     attributes: dict[int, dict[str, dict[str, Any]]] = None,
     registry: DeviceRegistry = DEVICE_REGISTRY,
-) -> zigpy.device.Device:
+) -> zigpy.device.ZigbeeDevice:
     """Make a fake device using the specified cluster classes."""
     zigpy_app_controller = zha_gateway.application_controller
-    device = zigpy.device.Device(
+    device = zigpy.device.ZigbeeDevice(
         zigpy_app_controller, zigpy.types.EUI64.convert(ieee), nwk
     )
     device.manufacturer = manufacturer

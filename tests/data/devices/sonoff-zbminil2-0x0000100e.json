@@ -8,7 +8,7 @@
   "friendly_model": "ZBMINIL2",
   "name": "SONOFF ZBMINIL2",
   "quirk_applied": false,
-  "quirk_class": "zigpy.device.Device",
+  "quirk_class": "zigpy.device.ZigbeeDevice",
   "exposes_features": [],
   "manufacturer_code": 4742,
   "power_source": "Battery or Unknown",

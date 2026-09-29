@@ -8,7 +8,7 @@
   "friendly_model": "HS-22ZW   0000011216",
   "name": "HORN-ZONE-HAIER  HS-22ZW   0000011216",
   "quirk_applied": false,
-  "quirk_class": "zigpy.device.Device",
+  "quirk_class": "zigpy.device.ZigbeeDevice",
   "exposes_features": [],
   "manufacturer_code": 0,
   "power_source": "Battery or Unknown",

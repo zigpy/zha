@@ -8,7 +8,7 @@
   "friendly_model": "TS0216",
   "name": "_TYZB01_8scntis1 TS0216",
   "quirk_applied": false,
-  "quirk_class": "zigpy.device.Device",
+  "quirk_class": "zigpy.device.ZigbeeDevice",
   "exposes_features": [],
   "manufacturer_code": 4619,
   "power_source": "Mains",

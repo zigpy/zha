@@ -8,7 +8,7 @@
   "friendly_model": "RS 232 C",
   "name": "innr RS 232 C",
   "quirk_applied": false,
-  "quirk_class": "zigpy.device.Device",
+  "quirk_class": "zigpy.device.ZigbeeDevice",
   "exposes_features": [],
   "manufacturer_code": 4454,
   "power_source": "Mains",

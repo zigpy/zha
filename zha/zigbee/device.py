@@ -17,7 +17,7 @@ import logging
 import time
 from typing import TYPE_CHECKING, Any, Final
 
-from zigpy.device import Device as ZigpyDevice
+from zigpy.device import ZigbeeDevice
 import zigpy.exceptions
 from zigpy.profiles import PROFILES
 from zigpy.types import uint1_t, uint8_t, uint16_t
@@ -147,7 +147,7 @@ def _cluster_entry(cluster_id: int, cluster: Cluster) -> dict[str, Any]:
 
 
 def get_device_automation_triggers(
-    device: zigpy.device.Device,
+    device: zigpy.device.ZigbeeDevice,
 ) -> dict[tuple[str, str], dict[str, str]]:
     """Get the supported device automation triggers for a zigpy device."""
     return {
@@ -336,7 +336,7 @@ class Device(LogMixin, EventBase):
     _device_match: DeviceMatch | None = None
     _zigpy_device_cls: ReplacingZigpyDeviceFactory | None = None
     _zigpy_device_transforms: tuple[
-        Callable[[zigpy.device.Device], zigpy.device.Device], ...
+        Callable[[zigpy.device.ZigbeeDevice], zigpy.device.ZigbeeDevice], ...
     ] = ()
 
     # Cached properties that depend on the zigpy device and must be invalidated
@@ -360,7 +360,7 @@ class Device(LogMixin, EventBase):
 
     def __init__(
         self,
-        zigpy_device: zigpy.device.Device,
+        zigpy_device: zigpy.device.ZigbeeDevice,
         _gateway: Gateway,
     ) -> None:
         """Initialize the gateway."""
@@ -388,7 +388,7 @@ class Device(LogMixin, EventBase):
 
         self._init_from_zigpy_device(zigpy_device)
 
-    def _init_from_zigpy_device(self, zigpy_device: zigpy.device.Device) -> None:
+    def _init_from_zigpy_device(self, zigpy_device: zigpy.device.ZigbeeDevice) -> None:
         """(Re-)initialize device state from a zigpy device.
 
         Sets up the zigpy device reference, quirk metadata, cluster handlers,
@@ -404,7 +404,7 @@ class Device(LogMixin, EventBase):
         self._pending_entities.clear()
         self._discovered_entities.clear()
 
-        self._zigpy_device: ZigpyDevice = zigpy_device
+        self._zigpy_device: ZigbeeDevice = zigpy_device
 
         # Invalidate cached properties that depend on the zigpy device before
         # they are read below (e.g. is_mains_powered, is_coordinator).
@@ -462,7 +462,7 @@ class Device(LogMixin, EventBase):
         )
 
     @property
-    def device(self) -> zigpy.device.Device:
+    def device(self) -> zigpy.device.ZigbeeDevice:
         """Return underlying Zigpy device."""
         return self._zigpy_device
 
@@ -787,7 +787,7 @@ class Device(LogMixin, EventBase):
     @classmethod
     def new(
         cls,
-        zigpy_dev: zigpy.device.Device,
+        zigpy_dev: zigpy.device.ZigbeeDevice,
         gateway: Gateway,
     ) -> Device:
         """Create new device, dispatching to the factory matched during resolution."""
@@ -1035,7 +1035,7 @@ class Device(LogMixin, EventBase):
             )
 
     async def async_rebuild_from_zigpy_device(
-        self, zigpy_device: zigpy.device.Device
+        self, zigpy_device: zigpy.device.ZigbeeDevice
     ) -> None:
         """Tear down and rebuild this device from a new zigpy device.
 

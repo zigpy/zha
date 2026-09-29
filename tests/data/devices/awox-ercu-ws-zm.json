@@ -8,7 +8,7 @@
   "friendly_model": "ERCU_WS_Zm",
   "name": "AwoX ERCU_WS_Zm",
   "quirk_applied": false,
-  "quirk_class": "zigpy.device.Device",
+  "quirk_class": "zigpy.device.ZigbeeDevice",
   "exposes_features": [],
   "manufacturer_code": 4417,
   "power_source": "Battery or Unknown",

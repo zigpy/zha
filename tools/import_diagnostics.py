@@ -81,7 +81,7 @@ def zigpy_device_from_legacy_diagnostics(  # noqa: C901
     app: ControllerApplication,
     data: dict,
     patch_cluster: bool = True,
-) -> zigpy.device.Device | None:
+) -> zigpy.device.ZigbeeDevice | None:
     """Make a fake device using the specified cluster classes."""
     device_data = data["data"]
 
@@ -155,7 +155,7 @@ def zigpy_device_from_legacy_diagnostics(  # noqa: C901
     # real (unique) IEEE is redacted
     ieee = ieee_from_manufacturer_model(manufacturer, model)
 
-    device = zigpy.device.Device(app, ieee, nwk)
+    device = zigpy.device.ZigbeeDevice(app, ieee, nwk)
     device.manufacturer = manufacturer
     device.model = model
 
@@ -307,7 +307,7 @@ def zigpy_device_from_diagnostics(
     app: ControllerApplication,
     data: dict,
     patch_cluster: bool = True,
-) -> zigpy.device.Device | None:
+) -> zigpy.device.ZigbeeDevice | None:
     """Create a zigpy device from diagnostics JSON, both modern and legacy formats."""
     if "data" not in data:
         return None

@@ -8,7 +8,7 @@
   "friendly_model": "TS0215",
   "name": "_TYZB01_qm6djpta TS0215",
   "quirk_applied": false,
-  "quirk_class": "zigpy.device.Device",
+  "quirk_class": "zigpy.device.ZigbeeDevice",
   "exposes_features": [],
   "manufacturer_code": 4619,
   "power_source": "Battery or Unknown",

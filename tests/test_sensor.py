@@ -14,7 +14,7 @@ from zhaquirks.clusters import CustomCluster
 from zhaquirks.danfoss import thermostat as danfoss_thermostat
 from zhaquirks.device import CustomZigpyDevice
 from zhaquirks.legacy import get_device
-from zigpy.device import Device as ZigpyDevice
+from zigpy.device import ZigbeeDevice
 from zigpy.profiles import zha
 import zigpy.profiles.zha
 import zigpy.types as t
@@ -65,7 +65,7 @@ EMAttrs = homeautomation.ElectricalMeasurement.AttributeDefs
 
 def elec_measurement_zigpy_device_mock(
     zha_gateway: Gateway,
-) -> ZigpyDevice:
+) -> ZigbeeDevice:
     """Electric Measurement zigpy device."""
 
     zigpy_device = create_mock_zigpy_device(
@@ -105,7 +105,7 @@ def elec_measurement_zigpy_device_mock(
 
 def metering_zigpy_device_mock(
     zha_gateway: Gateway,
-) -> ZigpyDevice:
+) -> ZigbeeDevice:
     """Metering zigpy device."""
 
     zigpy_device = create_mock_zigpy_device(
@@ -1864,7 +1864,7 @@ async def test_device_unavailable_or_disabled_skips_entity_polling(
 
 async def zigpy_device_danfoss_thermostat_mock(
     zha_gateway: Gateway,
-) -> tuple[Device, zigpy.device.Device]:
+) -> tuple[Device, zigpy.device.ZigbeeDevice]:
     """Danfoss thermostat device."""
 
     zigpy_device = create_mock_zigpy_device(

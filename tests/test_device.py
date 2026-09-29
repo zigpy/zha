@@ -75,7 +75,7 @@ from zha.zigbee.group import Group, GroupMemberReference
 
 
 def zigpy_device(zha_gateway: Gateway, with_basic_cluster: bool = True, **kwargs):
-    """Return a ZigpyDevice with a switch cluster."""
+    """Return a ZigbeeDevice with a switch cluster."""
     in_clusters = [general.OnOff.cluster_id]
     if with_basic_cluster:
         in_clusters.append(general.Basic.cluster_id)
@@ -92,7 +92,7 @@ def zigpy_device(zha_gateway: Gateway, with_basic_cluster: bool = True, **kwargs
 
 
 def zigpy_device_mains(zha_gateway: Gateway, with_basic_cluster: bool = True):
-    """Return a ZigpyDevice with a switch cluster."""
+    """Return a ZigbeeDevice with a switch cluster."""
     in_clusters = [general.OnOff.cluster_id]
     if with_basic_cluster:
         in_clusters.append(general.Basic.cluster_id)
@@ -799,7 +799,7 @@ async def test_async_add_to_group_remove_from_group(
 
     assert (zha_device.ieee, 3) not in group.zigpy_group.members
 
-    with patch("zigpy.device.Device.add_to_group", side_effect=ZigbeeException):
+    with patch("zigpy.device.ZigbeeDevice.add_to_group", side_effect=ZigbeeException):
         await zha_device.async_add_to_group(group.group_id)
         assert (zha_device.ieee, 3) not in group.zigpy_group.members
         assert (
@@ -820,7 +820,9 @@ async def test_async_add_to_group_remove_from_group(
     await zha_device.async_add_to_group(group.group_id)
     assert (zha_device.ieee, 3) in group.zigpy_group.members
 
-    with patch("zigpy.device.Device.remove_from_group", side_effect=ZigbeeException):
+    with patch(
+        "zigpy.device.ZigbeeDevice.remove_from_group", side_effect=ZigbeeException
+    ):
         await zha_device.async_remove_from_group(group.group_id)
         assert (zha_device.ieee, 3) in group.zigpy_group.members
         assert (

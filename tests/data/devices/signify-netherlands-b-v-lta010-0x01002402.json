@@ -8,7 +8,7 @@
   "friendly_model": "LTA010",
   "name": "Signify Netherlands B.V. LTA010",
   "quirk_applied": false,
-  "quirk_class": "zigpy.device.Device",
+  "quirk_class": "zigpy.device.ZigbeeDevice",
   "exposes_features": [],
   "manufacturer_code": 4107,
   "power_source": "Mains",

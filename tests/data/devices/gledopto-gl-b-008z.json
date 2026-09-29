@@ -8,7 +8,7 @@
   "friendly_model": "GL-B-008Z",
   "name": "GLEDOPTO GL-B-008Z",
   "quirk_applied": false,
-  "quirk_class": "zigpy.device.Device",
+  "quirk_class": "zigpy.device.ZigbeeDevice",
   "exposes_features": [],
   "manufacturer_code": 0,
   "power_source": "Mains",
