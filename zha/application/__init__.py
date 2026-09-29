@@ -14,6 +14,7 @@ class Platform(StrEnum):
     DEVICE_TRACKER = "device_tracker"
     EVENT = "event"
     FAN = "fan"
+    INFRARED = "infrared"
     LIGHT = "light"
     LOCK = "lock"
     NUMBER = "number"
