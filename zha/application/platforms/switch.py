@@ -376,14 +376,15 @@ class SwitchGroup(GroupEntity, BaseSwitch):  # type: ignore[misc]
         self.maybe_emit_state_changed_event()
 
     def update(self, _: Any | None = None) -> None:
-        """Query all members and determine the light group state."""
+        """Query all members and determine the switch group state."""
         self.debug("Updating switch group entity state")
         platform_entities = self._group.get_platform_entities(self.PLATFORM)
         all_states = [cast(SwitchState, entity.state) for entity in platform_entities]
         self.debug(
             "All platform entity states for group entity members: %s", all_states
         )
-        on_states = [state for state in all_states if state.is_on]
+        # Unavailable members keep their last state, don't let them keep the group on
+        on_states = [state for state in all_states if state.is_on and state.available]
 
         self._state = len(on_states) > 0
 

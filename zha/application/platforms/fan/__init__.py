@@ -368,8 +368,10 @@ class FanGroup(BaseFan, GroupEntity):
             "All platform entity states for group entity members: %s", all_states
         )
 
-        percentage_states = [state for state in all_states if state.percentage]
-        preset_mode_states = [state for state in all_states if state.preset_mode]
+        # Unavailable members keep their last state, ignore them
+        states = [state for state in all_states if state.available]
+        percentage_states = [state for state in states if state.percentage]
+        preset_mode_states = [state for state in states if state.preset_mode]
 
         if percentage_states:
             self._percentage = percentage_states[0].percentage
