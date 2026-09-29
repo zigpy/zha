@@ -24,7 +24,7 @@ if TYPE_CHECKING:
 _LOGGER = logging.getLogger(__name__)
 
 QUIRK_REGISTRY_ENTRY_ATTR = "_quirk_registry_entry"
-FilterType = Callable[[zigpy.device.Device], bool]
+FilterType = Callable[[zigpy.device.ZigbeeDevice], bool]
 
 DEVICE_REGISTRY: DeviceRegistry
 
@@ -46,7 +46,9 @@ class ModelInfo(NamedTuple):
     model: str | None
 
 
-def _read_current_firmware_version(zigpy_device: zigpy.device.Device) -> int | None:
+def _read_current_firmware_version(
+    zigpy_device: zigpy.device.ZigbeeDevice,
+) -> int | None:
     """Read `current_file_version` from the device's OTA cluster, or None."""
     try:
         ota = zigpy_device.find_cluster(
@@ -72,7 +74,7 @@ class DeviceMatch:
     firmware_version_max: int | None = None
     firmware_version_allow_missing: bool = True
 
-    def matches(self, zigpy_device: zigpy.device.Device) -> bool:
+    def matches(self, zigpy_device: zigpy.device.ZigbeeDevice) -> bool:
         """Return True if `zigpy_device` satisfies all criteria."""
         if self.applies_to and not any(
             (manufacturer is None or manufacturer == zigpy_device.manufacturer)
@@ -125,7 +127,8 @@ class QuirkSource:
 
 # A zigpy device class whose constructor takes the device it replaces as a 4th arg.
 ReplacingZigpyDeviceFactory = Callable[
-    [ControllerApplication, EUI64, NWK, zigpy.device.Device], zigpy.device.Device
+    [ControllerApplication, EUI64, NWK, zigpy.device.ZigbeeDevice],
+    zigpy.device.ZigbeeDevice,
 ]
 
 
@@ -135,7 +138,7 @@ class ReplaceZigpyDevice:
 
     device_cls: ReplacingZigpyDeviceFactory
 
-    def __call__(self, device: zigpy.device.Device) -> zigpy.device.Device:
+    def __call__(self, device: zigpy.device.ZigbeeDevice) -> zigpy.device.ZigbeeDevice:
         """Replace a zigpy device."""
         return self.device_cls(device.application, device.ieee, device.nwk, device)
 
@@ -146,7 +149,7 @@ class QuirkRegistryEntry:
 
     device_match: DeviceMatch
     zigpy_transforms: tuple[
-        Callable[[zigpy.device.Device], zigpy.device.Device], ...
+        Callable[[zigpy.device.ZigbeeDevice], zigpy.device.ZigbeeDevice], ...
     ] = ()
     zha_device_factory: Callable[..., Device] | None = None
     # Excluded from equality so identical quirks registered at different sites still
@@ -192,7 +195,9 @@ class DeviceRegistry:
         if cls._device_match is None:
             raise ValueError(f"{cls!r} does not define `_device_match`")
 
-        transforms: list[Callable[[zigpy.device.Device], zigpy.device.Device]] = []
+        transforms: list[
+            Callable[[zigpy.device.ZigbeeDevice], zigpy.device.ZigbeeDevice]
+        ] = []
         if cls._zigpy_device_cls is not None:
             transforms.append(ReplaceZigpyDevice(cls._zigpy_device_cls))
         transforms.extend(cls._zigpy_device_transforms)
@@ -209,7 +214,7 @@ class DeviceRegistry:
         return cls
 
     def match_entry(
-        self, zigpy_device: zigpy.device.Device
+        self, zigpy_device: zigpy.device.ZigbeeDevice
     ) -> QuirkRegistryEntry | None:
         """Return the first registered entry matching `zigpy_device`."""
         for key in (
@@ -227,7 +232,9 @@ class DeviceRegistry:
 
         return None
 
-    def resolve(self, zigpy_device: zigpy.device.Device) -> zigpy.device.Device:
+    def resolve(
+        self, zigpy_device: zigpy.device.ZigbeeDevice
+    ) -> zigpy.device.ZigbeeDevice:
         """Apply the quirk transforms registered for `zigpy_device` and return the result."""
 
         # Resolution is idempotent: an already-quirked device is returned as-is

@@ -3,7 +3,7 @@
 from unittest.mock import call
 
 import pytest
-from zigpy.device import Device as ZigpyDevice
+from zigpy.device import ZigbeeDevice
 from zigpy.exceptions import ZigbeeException
 from zigpy.profiles import zha
 import zigpy.types
@@ -37,7 +37,7 @@ ZIGPY_ANALOG_OUTPUT_DEVICE = {
 }
 
 
-async def light_mock(zha_gateway: Gateway) -> ZigpyDevice:
+async def light_mock(zha_gateway: Gateway) -> ZigbeeDevice:
     """Siren fixture."""
 
     zigpy_device = create_mock_zigpy_device(

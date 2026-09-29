@@ -8,7 +8,7 @@ from unittest.mock import AsyncMock, call, patch
 
 import pytest
 import zhaquirks
-from zigpy.device import Device as ZigpyDevice
+from zigpy.device import ZigbeeDevice
 from zigpy.exceptions import ZigbeeException
 from zigpy.profiles import zha
 from zigpy.typing import UNDEFINED
@@ -50,7 +50,7 @@ IEEE_GROUPABLE_DEVICE2 = "02:2d:6f:00:0a:90:69:e8"
 _LOGGER = logging.getLogger(__name__)
 
 
-def zigpy_device_mock(zha_gateway: Gateway) -> ZigpyDevice:
+def zigpy_device_mock(zha_gateway: Gateway) -> ZigbeeDevice:
     """Device tracker zigpy device."""
     endpoints = {
         1: {
@@ -497,7 +497,7 @@ async def test_fan_update_entity(
     assert cluster.read_attributes.await_count == 4
 
 
-def zigpy_device_ikea_mock(zha_gateway: Gateway) -> ZigpyDevice:
+def zigpy_device_ikea_mock(zha_gateway: Gateway) -> ZigbeeDevice:
     """Ikea fan zigpy device."""
     endpoints = {
         1: {
@@ -681,7 +681,7 @@ async def test_fan_ikea_update_entity(
     assert entity.percentage_step == 100 / 10
 
 
-def zigpy_device_kof_mock(zha_gateway: Gateway) -> ZigpyDevice:
+def zigpy_device_kof_mock(zha_gateway: Gateway) -> ZigbeeDevice:
     """Fan by King of Fans zigpy device."""
     endpoints = {
         1: {
