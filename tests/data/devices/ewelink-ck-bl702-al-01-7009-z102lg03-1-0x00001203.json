@@ -8,7 +8,7 @@
   "friendly_model": "CK-BL702-AL-01(7009_Z102LG03-1)",
   "name": "eWeLink CK-BL702-AL-01(7009_Z102LG03-1)",
   "quirk_applied": false,
-  "quirk_class": "zigpy.device.Device",
+  "quirk_class": "zigpy.device.ZigbeeDevice",
   "exposes_features": [],
   "manufacturer_code": 4742,
   "power_source": "Mains",

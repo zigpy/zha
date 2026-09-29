@@ -8,7 +8,7 @@
   "friendly_model": "Generic Zigbee Coordinator (EZSP)",
   "name": " Generic Zigbee Coordinator (EZSP)",
   "quirk_applied": false,
-  "quirk_class": "zigpy.device.Device",
+  "quirk_class": "zigpy.device.ZigbeeDevice",
   "exposes_features": [],
   "manufacturer_code": 43981,
   "power_source": "Mains",

@@ -8,7 +8,7 @@
   "friendly_model": "3156105",
   "name": "CentraLite Systems 3156105",
   "quirk_applied": false,
-  "quirk_class": "zigpy.device.Device",
+  "quirk_class": "zigpy.device.ZigbeeDevice",
   "exposes_features": [],
   "manufacturer_code": 49887,
   "power_source": "Battery or Unknown",

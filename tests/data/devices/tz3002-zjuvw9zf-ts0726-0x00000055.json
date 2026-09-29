@@ -8,7 +8,7 @@
   "friendly_model": "TS0726",
   "name": "_TZ3002_zjuvw9zf TS0726",
   "quirk_applied": false,
-  "quirk_class": "zigpy.device.Device",
+  "quirk_class": "zigpy.device.ZigbeeDevice",
   "exposes_features": [],
   "manufacturer_code": 4417,
   "power_source": "Mains",

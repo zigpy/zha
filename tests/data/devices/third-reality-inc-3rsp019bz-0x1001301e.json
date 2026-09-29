@@ -8,7 +8,7 @@
   "friendly_model": "3RSP019BZ",
   "name": "Third Reality, Inc 3RSP019BZ",
   "quirk_applied": false,
-  "quirk_class": "zigpy.device.Device",
+  "quirk_class": "zigpy.device.ZigbeeDevice",
   "exposes_features": [],
   "manufacturer_code": 4659,
   "power_source": "Mains",

@@ -8,7 +8,7 @@
   "friendly_model": "SPM01X001",
   "name": "BITUO TECHNIK SPM01X001",
   "quirk_applied": false,
-  "quirk_class": "zigpy.device.Device",
+  "quirk_class": "zigpy.device.ZigbeeDevice",
   "exposes_features": [],
   "manufacturer_code": 4630,
   "power_source": "Mains",

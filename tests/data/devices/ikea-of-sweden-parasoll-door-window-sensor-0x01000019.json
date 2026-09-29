@@ -8,7 +8,7 @@
   "friendly_model": "PARASOLL Door/Window Sensor",
   "name": "IKEA of Sweden PARASOLL Door/Window Sensor",
   "quirk_applied": false,
-  "quirk_class": "zigpy.device.Device",
+  "quirk_class": "zigpy.device.ZigbeeDevice",
   "exposes_features": [],
   "manufacturer_code": 4476,
   "power_source": "Battery or Unknown",

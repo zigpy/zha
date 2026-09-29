@@ -8,7 +8,7 @@
   "friendly_model": "VMS_ADUROLIGHT",
   "name": "AduroSmart Eria VMS_ADUROLIGHT",
   "quirk_applied": false,
-  "quirk_class": "zigpy.device.Device",
+  "quirk_class": "zigpy.device.ZigbeeDevice",
   "exposes_features": [],
   "manufacturer_code": 4653,
   "power_source": "Battery or Unknown",

@@ -8,7 +8,7 @@
   "friendly_model": "Ecosmart-ZBT-A19-CCT-Bulb",
   "name": "The Home Depot Ecosmart-ZBT-A19-CCT-Bulb",
   "quirk_applied": false,
-  "quirk_class": "zigpy.device.Device",
+  "quirk_class": "zigpy.device.ZigbeeDevice",
   "exposes_features": [],
   "manufacturer_code": 4688,
   "power_source": "Mains",

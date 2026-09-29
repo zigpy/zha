@@ -8,7 +8,7 @@
   "friendly_model": "unk_model",
   "name": "unk_manufacturer unk_model",
   "quirk_applied": false,
-  "quirk_class": "zigpy.device.Device",
+  "quirk_class": "zigpy.device.ZigbeeDevice",
   "exposes_features": [],
   "manufacturer_code": 4368,
   "power_source": "Mains",

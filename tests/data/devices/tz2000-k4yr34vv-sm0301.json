@@ -8,7 +8,7 @@
   "friendly_model": "SM0301",
   "name": "_TZ2000_k4yr34vv SM0301",
   "quirk_applied": false,
-  "quirk_class": "zigpy.device.Device",
+  "quirk_class": "zigpy.device.ZigbeeDevice",
   "exposes_features": [],
   "manufacturer_code": 4692,
   "power_source": "Mains",

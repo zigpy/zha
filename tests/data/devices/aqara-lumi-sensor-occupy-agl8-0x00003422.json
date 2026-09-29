@@ -8,7 +8,7 @@
   "friendly_model": "lumi.sensor_occupy.agl8",
   "name": "Aqara lumi.sensor_occupy.agl8",
   "quirk_applied": false,
-  "quirk_class": "zigpy.device.Device",
+  "quirk_class": "zigpy.device.ZigbeeDevice",
   "exposes_features": [],
   "manufacturer_code": 4447,
   "power_source": "Battery or Unknown",

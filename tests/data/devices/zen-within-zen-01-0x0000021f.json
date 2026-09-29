@@ -8,7 +8,7 @@
   "friendly_model": "Zen-01",
   "name": "Zen Within Zen-01",
   "quirk_applied": false,
-  "quirk_class": "zigpy.device.Device",
+  "quirk_class": "zigpy.device.ZigbeeDevice",
   "exposes_features": [],
   "manufacturer_code": 4440,
   "power_source": "Battery or Unknown",

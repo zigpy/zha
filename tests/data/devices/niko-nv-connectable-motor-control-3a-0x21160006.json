@@ -8,7 +8,7 @@
   "friendly_model": "Connectable motor control,3A",
   "name": "NIKO NV Connectable motor control,3A",
   "quirk_applied": false,
-  "quirk_class": "zigpy.device.Device",
+  "quirk_class": "zigpy.device.ZigbeeDevice",
   "exposes_features": [],
   "manufacturer_code": 4703,
   "power_source": "Mains",

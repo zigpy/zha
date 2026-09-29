@@ -8,7 +8,7 @@
   "friendly_model": "Temp Sensor V1.2 Jan 19 2026",
   "name": "Occam Temp Sensor V1.2 Jan 19 2026",
   "quirk_applied": false,
-  "quirk_class": "zigpy.device.Device",
+  "quirk_class": "zigpy.device.ZigbeeDevice",
   "exposes_features": [],
   "manufacturer_code": 4660,
   "power_source": "Battery or Unknown",

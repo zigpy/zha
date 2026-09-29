@@ -8,7 +8,7 @@
   "friendly_model": "TS130F",
   "name": "_TZ3000_qa8s8vca TS130F",
   "quirk_applied": false,
-  "quirk_class": "zigpy.device.Device",
+  "quirk_class": "zigpy.device.ZigbeeDevice",
   "exposes_features": [],
   "manufacturer_code": 4417,
   "power_source": "Mains",

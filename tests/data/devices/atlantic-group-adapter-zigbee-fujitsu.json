@@ -8,7 +8,7 @@
   "friendly_model": "Adapter Zigbee FUJITSU",
   "name": "ATLANTIC GROUP Adapter Zigbee FUJITSU",
   "quirk_applied": false,
-  "quirk_class": "zigpy.device.Device",
+  "quirk_class": "zigpy.device.ZigbeeDevice",
   "exposes_features": [],
   "manufacturer_code": 4699,
   "power_source": "Mains",

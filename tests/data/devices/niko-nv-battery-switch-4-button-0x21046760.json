@@ -8,7 +8,7 @@
   "friendly_model": "Battery switch, 4 button",
   "name": "NIKO NV Battery switch, 4 button",
   "quirk_applied": false,
-  "quirk_class": "zigpy.device.Device",
+  "quirk_class": "zigpy.device.ZigbeeDevice",
   "exposes_features": [],
   "manufacturer_code": 4703,
   "power_source": "Battery or Unknown",
