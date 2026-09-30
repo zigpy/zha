@@ -556,6 +556,20 @@ async def async_test_em_dc_power(
             None,
         ),
         (
+            measurement.SoilMoisture.cluster_id,
+            sensor.SoilMoisture,
+            async_test_humidity,
+            None,
+            None,
+        ),
+        (
+            measurement.LeafWetness.cluster_id,
+            sensor.LeafWetness,
+            async_test_humidity,
+            None,
+            None,
+        ),
+        (
             measurement.FlowMeasurement.cluster_id,
             sensor.Flow,
             async_test_flow,
