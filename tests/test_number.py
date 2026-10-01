@@ -208,6 +208,44 @@ async def test_number_missing_description_attr(
 
 
 @pytest.mark.parametrize(
+    ("application_type", "icon"),
+    [
+        (0x00040000, "mdi:percent"),
+        (0x01040000, "mdi:percent"),
+        (0x0106FFFF, "mdi:fan"),
+        (0x01FF0000, None),
+    ],
+)
+async def test_number_icon(
+    zha_gateway: Gateway,
+    application_type: int,
+    icon: str | None,
+) -> None:
+    """Test the icon is taken from the type of the application type.
+
+    The group in bits 24 to 31 is ignored, it is `0x01` for analog outputs.
+    """
+    zigpy_analog_output_device = create_mock_zigpy_device(
+        zha_gateway, ZIGPY_ANALOG_OUTPUT_DEVICE
+    )
+    cluster: general.AnalogOutput = zigpy_analog_output_device.endpoints.get(
+        1
+    ).analog_output
+    cluster.PLUGGED_ATTR_READS = {
+        "max_present_value": 100.0,
+        "min_present_value": 0.0,
+        "application_type": application_type,
+        "present_value": 50.0,
+    }
+    update_attribute_cache(cluster)
+
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_analog_output_device)
+    entity: PlatformEntity = get_entity(zha_device, platform=Platform.NUMBER)
+
+    assert entity.icon == icon
+
+
+@pytest.mark.parametrize(
     ("attr", "initial_value", "new_value", "max_value"),
     (
         ("on_off_transition_time", 20, 5, 65535),
