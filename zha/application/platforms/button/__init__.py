@@ -223,22 +223,6 @@ class NoPresenceStatusResetButton(WriteAttributeButton):
 
 
 @register_entity(AQARA_OPPLE_CLUSTER)
-class AqaraPetFeederFeedButton(WriteAttributeButton):
-    """Defines a feed button for the aqara c1 pet feeder."""
-
-    _unique_id_suffix = "feeding"
-    _attribute_name = "feeding"
-    _attribute_value = 1
-    _attr_translation_key = "feed"
-    _cluster_id = AQARA_OPPLE_CLUSTER
-
-    _cluster_match = ClusterMatch(
-        server_clusters=frozenset({AQARA_OPPLE_CLUSTER}),
-        models=frozenset({"aqara.feeder.acn001"}),
-    )
-
-
-@register_entity(AQARA_OPPLE_CLUSTER)
 class AqaraSelfTestButton(WriteAttributeButton):
     """Defines a ZHA self-test button for Aqara smoke sensors."""
 
