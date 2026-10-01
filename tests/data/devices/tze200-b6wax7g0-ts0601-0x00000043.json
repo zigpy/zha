@@ -263,7 +263,7 @@
         "unique_id": "ab:cd:ef:12:6b:27:4c:e0-1",
         "migrate_unique_ids": [],
         "platform": "climate",
-        "class_name": "BecaThermostat",
+        "class_name": "Thermostat",
         "translation_key": "thermostat",
         "translation_placeholders": null,
         "device_class": null,
@@ -288,17 +288,11 @@
         "fan_mode": "auto",
         "max_temp": 30.0,
         "min_temp": 7.0,
-        "supported_features": 401,
+        "supported_features": 385,
         "fan_modes": null,
-        "preset_modes": [
-          "none",
-          "away",
-          "Schedule",
-          "eco",
-          "boost",
-          "Temporary manual"
-        ],
+        "preset_modes": [],
         "hvac_modes": [
+          "off",
           "heat"
         ],
         "sys_mode": "[<SystemMode.Heat: 4>]/heat",
