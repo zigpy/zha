@@ -187,7 +187,8 @@ class AnalogOutputNumber(BaseNumber):
             AnalogOutput.AttributeDefs.application_type.name
         )
         if application_type is not None:
-            self._attr_icon = ICONS.get(application_type >> 16)
+            # Bits 16 to 23 are the type, bits 24 to 31 the group
+            self._attr_icon = ICONS.get((application_type >> 16) & 0xFF)
         else:
             self._attr_icon = None
 
