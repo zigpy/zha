@@ -4,8 +4,8 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-import functools
 import logging
+import math
 from typing import TYPE_CHECKING, Any
 
 from zigpy.zcl import (
@@ -110,12 +110,12 @@ class BaseNumber(PlatformEntity, ABC):
         """Return the value step."""
         return self._attr_native_step
 
-    @functools.cached_property
+    @property
     def native_unit_of_measurement(self) -> str | None:
         """Return the unit the value is expressed in."""
         return self._attr_native_unit_of_measurement
 
-    @functools.cached_property
+    @property
     def mode(self) -> NumberMode:
         """Return the mode of the entity."""
         return self._attr_mode
@@ -168,17 +168,38 @@ class AnalogOutputNumber(BaseNumber):
         ),
     }
 
+    _capability_attribute_ids = frozenset(
+        {
+            AnalogOutput.AttributeDefs.min_present_value.id,
+            AnalogOutput.AttributeDefs.max_present_value.id,
+            AnalogOutput.AttributeDefs.resolution.id,
+            AnalogOutput.AttributeDefs.description.id,
+            AnalogOutput.AttributeDefs.engineering_units.id,
+            AnalogOutput.AttributeDefs.application_type.id,
+        }
+    )
+
+    def __init__(self, endpoint: Endpoint, device: Device, **kwargs: Any) -> None:
+        """Init this number."""
+        super().__init__(endpoint=endpoint, device=device, **kwargs)
+        self.recompute_capabilities()
+
     def recompute_capabilities(self) -> None:
         """Recompute capabilities."""
         super().recompute_capabilities()
 
         min_val = self._cluster.get(AnalogOutput.AttributeDefs.min_present_value.name)
         max_val = self._cluster.get(AnalogOutput.AttributeDefs.max_present_value.name)
-        self._attr_native_min_value = min_val or 0
-        self._attr_native_max_value = max_val or 1023
-        self._attr_native_step = self._cluster.get(
-            AnalogOutput.AttributeDefs.resolution.name
-        )
+        self._attr_native_min_value = 0 if min_val is None else min_val
+        self._attr_native_max_value = 1023 if max_val is None else max_val
+
+        # Guard against 0 resolution reported by some devices
+        resolution = self._cluster.get(AnalogOutput.AttributeDefs.resolution.name)
+        if resolution is not None and math.isfinite(resolution) and resolution > 0:
+            self._attr_native_step = resolution
+        else:
+            self._attr_native_step = None
+
         self._attr_native_unit_of_measurement = BACNET_UNITS_TO_HA_UNITS.get(
             self._cluster.get(AnalogOutput.AttributeDefs.engineering_units.name)
         )
@@ -241,6 +262,8 @@ class AnalogOutputNumber(BaseNumber):
         | AttributeWrittenEvent,
     ) -> None:
         """Handle value update from cluster."""
+        if event.attribute_id in self._capability_attribute_ids:
+            self.recompute_capabilities()
         self.maybe_emit_state_changed_event()
 
 
