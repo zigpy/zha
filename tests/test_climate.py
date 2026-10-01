@@ -43,10 +43,11 @@ from zha.application.platforms import BaseEntity
 from zha.application.platforms.climate import (
     HVAC_MODE_2_SYSTEM,
     SEQ_OF_OPERATION,
+    SinopeTechnologiesThermostat as SinopeThermostatEntity,
     Thermostat as ThermostatEntity,
     ZehnderThermostat,
 )
-from zha.application.platforms.climate.const import FanState
+from zha.application.platforms.climate.const import PRECISION_TENTHS, FanState
 from zha.application.platforms.number import NumberConfigurationEntity
 from zha.application.platforms.sensor import (
     Sensor,
@@ -242,7 +243,7 @@ async def device_climate_mock(
     "ep_attribute",
     "sinope_manufacturer_specific",
 )
-async def device_climate_sinope(zha_gateway: Gateway):
+async def device_climate_sinope(zha_gateway: Gateway) -> Device:
     """Sinope thermostat."""
 
     return await device_climate_mock(
@@ -251,6 +252,18 @@ async def device_climate_sinope(zha_gateway: Gateway):
         manuf=MANUF_SINOPE,
         quirk=zhaquirks.sinope.thermostat.SinopeTechnologiesThermostat,
     )
+
+
+async def sinope_climate_entity(
+    zha_gateway: Gateway,
+) -> tuple[Device, SinopeThermostatEntity]:
+    """Create a Sinope thermostat and return its climate entity."""
+    device = await device_climate_sinope(zha_gateway)
+    entity = get_entity(
+        device, platform=Platform.CLIMATE, entity_type=SinopeThermostatEntity
+    )
+    assert isinstance(entity, SinopeThermostatEntity)
+    return device, entity
 
 
 def test_sequence_mappings():
@@ -372,13 +385,9 @@ async def test_sinope_time(
 ):
     """Test hvac action via running state."""
 
-    dev_climate_sinope = await device_climate_sinope(zha_gateway)
+    dev_climate_sinope, entity = await sinope_climate_entity(zha_gateway)
     mfg_cluster = dev_climate_sinope.device.endpoints[1].sinope_manufacturer_specific
     assert mfg_cluster is not None
-
-    entity: ThermostatEntity = get_entity(
-        dev_climate_sinope, platform=Platform.CLIMATE, entity_type=ThermostatEntity
-    )
 
     entity._async_update_time = AsyncMock(wraps=entity._async_update_time)
 
@@ -430,6 +439,79 @@ async def test_sinope_time(
 
     write_attributes.reset_mock()
     entity._async_update_time.reset_mock()
+
+
+async def test_sinope_time_update_task_lifecycle_is_idempotent(
+    zha_gateway: Gateway,
+) -> None:
+    """Test polling is idempotent and restarts after cancellation completes."""
+    _, entity = await sinope_climate_entity(zha_gateway)
+    time_update_task = entity._time_update_task
+    assert time_update_task is not None
+    assert entity._tracked_tasks == [time_update_task]
+    assert time_update_task in zha_gateway._untracked_background_tasks
+
+    for _ in range(3):
+        entity.enable()
+        entity.start_polling()
+    assert entity._time_update_task is time_update_task
+    assert entity._tracked_tasks == [time_update_task]
+
+    entity.disable()
+    entity.start_polling()
+    assert not entity.enabled
+    assert entity._time_update_task is time_update_task
+    assert time_update_task.cancelling() == 1
+
+    entity.enable()
+    assert entity.enabled
+    assert entity._time_update_task is time_update_task
+
+    await asyncio.gather(time_update_task, return_exceptions=True)
+    await asyncio.sleep(0)
+
+    replacement_task = entity._time_update_task
+    assert replacement_task is not None
+    assert replacement_task is not time_update_task
+    assert time_update_task.done()
+    assert entity._tracked_tasks == [replacement_task]
+    assert replacement_task in zha_gateway._untracked_background_tasks
+    assert time_update_task not in zha_gateway._untracked_background_tasks
+
+    entity.disable()
+    await asyncio.gather(replacement_task, return_exceptions=True)
+    await asyncio.sleep(0)
+    assert replacement_task.done()
+    assert entity._time_update_task is None
+    assert not entity._tracked_tasks
+    assert replacement_task not in zha_gateway._untracked_background_tasks
+
+
+async def test_sinope_removal_prevents_updater_restart(
+    zha_gateway: Gateway,
+) -> None:
+    """Test removal cancels the updater and prevents a pending restart."""
+    _, entity = await sinope_climate_entity(zha_gateway)
+    time_update_task = entity._time_update_task
+    assert time_update_task is not None
+
+    entity.disable()
+    entity.enable()
+    assert entity.enabled
+    assert entity._time_update_task is time_update_task
+
+    await entity.on_remove()
+    assert not entity.enabled
+    assert time_update_task.done()
+    assert entity._time_update_task is None
+    assert not entity._tracked_tasks
+    assert time_update_task not in zha_gateway._untracked_background_tasks
+
+    entity.enable()
+    entity.start_polling()
+    assert not entity.enabled
+    assert entity._time_update_task is None
+    assert not entity._tracked_tasks
 
 
 async def test_climate_hvac_action_running_state_zen(
@@ -1037,34 +1119,34 @@ async def test_set_temperature_heat_cool(
     assert entity.state.target_temperature_high == 25.0
     assert thrm_cluster.write_attributes.await_count == 0
 
-    await entity.async_set_temperature(target_temp_high=26, target_temp_low=19)
+    await entity.async_set_temperature(target_temp_high=20.4, target_temp_low=19.9)
     await zha_gateway.async_block_till_done()
 
-    assert entity.state.target_temperature_low == 19.0
-    assert entity.state.target_temperature_high == 26.0
+    assert entity.state.target_temperature_low == 19.9
+    assert entity.state.target_temperature_high == 20.4
     assert thrm_cluster.write_attributes.await_count == 2
     assert thrm_cluster.write_attributes.call_args_list[0][0][0] == {
-        "occupied_heating_setpoint": 1900
+        "occupied_heating_setpoint": 1990
     }
     assert thrm_cluster.write_attributes.call_args_list[1][0][0] == {
-        "occupied_cooling_setpoint": 2600
+        "occupied_cooling_setpoint": 2040
     }
 
     await entity.async_set_preset_mode("away")
     await zha_gateway.async_block_till_done()
     thrm_cluster.write_attributes.reset_mock()
 
-    await entity.async_set_temperature(target_temp_high=30, target_temp_low=15)
+    await entity.async_set_temperature(target_temp_high=-19.9, target_temp_low=-20.4)
     await zha_gateway.async_block_till_done()
 
-    assert entity.state.target_temperature_low == 15.0
-    assert entity.state.target_temperature_high == 30.0
+    assert entity.state.target_temperature_low == -20.4
+    assert entity.state.target_temperature_high == -19.9
     assert thrm_cluster.write_attributes.await_count == 2
     assert thrm_cluster.write_attributes.call_args_list[0][0][0] == {
-        "unoccupied_heating_setpoint": 1500
+        "unoccupied_heating_setpoint": -2040
     }
     assert thrm_cluster.write_attributes.call_args_list[1][0][0] == {
-        "unoccupied_cooling_setpoint": 3000
+        "unoccupied_cooling_setpoint": -1990
     }
 
 
@@ -1090,6 +1172,7 @@ async def test_set_temperature_heat(
     entity: ThermostatEntity = get_entity(
         device_climate, platform=Platform.CLIMATE, entity_type=ThermostatEntity
     )
+    assert entity._attr_precision == PRECISION_TENTHS
 
     assert entity.state.hvac_mode == "heat"
 
@@ -1101,30 +1184,30 @@ async def test_set_temperature_heat(
     assert entity.state.target_temperature == 20.0
     assert thrm_cluster.write_attributes.await_count == 0
 
-    await entity.async_set_temperature(temperature=21)
+    await entity.async_set_temperature(temperature=19.9)
     await zha_gateway.async_block_till_done()
 
     assert entity.state.target_temperature_low is None
     assert entity.state.target_temperature_high is None
-    assert entity.state.target_temperature == 21.0
+    assert entity.state.target_temperature == 19.9
     assert thrm_cluster.write_attributes.await_count == 1
     assert thrm_cluster.write_attributes.call_args_list[0][0][0] == {
-        "occupied_heating_setpoint": 2100
+        "occupied_heating_setpoint": 1990
     }
 
     await entity.async_set_preset_mode("away")
     await zha_gateway.async_block_till_done()
     thrm_cluster.write_attributes.reset_mock()
 
-    await entity.async_set_temperature(temperature=22)
+    await entity.async_set_temperature(temperature=-19.9)
     await zha_gateway.async_block_till_done()
 
     assert entity.state.target_temperature_low is None
     assert entity.state.target_temperature_high is None
-    assert entity.state.target_temperature == 22.0
+    assert entity.state.target_temperature == -19.9
     assert thrm_cluster.write_attributes.await_count == 1
     assert thrm_cluster.write_attributes.call_args_list[0][0][0] == {
-        "unoccupied_heating_setpoint": 2200
+        "unoccupied_heating_setpoint": -1990
     }
 
 
@@ -1161,30 +1244,30 @@ async def test_set_temperature_cool(
     assert entity.state.target_temperature == 25.0
     assert thrm_cluster.write_attributes.await_count == 0
 
-    await entity.async_set_temperature(temperature=21)
+    await entity.async_set_temperature(temperature=20.4)
     await zha_gateway.async_block_till_done()
 
     assert entity.state.target_temperature_low is None
     assert entity.state.target_temperature_high is None
-    assert entity.state.target_temperature == 21.0
+    assert entity.state.target_temperature == 20.4
     assert thrm_cluster.write_attributes.await_count == 1
     assert thrm_cluster.write_attributes.call_args_list[0][0][0] == {
-        "occupied_cooling_setpoint": 2100
+        "occupied_cooling_setpoint": 2040
     }
 
     await entity.async_set_preset_mode("away")
     await zha_gateway.async_block_till_done()
     thrm_cluster.write_attributes.reset_mock()
 
-    await entity.async_set_temperature(temperature=22)
+    await entity.async_set_temperature(temperature=-20.4)
     await zha_gateway.async_block_till_done()
 
     assert entity.state.target_temperature_low is None
     assert entity.state.target_temperature_high is None
-    assert entity.state.target_temperature == 22.0
+    assert entity.state.target_temperature == -20.4
     assert thrm_cluster.write_attributes.await_count == 1
     assert thrm_cluster.write_attributes.call_args_list[0][0][0] == {
-        "unoccupied_cooling_setpoint": 2200
+        "unoccupied_cooling_setpoint": -2040
     }
 
 
