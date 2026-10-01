@@ -365,10 +365,21 @@ class Gateway(AsyncUtilMixin, EventBase):
         # Make sure that we always leave slots for non-startup requests
         max_poll_concurrency = max(1, self.radio_concurrency - 4)
 
-        await gather_with_limited_concurrency(
+        results = await gather_with_limited_concurrency(
             max_poll_concurrency,
             *(dev.async_initialize(from_cache=False) for dev in online_devices),
+            return_exceptions=True,
         )
+
+        # Keep this task alive on a per-device failure so the caller still gets
+        # to allow polling, and log each failure against its device
+        for dev, result in zip(online_devices, results, strict=True):
+            if isinstance(result, asyncio.CancelledError):
+                _LOGGER.debug("Fetching updated state for device %s was cancelled", dev)
+            elif isinstance(result, BaseException):
+                _LOGGER.warning(
+                    "Failed to fetch updated state for device %s", dev, exc_info=result
+                )
 
         _LOGGER.debug("completed fetching current state for mains powered devices")
 
@@ -382,13 +393,19 @@ class Gateway(AsyncUtilMixin, EventBase):
 
         async def fetch_updated_state() -> None:
             """Fetch updated state for mains powered devices."""
-            if self.config.config.device_options.enable_mains_startup_polling:
-                async with self.request_priority(t.PacketPriority.LOW):
-                    await self.async_fetch_updated_state_mains()
-            else:
-                _LOGGER.debug("Polling of mains powered devices at startup is disabled")
-            _LOGGER.debug("Allowing polled requests")
-            self.config.allow_polling = True
+            try:
+                if self.config.config.device_options.enable_mains_startup_polling:
+                    async with self.request_priority(t.PacketPriority.LOW):
+                        await self.async_fetch_updated_state_mains()
+                else:
+                    _LOGGER.debug(
+                        "Polling of mains powered devices at startup is disabled"
+                    )
+            finally:
+                # Polled entities must work for the rest of the session even if
+                # startup polling itself failed
+                _LOGGER.debug("Allowing polled requests")
+                self.config.allow_polling = True
 
         # background the fetching of state for mains powered devices
         self.async_create_background_task(

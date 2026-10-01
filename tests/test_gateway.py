@@ -513,6 +513,56 @@ async def test_startup_concurrency_limit(
         assert 1 == max(concurrencies) == zha_gw.radio_concurrency
 
 
+async def test_gateway_fetch_updated_state_mains_device_failure(
+    zha_gateway: Gateway, caplog: pytest.LogCaptureFixture
+) -> None:
+    """Test that one device failing to initialize does not stop mains polling."""
+    devices = []
+    for i in range(3):
+        zigpy_dev = create_mock_zigpy_device(
+            zha_gateway,
+            {
+                1: {
+                    SIG_EP_INPUT: [general.Basic.cluster_id],
+                    SIG_EP_OUTPUT: [],
+                    SIG_EP_TYPE: zha.DeviceType.ON_OFF_SWITCH,
+                    SIG_EP_PROFILE: zha.PROFILE_ID,
+                }
+            },
+            ieee=f"11:22:33:44:{i:08x}",
+            nwk=0x1234 + i,
+        )
+        zigpy_dev.node_desc.mac_capability_flags |= (
+            zigpy.zdo.types.NodeDescriptor.MACCapabilityFlags.MainsPowered
+        )
+        devices.append(await join_zigpy_device(zha_gateway, zigpy_dev))
+
+    initialized: list[Device] = []
+
+    async def mock_initialize(self: Device, from_cache: bool = False) -> None:
+        if from_cache:
+            return
+        # Suspend like a real initialization reading from the device does
+        await asyncio.sleep(0)
+        if self is devices[0]:
+            raise ValueError("Cannot add entity")
+        if self is devices[1]:
+            # e.g. zigpy cancelling the request on a radio disconnect
+            raise asyncio.CancelledError()
+        initialized.append(self)
+
+    zha_gateway.config.allow_polling = False
+
+    with patch("zha.zigbee.device.Device.async_initialize", mock_initialize):
+        await zha_gateway.async_initialize_devices_and_entities()
+        await zha_gateway.async_block_till_done(wait_background_tasks=True)
+
+    assert initialized == [devices[2]]
+    assert "Failed to fetch updated state for device" in caplog.text
+    assert "was cancelled" in caplog.text
+    assert zha_gateway.config.allow_polling is True
+
+
 async def test_gateway_device_removed(zha_gateway: Gateway) -> None:
     """Test ZHA device removal."""
 
