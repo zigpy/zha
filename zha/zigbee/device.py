@@ -1008,7 +1008,17 @@ class Device(LogMixin, EventBase):
             self.debug("applying quirks custom device configuration")
             await self._zigpy_device.apply_custom_configuration()
 
-        self._discover_new_entities()
+        # On a reconfigure of a live device, discovery is only needed to
+        # aggregate the cluster configs. The entities must not be queued for
+        # adding then: nothing flushes the pending entities, so they would
+        # linger with active `on_add()` side effects (e.g. cluster listeners)
+        # without ever being added — the live entities already listen. Without
+        # live entities (initial join, or a rebuild after a re-interview), the
+        # entities must be activated, however: e.g. the IAS zone enrollment
+        # entity has to answer a device-initiated enroll request right after
+        # `configure_cluster_configs` writes the CIE address below.
+        # `async_initialize()` adds them and cleans up its own re-discoveries.
+        self._discover_new_entities(add_entities=not self._platform_entities)
 
         # Configure binding and reporting from entity-level cluster configs
         aggregated = aggregate_cluster_configs(self._discovered_entities)
@@ -1078,7 +1088,13 @@ class Device(LogMixin, EventBase):
             )
             yield from discovery.discover_entities_for_endpoint(endpoint)
 
-    def _discover_new_entities(self) -> None:
+    def _discover_new_entities(self, *, add_entities: bool = True) -> None:
+        """Discover entities and queue them to be added to the device.
+
+        With `add_entities=False`, only `self._discovered_entities` is populated
+        (e.g. for aggregating cluster configs): the entities are neither activated
+        via `on_add()` nor queued for `_add_pending_entities`.
+        """
         self._discovered_entities.clear()
 
         # Iterate defensively so a failure in any single entity construction
@@ -1100,6 +1116,9 @@ class Device(LogMixin, EventBase):
 
             # Apply any metadata changes from quirks v2
             self._apply_entity_metadata_changes(entity)
+
+            if not add_entities:
+                continue
 
             entity.on_add()
             self._pending_entities.append(entity)
