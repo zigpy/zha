@@ -39,7 +39,7 @@ from zha.application.const import (
     PRESET_TEMP_MANUAL,
 )
 from zha.application.gateway import Gateway
-from zha.application.platforms import BaseEntity
+from zha.application.platforms import PlatformEntity
 from zha.application.platforms.climate import (
     HVAC_MODE_2_SYSTEM,
     SEQ_OF_OPERATION,
@@ -1653,7 +1653,7 @@ async def test_thermostat_quirkv2_local_temperature_calibration_config_overwrite
             applies_to=(ModelInfo("unk_manufacturer", "FakeModel"),)
         )
 
-        def discover_entities(self) -> Iterator[BaseEntity]:
+        def discover_entities(self) -> Iterator[PlatformEntity]:
             yield from super().discover_entities()
 
             endpoint = self.endpoints[1]

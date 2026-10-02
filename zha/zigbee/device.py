@@ -1061,7 +1061,7 @@ class Device(LogMixin, EventBase):
             DeviceConfiguredEvent(device_ieee=self.ieee),
         )
 
-    def discover_entities(self) -> Iterator[BaseEntity]:
+    def discover_entities(self) -> Iterator[PlatformEntity]:
         """Yield the default (ZCL) entities for this device.
 
         Declarative quirks add their exposed entities by overriding this in
@@ -1848,7 +1848,7 @@ class Device(LogMixin, EventBase):
 class CoordinatorDevice(Device):
     """ZHA wrapper for the active coordinator device."""
 
-    def discover_entities(self) -> Iterator[BaseEntity]:
+    def discover_entities(self) -> Iterator[PlatformEntity]:
         """Yield counter sensors for the active coordinator."""
         state = self.gateway.application_controller.state
         for counter_groups in (
