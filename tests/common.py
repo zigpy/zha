@@ -81,18 +81,6 @@ def patch_cluster_for_testing(cluster: zigpy.zcl.Cluster) -> None:
                 total=0, start_index=0, group_info_records=[]
             )
         )
-    if cluster.cluster_id == 0xFC45:
-        cluster.attributes = {
-            # Relative Humidity Measurement Information
-            0x0000: zcl_f.ZCLAttributeDef(
-                id=0x0000, name="measured_value", type=t.uint16_t
-            )
-        }
-        cluster.attributes_by_name = {
-            "measured_value": zcl_f.ZCLAttributeDef(
-                id=0x0000, name="measured_value", type=t.uint16_t
-            )
-        }
 
 
 def update_attribute_cache(cluster: zigpy.zcl.Cluster) -> None:
