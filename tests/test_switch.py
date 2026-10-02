@@ -41,6 +41,7 @@ from tests.common import (
 from zha.application import Platform
 from zha.application.gateway import Gateway
 from zha.application.platforms import GroupEntity, PlatformEntity
+from zha.application.platforms.switch import ConfigurableAttributeSwitch
 from zha.exceptions import ZHAException
 from zha.quirks import QUIRK_REGISTRY_ENTRY_ATTR, DeviceRegistry
 from zha.zigbee.device import Device
@@ -724,6 +725,80 @@ async def test_switch_configurable_custom_on_off_values_inverter_attribute(
         assert cluster.write_attributes.mock_calls == [
             call({"window_detection_function": 3}, manufacturer=UNDEFINED)
         ]
+
+
+async def test_switch_configurable_bitmap_mask(zha_gateway: Gateway) -> None:
+    """A masked configurable switch toggles a single bit, preserving the others.
+
+    Uses ``DanfossAdaptationRunSettings`` (``_mask = 0x01``) as a real consumer of
+    the ``mask`` support on ``ConfigurableAttributeSwitch``.
+    """
+    zigpy_device_ = await zigpy_device_from_json(
+        zha_gateway.application_controller,
+        "tests/data/devices/danfoss-etrv0103-0x00000014.json",
+    )
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device_)
+
+    entity = get_entity(
+        zha_device, platform=Platform.SWITCH, qualifier="adaptation_run_settings"
+    )
+    cluster = zigpy_device_.endpoints[1].thermostat
+    attr_name = "adaptation_run_settings"
+
+    # Another (higher) bit is set on the device; the masked bit (0x01) is clear.
+    await send_attributes_report(zha_gateway, cluster, {attr_name: 0b10})
+    assert entity.is_on is False
+
+    with patch(
+        "zigpy.zcl.Cluster.write_attributes",
+        return_value=[zcl_f.WriteAttributesResponse.deserialize(b"\x00")[0]],
+    ):
+        # Turn on: set bit 0x01 while preserving the existing 0b10 bit.
+        await entity.async_turn_on()
+        await zha_gateway.async_block_till_done()
+        assert cluster.write_attributes.mock_calls == [
+            call({attr_name: 0b11}, manufacturer=UNDEFINED)
+        ]
+        cluster.write_attributes.reset_mock()
+
+        # Both bits now set; turning off clears only the masked bit.
+        await send_attributes_report(zha_gateway, cluster, {attr_name: 0b11})
+        assert entity.is_on is True
+        await entity.async_turn_off()
+        await zha_gateway.async_block_till_done()
+        assert cluster.write_attributes.mock_calls == [
+            call({attr_name: 0b10}, manufacturer=UNDEFINED)
+        ]
+
+    # The `mask=` constructor argument (the path quirks v2 discovery uses) is
+    # honored: build a switch on the same cluster targeting the higher bit.
+    masked = ConfigurableAttributeSwitch(
+        endpoint=entity._endpoint,
+        device=zha_device,
+        cluster=cluster,
+        from_quirk=True,
+        attribute_name=attr_name,
+        mask=0b10,
+        fallback_name="Masked bit",
+        unique_id_suffix="masked-bit",
+    )
+    await send_attributes_report(zha_gateway, cluster, {attr_name: 0b10})
+    assert masked.is_on is True
+    await send_attributes_report(zha_gateway, cluster, {attr_name: 0b01})
+    assert masked.is_on is False
+
+    # A zero mask is rejected (it would make the switch a permanent no-op).
+    with pytest.raises(ValueError, match="mask must be a non-zero bitmask"):
+        ConfigurableAttributeSwitch(
+            endpoint=entity._endpoint,
+            device=zha_device,
+            cluster=cluster,
+            from_quirk=True,
+            attribute_name=attr_name,
+            mask=0,
+            fallback_name="Zero mask",
+            unique_id_suffix="zero-mask",
+        )
 
 
 WCAttrs = closures.WindowCovering.AttributeDefs
