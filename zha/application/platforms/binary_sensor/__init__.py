@@ -29,6 +29,7 @@ from zha.application.platforms import (
     ClusterConfig,
     ClusterMatch,
     EntityCategory,
+    PlatformEntity,
     PlatformFeatureGroup,
     ZclPlatformEntity,
     register_entity,
@@ -61,7 +62,7 @@ class BinarySensorState(BaseEntityState):
     attribute_name: str
 
 
-class BaseBinarySensor(ZclPlatformEntity, ABC):
+class BaseBinarySensor(PlatformEntity, ABC):
     """Abstract base class for ZHA binary sensors."""
 
     PLATFORM: Platform = Platform.BINARY_SENSOR
@@ -72,7 +73,7 @@ class BaseBinarySensor(ZclPlatformEntity, ABC):
         """Return True if the binary sensor is on."""
 
 
-class BinarySensor(BaseBinarySensor):
+class BinarySensor(BaseBinarySensor, ZclPlatformEntity):
     """ZHA BinarySensor."""
 
     _attr_device_class: BinarySensorDeviceClass | None

@@ -25,6 +25,7 @@ from zha.application.platforms import (
     BaseEntityState,
     ClusterConfig,
     ClusterMatch,
+    PlatformEntity,
     ZclPlatformEntity,
     register_entity,
 )
@@ -58,7 +59,7 @@ class DeviceTrackerState(BaseEntityState):
     battery_level: float | None
 
 
-class BaseDeviceTracker(ZclPlatformEntity, ABC):
+class BaseDeviceTracker(PlatformEntity, ABC):
     """Abstract base class for ZHA device tracker entities."""
 
     PLATFORM = Platform.DEVICE_TRACKER
@@ -89,7 +90,7 @@ class BaseDeviceTracker(ZclPlatformEntity, ABC):
 
 
 @register_entity(PowerConfiguration.cluster_id)
-class DeviceScannerEntity(BaseDeviceTracker):
+class DeviceScannerEntity(BaseDeviceTracker, ZclPlatformEntity):
     """Represent a tracked device."""
 
     _attr_should_poll = True  # BaseZhaEntity defaults to False
