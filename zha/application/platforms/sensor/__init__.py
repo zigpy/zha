@@ -20,6 +20,7 @@ from zigpy.zcl import (
     AttributeReportedEvent,
     AttributeUpdatedEvent,
     AttributeWrittenEvent,
+    ClusterType,
     ReportingConfig,
     foundation,
 )
@@ -3182,6 +3183,23 @@ class RSSISensor(BaseSensor):
     _attr_entity_category = EntityCategory.DIAGNOSTIC
     _attr_entity_registry_enabled_default = False
     _attr_translation_key: str = "rssi"
+
+    # TODO: remove once zha-quirks only filters `ZclPlatformEntity` by endpoint/cluster
+    @property
+    def endpoint(self) -> Endpoint:
+        """Return the endpoint of the legacy Basic cluster entity, for old quirks."""
+        basic_cluster = self._device.basic_cluster
+        assert basic_cluster is not None
+        return self._device.endpoints[basic_cluster.endpoint.endpoint_id]
+
+    def targets_cluster(
+        self, cluster_id: int, cluster_type: ClusterType | None = None
+    ) -> bool:
+        """Match the legacy Basic cluster entity, for old quirks."""
+        return cluster_id == Basic.cluster_id and cluster_type in (
+            None,
+            ClusterType.Server,
+        )
 
     def on_add(self) -> None:
         """Run when entity is added."""
