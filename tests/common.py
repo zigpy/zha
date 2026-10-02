@@ -1,5 +1,6 @@
 """Common test objects."""
 
+import ast
 import asyncio
 from collections.abc import Awaitable, Callable
 from datetime import datetime
@@ -358,6 +359,31 @@ async def group_entity_availability_test(
     assert entity.state.available is True
 
 
+def signature_from_json(signature: dict[str, Any]) -> dict[str, Any]:
+    """Convert a signature from diagnostics JSON back into zigpy's format."""
+    result = {k: v for k, v in signature.items() if k != "endpoints"}
+    result["endpoints"] = {}
+
+    for epid, ep in signature["endpoints"].items():
+        endpoint = {}
+
+        if "profile_id" in ep:
+            endpoint["profile_id"] = int(ep["profile_id"], 16)
+
+        if "device_type" in ep:
+            endpoint["device_type"] = int(ep["device_type"], 16)
+
+        if "input_clusters" in ep:
+            endpoint["input_clusters"] = [int(c, 16) for c in ep["input_clusters"]]
+
+        if "output_clusters" in ep:
+            endpoint["output_clusters"] = [int(c, 16) for c in ep["output_clusters"]]
+
+        result["endpoints"][int(epid)] = endpoint
+
+    return result
+
+
 def zigpy_device_from_device_data(  # noqa: C901
     app: ControllerApplication,
     device_data: dict,
@@ -372,15 +398,24 @@ def zigpy_device_from_device_data(  # noqa: C901
         ieee=zigpy.types.EUI64.convert(device_data["ieee"]),
         nwk=zigpy.types.NWK.convert(device_data["nwk"][2:]),
     )
-    device.manufacturer = device_data["manufacturer"]
-    device.model = device_data["model"]
     device.last_seen = datetime.fromisoformat(device_data["last_seen"])
     device.lqi = int(device_data["lqi"]) if device_data["lqi"] is not None else None
     device.rssi = int(device_data["rssi"]) if device_data["rssi"] is not None else None
-    device.node_desc = zdo_t.NodeDescriptor(**device_data["node_descriptor"])
 
+    # The original signature is canonical: it describes the device before quirks
     if device_data.get("original_signature", {}):
-        for epid, ep in device_data["original_signature"]["endpoints"].items():
+        original_signature = device_data["original_signature"]
+
+        if "manufacturer" in original_signature:
+            device.manufacturer = original_signature["manufacturer"]
+
+        if "model" in original_signature:
+            device.model = original_signature["model"]
+
+        if "node_desc" in original_signature:
+            device.node_desc = zdo_t.NodeDescriptor(**original_signature["node_desc"])
+
+        for epid, ep in original_signature["endpoints"].items():
             endpoint = device.add_endpoint(int(epid))
             profile_id = int(ep["profile_id"], 16)
             device_type = int(ep["device_type"], 16)
@@ -398,7 +433,13 @@ def zigpy_device_from_device_data(  # noqa: C901
 
             for cluster_id in ep.get("output_clusters", []):
                 endpoint.add_output_cluster(int(cluster_id, 16))
+
+        device.original_signature = signature_from_json(original_signature)
     else:
+        device.manufacturer = device_data["manufacturer"]
+        device.model = device_data["model"]
+        device.node_desc = zdo_t.NodeDescriptor(**device_data["node_descriptor"])
+
         for epid, ep in device_data["endpoints"].items():
             endpoint = device.add_endpoint(int(epid))
 
@@ -475,12 +516,12 @@ def zigpy_device_from_device_data(  # noqa: C901
                     # The attribute may not be defined on the cluster, or a quirk may
                     # have moved its name to a different id. Cache it as a legacy value
                     # so the device still loads.
+                    value = decode_json_value(attr.get("value", None))
+
                     if attr_def is None or attr_def.id != attrid:
-                        if attr.get("value", None) is not None:
-                            real_cluster._attr_cache.set_legacy_value(
-                                attrid, attr["value"]
-                            )
-                            real_cluster.PLUGGED_ATTR_READS[attrid] = attr["value"]
+                        if value is not None:
+                            real_cluster._attr_cache.set_legacy_value(attrid, value)
+                            real_cluster.PLUGGED_ATTR_READS[attrid] = value
                         continue
 
                     # Quirks can mark attributes as unsupported during cluster init so
@@ -488,9 +529,9 @@ def zigpy_device_from_device_data(  # noqa: C901
                     # to preserve the "unsupported" state.
                     was_unsupported = real_cluster.is_attribute_unsupported(attr_def)
 
-                    if attr.get("value", None) is not None:
-                        real_cluster._attr_cache.set_value(attr_def, attr["value"])
-                        real_cluster.PLUGGED_ATTR_READS[attrid] = attr["value"]
+                    if value is not None:
+                        real_cluster._attr_cache.set_value(attr_def, value)
+                        real_cluster.PLUGGED_ATTR_READS[attrid] = value
 
                     if attr.get("unsupported", False) or was_unsupported:
                         real_cluster.add_unsupported_attribute(attr_def)
@@ -638,12 +679,24 @@ def create_mock_zigpy_device(
     return device
 
 
+def decode_json_value(value: Any) -> Any:
+    """Decode a value encoded by Home Assistant diagnostics or `ZhaJsonEncoder`."""
+    if isinstance(value, dict) and value.keys() == {"__type", "repr"}:
+        return ast.literal_eval(value["repr"])
+
+    return value
+
+
 class ZhaJsonEncoder(json.JSONEncoder):
-    """JSON encoder to handle common Python data types, currently just `set`."""
+    """JSON encoder to handle common Python data types: `set` and `bytes`."""
 
     def default(self, obj):
         """Convert non-JSON types."""
         if isinstance(obj, set):
             return sorted(obj, key=repr)
+
+        # Match the Home Assistant diagnostics format
+        if isinstance(obj, bytes):
+            return {"__type": str(bytes), "repr": repr(bytes(obj))}
 
         return super().default(obj)
