@@ -1353,7 +1353,6 @@ async def test_quirks_v2_change_entity_metadata(zha_gateway: Gateway) -> None:
     (
         QuirkBuilder("CentraLite", "3405-L")
         .change_entity_metadata(
-            endpoint_id=1,
             unique_id_suffix="-lqi",
             new_device_class=SensorDeviceClass.POWER,
             new_state_class=SensorStateClass.MEASUREMENT,
