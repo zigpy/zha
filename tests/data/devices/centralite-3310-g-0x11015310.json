@@ -172,7 +172,7 @@
             {
               "id": "0x0000",
               "name": "measured_value",
-              "zcl_type": "uint16",
+              "zcl_type": "int16",
               "value": 5987
             }
           ]
