@@ -639,11 +639,14 @@ def create_mock_zigpy_device(
 
 
 class ZhaJsonEncoder(json.JSONEncoder):
-    """JSON encoder to handle common Python data types, currently just `set`."""
+    """JSON encoder to handle common Python data types, e.g. `set` and `bytes`."""
 
     def default(self, obj):
         """Convert non-JSON types."""
         if isinstance(obj, set):
             return sorted(obj, key=repr)
+
+        if isinstance(obj, bytes):
+            return {"__type": str(type(obj)), "repr": repr(obj)}
 
         return super().default(obj)
