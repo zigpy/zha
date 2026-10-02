@@ -1071,6 +1071,16 @@ class Device(LogMixin, EventBase):
         if self.is_coordinator:
             return
 
+        # TODO: detach these entities from the `Basic` cluster once we finish
+        # implementing unique ID migrations in the Core integration
+        if (basic_cluster := self.basic_cluster) is not None:
+            unique_id_base = (
+                f"{self.ieee}-{basic_cluster.endpoint.endpoint_id}-{Basic.cluster_id}"
+            )
+
+            yield sensor.RSSISensor(self, unique_id=unique_id_base)
+            yield sensor.LQISensor(self, unique_id=unique_id_base)
+
         for ep_id, endpoint in self.endpoints.items():
             if ep_id == 0:
                 continue
@@ -1850,7 +1860,7 @@ class CoordinatorDevice(Device):
             for counter_group, counters in getattr(state, counter_groups).items():
                 for counter in counters:
                     yield sensor.DeviceCounterSensor(
-                        zha_device=self,
+                        device=self,
                         counter_groups=counter_groups,
                         counter_group=counter_group,
                         counter=counter,
