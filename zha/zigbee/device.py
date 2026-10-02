@@ -334,7 +334,7 @@ class ExtendedDeviceInfo(DeviceInfo):
     endpoint_names: list[EndpointNameInfo]
 
 
-class BaseDevice(LogMixin, EventBase):
+class BaseDevice[ZigpyDeviceT: ZigpyBaseDevice](LogMixin, EventBase):
     """Base class for all ZHA device types."""
 
     # Cached properties that depend on the zigpy device and must be invalidated
@@ -351,7 +351,7 @@ class BaseDevice(LogMixin, EventBase):
 
     def __init__(
         self,
-        zigpy_device: zigpy.device.BaseDevice,
+        zigpy_device: ZigpyDeviceT,
         _gateway: Gateway,
     ) -> None:
         """Initialize the gateway."""
@@ -378,7 +378,7 @@ class BaseDevice(LogMixin, EventBase):
 
         self._init_from_zigpy_device(zigpy_device)
 
-    def _init_from_zigpy_device(self, zigpy_device: zigpy.device.BaseDevice) -> None:
+    def _init_from_zigpy_device(self, zigpy_device: ZigpyDeviceT) -> None:
         """(Re-)initialize device state from a zigpy device.
 
         Sets up the zigpy device reference, quirk metadata, cluster handlers,
@@ -393,7 +393,7 @@ class BaseDevice(LogMixin, EventBase):
         self._pending_entities.clear()
         self._discovered_entities.clear()
 
-        self._zigpy_device: ZigpyBaseDevice = zigpy_device
+        self._zigpy_device: ZigpyDeviceT = zigpy_device
 
         # Invalidate cached properties that depend on the zigpy device before
         # they are read below (e.g. is_mains_powered, is_coordinator).
@@ -451,7 +451,10 @@ class BaseDevice(LogMixin, EventBase):
         gateway: Gateway,
     ) -> BaseDevice:
         """Create new device, dispatching to the factory matched during resolution."""
-        if zigpy_dev.ieee == gateway.state.node_info.ieee:
+        if (
+            isinstance(zigpy_dev, ZigpyDevice)
+            and zigpy_dev.ieee == gateway.state.node_info.ieee
+        ):
             return CoordinatorDevice(zigpy_dev, gateway)
 
         entry = getattr(zigpy_dev, QUIRK_REGISTRY_ENTRY_ATTR, None)
@@ -461,10 +464,11 @@ class BaseDevice(LogMixin, EventBase):
         if isinstance(zigpy_dev, ZigpyGreenPowerDevice):
             return GreenPowerDevice(zigpy_dev, gateway)
 
+        assert isinstance(zigpy_dev, ZigpyDevice)
         return ZigbeeDevice(zigpy_dev, gateway)
 
     @property
-    def device(self) -> zigpy.device.BaseDevice:
+    def device(self) -> ZigpyDeviceT:
         """Return underlying Zigpy device."""
         return self._zigpy_device
 
@@ -1102,7 +1106,7 @@ class BaseDevice(LogMixin, EventBase):
         )
 
 
-class ZigbeeDevice(BaseDevice):
+class ZigbeeDevice(BaseDevice[ZigpyDevice]):
     """ZHA Zigbee device object."""
 
     # Authoring surface for hand-written quirks; `None` marks the unquirked fallback.
@@ -1123,8 +1127,6 @@ class ZigbeeDevice(BaseDevice):
         "zigbee_signature",
     )
 
-    _zigpy_device: ZigpyDevice
-
     def __init__(
         self,
         zigpy_device: ZigpyDevice,
@@ -1143,11 +1145,6 @@ class ZigbeeDevice(BaseDevice):
                 ep = Endpoint.new(endpoint, self)
                 self._endpoints[ep_id] = ep
                 self._on_remove_callbacks.append(ep.on_remove)
-
-    @property
-    def device(self) -> ZigpyDevice:
-        """Return underlying Zigpy device."""
-        return self._zigpy_device
 
     def _resolve_manufacturer(self) -> str:
         """Resolve the manufacturer name (declarative quirks override this)."""
@@ -1956,21 +1953,14 @@ class CoordinatorDevice(ZigbeeDevice):
                     )
 
 
-class GreenPowerDevice(BaseDevice):
+class GreenPowerDevice(BaseDevice[ZigpyGreenPowerDevice]):
     """ZHA Green Power device object."""
-
-    _zigpy_device: ZigpyGreenPowerDevice
 
     def _init_from_zigpy_device(self, zigpy_device: ZigpyGreenPowerDevice) -> None:
         super()._init_from_zigpy_device(zigpy_device)
 
         # A GPD has no heartbeat to age against: it is available until removed
         self._available = True
-
-    @property
-    def device(self) -> ZigpyGreenPowerDevice:
-        """Return underlying Zigpy device."""
-        return self._zigpy_device
 
     def _resolve_manufacturer(self) -> str:
         """Resolve the manufacturer name (declarative quirks override this)."""

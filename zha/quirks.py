@@ -332,24 +332,36 @@ class DeviceRegistry:
         if hasattr(zigpy_device, QUIRK_REGISTRY_ENTRY_ATTR):
             return zigpy_device
 
-        entry: QuirkRegistryEntry | GreenPowerQuirkRegistryEntry | None
         if isinstance(zigpy_device, zigpy.device.GreenPowerDevice):
-            entry = self.match_green_power_entry(zigpy_device)
-        elif isinstance(zigpy_device, zigpy.device.ZigbeeDevice):
+            gp_entry = self.match_green_power_entry(zigpy_device)
+            if gp_entry is None:
+                return zigpy_device
+
+            return self._apply_entry(zigpy_device, gp_entry, gp_entry.zigpy_transforms)
+
+        if isinstance(zigpy_device, zigpy.device.ZigbeeDevice):
             entry = self.match_entry(zigpy_device)
-        else:
-            return zigpy_device
+            if entry is None:
+                return zigpy_device
 
-        if entry is None:
-            return zigpy_device
+            return self._apply_entry(zigpy_device, entry, entry.zigpy_transforms)
 
+        return zigpy_device
+
+    @staticmethod
+    def _apply_entry[DeviceT: zigpy.device.BaseDevice](
+        zigpy_device: DeviceT,
+        entry: QuirkRegistryEntry | GreenPowerQuirkRegistryEntry,
+        transforms: tuple[Callable[[DeviceT], DeviceT], ...],
+    ) -> DeviceT:
+        """Apply a matched entry's transforms and tag the result with the entry."""
         _LOGGER.debug("Resolved %s to quirk %s", zigpy_device, entry)
 
         # A failing quirk must not prevent the device from loading: log and fall
         # back to the bare device rather than letting the exception propagate.
         resolved_device = zigpy_device
         try:
-            for transform in entry.zigpy_transforms:
+            for transform in transforms:
                 resolved_device = transform(resolved_device)
         except Exception:
             _LOGGER.exception("Failed to load quirk for %s", zigpy_device)
