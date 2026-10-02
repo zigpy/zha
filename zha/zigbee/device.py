@@ -19,8 +19,8 @@ from typing import TYPE_CHECKING, Any, Final
 
 from zigpy.device import (
     BaseDevice as ZigpyBaseDevice,
-    ZigbeeDevice as ZigpyDevice,
     GreenPowerDevice as ZigpyGreenPowerDevice,
+    ZigbeeDevice as ZigpyDevice,
 )
 import zigpy.exceptions
 from zigpy.profiles import PROFILES
