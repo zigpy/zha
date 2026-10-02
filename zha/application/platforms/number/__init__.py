@@ -28,6 +28,7 @@ from zha.application.platforms import (
     ClusterConfig,
     ClusterMatch,
     EntityCategory,
+    PlatformEntity,
     PlatformFeatureGroup,
     ZclPlatformEntity,
     register_entity,
@@ -63,7 +64,7 @@ class NumberState(BaseEntityState):
     native_unit_of_measurement: str | None
 
 
-class BaseNumber(ZclPlatformEntity, ABC):
+class BaseNumber(PlatformEntity, ABC):
     """Representation of a ZHA Number entity."""
 
     PLATFORM = Platform.NUMBER
@@ -126,7 +127,7 @@ class BaseNumber(ZclPlatformEntity, ABC):
 
 
 @register_entity(AnalogOutput.cluster_id)
-class AnalogOutputNumber(BaseNumber):
+class AnalogOutputNumber(BaseNumber, ZclPlatformEntity):
     """Representation of a ZHA Number entity."""
 
     _cluster_match = ClusterMatch(
@@ -245,7 +246,7 @@ class AnalogOutputNumber(BaseNumber):
         self.maybe_emit_state_changed_event()
 
 
-class NumberConfigurationEntity(BaseNumber):
+class NumberConfigurationEntity(BaseNumber, ZclPlatformEntity):
     """Representation of a ZHA number configuration entity."""
 
     _attr_entity_category = EntityCategory.CONFIG

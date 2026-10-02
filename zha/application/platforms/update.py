@@ -27,6 +27,7 @@ from zha.application.platforms import (
     ClusterConfig,
     ClusterMatch,
     EntityCategory,
+    PlatformEntity,
     PlatformFeatureGroup,
     ZclPlatformEntity,
     register_entity,
@@ -80,7 +81,7 @@ class UpdateState(BaseEntityState):
     supported_features: UpdateEntityFeature
 
 
-class BaseFirmwareUpdateEntity(ZclPlatformEntity, ABC):
+class BaseFirmwareUpdateEntity(PlatformEntity, ABC):
     """Abstract base class for ZHA firmware update entities."""
 
     PLATFORM = Platform.UPDATE
@@ -289,7 +290,7 @@ class BaseFirmwareUpdateEntity(ZclPlatformEntity, ABC):
 
 
 @register_entity(Ota.cluster_id)
-class FirmwareUpdateEntity(BaseFirmwareUpdateEntity):
+class FirmwareUpdateEntity(BaseFirmwareUpdateEntity, ZclPlatformEntity):
     """Representation of a ZHA firmware update entity."""
 
     _unique_id_suffix = "firmware_update"

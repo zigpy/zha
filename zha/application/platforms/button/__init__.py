@@ -17,6 +17,7 @@ from zha.application.platforms import (
     BaseEntityState,
     ClusterMatch,
     EntityCategory,
+    PlatformEntity,
     ZclPlatformEntity,
     register_entity,
 )
@@ -55,7 +56,7 @@ class WriteAttributeButtonState(ButtonState):
     attribute_value: Any
 
 
-class BaseButton(ZclPlatformEntity, ABC):
+class BaseButton(PlatformEntity, ABC):
     """Base representation of a ZHA button."""
 
     PLATFORM = Platform.BUTTON
@@ -70,7 +71,7 @@ class BaseButton(ZclPlatformEntity, ABC):
         """Send out a press command."""
 
 
-class Button(BaseButton):
+class Button(BaseButton, ZclPlatformEntity):
     """Defines a ZHA button."""
 
     _command_name: str
@@ -146,7 +147,7 @@ class IdentifyButton(Button):
         return not any(type(entity) is cls for entity in entities if entity is not self)
 
 
-class WriteAttributeButton(BaseButton):
+class WriteAttributeButton(BaseButton, ZclPlatformEntity):
     """Defines a ZHA button, which writes a value to an attribute."""
 
     _attribute_name: str

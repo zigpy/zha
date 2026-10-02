@@ -32,6 +32,7 @@ from zha.application.platforms import (
     BaseEntityState,
     ClusterConfig,
     ClusterMatch,
+    PlatformEntity,
     PlatformFeatureGroup,
     ZclPlatformEntity,
     register_entity,
@@ -94,7 +95,7 @@ class ThermostatState(ClimateState):
     unoccupied_heating_setpoint: int | None = None
 
 
-class BaseThermostat(ZclPlatformEntity, ABC):
+class BaseThermostat(PlatformEntity, ABC):
     """Abstract base class for climate entities."""
 
     PLATFORM = Platform.CLIMATE
@@ -220,7 +221,7 @@ class BaseThermostat(ZclPlatformEntity, ABC):
 
 
 @register_entity(ThermostatCluster.cluster_id)
-class Thermostat(BaseThermostat):
+class Thermostat(BaseThermostat, ZclPlatformEntity):
     """Representation of a ZHA Thermostat device."""
 
     DEFAULT_MAX_TEMP = 35

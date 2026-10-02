@@ -26,6 +26,7 @@ from zha.application.platforms import (
     BaseEntityState,
     ClusterConfig,
     ClusterMatch,
+    PlatformEntity,
     ZclPlatformEntity,
     register_entity,
 )
@@ -47,7 +48,7 @@ class LockState(BaseEntityState):
     is_locked: bool
 
 
-class BaseLock(ZclPlatformEntity, ABC):
+class BaseLock(PlatformEntity, ABC):
     """Abstract base class for ZHA lock entities."""
 
     PLATFORM = Platform.LOCK
@@ -75,7 +76,7 @@ class BaseLock(ZclPlatformEntity, ABC):
 
 
 @register_entity(DoorLockCluster.cluster_id)
-class DoorLock(BaseLock):
+class DoorLock(BaseLock, ZclPlatformEntity):
     """Representation of a ZHA lock."""
 
     _attr_translation_key: str = "door_lock"
