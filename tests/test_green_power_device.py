@@ -160,7 +160,6 @@ async def test_green_power_device_match_ieee(zha_gateway: Gateway) -> None:
         zha_gateway.application_controller,
         application_id=ApplicationID.IEEE,
         ieee=EUI64.convert("04:cd:15:00:11:22:33:44"),
-        endpoint=1,
     )
 
     assert GreenPowerDeviceMatch(ieee_prefixes=(bytes([0x04, 0xCD, 0x15]),)).matches(
