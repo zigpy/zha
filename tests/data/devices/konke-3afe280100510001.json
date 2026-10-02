@@ -102,6 +102,12 @@
           "attributes": [
             {
               "id": "0x0000",
+              "name": "konke_button_event",
+              "zcl_type": "enum8",
+              "value": 0
+            },
+            {
+              "id": "0x0000",
               "name": "on_off",
               "zcl_type": "bool",
               "value": 0

@@ -111,7 +111,7 @@ def get_cluster_attr_data(cluster: Cluster) -> list[dict]:
     """Return cluster attribute data."""
     attributes_info = []
 
-    for attr_def in cluster.attributes.values():
+    for attr_def in cluster.AttributeDefs:
         info = {
             "id": f"0x{attr_def.id:04x}",
             "name": attr_def.name,
