@@ -1073,7 +1073,7 @@ class Device(LogMixin, EventBase):
 
         # TODO: detach these entities from the `Basic` cluster once we finish
         # implementing unique ID migrations in the Core integration
-        if (basic_cluster := self.basic_cluster) is not None:
+        if (basic_cluster := sensor.RSSISensor.legacy_basic_cluster(self)) is not None:
             unique_id_base = (
                 f"{self.ieee}-{basic_cluster.endpoint.endpoint_id}-{Basic.cluster_id}"
             )

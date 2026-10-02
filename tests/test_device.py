@@ -1408,7 +1408,7 @@ async def test_quirks_v2_change_entity_metadata(zha_gateway: Gateway) -> None:
 
     assert lqi_entity is not None, "LQI sensor entity should exist"
 
-    # Verify metadata changes were applied - first filter matches by endpoint_id=1 and unique_id_suffix="-lqi"
+    # Verify metadata changes were applied - first filter matches by endpoint_id=1, cluster_id=Basic and unique_id_suffix="-lqi"
     assert lqi_entity._attr_device_class == SensorDeviceClass.POWER
     assert lqi_entity._attr_state_class == SensorStateClass.MEASUREMENT
     assert lqi_entity._attr_entity_category == EntityType.CONFIG
