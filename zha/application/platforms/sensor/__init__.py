@@ -12,14 +12,18 @@ import math
 import numbers
 import typing
 from typing import TYPE_CHECKING, Any, cast
+import warnings
 
 from zigpy import types
+from zigpy.profiles.zha import PROFILE_ID as ZHA_PROFILE_ID
+from zigpy.profiles.zll import PROFILE_ID as ZLL_PROFILE_ID
 from zigpy.state import Counter, State
 from zigpy.zcl import (
     AttributeReadEvent,
     AttributeReportedEvent,
     AttributeUpdatedEvent,
     AttributeWrittenEvent,
+    Cluster,
     ClusterType,
     ReportingConfig,
     foundation,
@@ -3184,11 +3188,30 @@ class RSSISensor(BaseSensor):
     _attr_entity_registry_enabled_default = False
     _attr_translation_key: str = "rssi"
 
+    @staticmethod
+    def legacy_basic_cluster(device: Device) -> Cluster | None:
+        """Return the Basic cluster the legacy RSSI/LQI unique IDs were derived from."""
+        fallback = None
+        for ep_id, ep in device.device.endpoints.items():
+            if ep_id == 0 or (cluster := ep.in_clusters.get(Basic.cluster_id)) is None:
+                continue
+            if ep.profile_id in (ZHA_PROFILE_ID, ZLL_PROFILE_ID):
+                return cluster
+            fallback = fallback or cluster
+        return fallback
+
     # TODO: remove once zha-quirks only filters `ZclPlatformEntity` by endpoint/cluster
+    # and HA Core's `websocket_get_groupable_devices` no longer reads `entity.endpoint`
     @property
     def endpoint(self) -> Endpoint:
         """Return the endpoint of the legacy Basic cluster entity, for old quirks."""
-        basic_cluster = self._device.basic_cluster
+        warnings.warn(
+            f"`{type(self).__name__}.endpoint` is deprecated, device-bound entities"
+            " have no endpoint",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        basic_cluster = self.legacy_basic_cluster(self._device)
         assert basic_cluster is not None
         return self._device.endpoints[basic_cluster.endpoint.endpoint_id]
 
@@ -3196,6 +3219,12 @@ class RSSISensor(BaseSensor):
         self, cluster_id: int, cluster_type: ClusterType | None = None
     ) -> bool:
         """Match the legacy Basic cluster entity, for old quirks."""
+        warnings.warn(
+            f"`{type(self).__name__}.targets_cluster` is deprecated, device-bound"
+            " entities have no cluster",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         return cluster_id == Basic.cluster_id and cluster_type in (
             None,
             ClusterType.Server,
