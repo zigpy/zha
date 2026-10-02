@@ -16,6 +16,7 @@ from zha.application.platforms import (
     BaseEntityState,
     EntityStateChangedEvent,
     PlatformEntity,
+    ZclPlatformEntity,
 )
 from zha.const import STATE_CHANGED
 from zha.mixins import LogMixin
@@ -109,12 +110,12 @@ class GroupMember(LogMixin):
         )
 
     @cached_property
-    def associated_entities(self) -> list[PlatformEntity]:
+    def associated_entities(self) -> list[ZclPlatformEntity]:
         """Return the list of entities that were derived from this endpoint."""
         return [
             platform_entity
             for platform_entity in self._device.platform_entities.values()
-            if hasattr(platform_entity, "endpoint")
+            if isinstance(platform_entity, ZclPlatformEntity)
             and platform_entity.endpoint.id == self.endpoint_id
         ]
 

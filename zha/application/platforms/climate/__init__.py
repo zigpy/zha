@@ -34,6 +34,7 @@ from zha.application.platforms import (
     ClusterMatch,
     PlatformEntity,
     PlatformFeatureGroup,
+    ZclPlatformEntity,
     register_entity,
 )
 from zha.application.platforms.climate.const import (
@@ -220,7 +221,7 @@ class BaseThermostat(PlatformEntity, ABC):
 
 
 @register_entity(ThermostatCluster.cluster_id)
-class Thermostat(BaseThermostat):
+class Thermostat(BaseThermostat, ZclPlatformEntity):
     """Representation of a ZHA Thermostat device."""
 
     DEFAULT_MAX_TEMP = 35
