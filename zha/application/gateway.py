@@ -648,6 +648,9 @@ class Gateway(AsyncUtilMixin, EventBase):
         self._emit_group_gateway_message(zigpy_group, ZHA_GW_MSG_GROUP_REMOVED)
         zha_group = self._groups.pop(zigpy_group.group_id)
         zha_group.info("group_removed")
+        self.track_task(
+            create_eager_task(zha_group.on_remove(), name="Gateway.group_removed")
+        )
 
     def _emit_group_gateway_message(  # pylint: disable=unused-argument
         self,
