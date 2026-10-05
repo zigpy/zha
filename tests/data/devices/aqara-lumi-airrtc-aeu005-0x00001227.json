@@ -98,7 +98,7 @@
               "name": "product_code",
               "zcl_type": "octstr",
               "value": {
-                "__type": "<class 'zigpy.types.basic.LVBytes'>",
+                "__type": "<class 'bytes'>",
                 "repr": "b''"
               }
             },
