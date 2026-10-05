@@ -293,7 +293,6 @@ class BaseEntity(LogMixin, EventBase):
     _attr_state_class: str | None = None
     _attr_enabled: bool = True
     _attr_extra_state_attribute_names: set[str] | None = None
-    _attr_always_supported: bool = False
 
     # Explicitly marks the entity as (not) primary, set by entity classes and quirks.
     # It takes precedence over (and is never overwritten by) the weight-based primary
@@ -318,9 +317,6 @@ class BaseEntity(LogMixin, EventBase):
 
     def is_supported(self) -> bool:
         """Return if the entity is supported for the device."""
-        if self._attr_always_supported:
-            return True
-
         return self._is_supported()
 
     def _is_supported(self) -> bool:
@@ -533,6 +529,7 @@ class PlatformEntity(BaseEntity):
         *,
         unique_id: str,
         from_quirk: bool = False,
+        discovered: bool = False,
         fallback_name: str | None = None,
         translation_key: str | None = None,
         translation_placeholders: Mapping[str, str] | None = None,
@@ -558,6 +555,7 @@ class PlatformEntity(BaseEntity):
                 primary=primary,
                 initially_disabled=initially_disabled,
             )
+        self._discovered = discovered
 
         if self._unique_id_suffix is not None:
             unique_id = f"{unique_id}-{self._unique_id_suffix}"
@@ -580,9 +578,6 @@ class PlatformEntity(BaseEntity):
         """Apply the generic quirk entity configuration keywords."""
         if initially_disabled:
             self._attr_entity_registry_enabled_default = False
-
-        # quirk entities are assumed to always be supported
-        self._attr_always_supported = True
 
         if fallback_name:
             self._attr_fallback_name = fallback_name
@@ -610,6 +605,11 @@ class PlatformEntity(BaseEntity):
     def device(self) -> BaseDevice:
         """Return the device."""
         return self._device
+
+    @property
+    def discovered(self) -> bool:
+        """Return if the entity was created by ZHA's discovery."""
+        return self._discovered
 
     @property
     def primary(self) -> bool:

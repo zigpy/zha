@@ -80,7 +80,6 @@ class VirtualEntity(ZclPlatformEntity):
     """
 
     PLATFORM = Platform.VIRTUAL
-    _attr_always_supported = True
 
     def on_add(self) -> None:
         """Subscribe to incoming cluster commands and attribute events."""

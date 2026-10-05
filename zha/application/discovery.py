@@ -354,6 +354,7 @@ def discover_entities_for_endpoint(endpoint: Endpoint) -> Iterator[ZclPlatformEn
                 entity = entity_class(
                     endpoint=endpoint,
                     device=device,
+                    discovered=True,
                     **kwargs,
                 )
             except Exception:  # pylint: disable=broad-except
