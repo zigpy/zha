@@ -8,6 +8,7 @@ import itertools
 import json
 import logging
 import pathlib
+import re
 import time
 from typing import Any
 from unittest.mock import AsyncMock
@@ -665,12 +666,34 @@ def create_mock_zigpy_device(
     return device
 
 
+# Types whose `repr` is a bytes literal
+JSON_BYTES_TYPES = frozenset(
+    {
+        "<class 'bytes'>",
+        "<class 'zigpy.types.basic.LVBytes'>",
+        "<class 'zigpy.types.basic.LimitedLVBytes.<locals>.LimitedLVBytes'>",
+        "<class 'sonoff_tp_wgzba.RawBytes'>",
+        "<class 'sonoff_tp_wgzba.Uint8ArrayPayload'>",
+    }
+)
+JSON_ARRAY_TYPE = "<class 'zigpy.zcl.foundation.Array'>"
+ARRAY_REPR_REGEX = re.compile(r"Array\(type=\w+, value=(?P<value>\[.*\])\)")
+
+
 def decode_json_value(value: Any) -> Any:
     """Decode a value encoded by Home Assistant diagnostics or `ZhaJsonEncoder`."""
-    if isinstance(value, dict) and value.keys() == {"__type", "repr"}:
+    if not (isinstance(value, dict) and value.keys() == {"__type", "repr"}):
+        return value
+
+    if value["__type"] in JSON_BYTES_TYPES:
         return ast.literal_eval(value["repr"])
 
-    return value
+    if value["__type"] == JSON_ARRAY_TYPE:
+        # The element type is lost, only the elements can be recovered
+        match = ARRAY_REPR_REGEX.fullmatch(value["repr"])
+        return ast.literal_eval(match.group("value"))
+
+    raise ValueError(f"Cannot decode JSON value: {value!r}")
 
 
 class ZhaJsonEncoder(json.JSONEncoder):
