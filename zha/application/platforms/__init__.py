@@ -528,7 +528,6 @@ class PlatformEntity(BaseEntity):
         device: BaseDevice,
         *,
         unique_id: str,
-        from_quirk: bool = False,
         discovered: bool = False,
         fallback_name: str | None = None,
         translation_key: str | None = None,
@@ -541,21 +540,22 @@ class PlatformEntity(BaseEntity):
     ):
         """Initialize the platform entity.
 
-        Quirk entities are constructed with `from_quirk=True` and the generic
-        config keywords (`fallback_name`, `translation_key`, `entity_type`, etc.);
-        the platform subclasses add their own keywords.
+        The generic config keywords (`fallback_name`, `translation_key`, `entity_type`,
+        etc.) override the class's values when given; the platform subclasses add their
+        own keywords. Entities created by ZHA's discovery pass `discovered=True`, only
+        their support is checked.
         """
-        if from_quirk:
-            self._apply_quirk_entity_config(
-                fallback_name=fallback_name,
-                translation_key=translation_key,
-                translation_placeholders=translation_placeholders,
-                unique_id_suffix=unique_id_suffix,
-                entity_type=entity_type,
-                primary=primary,
-                initially_disabled=initially_disabled,
-            )
         self._discovered = discovered
+
+        self._apply_entity_config(
+            fallback_name=fallback_name,
+            translation_key=translation_key,
+            translation_placeholders=translation_placeholders,
+            unique_id_suffix=unique_id_suffix,
+            entity_type=entity_type,
+            primary=primary,
+            initially_disabled=initially_disabled,
+        )
 
         if self._unique_id_suffix is not None:
             unique_id = f"{unique_id}-{self._unique_id_suffix}"
@@ -564,7 +564,7 @@ class PlatformEntity(BaseEntity):
 
         self._device: BaseDevice = device
 
-    def _apply_quirk_entity_config(
+    def _apply_entity_config(
         self,
         *,
         fallback_name: str | None,
@@ -575,7 +575,7 @@ class PlatformEntity(BaseEntity):
         primary: bool | None,
         initially_disabled: bool,
     ) -> None:
-        """Apply the generic quirk entity configuration keywords."""
+        """Apply the generic entity configuration keywords that are given."""
         if initially_disabled:
             self._attr_entity_registry_enabled_default = False
 
@@ -595,7 +595,7 @@ class PlatformEntity(BaseEntity):
             self._attr_entity_category = EntityCategory.CONFIG
         elif entity_type == EntityType.DIAGNOSTIC:
             self._attr_entity_category = EntityCategory.DIAGNOSTIC
-        else:
+        elif entity_type == EntityType.STANDARD:
             self._attr_entity_category = None
 
         if primary is not None:
@@ -674,29 +674,29 @@ class ZclPlatformEntity(PlatformEntity):
         device: Device,
         *,
         cluster: zigpy.zcl.Cluster,
-        from_quirk: bool = False,
+        unique_id: str | None = None,
         legacy_discovery_unique_id: str | None = None,
         **kwargs: Any,
     ):
         """Initialize the ZCL platform entity.
 
-        Default-discovery entities pass no config keywords.
+        Default-discovery entities pass no config keywords. `unique_id` overrides the
+        legacy unique ID base.
         """
         if legacy_discovery_unique_id is None:
-            if from_quirk:
-                legacy_discovery_unique_id = f"{device.ieee}-{endpoint.id}"
-            else:
-                legacy_discovery_unique_id = (
-                    f"{device.ieee}-{endpoint.id}-{cluster.cluster_id}"
-                )
+            legacy_discovery_unique_id = (
+                f"{device.ieee}-{endpoint.id}-{cluster.cluster_id}"
+            )
+
+        if unique_id is None:
+            unique_id = legacy_discovery_unique_id
 
         self._endpoint = endpoint
         self._cluster: zigpy.zcl.Cluster = cluster
 
         super().__init__(
             device,
-            unique_id=legacy_discovery_unique_id,
-            from_quirk=from_quirk,
+            unique_id=unique_id,
             **kwargs,
         )
 

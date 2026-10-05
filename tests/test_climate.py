@@ -1975,7 +1975,7 @@ async def test_thermostat_quirkv2_local_temperature_calibration_config_overwrite
                 endpoint=endpoint,
                 device=self,
                 cluster=cluster,
-                from_quirk=True,
+                unique_id=f"{self.ieee}-{endpoint.id}",
                 attribute_name=calibration,
                 unique_id_suffix=calibration,
                 min_value=-5,
