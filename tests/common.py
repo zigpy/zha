@@ -421,8 +421,6 @@ def zigpy_device_from_device_data(  # noqa: C901
 
             for cluster_id in ep.get("output_clusters", []):
                 endpoint.add_output_cluster(int(cluster_id, 16))
-
-        device.original_signature = signature_from_json(original_signature)
     else:
         device.manufacturer = device_data["manufacturer"]
         device.model = device_data["model"]
