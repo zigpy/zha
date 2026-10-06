@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import logging
 from unittest.mock import AsyncMock, MagicMock, call
 
 import pytest
@@ -202,12 +203,14 @@ def test_handle_event_protocol():
     assert event_handler.handle_test.call_args[0] == (event,)
 
 
-def test_handle_event_protocol_no_event(caplog: pytest.LogCaptureFixture):
-    """Test event base class."""
+def test_handle_event_protocol_no_handler(caplog: pytest.LogCaptureFixture):
+    """Test events without a handler are ignored without a warning."""
 
     event_handler = EventGenerator()
-    event_handler.on_event("not_test", event_handler._handle_event_protocol)
+    event_handler.on_all_events(event_handler._handle_event_protocol)
     event = Event()
-    event_handler.emit("not_test", event)
 
-    assert "Received unknown event:" in caplog.text
+    with caplog.at_level(logging.WARNING):
+        event_handler.emit(event.event, event)
+
+    assert not caplog.records

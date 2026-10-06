@@ -130,7 +130,8 @@ class EventBase:
         )
         handler = getattr(self, f"handle_{event.event.replace(' ', '_')}", None)
         if handler is None:
-            _LOGGER.warning("Received unknown event: %s", event)
+            # Listeners registered with `on_all_events` receive every event, so
+            # events without a handler are expected and ignored
             return
         if inspect.iscoroutinefunction(handler):
             task = asyncio.create_task(handler(event))
