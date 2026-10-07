@@ -242,7 +242,7 @@ class AnalogOutputNumber(BaseNumber):
     def native_value(self) -> float | None:
         """Return the current value."""
         value = self._cluster.get(AnalogOutput.AttributeDefs.present_value.name)
-        if value is not None and math.isnan(value):
+        if isinstance(value, float) and math.isnan(value):
             # NaN is the non-value of the single precision type
             return None
         return value

@@ -311,6 +311,37 @@ async def test_number_non_finite_range(
     assert entity.state.native_max_value == 1023
 
 
+async def test_number_non_finite_max_reported(
+    zha_gateway: Gateway,
+) -> None:
+    """Test a NaN maximum reported after joining falls back to the default."""
+    zigpy_analog_output_device = create_mock_zigpy_device(
+        zha_gateway, ZIGPY_ANALOG_OUTPUT_DEVICE
+    )
+    cluster: general.AnalogOutput = zigpy_analog_output_device.endpoints.get(
+        1
+    ).analog_output
+    cluster.PLUGGED_ATTR_READS = {
+        "min_present_value": 5.0,
+        "max_present_value": 100.0,
+        "present_value": 50.0,
+    }
+    update_attribute_cache(cluster)
+
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_analog_output_device)
+    entity: PlatformEntity = get_entity(zha_device, platform=Platform.NUMBER)
+
+    assert entity.state.native_min_value == 5.0
+    assert entity.state.native_max_value == 100.0
+
+    await send_attributes_report(
+        zha_gateway, cluster, {"max_present_value": float("nan")}
+    )
+
+    assert entity.state.native_min_value == 5.0
+    assert entity.state.native_max_value == 1023
+
+
 async def test_number_nan_present_value(
     zha_gateway: Gateway,
 ) -> None:
