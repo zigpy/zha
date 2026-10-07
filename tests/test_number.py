@@ -1,5 +1,6 @@
 """Test zha number platform."""
 
+import logging
 from unittest.mock import call
 
 import pytest
@@ -79,10 +80,17 @@ async def light_mock(zha_gateway: Gateway) -> ZigbeeDevice:
     return zigpy_device
 
 
+@pytest.mark.parametrize("cached", [True, False])
 async def test_number(
     zha_gateway: Gateway,
+    cached: bool,
+    caplog: pytest.LogCaptureFixture,
 ) -> None:
-    """Test zha number platform."""
+    """Test zha number platform.
+
+    Without a cached value, everything has to be read from the device, as on the
+    (re-)interview of a device.
+    """
     zigpy_analog_output_device = create_mock_zigpy_device(
         zha_gateway, ZIGPY_ANALOG_OUTPUT_DEVICE
     )
@@ -98,10 +106,13 @@ async def test_number(
         "engineering_units": 98,
         "application_type": 4 * 0x10000,
     }
-    update_attribute_cache(cluster)
+    if cached:
+        update_attribute_cache(cluster)
     cluster.PLUGGED_ATTR_READS["present_value"] = 15.0
 
+    caplog.set_level(logging.DEBUG, logger="zha.zigbee.cluster_config")
     zha_device = await join_zigpy_device(zha_gateway, zigpy_analog_output_device)
+    assert "Failed to read attributes" not in caplog.text
     # one for present_value and one for the rest configuration attributes
     assert cluster.read_attributes.call_count == 2
     attr_reads = set()
@@ -177,6 +188,101 @@ async def test_number(
         {"present_value": 30}, manufacturer=UNDEFINED
     )
     assert entity.state.native_value == 30.0
+
+
+async def test_number_capabilities_updated(
+    zha_gateway: Gateway,
+) -> None:
+    """Test the range, step and unit follow the device after the entity was added.
+
+    A device paired with an incomplete cache only gets the missing values later, e.g.
+    from the startup poll or a report.
+    """
+    zigpy_analog_output_device = create_mock_zigpy_device(
+        zha_gateway, ZIGPY_ANALOG_OUTPUT_DEVICE
+    )
+    cluster: general.AnalogOutput = zigpy_analog_output_device.endpoints.get(
+        1
+    ).analog_output
+    cluster.PLUGGED_ATTR_READS = {"min_present_value": 5.0, "present_value": 50.0}
+    update_attribute_cache(cluster)
+
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_analog_output_device)
+    entity: PlatformEntity = get_entity(zha_device, platform=Platform.NUMBER)
+
+    assert entity.state.native_min_value == 5.0
+    assert entity.state.native_max_value == 1023
+    assert entity.state.native_step is None
+    assert entity.state.native_unit_of_measurement is None
+    assert entity.fallback_name is None
+
+    await send_attributes_report(
+        zha_gateway,
+        cluster,
+        {
+            "max_present_value": 100.0,
+            "resolution": 10.0,
+            "engineering_units": 98,
+            "description": "Power Limit",
+        },
+    )
+    await zha_gateway.async_block_till_done()
+
+    assert entity.state.native_min_value == 5.0
+    assert entity.state.native_max_value == 100.0
+    assert entity.state.native_step == 10.0
+    assert entity.state.native_unit_of_measurement == "%"
+    assert entity.fallback_name == "Power Limit"
+
+
+async def test_number_zero_max_value(
+    zha_gateway: Gateway,
+) -> None:
+    """Test a maximum of 0 is not replaced by the default."""
+    zigpy_analog_output_device = create_mock_zigpy_device(
+        zha_gateway, ZIGPY_ANALOG_OUTPUT_DEVICE
+    )
+    cluster: general.AnalogOutput = zigpy_analog_output_device.endpoints.get(
+        1
+    ).analog_output
+    cluster.PLUGGED_ATTR_READS = {
+        "min_present_value": -100.0,
+        "max_present_value": 0.0,
+        "present_value": -50.0,
+    }
+    update_attribute_cache(cluster)
+
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_analog_output_device)
+    entity: PlatformEntity = get_entity(zha_device, platform=Platform.NUMBER)
+
+    assert entity.state.native_min_value == -100.0
+    assert entity.state.native_max_value == 0.0
+
+
+@pytest.mark.parametrize("resolution", [0.0, float("inf"), float("nan")])
+async def test_number_invalid_resolution(
+    zha_gateway: Gateway,
+    resolution: float,
+) -> None:
+    """Test an invalid resolution is not used as step."""
+    zigpy_analog_output_device = create_mock_zigpy_device(
+        zha_gateway, ZIGPY_ANALOG_OUTPUT_DEVICE
+    )
+    cluster: general.AnalogOutput = zigpy_analog_output_device.endpoints.get(
+        1
+    ).analog_output
+    cluster.PLUGGED_ATTR_READS = {
+        "min_present_value": 0.0,
+        "max_present_value": 1.0,
+        "resolution": resolution,
+        "present_value": 0.5,
+    }
+    update_attribute_cache(cluster)
+
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_analog_output_device)
+    entity: PlatformEntity = get_entity(zha_device, platform=Platform.NUMBER)
+
+    assert entity.state.native_step is None
 
 
 async def test_number_missing_description_attr(
