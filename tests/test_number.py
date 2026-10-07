@@ -179,6 +179,47 @@ async def test_number(
     assert entity.state.native_value == 30.0
 
 
+async def test_number_report_before_initialization(
+    zha_gateway: Gateway,
+) -> None:
+    """A report that arrives during the initialization read must not break it."""
+    zigpy_analog_output_device = create_mock_zigpy_device(
+        zha_gateway, ZIGPY_ANALOG_OUTPUT_DEVICE
+    )
+    cluster: general.AnalogOutput = zigpy_analog_output_device.endpoints.get(
+        1
+    ).analog_output
+    cluster.PLUGGED_ATTR_READS = {
+        "max_present_value": 100.0,
+        "min_present_value": 1.0,
+        "resolution": 1.1,
+        "description": "PWM1",
+        "engineering_units": 98,
+        "present_value": 15.0,
+    }
+
+    read_attributes_raw = cluster.read_attributes_raw.side_effect
+
+    async def report_then_read(attributes: list[int], *args, **kwargs):
+        # Devices report present_value as soon as reporting is configured,
+        # which is before the entity has been initialized.
+        if general.AnalogOutput.AttributeDefs.max_present_value.id in attributes:
+            await send_attributes_report(zha_gateway, cluster, {0x0055: 15.0})
+        return await read_attributes_raw(attributes, *args, **kwargs)
+
+    cluster.read_attributes_raw.side_effect = report_then_read
+
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_analog_output_device)
+    entity: PlatformEntity = get_entity(zha_device, platform=Platform.NUMBER)
+
+    assert entity.fallback_name == "PWM1"
+    assert entity.state.native_min_value == 1.0
+    assert entity.state.native_max_value == 100.0
+    assert entity.state.native_step == 1.1
+    assert entity.native_unit_of_measurement == "%"
+    assert entity.state.native_value == 15.0
+
+
 async def test_number_missing_description_attr(
     zha_gateway: Gateway,
 ) -> None:

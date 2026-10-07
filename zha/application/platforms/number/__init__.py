@@ -110,7 +110,7 @@ class BaseNumber(PlatformEntity, ABC):
         """Return the value step."""
         return self._attr_native_step
 
-    @functools.cached_property
+    @property
     def native_unit_of_measurement(self) -> str | None:
         """Return the unit the value is expressed in."""
         return self._attr_native_unit_of_measurement
@@ -128,6 +128,11 @@ class BaseNumber(PlatformEntity, ABC):
 @register_entity(AnalogOutput.cluster_id)
 class AnalogOutputNumber(BaseNumber):
     """Representation of a ZHA Number entity."""
+
+    # Attribute events can arrive before recompute_capabilities() has run, so the
+    # state must be readable with the same fallbacks it applies.
+    _attr_native_min_value: float = 0
+    _attr_native_max_value: float = 1023
 
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({AnalogOutput.cluster_id}),
