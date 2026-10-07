@@ -129,8 +129,7 @@ class BaseNumber(PlatformEntity, ABC):
 class AnalogOutputNumber(BaseNumber):
     """Representation of a ZHA Number entity."""
 
-    # Attribute events can arrive before recompute_capabilities() has run, so the
-    # state must be readable with the same fallbacks it applies.
+    # Fallbacks so state is readable before recompute_capabilities() runs
     _attr_native_min_value: float = 0
     _attr_native_max_value: float = 1023
 
