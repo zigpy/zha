@@ -62,6 +62,7 @@ from zha.application.platforms.sensor.device_class import (
 from zha.application.platforms.switch import Switch
 from zha.exceptions import ZHAException
 from zha.quirks import DeviceRegistry
+from zha.zigbee.cluster_config import AggregatedAttrConfig, AggregatedClusterConfig
 from zha.zigbee.device import (
     ClusterBinding,
     Device,
@@ -127,6 +128,60 @@ def zigpy_device_mains(zha_gateway: Gateway, with_basic_cluster: bool = True):
             descriptor_capability_field=zdo_t.NodeDescriptor.DescriptorCapability.NONE,
         ),
     )
+
+
+@pytest.mark.parametrize(
+    ("request_priority", "expected_read_attribute_options"),
+    [
+        (None, {}),
+        (
+            zigpy.types.PacketPriority.LOW,
+            {"priority": zigpy.types.PacketPriority.LOW},
+        ),
+    ],
+)
+async def test_initialize_request_priority(
+    zha_gateway: Gateway,
+    request_priority: int | None,
+    expected_read_attribute_options: dict[str, int],
+) -> None:
+    """Test device initialization forwards request priority to attribute reads."""
+    zha_device = zha_gateway.get_or_create_device(zigpy_device_mains(zha_gateway))
+    cluster = mock.MagicMock()
+    cluster.read_attributes = AsyncMock()
+    cluster_configs = {
+        (1, 6, True): AggregatedClusterConfig(
+            cluster=cluster,
+            attributes={
+                "cached_attribute": AggregatedAttrConfig(read_on_startup=False),
+                "fresh_attribute": AggregatedAttrConfig(read_on_startup=True),
+            },
+        )
+    }
+
+    with patch(
+        "zha.zigbee.device.aggregate_cluster_configs",
+        return_value=cluster_configs,
+    ):
+        await zha_device.async_initialize(
+            from_cache=False,
+            request_priority=request_priority,
+        )
+
+    assert cluster.read_attributes.await_args_list == [
+        call(
+            ["cached_attribute"],
+            allow_cache=True,
+            only_cache=False,
+            **expected_read_attribute_options,
+        ),
+        call(
+            ["fresh_attribute"],
+            allow_cache=False,
+            only_cache=False,
+            **expected_read_attribute_options,
+        ),
+    ]
 
 
 async def _send_time_changed(zha_gateway: Gateway, seconds: int):

@@ -260,8 +260,14 @@ async def configure_cluster_configs(
 async def initialize_cluster_configs(
     configs: dict[tuple[int, int, bool], AggregatedClusterConfig],
     from_cache: bool,
+    *,
+    request_priority: int | None = None,
 ) -> None:
-    """Read initial attribute values from aggregated configs."""
+    """Read initial attribute values with an optional request priority."""
+    read_attribute_options = (
+        {"priority": request_priority} if request_priority is not None else {}
+    )
+
     for agg in configs.values():
         cached_attrs = [
             attr_name
@@ -277,7 +283,10 @@ async def initialize_cluster_configs(
         if cached_attrs:
             try:
                 await agg.cluster.read_attributes(
-                    cached_attrs, allow_cache=True, only_cache=from_cache
+                    cached_attrs,
+                    allow_cache=True,
+                    only_cache=from_cache,
+                    **read_attribute_options,
                 )
             except Exception as ex:  # pylint: disable=broad-except
                 _LOGGER.debug(
@@ -291,7 +300,10 @@ async def initialize_cluster_configs(
         if fresh_attrs:
             try:
                 await agg.cluster.read_attributes(
-                    fresh_attrs, allow_cache=from_cache, only_cache=from_cache
+                    fresh_attrs,
+                    allow_cache=from_cache,
+                    only_cache=from_cache,
+                    **read_attribute_options,
                 )
             except Exception as ex:  # pylint: disable=broad-except
                 _LOGGER.debug(
