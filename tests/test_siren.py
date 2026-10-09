@@ -3,6 +3,7 @@
 import asyncio
 from unittest.mock import patch
 
+import pytest
 from zigpy.const import SIG_EP_PROFILE
 from zigpy.profiles import zha
 from zigpy.zcl.clusters import general, security
@@ -111,7 +112,7 @@ async def test_siren(zha_gateway: Gateway) -> None:
         "zigpy.zcl.Cluster.request",
         return_value=mock_coro([0x00, zcl_f.Status.SUCCESS]),
     ):
-        await entity.async_turn_on(duration=100, volume_level=3, tone=3)
+        await entity.async_turn_on(duration=100, volume_level=1.0, tone=3)
         await zha_gateway.async_block_till_done()
         assert len(cluster.request.mock_calls) == 1
         assert cluster.request.call_args[0][0] is False
@@ -125,6 +126,35 @@ async def test_siren(zha_gateway: Gateway) -> None:
 
     # test that the state has changed to on
     assert entity.state.is_on is True
+
+
+@pytest.mark.parametrize(
+    ("volume_level", "siren_level"),
+    [
+        (0.0, security.SirenLevel.Low_level_sound),
+        (0.24, security.SirenLevel.Low_level_sound),
+        (0.25, security.SirenLevel.Medium_level_sound),
+        (0.5, security.SirenLevel.High_level_sound),
+        (0.75, security.SirenLevel.Very_high_level_sound),
+        (1.0, security.SirenLevel.Very_high_level_sound),
+    ],
+)
+async def test_siren_volume_level(
+    zha_gateway: Gateway, volume_level: float, siren_level: security.SirenLevel
+) -> None:
+    """Test mapping the siren volume level onto IAS WD siren levels."""
+
+    zha_device, cluster = await siren_mock(zha_gateway)
+    entity = get_entity(zha_device, platform=Platform.SIREN)
+
+    with patch(
+        "zigpy.zcl.Cluster.request",
+        return_value=[0x00, zcl_f.Status.SUCCESS],
+    ):
+        await entity.async_turn_on(volume_level=volume_level)
+        await zha_gateway.async_block_till_done()
+
+        assert cluster.request.call_args.kwargs["warning"].level == siren_level
 
 
 async def test_basic_siren(zha_gateway: Gateway) -> None:
