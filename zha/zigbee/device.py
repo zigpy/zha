@@ -371,6 +371,11 @@ class Device(LogMixin, EventBase):
 
         self._platform_entities: dict[tuple[Platform, str], PlatformEntity] = {}
         self._pending_entities: list[PlatformEntity] = []
+        # Serializes entity discovery + registration. `async_initialize` can be
+        # entered concurrently (startup mains polling, a join / re-interview, the
+        # device becoming available again) and both calls would otherwise drain
+        # the same pending list and register the same entity objects twice.
+        self._entity_lifecycle_lock = asyncio.Lock()
         self._primary_entity: PlatformEntity | None = None
         # All entities discovered for this device, including ones removed by a quirk.
         # Used for aggregating cluster configs so binding/reporting matches the
@@ -1212,36 +1217,40 @@ class Device(LogMixin, EventBase):
         """Recompute all entities for this device."""
         self.debug("Recomputing entities")
 
-        entities = list(self._platform_entities.values())
+        async with self._entity_lifecycle_lock:
+            entities = list(self._platform_entities.values())
 
-        # Remove all entities that are no longer supported
-        for entity in entities[:]:
-            entity.recompute_capabilities()
+            # Remove all entities that are no longer supported
+            for entity in entities[:]:
+                entity.recompute_capabilities()
 
-            if not entity.is_supported() or not entity.is_supported_in_list(entities):
-                self.debug("Removing unsupported entity %s", entity)
-                await self._remove_entity(entity, remove=True)
-                entities.remove(entity)
+                if not entity.is_supported() or not entity.is_supported_in_list(
+                    entities
+                ):
+                    self.debug("Removing unsupported entity %s", entity)
+                    await self._remove_entity(entity, remove=True)
+                    entities.remove(entity)
 
-        # Discover new entities
-        self._discover_new_entities()
-        await self._add_pending_entities()
+            # Discover new entities
+            self._discover_new_entities()
+            await self._add_pending_entities()
 
     async def async_initialize(self, from_cache: bool = False) -> None:
         """Initialize cluster handlers."""
         self.debug("started initialization")
 
-        # We discover prospective entities before initialization
-        self._discover_new_entities()
+        async with self._entity_lifecycle_lock:
+            # We discover prospective entities before initialization
+            self._discover_new_entities()
 
-        # Read initial attributes from entity-level cluster configs
-        aggregated = aggregate_cluster_configs(self._discovered_entities)
-        if aggregated and not self.skip_configuration:
-            await initialize_cluster_configs(aggregated, from_cache)
+            # Read initial attributes from entity-level cluster configs
+            aggregated = aggregate_cluster_configs(self._discovered_entities)
+            if aggregated and not self.skip_configuration:
+                await initialize_cluster_configs(aggregated, from_cache)
 
-        # And add them after. Emit events only on re-initialization, not the first.
-        await self._add_pending_entities(emit_event=self._initialized)
-        self._initialized = True
+            # And add them after. Emit events only on re-initialization, not the first.
+            await self._add_pending_entities(emit_event=self._initialized)
+            self._initialized = True
 
         # Sync the device's firmware version with the first platform entity
         for (platform, _unique_id), entity in self.platform_entities.items():
