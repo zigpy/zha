@@ -190,8 +190,14 @@ class AnalogOutputNumber(BaseNumber):
 
         min_val = self._cluster.get(AnalogOutput.AttributeDefs.min_present_value.name)
         max_val = self._cluster.get(AnalogOutput.AttributeDefs.max_present_value.name)
-        self._attr_native_min_value = 0 if min_val is None else min_val
-        self._attr_native_max_value = 1023 if max_val is None else max_val
+        # NaN is the non-value of the single precision type (ZCL 2.6.2), so treat it
+        # and unusable infinite bounds as not set
+        self._attr_native_min_value = (
+            min_val if min_val is not None and math.isfinite(min_val) else 0
+        )
+        self._attr_native_max_value = (
+            max_val if max_val is not None and math.isfinite(max_val) else 1023
+        )
 
         # Guard against 0 resolution reported by some devices
         resolution = self._cluster.get(AnalogOutput.AttributeDefs.resolution.name)
@@ -235,7 +241,11 @@ class AnalogOutputNumber(BaseNumber):
     @property
     def native_value(self) -> float | None:
         """Return the current value."""
-        return self._cluster.get(AnalogOutput.AttributeDefs.present_value.name)
+        value = self._cluster.get(AnalogOutput.AttributeDefs.present_value.name)
+        if isinstance(value, float) and math.isnan(value):
+            # NaN is the non-value of the single precision type
+            return None
+        return value
 
     async def async_set_native_value(self, value: float) -> None:
         """Update the current value from HA."""
