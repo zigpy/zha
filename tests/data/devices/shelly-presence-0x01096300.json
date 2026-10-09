@@ -1,0 +1,914 @@
+{
+  "version": 3,
+  "ieee": "ab:cd:ef:12:31:48:95:e1",
+  "nwk": "0xC99C",
+  "manufacturer": "Shelly",
+  "model": "Presence",
+  "friendly_manufacturer": "Shelly",
+  "friendly_model": "Presence",
+  "name": "Shelly Presence",
+  "quirk_applied": false,
+  "quirk_class": "zigpy.device.ZigbeeDevice",
+  "exposes_features": [],
+  "manufacturer_code": 5264,
+  "power_source": "Mains",
+  "lqi": 255,
+  "rssi": -29,
+  "last_seen": "2026-05-04T07:25:17.743541+00:00",
+  "available": true,
+  "device_type": "Router",
+  "active_coordinator": false,
+  "node_descriptor": {
+    "logical_type": "Router",
+    "complex_descriptor_available": false,
+    "user_descriptor_available": false,
+    "reserved": 0,
+    "aps_flags": 0,
+    "frequency_band": 8,
+    "mac_capability_flags": 142,
+    "manufacturer_code": 5264,
+    "maximum_buffer_size": 108,
+    "maximum_incoming_transfer_size": 1613,
+    "server_mask": 11264,
+    "maximum_outgoing_transfer_size": 1613,
+    "descriptor_capability_field": 0
+  },
+  "endpoints": {
+    "1": {
+      "profile_id": 260,
+      "device_type": {
+        "name": "undefined_0x0406",
+        "id": 1030
+      },
+      "in_clusters": [
+        {
+          "cluster_id": "0x0000",
+          "endpoint_attribute": "basic",
+          "attributes": [
+            {
+              "id": "0x0004",
+              "name": "manufacturer",
+              "zcl_type": "string",
+              "value": "Shelly"
+            },
+            {
+              "id": "0x0005",
+              "name": "model",
+              "zcl_type": "string",
+              "value": "Presence"
+            }
+          ]
+        },
+        {
+          "cluster_id": "0x0003",
+          "endpoint_attribute": "identify",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0406",
+          "endpoint_attribute": "occupancy",
+          "attributes": [
+            {
+              "id": "0x0000",
+              "name": "occupancy",
+              "zcl_type": "map8",
+              "value": 0
+            },
+            {
+              "id": "0x0010",
+              "name": "pir_o_to_u_delay",
+              "zcl_type": "uint16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0011",
+              "name": "pir_u_to_o_delay",
+              "zcl_type": "uint16",
+              "unsupported": true
+            }
+          ]
+        },
+        {
+          "cluster_id": "0xfc21",
+          "endpoint_attribute": "manufacturer_specific",
+          "attributes": []
+        }
+      ],
+      "out_clusters": [
+        {
+          "cluster_id": "0x0003",
+          "endpoint_attribute": "identify",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0019",
+          "endpoint_attribute": "ota",
+          "attributes": [
+            {
+              "id": "0x0002",
+              "name": "current_file_version",
+              "zcl_type": "uint32",
+              "value": 17392384
+            }
+          ]
+        }
+      ]
+    },
+    "2": {
+      "profile_id": 260,
+      "device_type": {
+        "name": "undefined_0x0406",
+        "id": 1030
+      },
+      "in_clusters": [
+        {
+          "cluster_id": "0x0406",
+          "endpoint_attribute": "occupancy",
+          "attributes": [
+            {
+              "id": "0x0000",
+              "name": "occupancy",
+              "zcl_type": "map8",
+              "value": 0
+            },
+            {
+              "id": "0x0010",
+              "name": "pir_o_to_u_delay",
+              "zcl_type": "uint16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0011",
+              "name": "pir_u_to_o_delay",
+              "zcl_type": "uint16",
+              "unsupported": true
+            }
+          ]
+        }
+      ],
+      "out_clusters": []
+    },
+    "3": {
+      "profile_id": 260,
+      "device_type": {
+        "name": "undefined_0x0406",
+        "id": 1030
+      },
+      "in_clusters": [
+        {
+          "cluster_id": "0x0406",
+          "endpoint_attribute": "occupancy",
+          "attributes": [
+            {
+              "id": "0x0000",
+              "name": "occupancy",
+              "zcl_type": "map8",
+              "value": 0
+            },
+            {
+              "id": "0x0010",
+              "name": "pir_o_to_u_delay",
+              "zcl_type": "uint16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0011",
+              "name": "pir_u_to_o_delay",
+              "zcl_type": "uint16",
+              "unsupported": true
+            }
+          ]
+        }
+      ],
+      "out_clusters": []
+    },
+    "4": {
+      "profile_id": 260,
+      "device_type": {
+        "name": "undefined_0x0406",
+        "id": 1030
+      },
+      "in_clusters": [
+        {
+          "cluster_id": "0x0406",
+          "endpoint_attribute": "occupancy",
+          "attributes": [
+            {
+              "id": "0x0000",
+              "name": "occupancy",
+              "zcl_type": "map8",
+              "value": 0
+            },
+            {
+              "id": "0x0010",
+              "name": "pir_o_to_u_delay",
+              "zcl_type": "uint16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0011",
+              "name": "pir_u_to_o_delay",
+              "zcl_type": "uint16",
+              "unsupported": true
+            }
+          ]
+        }
+      ],
+      "out_clusters": []
+    },
+    "5": {
+      "profile_id": 260,
+      "device_type": {
+        "name": "undefined_0x0406",
+        "id": 1030
+      },
+      "in_clusters": [
+        {
+          "cluster_id": "0x0406",
+          "endpoint_attribute": "occupancy",
+          "attributes": [
+            {
+              "id": "0x0000",
+              "name": "occupancy",
+              "zcl_type": "map8",
+              "value": 0
+            },
+            {
+              "id": "0x0010",
+              "name": "pir_o_to_u_delay",
+              "zcl_type": "uint16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0011",
+              "name": "pir_u_to_o_delay",
+              "zcl_type": "uint16",
+              "unsupported": true
+            }
+          ]
+        }
+      ],
+      "out_clusters": []
+    },
+    "6": {
+      "profile_id": 260,
+      "device_type": {
+        "name": "undefined_0x0406",
+        "id": 1030
+      },
+      "in_clusters": [
+        {
+          "cluster_id": "0x0406",
+          "endpoint_attribute": "occupancy",
+          "attributes": [
+            {
+              "id": "0x0000",
+              "name": "occupancy",
+              "zcl_type": "map8",
+              "value": 0
+            },
+            {
+              "id": "0x0010",
+              "name": "pir_o_to_u_delay",
+              "zcl_type": "uint16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0011",
+              "name": "pir_u_to_o_delay",
+              "zcl_type": "uint16",
+              "unsupported": true
+            }
+          ]
+        }
+      ],
+      "out_clusters": []
+    },
+    "7": {
+      "profile_id": 260,
+      "device_type": {
+        "name": "undefined_0x0406",
+        "id": 1030
+      },
+      "in_clusters": [
+        {
+          "cluster_id": "0x0406",
+          "endpoint_attribute": "occupancy",
+          "attributes": [
+            {
+              "id": "0x0000",
+              "name": "occupancy",
+              "zcl_type": "map8",
+              "value": 0
+            },
+            {
+              "id": "0x0010",
+              "name": "pir_o_to_u_delay",
+              "zcl_type": "uint16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0011",
+              "name": "pir_u_to_o_delay",
+              "zcl_type": "uint16",
+              "unsupported": true
+            }
+          ]
+        }
+      ],
+      "out_clusters": []
+    },
+    "8": {
+      "profile_id": 260,
+      "device_type": {
+        "name": "undefined_0x0406",
+        "id": 1030
+      },
+      "in_clusters": [
+        {
+          "cluster_id": "0x0406",
+          "endpoint_attribute": "occupancy",
+          "attributes": [
+            {
+              "id": "0x0000",
+              "name": "occupancy",
+              "zcl_type": "map8",
+              "value": 0
+            },
+            {
+              "id": "0x0010",
+              "name": "pir_o_to_u_delay",
+              "zcl_type": "uint16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0011",
+              "name": "pir_u_to_o_delay",
+              "zcl_type": "uint16",
+              "unsupported": true
+            }
+          ]
+        }
+      ],
+      "out_clusters": []
+    },
+    "9": {
+      "profile_id": 260,
+      "device_type": {
+        "name": "undefined_0x0406",
+        "id": 1030
+      },
+      "in_clusters": [
+        {
+          "cluster_id": "0x0406",
+          "endpoint_attribute": "occupancy",
+          "attributes": [
+            {
+              "id": "0x0000",
+              "name": "occupancy",
+              "zcl_type": "map8",
+              "value": 0
+            },
+            {
+              "id": "0x0010",
+              "name": "pir_o_to_u_delay",
+              "zcl_type": "uint16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0011",
+              "name": "pir_u_to_o_delay",
+              "zcl_type": "uint16",
+              "unsupported": true
+            }
+          ]
+        }
+      ],
+      "out_clusters": []
+    },
+    "10": {
+      "profile_id": 260,
+      "device_type": {
+        "name": "undefined_0x0406",
+        "id": 1030
+      },
+      "in_clusters": [
+        {
+          "cluster_id": "0x0406",
+          "endpoint_attribute": "occupancy",
+          "attributes": [
+            {
+              "id": "0x0000",
+              "name": "occupancy",
+              "zcl_type": "map8",
+              "value": 0
+            },
+            {
+              "id": "0x0010",
+              "name": "pir_o_to_u_delay",
+              "zcl_type": "uint16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0011",
+              "name": "pir_u_to_o_delay",
+              "zcl_type": "uint16",
+              "unsupported": true
+            }
+          ]
+        }
+      ],
+      "out_clusters": []
+    },
+    "239": {
+      "profile_id": 49153,
+      "device_type": {
+        "name": "unknown",
+        "id": 8193
+      },
+      "in_clusters": [
+        {
+          "cluster_id": "0xfc01",
+          "endpoint_attribute": "manufacturer_specific",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0xfc02",
+          "endpoint_attribute": "manufacturer_specific",
+          "attributes": []
+        }
+      ],
+      "out_clusters": []
+    },
+    "242": {
+      "profile_id": 41440,
+      "device_type": {
+        "name": "PROXY_BASIC",
+        "id": 97
+      },
+      "in_clusters": [],
+      "out_clusters": [
+        {
+          "cluster_id": "0x0021",
+          "endpoint_attribute": "green_power",
+          "attributes": []
+        }
+      ]
+    }
+  },
+  "original_signature": {
+    "manufacturer": "Shelly",
+    "model": "Presence",
+    "node_desc": {
+      "logical_type": 1,
+      "complex_descriptor_available": 0,
+      "user_descriptor_available": 0,
+      "reserved": 0,
+      "aps_flags": 0,
+      "frequency_band": 8,
+      "mac_capability_flags": 142,
+      "manufacturer_code": 5264,
+      "maximum_buffer_size": 108,
+      "maximum_incoming_transfer_size": 1613,
+      "server_mask": 11264,
+      "maximum_outgoing_transfer_size": 1613,
+      "descriptor_capability_field": 0
+    },
+    "endpoints": {
+      "1": {
+        "profile_id": "0x0104",
+        "device_type": "0x0406",
+        "input_clusters": [
+          "0x0000",
+          "0x0003",
+          "0x0406",
+          "0xfc21"
+        ],
+        "output_clusters": [
+          "0x0019",
+          "0x0003"
+        ]
+      },
+      "2": {
+        "profile_id": "0x0104",
+        "device_type": "0x0406",
+        "input_clusters": [
+          "0x0406"
+        ],
+        "output_clusters": []
+      },
+      "3": {
+        "profile_id": "0x0104",
+        "device_type": "0x0406",
+        "input_clusters": [
+          "0x0406"
+        ],
+        "output_clusters": []
+      },
+      "4": {
+        "profile_id": "0x0104",
+        "device_type": "0x0406",
+        "input_clusters": [
+          "0x0406"
+        ],
+        "output_clusters": []
+      },
+      "5": {
+        "profile_id": "0x0104",
+        "device_type": "0x0406",
+        "input_clusters": [
+          "0x0406"
+        ],
+        "output_clusters": []
+      },
+      "6": {
+        "profile_id": "0x0104",
+        "device_type": "0x0406",
+        "input_clusters": [
+          "0x0406"
+        ],
+        "output_clusters": []
+      },
+      "7": {
+        "profile_id": "0x0104",
+        "device_type": "0x0406",
+        "input_clusters": [
+          "0x0406"
+        ],
+        "output_clusters": []
+      },
+      "8": {
+        "profile_id": "0x0104",
+        "device_type": "0x0406",
+        "input_clusters": [
+          "0x0406"
+        ],
+        "output_clusters": []
+      },
+      "9": {
+        "profile_id": "0x0104",
+        "device_type": "0x0406",
+        "input_clusters": [
+          "0x0406"
+        ],
+        "output_clusters": []
+      },
+      "10": {
+        "profile_id": "0x0104",
+        "device_type": "0x0406",
+        "input_clusters": [
+          "0x0406"
+        ],
+        "output_clusters": []
+      },
+      "239": {
+        "profile_id": "0xc001",
+        "device_type": "0x2001",
+        "input_clusters": [
+          "0xfc01",
+          "0xfc02"
+        ],
+        "output_clusters": []
+      },
+      "242": {
+        "profile_id": "0xa1e0",
+        "device_type": "0x0061",
+        "input_clusters": [],
+        "output_clusters": [
+          "0x0021"
+        ]
+      }
+    }
+  },
+  "zha_lib_entities": {
+    "binary_sensor": [
+      {
+        "fallback_name": null,
+        "unique_id": "ab:cd:ef:12:31:48:95:e1-1-1030",
+        "migrate_unique_ids": [],
+        "platform": "binary_sensor",
+        "class_name": "Occupancy",
+        "translation_key": null,
+        "translation_placeholders": null,
+        "device_class": "occupancy",
+        "state_class": null,
+        "entity_category": null,
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:31:48:95:e1",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "is_on": false,
+        "attribute_name": "occupancy"
+      },
+      {
+        "fallback_name": null,
+        "unique_id": "ab:cd:ef:12:31:48:95:e1-10-1030",
+        "migrate_unique_ids": [],
+        "platform": "binary_sensor",
+        "class_name": "Occupancy",
+        "translation_key": null,
+        "translation_placeholders": null,
+        "device_class": "occupancy",
+        "state_class": null,
+        "entity_category": null,
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:31:48:95:e1",
+        "endpoint_id": 10,
+        "available": true,
+        "group_id": null,
+        "is_on": false,
+        "attribute_name": "occupancy"
+      },
+      {
+        "fallback_name": null,
+        "unique_id": "ab:cd:ef:12:31:48:95:e1-2-1030",
+        "migrate_unique_ids": [],
+        "platform": "binary_sensor",
+        "class_name": "Occupancy",
+        "translation_key": null,
+        "translation_placeholders": null,
+        "device_class": "occupancy",
+        "state_class": null,
+        "entity_category": null,
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:31:48:95:e1",
+        "endpoint_id": 2,
+        "available": true,
+        "group_id": null,
+        "is_on": false,
+        "attribute_name": "occupancy"
+      },
+      {
+        "fallback_name": null,
+        "unique_id": "ab:cd:ef:12:31:48:95:e1-3-1030",
+        "migrate_unique_ids": [],
+        "platform": "binary_sensor",
+        "class_name": "Occupancy",
+        "translation_key": null,
+        "translation_placeholders": null,
+        "device_class": "occupancy",
+        "state_class": null,
+        "entity_category": null,
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:31:48:95:e1",
+        "endpoint_id": 3,
+        "available": true,
+        "group_id": null,
+        "is_on": false,
+        "attribute_name": "occupancy"
+      },
+      {
+        "fallback_name": null,
+        "unique_id": "ab:cd:ef:12:31:48:95:e1-4-1030",
+        "migrate_unique_ids": [],
+        "platform": "binary_sensor",
+        "class_name": "Occupancy",
+        "translation_key": null,
+        "translation_placeholders": null,
+        "device_class": "occupancy",
+        "state_class": null,
+        "entity_category": null,
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:31:48:95:e1",
+        "endpoint_id": 4,
+        "available": true,
+        "group_id": null,
+        "is_on": false,
+        "attribute_name": "occupancy"
+      },
+      {
+        "fallback_name": null,
+        "unique_id": "ab:cd:ef:12:31:48:95:e1-5-1030",
+        "migrate_unique_ids": [],
+        "platform": "binary_sensor",
+        "class_name": "Occupancy",
+        "translation_key": null,
+        "translation_placeholders": null,
+        "device_class": "occupancy",
+        "state_class": null,
+        "entity_category": null,
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:31:48:95:e1",
+        "endpoint_id": 5,
+        "available": true,
+        "group_id": null,
+        "is_on": false,
+        "attribute_name": "occupancy"
+      },
+      {
+        "fallback_name": null,
+        "unique_id": "ab:cd:ef:12:31:48:95:e1-6-1030",
+        "migrate_unique_ids": [],
+        "platform": "binary_sensor",
+        "class_name": "Occupancy",
+        "translation_key": null,
+        "translation_placeholders": null,
+        "device_class": "occupancy",
+        "state_class": null,
+        "entity_category": null,
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:31:48:95:e1",
+        "endpoint_id": 6,
+        "available": true,
+        "group_id": null,
+        "is_on": false,
+        "attribute_name": "occupancy"
+      },
+      {
+        "fallback_name": null,
+        "unique_id": "ab:cd:ef:12:31:48:95:e1-7-1030",
+        "migrate_unique_ids": [],
+        "platform": "binary_sensor",
+        "class_name": "Occupancy",
+        "translation_key": null,
+        "translation_placeholders": null,
+        "device_class": "occupancy",
+        "state_class": null,
+        "entity_category": null,
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:31:48:95:e1",
+        "endpoint_id": 7,
+        "available": true,
+        "group_id": null,
+        "is_on": false,
+        "attribute_name": "occupancy"
+      },
+      {
+        "fallback_name": null,
+        "unique_id": "ab:cd:ef:12:31:48:95:e1-8-1030",
+        "migrate_unique_ids": [],
+        "platform": "binary_sensor",
+        "class_name": "Occupancy",
+        "translation_key": null,
+        "translation_placeholders": null,
+        "device_class": "occupancy",
+        "state_class": null,
+        "entity_category": null,
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:31:48:95:e1",
+        "endpoint_id": 8,
+        "available": true,
+        "group_id": null,
+        "is_on": false,
+        "attribute_name": "occupancy"
+      },
+      {
+        "fallback_name": null,
+        "unique_id": "ab:cd:ef:12:31:48:95:e1-9-1030",
+        "migrate_unique_ids": [],
+        "platform": "binary_sensor",
+        "class_name": "Occupancy",
+        "translation_key": null,
+        "translation_placeholders": null,
+        "device_class": "occupancy",
+        "state_class": null,
+        "entity_category": null,
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:31:48:95:e1",
+        "endpoint_id": 9,
+        "available": true,
+        "group_id": null,
+        "is_on": false,
+        "attribute_name": "occupancy"
+      }
+    ],
+    "button": [
+      {
+        "fallback_name": null,
+        "unique_id": "ab:cd:ef:12:31:48:95:e1-1-3",
+        "migrate_unique_ids": [],
+        "platform": "button",
+        "class_name": "IdentifyButton",
+        "translation_key": null,
+        "translation_placeholders": null,
+        "device_class": "identify",
+        "state_class": null,
+        "entity_category": "diagnostic",
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:31:48:95:e1",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "command": "identify",
+        "args": [
+          5
+        ],
+        "kwargs": {}
+      }
+    ],
+    "sensor": [
+      {
+        "fallback_name": null,
+        "unique_id": "ab:cd:ef:12:31:48:95:e1-1-0-lqi",
+        "migrate_unique_ids": [],
+        "platform": "sensor",
+        "class_name": "LQISensor",
+        "translation_key": "lqi",
+        "translation_placeholders": null,
+        "device_class": null,
+        "state_class": "measurement",
+        "entity_category": "diagnostic",
+        "entity_registry_enabled_default": false,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:31:48:95:e1",
+        "endpoint_id": null,
+        "available": true,
+        "group_id": null,
+        "native_value": 255,
+        "suggested_display_precision": null,
+        "unit": null
+      },
+      {
+        "fallback_name": null,
+        "unique_id": "ab:cd:ef:12:31:48:95:e1-1-0-rssi",
+        "migrate_unique_ids": [],
+        "platform": "sensor",
+        "class_name": "RSSISensor",
+        "translation_key": "rssi",
+        "translation_placeholders": null,
+        "device_class": "signal_strength",
+        "state_class": "measurement",
+        "entity_category": "diagnostic",
+        "entity_registry_enabled_default": false,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:31:48:95:e1",
+        "endpoint_id": null,
+        "available": true,
+        "group_id": null,
+        "native_value": -29,
+        "suggested_display_precision": null,
+        "unit": "dBm"
+      }
+    ],
+    "update": [
+      {
+        "fallback_name": null,
+        "unique_id": "ab:cd:ef:12:31:48:95:e1-1-25-firmware_update",
+        "migrate_unique_ids": [],
+        "platform": "update",
+        "class_name": "FirmwareUpdateEntity",
+        "translation_key": null,
+        "translation_placeholders": null,
+        "device_class": "firmware",
+        "state_class": null,
+        "entity_category": "config",
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:31:48:95:e1",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "installed_version": "0x01096300",
+        "in_progress": false,
+        "update_percentage": null,
+        "latest_version": null,
+        "release_summary": null,
+        "release_notes": null,
+        "release_url": null,
+        "supported_features": 23
+      }
+    ]
+  },
+  "neighbors": [],
+  "routes": []
+}
