@@ -191,7 +191,7 @@ class Group(LogMixin):
     def members(self) -> list[GroupMember]:
         """Return the ZHA devices that are members of this group."""
         return [
-            GroupMember(self, self._gateway.devices[member_ieee], endpoint_id)
+            GroupMember(self, self._gateway.get_zigbee_device(member_ieee), endpoint_id)
             for (member_ieee, endpoint_id) in self._zigpy_group.members
             if member_ieee in self._gateway.devices
         ]
@@ -288,40 +288,40 @@ class Group(LogMixin):
 
     async def async_add_members(self, members: list[GroupMemberReference]) -> None:
         """Add members to this group."""
-        devices: dict[EUI64, Device] = self._gateway.devices
         if len(members) > 1:
             tasks = []
             for member in members:
                 tasks.append(
-                    devices[member.ieee].async_add_endpoint_to_group(
-                        member.endpoint_id, self.group_id
-                    )
+                    self._gateway.get_zigbee_device(
+                        member.ieee
+                    ).async_add_endpoint_to_group(member.endpoint_id, self.group_id)
                 )
             await asyncio.gather(*tasks)
         else:
             member = members[0]
-            await devices[member.ieee].async_add_endpoint_to_group(
-                member.endpoint_id, self.group_id
-            )
+            await self._gateway.get_zigbee_device(
+                member.ieee
+            ).async_add_endpoint_to_group(member.endpoint_id, self.group_id)
         self.update_entity_subscriptions()
 
     async def async_remove_members(self, members: list[GroupMemberReference]) -> None:
         """Remove members from this group."""
-        devices: dict[EUI64, Device] = self._gateway.devices
         if len(members) > 1:
             tasks = []
             for member in members:
                 tasks.append(
-                    devices[member.ieee].async_remove_endpoint_from_group(
+                    self._gateway.get_zigbee_device(
+                        member.ieee
+                    ).async_remove_endpoint_from_group(
                         member.endpoint_id, self.group_id
                     )
                 )
             await asyncio.gather(*tasks)
         else:
             member = members[0]
-            await devices[member.ieee].async_remove_endpoint_from_group(
-                member.endpoint_id, self.group_id
-            )
+            await self._gateway.get_zigbee_device(
+                member.ieee
+            ).async_remove_endpoint_from_group(member.endpoint_id, self.group_id)
         self.update_entity_subscriptions()
 
     def get_platform_entities(self, platform: str) -> list[PlatformEntity]:

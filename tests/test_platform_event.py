@@ -16,7 +16,7 @@ from tests.common import (
 )
 from zha.application import Platform
 from zha.application.gateway import Gateway
-from zha.application.platforms import EntityStateChangedEvent
+from zha.application.platforms import EntityStateChangedEvent, ZclPlatformEntity
 from zha.application.platforms.event import (
     BaseEvent,
     EntityEventTriggeredEvent,
@@ -31,8 +31,8 @@ from zha.application.platforms.event.const import (
 from zha.zigbee.device import Device
 
 
-class FakeEvent(BaseEvent):
-    """Event entity with a fixed set of event types."""
+class FakeEvent(BaseEvent, ZclPlatformEntity):
+    """ZCL-backed event entity with a fixed set of event types."""
 
     _unique_id_suffix = "fake"
     _attr_device_class = EventDeviceClass.BUTTON

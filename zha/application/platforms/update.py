@@ -27,8 +27,8 @@ from zha.application.platforms import (
     ClusterConfig,
     ClusterMatch,
     EntityCategory,
-    PlatformEntity,
     PlatformFeatureGroup,
+    ZclPlatformEntity,
     register_entity,
 )
 from zha.exceptions import ZHAException
@@ -80,7 +80,7 @@ class UpdateState(BaseEntityState):
     supported_features: UpdateEntityFeature
 
 
-class BaseFirmwareUpdateEntity(PlatformEntity, ABC):
+class BaseFirmwareUpdateEntity(ZclPlatformEntity, ABC):
     """Abstract base class for ZHA firmware update entities."""
 
     PLATFORM = Platform.UPDATE
