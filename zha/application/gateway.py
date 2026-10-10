@@ -273,7 +273,9 @@ class Gateway(AsyncUtilMixin, EventBase):
         """Initialize controller and connect radio."""
         try:
             await self._async_initialize()
-        except Exception:
+        except (Exception, asyncio.CancelledError):
+            # Also tear down on cancellation (e.g. a setup timeout), otherwise the
+            # radio connection and zigpy's background tasks are left running
             await self.shutdown()
             raise
 

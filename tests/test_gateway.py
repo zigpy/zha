@@ -181,6 +181,52 @@ async def test_gateway_startup_failure(
     assert zha_gateway.shutdown.await_count == 1
 
 
+@pytest.mark.parametrize("blocking_call", ["start_network", "load_devices"])
+async def test_gateway_startup_cancelled(
+    zha_data: ZHAData,
+    zigpy_app_controller: ControllerApplication,
+    blocking_call: str,
+) -> None:
+    """Test shutdown called when gateway init is cancelled, e.g. by a setup timeout."""
+
+    entered = asyncio.Event()
+
+    async def block_forever(*args, **kwargs) -> None:
+        entered.set()
+        await asyncio.Future()
+
+    with (
+        patch(
+            "bellows.zigbee.application.ControllerApplication.new",
+            return_value=zigpy_app_controller,
+        ),
+        patch.object(
+            zigpy_app_controller,
+            "shutdown",
+            AsyncMock(wraps=zigpy_app_controller.shutdown),
+        ) as app_shutdown,
+    ):
+        zha_gateway = await Gateway.async_from_config(zha_data)
+        zha_gateway.shutdown = AsyncMock(wraps=zha_gateway.shutdown)
+
+        with patch.object(
+            zigpy_app_controller if blocking_call == "start_network" else zha_gateway,
+            blocking_call,
+            block_forever,
+        ):
+            init_task = asyncio.create_task(zha_gateway.async_initialize())
+            await entered.wait()
+            init_task.cancel()
+
+            with pytest.raises(asyncio.CancelledError):
+                await init_task
+
+    assert zha_gateway.shutdown.await_count == 1
+    assert app_shutdown.await_count == 1
+    assert zha_gateway.application_controller is None
+    assert zigpy_app_controller._watchdog_task.cancelled()
+
+
 async def test_gateway_starts_entity_exception(
     zha_data: ZHAData,
     zigpy_app_controller: ControllerApplication,
