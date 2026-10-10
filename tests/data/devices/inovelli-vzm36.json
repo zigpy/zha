@@ -441,7 +441,7 @@
         "unique_id": "ab:cd:ef:12:25:9f:47:fc-2-514",
         "migrate_unique_ids": [],
         "platform": "fan",
-        "class_name": "Fan",
+        "class_name": "InovelliFan",
         "translation_key": "fan",
         "translation_placeholders": null,
         "device_class": null,
