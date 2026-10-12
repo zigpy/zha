@@ -37,21 +37,21 @@ testing = [
 
 [dependency-groups]
 testing = [
-    "codespell==2.4.2",
+    "codespell==2.4.3",
     "coloredlogs",
     "colorlog",
     "coverage",
     "freezegun",
     "looptime>=0.7",
-    "mypy==2.1.0",
-    "pre-commit==4.6.0",
+    "mypy==2.4.0",
+    "pre-commit==4.6.2",
     "pytest",
     "pytest-asyncio>=1.4.0",
     "pytest-cov",
     "pytest-sugar",
     "pytest-timeout",
     "python-slugify",
-    "ruff==0.15.16",
+    "ruff==0.16.10",
     "uv>=0.11.16",
     "zha-quirks>=2.0.0",
 ]
@@ -374,6 +374,7 @@ ignore = [
     "PLR0912", # Too many branches ({branches} > {max_branches})
     "PLR0913", # Too many arguments to function call ({c_args} > {max_args})
     "PLR0915", # Too many statements ({statements} > {max_statements})
+    "PLR0917", # Too many positional arguments ({c_pos} > {max_pos})
     "PLR2004", # Magic value used in comparison, consider replacing {value} with a constant variable
     "PLW2901", # Outer {outer_kind} variable {name} overwritten by inner {inner_kind} target
     "UP006", # keep type annotation style as is
