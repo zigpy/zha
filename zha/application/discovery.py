@@ -146,7 +146,9 @@ def discover_group_entities(group: Group) -> Iterator[GroupEntity]:
                 group_entity_class,
                 group.name,
             )
-            yield group_entity_class(group)
+            group_entity = group_entity_class(group)
+            group_entity.recompute_capabilities()
+            yield group_entity
 
 
 def _is_renamed_cluster(cluster: Cluster) -> bool:

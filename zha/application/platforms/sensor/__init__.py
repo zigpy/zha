@@ -280,8 +280,6 @@ class Sensor(BaseSensor):
             with contextlib.suppress(KeyError):
                 self._attr_def = self._cluster.find_attribute(self._attribute_name)
 
-        self.recompute_capabilities()
-
     def on_add(self) -> None:
         """Run when entity is added."""
         super().on_add()

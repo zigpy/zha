@@ -179,11 +179,6 @@ class AnalogOutputNumber(BaseNumber):
         }
     )
 
-    def __init__(self, endpoint: Endpoint, device: Device, **kwargs: Any) -> None:
-        """Init this number."""
-        super().__init__(endpoint=endpoint, device=device, **kwargs)
-        self.recompute_capabilities()
-
     def recompute_capabilities(self) -> None:
         """Recompute capabilities."""
         super().recompute_capabilities()

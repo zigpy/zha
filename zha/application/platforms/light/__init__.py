@@ -1002,8 +1002,6 @@ class Light(BaseSharedLight, PlatformEntity):
 
         self._refresh_task: asyncio.Task | None = None
 
-        self.recompute_capabilities()
-
     @property
     def _gateway(self) -> Gateway:
         return self._device.gateway
@@ -1372,8 +1370,6 @@ class LightGroup(BaseSharedLight, GroupEntity):
             immediate=True,
             function=self._force_member_updates,
         )
-
-        self.recompute_capabilities()
 
     @property
     def _gateway(self) -> Gateway:

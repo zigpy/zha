@@ -6,7 +6,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 import functools
 import math
-from typing import TYPE_CHECKING, Any, cast
+from typing import Any, cast
 
 from zigpy.zcl import (
     AttributeReadEvent,
@@ -52,10 +52,6 @@ from zha.application.platforms.fan.helpers import (
     ranged_value_to_percentage,
 )
 from zha.zigbee.group import Group
-
-if TYPE_CHECKING:
-    from zha.zigbee.device import Device
-    from zha.zigbee.endpoint import Endpoint
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -267,16 +263,6 @@ class Fan(BaseFan, PlatformEntity):
             },
         ),
     }
-
-    def __init__(
-        self,
-        endpoint: Endpoint,
-        device: Device,
-        **kwargs,
-    ) -> None:
-        """Initialize the fan."""
-        super().__init__(endpoint=endpoint, device=device, **kwargs)
-        self.recompute_capabilities()
 
     def on_add(self) -> None:
         """Run when entity is added."""

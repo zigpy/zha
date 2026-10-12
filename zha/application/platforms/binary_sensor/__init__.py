@@ -112,7 +112,6 @@ class BinarySensor(BaseBinarySensor):
             )
 
         super().__init__(endpoint=endpoint, device=device, **kwargs)
-        self.recompute_capabilities()
 
     def _is_supported(self) -> bool:
         if self._attribute_name not in self._cluster.attributes_by_name:

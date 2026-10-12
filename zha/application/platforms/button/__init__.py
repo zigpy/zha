@@ -168,7 +168,6 @@ class WriteAttributeButton(BaseButton):
             self._attribute_value = attribute_value
 
         super().__init__(endpoint=endpoint, device=device, **kwargs)
-        self.recompute_capabilities()
 
     @property
     def state(self) -> WriteAttributeButtonState:

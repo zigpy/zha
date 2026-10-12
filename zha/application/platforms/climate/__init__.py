@@ -392,7 +392,6 @@ class Thermostat(BaseThermostat):
         )
 
         self._supported_features = ClimateEntityFeature(0)
-        self.recompute_capabilities()
 
     @property
     def _local_temperature(self) -> int | None:

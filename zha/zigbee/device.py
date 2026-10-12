@@ -1093,6 +1093,17 @@ class Device(LogMixin, EventBase):
                 _LOGGER.exception("Failed to create entity during discovery")
                 continue
 
+            # Quirk predicates below match on capabilities (e.g. `translation_key`), and
+            # entities can be asked for their state as soon as `on_add()` subscribes them
+            # to cluster events, so compute capabilities right after construction
+            try:
+                entity.recompute_capabilities()
+            except Exception:  # pylint: disable=broad-except
+                _LOGGER.exception(
+                    "Failed to compute capabilities of %s during discovery", entity
+                )
+                continue
+
             self._discovered_entities.append(entity)
 
             if self._is_entity_removed_by_quirk(entity):

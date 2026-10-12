@@ -197,6 +197,7 @@ class Cover(BaseCover):
                 ZCL_TO_COVER_DEVICE_CLASS.get(self._window_covering_type)
             )
         self._attr_supported_features: CoverEntityFeature = CoverEntityFeature(0)
+        # Needed here already: `_determine_cover_state()` below uses the features
         self.recompute_capabilities()
 
         self._target_lift_position: int | None = None
@@ -850,8 +851,6 @@ class Shade(BaseCover):
             self._position = self._zcl_level_to_ha_position(
                 self._level_cluster.get(LevelControl.AttributeDefs.current_level.name)
             )
-
-        self.recompute_capabilities()
 
     def recompute_capabilities(self) -> None:
         """Recompute capabilities."""
