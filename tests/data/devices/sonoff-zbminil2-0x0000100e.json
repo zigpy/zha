@@ -7,8 +7,8 @@
   "friendly_manufacturer": "SONOFF",
   "friendly_model": "ZBMINIL2",
   "name": "SONOFF ZBMINIL2",
-  "quirk_applied": false,
-  "quirk_class": "zigpy.device.ZigbeeDevice",
+  "quirk_applied": true,
+  "quirk_class": "zhaquirks.sonoff.zbminil2:(SONOFF / ZBMINIL2)",
   "exposes_features": [],
   "manufacturer_code": 4742,
   "power_source": "Battery or Unknown",
@@ -140,6 +140,11 @@
               "value": 4110
             }
           ]
+        },
+        {
+          "cluster_id": "0x0025",
+          "endpoint_attribute": "keep_alive",
+          "attributes": []
         }
       ]
     }
