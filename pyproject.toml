@@ -40,7 +40,7 @@ testing = [
     "codespell==2.4.2",
     "coloredlogs",
     "colorlog",
-    "coverage[toml]",
+    "coverage",
     "freezegun",
     "looptime>=0.7",
     "mypy==2.1.0",

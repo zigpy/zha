@@ -21,6 +21,14 @@ updates:
           - "zigpy*"
           - "bellows"
           - "zha-quirks"
+          # Build requirements aren't in uv.lock (no previous version); a grouped
+          # change mixing them with lock-only bumps is dropped entirely.
+          - "setuptools-git-versioning"
+          - "wheel"
+    ignore:
+      # Both a build requirement and a transitive uv.lock entry; Dependabot fails
+      # the job with "No files have changed!" (dependabot/dependabot-core#14118).
+      - dependency-name: "setuptools"
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
