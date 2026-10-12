@@ -37,21 +37,21 @@ testing = [
 
 [dependency-groups]
 testing = [
-    "codespell==2.4.2",
+    "codespell==2.4.3",
     "coloredlogs",
     "colorlog",
     "coverage",
     "freezegun",
     "looptime>=0.7",
-    "mypy==2.1.0",
-    "pre-commit==4.6.0",
+    "mypy==2.4.0",
+    "pre-commit==4.6.2",
     "pytest",
     "pytest-asyncio>=1.4.0",
     "pytest-cov",
     "pytest-sugar",
     "pytest-timeout",
     "python-slugify",
-    "ruff==0.15.16",
+    "ruff==0.16.10",
     "uv>=0.11.16",
     "zha-quirks>=2.0.0",
 ]
