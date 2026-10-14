@@ -3,8 +3,10 @@
 from unittest.mock import patch
 
 import pytest
+from zhaquirks.builder import QuirkBuilder
 from zigpy.typing import UNDEFINED
 from zigpy.zcl.clusters.general import Basic, OnOff
+from zigpy.zcl.clusters.homeautomation import ElectricalMeasurement
 from zigpy.zcl.clusters.smartenergy import Metering
 
 from tests.common import join_zigpy_device, zigpy_device_from_json
@@ -12,6 +14,7 @@ from zha.application import Platform
 from zha.application.gateway import Gateway
 from zha.application.platforms import PlatformEntity
 from zha.const import STATE_CHANGED
+from zha.quirks import DeviceRegistry
 from zha.zigbee.child_device import (
     DEVICE_LEVEL_CLUSTERS,
     ChildDevice,
@@ -174,38 +177,47 @@ async def test_quirk_child_devices(zha_gateway: Gateway) -> None:
     """Test child devices defined by a quirk."""
     child_devices = (
         ChildDevice(
-            id="fan",
-            endpoint_ids=frozenset({2}),
-            translation_key="fan",
-            fallback_name="Fan",
+            id="heating",
+            endpoint_ids=frozenset({5, 7}),
+            translation_key="heating",
+            fallback_name="Heating",
         ),
-        ChildDevice(id="unused", endpoint_ids=frozenset({3}), fallback_name="Unused"),
+        ChildDevice(
+            id="hot_water", endpoint_ids=frozenset({6}), fallback_name="Hot water"
+        ),
+        ChildDevice(id="unused", endpoint_ids=frozenset({9}), fallback_name="Unused"),
     )
 
     with patch.object(Device, "_quirk_child_devices", return_value=child_devices):
         device = await _join_device(
-            zha_gateway, "tests/data/devices/inovelli-vzm36.json"
+            zha_gateway, "tests/data/devices/computime-slr2b.json"
         )
 
     # A child device without entities is left out
-    assert list(device.child_devices) == ["fan"]
+    assert list(device.child_devices) == ["heating", "hot_water"]
 
+    expected_child_device_ids = {5: "heating", 6: "hot_water", 7: "heating", 8: None}
     for entity in device.platform_entities.values():
-        if (
-            entity.endpoint.id == 2
-            and entity.cluster.cluster_id not in DEVICE_LEVEL_CLUSTERS
-        ):
-            assert entity.state.child_device_id == "fan", entity
-        else:
+        if entity.cluster.cluster_id in DEVICE_LEVEL_CLUSTERS:
             # Entities of device-level clusters stay on the main device, wherever
             # they are
             assert entity.child_device is None, entity
+        else:
+            assert (
+                entity.state.child_device_id
+                == expected_child_device_ids[entity.endpoint.id]
+            ), entity
 
-    (fan,) = _entities(device, Platform.FAN)
-    assert fan.child_device is device.child_devices["fan"]
+    # Each child device elects its own primary entity
+    climates = _entities(device, Platform.CLIMATE)
+    assert [climate.child_device for climate in climates] == [
+        device.child_devices["heating"],
+        device.child_devices["hot_water"],
+    ]
+    assert all(climate.primary for climate in climates)
 
-    # The main device keeps electing its primary entity among its output entities
-    assert device.primary_entity is _entities(device, Platform.LIGHT)[0]
+    # The main device has no output entity left, so it has no primary entity
+    assert device.primary_entity is None
 
 
 async def test_quirk_no_child_devices(zha_gateway: Gateway) -> None:
@@ -306,3 +318,69 @@ async def test_child_device_primary_reelection(zha_gateway: Gateway) -> None:
     (remaining_switch,) = _entities(device, Platform.SWITCH, OnOff.cluster_id)
     assert remaining_switch.child_device is None
     assert remaining_switch.primary
+
+
+@pytest.mark.skipif(
+    not hasattr(QuirkBuilder, "child_device"),
+    reason="requires zha-quirks with child device support",
+)
+async def test_quirks_v2_child_devices(zha_gateway: Gateway) -> None:
+    """Test child devices defined by a quirks v2 quirk."""
+    registry = DeviceRegistry()
+
+    (
+        QuirkBuilder("Aurora", "DoubleSocket50AU")
+        .child_device(
+            "left", endpoint_id=1, translation_key="left", fallback_name="Left"
+        )
+        .child_device("right", endpoint_id=2, fallback_name="Right")
+        # A default entity kept on the main device
+        .change_entity_metadata(
+            endpoint_id=2,
+            cluster_id=ElectricalMeasurement.cluster_id,
+            new_child_device_id=None,
+        )
+        # A quirk entity on the first endpoint, assigned to the second child device
+        .switch(
+            OnOff.AttributeDefs.on_time.name,
+            OnOff.cluster_id,
+            endpoint_id=1,
+            translation_key="on_time",
+            fallback_name="On time",
+            child_device_id="right",
+        )
+        .add_to_registry(registry)
+    )
+
+    zigpy_device = registry.resolve(
+        await zigpy_device_from_json(
+            zha_gateway.application_controller,
+            "tests/data/devices/aurora-doublesocket50au.json",
+        )
+    )
+    device = await join_zigpy_device(zha_gateway, zigpy_device)
+
+    assert list(device.child_devices) == ["left", "right"]
+    assert device.child_devices["left"] == ChildDevice(
+        id="left",
+        endpoint_ids=frozenset({1}),
+        translation_key="left",
+        fallback_name="Left",
+    )
+
+    for entity in device.platform_entities.values():
+        if entity.PLATFORM == Platform.VIRTUAL:
+            # Not exposed, and not changed by `change_entity_metadata`
+            continue
+
+        if entity.translation_key == "on_time":
+            expected = "right"
+        elif entity.cluster.cluster_id in DEVICE_LEVEL_CLUSTERS or (
+            entity.endpoint.id == 2
+            and entity.cluster.cluster_id == ElectricalMeasurement.cluster_id
+        ):
+            expected = None
+        else:
+            expected = {1: "left", 2: "right"}[entity.endpoint.id]
+
+        assert entity.state.child_device_id == expected, entity
