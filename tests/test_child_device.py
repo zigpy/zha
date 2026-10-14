@@ -453,3 +453,17 @@ async def test_virtual_entities_stay_on_main_device(zha_gateway: Gateway) -> Non
         await device.recompute_entities()
 
     assert list(device.child_devices) == ["a"]
+
+
+async def test_allowlisted_device_level_entities_stay(zha_gateway: Gateway) -> None:
+    """Test device-level entities repeated on every output stay on the main device."""
+    device = await _join_device(
+        zha_gateway, "tests/data/devices/tz3000-u4kojtqz-ts0002-0x10013607.json"
+    )
+
+    assert list(device.child_devices) == ["1", "2"]
+
+    # The OTA cluster is on both outputs, but firmware is not per output
+    updates = _entities(device, Platform.UPDATE)
+    assert [update.endpoint.id for update in updates] == [1, 2]
+    assert all(update.child_device is None for update in updates)
