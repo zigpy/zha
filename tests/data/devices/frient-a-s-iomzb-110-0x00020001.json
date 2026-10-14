@@ -705,12 +705,12 @@
         "entity_category": null,
         "entity_registry_enabled_default": true,
         "enabled": true,
-        "primary": false,
+        "primary": true,
         "extra_state_attribute_names": [],
         "device_ieee": "00:15:bc:00:42:00:09:1c",
         "endpoint_id": 116,
         "available": true,
-        "child_device_id": null,
+        "child_device_id": "116",
         "group_id": null,
         "is_on": 0
       },
@@ -727,12 +727,12 @@
         "entity_category": null,
         "entity_registry_enabled_default": true,
         "enabled": true,
-        "primary": false,
+        "primary": true,
         "extra_state_attribute_names": [],
         "device_ieee": "00:15:bc:00:42:00:09:1c",
         "endpoint_id": 117,
         "available": true,
-        "child_device_id": null,
+        "child_device_id": "117",
         "group_id": null,
         "is_on": 0
       }
@@ -769,7 +769,30 @@
       }
     ]
   },
-  "child_devices": [],
+  "child_devices": [
+    {
+      "id": "116",
+      "endpoint_ids": [
+        116
+      ],
+      "translation_key": "channel",
+      "translation_placeholders": {
+        "index": "1"
+      },
+      "fallback_name": "Channel 1"
+    },
+    {
+      "id": "117",
+      "endpoint_ids": [
+        117
+      ],
+      "translation_key": "channel",
+      "translation_placeholders": {
+        "index": "2"
+      },
+      "fallback_name": "Channel 2"
+    }
+  ],
   "neighbors": [],
   "routes": []
 }

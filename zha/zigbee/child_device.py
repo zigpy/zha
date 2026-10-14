@@ -104,7 +104,7 @@ class ChildDeviceMatch:
 # Quirks can define child devices themselves instead, which takes precedence.
 CHILD_DEVICE_ALLOWLIST: Final[tuple[ChildDeviceMatch, ...]] = (
     # Tuya multi-gang wall switches and relays
-    ChildDeviceMatch(models=frozenset({"TS0002", "TS0003", "TS0004"})),
+    ChildDeviceMatch(models=frozenset({"TS0002", "TS0003", "TS0004", "TS000F"})),
     ChildDeviceMatch(models=frozenset({"TS0012", "TS0013"})),
     # Tuya power strips and multi-socket plugs
     ChildDeviceMatch(models=frozenset({"TS011F", "TS0115"})),
@@ -117,6 +117,8 @@ CHILD_DEVICE_ALLOWLIST: Final[tuple[ChildDeviceMatch, ...]] = (
             {
                 "lumi.relay.c2acn01",
                 "lumi.switch.acn047",
+                "lumi.switch.agl006",
+                "lumi.switch.agl010",
                 "lumi.switch.b2naus01",
                 "lumi.switch.b2nc01",
                 "lumi.switch.l2aeu1",
@@ -128,7 +130,14 @@ CHILD_DEVICE_ALLOWLIST: Final[tuple[ChildDeviceMatch, ...]] = (
         manufacturers=frozenset({"Aurora"}), models=frozenset({"DoubleSocket50AU"})
     ),
     ChildDeviceMatch(
+        manufacturers=frozenset({"EcoDim BV"}),
+        models=frozenset({"Eco-Dim.05 Zigbee", "EcoDim-Zigbee 3.0"}),
+    ),
+    ChildDeviceMatch(
         manufacturers=frozenset({"eWeLink"}), models=frozenset({"ZB-SW02"})
+    ),
+    ChildDeviceMatch(
+        manufacturers=frozenset({"frient A/S"}), models=frozenset({"IOMZB-110"})
     ),
     ChildDeviceMatch(
         manufacturers=frozenset({"Sunricher"}), models=frozenset({"ON/OFF(2CH)"})
