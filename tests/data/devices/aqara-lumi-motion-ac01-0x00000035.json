@@ -212,6 +212,7 @@
         "device_ieee": "54:ef:44:10:00:4d:2d:5b",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "is_on": true,
         "attribute_name": "occupancy"
@@ -236,6 +237,7 @@
         "device_ieee": "54:ef:44:10:00:4d:2d:5b",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "command": "identify",
         "args": [
@@ -261,6 +263,7 @@
         "device_ieee": "54:ef:44:10:00:4d:2d:5b",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "attribute_name": "reset_no_presence_status",
         "attribute_value": 1
@@ -285,6 +288,7 @@
         "device_ieee": "54:ef:44:10:00:4d:2d:5b",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "current_option": "Far",
         "enum": "AqaraApproachDistances",
@@ -312,6 +316,7 @@
         "device_ieee": "54:ef:44:10:00:4d:2d:5b",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "current_option": "Left Right",
         "enum": "AqaraMonitoringModess",
@@ -338,6 +343,7 @@
         "device_ieee": "54:ef:44:10:00:4d:2d:5b",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "current_option": "High",
         "enum": "AqaraMotionSensitivities",
@@ -367,6 +373,7 @@
         "device_ieee": "54:ef:44:10:00:4d:2d:5b",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "native_value": null,
         "suggested_display_precision": null,
@@ -390,6 +397,7 @@
         "device_ieee": "54:ef:44:10:00:4d:2d:5b",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "native_value": null,
         "suggested_display_precision": null,
@@ -413,6 +421,7 @@
         "device_ieee": "54:ef:44:10:00:4d:2d:5b",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "native_value": 27.0,
         "suggested_display_precision": null,
@@ -438,6 +447,7 @@
         "device_ieee": "54:ef:44:10:00:4d:2d:5b",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "installed_version": "0x00000035",
         "in_progress": false,
@@ -450,6 +460,7 @@
       }
     ]
   },
+  "child_devices": [],
   "neighbors": [],
   "routes": []
 }

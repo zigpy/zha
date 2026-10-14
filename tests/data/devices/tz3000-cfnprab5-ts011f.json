@@ -431,6 +431,7 @@
         "device_ieee": "ab:cd:ef:12:86:cf:95:48",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "command": "identify",
         "args": [
@@ -453,11 +454,12 @@
         "entity_category": null,
         "entity_registry_enabled_default": true,
         "enabled": true,
-        "primary": false,
+        "primary": true,
         "extra_state_attribute_names": [],
         "device_ieee": "ab:cd:ef:12:86:cf:95:48",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": "1",
         "group_id": null,
         "on": true,
         "brightness": null,
@@ -490,11 +492,12 @@
         "entity_category": null,
         "entity_registry_enabled_default": true,
         "enabled": true,
-        "primary": false,
+        "primary": true,
         "extra_state_attribute_names": [],
         "device_ieee": "ab:cd:ef:12:86:cf:95:48",
         "endpoint_id": 2,
         "available": true,
+        "child_device_id": "2",
         "group_id": null,
         "on": true,
         "brightness": null,
@@ -527,11 +530,12 @@
         "entity_category": null,
         "entity_registry_enabled_default": true,
         "enabled": true,
-        "primary": false,
+        "primary": true,
         "extra_state_attribute_names": [],
         "device_ieee": "ab:cd:ef:12:86:cf:95:48",
         "endpoint_id": 3,
         "available": true,
+        "child_device_id": "3",
         "group_id": null,
         "on": true,
         "brightness": null,
@@ -564,11 +568,12 @@
         "entity_category": null,
         "entity_registry_enabled_default": true,
         "enabled": true,
-        "primary": false,
+        "primary": true,
         "extra_state_attribute_names": [],
         "device_ieee": "ab:cd:ef:12:86:cf:95:48",
         "endpoint_id": 4,
         "available": true,
+        "child_device_id": "4",
         "group_id": null,
         "on": true,
         "brightness": null,
@@ -601,11 +606,12 @@
         "entity_category": null,
         "entity_registry_enabled_default": true,
         "enabled": true,
-        "primary": false,
+        "primary": true,
         "extra_state_attribute_names": [],
         "device_ieee": "ab:cd:ef:12:86:cf:95:48",
         "endpoint_id": 5,
         "available": true,
+        "child_device_id": "5",
         "group_id": null,
         "on": true,
         "brightness": null,
@@ -645,6 +651,7 @@
         "device_ieee": "ab:cd:ef:12:86:cf:95:48",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "native_value": null,
         "suggested_display_precision": null,
@@ -668,6 +675,7 @@
         "device_ieee": "ab:cd:ef:12:86:cf:95:48",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "native_value": null,
         "suggested_display_precision": null,
@@ -675,6 +683,63 @@
       }
     ]
   },
+  "child_devices": [
+    {
+      "id": "1",
+      "endpoint_ids": [
+        1
+      ],
+      "translation_key": "channel",
+      "translation_placeholders": {
+        "index": "1"
+      },
+      "fallback_name": "Channel 1"
+    },
+    {
+      "id": "2",
+      "endpoint_ids": [
+        2
+      ],
+      "translation_key": "channel",
+      "translation_placeholders": {
+        "index": "2"
+      },
+      "fallback_name": "Channel 2"
+    },
+    {
+      "id": "3",
+      "endpoint_ids": [
+        3
+      ],
+      "translation_key": "channel",
+      "translation_placeholders": {
+        "index": "3"
+      },
+      "fallback_name": "Channel 3"
+    },
+    {
+      "id": "4",
+      "endpoint_ids": [
+        4
+      ],
+      "translation_key": "channel",
+      "translation_placeholders": {
+        "index": "4"
+      },
+      "fallback_name": "Channel 4"
+    },
+    {
+      "id": "5",
+      "endpoint_ids": [
+        5
+      ],
+      "translation_key": "channel",
+      "translation_placeholders": {
+        "index": "5"
+      },
+      "fallback_name": "Channel 5"
+    }
+  ],
   "neighbors": [],
   "routes": []
 }

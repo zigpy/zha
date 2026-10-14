@@ -405,6 +405,7 @@
         "device_ieee": "ab:cd:ef:12:dc:6a:11:ac",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "is_on": false,
         "attribute_name": "charging"
@@ -427,6 +428,7 @@
         "device_ieee": "ab:cd:ef:12:dc:6a:11:ac",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "is_on": true,
         "attribute_name": "positions_stored"
@@ -451,6 +453,7 @@
         "device_ieee": "ab:cd:ef:12:dc:6a:11:ac",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "command": "identify",
         "args": [
@@ -478,6 +481,7 @@
         "device_ieee": "ab:cd:ef:12:dc:6a:11:ac",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "current_position": 0,
         "current_tilt_position": null,
@@ -506,6 +510,7 @@
         "device_ieee": "ab:cd:ef:12:dc:6a:11:ac",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "current_option": "High",
         "enum": "AqaraRollerDriverSpeed",
@@ -535,6 +540,7 @@
         "device_ieee": "ab:cd:ef:12:dc:6a:11:ac",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "native_value": null,
         "suggested_display_precision": null,
@@ -558,6 +564,7 @@
         "device_ieee": "ab:cd:ef:12:dc:6a:11:ac",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "native_value": null,
         "suggested_display_precision": null,
@@ -585,6 +592,7 @@
         "device_ieee": "ab:cd:ef:12:dc:6a:11:ac",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "native_value": 79.0,
         "suggested_display_precision": 0,
@@ -611,6 +619,7 @@
         "device_ieee": "ab:cd:ef:12:dc:6a:11:ac",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "native_value": 24.0,
         "suggested_display_precision": null,
@@ -634,6 +643,7 @@
         "device_ieee": "ab:cd:ef:12:dc:6a:11:ac",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "native_value": "Rollershade",
         "suggested_display_precision": null,
@@ -671,6 +681,7 @@
         "device_ieee": "ab:cd:ef:12:dc:6a:11:ac",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "is_on": false,
         "inverted": false,
@@ -700,6 +711,7 @@
         "device_ieee": "ab:cd:ef:12:dc:6a:11:ac",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "installed_version": "0x00000e1f",
         "in_progress": false,
@@ -712,6 +724,7 @@
       }
     ]
   },
+  "child_devices": [],
   "neighbors": [],
   "routes": []
 }

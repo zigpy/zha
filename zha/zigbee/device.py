@@ -93,6 +93,7 @@ from zha.quirks import (
     ReplacingZigpyDeviceFactory,
 )
 from zha.zigbee.child_device import (
+    OUTPUT_PLATFORMS,
     ChildDevice,
     apply_explicit_child_devices,
     assign_endpoint_child_devices,
@@ -1711,9 +1712,19 @@ class Device(LogMixin, EventBase):
             )
             entities_by_child_device[child_device_id].append(entity)
 
-        self._primary_entity = self._elect_primary_entity(
-            entities_by_child_device.pop(None, [])
-        )
+        main_entities = entities_by_child_device.pop(None, [])
+
+        if entities_by_child_device:
+            # With child devices, the main feature of the device is split over them.
+            # Electing a leftover entity (e.g. a meter) of the main device would take
+            # its name, so only an output entity can still be its primary entity.
+            main_entities = [
+                entity
+                for entity in main_entities
+                if entity._attr_primary or entity.PLATFORM in OUTPUT_PLATFORMS
+            ]
+
+        self._primary_entity = self._elect_primary_entity(main_entities)
         self._child_device_primary_entities = {}
         for child_device_id, child_device_entities in entities_by_child_device.items():
             assert child_device_id is not None

@@ -186,6 +186,7 @@
         "device_ieee": "00:13:a2:00:40:c0:4e:54",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "is_on": false,
         "attribute_name": "present_value"
@@ -210,6 +211,7 @@
         "device_ieee": "00:13:a2:00:40:c0:4e:54",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "native_value": null,
         "suggested_display_precision": null,
@@ -233,6 +235,7 @@
         "device_ieee": "00:13:a2:00:40:c0:4e:54",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "native_value": null,
         "suggested_display_precision": null,
@@ -256,6 +259,7 @@
         "device_ieee": "00:13:a2:00:40:c0:4e:54",
         "endpoint_id": 2,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "native_value": 26.4,
         "suggested_display_precision": null,
@@ -279,6 +283,7 @@
         "device_ieee": "00:13:a2:00:40:c0:4e:54",
         "endpoint_id": 2,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "native_value": 46.8,
         "suggested_display_precision": null,
@@ -286,6 +291,7 @@
       }
     ]
   },
+  "child_devices": [],
   "neighbors": [],
   "routes": []
 }

@@ -214,6 +214,7 @@
         "device_ieee": "ab:cd:ef:12:32:4e:24:ab",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "is_on": false,
         "attribute_name": "zone_status"
@@ -238,6 +239,7 @@
         "device_ieee": "ab:cd:ef:12:32:4e:24:ab",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "command": "identify",
         "args": [
@@ -265,6 +267,7 @@
         "device_ieee": "ab:cd:ef:12:32:4e:24:ab",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "native_value": 160,
         "suggested_display_precision": null,
@@ -288,6 +291,7 @@
         "device_ieee": "ab:cd:ef:12:32:4e:24:ab",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "native_value": -60,
         "suggested_display_precision": null,
@@ -315,6 +319,7 @@
         "device_ieee": "ab:cd:ef:12:32:4e:24:ab",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "native_value": 100.0,
         "suggested_display_precision": 0,
@@ -325,6 +330,7 @@
       }
     ]
   },
+  "child_devices": [],
   "neighbors": [],
   "routes": []
 }

@@ -292,6 +292,7 @@
         "device_ieee": "00:15:bc:00:41:00:6f:8e",
         "endpoint_id": 43,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "command": "identify",
         "args": [
@@ -319,6 +320,7 @@
         "device_ieee": "00:15:bc:00:41:00:6f:8e",
         "endpoint_id": 43,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "current_option": null,
         "enum": "SirenLevel",
@@ -347,6 +349,7 @@
         "device_ieee": "00:15:bc:00:41:00:6f:8e",
         "endpoint_id": 43,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "current_option": null,
         "enum": "Strobe",
@@ -373,6 +376,7 @@
         "device_ieee": "00:15:bc:00:41:00:6f:8e",
         "endpoint_id": 43,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "current_option": null,
         "enum": "StrobeLevel",
@@ -401,6 +405,7 @@
         "device_ieee": "00:15:bc:00:41:00:6f:8e",
         "endpoint_id": 43,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "current_option": null,
         "enum": "WarningMode",
@@ -434,6 +439,7 @@
         "device_ieee": "00:15:bc:00:41:00:6f:8e",
         "endpoint_id": 43,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "native_value": null,
         "suggested_display_precision": null,
@@ -457,6 +463,7 @@
         "device_ieee": "00:15:bc:00:41:00:6f:8e",
         "endpoint_id": 43,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "native_value": null,
         "suggested_display_precision": null,
@@ -480,6 +487,7 @@
         "device_ieee": "00:15:bc:00:41:00:6f:8e",
         "endpoint_id": 43,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "native_value": 5.0,
         "suggested_display_precision": null,
@@ -505,6 +513,7 @@
         "device_ieee": "00:15:bc:00:41:00:6f:8e",
         "endpoint_id": 43,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "is_on": false,
         "available_tones": {
@@ -537,6 +546,7 @@
         "device_ieee": "00:15:bc:00:41:00:6f:8e",
         "endpoint_id": 43,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "installed_version": "0x00020004",
         "in_progress": false,
@@ -549,6 +559,7 @@
       }
     ]
   },
+  "child_devices": [],
   "neighbors": [],
   "routes": []
 }

@@ -241,6 +241,7 @@
         "device_ieee": "ab:cd:ef:12:4f:81:48:a1",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "command": "identify",
         "args": [
@@ -268,6 +269,7 @@
         "device_ieee": "ab:cd:ef:12:4f:81:48:a1",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "on": false,
         "brightness": null,
@@ -307,6 +309,7 @@
         "device_ieee": "ab:cd:ef:12:4f:81:48:a1",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "native_value": 240,
         "suggested_display_precision": null,
@@ -330,6 +333,7 @@
         "device_ieee": "ab:cd:ef:12:4f:81:48:a1",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "native_value": -40,
         "suggested_display_precision": null,
@@ -353,6 +357,7 @@
         "device_ieee": "ab:cd:ef:12:4f:81:48:a1",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "native_value": 0.3,
         "suggested_display_precision": null,
@@ -378,6 +383,7 @@
         "device_ieee": "ab:cd:ef:12:4f:81:48:a1",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "installed_version": "0x00000e0b",
         "in_progress": false,
@@ -390,6 +396,7 @@
       }
     ]
   },
+  "child_devices": [],
   "neighbors": [],
   "routes": []
 }

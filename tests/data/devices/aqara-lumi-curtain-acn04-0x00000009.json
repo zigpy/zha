@@ -218,6 +218,7 @@
         "device_ieee": "ab:cd:ef:12:a4:d1:4f:84",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "command": "identify",
         "args": [
@@ -245,6 +246,7 @@
         "device_ieee": "ab:cd:ef:12:a4:d1:4f:84",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "current_position": 100,
         "current_tilt_position": null,
@@ -273,6 +275,7 @@
         "device_ieee": "ab:cd:ef:12:a4:d1:4f:84",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "native_value": null,
         "suggested_display_precision": null,
@@ -296,6 +299,7 @@
         "device_ieee": "ab:cd:ef:12:a4:d1:4f:84",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "native_value": null,
         "suggested_display_precision": null,
@@ -319,6 +323,7 @@
         "device_ieee": "ab:cd:ef:12:a4:d1:4f:84",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "native_value": "Rollershade_two_motors",
         "suggested_display_precision": null,
@@ -356,6 +361,7 @@
         "device_ieee": "ab:cd:ef:12:a4:d1:4f:84",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "is_on": false,
         "inverted": false,
@@ -385,6 +391,7 @@
         "device_ieee": "ab:cd:ef:12:a4:d1:4f:84",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "installed_version": "0x00000009",
         "in_progress": false,
@@ -397,6 +404,7 @@
       }
     ]
   },
+  "child_devices": [],
   "neighbors": [],
   "routes": []
 }
