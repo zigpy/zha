@@ -105,7 +105,7 @@ class ChildDeviceMatch:
 CHILD_DEVICE_ALLOWLIST: Final[tuple[ChildDeviceMatch, ...]] = (
     # Tuya multi-gang wall switches and relays
     ChildDeviceMatch(models=frozenset({"TS0002", "TS0003", "TS0004"})),
-    ChildDeviceMatch(models=frozenset({"TS0012", "TS0013", "TS0014"})),
+    ChildDeviceMatch(models=frozenset({"TS0012", "TS0013"})),
     # Tuya power strips and multi-socket plugs
     ChildDeviceMatch(models=frozenset({"TS011F", "TS0115"})),
     # Tuya dual cover and dual dimmer modules
