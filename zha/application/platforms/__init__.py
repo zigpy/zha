@@ -211,7 +211,7 @@ class BaseEntityState:
     endpoint_id: int | None
     available: bool | None
     # The id of the child device of `device_ieee` the entity belongs to, if any
-    child_device_id: str | None
+    child_device_id: str | None = None
 
     # For group entities
     group_id: int | None
@@ -450,7 +450,6 @@ class BaseEntity(LogMixin, EventBase):
             device_ieee=None,
             endpoint_id=None,
             available=None,
-            child_device_id=None,
             # Set by group entities
             group_id=None,
         )

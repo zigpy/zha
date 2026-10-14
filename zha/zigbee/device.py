@@ -6,7 +6,7 @@ from __future__ import annotations
 
 import asyncio
 from collections import defaultdict
-from collections.abc import Callable, Iterable, Iterator, Sequence
+from collections.abc import Callable, Iterable, Iterator, Mapping, Sequence
 import contextlib
 import copy
 import dataclasses
@@ -15,6 +15,7 @@ from enum import Enum
 from functools import cached_property
 import logging
 import time
+from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, Final
 
 from zigpy.device import ZigbeeDevice
@@ -335,7 +336,7 @@ class ExtendedDeviceInfo(DeviceInfo):
     neighbors: list[NeighborInfo]
     routes: list[RouteInfo]
     endpoint_names: list[EndpointNameInfo]
-    child_devices: list[ChildDevice]
+    child_devices: list[ChildDevice] = dataclasses.field(default_factory=list)
 
 
 class Device(LogMixin, EventBase):
@@ -769,9 +770,9 @@ class Device(LogMixin, EventBase):
         return self._primary_entity
 
     @property
-    def child_devices(self) -> dict[str, ChildDevice]:
+    def child_devices(self) -> Mapping[str, ChildDevice]:
         """Return the child devices holding at least one entity, by id."""
-        return self._child_devices
+        return MappingProxyType(self._child_devices)
 
     def is_primary_entity(self, entity: PlatformEntity) -> bool:
         """Return whether the entity is elected primary on its (child) device."""
@@ -1747,8 +1748,14 @@ class Device(LogMixin, EventBase):
             )
             return explicitly_primary[0]
 
-        # It should not be possible for there to be more than one
-        assert not explicitly_primary
+        if explicitly_primary:
+            # Quirks prevent this, but e.g. entity metadata changes can still move
+            # several explicitly primary entities onto the same (child) device
+            self.warning(
+                "Multiple explicitly primary entities %s, no primary entity",
+                explicitly_primary,
+            )
+            return None
 
         # For weight matching, only consider entities with a non-zero primary weight
         # which are not explicitly marked as not primary. Entities disabled at runtime

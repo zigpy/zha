@@ -234,19 +234,59 @@ async def test_quirk_no_child_devices(zha_gateway: Gateway) -> None:
 async def test_quirk_overlapping_child_devices(
     zha_gateway: Gateway, caplog: pytest.LogCaptureFixture
 ) -> None:
-    """Test child devices sharing an endpoint are rejected."""
+    """Test child devices sharing an endpoint don't break the device."""
     child_devices = (
         ChildDevice(id="a", endpoint_ids=frozenset({1, 2}), fallback_name="A"),
         ChildDevice(id="b", endpoint_ids=frozenset({2}), fallback_name="B"),
     )
 
-    with (
-        patch.object(Device, "_quirk_child_devices", return_value=child_devices),
-        pytest.raises(ValueError, match="Endpoint 2 is assigned to both"),
-    ):
-        await _join_device(
+    with patch.object(Device, "_quirk_child_devices", return_value=child_devices):
+        device = await _join_device(
             zha_gateway, "tests/data/devices/tz3000-mw1pqqqt-ts0003-0x0000004a.json"
         )
+
+    assert "Endpoint 2 is assigned to both child device 'a' and 'b'" in caplog.text
+    assert device.child_devices == {}
+    assert set(_child_device_ids(device).values()) == {None}
+
+
+async def test_disabled_by_default_outputs_not_split(zha_gateway: Gateway) -> None:
+    """Test outputs disabled by default don't make an endpoint an output endpoint."""
+    device = await _join_device(
+        zha_gateway, "tests/data/devices/tz3000-mw1pqqqt-ts0003-0x0000004a.json"
+    )
+    lights = _entities(device, Platform.LIGHT)
+
+    for light in lights[1:]:
+        light._attr_entity_registry_enabled_default = False
+
+    await device.recompute_entities()
+
+    # The only enabled-by-default output has no sibling output
+    assert device.child_devices == {}
+    assert set(_child_device_ids(device).values()) == {None}
+
+
+async def test_multiple_explicit_primary_entities(
+    zha_gateway: Gateway, caplog: pytest.LogCaptureFixture
+) -> None:
+    """Test several explicitly primary entities on one device elect none."""
+    device = await _join_device(
+        zha_gateway, "tests/data/devices/tz3000-mw1pqqqt-ts0003-0x0000004a.json"
+    )
+    lights = _entities(device, Platform.LIGHT)
+
+    # Move two explicitly primary outputs onto the same child device
+    for light in lights[:2]:
+        light._attr_primary = True
+        light._attr_child_device_id = "1"
+
+    await device.recompute_entities()
+
+    assert "Multiple explicitly primary entities" in caplog.text
+    assert not device.is_primary_entity(lights[0])
+    assert not device.is_primary_entity(lights[1])
+    assert device.is_primary_entity(lights[2])
 
 
 async def test_explicit_child_device_assignment(

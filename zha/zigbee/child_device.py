@@ -169,7 +169,11 @@ def compute_output_child_devices(
 
     output_platform_endpoints: defaultdict[Platform, set[int]] = defaultdict(set)
     for entity in entities:
-        if entity.PLATFORM in OUTPUT_PLATFORMS and entity.entity_category is None:
+        if (
+            entity.PLATFORM in OUTPUT_PLATFORMS
+            and entity.entity_category is None
+            and entity.entity_registry_enabled_default
+        ):
             output_platform_endpoints[entity.PLATFORM].add(entity.endpoint.id)
 
     output_endpoints = sorted(
@@ -229,10 +233,14 @@ def assign_endpoint_child_devices(
     for child_device in child_devices:
         for endpoint_id in child_device.endpoint_ids:
             if endpoint_id in by_endpoint:
-                raise ValueError(
-                    f"Endpoint {endpoint_id} is assigned to both child device"
-                    f" {by_endpoint[endpoint_id].id!r} and {child_device.id!r}"
+                _LOGGER.warning(
+                    "Endpoint %s is assigned to both child device %r and %r, not"
+                    " assigning entities to child devices by endpoint",
+                    endpoint_id,
+                    by_endpoint[endpoint_id].id,
+                    child_device.id,
                 )
+                return {}
             by_endpoint[endpoint_id] = child_device
 
     assignments: dict[PlatformEntity, ChildDevice] = {}
