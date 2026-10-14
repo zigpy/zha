@@ -198,9 +198,12 @@ async def test_quirk_child_devices(zha_gateway: Gateway) -> None:
 
     expected_child_device_ids = {5: "heating", 6: "hot_water", 7: "heating", 8: None}
     for entity in device.platform_entities.values():
-        if entity.cluster.cluster_id in DEVICE_LEVEL_CLUSTERS:
-            # Entities of device-level clusters stay on the main device, wherever
-            # they are
+        if (
+            entity.cluster.cluster_id in DEVICE_LEVEL_CLUSTERS
+            or entity.PLATFORM is Platform.VIRTUAL
+        ):
+            # Entities of device-level clusters and virtual entities stay on the
+            # main device, wherever they are
             assert entity.child_device is None, entity
         else:
             assert (
@@ -423,3 +426,30 @@ async def test_quirks_v2_child_devices(zha_gateway: Gateway) -> None:
             expected = {1: "left", 2: "right"}[entity.endpoint.id]
 
         assert entity.state.child_device_id == expected, entity
+
+
+async def test_virtual_entities_stay_on_main_device(zha_gateway: Gateway) -> None:
+    """Test virtual entities neither join nor keep alive a child device."""
+    child_devices = (
+        ChildDevice(id="a", endpoint_ids=frozenset({1}), fallback_name="A"),
+        ChildDevice(id="b", endpoint_ids=frozenset({2}), fallback_name="B"),
+    )
+
+    with patch.object(Device, "_quirk_child_devices", return_value=child_devices):
+        device = await _join_device(
+            zha_gateway, "tests/data/devices/aurora-doublesocket50au.json"
+        )
+
+        virtual_entities = _entities(device, Platform.VIRTUAL)
+        assert {entity.endpoint.id for entity in virtual_entities} >= {2}
+        assert all(entity.child_device is None for entity in virtual_entities)
+
+        # Move all exposed entities of endpoint 2 to the main device: child device
+        # "b" is left with virtual entities only, so it is dropped
+        for entity in device.platform_entities.values():
+            if entity.endpoint.id == 2 and entity.PLATFORM is not Platform.VIRTUAL:
+                entity._attr_child_device_id = None
+
+        await device.recompute_entities()
+
+    assert list(device.child_devices) == ["a"]

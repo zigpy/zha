@@ -1680,6 +1680,16 @@ class Device(LogMixin, EventBase):
             self._child_devices = {}
             return
 
+        # Virtual entities are internal helpers that consumers don't expose, so they
+        # stay on the main device and don't keep a child device alive
+        for entity in entities:
+            if entity.PLATFORM is Platform.VIRTUAL:
+                entity.child_device = None
+
+        entities = [
+            entity for entity in entities if entity.PLATFORM is not Platform.VIRTUAL
+        ]
+
         if (quirk_child_devices := self._quirk_child_devices()) is not None:
             child_devices = quirk_child_devices
             assignments = assign_endpoint_child_devices(child_devices, entities)
