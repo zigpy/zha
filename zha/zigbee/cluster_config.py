@@ -153,10 +153,7 @@ async def configure_cluster_configs(
     per-cluster outcomes.
     """
     # Imported lazily to avoid a circular import.
-    from zha.zigbee.device import (  # noqa: PLC0415
-        ClusterBindEvent,
-        ClusterConfigureReportingEvent,
-    )
+    from zha.zigbee.device import ClusterBindEvent, ClusterConfigureReportingEvent  # noqa: PLC0415
 
     for (endpoint_id, _cluster_id, _is_server), agg in configs.items():
         if agg.bind:

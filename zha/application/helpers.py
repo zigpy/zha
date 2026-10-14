@@ -10,7 +10,7 @@ from collections.abc import Callable
 import contextlib
 import dataclasses
 from dataclasses import dataclass
-import datetime
+import datetime as dt
 import enum
 import logging
 import re
@@ -428,7 +428,7 @@ class ZHAData:
         default_factory=dict
     )
     allow_polling: bool = dataclasses.field(default=False)
-    local_timezone: datetime.tzinfo = dataclasses.field(default=datetime.UTC)
+    local_timezone: dt.tzinfo = dataclasses.field(default=dt.UTC)
     country_code: str | None = None
 
 
