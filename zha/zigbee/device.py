@@ -92,6 +92,13 @@ from zha.quirks import (
     DeviceMatch,
     ReplacingZigpyDeviceFactory,
 )
+from zha.zigbee.child_device import (
+    ChildDevice,
+    apply_explicit_child_devices,
+    assign_endpoint_child_devices,
+    compute_output_child_devices,
+    is_child_device_allowlisted,
+)
 from zha.zigbee.cluster_config import (
     aggregate_cluster_configs,
     configure_cluster_configs,
@@ -327,6 +334,7 @@ class ExtendedDeviceInfo(DeviceInfo):
     neighbors: list[NeighborInfo]
     routes: list[RouteInfo]
     endpoint_names: list[EndpointNameInfo]
+    child_devices: list[ChildDevice]
 
 
 class Device(LogMixin, EventBase):
@@ -372,6 +380,8 @@ class Device(LogMixin, EventBase):
         self._platform_entities: dict[tuple[Platform, str], PlatformEntity] = {}
         self._pending_entities: list[PlatformEntity] = []
         self._primary_entity: PlatformEntity | None = None
+        self._child_devices: dict[str, ChildDevice] = {}
+        self._child_device_primary_entities: dict[str, PlatformEntity] = {}
         # All entities discovered for this device, including ones removed by a quirk.
         # Used for aggregating cluster configs so binding/reporting matches the
         # legacy claim-during-discovery flow (which configured handlers even when
@@ -403,6 +413,8 @@ class Device(LogMixin, EventBase):
         self._endpoints.clear()
         self._pending_entities.clear()
         self._discovered_entities.clear()
+        self._child_devices.clear()
+        self._child_device_primary_entities.clear()
 
         self._zigpy_device: ZigbeeDevice = zigpy_device
 
@@ -502,6 +514,14 @@ class Device(LogMixin, EventBase):
     ) -> dict[tuple[str, str], dict[str, str]]:
         """Device automation triggers contributed by a quirk."""
         return {}
+
+    def _quirk_child_devices(self) -> Sequence[ChildDevice] | None:
+        """Child devices defined by a quirk, `None` if the quirk defines none.
+
+        Quirk defined child devices replace the automatic split of allowlisted devices.
+        An empty sequence disables child devices for the device.
+        """
+        return None
 
     def _is_entity_removed_by_quirk(self, entity: PlatformEntity) -> bool:
         """Whether a quirk hides this default entity (declarative quirks override)."""
@@ -744,8 +764,20 @@ class Device(LogMixin, EventBase):
 
     @property
     def primary_entity(self) -> PlatformEntity | None:
-        """Return the primary entity of the device, if any."""
+        """Return the primary entity of the main device, if any."""
         return self._primary_entity
+
+    @property
+    def child_devices(self) -> dict[str, ChildDevice]:
+        """Return the child devices holding at least one entity, by id."""
+        return self._child_devices
+
+    def is_primary_entity(self, entity: PlatformEntity) -> bool:
+        """Return whether the entity is elected primary on its (child) device."""
+        if entity.child_device is None:
+            return entity is self._primary_entity
+
+        return self._child_device_primary_entities.get(entity.child_device.id) is entity
 
     def get_platform_entity(self, platform: Platform, unique_id: str) -> PlatformEntity:
         """Get a platform entity by unique id."""
@@ -998,6 +1030,7 @@ class Device(LogMixin, EventBase):
                 for route in topology.routes[self.ieee]
             ],
             endpoint_names=names,
+            child_devices=list(self._child_devices.values()),
         )
 
     async def async_configure(self) -> None:
@@ -1147,10 +1180,17 @@ class Device(LogMixin, EventBase):
             # rediscovers the same unique_id would skip the replacement and
             # leave the stale entity shadowing it indefinitely.
             del self._platform_entities[key]
+            # No re-election here: every live-removal caller runs the election (and
+            # the child device assignment) right after via `_add_pending_entities`
             if entity is self._primary_entity:
-                # No re-election here: every live-removal caller runs the
-                # election right after via `_add_pending_entities`
                 self._primary_entity = None
+            self._child_device_primary_entities = {
+                child_device_id: primary_entity
+                for child_device_id, primary_entity in (
+                    self._child_device_primary_entities.items()
+                )
+                if primary_entity is not entity
+            }
             if emit_event:
                 self.emit(
                     DeviceEntityRemovedEvent.event_type,
@@ -1188,8 +1228,9 @@ class Device(LogMixin, EventBase):
 
         self._pending_entities.clear()
 
-        # Compute a new primary entity
-        self._compute_primary_entity(all_entities.values())
+        # Assign the entities to child devices, then compute the new primary entities
+        self._compute_child_devices(list(all_entities.values()))
+        self._compute_primary_entities(list(all_entities.values()))
 
         # Finally, add the new entities
         for entity in new_entities.values():
@@ -1201,7 +1242,8 @@ class Device(LogMixin, EventBase):
             for entity in new_entities.values():
                 entity.maybe_emit_state_changed_event()
 
-        # `_compute_primary_entity` above can flip `primary` on an existing entity, and
+        # `_compute_primary_entities` and `_compute_child_devices` above can change the
+        # primary state and child device of an existing entity, and
         # the caller may have recomputed their capabilities beforehand; emit so those
         # changes reach consumers.
         for key, entity in all_entities.items():
@@ -1626,10 +1668,64 @@ class Device(LogMixin, EventBase):
         args = (self.nwk, self.model) + args
         _LOGGER.log(level, msg, *args, **kwargs)
 
-    def _compute_primary_entity(self, entities: Sequence[PlatformEntity]) -> None:
-        """Compute the primary entity from a given set of entities."""
-        self._primary_entity = None
+    def _compute_child_devices(self, entities: Sequence[PlatformEntity]) -> None:
+        """Assign the entities to the child devices of the device."""
+        child_devices: Sequence[ChildDevice]
+        assignments: dict[PlatformEntity, ChildDevice]
 
+        if self.is_coordinator:
+            # The coordinator's entities are not all platform entities
+            self._child_devices = {}
+            return
+
+        if (quirk_child_devices := self._quirk_child_devices()) is not None:
+            child_devices = quirk_child_devices
+            assignments = assign_endpoint_child_devices(child_devices, entities)
+        elif is_child_device_allowlisted(self.manufacturer, self.model):
+            child_devices, assignments = compute_output_child_devices(entities)
+        else:
+            child_devices, assignments = (), {}
+
+        assignments = apply_explicit_child_devices(child_devices, assignments, entities)
+
+        for entity in entities:
+            entity.child_device = assignments.get(entity)
+
+        used_child_device_ids = {
+            child_device.id for child_device in assignments.values()
+        }
+        self._child_devices = {
+            child_device.id: child_device
+            for child_device in child_devices
+            if child_device.id in used_child_device_ids
+        }
+
+    def _compute_primary_entities(self, entities: Sequence[PlatformEntity]) -> None:
+        """Elect the primary entity of the main device and of each child device."""
+        entities_by_child_device: defaultdict[str | None, list[PlatformEntity]] = (
+            defaultdict(list)
+        )
+        for entity in entities:
+            child_device_id = (
+                entity.child_device.id if entity.child_device is not None else None
+            )
+            entities_by_child_device[child_device_id].append(entity)
+
+        self._primary_entity = self._elect_primary_entity(
+            entities_by_child_device.pop(None, [])
+        )
+        self._child_device_primary_entities = {}
+        for child_device_id, child_device_entities in entities_by_child_device.items():
+            assert child_device_id is not None
+            primary_entity = self._elect_primary_entity(child_device_entities)
+
+            if primary_entity is not None:
+                self._child_device_primary_entities[child_device_id] = primary_entity
+
+    def _elect_primary_entity(
+        self, entities: Sequence[PlatformEntity]
+    ) -> PlatformEntity | None:
+        """Elect the primary entity from a given set of entities."""
         # First, check if any entity is explicitly primary
         explicitly_primary = [entity for entity in entities if entity._attr_primary]
 
@@ -1638,8 +1734,7 @@ class Device(LogMixin, EventBase):
                 "Device has a single explicitly primary entity,"
                 " not performing weight matching"
             )
-            self._primary_entity = explicitly_primary[0]
-            return
+            return explicitly_primary[0]
 
         # It should not be possible for there to be more than one
         assert not explicitly_primary
@@ -1655,19 +1750,19 @@ class Device(LogMixin, EventBase):
         candidates.sort(reverse=True, key=lambda e: e.primary_weight)
 
         if not candidates:
-            return
+            return None
 
         winner = candidates[0]
         others = candidates[1:]
 
         # We have a clear winner
         if not others or winner.primary_weight > others[0].primary_weight:
-            self._primary_entity = winner
-            return
+            return winner
 
         self.debug(
             "Primary entity tie between %s and %s, no primary entity", winner, others[0]
         )
+        return None
 
     def get_diagnostics_json(self):
         """Get ZHA device information."""
@@ -1799,6 +1894,21 @@ class Device(LogMixin, EventBase):
             )
 
             info["zha_lib_entities"][platform].append(state_dict)
+
+        info["child_devices"] = [
+            {
+                "id": child_device.id,
+                "endpoint_ids": sorted(child_device.endpoint_ids),
+                "translation_key": child_device.translation_key,
+                "translation_placeholders": (
+                    dict(child_device.translation_placeholders)
+                    if child_device.translation_placeholders is not None
+                    else None
+                ),
+                "fallback_name": child_device.fallback_name,
+            }
+            for child_device in self._child_devices.values()
+        ]
 
         topology = self.gateway.application_controller.topology
         info["neighbors"] = [
