@@ -327,6 +327,7 @@
         "device_ieee": "00:13:a2:00:41:67:1f:d7",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "is_on": false,
         "attribute_name": "present_value"
@@ -349,6 +350,7 @@
         "device_ieee": "00:13:a2:00:41:67:1f:d7",
         "endpoint_id": 2,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "is_on": false,
         "attribute_name": "present_value"
@@ -371,6 +373,7 @@
         "device_ieee": "00:13:a2:00:41:67:1f:d7",
         "endpoint_id": 4,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "is_on": false,
         "attribute_name": "present_value"
@@ -395,6 +398,7 @@
         "device_ieee": "00:13:a2:00:41:67:1f:d7",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "native_value": 3.0,
         "mode": "auto",
@@ -423,6 +427,7 @@
         "device_ieee": "00:13:a2:00:41:67:1f:d7",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "native_value": null,
         "suggested_display_precision": null,
@@ -446,6 +451,7 @@
         "device_ieee": "00:13:a2:00:41:67:1f:d7",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "native_value": null,
         "suggested_display_precision": null,
@@ -471,11 +477,13 @@
         "device_ieee": "00:13:a2:00:41:67:1f:d7",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "is_on": 0
       }
     ]
   },
+  "child_devices": [],
   "neighbors": [],
   "routes": []
 }

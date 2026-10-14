@@ -19,6 +19,7 @@ from zigpy.profiles.zha import PROFILE_ID as ZHA_PROFILE_ID
 from zigpy.profiles.zll import PROFILE_ID as ZLL_PROFILE_ID
 from zigpy.types import ClusterId
 from zigpy.types.named import EUI64
+from zigpy.typing import UNDEFINED, UndefinedType
 import zigpy.zcl
 from zigpy.zcl import ReportingConfig
 from zigpy.zcl.foundation import ZCLAttributeDef
@@ -31,6 +32,7 @@ from zha.event import EventBase
 from zha.mixins import LogMixin
 
 if TYPE_CHECKING:
+    from zha.zigbee.child_device import ChildDevice
     from zha.zigbee.device import Device
     from zha.zigbee.endpoint import Endpoint
     from zha.zigbee.group import Group
@@ -208,6 +210,8 @@ class BaseEntityState:
     device_ieee: EUI64 | None
     endpoint_id: int | None
     available: bool | None
+    # The id of the child device of `device_ieee` the entity belongs to, if any
+    child_device_id: str | None = None
 
     # For group entities
     group_id: int | None
@@ -352,6 +356,11 @@ class BaseEntity(LogMixin, EventBase):
     def primary_weight(self) -> int:
         """Return the primary weight of the entity."""
         return self._attr_primary_weight
+
+    @property
+    def child_device(self) -> ChildDevice | None:
+        """Return the child device the entity belongs to, if any."""
+        return None
 
     @property
     def fallback_name(self) -> str | None:
@@ -533,6 +542,11 @@ class PlatformEntity(BaseEntity):
 
     _client_cluster_config: Mapping[int, ClusterConfig] = MappingProxyType({})
 
+    # Explicitly assigns the entity to a child device of its device by child device id,
+    # or keeps it on the main device with `None`. `UNDEFINED` derives it from the
+    # endpoint (see `zha.zigbee.child_device`).
+    _attr_child_device_id: str | None | UndefinedType = UNDEFINED
+
     def __init__(
         self,
         endpoint: Endpoint,
@@ -547,6 +561,7 @@ class PlatformEntity(BaseEntity):
         entity_type: EntityType | None = None,
         primary: bool | None = None,
         initially_disabled: bool = False,
+        child_device_id: str | None | UndefinedType = UNDEFINED,
         legacy_discovery_unique_id: str | None = None,
         **kwargs: Any,
     ):
@@ -566,6 +581,7 @@ class PlatformEntity(BaseEntity):
                 entity_type=entity_type,
                 primary=primary,
                 initially_disabled=initially_disabled,
+                child_device_id=child_device_id,
             )
 
         if legacy_discovery_unique_id is None:
@@ -586,6 +602,7 @@ class PlatformEntity(BaseEntity):
         self._device: Device = device
         self._endpoint = endpoint
         self._cluster: zigpy.zcl.Cluster = cluster
+        self._child_device: ChildDevice | None = None
 
     def _apply_quirk_entity_config(
         self,
@@ -597,6 +614,7 @@ class PlatformEntity(BaseEntity):
         entity_type: EntityType | None,
         primary: bool | None,
         initially_disabled: bool,
+        child_device_id: str | None | UndefinedType = UNDEFINED,
     ) -> None:
         """Apply the generic quirk entity configuration keywords."""
         if initially_disabled:
@@ -627,6 +645,9 @@ class PlatformEntity(BaseEntity):
         if primary is not None:
             self._attr_primary = primary
 
+        if child_device_id is not UNDEFINED:
+            self._attr_child_device_id = child_device_id
+
     @cached_property
     def identifiers(self) -> PlatformEntityIdentifiers:
         """Return a dict with the information necessary to identify this entity."""
@@ -645,10 +666,28 @@ class PlatformEntity(BaseEntity):
     @property
     def primary(self) -> bool:
         """Return if the entity is the primary device control."""
-        if self._attr_primary is not None:
-            return self._attr_primary
+        if self._attr_primary is False:
+            return False
 
-        return self._device.primary_entity is self
+        # An explicitly primary entity wins the election, unless it conflicts with
+        # another one on the same (child) device. Until its device has run the
+        # election (when the entity is added), no entity is primary.
+        return self._device.is_primary_entity(self)
+
+    @property
+    def explicit_child_device_id(self) -> str | None | UndefinedType:
+        """Return the explicitly assigned child device id (`None`: main device)."""
+        return self._attr_child_device_id
+
+    @property
+    def child_device(self) -> ChildDevice | None:
+        """Return the child device the entity belongs to, if any."""
+        return self._child_device
+
+    @child_device.setter
+    def child_device(self, child_device: ChildDevice | None) -> None:
+        """Set the child device the entity belongs to (set by its device)."""
+        self._child_device = child_device
 
     @property
     def endpoint(self) -> Endpoint:
@@ -720,6 +759,9 @@ class PlatformEntity(BaseEntity):
             device_ieee=self._device.ieee,
             endpoint_id=self._endpoint.id,
             available=self.available,
+            child_device_id=(
+                self._child_device.id if self._child_device is not None else None
+            ),
         )
 
 

@@ -211,6 +211,7 @@
         "device_ieee": "ab:cd:ef:12:90:34:fa:13",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "current_temperature": 20.2,
         "outdoor_temperature": null,
@@ -259,6 +260,7 @@
         "device_ieee": "ab:cd:ef:12:90:34:fa:13",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "native_value": 180,
         "suggested_display_precision": null,
@@ -282,6 +284,7 @@
         "device_ieee": "ab:cd:ef:12:90:34:fa:13",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "native_value": -55,
         "suggested_display_precision": null,
@@ -305,6 +308,7 @@
         "device_ieee": "ab:cd:ef:12:90:34:fa:13",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "native_value": "idle",
         "suggested_display_precision": null,
@@ -330,6 +334,7 @@
         "device_ieee": "ab:cd:ef:12:90:34:fa:13",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "installed_version": null,
         "in_progress": false,
@@ -342,6 +347,7 @@
       }
     ]
   },
+  "child_devices": [],
   "neighbors": [],
   "routes": []
 }

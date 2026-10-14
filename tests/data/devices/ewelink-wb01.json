@@ -163,6 +163,7 @@
         "device_ieee": "00:12:4b:00:25:12:e0:f9",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "command": "identify",
         "args": [
@@ -190,6 +191,7 @@
         "device_ieee": "00:12:4b:00:25:12:e0:f9",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "native_value": null,
         "suggested_display_precision": null,
@@ -213,6 +215,7 @@
         "device_ieee": "00:12:4b:00:25:12:e0:f9",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "native_value": null,
         "suggested_display_precision": null,
@@ -240,6 +243,7 @@
         "device_ieee": "00:12:4b:00:25:12:e0:f9",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "native_value": 100.0,
         "suggested_display_precision": 0,
@@ -250,6 +254,7 @@
       }
     ]
   },
+  "child_devices": [],
   "neighbors": [],
   "routes": []
 }
