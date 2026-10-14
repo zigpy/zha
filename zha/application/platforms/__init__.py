@@ -666,9 +666,11 @@ class PlatformEntity(BaseEntity):
     @property
     def primary(self) -> bool:
         """Return if the entity is the primary device control."""
-        if self._attr_primary is not None:
-            return self._attr_primary
+        if self._attr_primary is False:
+            return False
 
+        # An explicitly primary entity wins the election, unless it conflicts with
+        # another one on the same (child) device
         return self._device.is_primary_entity(self)
 
     @property

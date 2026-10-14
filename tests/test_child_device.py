@@ -284,9 +284,8 @@ async def test_multiple_explicit_primary_entities(
     await device.recompute_entities()
 
     assert "Multiple explicitly primary entities" in caplog.text
-    assert not device.is_primary_entity(lights[0])
-    assert not device.is_primary_entity(lights[1])
-    assert device.is_primary_entity(lights[2])
+    assert [light.primary for light in lights] == [False, False, True]
+    assert [light.state.primary for light in lights] == [False, False, True]
 
 
 async def test_explicit_child_device_assignment(
