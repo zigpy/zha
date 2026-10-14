@@ -670,7 +670,8 @@ class PlatformEntity(BaseEntity):
             return False
 
         # An explicitly primary entity wins the election, unless it conflicts with
-        # another one on the same (child) device
+        # another one on the same (child) device. Until its device has run the
+        # election (when the entity is added), no entity is primary.
         return self._device.is_primary_entity(self)
 
     @property
