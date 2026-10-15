@@ -997,3 +997,37 @@ async def test_entityless_cluster_binds_via_virtual_entity(
     await zha_gateway.async_block_till_done(wait_background_tasks=True)
 
     assert len(philips_cluster.bind.mock_calls) == 1
+
+
+async def test_entity_creation_failure_is_skipped(
+    zha_gateway: Gateway,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    """Test discovery skips (and logs) an entity that fails to instantiate."""
+    zigpy_device = create_mock_zigpy_device(
+        zha_gateway,
+        {
+            1: {
+                SIG_EP_INPUT: [
+                    zigpy.zcl.clusters.general.Basic.cluster_id,
+                    zigpy.zcl.clusters.general.OnOff.cluster_id,
+                ],
+                SIG_EP_OUTPUT: [],
+                SIG_EP_TYPE: zigpy.profiles.zha.DeviceType.ON_OFF_SWITCH,
+                SIG_EP_PROFILE: zigpy.profiles.zha.PROFILE_ID,
+            }
+        },
+    )
+
+    with mock.patch(
+        "zha.application.platforms.switch.Switch.__init__",
+        side_effect=RuntimeError("boom"),
+    ):
+        zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
+
+    # The broad except logged the failure and let discovery continue.
+    assert "Failed to create Switch entity" in caplog.text
+
+    # The switch entity was skipped, but the device still joined.
+    with pytest.raises(KeyError):
+        get_entity(zha_device, platform=Platform.SWITCH)
