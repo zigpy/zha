@@ -104,7 +104,7 @@ class BaseSiren(PlatformEntity, ABC):
         self,
         duration: int | None = None,
         tone: int | None = None,
-        volume_level: int | None = None,
+        volume_level: float | None = None,
         # These kwargs are ZHA extensions to the base HA entity signature
         strobe: int | None = None,
         strobe_duty_cycle: int | None = None,
@@ -260,7 +260,7 @@ class AdvancedSiren(BaseZclSiren):
         self,
         duration: int | None = None,
         tone: int | None = None,
-        volume_level: int | None = None,
+        volume_level: float | None = None,
         # These kwargs are ZHA extensions to the base HA entity signature
         strobe: int | None = None,
         strobe_duty_cycle: int | None = None,
@@ -294,7 +294,8 @@ class AdvancedSiren(BaseZclSiren):
         if tone is not None:
             siren_tone = tone
         if volume_level is not None:
-            siren_level = int(volume_level)
+            # Map the 0.0-1.0 volume onto the four siren levels in equal quarters
+            siren_level = SirenLevel(min(int(volume_level * 4), 3))  # type:ignore[no-untyped-call]
         if strobe is not None:
             should_strobe = strobe
         if strobe_intensity is not None:
@@ -355,7 +356,7 @@ class BasicSiren(BaseZclSiren):
         self,
         duration: int | None = None,
         tone: int | None = None,
-        volume_level: int | None = None,
+        volume_level: float | None = None,
         # These kwargs are ZHA extensions to the base HA entity signature
         strobe: int | None = None,
         strobe_duty_cycle: int | None = None,
