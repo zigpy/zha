@@ -1641,8 +1641,17 @@ class Device(LogMixin, EventBase):
             self._primary_entity = explicitly_primary[0]
             return
 
-        # It should not be possible for there to be more than one
-        assert not explicitly_primary
+        if explicitly_primary:
+            # More than one explicitly primary entity is a bug in a quirk. Elect
+            # none instead of crashing device initialization. Note that all of
+            # them still report `primary` themselves, as the explicit marking
+            # takes precedence.
+            self.warning(
+                "Device has multiple explicitly primary entities,"
+                " not electing a primary entity: %s",
+                explicitly_primary,
+            )
+            return
 
         # For weight matching, only consider entities with a non-zero primary weight
         # which are not explicitly marked as not primary. Entities disabled at runtime
