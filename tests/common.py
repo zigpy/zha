@@ -16,6 +16,7 @@ from zigpy.application import ControllerApplication
 from zigpy.const import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_PROFILE, SIG_EP_TYPE
 import zigpy.types as t
 import zigpy.zcl
+from zigpy.zcl.clusters.general import Ota
 import zigpy.zcl.foundation as zcl_f
 import zigpy.zdo.types as zdo_t
 
@@ -521,6 +522,23 @@ def zigpy_device_from_device_data(  # noqa: C901
 
                     if attr.get("unsupported", False) or was_unsupported:
                         real_cluster.add_unsupported_attribute(attr_def)
+
+                if (
+                    isinstance(real_cluster, Ota)
+                    and (last_query_cmd := cluster.get("last_query_cmd")) is not None
+                ):
+                    hardware_version = last_query_cmd["hardware_version"]
+                    real_cluster.last_query_cmd = Ota.QueryNextImageCommand(
+                        field_control=(
+                            Ota.QueryNextImageCommand.FieldControl(0)
+                            if hardware_version is None
+                            else Ota.QueryNextImageCommand.FieldControl.HardwareVersion
+                        ),
+                        manufacturer_code=last_query_cmd["manufacturer_code"],
+                        image_type=last_query_cmd["image_type"],
+                        current_file_version=last_query_cmd["current_file_version"],
+                        hardware_version=hardware_version,
+                    )
 
     for obj in device_data["neighbors"]:
         app.topology.neighbors[device.ieee].append(
