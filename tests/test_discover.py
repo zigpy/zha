@@ -931,14 +931,26 @@ async def test_get_diagnostics_json_repeated_calls(zha_gateway: Gateway) -> None
     assert first == second
 
 
-async def test_diagnostics_includes_ota_last_query_cmd(zha_gateway: Gateway) -> None:
+@pytest.mark.parametrize(
+    ("device_path", "cluster_type"),
+    [
+        (
+            "tests/data/devices/ikea-of-sweden-tradfri-bulb-gu10-ws-400lm-0x23095631.json",
+            "out_clusters",
+        ),
+        # Server-only OTA: zigpy routes the query onto the in cluster
+        ("tests/data/devices/third-reality-inc-3rss007z.json", "in_clusters"),
+    ],
+)
+async def test_diagnostics_includes_ota_last_query_cmd(
+    zha_gateway: Gateway, device_path: str, cluster_type: str
+) -> None:
     """Test that diagnostics includes last_query_cmd for OTA clusters."""
     zigpy_device = await zigpy_device_from_json(
-        zha_gateway.application_controller,
-        "tests/data/devices/ikea-of-sweden-tradfri-bulb-gu10-ws-400lm-0x23095631.json",
+        zha_gateway.application_controller, device_path
     )
 
-    ota_cluster = zigpy_device.endpoints[1].out_clusters[Ota.cluster_id]
+    ota_cluster = getattr(zigpy_device.endpoints[1], cluster_type)[Ota.cluster_id]
     ota_cluster.last_query_cmd = QueryNextImageCommand(
         field_control=0,
         manufacturer_code=0x117C,
@@ -950,7 +962,7 @@ async def test_diagnostics_includes_ota_last_query_cmd(zha_gateway: Gateway) -> 
     diag = json.loads(json.dumps(zha_device.get_diagnostics_json(), cls=ZhaJsonEncoder))
 
     ota_diag = next(
-        c for c in diag["endpoints"]["1"]["out_clusters"] if c["cluster_id"] == "0x0019"
+        c for c in diag["endpoints"]["1"][cluster_type] if c["cluster_id"] == "0x0019"
     )
 
     assert ota_diag["last_query_cmd"] == {
