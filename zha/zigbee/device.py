@@ -80,6 +80,7 @@ from zha.application.platforms import (
     BaseEntityState,
     EntityStateChangedEvent,
     PlatformEntity,
+    ZclPlatformEntity,
     sensor,
 )
 from zha.application.platforms.update import BaseFirmwareUpdateEntity
@@ -771,10 +772,13 @@ class Device(LogMixin, EventBase):
         for entity in self._platform_entities.values():
             if platform != entity.PLATFORM:
                 continue
-            if endpoint_id is not None and entity.endpoint.id != endpoint_id:
-                continue
-            if cluster_id is not None and entity.cluster.cluster_id != cluster_id:
-                continue
+            if endpoint_id is not None or cluster_id is not None:
+                if not isinstance(entity, ZclPlatformEntity):
+                    continue
+                if endpoint_id is not None and entity.endpoint.id != endpoint_id:
+                    continue
+                if cluster_id is not None and entity.cluster.cluster_id != cluster_id:
+                    continue
             matches.append(entity)
         if not matches or (not pick_first and len(matches) != 1):
             raise LookupError(
@@ -1057,7 +1061,7 @@ class Device(LogMixin, EventBase):
             DeviceConfiguredEvent(device_ieee=self.ieee),
         )
 
-    def discover_entities(self) -> Iterator[BaseEntity]:
+    def discover_entities(self) -> Iterator[PlatformEntity]:
         """Yield the default (ZCL) entities for this device.
 
         Declarative quirks add their exposed entities by overriding this in
@@ -1066,6 +1070,16 @@ class Device(LogMixin, EventBase):
         # TODO: purge old coordinator entities
         if self.is_coordinator:
             return
+
+        # TODO: detach these entities from the `Basic` cluster once we finish
+        # implementing unique ID migrations in the Core integration
+        if (basic_cluster := sensor.RSSISensor.legacy_basic_cluster(self)) is not None:
+            unique_id_base = (
+                f"{self.ieee}-{basic_cluster.endpoint.endpoint_id}-{Basic.cluster_id}"
+            )
+
+            yield sensor.RSSISensor(self, unique_id=unique_id_base)
+            yield sensor.LQISensor(self, unique_id=unique_id_base)
 
         for ep_id, endpoint in self.endpoints.items():
             if ep_id == 0:
@@ -1834,7 +1848,7 @@ class Device(LogMixin, EventBase):
 class CoordinatorDevice(Device):
     """ZHA wrapper for the active coordinator device."""
 
-    def discover_entities(self) -> Iterator[BaseEntity]:
+    def discover_entities(self) -> Iterator[PlatformEntity]:
         """Yield counter sensors for the active coordinator."""
         state = self.gateway.application_controller.state
         for counter_groups in (
@@ -1846,7 +1860,7 @@ class CoordinatorDevice(Device):
             for counter_group, counters in getattr(state, counter_groups).items():
                 for counter in counters:
                     yield sensor.DeviceCounterSensor(
-                        zha_device=self,
+                        device=self,
                         counter_groups=counter_groups,
                         counter_group=counter_group,
                         counter=counter,

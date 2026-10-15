@@ -22,6 +22,7 @@ from zha.application.platforms import (
     ClusterConfig,
     ClusterMatch,
     PlatformEntity,
+    ZclPlatformEntity,
     register_entity,
 )
 from zha.application.platforms.alarm_control_panel.const import (
@@ -116,7 +117,7 @@ class BaseAlarmControlPanel(PlatformEntity, ABC):
 
 
 @register_entity(AceCluster.cluster_id)
-class AlarmControlPanel(BaseAlarmControlPanel):
+class AlarmControlPanel(BaseAlarmControlPanel, ZclPlatformEntity):
     """Entity for ZHA alarm control devices."""
 
     _attr_translation_key: str = "alarm_control_panel"
