@@ -1218,7 +1218,9 @@ class Device(LogMixin, EventBase):
         for entity in entities[:]:
             entity.recompute_capabilities()
 
-            if not entity.is_supported() or not entity.is_supported_in_list(entities):
+            if not entity.is_supported() or not entity.is_supported_in_list(
+                [e for e in entities if e is not entity]
+            ):
                 self.debug("Removing unsupported entity %s", entity)
                 await self._remove_entity(entity, remove=True)
                 entities.remove(entity)

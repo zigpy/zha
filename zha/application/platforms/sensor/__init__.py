@@ -3248,7 +3248,7 @@ class RSSISensor(Sensor):
     def is_supported_in_list(self, entities: list[BaseEntity]) -> bool:
         """Check if the sensor is supported given the list of entities."""
         cls = type(self)
-        return not any(type(entity) is cls for entity in entities if entity is not self)
+        return not any(type(entity) is cls for entity in entities)
 
     @property
     def native_value(self) -> str | int | float | None:
