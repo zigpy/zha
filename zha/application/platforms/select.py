@@ -716,29 +716,6 @@ class AqaraT2RelayDecoupledMode(ZCLEnumSelectEntity):
     )
 
 
-class AqaraFeedingMode(types.enum8):
-    """Feeding mode."""
-
-    Manual = 0x00
-    Schedule = 0x01
-
-
-@register_entity(AQARA_OPPLE_CLUSTER)
-class AqaraPetFeederMode(ZCLEnumSelectEntity):
-    """Representation of an Aqara pet feeder mode configuration entity."""
-
-    _unique_id_suffix = "feeding_mode"
-    _attribute_name = "feeding_mode"
-    _enum = AqaraFeedingMode
-    _attr_translation_key: str = "feeding_mode"
-    _cluster_id = AQARA_OPPLE_CLUSTER
-
-    _cluster_match = ClusterMatch(
-        server_clusters=frozenset({AQARA_OPPLE_CLUSTER}),
-        models=frozenset({"aqara.feeder.acn001"}),
-    )
-
-
 class AqaraThermostatPresetMode(types.enum8):
     """Thermostat preset mode."""
 
