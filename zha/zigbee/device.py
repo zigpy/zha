@@ -1076,7 +1076,14 @@ class Device(LogMixin, EventBase):
                 str(endpoint.device.ieee),
                 endpoint.id,
             )
-            yield from discovery.discover_entities_for_endpoint(endpoint)
+            try:
+                yield from discovery.discover_entities_for_endpoint(endpoint)
+            except Exception:  # pylint: disable=broad-except
+                _LOGGER.exception(
+                    "Failed to discover entities for endpoint %s on device %s",
+                    endpoint.id,
+                    str(self.ieee),
+                )
 
     def _discover_new_entities(self) -> None:
         self._discovered_entities.clear()
