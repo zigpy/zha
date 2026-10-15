@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import asyncio
-from collections.abc import Callable, Generator
+from collections.abc import Awaitable, Callable, Generator
 import contextlib
 from contextvars import ContextVar
 import dataclasses
@@ -42,8 +42,14 @@ class EventBase:
         """Initialize event base."""
         super().__init__(*args, **kwargs)
         self._listeners: dict[str, list[EventListener]] = {}
-        self._event_tasks: list[asyncio.Task] = []
+        self._event_tasks: list[asyncio.Future[Any]] = []
         self._global_listeners: list[EventListener] = []
+
+    def _track_event_awaitable(self, awaitable: Awaitable[Any]) -> None:
+        """Schedule and track an event listener awaitable."""
+        task = asyncio.ensure_future(awaitable)
+        self._event_tasks.append(task)
+        task.add_done_callback(self._event_tasks.remove)
 
     def on_event(  # pylint: disable=invalid-name
         self, event_name: str, callback: Callable, with_context: bool = False
@@ -79,22 +85,17 @@ class EventBase:
         self, event_name: str, callback: Callable, with_context: bool = False
     ) -> Callable:
         """Listen for an event exactly once."""
-        if inspect.iscoroutinefunction(callback):
-
-            async def async_event_listener(*args, **kwargs) -> None:
-                unsub()
-                task = asyncio.create_task(callback(*args, **kwargs))
-                self._event_tasks.append(task)
-                task.add_done_callback(self._event_tasks.remove)
-
-            unsub = self.on_event(
-                event_name, async_event_listener, with_context=with_context
-            )
-            return unsub
+        consumed = False
 
         def event_listener(*args, **kwargs) -> None:
+            nonlocal consumed
+            if consumed:
+                return
+            consumed = True
             unsub()
-            callback(*args, **kwargs)
+            call = callback(*args, **kwargs)
+            if inspect.isawaitable(call):
+                self._track_event_awaitable(call)
 
         unsub = self.on_event(event_name, event_listener, with_context=with_context)
         return unsub
@@ -118,10 +119,8 @@ class EventBase:
             else:
                 call = listener.callback(data)
 
-            if inspect.iscoroutinefunction(listener.callback):
-                task = asyncio.create_task(call)
-                self._event_tasks.append(task)
-                task.add_done_callback(self._event_tasks.remove)
+            if inspect.isawaitable(call):
+                self._track_event_awaitable(call)
 
     def _handle_event_protocol(self, event) -> None:
         """Process an event based on event protocol."""
