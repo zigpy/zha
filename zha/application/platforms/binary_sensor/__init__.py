@@ -38,7 +38,6 @@ from zha.application.platforms.binary_sensor.const import (
     BinarySensorDeviceClass,
 )
 from zha.application.platforms.const import (
-    IKEA_AIR_PURIFIER_CLUSTER,
     SMARTTHINGS_ACCELERATION_CLUSTER,
     TUYA_MANUFACTURER_CLUSTER,
 )
@@ -496,22 +495,6 @@ class FrostLock(BinarySensor):
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({TUYA_MANUFACTURER_CLUSTER}),
         manufacturers=frozenset({"_TZE200_htnnfasr"}),
-    )
-
-
-@register_entity(IKEA_AIR_PURIFIER_CLUSTER)
-class ReplaceFilter(BinarySensor):
-    """ZHA BinarySensor."""
-
-    _attribute_name = "replace_filter"
-    _unique_id_suffix = "replace_filter"
-    _attr_device_class: BinarySensorDeviceClass = BinarySensorDeviceClass.PROBLEM
-    _attr_entity_category: EntityCategory = EntityCategory.DIAGNOSTIC
-    _attr_translation_key: str = "replace_filter"
-    _cluster_id = IKEA_AIR_PURIFIER_CLUSTER
-
-    _cluster_match = ClusterMatch(
-        server_clusters=frozenset({IKEA_AIR_PURIFIER_CLUSTER}),
     )
 
 
