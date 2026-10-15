@@ -301,9 +301,18 @@ class BaseSharedLight(BaseLight):
 
     @property
     def _color_temp_supported(self) -> bool:
-        return (
-            Color.ColorCapabilities.Color_temperature in self._color_capabilities
-        ) or self._color_temperature is not None
+        assert self._color_cluster is not None
+        capability_name = Color.AttributeDefs.color_capabilities.name
+        capabilities = self._color_cluster.get(capability_name)
+        if capabilities is None or self._color_cluster.is_attribute_unsupported(
+            capability_name
+        ):
+            # Older lights may not implement the capability bitmap. Preserve
+            # their existing attribute-based detection in that case.
+            return self._color_temperature is not None
+        return Color.ColorCapabilities.Color_temperature in Color.ColorCapabilities(
+            capabilities
+        )
 
     @property
     def _color_loop_supported(self) -> bool:
@@ -1057,6 +1066,7 @@ class Light(BaseSharedLight, PlatformEntity):
             self._min_mireds: int = self._color_min_mireds
             self._max_mireds: int = self._color_max_mireds
 
+            self._color_temp = None
             if self._color_temp_supported:
                 self._internal_supported_color_modes.add(ColorMode.COLOR_TEMP)
                 self._color_temp = self._color_temperature
