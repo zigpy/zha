@@ -60,6 +60,7 @@ from zha.application.platforms.sensor.device_class import (
     SensorStateClass,
 )
 from zha.application.platforms.switch import Switch
+from zha.const import STATE_CHANGED
 from zha.exceptions import ZHAException
 from zha.quirks import DeviceRegistry
 from zha.zigbee.device import (
@@ -223,6 +224,50 @@ async def test_check_available_success(
         entity.emit.assert_called()
         assert not entity.available
         entity.emit.reset_mock()
+
+
+@pytest.mark.parametrize("seen_while_off_network", [False, True])
+async def test_on_network_emits_entity_availability(
+    zha_gateway: Gateway, seen_while_off_network: bool
+) -> None:
+    """Test entities emit their availability when the device leaves and returns."""
+    zigpy_dev = zigpy_device_mains(zha_gateway, with_basic_cluster=True)
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
+
+    # we want to test the device availability handling alone
+    zha_gateway.global_updater.stop()
+
+    entities = list(zha_device.platform_entities.values())
+    assert entities
+    diffs: dict[str, list[dict]] = {entity.unique_id: [] for entity in entities}
+    for entity in entities:
+        entity.on_event(
+            STATE_CHANGED,
+            lambda event, uid=entity.unique_id: diffs[uid].append(event.state_diff),
+        )
+
+    zha_device.on_network = False
+    await zha_gateway.async_block_till_done()
+    assert zha_device.available is False
+    for entity in entities:
+        assert any(diff.get("available") is False for diff in diffs[entity.unique_id])
+        diffs[entity.unique_id].clear()
+
+    if seen_while_off_network:
+        # the availability checker saw recent traffic, but the device is still
+        # not on the network, so it stays unavailable
+        zha_device.update_available(True)
+        await zha_gateway.async_block_till_done()
+        assert zha_device.available is False
+        for entity in entities:
+            assert all("available" not in diff for diff in diffs[entity.unique_id])
+
+    zha_device.on_network = True
+    await zha_gateway.async_block_till_done()
+    assert zha_device.available is True
+    for entity in entities:
+        assert entity.state.available is True
+        assert any(diff.get("available") is True for diff in diffs[entity.unique_id])
 
 
 async def test_check_available_unsuccessful(

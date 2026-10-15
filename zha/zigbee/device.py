@@ -687,9 +687,16 @@ class Device(LogMixin, EventBase):
     @on_network.setter
     def on_network(self, new_on_network: bool) -> None:
         """Set device on_network flag."""
-        self.update_available(new_on_network)
-        self._on_network = new_on_network
-        if not new_on_network:
+        if new_on_network:
+            # `available` includes `on_network`, so set it before entities emit
+            # their state, but compare against the availability from before
+            was_available = self.available
+            self._on_network = True
+            self._update_available(True, was_available=was_available)
+        else:
+            # `available` must still include `on_network` here to see the change
+            self.update_available(False)
+            self._on_network = False
             self.debug("Device is not on the network, marking unavailable")
 
     def _first_in_cluster(self, cluster_id: int) -> zigpy.zcl.Cluster | None:
@@ -868,16 +875,20 @@ class Device(LogMixin, EventBase):
 
     def update_available(self, available: bool) -> None:
         """Update device availability and signal entities."""
+        self._update_available(available, was_available=self.available)
+
+    def _update_available(self, available: bool, *, was_available: bool) -> None:
+        """Update device availability, comparing against `was_available`."""
         self.debug(
             (
                 "Update device availability -  device available: %s - new availability:"
                 " %s - changed: %s"
             ),
-            self.available,
+            was_available,
             available,
-            self.available ^ available,
+            was_available ^ available,
         )
-        availability_changed = self.available ^ available
+        availability_changed = was_available ^ available
         self.available = available
         if availability_changed and available:
             # reinit cluster handlers then signal entities
