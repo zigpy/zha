@@ -139,11 +139,26 @@ def get_cluster_attr_data(cluster: Cluster) -> list[dict]:
 
 def _cluster_entry(cluster_id: int, cluster: Cluster) -> dict[str, Any]:
     """Build the per-cluster diagnostics entry."""
-    return {
+    entry: dict[str, Any] = {
         "cluster_id": f"0x{cluster_id:04x}",
         "endpoint_attribute": cluster.ep_attribute,
         "attributes": get_cluster_attr_data(cluster),
     }
+
+    # zigpy routes a Query Next Image to the server OTA cluster when the device has
+    # no client one, so this can be set in either direction
+    if (
+        isinstance(cluster, Ota)
+        and (last_query_cmd := getattr(cluster, "last_query_cmd", None)) is not None
+    ):
+        entry["last_query_cmd"] = {
+            "manufacturer_code": last_query_cmd.manufacturer_code,
+            "image_type": last_query_cmd.image_type,
+            "current_file_version": last_query_cmd.current_file_version,
+            "hardware_version": last_query_cmd.hardware_version,
+        }
+
+    return entry
 
 
 def get_device_automation_triggers(
@@ -1737,22 +1752,7 @@ class Device(LogMixin, EventBase):
                     for cluster_id, cluster in sorted(endpoint.in_clusters.items())
                 ],
                 "out_clusters": [
-                    {
-                        **_cluster_entry(cluster_id, cluster),
-                        **(
-                            {
-                                "last_query_cmd": {
-                                    "manufacturer_code": cluster.last_query_cmd.manufacturer_code,
-                                    "image_type": cluster.last_query_cmd.image_type,
-                                    "current_file_version": cluster.last_query_cmd.current_file_version,
-                                    "hardware_version": cluster.last_query_cmd.hardware_version,
-                                }
-                            }
-                            if isinstance(cluster, Ota)
-                            and getattr(cluster, "last_query_cmd", None) is not None
-                            else {}
-                        ),
-                    }
+                    _cluster_entry(cluster_id, cluster)
                     for cluster_id, cluster in sorted(endpoint.out_clusters.items())
                 ],
             }
