@@ -4,7 +4,7 @@ from typing import Any
 
 import pytest
 from zigpy.profiles import zha
-from zigpy.zcl.clusters import general
+from zigpy.zcl.clusters import general, lighting
 
 from tests.common import (
     SIG_EP_INPUT,
@@ -12,15 +12,20 @@ from tests.common import (
     SIG_EP_PROFILE,
     SIG_EP_TYPE,
     create_mock_zigpy_device,
+    get_entity,
     join_zigpy_device,
+    make_zcl_header,
 )
 from zha.application import Platform
 from zha.application.gateway import Gateway
 from zha.application.platforms import EntityStateChangedEvent
 from zha.application.platforms.event import (
     BaseEvent,
+    ColorEvent,
     EntityEventTriggeredEvent,
     EventState,
+    LevelControlEvent,
+    OnOffEvent,
     TriggeredEvent,
 )
 from zha.application.platforms.event.const import (
@@ -162,3 +167,174 @@ async def test_trigger_unsupported_event(entity: FakeEvent) -> None:
         entity.trigger(ButtonEventType.LONG_PRESS_END)
 
     assert events == []
+
+
+async def test_level_control_event(zha_gateway: Gateway) -> None:
+    """Test the LevelControl client cluster event entity."""
+    zigpy_device = create_mock_zigpy_device(
+        zha_gateway,
+        {
+            1: {
+                SIG_EP_INPUT: [],
+                SIG_EP_OUTPUT: [general.LevelControl.cluster_id],
+                SIG_EP_TYPE: zha.DeviceType.LEVEL_CONTROL_SWITCH,
+                SIG_EP_PROFILE: zha.PROFILE_ID,
+            }
+        },
+    )
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
+    cluster = zigpy_device.endpoints[1].out_clusters[general.LevelControl.cluster_id]
+
+    entity = get_entity(
+        zha_device, platform=Platform.EVENT, exact_entity_type=LevelControlEvent
+    )
+    assert isinstance(entity, BaseEvent)
+    assert entity.event_types == [
+        "step",
+        "step_with_on_off",
+        "stop",
+        "move",
+        "move_with_on_off",
+        "move_to_level",
+        "move_to_level_with_on_off",
+    ]
+
+    events: list[EntityEventTriggeredEvent] = []
+    entity.on_event(EntityEventTriggeredEvent.event, events.append)
+
+    cmd = cluster.ServerCommandDefs.move_to_level_with_on_off
+    hdr = make_zcl_header(cmd.id, global_command=False, tsn=1)
+    msg = cmd.schema(level=100, transition_time=5)
+    cluster.handle_message(hdr, msg)
+
+    assert events == [
+        EntityEventTriggeredEvent(
+            platform=Platform.EVENT,
+            unique_id=entity.unique_id,
+            device_ieee=entity.device.ieee,
+            endpoint_id=1,
+            triggered=TriggeredEvent(
+                event_type="move_to_level_with_on_off",
+                event_attributes={"level": 100, "transition_time": 5},
+            ),
+        )
+    ]
+
+
+async def test_on_off_event(zha_gateway: Gateway) -> None:
+    """Test the OnOff client cluster event entity."""
+    zigpy_device = create_mock_zigpy_device(
+        zha_gateway,
+        {
+            1: {
+                SIG_EP_INPUT: [],
+                SIG_EP_OUTPUT: [general.OnOff.cluster_id],
+                SIG_EP_TYPE: zha.DeviceType.ON_OFF_SWITCH,
+                SIG_EP_PROFILE: zha.PROFILE_ID,
+            }
+        },
+    )
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
+    cluster = zigpy_device.endpoints[1].out_clusters[general.OnOff.cluster_id]
+
+    entity = get_entity(
+        zha_device, platform=Platform.EVENT, exact_entity_type=OnOffEvent
+    )
+    assert isinstance(entity, BaseEvent)
+    assert entity.event_types == [
+        "off",
+        "on",
+        "toggle",
+        "off_with_effect",
+        "on_with_recall_global_scene",
+        "on_with_timed_off",
+    ]
+
+    events: list[EntityEventTriggeredEvent] = []
+    entity.on_event(EntityEventTriggeredEvent.event, events.append)
+
+    cmd = cluster.ServerCommandDefs.toggle
+    hdr = make_zcl_header(cmd.id, global_command=False, tsn=1)
+    msg = cmd.schema()
+    cluster.handle_message(hdr, msg)
+
+    assert events == [
+        EntityEventTriggeredEvent(
+            platform=Platform.EVENT,
+            unique_id=entity.unique_id,
+            device_ieee=entity.device.ieee,
+            endpoint_id=1,
+            triggered=TriggeredEvent(
+                event_type="toggle",
+                event_attributes={},
+            ),
+        )
+    ]
+
+
+async def test_color_event(zha_gateway: Gateway) -> None:
+    """Test the Color client cluster event entity."""
+    zigpy_device = create_mock_zigpy_device(
+        zha_gateway,
+        {
+            1: {
+                SIG_EP_INPUT: [],
+                SIG_EP_OUTPUT: [lighting.Color.cluster_id],
+                SIG_EP_TYPE: zha.DeviceType.LEVEL_CONTROL_SWITCH,
+                SIG_EP_PROFILE: zha.PROFILE_ID,
+            }
+        },
+    )
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
+    cluster = zigpy_device.endpoints[1].out_clusters[lighting.Color.cluster_id]
+
+    entity = get_entity(
+        zha_device, platform=Platform.EVENT, exact_entity_type=ColorEvent
+    )
+    assert isinstance(entity, BaseEvent)
+    assert entity.event_types == [
+        "move_to_hue",
+        "move_hue",
+        "step_hue",
+        "move_to_saturation",
+        "move_saturation",
+        "step_saturation",
+        "move_to_hue_and_saturation",
+        "move_to_color",
+        "move_color",
+        "step_color",
+        "move_to_color_temp",
+        "enhanced_move_to_hue",
+        "enhanced_move_hue",
+        "enhanced_step_hue",
+        "enhanced_move_to_hue_and_saturation",
+        "color_loop_set",
+        "stop_move_step",
+        "move_color_temp",
+        "step_color_temp",
+    ]
+
+    events: list[EntityEventTriggeredEvent] = []
+    entity.on_event(EntityEventTriggeredEvent.event, events.append)
+
+    cmd = cluster.ServerCommandDefs.step_color_temp
+    hdr = make_zcl_header(cmd.id, global_command=False, tsn=1)
+    msg = cmd.schema(step_mode=1, step_size=10, transition_time=5)
+    cluster.handle_message(hdr, msg)
+
+    assert events == [
+        EntityEventTriggeredEvent(
+            platform=Platform.EVENT,
+            unique_id=entity.unique_id,
+            device_ieee=entity.device.ieee,
+            endpoint_id=1,
+            triggered=TriggeredEvent(
+                event_type="step_color_temp",
+                event_attributes={
+                    "step_mode": 1,
+                    "step_size": 10,
+                    "transition_time": 5,
+                },
+            ),
+        )
+    ]
