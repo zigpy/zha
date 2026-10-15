@@ -35,8 +35,8 @@ from zha.application.platforms import (
     BaseEntityState,
     ClusterConfig,
     ClusterMatch,
-    PlatformEntity,
     PlatformFeatureGroup,
+    ZclPlatformEntity,
     register_entity,
 )
 from zha.application.platforms.cover.const import (
@@ -77,7 +77,7 @@ class CoverEntityState(BaseEntityState):
     supported_features: CoverEntityFeature
 
 
-class BaseCover(PlatformEntity, ABC):
+class BaseCover(ZclPlatformEntity, ABC):
     """Abstract base class for ZHA covers."""
 
     PLATFORM = Platform.COVER

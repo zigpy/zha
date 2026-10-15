@@ -28,8 +28,8 @@ from zha.application.platforms import (
     ClusterConfig,
     ClusterMatch,
     EntityCategory,
-    PlatformEntity,
     PlatformFeatureGroup,
+    ZclPlatformEntity,
     register_entity,
 )
 from zha.application.platforms.const import (
@@ -63,7 +63,7 @@ class NumberState(BaseEntityState):
     native_unit_of_measurement: str | None
 
 
-class BaseNumber(PlatformEntity, ABC):
+class BaseNumber(ZclPlatformEntity, ABC):
     """Representation of a ZHA Number entity."""
 
     PLATFORM = Platform.NUMBER

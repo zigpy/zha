@@ -16,7 +16,7 @@ from tests.common import (
 )
 from zha.application import Platform
 from zha.application.gateway import Gateway
-from zha.application.platforms import EntityStateChangedEvent
+from zha.application.platforms import EntityStateChangedEvent, ZclPlatformEntity
 from zha.application.platforms.infrared import (
     BaseInfraredEmitter,
     BaseInfraredReceiver,
@@ -27,7 +27,7 @@ from zha.application.platforms.infrared.const import InfraredDeviceClass
 from zha.zigbee.device import Device
 
 
-class FakeEmitter(BaseInfraredEmitter):
+class FakeEmitter(ZclPlatformEntity, BaseInfraredEmitter):
     """Emitter that records what it was asked to transmit."""
 
     _unique_id_suffix = "fake_emitter"
@@ -42,7 +42,7 @@ class FakeEmitter(BaseInfraredEmitter):
         self.sent.append(signal)
 
 
-class FakeReceiver(BaseInfraredReceiver):
+class FakeReceiver(ZclPlatformEntity, BaseInfraredReceiver):
     """Receiver that captures signals on demand."""
 
     _unique_id_suffix = "fake_receiver"

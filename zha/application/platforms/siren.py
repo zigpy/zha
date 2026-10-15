@@ -27,8 +27,8 @@ from zha.application.platforms import (
     BaseEntityState,
     ClusterConfig,
     ClusterMatch,
-    PlatformEntity,
     PlatformFeatureGroup,
+    ZclPlatformEntity,
     register_entity,
 )
 from zha.quirks import SIREN_BASIC
@@ -65,7 +65,7 @@ class SirenState(BaseEntityState):
     supported_features: SirenEntityFeature
 
 
-class BaseSiren(PlatformEntity, ABC):
+class BaseSiren(ZclPlatformEntity, ABC):
     """Abstract base class for ZHA siren entities."""
 
     PLATFORM = Platform.SIREN

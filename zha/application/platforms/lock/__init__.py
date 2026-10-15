@@ -26,7 +26,7 @@ from zha.application.platforms import (
     BaseEntityState,
     ClusterConfig,
     ClusterMatch,
-    PlatformEntity,
+    ZclPlatformEntity,
     register_entity,
 )
 from zha.application.platforms.lock.const import (
@@ -47,7 +47,7 @@ class LockState(BaseEntityState):
     is_locked: bool
 
 
-class BaseLock(PlatformEntity, ABC):
+class BaseLock(ZclPlatformEntity, ABC):
     """Abstract base class for ZHA lock entities."""
 
     PLATFORM = Platform.LOCK

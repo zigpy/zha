@@ -29,8 +29,8 @@ from zha.application.platforms import (
     ClusterConfig,
     ClusterMatch,
     EntityCategory,
-    PlatformEntity,
     PlatformFeatureGroup,
+    ZclPlatformEntity,
     register_entity,
 )
 from zha.application.platforms.binary_sensor.const import (
@@ -61,7 +61,7 @@ class BinarySensorState(BaseEntityState):
     attribute_name: str
 
 
-class BaseBinarySensor(PlatformEntity, ABC):
+class BaseBinarySensor(ZclPlatformEntity, ABC):
     """Abstract base class for ZHA binary sensors."""
 
     PLATFORM: Platform = Platform.BINARY_SENSOR
