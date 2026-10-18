@@ -3,6 +3,7 @@
 import asyncio
 import logging
 import time
+from typing import Any
 from unittest import mock
 from unittest.mock import AsyncMock, call, patch
 
@@ -63,6 +64,7 @@ from zha.application.platforms.switch import Switch
 from zha.const import STATE_CHANGED
 from zha.exceptions import ZHAException
 from zha.quirks import DeviceRegistry
+from zha.zigbee.cluster_config import initialize_cluster_configs
 from zha.zigbee.device import (
     ClusterBinding,
     Device,
@@ -1975,6 +1977,102 @@ async def test_reinitialize_after_on_remove_emits_events(
 
     assert len(zha_device.platform_entities) == entity_count
     assert event_listener.call_count == entity_count
+
+
+async def test_reinitialize_does_not_activate_live_entity_copies(
+    zha_gateway: Gateway,
+) -> None:
+    """Test that re-initializing a live device does not duplicate its listeners."""
+    zigpy_dev = await zigpy_device_from_json(
+        zha_gateway.application_controller,
+        "tests/data/devices/ikea-of-sweden-tradfri-on-off-switch.json",
+    )
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
+    entities = dict(zha_device.platform_entities)
+
+    listener = mock.Mock()
+    zha_device.on_all_events(listener)
+
+    async def initialize_and_receive(*args: Any, **kwargs: Any) -> None:
+        # A sleepy remote becoming available again: it keeps sending commands
+        # while its attributes are read
+        zigpy_dev.packet_received(
+            zigpy.types.ZigbeePacket(
+                src_ep=1,
+                dst_ep=1,
+                tsn=1,
+                profile_id=zigpy.profiles.zha.PROFILE_ID,
+                cluster_id=general.OnOff.cluster_id,
+                data=zigpy.types.SerializableBytes(b"\x01\x01\x01"),
+            )
+        )
+        await initialize_cluster_configs(*args, **kwargs)
+
+    with patch(
+        "zha.zigbee.device.initialize_cluster_configs",
+        side_effect=initialize_and_receive,
+    ) as mock_initialize:
+        await zha_device.async_initialize(from_cache=False)
+
+    assert mock_initialize.call_count == 1
+
+    # The command emits a single zha_event
+    on_events = [
+        mock_call.args[0]
+        for mock_call in listener.mock_calls
+        if isinstance(mock_call.args[0], ZHAEvent)
+        and mock_call.args[0].data.get("command") == "on"
+    ]
+    assert len(on_events) == 1
+
+    # The live entities were kept rather than replaced by new copies
+    assert zha_device.platform_entities.keys() == entities.keys()
+    assert all(
+        zha_device.platform_entities[key] is entity for key, entity in entities.items()
+    )
+
+
+async def test_reinitialize_does_not_activate_live_entity_copies_renamed_by_quirk(
+    zha_gateway: Gateway,
+) -> None:
+    """Test that re-initializing skips copies of entities whose ID a quirk changed."""
+    registry = DeviceRegistry()
+    (
+        QuirkBuilder("CentraLite", "3405-L")
+        .change_entity_metadata(
+            function=lambda entity: isinstance(entity, LQISensor),
+            new_unique_id="custom_lqi_unique_id",
+        )
+        .add_to_registry(registry)
+    )
+    zigpy_dev = registry.resolve(
+        await zigpy_device_from_json(
+            zha_gateway.application_controller,
+            "tests/data/devices/centralite-3405-l-0x10025310.json",
+        )
+    )
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
+    entities = dict(zha_device.platform_entities)
+    assert (Platform.SENSOR, "custom_lqi_unique_id") in entities
+
+    pending_during_reads: list[PlatformEntity] = []
+
+    async def initialize_and_capture(*args: Any, **kwargs: Any) -> None:
+        pending_during_reads.extend(zha_device._pending_entities)
+        await initialize_cluster_configs(*args, **kwargs)
+
+    with patch(
+        "zha.zigbee.device.initialize_cluster_configs",
+        side_effect=initialize_and_capture,
+    ):
+        await zha_device.async_initialize(from_cache=False)
+
+    # No copy of a live entity was activated, the renamed one included
+    assert pending_during_reads == []
+    assert zha_device.platform_entities.keys() == entities.keys()
+    assert all(
+        zha_device.platform_entities[key] is entity for key, entity in entities.items()
+    )
 
 
 async def test_remove_entity_no_event(zha_gateway: Gateway) -> None:

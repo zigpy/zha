@@ -1109,6 +1109,13 @@ class Device(LogMixin, EventBase):
             # Apply any metadata changes from quirks v2
             self._apply_entity_metadata_changes(entity)
 
+            # A copy of a live entity stays inactive, it only contributes its cluster
+            # configs via `_discovered_entities`: its `on_add()` would attach a second
+            # set of cluster listeners, duplicating every event until
+            # `_add_pending_entities` drops it
+            if (entity.PLATFORM, entity.unique_id) in self._platform_entities:
+                continue
+
             entity.on_add()
             self._pending_entities.append(entity)
 
