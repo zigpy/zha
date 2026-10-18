@@ -60,6 +60,7 @@ from zha.application.platforms.sensor.device_class import (
     SensorStateClass,
 )
 from zha.application.platforms.switch import Switch
+from zha.const import STATE_CHANGED
 from zha.exceptions import ZHAException
 from zha.quirks import DeviceRegistry
 from zha.zigbee.device import (
@@ -223,6 +224,32 @@ async def test_check_available_success(
         entity.emit.assert_called()
         assert not entity.available
         entity.emit.reset_mock()
+
+
+async def test_back_on_network_signals_entities(zha_gateway: Gateway) -> None:
+    """Test that entities are signaled available when a device is back on the network."""
+    zigpy_dev = await zigpy_device_from_json(
+        zha_gateway.application_controller,
+        "tests/data/devices/ikea-of-sweden-tradfri-on-off-switch.json",
+    )
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
+    entity = get_entity(zha_device, platform=Platform.SENSOR, exact_entity_type=Battery)
+
+    zha_device.on_network = False
+    await zha_gateway.async_block_till_done()
+    assert entity.state.available is False
+
+    listener = mock.Mock()
+    entity.on_event(STATE_CHANGED, listener)
+
+    # The re-initialization starts eagerly within the setter
+    zha_device.on_network = True
+    await zha_gateway.async_block_till_done()
+
+    assert zha_device.available is True
+    assert listener.call_count == 1
+    assert listener.call_args[0][0].state_diff["available"] is True
+    assert entity.state.available is True
 
 
 async def test_check_available_unsuccessful(

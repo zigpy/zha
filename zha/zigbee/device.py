@@ -687,8 +687,7 @@ class Device(LogMixin, EventBase):
     @on_network.setter
     def on_network(self, new_on_network: bool) -> None:
         """Set device on_network flag."""
-        self.update_available(new_on_network)
-        self._on_network = new_on_network
+        self.update_available(new_on_network, on_network=new_on_network)
         if not new_on_network:
             self.debug("Device is not on the network, marking unavailable")
 
@@ -866,8 +865,15 @@ class Device(LogMixin, EventBase):
             if res.get(ATTR_MANUFACTURER) is not None:
                 self._checkins_missed_count = 0
 
-    def update_available(self, available: bool) -> None:
-        """Update device availability and signal entities."""
+    def update_available(
+        self, available: bool, *, on_network: bool | None = None
+    ) -> None:
+        """Update device availability and signal entities.
+
+        `on_network` also updates the on-network flag, after detecting the change but
+        before signaling: the re-initialization task starts eagerly, so it must not
+        see the previous flag.
+        """
         self.debug(
             (
                 "Update device availability -  device available: %s - new availability:"
@@ -879,6 +885,8 @@ class Device(LogMixin, EventBase):
         )
         availability_changed = self.available ^ available
         self.available = available
+        if on_network is not None:
+            self._on_network = on_network
         if availability_changed and available:
             # reinit cluster handlers then signal entities
             self.debug(
