@@ -1307,8 +1307,9 @@ class TongouRelaxedElectricalMeasurementReporting(VirtualEntity):
     and load drift the breakers report at the 5-second minimum interval. Override
     with 5 V / 0.1 A / 10 W.
 
-    Temporary workaround, same as the SONOFF S60 entry above: remove it in the same
-    release the quirk starts declaring its own reporting override.
+    Quirks cannot declare reporting overrides yet. If the quirk for this device
+    starts declaring its own, remove this entry in the same release, as overriding
+    configs are merged with each other (tightest wins).
     """
 
     _unique_id_suffix = "tongou_breaker_em_reporting"
