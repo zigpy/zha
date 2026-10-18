@@ -1301,9 +1301,10 @@ class TongouRelaxedElectricalMeasurementReporting(VirtualEntity):
     """Relaxed voltage/current/power reporting for the Tongou TO-Q-SY1-JZT breakers.
 
     These breakers (`_TZ3000_qeuvnohg`) report `rms_voltage` in volts and
-    `active_power` in watts (no voltage/power divisor), and `rms_current` in
-    milliamps (`ac_current_divisor` of 1000, verified on firmware 0x00000045). The
-    default raw reportable change of 1 means 1 V / 1 mA / 1 W, so with mains voltage
+    `active_power` in watts (the voltage/power divisors are unsupported), and
+    `rms_current` in milliamps (`ac_current_divisor` of 1000 is set by the quirk,
+    consistent with the values reported on firmware 0x00000045). The default raw
+    reportable change of 1 means 1 V / 1 mA / 1 W, so with mains voltage
     and load drift the breakers report at the 5-second minimum interval. Override
     with 5 V / 0.1 A / 10 W.
 
