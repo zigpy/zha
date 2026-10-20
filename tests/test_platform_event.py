@@ -441,6 +441,73 @@ async def test_zha_event_button_repeated_hold(zha_device: Device) -> None:
     ]
 
 
+async def test_zha_event_button_release_while_held(zha_device: Device) -> None:
+    """Test that a release the device does not classify ends a hold if one started."""
+    entity = create_event_button(
+        zha_device,
+        [
+            ZhaEventMatch(
+                event_type=ButtonEventType.LONG_PRESS_START,
+                event_data={"command": "hold"},
+            ),
+            ZhaEventMatch(
+                event_type=ButtonEventType.LONG_PRESS_END,
+                event_data={"command": "release"},
+                while_held=True,
+            ),
+            ZhaEventMatch(
+                event_type=ButtonEventType.PRESS_END, event_data={"command": "release"}
+            ),
+        ],
+    )
+    event_types = fired_event_types(entity)
+
+    for command in ("release", "hold", "release", "release", "hold", "hold"):
+        emit_zha_event(zha_device, {"command": command})
+
+    assert event_types == [
+        "press_end",
+        "long_press_start",
+        "long_press_end",
+        "press_end",
+        "long_press_start",
+        "long_press_start",
+    ]
+
+
+async def test_zha_event_button_release_of_held_button(zha_device: Device) -> None:
+    """Test that a release shared by two buttons only ends the hold of the held one."""
+    left, right = (
+        create_event_button(
+            zha_device,
+            [
+                ZhaEventMatch(
+                    event_type=ButtonEventType.LONG_PRESS_START,
+                    event_data={"command": "hold", "params": {"button": button}},
+                ),
+                ZhaEventMatch(
+                    event_type=ButtonEventType.LONG_PRESS_END,
+                    event_data={"command": "release"},
+                    while_held=True,
+                ),
+            ],
+        )
+        for button in ("left", "right")
+    )
+    left_event_types = fired_event_types(left)
+    right_event_types = fired_event_types(right)
+
+    emit_zha_event(zha_device, {"command": "release"})
+    emit_zha_event(zha_device, {"command": "hold", "params": {"button": "left"}})
+    emit_zha_event(zha_device, {"command": "release"})
+    emit_zha_event(zha_device, {"command": "release"})
+    emit_zha_event(zha_device, {"command": "hold", "params": {"button": "right"}})
+    emit_zha_event(zha_device, {"command": "release"})
+
+    assert left_event_types == ["long_press_start", "long_press_end"]
+    assert right_event_types == ["long_press_start", "long_press_end"]
+
+
 async def test_zha_event_button_hold_without_repeats(zha_device: Device) -> None:
     """Test that a hold match that does not repeat fires for every event."""
     entity = create_event_button(
@@ -553,4 +620,11 @@ def test_zha_event_match_invalid() -> None:
             event_type=ButtonEventType.PRESS_END,
             event_data={"command": "release"},
             repeats=True,
+        )
+
+    with pytest.raises(ValueError, match="Only 'long_press_end' can match while held"):
+        ZhaEventMatch(
+            event_type=ButtonEventType.PRESS_END,
+            event_data={"command": "release"},
+            while_held=True,
         )
