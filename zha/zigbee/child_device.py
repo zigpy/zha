@@ -23,7 +23,7 @@ from zigpy.zcl.clusters.homeautomation import Diagnostic
 from zha.application import Platform
 
 if TYPE_CHECKING:
-    from zha.application.platforms import PlatformEntity
+    from zha.application.platforms import PlatformEntity, ZclPlatformEntity
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -150,7 +150,15 @@ def is_child_device_allowlisted(manufacturer: str, model: str) -> bool:
     return any(match.matches(manufacturer, model) for match in CHILD_DEVICE_ALLOWLIST)
 
 
-def _entity_kind(entity: PlatformEntity) -> tuple[object, ...]:
+def _zcl_entities(entities: Iterable[PlatformEntity]) -> list[ZclPlatformEntity]:
+    """Return the entities backed by an endpoint, only those can be split by endpoint."""
+    # Imported here, `zha.application.platforms` imports this module for typing only
+    from zha.application.platforms import ZclPlatformEntity  # noqa: PLC0415
+
+    return [entity for entity in entities if isinstance(entity, ZclPlatformEntity)]
+
+
+def _entity_kind(entity: ZclPlatformEntity) -> tuple[object, ...]:
     """Return what makes entities on different endpoints "the same" entity."""
     return (
         entity.PLATFORM,
@@ -174,7 +182,7 @@ def compute_output_child_devices(
     device. Everything else, such as a meter for the whole device that is only on the
     first endpoint or a device-wide setting, stays on the main device.
     """
-    entities = list(entities)
+    entities = _zcl_entities(entities)
 
     output_platform_endpoints: defaultdict[Platform, set[int]] = defaultdict(set)
     for entity in entities:
@@ -253,7 +261,7 @@ def assign_endpoint_child_devices(
             by_endpoint[endpoint_id] = child_device
 
     assignments: dict[PlatformEntity, ChildDevice] = {}
-    for entity in entities:
+    for entity in _zcl_entities(entities):
         endpoint_child_device = by_endpoint.get(entity.endpoint.id)
 
         if (

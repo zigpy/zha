@@ -42,7 +42,9 @@ _LOGGER = logging.getLogger(__name__)
 
 DEFAULT_UPDATE_GROUP_FROM_CHILD_DELAY: float = 0.5
 
-ENTITY_REGISTRY: dict[ClusterId | int, list[type[PlatformEntity]]] = defaultdict(list)
+ENTITY_REGISTRY: dict[ClusterId | int, list[type[ZclPlatformEntity]]] = defaultdict(
+    list
+)
 GROUP_ENTITY_REGISTRY: list[type[GroupEntity]] = []
 
 
@@ -157,7 +159,7 @@ class ClusterMatch:
                 )
 
 
-def register_entity[T: type[PlatformEntity]](
+def register_entity[T: type[ZclPlatformEntity]](
     cluster_id: ClusterId | int,
 ) -> Callable[[T], T]:
     """Register an entity class for discovery."""
@@ -235,7 +237,7 @@ class PlatformEntityIdentifiers(BaseIdentifiers):
     """Identifiers for the platform entity."""
 
     device_ieee: EUI64
-    endpoint_id: int
+    endpoint_id: int | None = None
 
 
 @dataclasses.dataclass(frozen=True, kw_only=True)
@@ -526,21 +528,13 @@ class BaseEntity(LogMixin, EventBase):
 
 
 class PlatformEntity(BaseEntity):
-    """Class that represents an entity for a device platform."""
+    """Class that represents a device-bound entity for a device platform."""
 
     # suffix to add to the unique_id of the entity. Used for multi
     # entities using the same cluster handler/cluster id for the entity.
     _unique_id_suffix: str | None = None
 
     _migrate_platform_unique_ids: tuple[tuple[UniqueIdMigration, str]] | None = None
-
-    # Direct cluster matching for discovery
-    _cluster_match: ClusterMatch | None = None
-
-    # Per-cluster configuration (keyed by cluster ID)
-    _server_cluster_config: Mapping[int, ClusterConfig] = MappingProxyType({})
-
-    _client_cluster_config: Mapping[int, ClusterConfig] = MappingProxyType({})
 
     # Explicitly assigns the entity to a child device of its device by child device id,
     # or keeps it on the main device with `None`. `UNDEFINED` derives it from the
@@ -549,10 +543,9 @@ class PlatformEntity(BaseEntity):
 
     def __init__(
         self,
-        endpoint: Endpoint,
         device: Device,
         *,
-        cluster: zigpy.zcl.Cluster,
+        unique_id: str,
         from_quirk: bool = False,
         fallback_name: str | None = None,
         translation_key: str | None = None,
@@ -562,15 +555,13 @@ class PlatformEntity(BaseEntity):
         primary: bool | None = None,
         initially_disabled: bool = False,
         child_device_id: str | None | UndefinedType = UNDEFINED,
-        legacy_discovery_unique_id: str | None = None,
         **kwargs: Any,
     ):
         """Initialize the platform entity.
 
         Quirk entities are constructed with `from_quirk=True` and the generic
         config keywords (`fallback_name`, `translation_key`, `entity_type`, etc.);
-        the platform subclasses add their own keywords. Default-discovery
-        entities pass none of these.
+        the platform subclasses add their own keywords.
         """
         if from_quirk:
             self._apply_quirk_entity_config(
@@ -584,24 +575,12 @@ class PlatformEntity(BaseEntity):
                 child_device_id=child_device_id,
             )
 
-        if legacy_discovery_unique_id is None:
-            if from_quirk:
-                legacy_discovery_unique_id = f"{device.ieee}-{endpoint.id}"
-            else:
-                legacy_discovery_unique_id = (
-                    f"{device.ieee}-{endpoint.id}-{cluster.cluster_id}"
-                )
-
         if self._unique_id_suffix is not None:
-            unique_id = f"{legacy_discovery_unique_id}-{self._unique_id_suffix}"
-        else:
-            unique_id = legacy_discovery_unique_id
+            unique_id = f"{unique_id}-{self._unique_id_suffix}"
 
         super().__init__(unique_id=unique_id, **kwargs)
 
         self._device: Device = device
-        self._endpoint = endpoint
-        self._cluster: zigpy.zcl.Cluster = cluster
         self._child_device: ChildDevice | None = None
 
     def _apply_quirk_entity_config(
@@ -648,16 +627,6 @@ class PlatformEntity(BaseEntity):
         if child_device_id is not UNDEFINED:
             self._attr_child_device_id = child_device_id
 
-    @cached_property
-    def identifiers(self) -> PlatformEntityIdentifiers:
-        """Return a dict with the information necessary to identify this entity."""
-        return PlatformEntityIdentifiers(
-            unique_id=self.unique_id,
-            platform=self.PLATFORM,
-            device_ieee=self.device.ieee,
-            endpoint_id=self.endpoint.id,
-        )
-
     @property
     def device(self) -> Device:
         """Return the device."""
@@ -688,6 +657,88 @@ class PlatformEntity(BaseEntity):
     def child_device(self, child_device: ChildDevice | None) -> None:
         """Set the child device the entity belongs to (set by its device)."""
         self._child_device = child_device
+
+    @cached_property
+    def identifiers(self) -> PlatformEntityIdentifiers:
+        """Return a dict with the information necessary to identify this entity."""
+        return PlatformEntityIdentifiers(
+            unique_id=self.unique_id,
+            platform=self.PLATFORM,
+            device_ieee=self.device.ieee,
+        )
+
+    @property
+    def should_poll(self) -> bool:
+        """Return True if we need to poll for state changes."""
+        return False
+
+    @property
+    def available(self) -> bool:
+        """Return true if the device this entity belongs to is available."""
+        return self.device.available
+
+    async def async_update(self) -> None:
+        """Retrieve latest state.
+
+        Default no-op: subclasses that need polling override this to read their
+        own attributes directly from the relevant cluster(s).
+        """
+
+    @property
+    def state(self) -> BaseEntityState:
+        """Return the state of this entity."""
+        return dataclasses.replace(
+            super().state,
+            device_ieee=self._device.ieee,
+            available=self.available,
+            child_device_id=(
+                self._child_device.id if self._child_device is not None else None
+            ),
+        )
+
+
+class ZclPlatformEntity(PlatformEntity):
+    """Platform entity backed by ZCL cluster(s) on an endpoint."""
+
+    # Direct cluster matching for discovery
+    _cluster_match: ClusterMatch | None = None
+
+    # Per-cluster configuration (keyed by cluster ID)
+    _server_cluster_config: Mapping[int, ClusterConfig] = MappingProxyType({})
+
+    _client_cluster_config: Mapping[int, ClusterConfig] = MappingProxyType({})
+
+    def __init__(
+        self,
+        endpoint: Endpoint,
+        device: Device,
+        *,
+        cluster: zigpy.zcl.Cluster,
+        from_quirk: bool = False,
+        legacy_discovery_unique_id: str | None = None,
+        **kwargs: Any,
+    ):
+        """Initialize the ZCL platform entity.
+
+        Default-discovery entities pass no config keywords.
+        """
+        if legacy_discovery_unique_id is None:
+            if from_quirk:
+                legacy_discovery_unique_id = f"{device.ieee}-{endpoint.id}"
+            else:
+                legacy_discovery_unique_id = (
+                    f"{device.ieee}-{endpoint.id}-{cluster.cluster_id}"
+                )
+
+        self._endpoint = endpoint
+        self._cluster: zigpy.zcl.Cluster = cluster
+
+        super().__init__(
+            device,
+            unique_id=legacy_discovery_unique_id,
+            from_quirk=from_quirk,
+            **kwargs,
+        )
 
     @property
     def endpoint(self) -> Endpoint:
@@ -734,34 +785,22 @@ class PlatformEntity(BaseEntity):
             return in_client
         return in_server or in_client
 
-    @property
-    def should_poll(self) -> bool:
-        """Return True if we need to poll for state changes."""
-        return False
-
-    @property
-    def available(self) -> bool:
-        """Return true if the device this entity belongs to is available."""
-        return self.device.available
-
-    async def async_update(self) -> None:
-        """Retrieve latest state.
-
-        Default no-op: subclasses that need polling override this to read their
-        own attributes directly from the relevant cluster(s).
-        """
+    @cached_property
+    def identifiers(self) -> PlatformEntityIdentifiers:
+        """Return a dict with the information necessary to identify this entity."""
+        return PlatformEntityIdentifiers(
+            unique_id=self.unique_id,
+            platform=self.PLATFORM,
+            device_ieee=self.device.ieee,
+            endpoint_id=self.endpoint.id,
+        )
 
     @property
     def state(self) -> BaseEntityState:
         """Return the state of this entity."""
         return dataclasses.replace(
             super().state,
-            device_ieee=self._device.ieee,
             endpoint_id=self._endpoint.id,
-            available=self.available,
-            child_device_id=(
-                self._child_device.id if self._child_device is not None else None
-            ),
         )
 
 

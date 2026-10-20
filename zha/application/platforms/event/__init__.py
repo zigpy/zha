@@ -3,17 +3,13 @@
 from __future__ import annotations
 
 import dataclasses
-from typing import TYPE_CHECKING, Any, Final
+from typing import Any, Final
 
 from zigpy.types.named import EUI64
 
 from zha.application import Platform
 from zha.application.platforms import BaseEntityState, PlatformEntity
 from zha.application.platforms.event.const import DoorbellEventType, EventDeviceClass
-
-if TYPE_CHECKING:
-    from zha.zigbee.device import Device
-    from zha.zigbee.endpoint import Endpoint
 
 
 @dataclasses.dataclass(frozen=True, kw_only=True)
@@ -53,9 +49,9 @@ class BaseEvent(PlatformEntity):
     _attr_device_class: EventDeviceClass | None = None
     _attr_event_types: list[str]
 
-    def __init__(self, endpoint: Endpoint, device: Device, **kwargs: Any) -> None:
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         """Initialize the event entity."""
-        super().__init__(endpoint=endpoint, device=device, **kwargs)
+        super().__init__(*args, **kwargs)
 
         # Doorbells are expected to ring: the `doorbell.rang` trigger matches on it
         if (

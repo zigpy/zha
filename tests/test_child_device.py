@@ -12,7 +12,7 @@ from zigpy.zcl.clusters.smartenergy import Metering
 from tests.common import join_zigpy_device, zigpy_device_from_json
 from zha.application import Platform
 from zha.application.gateway import Gateway
-from zha.application.platforms import PlatformEntity
+from zha.application.platforms import PlatformEntity, ZclPlatformEntity
 from zha.const import STATE_CHANGED
 from zha.quirks import DeviceRegistry
 from zha.zigbee.child_device import (
@@ -40,7 +40,8 @@ def _entities(
         (
             entity
             for entity in device.platform_entities.values()
-            if platform == entity.PLATFORM
+            if isinstance(entity, ZclPlatformEntity)
+            and platform == entity.PLATFORM
             and (cluster_id is None or entity.cluster.cluster_id == cluster_id)
         ),
         key=lambda entity: entity.endpoint.id,
@@ -199,7 +200,8 @@ async def test_quirk_child_devices(zha_gateway: Gateway) -> None:
     expected_child_device_ids = {5: "heating", 6: "hot_water", 7: "heating", 8: None}
     for entity in device.platform_entities.values():
         if (
-            entity.cluster.cluster_id in DEVICE_LEVEL_CLUSTERS
+            not isinstance(entity, ZclPlatformEntity)
+            or entity.cluster.cluster_id in DEVICE_LEVEL_CLUSTERS
             or entity.PLATFORM is Platform.VIRTUAL
         ):
             # Entities of device-level clusters and virtual entities stay on the
@@ -417,9 +419,13 @@ async def test_quirks_v2_child_devices(zha_gateway: Gateway) -> None:
 
         if entity.translation_key == "on_time":
             expected = "right"
-        elif entity.cluster.cluster_id in DEVICE_LEVEL_CLUSTERS or (
-            entity.endpoint.id == 2
-            and entity.cluster.cluster_id == ElectricalMeasurement.cluster_id
+        elif (
+            not isinstance(entity, ZclPlatformEntity)
+            or (entity.cluster.cluster_id in DEVICE_LEVEL_CLUSTERS)
+            or (
+                entity.endpoint.id == 2
+                and entity.cluster.cluster_id == ElectricalMeasurement.cluster_id
+            )
         ):
             expected = None
         else:
@@ -447,7 +453,11 @@ async def test_virtual_entities_stay_on_main_device(zha_gateway: Gateway) -> Non
         # Move all exposed entities of endpoint 2 to the main device: child device
         # "b" is left with virtual entities only, so it is dropped
         for entity in device.platform_entities.values():
-            if entity.endpoint.id == 2 and entity.PLATFORM is not Platform.VIRTUAL:
+            if (
+                isinstance(entity, ZclPlatformEntity)
+                and entity.endpoint.id == 2
+                and entity.PLATFORM is not Platform.VIRTUAL
+            ):
                 entity._attr_child_device_id = None
 
         await device.recompute_entities()
