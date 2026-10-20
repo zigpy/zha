@@ -796,6 +796,20 @@ class BaseDevice[ZigpyDeviceT: ZigpyBaseDevice](LogMixin, EventBase):
         """Get extended device information."""
         raise NotImplementedError
 
+    async def async_configure(self) -> None:
+        """Configure the device."""
+        raise NotImplementedError
+
+    async def async_rebuild_from_zigpy_device(self, zigpy_device: ZigpyDeviceT) -> None:
+        """Tear down and rebuild this device from a new zigpy device.
+
+        Called by the gateway after a successful re-interview swaps the
+        underlying zigpy device.  Emits entity removal events so listeners
+        (e.g. HA) can clean up stale entities.
+        """
+        await self.async_teardown(emit_entity_events=True)
+        self._init_from_zigpy_device(zigpy_device)
+
     def emit_reconfigure_done(self) -> None:
         """Emit `DeviceConfiguredEvent`.
 
@@ -1427,18 +1441,6 @@ class ZigbeeDevice(BaseDevice[ZigpyDevice]):
                 name=f"({self.nwk},{self.model}) trigger_effect identify",
                 eager_start=True,
             )
-
-    async def async_rebuild_from_zigpy_device(
-        self, zigpy_device: zigpy.device.ZigbeeDevice
-    ) -> None:
-        """Tear down and rebuild this device from a new zigpy device.
-
-        Called by the gateway after a successful re-interview swaps the
-        underlying zigpy device.  Emits entity removal events so listeners
-        (e.g. HA) can clean up stale entities.
-        """
-        await self.async_teardown(emit_entity_events=True)
-        self._init_from_zigpy_device(zigpy_device)
 
     def discover_entities(self) -> Iterator[PlatformEntity]:
         """Yield the default (ZCL) entities for this device.

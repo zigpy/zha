@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import asyncio
-from collections.abc import AsyncGenerator
+from collections.abc import AsyncGenerator, Callable
 from contextlib import asynccontextmanager, suppress
 from dataclasses import dataclass
 from datetime import timedelta
@@ -53,13 +53,19 @@ from zha.async_ import (
     gather_with_limited_concurrency,
 )
 from zha.event import EventBase
-from zha.quirks import DEVICE_REGISTRY, QUIRK_REGISTRY_ENTRY_ATTR
+from zha.quirks import (
+    DEVICE_REGISTRY,
+    QUIRK_REGISTRY_ENTRY_ATTR,
+    GreenPowerQuirkRegistryEntry,
+    QuirkRegistryEntry,
+)
 from zha.zigbee.device import (
     BaseDevice,
     Device,
     DeviceInfo,
     DeviceStatus,
     ExtendedDeviceInfo,
+    GreenPowerDevice,
 )
 from zha.zigbee.group import Group, GroupInfo, GroupMemberReference
 
@@ -173,6 +179,20 @@ class DeviceRemovedEvent:
     device_info: ExtendedDeviceInfo
     event_type: Final[str] = ZHA_GW_MSG
     event: Final[str] = ZHA_GW_MSG_DEVICE_REMOVED
+
+
+def _device_factory(zigpy_device: zigpy.device.BaseDevice) -> Callable[..., BaseDevice]:
+    """Return the ZHA device class `Device.new` creates for a zigpy device."""
+    entry: QuirkRegistryEntry | GreenPowerQuirkRegistryEntry | None = getattr(
+        zigpy_device, QUIRK_REGISTRY_ENTRY_ATTR, None
+    )
+    if entry is not None and entry.zha_device_factory:
+        return entry.zha_device_factory
+
+    if isinstance(zigpy_device, zigpy.device.GreenPowerDevice):
+        return GreenPowerDevice
+
+    return Device
 
 
 class Gateway(AsyncUtilMixin, EventBase):
@@ -419,8 +439,14 @@ class Gateway(AsyncUtilMixin, EventBase):
             ),
         )
 
-    def raw_device_initialized(self, device: zigpy.device.ZigbeeDevice) -> None:  # pylint: disable=unused-argument
+    def raw_device_initialized(self, device: zigpy.device.BaseDevice) -> None:  # pylint: disable=unused-argument
         """Handle a device initialization without quirks loaded."""
+
+        # A GPD has no model or manufacturer strings
+        if isinstance(device, zigpy.device.ZigbeeDevice):
+            model, manufacturer = device.model, device.manufacturer
+        else:
+            model, manufacturer = None, None
 
         self.emit(
             ZHA_GW_MSG_RAW_INIT,
@@ -429,10 +455,8 @@ class Gateway(AsyncUtilMixin, EventBase):
                     ieee=device.ieee,
                     nwk=device.nwk,
                     pairing_status=DevicePairingStatus.INTERVIEW_COMPLETE,
-                    model=device.model if device.model else UNKNOWN_MODEL,
-                    manufacturer=device.manufacturer
-                    if device.manufacturer
-                    else UNKNOWN_MANUFACTURER,
+                    model=model if model else UNKNOWN_MODEL,
+                    manufacturer=manufacturer if manufacturer else UNKNOWN_MANUFACTURER,
                     signature=device.get_signature(),
                 )
             ),
@@ -460,7 +484,7 @@ class Gateway(AsyncUtilMixin, EventBase):
 
         init_task.add_done_callback(_remove_init_task)
 
-    def device_reinterviewed(self, device: zigpy.device.ZigbeeDevice) -> None:
+    def device_reinterviewed(self, device: zigpy.device.BaseDevice) -> None:
         """Handle zigpy device_reinterviewed event (e.g. after OTA or reconfigure)."""
         if device.ieee in self._device_init_tasks:
             _LOGGER.debug(
@@ -483,7 +507,7 @@ class Gateway(AsyncUtilMixin, EventBase):
         init_task.add_done_callback(_remove_init_task)
 
     async def _async_device_reinterviewed(
-        self, new_zigpy_device: zigpy.device.ZigbeeDevice
+        self, new_zigpy_device: zigpy.device.BaseDevice
     ) -> None:
         """Rebuild a ZHA device after zigpy swapped the underlying device."""
         zha_device = self._devices.get(new_zigpy_device.ieee)
@@ -494,22 +518,9 @@ class Gateway(AsyncUtilMixin, EventBase):
             )
             return
 
-        # Only Zigbee devices can be re-interviewed
-        assert isinstance(zha_device, Device)
-
-        old_entry = getattr(zha_device.device, QUIRK_REGISTRY_ENTRY_ATTR, None)
-        old_factory = (
-            old_entry.zha_device_factory
-            if old_entry is not None and old_entry.zha_device_factory
-            else Device
-        )
-
-        new_entry = getattr(new_zigpy_device, QUIRK_REGISTRY_ENTRY_ATTR, None)
-        new_factory = (
-            new_entry.zha_device_factory
-            if new_entry is not None and new_entry.zha_device_factory
-            else Device
-        )
+        # A re-commissioned GPD is announced like a re-interview
+        old_factory = _device_factory(zha_device.device)
+        new_factory = _device_factory(new_zigpy_device)
 
         # Only a `Device` swap requires a new object
         if new_factory is old_factory:
@@ -530,7 +541,6 @@ class Gateway(AsyncUtilMixin, EventBase):
             await zha_device.async_teardown(emit_entity_events=True)
 
             zha_device = Device.new(new_zigpy_device, self)
-            assert isinstance(zha_device, Device)
             self._devices[new_zigpy_device.ieee] = zha_device
 
             zha_device.available = True
