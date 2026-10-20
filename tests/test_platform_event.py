@@ -4,6 +4,7 @@ from typing import Any
 
 import pytest
 from zigpy.profiles import zha
+import zigpy.types
 from zigpy.zcl.clusters import general
 
 from tests.common import (
@@ -13,6 +14,7 @@ from tests.common import (
     SIG_EP_TYPE,
     create_mock_zigpy_device,
     join_zigpy_device,
+    zigpy_device_from_json,
 )
 from zha.application import Platform
 from zha.application.gateway import Gateway
@@ -22,6 +24,9 @@ from zha.application.platforms.event import (
     EntityEventTriggeredEvent,
     EventState,
     TriggeredEvent,
+    ZhaEventButton,
+    ZhaEventMatch,
+    _event_data_matches,
 )
 from zha.application.platforms.event.const import (
     ATTR_PRESS_COUNT,
@@ -221,3 +226,331 @@ async def test_multi_press_rules_only_apply_to_buttons(zha_device: Device) -> No
     entity.trigger(ButtonEventType.MULTI_PRESS)
 
     assert [event.triggered.event_type for event in events] == ["multi_press"]
+
+
+TOGGLE = {"cluster_id": general.OnOff.cluster_id, "command": "toggle"}
+MOVE_UP = {
+    "cluster_id": general.LevelControl.cluster_id,
+    "command": "move",
+    "params": {"move_mode": general.LevelControl.MoveMode.Up},
+}
+STOP = {"cluster_id": general.LevelControl.cluster_id, "command": "stop"}
+
+
+def create_event_button(
+    zha_device: Device, event_matches: list[ZhaEventMatch]
+) -> ZhaEventButton:
+    """Create a `zha_event` button entity on the first endpoint of a device."""
+    endpoint = zha_device.endpoints[1]
+    entity = ZhaEventButton(
+        endpoint=endpoint,
+        device=zha_device,
+        cluster=endpoint.zigpy_endpoint.out_clusters[general.OnOff.cluster_id],
+        event_matches=event_matches,
+        from_quirk=True,
+        unique_id_suffix="button",
+        translation_key="button",
+        fallback_name="Button",
+    )
+    entity.on_add()
+    return entity
+
+
+def fired_event_types(entity: ZhaEventButton) -> list[str]:
+    """Collect the event types an entity fires from now on."""
+    event_types: list[str] = []
+    entity.on_event(
+        EntityEventTriggeredEvent.event,
+        lambda event: event_types.append(event.triggered.event_type),
+    )
+    return event_types
+
+
+def emit_zha_event(zha_device: Device, data: dict[str, Any]) -> None:
+    """Emit a `zha_event` from the first endpoint of a device."""
+    zha_device.endpoints[1].emit_zha_event(data)
+
+
+@pytest.mark.parametrize(
+    ("expected", "data", "matches"),
+    [
+        ({"command": "on"}, {"command": "on", "cluster_id": 6}, True),
+        ({"command": "on"}, {"command": "off", "cluster_id": 6}, False),
+        ({"command": "on", "endpoint_id": 2}, {"command": "on"}, False),
+        # Nested mappings only need to contain the expected keys
+        (
+            {"params": {"button": 1}},
+            {"params": {"button": 1, "press_type": 0}},
+            True,
+        ),
+        ({"params": {"button": 1}}, {"params": {"button": 2}}, False),
+        ({"params": {"button": 1}}, {"params": [1]}, False),
+        ({"args": {"value": 1}}, {"args": {"attribute_id": 85, "value": 1}}, True),
+        # Sequences have to be equal, lists and tuples alike
+        ({"args": (1, 2)}, {"args": [1, 2]}, True),
+        ({"args": [1, 2]}, {"args": (1, 2)}, True),
+        ({"args": [1]}, {"args": [1, 2]}, False),
+        ({"args": []}, {"args": []}, True),
+        ({"args": [1, 2]}, {"args": "12"}, False),
+        # Nested sequences and mappings inside sequences, as frozen by quirks
+        ({"args": ((1, 2),)}, {"args": [[1, 2]]}, True),
+        ({"args": ((1, 2),)}, {"args": [[1, 3]]}, False),
+        ({"args": ({"a": 1},)}, {"args": [{"a": 1, "b": 2}]}, True),
+        ({"args": ({"a": 1},)}, {"args": [{"b": 2}]}, False),
+    ],
+)
+def test_event_data_matches(
+    expected: dict[str, Any], data: dict[str, Any], matches: bool
+) -> None:
+    """Test matching `zha_event` data like a device automation trigger."""
+    assert _event_data_matches(expected, data) is matches
+
+
+async def test_zha_event_button(zha_gateway: Gateway) -> None:
+    """Test a button event entity firing for the commands a remote sends."""
+    zigpy_dev = await zigpy_device_from_json(
+        zha_gateway.application_controller,
+        "tests/data/devices/innr-rc-250-0x21086500.json",
+    )
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
+
+    entity = create_event_button(
+        zha_device,
+        [
+            ZhaEventMatch(event_type=ButtonEventType.PRESS_END, event_data=TOGGLE),
+            ZhaEventMatch(
+                event_type=ButtonEventType.LONG_PRESS_START, event_data=MOVE_UP
+            ),
+            ZhaEventMatch(event_type=ButtonEventType.LONG_PRESS_END, event_data=STOP),
+        ],
+    )
+    assert entity.device_class == EventDeviceClass.BUTTON
+    assert entity.event_types == ["press_end", "long_press_start", "long_press_end"]
+    assert entity.unique_id == f"{zha_device.ieee}-1-button"
+
+    events: list[EntityEventTriggeredEvent] = []
+    entity.on_event(EntityEventTriggeredEvent.event, events.append)
+
+    def send(tsn: int, cluster_id: int, payload: bytes) -> None:
+        zigpy_dev.packet_received(
+            zigpy.types.ZigbeePacket(
+                src_ep=1,
+                dst_ep=1,
+                tsn=tsn,
+                profile_id=zha.PROFILE_ID,
+                cluster_id=cluster_id,
+                data=zigpy.types.SerializableBytes(payload),
+            )
+        )
+
+    # OnOff toggle: the `attribute_updated` zha_event in front of it matches nothing
+    send(1, general.OnOff.cluster_id, b"\x01\x01\x02")
+    # LevelControl move(Up, 50), move(Down, 50) and stop
+    send(2, general.LevelControl.cluster_id, b"\x01\x02\x01\x00\x32")
+    send(3, general.LevelControl.cluster_id, b"\x01\x03\x01\x01\x32")
+    send(4, general.LevelControl.cluster_id, b"\x01\x04\x03")
+
+    assert [event.triggered for event in events] == [
+        TriggeredEvent(event_type="press_end", event_attributes={}),
+        TriggeredEvent(event_type="long_press_start", event_attributes={}),
+        TriggeredEvent(event_type="long_press_end", event_attributes={}),
+    ]
+    assert {event.unique_id for event in events} == {entity.unique_id}
+
+    # The entity stops listening once it is removed
+    await entity.on_remove()
+    send(5, general.OnOff.cluster_id, b"\x01\x05\x02")
+    assert len(events) == 3
+
+
+async def test_zha_event_button_first_match_fires(zha_device: Device) -> None:
+    """Test that one `zha_event` fires at most one event type."""
+    entity = create_event_button(
+        zha_device,
+        [
+            ZhaEventMatch(
+                event_type=ButtonEventType.SINGLE_PRESS,
+                event_data={"command": "press", "params": {"count": 1}},
+            ),
+            ZhaEventMatch(
+                event_type=ButtonEventType.MULTI_PRESS,
+                event_data={"command": "press", "params": {"count": 2}},
+                event_attributes={ATTR_PRESS_COUNT: 2},
+            ),
+            ZhaEventMatch(
+                event_type=ButtonEventType.PRESS_END, event_data={"command": "press"}
+            ),
+        ],
+    )
+    events: list[EntityEventTriggeredEvent] = []
+    entity.on_event(EntityEventTriggeredEvent.event, events.append)
+
+    emit_zha_event(zha_device, {"command": "press", "params": {"count": 2}})
+    emit_zha_event(zha_device, {"command": "press", "params": {"count": 1}})
+    emit_zha_event(zha_device, {"command": "press", "params": {"count": 3}})
+    emit_zha_event(zha_device, {"command": "release"})
+
+    assert [event.triggered for event in events] == [
+        TriggeredEvent(event_type="multi_press", event_attributes={"press_count": 2}),
+        TriggeredEvent(event_type="single_press", event_attributes={}),
+        TriggeredEvent(event_type="press_end", event_attributes={}),
+    ]
+
+
+async def test_zha_event_button_repeated_hold(zha_device: Device) -> None:
+    """Test that a hold the device repeats fires `long_press_start` once."""
+    entity = create_event_button(
+        zha_device,
+        [
+            ZhaEventMatch(
+                event_type=ButtonEventType.PRESS_END, event_data={"command": "release"}
+            ),
+            ZhaEventMatch(
+                event_type=ButtonEventType.LONG_PRESS_START,
+                event_data={"command": "hold"},
+                repeats=True,
+            ),
+            ZhaEventMatch(
+                event_type=ButtonEventType.LONG_PRESS_END,
+                event_data={"command": "long_release"},
+            ),
+        ],
+    )
+    event_types = fired_event_types(entity)
+
+    for command in (
+        "hold",
+        "hold",
+        "hold",
+        "long_release",
+        "hold",
+        "hold",
+        "release",  # a release of another kind ends the hold as well
+        "hold",
+        "unknown",  # a `zha_event` that does not match changes nothing
+        "hold",
+    ):
+        emit_zha_event(zha_device, {"command": command})
+
+    assert event_types == [
+        "long_press_start",
+        "long_press_end",
+        "long_press_start",
+        "press_end",
+        "long_press_start",
+    ]
+
+
+async def test_zha_event_button_hold_without_repeats(zha_device: Device) -> None:
+    """Test that a hold match that does not repeat fires for every event."""
+    entity = create_event_button(
+        zha_device,
+        [
+            ZhaEventMatch(
+                event_type=ButtonEventType.LONG_PRESS_START,
+                event_data={"command": "hold"},
+            ),
+        ],
+    )
+    event_types = fired_event_types(entity)
+
+    emit_zha_event(zha_device, {"command": "hold"})
+    emit_zha_event(zha_device, {"command": "hold"})
+
+    assert event_types == ["long_press_start", "long_press_start"]
+
+
+async def test_zha_event_button_ignores_other_devices(
+    zha_gateway: Gateway, zha_device: Device
+) -> None:
+    """Test that an entity only listens to the `zha_event`s of its own device."""
+    other_device = await join_zigpy_device(
+        zha_gateway,
+        create_mock_zigpy_device(
+            zha_gateway,
+            {
+                1: {
+                    SIG_EP_INPUT: [general.Basic.cluster_id],
+                    SIG_EP_OUTPUT: [general.OnOff.cluster_id],
+                    SIG_EP_TYPE: zha.DeviceType.NON_COLOR_CONTROLLER,
+                    SIG_EP_PROFILE: zha.PROFILE_ID,
+                }
+            },
+            ieee="01:2d:6f:00:0a:90:69:e8",
+        ),
+    )
+    entity = create_event_button(
+        zha_device,
+        [ZhaEventMatch(event_type=ButtonEventType.PRESS_END, event_data=TOGGLE)],
+    )
+    event_types = fired_event_types(entity)
+
+    emit_zha_event(other_device, TOGGLE)
+    assert event_types == []
+
+    emit_zha_event(zha_device, TOGGLE)
+    assert event_types == ["press_end"]
+
+
+@pytest.mark.parametrize(
+    ("event_matches", "error"),
+    [
+        ([], "has no events"),
+        (
+            [
+                ZhaEventMatch(
+                    event_type=ButtonEventType.SINGLE_PRESS,
+                    event_data={"command": "single"},
+                ),
+                ZhaEventMatch(
+                    event_type=ButtonEventType.MULTI_PRESS,
+                    event_data={"command": "double"},
+                ),
+            ],
+            "Invalid press_count None for 'multi_press'",
+        ),
+        (
+            [
+                ZhaEventMatch(
+                    event_type=ButtonEventType.SINGLE_PRESS,
+                    event_data={"command": "single"},
+                ),
+                ZhaEventMatch(
+                    event_type=ButtonEventType.MULTI_PRESS,
+                    event_data={"command": "double"},
+                    event_attributes={ATTR_PRESS_COUNT: 1},
+                ),
+            ],
+            "Invalid press_count 1 for 'multi_press'",
+        ),
+        (
+            [
+                ZhaEventMatch(
+                    event_type=ButtonEventType.MULTI_PRESS,
+                    event_data={"command": "double"},
+                    event_attributes={ATTR_PRESS_COUNT: 2},
+                ),
+            ],
+            "supports the 'multi_press' event type without 'single_press'",
+        ),
+    ],
+)
+async def test_zha_event_button_invalid(
+    zha_device: Device, event_matches: list[ZhaEventMatch], error: str
+) -> None:
+    """Test that invalid event matches are rejected when creating the entity."""
+    with pytest.raises(ValueError, match=error):
+        create_event_button(zha_device, event_matches)
+
+
+def test_zha_event_match_invalid() -> None:
+    """Test that invalid event matches are rejected."""
+    with pytest.raises(ValueError, match="matches every zha_event"):
+        ZhaEventMatch(event_type=ButtonEventType.PRESS_END, event_data={})
+
+    with pytest.raises(ValueError, match="Only 'long_press_start' can repeat"):
+        ZhaEventMatch(
+            event_type=ButtonEventType.PRESS_END,
+            event_data={"command": "release"},
+            repeats=True,
+        )
