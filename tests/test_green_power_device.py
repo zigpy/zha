@@ -6,7 +6,12 @@ from zigpy.device import GreenPowerDevice as ZigpyGreenPowerDevice
 from zigpy.types import EUI64
 from zigpy.zgp.types import ApplicationID, DeviceID, GPDCommandID, SrcID
 
-from zha.application.const import UNKNOWN_MANUFACTURER, UNKNOWN_MODEL
+from zha.application.const import (
+    UNKNOWN_MANUFACTURER,
+    UNKNOWN_MODEL,
+    ZHA_DEVICE_CONFIGURED_EVENT,
+    ZHA_GW_MSG_RAW_INIT,
+)
 from zha.application.gateway import Gateway
 from zha.quirks import (
     DEVICE_REGISTRY,
@@ -57,6 +62,7 @@ async def test_green_power_device_properties(zha_gateway: Gateway) -> None:
     assert zha_device.manufacturer == UNKNOWN_MANUFACTURER
     assert zha_device.model == UNKNOWN_MODEL
     assert zha_device.manufacturer_code is None
+    assert zha_device.skip_configuration is False
     assert zha_device.signature["device_id"] == DeviceID.OnOffSwitch
     assert zha_device.signature["src_id"] == 0x12345678
     assert zha_device.signature["commands"] == [
@@ -208,3 +214,35 @@ async def test_green_power_quirk_resolution(zha_gateway: Gateway) -> None:
         zha_device = zha_gateway.get_or_create_device(resolved)
         assert isinstance(zha_device, QuirkedGreenPowerDevice)
         assert zha_device.quirk_applied
+
+
+async def test_green_power_device_raw_initialized(zha_gateway: Gateway) -> None:
+    """Test the raw init event for a GPD, which has no model or manufacturer."""
+    zigpy_gpd = make_zigpy_gpd(zha_gateway)
+
+    events = []
+    zha_gateway.on_event(ZHA_GW_MSG_RAW_INIT, events.append)
+    zha_gateway.raw_device_initialized(zigpy_gpd)
+
+    assert len(events) == 1
+    assert events[0].device_info.ieee == zigpy_gpd.ieee
+    assert events[0].device_info.model == UNKNOWN_MODEL
+    assert events[0].device_info.manufacturer == UNKNOWN_MANUFACTURER
+
+
+async def test_green_power_device_recommissioned(zha_gateway: Gateway) -> None:
+    """Test that a re-commissioned GPD rebuilds the existing ZHA device."""
+    zha_device = zha_gateway.get_or_create_device(make_zigpy_gpd(zha_gateway))
+
+    events = []
+    zha_device.on_event(ZHA_DEVICE_CONFIGURED_EVENT, events.append)
+
+    new_zigpy_gpd = make_zigpy_gpd(zha_gateway)
+    zha_gateway.application_controller.listener_event(
+        "device_reinterviewed", new_zigpy_gpd
+    )
+    await zha_gateway.async_block_till_done()
+
+    assert zha_gateway.devices[new_zigpy_gpd.ieee] is zha_device
+    assert zha_device.device is new_zigpy_gpd
+    assert len(events) == 1
