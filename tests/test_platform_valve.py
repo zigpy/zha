@@ -14,13 +14,13 @@ from tests.common import (
 )
 from zha.application import Platform
 from zha.application.gateway import Gateway
-from zha.application.platforms import EntityStateChangedEvent
+from zha.application.platforms import EntityStateChangedEvent, ZclPlatformEntity
 from zha.application.platforms.valve import BaseValve, ValveEntityState
 from zha.application.platforms.valve.const import ValveDeviceClass, ValveEntityFeature
 from zha.zigbee.device import Device
 
 
-class FakeValve(BaseValve):
+class FakeValve(ZclPlatformEntity, BaseValve):
     """Valve entity that only opens and closes."""
 
     _unique_id_suffix = "fake"

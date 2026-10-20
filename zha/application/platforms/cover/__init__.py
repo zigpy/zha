@@ -37,6 +37,7 @@ from zha.application.platforms import (
     ClusterMatch,
     PlatformEntity,
     PlatformFeatureGroup,
+    ZclPlatformEntity,
     register_entity,
 )
 from zha.application.platforms.cover.const import (
@@ -139,7 +140,7 @@ class BaseCover(PlatformEntity, ABC):
 
 
 @register_entity(WindowCovering.cluster_id)
-class Cover(BaseCover):
+class Cover(BaseCover, ZclPlatformEntity):
     """Representation of a ZHA cover."""
 
     _attr_translation_key: str = "cover"
@@ -755,7 +756,7 @@ class Cover(BaseCover):
 
 
 @register_entity(OnOffCluster.cluster_id)
-class Shade(BaseCover):
+class Shade(BaseCover, ZclPlatformEntity):
     """ZHA Shade."""
 
     _attr_device_class = CoverDeviceClass.SHADE

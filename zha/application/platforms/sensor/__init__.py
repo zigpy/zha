@@ -4,23 +4,27 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 import contextlib
-from dataclasses import dataclass, replace
+from dataclasses import dataclass
 from datetime import date, datetime, timedelta
 import enum
-import functools
 import logging
 import math
 import numbers
 import typing
 from typing import TYPE_CHECKING, Any, cast
+import warnings
 
 from zigpy import types
+from zigpy.profiles.zha import PROFILE_ID as ZHA_PROFILE_ID
+from zigpy.profiles.zll import PROFILE_ID as ZLL_PROFILE_ID
 from zigpy.state import Counter, State
 from zigpy.zcl import (
     AttributeReadEvent,
     AttributeReportedEvent,
     AttributeUpdatedEvent,
     AttributeWrittenEvent,
+    Cluster,
+    ClusterType,
     ReportingConfig,
     foundation,
 )
@@ -59,14 +63,13 @@ from zha.application import Platform
 from zha.application.helpers import safe_read
 from zha.application.platforms import (
     AttrConfig,
-    BaseEntity,
     BaseEntityState,
-    BaseIdentifiers,
     ClusterConfig,
     ClusterMatch,
     EntityCategory,
     PlatformEntity,
     PlatformFeatureGroup,
+    ZclPlatformEntity,
     register_entity,
 )
 from zha.application.platforms.climate.const import HVACAction
@@ -183,13 +186,6 @@ class DeviceCounterSensorState(BaseEntityState):
     counter_group: str
 
 
-@dataclass(frozen=True, kw_only=True)
-class DeviceCounterSensorIdentifiers(BaseIdentifiers):
-    """Device counter sensor identifiers."""
-
-    device_ieee: str
-
-
 class BaseSensor(PlatformEntity, ABC):
     """Abstract base class for ZHA sensor entities."""
 
@@ -226,7 +222,7 @@ class BaseSensor(PlatformEntity, ABC):
         """Return the current sensor value."""
 
 
-class Sensor(BaseSensor):
+class Sensor(BaseSensor, ZclPlatformEntity):
     """Base ZHA sensor."""
 
     _attribute_name: int | str | None = None
@@ -406,7 +402,7 @@ class TimestampSensor(Sensor):
     """Timestamp ZHA sensor."""
 
 
-class DeviceCounterSensor(BaseEntity):
+class DeviceCounterSensor(PlatformEntity):
     """Device counter sensor."""
 
     PLATFORM = Platform.SENSOR
@@ -417,7 +413,7 @@ class DeviceCounterSensor(BaseEntity):
 
     def __init__(
         self,
-        zha_device: Device,
+        device: Device,
         counter_groups: str,
         counter_group: str,
         counter: str,
@@ -425,12 +421,12 @@ class DeviceCounterSensor(BaseEntity):
         """Init this sensor."""
 
         # XXX: ZHA uses the IEEE address of the device passed through `slugify`!
-        slugified_device_id = zha_device.unique_id.replace(":", "-")
+        slugified_device_id = device.unique_id.replace(":", "-")
         super().__init__(
-            unique_id=f"{slugified_device_id}_{counter_groups}_{counter_group}_{counter}"
+            device,
+            unique_id=f"{slugified_device_id}_{counter_groups}_{counter_group}_{counter}",
         )
 
-        self._device: Device = zha_device
         state: State = self._device.gateway.application_controller.state
         self._zigpy_counter: Counter = (
             getattr(state, counter_groups).get(counter_group, {}).get(counter, None)
@@ -439,7 +435,6 @@ class DeviceCounterSensor(BaseEntity):
         self._zigpy_counter_group: str = counter_group
 
         self._attr_fallback_name: str = self._zigpy_counter.name
-        self._always_supported: bool = True
 
         # TODO: why do entities get created with " None" as a name suffix instead of
         # falling back to `fallback_name`? We should be able to provide translation keys
@@ -456,24 +451,11 @@ class DeviceCounterSensor(BaseEntity):
             )
         )
 
-    @functools.cached_property
-    def identifiers(self) -> DeviceCounterSensorIdentifiers:
-        """Return a dict with the information necessary to identify this entity."""
-        return DeviceCounterSensorIdentifiers(
-            **super().identifiers.__dict__, device_ieee=str(self._device.ieee)
-        )
-
     @property
     def state(self) -> DeviceCounterSensorState:
         """Return the state for this sensor."""
-        # `BaseEntity.state` leaves the platform entity fields unset
-        base_state = replace(
-            super().state,
-            available=self.available,
-            device_ieee=self._device.ieee,
-        )
         return DeviceCounterSensorState(
-            **base_state.__dict__,
+            **super().state.__dict__,
             native_value=self._zigpy_counter.value,
             suggested_display_precision=self._attr_suggested_display_precision,
             counter=self._zigpy_counter.name,
@@ -486,16 +468,6 @@ class DeviceCounterSensor(BaseEntity):
     def native_value(self) -> int | None:
         """Return the state of the entity."""
         return self._zigpy_counter.value
-
-    @property
-    def available(self) -> bool:
-        """Return entity availability."""
-        return self._device.available
-
-    @functools.cached_property
-    def device(self) -> Device:
-        """Return the device."""
-        return self._device
 
     def enable(self) -> None:
         """Enable the entity."""
@@ -795,7 +767,9 @@ class Battery(Sensor):
 
     def _is_supported(self) -> bool:
         # XXX: We intentionally ignore the presence of this attribute
-        return PlatformEntity._is_supported(self) and not self.device.is_mains_powered
+        return (
+            ZclPlatformEntity._is_supported(self) and not self.device.is_mains_powered
+        )
 
     @staticmethod
     def formatter(value: int) -> float | None:  # pylint: disable=arguments-differ
@@ -3088,7 +3062,7 @@ class ThermostatHVACAction(Sensor):
     }
 
     def _is_supported(self) -> bool:
-        return PlatformEntity._is_supported(self)
+        return ZclPlatformEntity._is_supported(self)
 
     @property
     def _pi_heating_demand(self) -> int | None:
@@ -3203,11 +3177,9 @@ class SinopeHVACAction(ThermostatHVACAction):
         return HVACAction.OFF
 
 
-@register_entity(Basic.cluster_id)
-class RSSISensor(Sensor):
+class RSSISensor(BaseSensor):
     """RSSI sensor for a device."""
 
-    # TODO: migrate this away from `PlatformEntity`
     _unique_id_suffix: str = "rssi"
     _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
     _attr_device_class: SensorDeviceClass | None = SensorDeviceClass.SIGNAL_STRENGTH
@@ -3215,20 +3187,48 @@ class RSSISensor(Sensor):
     _attr_entity_category = EntityCategory.DIAGNOSTIC
     _attr_entity_registry_enabled_default = False
     _attr_translation_key: str = "rssi"
-    _cluster_id = Basic.cluster_id
 
-    _cluster_match = ClusterMatch(
-        server_clusters=frozenset({Basic.cluster_id}),
-    )
+    @staticmethod
+    def legacy_basic_cluster(device: Device) -> Cluster | None:
+        """Return the Basic cluster the legacy RSSI/LQI unique IDs were derived from."""
+        fallback = None
+        for ep_id, ep in device.device.endpoints.items():
+            if ep_id == 0 or (cluster := ep.in_clusters.get(Basic.cluster_id)) is None:
+                continue
+            if ep.profile_id in (ZHA_PROFILE_ID, ZLL_PROFILE_ID):
+                return cluster
+            fallback = fallback or cluster
+        return fallback
 
-    def __init__(
-        self,
-        endpoint: Endpoint,
-        device: Device,
-        **kwargs: Any,
-    ) -> None:
-        """Init."""
-        super().__init__(endpoint=endpoint, device=device, **kwargs)
+    # TODO: remove once zha-quirks only filters `ZclPlatformEntity` by endpoint/cluster
+    # and HA Core's `websocket_get_groupable_devices` no longer reads `entity.endpoint`
+    @property
+    def endpoint(self) -> Endpoint:
+        """Return the endpoint of the legacy Basic cluster entity, for old quirks."""
+        warnings.warn(
+            f"`{type(self).__name__}.endpoint` is deprecated, device-bound entities"
+            " have no endpoint",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        basic_cluster = self.legacy_basic_cluster(self._device)
+        assert basic_cluster is not None
+        return self._device.endpoints[basic_cluster.endpoint.endpoint_id]
+
+    def targets_cluster(
+        self, cluster_id: int, cluster_type: ClusterType | None = None
+    ) -> bool:
+        """Match the legacy Basic cluster entity, for old quirks."""
+        warnings.warn(
+            f"`{type(self).__name__}.targets_cluster` is deprecated, device-bound"
+            " entities have no cluster",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return cluster_id == Basic.cluster_id and cluster_type in (
+            None,
+            ClusterType.Server,
+        )
 
     def on_add(self) -> None:
         """Run when entity is added."""
@@ -3239,16 +3239,6 @@ class RSSISensor(Sensor):
                 self.update
             )
         )
-
-    def _is_supported(self) -> bool:
-        # This entity is not actually tied to an endpoint or cluster and will always be
-        # supported
-        return True
-
-    def is_supported_in_list(self, entities: list[BaseEntity]) -> bool:
-        """Check if the sensor is supported given the list of entities."""
-        cls = type(self)
-        return not any(type(entity) is cls for entity in entities if entity is not self)
 
     @property
     def native_value(self) -> str | int | float | None:
@@ -3278,20 +3268,13 @@ class RSSISensor(Sensor):
             )
 
 
-@register_entity(Basic.cluster_id)
 class LQISensor(RSSISensor):
     """LQI sensor for a device."""
 
-    # TODO: migrate this away from `PlatformEntity`
     _unique_id_suffix: str = "lqi"
     _attr_device_class = None
     _attr_native_unit_of_measurement = None
     _attr_translation_key = "lqi"
-    _cluster_id = Basic.cluster_id
-
-    _cluster_match = ClusterMatch(
-        server_clusters=frozenset({Basic.cluster_id}),
-    )
 
     @property
     def native_value(self) -> str | int | float | None:
