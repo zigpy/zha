@@ -475,6 +475,65 @@ async def test_zha_event_button_release_while_held(zha_device: Device) -> None:
     ]
 
 
+async def test_zha_event_button_release_while_held_any_order(
+    zha_device: Device,
+) -> None:
+    """Test that a release while held wins over a release listed before it."""
+    entity = create_event_button(
+        zha_device,
+        [
+            ZhaEventMatch(
+                event_type=ButtonEventType.PRESS_END, event_data={"command": "release"}
+            ),
+            ZhaEventMatch(
+                event_type=ButtonEventType.LONG_PRESS_START,
+                event_data={"command": "hold"},
+            ),
+            ZhaEventMatch(
+                event_type=ButtonEventType.LONG_PRESS_END,
+                event_data={"command": "release"},
+                while_held=True,
+            ),
+        ],
+    )
+    event_types = fired_event_types(entity)
+    assert entity.event_types == ["press_end", "long_press_start", "long_press_end"]
+
+    for command in ("release", "hold", "release", "release"):
+        emit_zha_event(zha_device, {"command": command})
+
+    assert event_types == [
+        "press_end",
+        "long_press_start",
+        "long_press_end",
+        "press_end",
+    ]
+
+
+async def test_zha_event_button_error_keeps_zha_event(
+    zha_device: Device, caplog: pytest.LogCaptureFixture
+) -> None:
+    """Test that an error firing an event does not keep the zha_event from others."""
+    entity = create_event_button(
+        zha_device,
+        [ZhaEventMatch(event_type=ButtonEventType.PRESS_END, event_data=TOGGLE)],
+    )
+
+    def fail(event: EntityEventTriggeredEvent) -> None:
+        raise RuntimeError("listener failed")
+
+    entity.on_event(EntityEventTriggeredEvent.event, fail)
+
+    zha_events: list[Any] = []
+    zha_device.on_all_events(zha_events.append)
+
+    emit_zha_event(zha_device, TOGGLE)
+
+    assert len(zha_events) == 1
+    assert "Failed to handle zha_event" in caplog.text
+    assert "listener failed" in caplog.text
+
+
 async def test_zha_event_button_release_of_held_button(zha_device: Device) -> None:
     """Test that a release shared by two buttons only ends the hold of the held one."""
     left, right = (
@@ -599,6 +658,26 @@ async def test_zha_event_button_ignores_other_devices(
                 ),
             ],
             "supports the 'multi_press' event type without 'single_press'",
+        ),
+        (
+            [
+                ZhaEventMatch(
+                    event_type=ButtonEventType.LONG_PRESS_END,
+                    event_data={"command": "release"},
+                    while_held=True,
+                ),
+            ],
+            "matches while held without 'long_press_start'",
+        ),
+        (
+            [
+                ZhaEventMatch(
+                    event_type=ButtonEventType.LONG_PRESS_START,
+                    event_data={"command": "hold"},
+                    repeats=True,
+                ),
+            ],
+            "repeats 'long_press_start' without other event types",
         ),
     ],
 )
