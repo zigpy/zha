@@ -370,7 +370,7 @@ class NumberConfigurationEntity(BaseNumber):
     async def async_set_native_value(self, value: float) -> None:
         """Update the current value from HA."""
         await write_attributes_safe(
-            self._cluster, {self._attribute_name: int(value / self._multiplier)}
+            self._cluster, {self._attribute_name: round(value / self._multiplier)}
         )
         self.maybe_emit_state_changed_event()
 
