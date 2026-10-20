@@ -2009,6 +2009,11 @@ class GreenPowerDevice(BaseDevice[ZigpyGreenPowerDevice]):
     async def _check_available(self, *_: Any) -> None:
         """Do nothing: a GPD has no heartbeat and nothing to ping."""
 
+    async def async_configure(self) -> None:
+        """Configure the device: a GPD has nothing to bind or report."""
+        self._discover_new_entities()
+        self.emit_reconfigure_done()
+
     def discover_entities(self) -> Iterator[BaseEntity]:
         """Yield the entities for this device.
 
