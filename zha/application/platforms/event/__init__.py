@@ -165,8 +165,8 @@ class ZhaEventMatch:
     """An event type fired when the device sends a matching `zha_event`.
 
     `event_data` is matched like the data of a ZHA device automation trigger, so a
-    trigger's data can be reused as is: the event fires for exactly the `zha_event`s
-    that fire that trigger.
+    trigger's data can be reused as is: the event fires for the `zha_event`s that the
+    trigger's data matches.
     """
 
     event_type: str
@@ -176,12 +176,15 @@ class ZhaEventMatch:
     )
 
     # The device repeats this event while the button is held. Only the first one
-    # fires, until any other event of the entity fires.
+    # fires, until any other event of the entity fires. If the device's release is
+    # lost, the whole next hold is taken for repeats, until its release.
     repeats: bool = False
 
     # Only match while the button is held, after a `long_press_start` of the entity
-    # and before any other event of it. This classifies a release the device does
-    # not tell apart, by button or from a short press, as the end of the hold.
+    # and before any other event of it, ahead of the entity's other matches. This
+    # classifies a release the device does not tell apart, by button or from a
+    # short press, as the end of the hold. If the release ending a hold is lost, the
+    # next such release is taken for the end of the hold once.
     while_held: bool = False
 
     def __post_init__(self) -> None:
@@ -223,9 +226,13 @@ class ZhaEventButton(BaseEvent, ZclPlatformEntity):
         **kwargs: Any,
     ) -> None:
         """Initialize the event entity."""
-        self._event_matches: tuple[ZhaEventMatch, ...] = tuple(event_matches)
+        # Matches only applying while held go first, so they win over an
+        # unconditional match on the same data in any order
+        self._event_matches: tuple[ZhaEventMatch, ...] = tuple(
+            sorted(event_matches, key=lambda match: not match.while_held)
+        )
         self._attr_event_types = list(
-            dict.fromkeys(match.event_type for match in self._event_matches)
+            dict.fromkeys(match.event_type for match in event_matches)
         )
         self._held: bool = False
 
@@ -233,6 +240,24 @@ class ZhaEventButton(BaseEvent, ZclPlatformEntity):
 
         if not self._event_matches:
             raise ValueError(f"Button event entity {self.unique_id} has no events")
+
+        # A repeated hold is only fired again after another event of the entity
+        if any(match.repeats for match in self._event_matches) and set(
+            self.event_types
+        ) == {ButtonEventType.LONG_PRESS_START}:
+            raise ValueError(
+                f"Button event entity {self.unique_id} repeats"
+                f" '{ButtonEventType.LONG_PRESS_START}' without other event types"
+            )
+
+        if (
+            any(match.while_held for match in self._event_matches)
+            and ButtonEventType.LONG_PRESS_START not in self.event_types
+        ):
+            raise ValueError(
+                f"Button event entity {self.unique_id} matches while held without"
+                f" '{ButtonEventType.LONG_PRESS_START}'"
+            )
 
         for match in self._event_matches:
             if match.event_type == ButtonEventType.MULTI_PRESS:
@@ -261,6 +286,15 @@ class ZhaEventButton(BaseEvent, ZclPlatformEntity):
         )
 
     def _handle_zha_event(self, event: ZHAEvent) -> None:
+        """Fire the event type of the first match for a `zha_event`."""
+        # The device's `zha_event` listeners, such as device triggers, come after
+        # this one and must still get the event
+        try:
+            self._fire_first_match(event)
+        except Exception:  # pylint: disable=broad-except
+            self.error("Failed to handle zha_event %s", event.data, exc_info=True)
+
+    def _fire_first_match(self, event: ZHAEvent) -> None:
         """Fire the event type of the first match for a `zha_event`."""
         for match in self._event_matches:
             if match.while_held and not self._held:
