@@ -179,6 +179,11 @@ class ZhaEventMatch:
     # fires, until any other event of the entity fires.
     repeats: bool = False
 
+    # Only match while the button is held, after a `long_press_start` of the entity
+    # and before any other event of it. This classifies a release the device does
+    # not tell apart, by button or from a short press, as the end of the hold.
+    while_held: bool = False
+
     def __post_init__(self) -> None:
         """Validate the match."""
         if not self.event_data:
@@ -190,6 +195,12 @@ class ZhaEventMatch:
                 f" '{self.event_type}'"
             )
 
+        if self.while_held and self.event_type != ButtonEventType.LONG_PRESS_END:
+            raise ValueError(
+                f"Only '{ButtonEventType.LONG_PRESS_END}' can match while held, not"
+                f" '{self.event_type}'"
+            )
+
 
 class ZhaEventButton(BaseEvent, ZclPlatformEntity):
     """Button event entity firing standard event types for the device's `zha_event`s.
@@ -197,6 +208,8 @@ class ZhaEventButton(BaseEvent, ZclPlatformEntity):
     Remotes report button presses as cluster commands, which ZHA relays as
     `zha_event`s. This entity maps them to event types: the first match for a
     `zha_event` fires, so one event from the device fires at most one event type.
+    The only state it keeps is whether the button is held, to fire a repeated
+    `long_press_start` once and to classify releases (`repeats`, `while_held`).
     """
 
     _attr_device_class = EventDeviceClass.BUTTON
@@ -250,6 +263,9 @@ class ZhaEventButton(BaseEvent, ZclPlatformEntity):
     def _handle_zha_event(self, event: ZHAEvent) -> None:
         """Fire the event type of the first match for a `zha_event`."""
         for match in self._event_matches:
+            if match.while_held and not self._held:
+                continue
+
             if _event_data_matches(match.event_data, event.data):
                 break
         else:
