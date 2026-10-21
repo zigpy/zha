@@ -14,6 +14,7 @@ from zigpy.zcl.clusters import general, lighting, measurement
 import zigpy.zdo.types
 import zigpy.zdo.types as zdo_t
 from zigpy.zdo.types import LogicalType, NodeDescriptor
+from zigpy.zgp import GP_GROUP_ID
 
 from tests.common import (
     SIG_EP_INPUT,
@@ -31,6 +32,7 @@ from zha.application.const import ZHA_GW_MSG, ZHA_GW_MSG_CONNECTION_LOST, RadioT
 from zha.application.gateway import (
     MAX_ALLOCATED_GROUP_ID,
     MIN_ALLOCATED_GROUP_ID,
+    RESERVED_GROUP_IDS,
     ConnectionLostEvent,
     DeviceFullInitEvent,
     DeviceJoinedDeviceInfo,
@@ -596,6 +598,10 @@ async def test_gateway_create_group_allocates_unused_id(
     candidates = random_choice.mock_calls[0].args[0]
     assert candidates[0] == 0x0100
     assert candidates[-1] == 0xFEFF
+    # the Green Power sink group is inside the range, but never a candidate
+    assert MIN_ALLOCATED_GROUP_ID <= GP_GROUP_ID <= MAX_ALLOCATED_GROUP_ID
+    assert GP_GROUP_ID not in candidates
+    assert RESERVED_GROUP_IDS.isdisjoint(candidates)
     # the fixture group's ID is inside the allocation range, so this is not vacuous
     assert MIN_ALLOCATED_GROUP_ID <= existing_group_id <= MAX_ALLOCATED_GROUP_ID
     assert existing_group_id not in candidates

@@ -29,6 +29,7 @@ import zigpy.group
 from zigpy.state import State
 import zigpy.types as t
 from zigpy.types.named import EUI64
+from zigpy.zgp import GP_GROUP_ID
 
 from zha.application import discovery
 from zha.application.const import (
@@ -73,6 +74,12 @@ MAX_GROUP_ID: Final[int] = 0xFFF7
 # contended ones, and the group IDs from 0xff00 up are reserved
 MIN_ALLOCATED_GROUP_ID: Final[int] = 0x0100
 MAX_ALLOCATED_GROUP_ID: Final[int] = 0xFEFF
+# Group IDs we never allocate even though no group holds them. The Green Power
+# sink group is the group ID zigpy uses for its own sink rather than a
+# spec-assigned one, and the coordinator joins it with
+# `ControllerApplication.subscribe_to_multicast_group` as Green Power devices are
+# commissioned or restored, so it never becomes a zigpy group
+RESERVED_GROUP_IDS: Final[frozenset[int]] = frozenset({GP_GROUP_ID})
 _R = TypeVar("_R")
 _LOGGER = logging.getLogger(__name__)
 
@@ -852,7 +859,7 @@ class Gateway(AsyncUtilMixin, EventBase):
         unused_group_ids = [
             candidate
             for candidate in range(MIN_ALLOCATED_GROUP_ID, MAX_ALLOCATED_GROUP_ID + 1)
-            if candidate not in zigpy_groups
+            if candidate not in zigpy_groups and candidate not in RESERVED_GROUP_IDS
         ]
         if not unused_group_ids:
             raise ZHAException("No unused Zigbee group ID is available")
