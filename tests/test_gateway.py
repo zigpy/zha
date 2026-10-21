@@ -29,6 +29,8 @@ from tests.common import (
 from zha.application import Platform
 from zha.application.const import ZHA_GW_MSG, ZHA_GW_MSG_CONNECTION_LOST, RadioType
 from zha.application.gateway import (
+    MAX_ALLOCATED_GROUP_ID,
+    MIN_ALLOCATED_GROUP_ID,
     ConnectionLostEvent,
     DeviceFullInitEvent,
     DeviceJoinedDeviceInfo,
@@ -284,7 +286,7 @@ async def test_gateway_group_methods(
     info = entity.state
     assert info.class_name == "LightGroup"
     assert info.platform == Platform.LIGHT
-    assert info.unique_id == "light_zha_group_0x0002"
+    assert info.unique_id == f"light_zha_group_0x{zha_group.group_id:04x}"
     assert info.fallback_name == "Test Group"
     assert info.group_id == zha_group.group_id
     assert info.supported_features == LightEntityFeature.TRANSITION
@@ -371,7 +373,7 @@ async def test_gateway_create_group_with_id_without_id(zha_gateway: Gateway) -> 
 
     assert len(zha_group2.members) == 1
     assert zha_group2.members[0].device is device_light_1
-    assert zha_group2.group_id == 0x0002
+    assert MIN_ALLOCATED_GROUP_ID <= zha_group2.group_id <= MAX_ALLOCATED_GROUP_ID
 
     # create group with no group id passed in
     zha_group3 = await zha_gateway.async_create_zigpy_group(
@@ -381,7 +383,9 @@ async def test_gateway_create_group_with_id_without_id(zha_gateway: Gateway) -> 
 
     assert len(zha_group3.members) == 1
     assert zha_group3.members[0].device is device_light_1
-    assert zha_group3.group_id == 0x0003
+    assert MIN_ALLOCATED_GROUP_ID <= zha_group3.group_id <= MAX_ALLOCATED_GROUP_ID
+
+    assert len({zha_group.group_id, zha_group2.group_id, zha_group3.group_id}) == 3
 
 
 @pytest.mark.parametrize("group_id", [0x0000, 0xFFF8, 0xFFFF])
@@ -574,6 +578,51 @@ async def test_gateway_create_group_duplicate(zha_gateway: Gateway) -> None:
     assert zha_gateway.get_group("Test Group2") is None
     # the fixture group and this one
     assert len(zha_gateway.application_controller.groups) == 2
+
+
+async def test_gateway_create_group_allocates_unused_id(
+    zha_gateway: Gateway,
+) -> None:
+    """Test that a group ID is allocated from the unused IDs of the valid range."""
+
+    existing_group_id = next(iter(zha_gateway.application_controller.groups))
+
+    with patch(
+        "zha.application.gateway.random.choice", side_effect=lambda seq: seq[0]
+    ) as random_choice:
+        zha_group = await zha_gateway.async_create_zigpy_group("Test Group", None)
+        await zha_gateway.async_block_till_done()
+
+    candidates = random_choice.mock_calls[0].args[0]
+    assert candidates[0] == 0x0100
+    assert candidates[-1] == 0xFEFF
+    # the fixture group's ID is inside the allocation range, so this is not vacuous
+    assert MIN_ALLOCATED_GROUP_ID <= existing_group_id <= MAX_ALLOCATED_GROUP_ID
+    assert existing_group_id not in candidates
+    assert zha_group.group_id == MIN_ALLOCATED_GROUP_ID
+
+    # the group that was just created is not a candidate anymore
+    with patch(
+        "zha.application.gateway.random.choice", side_effect=lambda seq: seq[0]
+    ) as random_choice:
+        zha_group2 = await zha_gateway.async_create_zigpy_group("Test Group2", None)
+        await zha_gateway.async_block_till_done()
+
+    assert zha_group.group_id not in random_choice.mock_calls[0].args[0]
+    assert zha_group2.group_id == MIN_ALLOCATED_GROUP_ID + 1
+
+
+async def test_gateway_create_group_without_unused_id(zha_gateway: Gateway) -> None:
+    """Test creating a group when every valid group ID is in use."""
+
+    with (
+        patch.dict(
+            zha_gateway.application_controller.groups,
+            dict.fromkeys(range(MIN_ALLOCATED_GROUP_ID, MAX_ALLOCATED_GROUP_ID + 1)),
+        ),
+        pytest.raises(ZHAException, match="No unused Zigbee group ID is available"),
+    ):
+        await zha_gateway.async_create_zigpy_group("Test Group", None)
 
 
 async def test_remove_device_cleans_up_group_membership(
