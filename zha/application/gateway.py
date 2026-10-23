@@ -9,6 +9,7 @@ from dataclasses import dataclass
 from datetime import timedelta
 from enum import Enum
 import logging
+import random
 import time
 from typing import Any, Final, Self, TypeVar, cast
 
@@ -28,6 +29,7 @@ import zigpy.group
 from zigpy.state import State
 import zigpy.types as t
 from zigpy.types.named import EUI64
+from zigpy.zgp import GP_GROUP_ID
 
 from zha.application import discovery
 from zha.application.const import (
@@ -66,6 +68,14 @@ SHUT_DOWN_DELAY_S: Final[float] = 0.1
 # section 3.6.2.3.2.2
 MIN_GROUP_ID: Final[int] = 0x0001
 MAX_GROUP_ID: Final[int] = 0xFFF7
+# Group IDs we pick ourselves: touchlink initiators hand out IDs upward from 0x0001
+# and reserve 0xff00 and up (ZCL R8 section 13.3.4.8.2)
+MIN_ALLOCATED_GROUP_ID: Final[int] = 0x0100
+MAX_ALLOCATED_GROUP_ID: Final[int] = 0xFEFF
+GROUP_ID_ALLOCATION_ATTEMPTS: Final[int] = 10
+# Never allocated: the coordinator joins the Green Power sink group itself, so it
+# never shows up as a zigpy group
+RESERVED_GROUP_IDS: Final[frozenset[int]] = frozenset({GP_GROUP_ID})
 _R = TypeVar("_R")
 _LOGGER = logging.getLogger(__name__)
 
@@ -832,6 +842,21 @@ class Gateway(AsyncUtilMixin, EventBase):
         # name)
         return member.endpoint_id in device.async_get_groupable_endpoints()
 
+    def _get_unused_group_id(self) -> int:
+        """Return a random group ID that is not in use."""
+        # Random rather than filling gaps, so a freed ID is not handed out again: an
+        # offline device may still hold it in its `Groups` cluster, and Home Assistant
+        # restores a deleted group entity (unique ID derived from the group ID)
+        zigpy_groups = self.application_controller.groups
+
+        for _ in range(GROUP_ID_ALLOCATION_ATTEMPTS):
+            candidate = random.randint(MIN_ALLOCATED_GROUP_ID, MAX_ALLOCATED_GROUP_ID)
+
+            if candidate not in zigpy_groups and candidate not in RESERVED_GROUP_IDS:
+                return candidate
+
+        raise ZHAException("No unused Zigbee group ID is available")
+
     async def async_create_zigpy_group(
         self,
         name: str,
@@ -844,10 +869,7 @@ class Gateway(AsyncUtilMixin, EventBase):
         zigpy_groups = self.application_controller.groups
 
         if group_id is None:
-            # we start with two to fill any gaps from a user removing existing groups
-            group_id = 2
-            while group_id in zigpy_groups:
-                group_id += 1
+            group_id = self._get_unused_group_id()
         elif not MIN_GROUP_ID <= group_id <= MAX_GROUP_ID:
             raise ZHAException(
                 f"Group ID 0x{group_id:04x} is not a valid Zigbee group ID,"
