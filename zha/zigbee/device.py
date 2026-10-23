@@ -819,7 +819,7 @@ class BaseDevice[ZigpyDeviceT: ZigpyBaseDevice](LogMixin, EventBase):
             DeviceConfiguredEvent(device_ieee=self.ieee),
         )
 
-    def discover_entities(self) -> Iterator[BaseEntity]:
+    def discover_entities(self) -> Iterator[PlatformEntity]:
         """Yield the entities for this device.
 
         Declarative quirks add their exposed entities by overriding this in
@@ -2011,7 +2011,7 @@ class GreenPowerDevice(BaseDevice[ZigpyGreenPowerDevice]):
         self._discover_new_entities()
         self.emit_reconfigure_done()
 
-    def discover_entities(self) -> Iterator[BaseEntity]:
+    def discover_entities(self) -> Iterator[PlatformEntity]:
         """Yield the entities for this device.
 
         GP quirks contribute event entities by overriding this; an unquirked GPD

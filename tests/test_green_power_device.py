@@ -21,7 +21,7 @@ from zha.application.const import (
     ZHA_GW_MSG_RAW_INIT,
 )
 from zha.application.gateway import Gateway
-from zha.application.platforms import BaseEntity
+from zha.application.platforms import PlatformEntity
 from zha.application.platforms.event import (
     BaseEvent,
     EntityEventTriggeredEvent,
@@ -289,7 +289,7 @@ class ToggleEvent(BaseEvent):
 class QuirkGreenPowerDevice(GreenPowerDevice):
     """Quirk device exposing a single event entity."""
 
-    def discover_entities(self) -> Iterator[BaseEntity]:
+    def discover_entities(self) -> Iterator[PlatformEntity]:
         """Yield the quirk's entities."""
         yield from super().discover_entities()
         yield ToggleEvent(
