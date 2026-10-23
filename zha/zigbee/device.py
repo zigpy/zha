@@ -17,7 +17,7 @@ import logging
 import time
 from typing import TYPE_CHECKING, Any, Final
 
-from zigpy.device import Device as ZigpyDevice
+from zigpy.device import ZigbeeDevice
 import zigpy.exceptions
 from zigpy.profiles import PROFILES
 from zigpy.types import uint1_t, uint8_t, uint16_t
@@ -80,6 +80,7 @@ from zha.application.platforms import (
     BaseEntityState,
     EntityStateChangedEvent,
     PlatformEntity,
+    ZclPlatformEntity,
     sensor,
 )
 from zha.application.platforms.update import BaseFirmwareUpdateEntity
@@ -111,7 +112,7 @@ def get_cluster_attr_data(cluster: Cluster) -> list[dict]:
     """Return cluster attribute data."""
     attributes_info = []
 
-    for attr_def in cluster.attributes.values():
+    for attr_def in cluster.AttributeDefs:
         info = {
             "id": f"0x{attr_def.id:04x}",
             "name": attr_def.name,
@@ -147,7 +148,7 @@ def _cluster_entry(cluster_id: int, cluster: Cluster) -> dict[str, Any]:
 
 
 def get_device_automation_triggers(
-    device: zigpy.device.Device,
+    device: zigpy.device.ZigbeeDevice,
 ) -> dict[tuple[str, str], dict[str, str]]:
     """Get the supported device automation triggers for a zigpy device."""
     return {
@@ -336,7 +337,7 @@ class Device(LogMixin, EventBase):
     _device_match: DeviceMatch | None = None
     _zigpy_device_cls: ReplacingZigpyDeviceFactory | None = None
     _zigpy_device_transforms: tuple[
-        Callable[[zigpy.device.Device], zigpy.device.Device], ...
+        Callable[[zigpy.device.ZigbeeDevice], zigpy.device.ZigbeeDevice], ...
     ] = ()
 
     # Cached properties that depend on the zigpy device and must be invalidated
@@ -360,7 +361,7 @@ class Device(LogMixin, EventBase):
 
     def __init__(
         self,
-        zigpy_device: zigpy.device.Device,
+        zigpy_device: zigpy.device.ZigbeeDevice,
         _gateway: Gateway,
     ) -> None:
         """Initialize the gateway."""
@@ -371,6 +372,7 @@ class Device(LogMixin, EventBase):
 
         self._platform_entities: dict[tuple[Platform, str], PlatformEntity] = {}
         self._pending_entities: list[PlatformEntity] = []
+        self._primary_entity: PlatformEntity | None = None
         # All entities discovered for this device, including ones removed by a quirk.
         # Used for aggregating cluster configs so binding/reporting matches the
         # legacy claim-during-discovery flow (which configured handlers even when
@@ -387,7 +389,7 @@ class Device(LogMixin, EventBase):
 
         self._init_from_zigpy_device(zigpy_device)
 
-    def _init_from_zigpy_device(self, zigpy_device: zigpy.device.Device) -> None:
+    def _init_from_zigpy_device(self, zigpy_device: zigpy.device.ZigbeeDevice) -> None:
         """(Re-)initialize device state from a zigpy device.
 
         Sets up the zigpy device reference, quirk metadata, cluster handlers,
@@ -403,7 +405,7 @@ class Device(LogMixin, EventBase):
         self._pending_entities.clear()
         self._discovered_entities.clear()
 
-        self._zigpy_device: ZigpyDevice = zigpy_device
+        self._zigpy_device: ZigbeeDevice = zigpy_device
 
         # Invalidate cached properties that depend on the zigpy device before
         # they are read below (e.g. is_mains_powered, is_coordinator).
@@ -461,7 +463,7 @@ class Device(LogMixin, EventBase):
         )
 
     @property
-    def device(self) -> zigpy.device.Device:
+    def device(self) -> zigpy.device.ZigbeeDevice:
         """Return underlying Zigpy device."""
         return self._zigpy_device
 
@@ -741,6 +743,11 @@ class Device(LogMixin, EventBase):
         """Return the platform entities for this device."""
         return self._platform_entities
 
+    @property
+    def primary_entity(self) -> PlatformEntity | None:
+        """Return the primary entity of the device, if any."""
+        return self._primary_entity
+
     def get_platform_entity(self, platform: Platform, unique_id: str) -> PlatformEntity:
         """Get a platform entity by unique id."""
         entity = self._platform_entities.get((platform, unique_id))
@@ -765,10 +772,13 @@ class Device(LogMixin, EventBase):
         for entity in self._platform_entities.values():
             if platform != entity.PLATFORM:
                 continue
-            if endpoint_id is not None and entity.endpoint.id != endpoint_id:
-                continue
-            if cluster_id is not None and entity.cluster.cluster_id != cluster_id:
-                continue
+            if endpoint_id is not None or cluster_id is not None:
+                if not isinstance(entity, ZclPlatformEntity):
+                    continue
+                if endpoint_id is not None and entity.endpoint.id != endpoint_id:
+                    continue
+                if cluster_id is not None and entity.cluster.cluster_id != cluster_id:
+                    continue
             matches.append(entity)
         if not matches or (not pick_first and len(matches) != 1):
             raise LookupError(
@@ -781,7 +791,7 @@ class Device(LogMixin, EventBase):
     @classmethod
     def new(
         cls,
-        zigpy_dev: zigpy.device.Device,
+        zigpy_dev: zigpy.device.ZigbeeDevice,
         gateway: Gateway,
     ) -> Device:
         """Create new device, dispatching to the factory matched during resolution."""
@@ -1029,7 +1039,7 @@ class Device(LogMixin, EventBase):
             )
 
     async def async_rebuild_from_zigpy_device(
-        self, zigpy_device: zigpy.device.Device
+        self, zigpy_device: zigpy.device.ZigbeeDevice
     ) -> None:
         """Tear down and rebuild this device from a new zigpy device.
 
@@ -1051,7 +1061,7 @@ class Device(LogMixin, EventBase):
             DeviceConfiguredEvent(device_ieee=self.ieee),
         )
 
-    def discover_entities(self) -> Iterator[BaseEntity]:
+    def discover_entities(self) -> Iterator[PlatformEntity]:
         """Yield the default (ZCL) entities for this device.
 
         Declarative quirks add their exposed entities by overriding this in
@@ -1060,6 +1070,16 @@ class Device(LogMixin, EventBase):
         # TODO: purge old coordinator entities
         if self.is_coordinator:
             return
+
+        # TODO: detach these entities from the `Basic` cluster once we finish
+        # implementing unique ID migrations in the Core integration
+        if (basic_cluster := sensor.RSSISensor.legacy_basic_cluster(self)) is not None:
+            unique_id_base = (
+                f"{self.ieee}-{basic_cluster.endpoint.endpoint_id}-{Basic.cluster_id}"
+            )
+
+            yield sensor.RSSISensor(self, unique_id=unique_id_base)
+            yield sensor.LQISensor(self, unique_id=unique_id_base)
 
         for ep_id, endpoint in self.endpoints.items():
             if ep_id == 0:
@@ -1141,6 +1161,10 @@ class Device(LogMixin, EventBase):
             # rediscovers the same unique_id would skip the replacement and
             # leave the stale entity shadowing it indefinitely.
             del self._platform_entities[key]
+            if entity is self._primary_entity:
+                # No re-election here: every live-removal caller runs the
+                # election right after via `_add_pending_entities`
+                self._primary_entity = None
             if emit_event:
                 self.emit(
                     DeviceEntityRemovedEvent.event_type,
@@ -1464,10 +1488,17 @@ class Device(LogMixin, EventBase):
             return  # client commands don't return a response
         if isinstance(response, Exception):
             raise ZHAException("Failed to issue cluster command") from response
-        if response[1] is not ZclStatus.SUCCESS:
-            raise ZHAException(
-                f"Failed to issue cluster command with status: {response[1]}"
-            )
+
+        # Depending on the command, the reply is either a Default Response
+        # (`command_id`, `status`) or the cluster-specific response defined for that
+        # command, whose fields differ per command. A field named `status` means the
+        # same thing in either kind of reply -- but its position does not carry over:
+        # indexing blindly into the response reads an unrelated field (e.g. a Groups
+        # `add_response`'s `group_id`) and reports it as a status. Many cluster-specific
+        # responses, such as `get_membership_response`, have no `status` field at all.
+        status = getattr(response, "status", None)
+        if status is not None and status != ZclStatus.SUCCESS:
+            raise ZHAException(f"Failed to issue cluster command with status: {status}")
 
     async def async_add_to_group(self, group_id: int) -> None:
         """Add this device to the provided zigbee group."""
@@ -1611,26 +1642,29 @@ class Device(LogMixin, EventBase):
 
     def _compute_primary_entity(self, entities: Sequence[PlatformEntity]) -> None:
         """Compute the primary entity from a given set of entities."""
+        self._primary_entity = None
 
         # First, check if any entity is explicitly primary
-        explicitly_primary = [entity for entity in entities if entity.primary]
+        explicitly_primary = [entity for entity in entities if entity._attr_primary]
 
         if len(explicitly_primary) == 1:
             self.debug(
                 "Device has a single explicitly primary entity,"
                 " not performing weight matching"
             )
+            self._primary_entity = explicitly_primary[0]
             return
 
         # It should not be possible for there to be more than one
         assert not explicitly_primary
 
         # For weight matching, only consider entities with a non-zero primary weight
-        # which are not explicitly marked as not primary
+        # which are not explicitly marked as not primary. Entities disabled at runtime
+        # (via the entity registry in HA) deliberately stay candidates: the primary
+        # entity describes the main feature of the device, which does not change when
+        # its entity is disabled.
         candidates = [
-            e
-            for e in entities
-            if e.enabled and e._attr_primary is not False and e.primary_weight > 0
+            e for e in entities if e._attr_primary is not False and e.primary_weight > 0
         ]
         candidates.sort(reverse=True, key=lambda e: e.primary_weight)
 
@@ -1642,19 +1676,12 @@ class Device(LogMixin, EventBase):
 
         # We have a clear winner
         if not others or winner.primary_weight > others[0].primary_weight:
-            winner.primary = True
-
-            for entity in others:
-                entity.primary = False
-
+            self._primary_entity = winner
             return
 
         self.debug(
             "Primary entity tie between %s and %s, no primary entity", winner, others[0]
         )
-
-        for entity in candidates:
-            entity.primary = False
 
     def get_diagnostics_json(self):
         """Get ZHA device information."""
@@ -1821,7 +1848,7 @@ class Device(LogMixin, EventBase):
 class CoordinatorDevice(Device):
     """ZHA wrapper for the active coordinator device."""
 
-    def discover_entities(self) -> Iterator[BaseEntity]:
+    def discover_entities(self) -> Iterator[PlatformEntity]:
         """Yield counter sensors for the active coordinator."""
         state = self.gateway.application_controller.state
         for counter_groups in (
@@ -1833,7 +1860,7 @@ class CoordinatorDevice(Device):
             for counter_group, counters in getattr(state, counter_groups).items():
                 for counter in counters:
                     yield sensor.DeviceCounterSensor(
-                        zha_device=self,
+                        device=self,
                         counter_groups=counter_groups,
                         counter_group=counter_group,
                         counter=counter,

@@ -32,8 +32,8 @@ from zha.application.platforms import (
     ClusterMatch,
     EntityCategory,
     GroupEntity,
-    PlatformEntity,
     PlatformFeatureGroup,
+    ZclPlatformEntity,
     register_entity,
     register_group_entity,
 )
@@ -102,7 +102,7 @@ class BaseSwitch(BaseEntity, ABC):
 
 
 @register_entity(OnOff.cluster_id)
-class Switch(PlatformEntity, BaseSwitch):  # type: ignore[misc]
+class Switch(ZclPlatformEntity, BaseSwitch):  # type: ignore[misc]
     """ZHA switch."""
 
     _attr_translation_key = "switch"
@@ -243,7 +243,7 @@ class Switch(PlatformEntity, BaseSwitch):  # type: ignore[misc]
 
 
 @register_entity(BinaryOutput.cluster_id)
-class BinaryOutputSwitch(PlatformEntity, BaseSwitch):  # type: ignore[misc]
+class BinaryOutputSwitch(ZclPlatformEntity, BaseSwitch):  # type: ignore[misc]
     """BinaryOutputCluster switch."""
 
     _attr_primary_weight = 10
@@ -376,21 +376,22 @@ class SwitchGroup(GroupEntity, BaseSwitch):  # type: ignore[misc]
         self.maybe_emit_state_changed_event()
 
     def update(self, _: Any | None = None) -> None:
-        """Query all members and determine the light group state."""
+        """Query all members and determine the switch group state."""
         self.debug("Updating switch group entity state")
         platform_entities = self._group.get_platform_entities(self.PLATFORM)
         all_states = [cast(SwitchState, entity.state) for entity in platform_entities]
         self.debug(
             "All platform entity states for group entity members: %s", all_states
         )
-        on_states = [state for state in all_states if state.is_on]
+        # Unavailable members keep their last state, don't let them keep the group on
+        on_states = [state for state in all_states if state.is_on and state.available]
 
         self._state = len(on_states) > 0
 
         self.maybe_emit_state_changed_event()
 
 
-class ConfigurableAttributeSwitch(PlatformEntity):
+class ConfigurableAttributeSwitch(ZclPlatformEntity):
     """Representation of a ZHA switch configuration entity."""
 
     PLATFORM = Platform.SWITCH

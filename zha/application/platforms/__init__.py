@@ -40,7 +40,9 @@ _LOGGER = logging.getLogger(__name__)
 
 DEFAULT_UPDATE_GROUP_FROM_CHILD_DELAY: float = 0.5
 
-ENTITY_REGISTRY: dict[ClusterId | int, list[type[PlatformEntity]]] = defaultdict(list)
+ENTITY_REGISTRY: dict[ClusterId | int, list[type[ZclPlatformEntity]]] = defaultdict(
+    list
+)
 GROUP_ENTITY_REGISTRY: list[type[GroupEntity]] = []
 
 
@@ -85,6 +87,19 @@ class AttrConfig:
 
     read_on_startup: bool
     reporting: ReportingConfig | None = None
+
+    # Whether `reporting` replaces the non-overriding reporting configs other
+    # entities declare for the same attribute, instead of being merged with them.
+    # By default the tightest config wins, which means a config can only ever make
+    # reporting more frequent. Device specific configs (e.g. from quirks) set this to
+    # relax ZHA's built-in defaults, such as for devices reporting with a high
+    # divisor. Multiple overriding configs are still merged with each other.
+    reporting_override: bool = False
+
+    def __post_init__(self) -> None:
+        """Validate the configuration."""
+        if self.reporting_override and self.reporting is None:
+            raise ValueError("reporting_override requires a reporting config")
 
 
 @dataclass(frozen=True)
@@ -142,7 +157,7 @@ class ClusterMatch:
                 )
 
 
-def register_entity[T: type[PlatformEntity]](
+def register_entity[T: type[ZclPlatformEntity]](
     cluster_id: ClusterId | int,
 ) -> Callable[[T], T]:
     """Register an entity class for discovery."""
@@ -218,7 +233,7 @@ class PlatformEntityIdentifiers(BaseIdentifiers):
     """Identifiers for the platform entity."""
 
     device_ieee: EUI64
-    endpoint_id: int
+    endpoint_id: int | None = None
 
 
 @dataclasses.dataclass(frozen=True, kw_only=True)
@@ -279,6 +294,10 @@ class BaseEntity(LogMixin, EventBase):
     _attr_enabled: bool = True
     _attr_extra_state_attribute_names: set[str] | None = None
     _attr_always_supported: bool = False
+
+    # Explicitly marks the entity as (not) primary, set by entity classes and quirks.
+    # It takes precedence over (and is never overwritten by) the weight-based primary
+    # entity election, whose result is held by the device.
     _attr_primary: bool | None = None
 
     # When two entities both want to be primary, the one with the higher weight will be
@@ -329,15 +348,7 @@ class BaseEntity(LogMixin, EventBase):
     @property
     def primary(self) -> bool:
         """Return if the entity is the primary device control."""
-        if self._attr_primary is None:
-            return False
-
-        return self._attr_primary
-
-    @primary.setter
-    def primary(self, value: bool | None) -> None:
-        """Set the entity as the primary device control."""
-        self._attr_primary = value
+        return bool(self._attr_primary)
 
     @property
     def primary_weight(self) -> int:
@@ -508,7 +519,7 @@ class BaseEntity(LogMixin, EventBase):
 
 
 class PlatformEntity(BaseEntity):
-    """Class that represents an entity for a device platform."""
+    """Class that represents a device-bound entity for a device platform."""
 
     # suffix to add to the unique_id of the entity. Used for multi
     # entities using the same cluster handler/cluster id for the entity.
@@ -516,20 +527,11 @@ class PlatformEntity(BaseEntity):
 
     _migrate_platform_unique_ids: tuple[tuple[UniqueIdMigration, str]] | None = None
 
-    # Direct cluster matching for discovery
-    _cluster_match: ClusterMatch | None = None
-
-    # Per-cluster configuration (keyed by cluster ID)
-    _server_cluster_config: Mapping[int, ClusterConfig] = MappingProxyType({})
-
-    _client_cluster_config: Mapping[int, ClusterConfig] = MappingProxyType({})
-
     def __init__(
         self,
-        endpoint: Endpoint,
         device: Device,
         *,
-        cluster: zigpy.zcl.Cluster,
+        unique_id: str,
         from_quirk: bool = False,
         fallback_name: str | None = None,
         translation_key: str | None = None,
@@ -538,15 +540,13 @@ class PlatformEntity(BaseEntity):
         entity_type: EntityType | None = None,
         primary: bool | None = None,
         initially_disabled: bool = False,
-        legacy_discovery_unique_id: str | None = None,
         **kwargs: Any,
     ):
         """Initialize the platform entity.
 
         Quirk entities are constructed with `from_quirk=True` and the generic
         config keywords (`fallback_name`, `translation_key`, `entity_type`, etc.);
-        the platform subclasses add their own keywords. Default-discovery
-        entities pass none of these.
+        the platform subclasses add their own keywords.
         """
         if from_quirk:
             self._apply_quirk_entity_config(
@@ -559,24 +559,12 @@ class PlatformEntity(BaseEntity):
                 initially_disabled=initially_disabled,
             )
 
-        if legacy_discovery_unique_id is None:
-            if from_quirk:
-                legacy_discovery_unique_id = f"{device.ieee}-{endpoint.id}"
-            else:
-                legacy_discovery_unique_id = (
-                    f"{device.ieee}-{endpoint.id}-{cluster.cluster_id}"
-                )
-
         if self._unique_id_suffix is not None:
-            unique_id = f"{legacy_discovery_unique_id}-{self._unique_id_suffix}"
-        else:
-            unique_id = legacy_discovery_unique_id
+            unique_id = f"{unique_id}-{self._unique_id_suffix}"
 
         super().__init__(unique_id=unique_id, **kwargs)
 
         self._device: Device = device
-        self._endpoint = endpoint
-        self._cluster: zigpy.zcl.Cluster = cluster
 
     def _apply_quirk_entity_config(
         self,
@@ -618,6 +606,19 @@ class PlatformEntity(BaseEntity):
         if primary is not None:
             self._attr_primary = primary
 
+    @property
+    def device(self) -> Device:
+        """Return the device."""
+        return self._device
+
+    @property
+    def primary(self) -> bool:
+        """Return if the entity is the primary device control."""
+        if self._attr_primary is not None:
+            return self._attr_primary
+
+        return self._device.primary_entity is self
+
     @cached_property
     def identifiers(self) -> PlatformEntityIdentifiers:
         """Return a dict with the information necessary to identify this entity."""
@@ -625,13 +626,77 @@ class PlatformEntity(BaseEntity):
             unique_id=self.unique_id,
             platform=self.PLATFORM,
             device_ieee=self.device.ieee,
-            endpoint_id=self.endpoint.id,
         )
 
     @property
-    def device(self) -> Device:
-        """Return the device."""
-        return self._device
+    def should_poll(self) -> bool:
+        """Return True if we need to poll for state changes."""
+        return False
+
+    @property
+    def available(self) -> bool:
+        """Return true if the device this entity belongs to is available."""
+        return self.device.available
+
+    async def async_update(self) -> None:
+        """Retrieve latest state.
+
+        Default no-op: subclasses that need polling override this to read their
+        own attributes directly from the relevant cluster(s).
+        """
+
+    @property
+    def state(self) -> BaseEntityState:
+        """Return the state of this entity."""
+        return dataclasses.replace(
+            super().state,
+            device_ieee=self._device.ieee,
+            available=self.available,
+        )
+
+
+class ZclPlatformEntity(PlatformEntity):
+    """Platform entity backed by ZCL cluster(s) on an endpoint."""
+
+    # Direct cluster matching for discovery
+    _cluster_match: ClusterMatch | None = None
+
+    # Per-cluster configuration (keyed by cluster ID)
+    _server_cluster_config: Mapping[int, ClusterConfig] = MappingProxyType({})
+
+    _client_cluster_config: Mapping[int, ClusterConfig] = MappingProxyType({})
+
+    def __init__(
+        self,
+        endpoint: Endpoint,
+        device: Device,
+        *,
+        cluster: zigpy.zcl.Cluster,
+        from_quirk: bool = False,
+        legacy_discovery_unique_id: str | None = None,
+        **kwargs: Any,
+    ):
+        """Initialize the ZCL platform entity.
+
+        Default-discovery entities pass no config keywords.
+        """
+        if legacy_discovery_unique_id is None:
+            if from_quirk:
+                legacy_discovery_unique_id = f"{device.ieee}-{endpoint.id}"
+            else:
+                legacy_discovery_unique_id = (
+                    f"{device.ieee}-{endpoint.id}-{cluster.cluster_id}"
+                )
+
+        self._endpoint = endpoint
+        self._cluster: zigpy.zcl.Cluster = cluster
+
+        super().__init__(
+            device,
+            unique_id=legacy_discovery_unique_id,
+            from_quirk=from_quirk,
+            **kwargs,
+        )
 
     @property
     def endpoint(self) -> Endpoint:
@@ -678,31 +743,22 @@ class PlatformEntity(BaseEntity):
             return in_client
         return in_server or in_client
 
-    @property
-    def should_poll(self) -> bool:
-        """Return True if we need to poll for state changes."""
-        return False
-
-    @property
-    def available(self) -> bool:
-        """Return true if the device this entity belongs to is available."""
-        return self.device.available
-
-    async def async_update(self) -> None:
-        """Retrieve latest state.
-
-        Default no-op: subclasses that need polling override this to read their
-        own attributes directly from the relevant cluster(s).
-        """
+    @cached_property
+    def identifiers(self) -> PlatformEntityIdentifiers:
+        """Return a dict with the information necessary to identify this entity."""
+        return PlatformEntityIdentifiers(
+            unique_id=self.unique_id,
+            platform=self.PLATFORM,
+            device_ieee=self.device.ieee,
+            endpoint_id=self.endpoint.id,
+        )
 
     @property
     def state(self) -> BaseEntityState:
         """Return the state of this entity."""
         return dataclasses.replace(
             super().state,
-            device_ieee=self._device.ieee,
             endpoint_id=self._endpoint.id,
-            available=self.available,
         )
 
 

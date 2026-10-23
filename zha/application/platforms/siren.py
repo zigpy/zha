@@ -29,6 +29,7 @@ from zha.application.platforms import (
     ClusterMatch,
     PlatformEntity,
     PlatformFeatureGroup,
+    ZclPlatformEntity,
     register_entity,
 )
 from zha.quirks import SIREN_BASIC
@@ -128,7 +129,7 @@ class BaseSiren(PlatformEntity, ABC):
         """Issue a brief squawk pulse."""
 
 
-class BaseZclSiren(BaseSiren, ABC):
+class BaseZclSiren(BaseSiren, ZclPlatformEntity, ABC):
     """Base class for ZHA IAS WD siren entities with shared ZCL logic."""
 
     _off_listener: asyncio.TimerHandle | None

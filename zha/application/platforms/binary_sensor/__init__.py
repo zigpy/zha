@@ -31,6 +31,7 @@ from zha.application.platforms import (
     EntityCategory,
     PlatformEntity,
     PlatformFeatureGroup,
+    ZclPlatformEntity,
     register_entity,
 )
 from zha.application.platforms.binary_sensor.const import (
@@ -72,7 +73,7 @@ class BaseBinarySensor(PlatformEntity, ABC):
         """Return True if the binary sensor is on."""
 
 
-class BinarySensor(BaseBinarySensor):
+class BinarySensor(BaseBinarySensor, ZclPlatformEntity):
     """ZHA BinarySensor."""
 
     _attr_device_class: BinarySensorDeviceClass | None

@@ -4,7 +4,7 @@ import logging
 from unittest.mock import AsyncMock, call, patch, sentinel
 
 import pytest
-from zigpy.device import Device as ZigpyDevice
+from zigpy.device import ZigbeeDevice
 from zigpy.zcl.clusters import security
 import zigpy.zcl.foundation as zcl_f
 
@@ -27,7 +27,7 @@ async def test_alarm_control_panel(
     caplog: pytest.LogCaptureFixture,
 ) -> None:
     """Test zhaws alarm control panel platform."""
-    zigpy_device: ZigpyDevice = await zigpy_device_from_json(
+    zigpy_device: ZigbeeDevice = await zigpy_device_from_json(
         zha_gateway.application_controller,
         "tests/data/devices/frient-a-s-kepzb-110-0x00020005.json",
     )
