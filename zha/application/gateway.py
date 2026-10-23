@@ -74,6 +74,8 @@ MAX_GROUP_ID: Final[int] = 0xFFF7
 # contended ones, and the group IDs from 0xff00 up are reserved
 MIN_ALLOCATED_GROUP_ID: Final[int] = 0x0100
 MAX_ALLOCATED_GROUP_ID: Final[int] = 0xFEFF
+# How many random candidates are tried before giving up on finding a free group ID
+GROUP_ID_ALLOCATION_ATTEMPTS: Final[int] = 10
 # Group IDs we never allocate even though no group holds them. The Green Power
 # sink group is the group ID zigpy uses for its own sink rather than a
 # spec-assigned one, and the coordinator joins it with
@@ -856,14 +858,17 @@ class Gateway(AsyncUtilMixin, EventBase):
         # group entity with the same unique ID, which is derived from the group ID,
         # is created again.
         zigpy_groups = self.application_controller.groups
-        unused_group_ids = [
-            candidate
-            for candidate in range(MIN_ALLOCATED_GROUP_ID, MAX_ALLOCATED_GROUP_ID + 1)
-            if candidate not in zigpy_groups and candidate not in RESERVED_GROUP_IDS
-        ]
-        if not unused_group_ids:
-            raise ZHAException("No unused Zigbee group ID is available")
-        return random.choice(unused_group_ids)
+
+        # Rejection sampling: nobody has more than a handful of groups, so a
+        # candidate is almost always free and there is no need to build the list of
+        # every unused ID. `randint` includes both bounds
+        for _ in range(GROUP_ID_ALLOCATION_ATTEMPTS):
+            candidate = random.randint(MIN_ALLOCATED_GROUP_ID, MAX_ALLOCATED_GROUP_ID)
+
+            if candidate not in zigpy_groups and candidate not in RESERVED_GROUP_IDS:
+                return candidate
+
+        raise ZHAException("No unused Zigbee group ID is available")
 
     async def async_create_zigpy_group(
         self,

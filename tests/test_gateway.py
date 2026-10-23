@@ -30,9 +30,9 @@ from tests.common import (
 from zha.application import Platform
 from zha.application.const import ZHA_GW_MSG, ZHA_GW_MSG_CONNECTION_LOST, RadioType
 from zha.application.gateway import (
+    GROUP_ID_ALLOCATION_ATTEMPTS,
     MAX_ALLOCATED_GROUP_ID,
     MIN_ALLOCATED_GROUP_ID,
-    RESERVED_GROUP_IDS,
     ConnectionLostEvent,
     DeviceFullInitEvent,
     DeviceJoinedDeviceInfo,
@@ -585,50 +585,54 @@ async def test_gateway_create_group_duplicate(zha_gateway: Gateway) -> None:
 async def test_gateway_create_group_allocates_unused_id(
     zha_gateway: Gateway,
 ) -> None:
-    """Test that a group ID is allocated from the unused IDs of the valid range."""
+    """Test that a group ID is allocated at random from the valid range."""
 
     existing_group_id = next(iter(zha_gateway.application_controller.groups))
+    assert MIN_ALLOCATED_GROUP_ID <= GP_GROUP_ID <= MAX_ALLOCATED_GROUP_ID
+    # the fixture group's ID is inside the allocation range, so this is not vacuous
+    assert MIN_ALLOCATED_GROUP_ID <= existing_group_id <= MAX_ALLOCATED_GROUP_ID
 
+    # IDs in use or reserved are rejected and another candidate is drawn
     with patch(
-        "zha.application.gateway.random.choice", side_effect=lambda seq: seq[0]
-    ) as random_choice:
+        "zha.application.gateway.random.randint",
+        side_effect=[existing_group_id, GP_GROUP_ID, 0x1234],
+    ) as randint:
         zha_group = await zha_gateway.async_create_zigpy_group("Test Group", None)
         await zha_gateway.async_block_till_done()
 
-    candidates = random_choice.mock_calls[0].args[0]
-    assert candidates[0] == 0x0100
-    assert candidates[-1] == 0xFEFF
-    # the Green Power sink group is inside the range, but never a candidate
-    assert MIN_ALLOCATED_GROUP_ID <= GP_GROUP_ID <= MAX_ALLOCATED_GROUP_ID
-    assert GP_GROUP_ID not in candidates
-    assert RESERVED_GROUP_IDS.isdisjoint(candidates)
-    # the fixture group's ID is inside the allocation range, so this is not vacuous
-    assert MIN_ALLOCATED_GROUP_ID <= existing_group_id <= MAX_ALLOCATED_GROUP_ID
-    assert existing_group_id not in candidates
-    assert zha_group.group_id == MIN_ALLOCATED_GROUP_ID
+    # both bounds are inclusive, and 0xff00 and up (touchlink reserved) is excluded
+    assert (
+        randint.call_args_list
+        == [call(MIN_ALLOCATED_GROUP_ID, MAX_ALLOCATED_GROUP_ID)] * 3
+    )
+    assert MIN_ALLOCATED_GROUP_ID == 0x0100
+    assert MAX_ALLOCATED_GROUP_ID == 0xFEFF
+    assert zha_group.group_id == 0x1234
 
-    # the group that was just created is not a candidate anymore
+    # the group that was just created is rejected as well
     with patch(
-        "zha.application.gateway.random.choice", side_effect=lambda seq: seq[0]
-    ) as random_choice:
+        "zha.application.gateway.random.randint",
+        side_effect=[zha_group.group_id, 0x1235],
+    ):
         zha_group2 = await zha_gateway.async_create_zigpy_group("Test Group2", None)
         await zha_gateway.async_block_till_done()
 
-    assert zha_group.group_id not in random_choice.mock_calls[0].args[0]
-    assert zha_group2.group_id == MIN_ALLOCATED_GROUP_ID + 1
+    assert zha_group2.group_id == 0x1235
 
 
 async def test_gateway_create_group_without_unused_id(zha_gateway: Gateway) -> None:
-    """Test creating a group when every valid group ID is in use."""
+    """Test creating a group when no unused group ID is found."""
 
     with (
-        patch.dict(
-            zha_gateway.application_controller.groups,
-            dict.fromkeys(range(MIN_ALLOCATED_GROUP_ID, MAX_ALLOCATED_GROUP_ID + 1)),
-        ),
+        patch(
+            "zha.application.gateway.random.randint",
+            return_value=next(iter(zha_gateway.application_controller.groups)),
+        ) as randint,
         pytest.raises(ZHAException, match="No unused Zigbee group ID is available"),
     ):
         await zha_gateway.async_create_zigpy_group("Test Group", None)
+
+    assert randint.call_count == GROUP_ID_ALLOCATION_ATTEMPTS
 
 
 async def test_remove_device_cleans_up_group_membership(
