@@ -588,12 +588,11 @@ async def test_gateway_create_group_allocates_unused_id(
     """Test that a group ID is allocated at random from the valid range."""
 
     existing_group_id = next(iter(zha_gateway.application_controller.groups))
-    # the Green Power sink group and the fixture group are inside the allocation
-    # range, so rejecting them is not vacuous
+    # both are inside the allocation range, so rejecting them is not vacuous
     assert MIN_ALLOCATED_GROUP_ID <= GP_GROUP_ID <= MAX_ALLOCATED_GROUP_ID
     assert MIN_ALLOCATED_GROUP_ID <= existing_group_id <= MAX_ALLOCATED_GROUP_ID
 
-    # IDs in use or reserved are rejected and another candidate is drawn
+    # IDs in use or reserved are rejected
     with patch(
         "zha.application.gateway.random.randint",
         side_effect=[existing_group_id, GP_GROUP_ID, 0x1234],
@@ -601,7 +600,6 @@ async def test_gateway_create_group_allocates_unused_id(
         zha_group = await zha_gateway.async_create_zigpy_group("Test Group", None)
         await zha_gateway.async_block_till_done()
 
-    # both bounds are inclusive, and 0xff00 and up (touchlink reserved) is excluded
     assert (
         randint.call_args_list
         == [call(MIN_ALLOCATED_GROUP_ID, MAX_ALLOCATED_GROUP_ID)] * 3

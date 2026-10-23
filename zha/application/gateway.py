@@ -68,19 +68,13 @@ SHUT_DOWN_DELAY_S: Final[float] = 0.1
 # section 3.6.2.3.2.2
 MIN_GROUP_ID: Final[int] = 0x0001
 MAX_GROUP_ID: Final[int] = 0xFFF7
-# The group IDs we pick ourselves, bounded by touchlink commissioning (ZCL R8
-# section 13.3.4.8.2): a factory-new assignment capable initiator hands out
-# group IDs sequentially upward from 0x0001, so the lowest ones are the
-# contended ones, and the group IDs from 0xff00 up are reserved
+# Group IDs we pick ourselves: touchlink initiators hand out IDs upward from 0x0001
+# and reserve 0xff00 and up (ZCL R8 section 13.3.4.8.2)
 MIN_ALLOCATED_GROUP_ID: Final[int] = 0x0100
 MAX_ALLOCATED_GROUP_ID: Final[int] = 0xFEFF
-# How many random candidates are tried before giving up on finding a free group ID
 GROUP_ID_ALLOCATION_ATTEMPTS: Final[int] = 10
-# Group IDs we never allocate even though no group holds them. The Green Power
-# sink group is the group ID zigpy uses for its own sink rather than a
-# spec-assigned one, and the coordinator joins it with
-# `ControllerApplication.subscribe_to_multicast_group` as Green Power devices are
-# commissioned or restored, so it never becomes a zigpy group
+# Never allocated: the coordinator joins the Green Power sink group itself, so it
+# never shows up as a zigpy group
 RESERVED_GROUP_IDS: Final[frozenset[int]] = frozenset({GP_GROUP_ID})
 _R = TypeVar("_R")
 _LOGGER = logging.getLogger(__name__)
@@ -850,18 +844,11 @@ class Gateway(AsyncUtilMixin, EventBase):
 
     def _get_unused_group_id(self) -> int:
         """Return a random group ID that is not in use."""
-        # Group IDs are picked at random rather than filling the gaps left by
-        # removed groups: a device whose removal from a group failed, because it
-        # was offline for instance, keeps the group ID in its `Groups` cluster and
-        # would be a member of the next group that gets the ID. Home Assistant
-        # also restores a deleted group entity's name, entity ID and labels when a
-        # group entity with the same unique ID, which is derived from the group ID,
-        # is created again.
+        # Random rather than filling gaps, so a freed ID is not handed out again: an
+        # offline device may still hold it in its `Groups` cluster, and Home Assistant
+        # restores a deleted group entity (unique ID derived from the group ID)
         zigpy_groups = self.application_controller.groups
 
-        # Rejection sampling: nobody has more than a handful of groups, so a
-        # candidate is almost always free and there is no need to build the list of
-        # every unused ID. `randint` includes both bounds
         for _ in range(GROUP_ID_ALLOCATION_ATTEMPTS):
             candidate = random.randint(MIN_ALLOCATED_GROUP_ID, MAX_ALLOCATED_GROUP_ID)
 
