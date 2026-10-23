@@ -209,7 +209,7 @@ def convert_zcl_value(value: Any, field_type: Any) -> Any:
 
 
 def convert_to_zcl_values(
-    fields: dict[str, Any], schema: CommandSchema
+    fields: dict[str, Any], schema: type[CommandSchema]
 ) -> dict[str, Any]:
     """Convert user input to ZCL values."""
     converted_fields: dict[str, Any] = {}

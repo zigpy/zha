@@ -6,7 +6,7 @@ from __future__ import annotations
 
 import asyncio
 from collections import defaultdict
-from collections.abc import Callable, Iterable, Iterator, Sequence
+from collections.abc import Callable, Collection, Iterable, Iterator
 import contextlib
 import copy
 import dataclasses
@@ -32,17 +32,11 @@ from zigpy.zcl.clusters import Cluster
 from zigpy.zcl.clusters.general import Basic, Groups, Identify, Ota
 from zigpy.zcl.foundation import (
     Status as ZclStatus,
-    WriteAttributesResponse,
+    WriteAttributesStatusRecord,
+    ZCLAttributeDef,
     ZCLCommandDef,
 )
 import zigpy.zdo.types as zdo_types
-from zigpy.zdo.types import (
-    DeviceType,
-    PermitJoins,
-    Relationship,
-    RouteStatus,
-    RxOnWhenIdle,
-)
 
 from zha.application import Platform, discovery
 from zha.application.const import (
@@ -95,6 +89,8 @@ from zha.mixins import LogMixin
 from zha.quirks import (
     QUIRK_REGISTRY_ENTRY_ATTR,
     DeviceMatch,
+    GreenPowerQuirkRegistryEntry,
+    QuirkRegistryEntry,
     ReplacingZigpyDeviceFactory,
 )
 from zha.zigbee.cluster_config import (
@@ -281,8 +277,8 @@ class DeviceInfo:
     exposes_features: set[str]
     manufacturer_code: int | None
     power_source: str
-    lqi: int
-    rssi: int
+    lqi: int | None
+    rssi: int | None
     last_seen: str
     available: bool
     device_type: str
@@ -293,13 +289,13 @@ class DeviceInfo:
 class NeighborInfo:
     """Describes a neighbor."""
 
-    device_type: DeviceType
-    rx_on_when_idle: RxOnWhenIdle
-    relationship: Relationship
+    device_type: str
+    rx_on_when_idle: str
+    relationship: str
     extended_pan_id: ExtendedPanId
     ieee: EUI64
     nwk: NWK
-    permit_joining: PermitJoins
+    permit_joining: str
     depth: uint8_t
     lqi: uint8_t
 
@@ -309,7 +305,7 @@ class RouteInfo:
     """Describes a route."""
 
     dest_nwk: NWK
-    route_status: RouteStatus
+    route_status: str
     memory_constrained: uint1_t
     many_to_one: uint1_t
     route_record_required: uint1_t
@@ -457,7 +453,9 @@ class BaseDevice[ZigpyDeviceT: ZigpyBaseDevice](LogMixin, EventBase):
         ):
             return CoordinatorDevice(zigpy_dev, gateway)
 
-        entry = getattr(zigpy_dev, QUIRK_REGISTRY_ENTRY_ATTR, None)
+        entry: QuirkRegistryEntry | GreenPowerQuirkRegistryEntry | None = getattr(
+            zigpy_dev, QUIRK_REGISTRY_ENTRY_ATTR, None
+        )
         if entry is not None and entry.zha_device_factory is not None:
             return entry.zha_device_factory(zigpy_dev, gateway)
 
@@ -550,12 +548,12 @@ class BaseDevice[ZigpyDeviceT: ZigpyBaseDevice](LogMixin, EventBase):
         return self._zigpy_device.nwk
 
     @property
-    def lqi(self):
+    def lqi(self) -> int | None:
         """Return lqi for device."""
         return self._zigpy_device.lqi
 
     @property
-    def rssi(self):
+    def rssi(self) -> int | None:
         """Return rssi for device."""
         return self._zigpy_device.rssi
 
@@ -592,7 +590,7 @@ class BaseDevice[ZigpyDeviceT: ZigpyBaseDevice](LogMixin, EventBase):
         return self._quirk_skip_configuration()
 
     @property
-    def gateway(self):
+    def gateway(self) -> Gateway:
         """Return the gateway for this device."""
         return self._gateway
 
@@ -613,7 +611,7 @@ class BaseDevice[ZigpyDeviceT: ZigpyBaseDevice](LogMixin, EventBase):
         return triggers
 
     @property
-    def available(self):
+    def available(self) -> bool:
         """Return True if device is available."""
         return self.is_active_coordinator or (self._available and self.on_network)
 
@@ -623,7 +621,7 @@ class BaseDevice[ZigpyDeviceT: ZigpyBaseDevice](LogMixin, EventBase):
         self._available = new_availability
 
     @property
-    def on_network(self):
+    def on_network(self) -> bool:
         """Return True if device is currently on the network."""
         return self.is_active_coordinator or self._on_network
 
@@ -695,7 +693,7 @@ class BaseDevice[ZigpyDeviceT: ZigpyBaseDevice](LogMixin, EventBase):
             )
         return matches[0]
 
-    def async_update_firmware_version(self, firmware_version: str) -> None:
+    def async_update_firmware_version(self, firmware_version: str | None) -> None:
         """Update device firmware version."""
         if firmware_version == self._firmware_version:
             return
@@ -1076,7 +1074,7 @@ class BaseDevice[ZigpyDeviceT: ZigpyBaseDevice](LogMixin, EventBase):
         args = (self.nwk, self.model) + args
         _LOGGER.log(level, msg, *args, **kwargs)
 
-    def _compute_primary_entity(self, entities: Sequence[PlatformEntity]) -> None:
+    def _compute_primary_entity(self, entities: Collection[PlatformEntity]) -> None:
         """Compute the primary entity from a given set of entities."""
         self._primary_entity = None
 
@@ -1154,11 +1152,10 @@ class ZigbeeDevice(BaseDevice[ZigpyDevice]):
         self._endpoints.clear()
         super()._init_from_zigpy_device(zigpy_device)
 
-        for ep_id, endpoint in zigpy_device.endpoints.items():
-            if ep_id != 0:
-                ep = Endpoint.new(endpoint, self)
-                self._endpoints[ep_id] = ep
-                self._on_remove_callbacks.append(ep.on_remove)
+        for endpoint in zigpy_device.non_zdo_endpoints:
+            ep = Endpoint.new(endpoint, self)
+            self._endpoints[endpoint.endpoint_id] = ep
+            self._on_remove_callbacks.append(ep.on_remove)
 
     def _resolve_manufacturer(self) -> str:
         """Resolve the manufacturer name (declarative quirks override this)."""
@@ -1258,10 +1255,8 @@ class ZigbeeDevice(BaseDevice[ZigpyDevice]):
 
     def _first_in_cluster(self, cluster_id: int) -> zigpy.zcl.Cluster | None:
         """Return the first in_cluster with the given cluster_id across endpoints."""
-        for ep_id, ep in self._zigpy_device.endpoints.items():
-            if ep_id == 0:
-                continue
-            cluster = ep.in_clusters.get(cluster_id)
+        for ep in self._zigpy_device.non_zdo_endpoints:
+            cluster: zigpy.zcl.Cluster | None = ep.in_clusters.get(cluster_id)
             if cluster is not None:
                 return cluster
         return None
@@ -1492,7 +1487,7 @@ class ZigbeeDevice(BaseDevice[ZigpyDevice]):
             if Groups.cluster_id in clusters[CLUSTER_TYPE_IN]
         ]
 
-    def async_get_std_clusters(self):
+    def async_get_std_clusters(self) -> dict[int, dict[str, dict[int, Cluster]]]:
         """Get ZHA and ZLL clusters for this device."""
 
         return {
@@ -1512,14 +1507,14 @@ class ZigbeeDevice(BaseDevice[ZigpyDevice]):
         return clusters[endpoint_id][cluster_type][cluster_id]
 
     def async_get_cluster_attributes(
-        self, endpoint_id, cluster_id, cluster_type=CLUSTER_TYPE_IN
-    ):
+        self, endpoint_id: int, cluster_id: int, cluster_type: str = CLUSTER_TYPE_IN
+    ) -> dict[int, ZCLAttributeDef]:
         """Get zigbee attributes for specified cluster."""
         return self.async_get_cluster(endpoint_id, cluster_id, cluster_type).attributes
 
     def async_get_cluster_commands(
-        self, endpoint_id, cluster_id, cluster_type=CLUSTER_TYPE_IN
-    ):
+        self, endpoint_id: int, cluster_id: int, cluster_type: str = CLUSTER_TYPE_IN
+    ) -> dict[str, dict[int, ZCLCommandDef]]:
         """Get zigbee commands for specified cluster."""
         cluster = self.async_get_cluster(endpoint_id, cluster_id, cluster_type)
         return {
@@ -1535,7 +1530,7 @@ class ZigbeeDevice(BaseDevice[ZigpyDevice]):
         value: Any,
         cluster_type: str = CLUSTER_TYPE_IN,
         manufacturer: int | UndefinedType | None = UNDEFINED,
-    ) -> WriteAttributesResponse | None:
+    ) -> list[list[WriteAttributesStatusRecord]]:
         """Write a value to a zigbee attribute for a cluster in this entity."""
         try:
             cluster: Cluster = self.async_get_cluster(
@@ -1774,7 +1769,7 @@ class ZigbeeDevice(BaseDevice[ZigpyDevice]):
                 fmt = f"{log_msg[1]} completed: %s"
             zdo.debug(fmt, *(log_msg[2] + (outcome,)))
 
-    def get_diagnostics_json(self):
+    def get_diagnostics_json(self) -> dict[str, Any]:
         """Get ZHA device information."""
 
         info: dict[str, Any] = {}
@@ -1854,7 +1849,7 @@ class ZigbeeDevice(BaseDevice[ZigpyDevice]):
                                 }
                             }
                             if isinstance(cluster, Ota)
-                            and getattr(cluster, "last_query_cmd", None) is not None
+                            and cluster.last_query_cmd is not None
                             else {}
                         ),
                     }

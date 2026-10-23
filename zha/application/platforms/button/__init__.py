@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from collections.abc import Collection
 from dataclasses import dataclass
 import functools
 import logging
@@ -141,7 +142,7 @@ class IdentifyButton(Button):
         server_clusters=frozenset({Identify.cluster_id}),
     )
 
-    def is_supported_in_list(self, entities: list[BaseEntity]) -> bool:
+    def is_supported_in_list(self, entities: Collection[BaseEntity]) -> bool:
         """Check if this button is supported given the list of entities."""
         cls = type(self)
         return not any(type(entity) is cls for entity in entities if entity is not self)
