@@ -1007,7 +1007,9 @@ class BaseDevice[ZigpyDeviceT: ZigpyBaseDevice](LogMixin, EventBase):
 
             def entity_update_listener(event: EntityStateChangedEvent) -> None:
                 """Listen to firmware update entity changes."""
-                entity = self.get_platform_entity(event.platform, event.unique_id)
+                entity = self.get_platform_entity(
+                    Platform(event.platform), event.unique_id
+                )
                 assert isinstance(entity, BaseFirmwareUpdateEntity)
                 self.async_update_firmware_version(entity.installed_version)
 

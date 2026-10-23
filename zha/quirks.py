@@ -59,7 +59,8 @@ def _read_current_firmware_version(
         )
     except ValueError:
         return None
-    return ota.get(Ota.AttributeDefs.current_file_version.id)
+    version: int | None = ota.get(Ota.AttributeDefs.current_file_version.id)
+    return version
 
 
 @dataclass(frozen=True)

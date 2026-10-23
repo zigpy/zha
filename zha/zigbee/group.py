@@ -137,7 +137,7 @@ class GroupMember(LogMixin):
                 str(ex),
             )
 
-    def log(self, level: int, msg: str, *args: Any, **kwargs) -> None:
+    def log(self, level: int, msg: str, *args: Any, **kwargs: Any) -> None:
         """Log a message."""
         msg = f"[%s](%s): {msg}"
         args = (f"0x{self._group.group_id:04x}", self.endpoint_id) + args
@@ -169,7 +169,7 @@ class Group(LogMixin):
         return self._zigpy_group.group_id
 
     @property
-    def endpoint(self) -> zigpy.endpoint.Endpoint:
+    def endpoint(self) -> GroupEndpoint:
         """Return the endpoint for this group."""
         return self._zigpy_group.endpoint
 
@@ -236,7 +236,9 @@ class Group(LogMixin):
             self._group_entities.pop(group_entity.unique_id)
             self._entity_unsubs.pop(group_entity.unique_id)()
 
-    def _handle_maybe_update_group_members(self, event: EntityStateChangedEvent):
+    def _handle_maybe_update_group_members(
+        self, event: EntityStateChangedEvent
+    ) -> None:
         """Handle the maybe update group members event."""
         self.gateway.async_create_task(self._maybe_update_group_members(event))
 
@@ -337,7 +339,7 @@ class Group(LogMixin):
 
         return platform_entities
 
-    def log(self, level: int, msg: str, *args: Any, **kwargs) -> None:
+    def log(self, level: int, msg: str, *args: Any, **kwargs: Any) -> None:
         """Log a message."""
         msg = f"[%s](%s): {msg}"
         args = (self.name, self.group_id) + args
