@@ -2,24 +2,42 @@
 
 from __future__ import annotations
 
-from zigpy.device import GreenPowerDevice as ZigpyGreenPowerDevice
+from collections.abc import Iterator
+
+from zigpy.device import (
+    GreenPowerCommandReceived,
+    GreenPowerDevice as ZigpyGreenPowerDevice,
+)
 from zigpy.types import EUI64
 from zigpy.zgp.types import ApplicationID, DeviceID, GPDCommandID, SrcID
 
+from zha.application import Platform
 from zha.application.const import (
     UNKNOWN_MANUFACTURER,
     UNKNOWN_MODEL,
     ZHA_DEVICE_CONFIGURED_EVENT,
+    ZHA_DEVICE_ENTITY_ADDED_EVENT,
+    ZHA_DEVICE_ENTITY_REMOVED_EVENT,
     ZHA_GW_MSG_RAW_INIT,
 )
 from zha.application.gateway import Gateway
+from zha.application.platforms import BaseEntity
+from zha.application.platforms.event import (
+    BaseEvent,
+    EntityEventTriggeredEvent,
+    TriggeredEvent,
+)
 from zha.quirks import (
     DEVICE_REGISTRY,
     QUIRK_REGISTRY_ENTRY_ATTR,
     GreenPowerDeviceMatch,
     GreenPowerQuirkRegistryEntry,
 )
-from zha.zigbee.device import GreenPowerDevice
+from zha.zigbee.device import (
+    DeviceEntityAddedEvent,
+    DeviceEntityRemovedEvent,
+    GreenPowerDevice,
+)
 
 
 def make_zigpy_gpd(zha_gateway: Gateway) -> ZigpyGreenPowerDevice:
@@ -246,3 +264,117 @@ async def test_green_power_device_recommissioned(zha_gateway: Gateway) -> None:
     assert zha_gateway.devices[new_zigpy_gpd.ieee] is zha_device
     assert zha_device.device is new_zigpy_gpd
     assert len(events) == 1
+
+
+# Mimics the zhaquirks `GreenPowerQuirkBuilder` until a released quirk replaces it
+class ToggleEvent(BaseEvent):
+    """Event entity firing when the GPD sends a toggle command."""
+
+    _attr_event_types = ["toggle"]
+
+    def on_add(self) -> None:
+        """Subscribe to the commands sent by the device."""
+        super().on_add()
+        self._on_remove_callbacks.append(
+            self.device.device.on_event(
+                GreenPowerCommandReceived.event_type, self._handle_gp_command
+            )
+        )
+
+    def _handle_gp_command(self, event: GreenPowerCommandReceived) -> None:
+        if event.command_id == GPDCommandID.Toggle:
+            self._trigger_event("toggle")
+
+
+class QuirkGreenPowerDevice(GreenPowerDevice):
+    """Quirk device exposing a single event entity."""
+
+    def discover_entities(self) -> Iterator[BaseEntity]:
+        """Yield the quirk's entities."""
+        yield from super().discover_entities()
+        yield ToggleEvent(
+            self,
+            unique_id=str(self.ieee),
+            from_quirk=True,
+            unique_id_suffix="toggle",
+            fallback_name="Toggle",
+        )
+
+
+def send_toggle(zigpy_gpd: ZigpyGreenPowerDevice) -> None:
+    """Emit a received toggle command from the zigpy GPD."""
+    zigpy_gpd.emit(
+        GreenPowerCommandReceived.event_type,
+        GreenPowerCommandReceived(
+            device_ieee=str(zigpy_gpd.ieee),
+            endpoint_id=None,
+            command_id=GPDCommandID.Toggle,
+            command=None,
+        ),
+    )
+
+
+async def test_green_power_quirk_entity_lifecycle(zha_gateway: Gateway) -> None:
+    """Test a quirk entity on a GPD through initialization and recommissioning."""
+    entry = GreenPowerQuirkRegistryEntry(
+        device_match=GreenPowerDeviceMatch(device_id=DeviceID.OnOffSwitch),
+        zha_device_factory=QuirkGreenPowerDevice,
+    )
+
+    with DEVICE_REGISTRY.preserve_state():
+        DEVICE_REGISTRY.register(entry)
+
+        zigpy_gpd = DEVICE_REGISTRY.resolve(make_zigpy_gpd(zha_gateway))
+        zha_device = zha_gateway.get_or_create_device(zigpy_gpd)
+        assert isinstance(zha_device, QuirkGreenPowerDevice)
+
+        await zha_device.async_initialize(from_cache=True)
+
+        unique_id = f"{zigpy_gpd.ieee}-toggle"
+        entity = zha_device.get_platform_entity(Platform.EVENT, unique_id)
+        assert list(zha_device.platform_entities) == [(Platform.EVENT, unique_id)]
+        assert entity.state.available is True
+        assert entity.state.event_types == ["toggle"]
+        assert zha_device.extended_device_info.entities == {unique_id: entity.state}
+
+        triggered = []
+        entity.on_event(EntityEventTriggeredEvent.event, triggered.append)
+        send_toggle(zigpy_gpd)
+        assert [event.triggered for event in triggered] == [
+            TriggeredEvent(event_type="toggle", event_attributes={})
+        ]
+
+        entity_events = []
+        zha_device.on_event(ZHA_DEVICE_ENTITY_REMOVED_EVENT, entity_events.append)
+        zha_device.on_event(ZHA_DEVICE_ENTITY_ADDED_EVENT, entity_events.append)
+
+        # Recommissioning replaces the zigpy device and recreates the entity
+        new_zigpy_gpd = DEVICE_REGISTRY.resolve(make_zigpy_gpd(zha_gateway))
+        zha_gateway.application_controller.listener_event(
+            "device_reinterviewed", new_zigpy_gpd
+        )
+        await zha_gateway.async_block_till_done()
+
+        assert zha_gateway.devices[new_zigpy_gpd.ieee] is zha_device
+        assert zha_device.device is new_zigpy_gpd
+        assert entity_events == [
+            DeviceEntityRemovedEvent(platform=Platform.EVENT, unique_id=unique_id),
+            DeviceEntityAddedEvent(platform=Platform.EVENT, unique_id=unique_id),
+        ]
+
+        new_entity = zha_device.get_platform_entity(Platform.EVENT, unique_id)
+        assert new_entity is not entity
+        assert list(zha_device.platform_entities) == [(Platform.EVENT, unique_id)]
+
+        # The old entity is unsubscribed from the old zigpy device
+        new_triggered = []
+        new_entity.on_event(EntityEventTriggeredEvent.event, new_triggered.append)
+        send_toggle(zigpy_gpd)
+        assert len(triggered) == 1
+        assert new_triggered == []
+
+        send_toggle(new_zigpy_gpd)
+        assert len(triggered) == 1
+        assert [event.triggered for event in new_triggered] == [
+            TriggeredEvent(event_type="toggle", event_attributes={})
+        ]
