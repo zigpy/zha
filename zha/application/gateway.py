@@ -119,7 +119,7 @@ class ExtendedDeviceInfoWithPairingStatus(ExtendedDeviceInfo):
 class DeviceJoinedDeviceInfo:
     """Information about a device."""
 
-    ieee: str
+    ieee: EUI64
     nwk: int
     pairing_status: DevicePairingStatus
 
@@ -238,7 +238,9 @@ class Gateway(AsyncUtilMixin, EventBase):
         """Get the current radio type."""
         return RadioType[self.config.config.coordinator_configuration.radio_type]
 
-    def get_application_controller_data(self) -> tuple[ControllerApplication, dict]:
+    def get_application_controller_data(
+        self,
+    ) -> tuple[type[ControllerApplication], dict[str, Any]]:
         """Get an uninitialized instance of a zigpy `ControllerApplication`."""
         app_config = self.config.zigpy_config
         app_config[CONF_DEVICE] = {
@@ -300,9 +302,9 @@ class Gateway(AsyncUtilMixin, EventBase):
 
         await self.application_controller.startup(auto_form=True)
 
-        self.coordinator_zha_device = self.get_or_create_device(
-            self._find_coordinator_device()
-        )
+        coordinator = self.get_or_create_device(self._find_coordinator_device())
+        assert isinstance(coordinator, Device)
+        self.coordinator_zha_device = coordinator
 
         await self.load_devices()
         self.load_groups()
@@ -322,7 +324,7 @@ class Gateway(AsyncUtilMixin, EventBase):
 
     @asynccontextmanager
     async def request_priority(
-        self, priority: t.PacketPriority | None
+        self, priority: t.PacketPriority
     ) -> AsyncGenerator[None, None]:
         """Context manager to request a priority for radio access."""
         async with self.application_controller.request_priority(priority):
@@ -333,7 +335,7 @@ class Gateway(AsyncUtilMixin, EventBase):
         _LOGGER.debug("Connection to the radio was lost: %r", exc)
         self.emit(ZHA_GW_MSG_CONNECTION_LOST, ConnectionLostEvent(exception=exc))
 
-    def _find_coordinator_device(self) -> zigpy.device.ZigbeeDevice:
+    def _find_coordinator_device(self) -> zigpy.device.BaseDevice:
         zigpy_coordinator = self.application_controller.get_device(nwk=0x0000)
 
         if last_backup := self.application_controller.backups.most_recent_backup():
@@ -719,7 +721,7 @@ class Gateway(AsyncUtilMixin, EventBase):
                     DeviceRemovedEvent(device_info=device_info),
                 )
 
-    def get_device(self, ieee: EUI64) -> Device | None:
+    def get_device(self, ieee: EUI64) -> BaseDevice | None:
         """Return Device for given ieee."""
         return self._devices.get(ieee)
 
@@ -817,7 +819,7 @@ class Gateway(AsyncUtilMixin, EventBase):
             DeviceFullInitEvent(device_info=device_info),
         )
 
-    async def _async_device_joined(self, zha_device: Device) -> None:
+    async def _async_device_joined(self, zha_device: BaseDevice) -> None:
         zha_device.available = True
         zha_device.on_network = True
 
@@ -836,7 +838,7 @@ class Gateway(AsyncUtilMixin, EventBase):
             ),
         )
 
-    async def _async_device_rejoined(self, zha_device: Device) -> None:
+    async def _async_device_rejoined(self, zha_device: BaseDevice) -> None:
         _LOGGER.debug(
             "skipping discovery for previously discovered device - %s:%s",
             zha_device.nwk,

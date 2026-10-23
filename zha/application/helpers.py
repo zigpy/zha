@@ -448,7 +448,7 @@ class GlobalUpdater:
         self._update_listeners: list[Callable] = []
         self._gateway: Gateway = gateway
 
-    def start(self):
+    def start(self) -> None:
         """Start the global updater."""
         self._updater_task_handle = self._gateway.async_create_background_task(
             self.update_listeners(),
@@ -461,7 +461,7 @@ class GlobalUpdater:
             getattr(self, "__polling_interval"),
         )
 
-    def stop(self):
+    def stop(self) -> None:
         """Stop the global updater."""
         _LOGGER.debug("stopping global updater")
         if self._updater_task_handle:
@@ -513,7 +513,7 @@ class DeviceAvailabilityChecker:
         self._gateway: Gateway = gateway
         self._device_availability_task_handle: asyncio.Task | None = None
 
-    def start(self):
+    def start(self) -> None:
         """Start the device availability checker."""
         self._device_availability_task_handle = (
             self._gateway.async_create_background_task(
@@ -528,7 +528,7 @@ class DeviceAvailabilityChecker:
             getattr(self, "__polling_interval"),
         )
 
-    def stop(self):
+    def stop(self) -> None:
         """Stop the device availability checker."""
         _LOGGER.debug("stopping device availability checker")
         if self._device_availability_task_handle:

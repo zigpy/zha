@@ -1484,7 +1484,7 @@ class ZigbeeDevice(BaseDevice[ZigpyDevice]):
             if ep_id != 0
         }
 
-    def async_get_groupable_endpoints(self):
+    def async_get_groupable_endpoints(self) -> list[int]:
         """Get device endpoints that have a group 'in' cluster."""
         return [
             ep_id
