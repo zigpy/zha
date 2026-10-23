@@ -53,12 +53,19 @@ from zha.async_ import (
     gather_with_limited_concurrency,
 )
 from zha.event import EventBase
+from zha.exceptions import ZHAException
 from zha.quirks import DEVICE_REGISTRY, QUIRK_REGISTRY_ENTRY_ATTR
 from zha.zigbee.device import Device, DeviceInfo, DeviceStatus, ExtendedDeviceInfo
 from zha.zigbee.group import Group, GroupInfo, GroupMemberReference
 
 BLOCK_LOG_TIMEOUT: Final[int] = 60
 SHUT_DOWN_DELAY_S: Final[float] = 0.1
+
+# Valid Zigbee group identifiers, per ZCL R8 section 3.6.1. A device answers
+# `INVALID_VALUE` to an `AddGroup` for anything outside this range, per ZCL R8
+# section 3.6.2.3.2.2
+MIN_GROUP_ID: Final[int] = 0x0001
+MAX_GROUP_ID: Final[int] = 0xFFF7
 _R = TypeVar("_R")
 _LOGGER = logging.getLogger(__name__)
 
@@ -816,44 +823,88 @@ class Gateway(AsyncUtilMixin, EventBase):
         zha_device.available = False
         zha_device.on_network = True
 
+    def _is_groupable_member(self, member: GroupMemberReference) -> bool:
+        """Return whether a group member refers to an endpoint that can join a group."""
+        if (device := self.devices.get(member.ieee)) is None:
+            return False
+        # the endpoints with a `Groups` cluster to join, which is also what Home
+        # Assistant offers in its "Add group" page (not a coroutine, despite the
+        # name)
+        return member.endpoint_id in device.async_get_groupable_endpoints()
+
     async def async_create_zigpy_group(
         self,
         name: str,
         members: list[GroupMemberReference] | None,
         group_id: int | None = None,
-    ) -> Group | None:
+    ) -> Group:
         """Create a new Zigpy Zigbee group."""
-
-        # we start with two to fill any gaps from a user removing existing groups
+        # zigpy's groups are the source of truth: a group we do not know about yet
+        # would be silently reused by `Groups.add_group`
+        zigpy_groups = self.application_controller.groups
 
         if group_id is None:
+            # we start with two to fill any gaps from a user removing existing groups
             group_id = 2
-            while group_id in self.groups:
+            while group_id in zigpy_groups:
                 group_id += 1
+        elif not MIN_GROUP_ID <= group_id <= MAX_GROUP_ID:
+            raise ZHAException(
+                f"Group ID 0x{group_id:04x} is not a valid Zigbee group ID,"
+                f" it must be between 0x{MIN_GROUP_ID:04x} and 0x{MAX_GROUP_ID:04x}"
+            )
+        elif group_id in zigpy_groups:
+            raise ZHAException(
+                f"Group ID 0x{group_id:04x} is already used by group"
+                f" '{zigpy_groups[group_id].name}'"
+            )
 
-        # guard against group already existing
-        if self.get_group(name) is None:
-            self.application_controller.groups.add_group(group_id, name)
-            if members is not None:
-                tasks = []
-                for member in members:
-                    _LOGGER.debug(
-                        (
-                            "Adding member with IEEE: %s and endpoint ID: %s to group:"
-                            " %s:0x%04x"
-                        ),
-                        member.ieee,
-                        member.endpoint_id,
-                        name,
-                        group_id,
+        # the name only has to be unique among the groups ZHA presents: it is the
+        # group ID that `Groups.add_group` keys on
+        if self.get_group(name) is not None:
+            raise ZHAException(f"A group named '{name}' already exists")
+
+        if members is not None and (
+            ungroupable_members := dict.fromkeys(
+                f"{member.ieee} endpoint {member.endpoint_id}"
+                for member in members
+                if not self._is_groupable_member(member)
+            )
+        ):
+            raise ZHAException(
+                f"Cannot add members to group '{name}' that are not groupable device"
+                f" endpoints: {', '.join(ungroupable_members)}"
+            )
+
+        zigpy_group = zigpy_groups.add_group(group_id, name)
+
+        if members is not None:
+            tasks = []
+            for member in members:
+                _LOGGER.debug(
+                    (
+                        "Adding member with IEEE: %s and endpoint ID: %s to group:"
+                        " %s:0x%04x"
+                    ),
+                    member.ieee,
+                    member.endpoint_id,
+                    name,
+                    group_id,
+                )
+                tasks.append(
+                    self.devices[member.ieee].async_add_endpoint_to_group(
+                        member.endpoint_id, group_id
                     )
-                    tasks.append(
-                        self.devices[member.ieee].async_add_endpoint_to_group(
-                            member.endpoint_id, group_id
-                        )
-                    )
-                await asyncio.gather(*tasks)
-        return self.groups.get(group_id)
+                )
+            await asyncio.gather(*tasks)
+
+        if zigpy_groups.get(group_id) is not zigpy_group:
+            # adding the members is awaited, so the group can be removed in the
+            # meantime: returning it would leave a group behind that zigpy, and
+            # therefore no device, knows anything about
+            raise ZHAException(f"Group '{name}' was removed while it was being created")
+
+        return self.get_or_create_group(zigpy_group)
 
     async def async_remove_device(self, ieee: EUI64) -> None:
         """Remove a device from ZHA."""

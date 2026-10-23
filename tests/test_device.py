@@ -71,7 +71,7 @@ from zha.zigbee.device import (
     ZHAEvent,
     get_device_automation_triggers,
 )
-from zha.zigbee.group import Group, GroupMemberReference
+from zha.zigbee.group import Group
 
 
 def zigpy_device(zha_gateway: Gateway, with_basic_cluster: bool = True, **kwargs):
@@ -2068,15 +2068,13 @@ async def test_gateway_reconfigure_with_swap(
 
     # Create a group containing this device so we can verify that group
     # subscriptions are refreshed after the reinterview rebuild.
-    zha_group = await zha_gateway.async_create_zigpy_group(
-        "Test Group",
-        [GroupMemberReference(ieee=zigpy_dev.ieee, endpoint_id=3)],
-    )
+    zha_group = await zha_gateway.async_create_zigpy_group("Test Group", members=None)
     await zha_gateway.async_block_till_done()
     assert zha_group is not None
 
-    # The mock endpoint.request doesn't actually add to the zigpy group,
-    # so add manually.
+    # The device's endpoint has no `Groups` cluster, so it cannot join a group
+    # itself, and the mock endpoint.request doesn't add it to the zigpy group
+    # either, so add it manually.
     zha_group.zigpy_group.add_member(zigpy_dev.endpoints[3], suppress_event=True)
 
     # Register a mock group entity so the group subscribes to member entities.
