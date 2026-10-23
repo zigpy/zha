@@ -579,6 +579,11 @@ class BaseDevice[ZigpyDeviceT: ZigpyBaseDevice](LogMixin, EventBase):
             POWER_MAINS_POWERED if self.is_mains_powered else POWER_BATTERY_OR_UNKNOWN
         )
 
+    @cached_property
+    def is_coordinator(self) -> bool | None:
+        """Return true if this device represents a coordinator."""
+        return False
+
     @property
     def is_active_coordinator(self) -> bool:
         """Return true if this device is the active coordinator."""
@@ -2050,9 +2055,10 @@ class GreenPowerDevice(BaseDevice[ZigpyGreenPowerDevice]):
         info["power_source"] = self.power_source
         info["lqi"] = self.lqi
         info["rssi"] = self.rssi
-        info["last_seen"] = self.last_seen
+        info["last_seen"] = self.device._last_seen.isoformat()
         info["available"] = self.available
         info["device_type"] = self.device_type
+        info["active_coordinator"] = self.is_active_coordinator
         info["signature"] = self.signature
 
         info["zha_lib_entities"] = defaultdict(list)

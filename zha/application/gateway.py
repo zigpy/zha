@@ -440,7 +440,7 @@ class Gateway(AsyncUtilMixin, EventBase):
             fetch_updated_state(), "zha.gateway-fetch_updated_state"
         )
 
-    def device_joined(self, device: zigpy.device.ZigbeeDevice) -> None:
+    def device_joined(self, device: zigpy.device.BaseDevice) -> None:
         """Handle device joined.
 
         At this point, no information about the device is known other than its
@@ -481,7 +481,7 @@ class Gateway(AsyncUtilMixin, EventBase):
             ),
         )
 
-    def device_initialized(self, device: zigpy.device.ZigbeeDevice) -> None:
+    def device_initialized(self, device: zigpy.device.BaseDevice) -> None:
         """Handle device joined and basic information discovered."""
         if device.ieee in self._device_init_tasks:
             _LOGGER.warning(
@@ -704,7 +704,7 @@ class Gateway(AsyncUtilMixin, EventBase):
                 ),
             )
 
-    def device_removed(self, device: zigpy.device.ZigbeeDevice) -> None:
+    def device_removed(self, device: zigpy.device.BaseDevice) -> None:
         """Handle device being removed from the network."""
         _LOGGER.info("Removing device %s - %s", device.ieee, f"0x{device.nwk:04x}")
         zha_device = self._devices.pop(device.ieee, None)
@@ -783,7 +783,7 @@ class Gateway(AsyncUtilMixin, EventBase):
             if device.status is DeviceStatus.INITIALIZED:
                 device.update_available(available)
 
-    async def async_device_initialized(self, device: zigpy.device.ZigbeeDevice) -> None:
+    async def async_device_initialized(self, device: zigpy.device.BaseDevice) -> None:
         """Handle device joined and basic information discovered (async)."""
         zha_device = self.get_or_create_device(device)
         _LOGGER.debug(

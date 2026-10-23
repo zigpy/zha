@@ -223,7 +223,7 @@ class DeviceRegistry:
     """Registry of quirk entries for all device types.
 
     Zigbee entries are indexed by (manufacturer, model); Green Power entries
-    are kept in a flat list matched in registration order.
+    are kept in a flat list. The most recently registered matching entry wins.
     """
 
     def __init__(self) -> None:
@@ -236,7 +236,7 @@ class DeviceRegistry:
         # Matched against every device by their filters alone, used mostly for legacy v1
         # quirks without model/manufacturer filters.
         self._wildcard_registry: list[QuirkRegistryEntry] = []
-        # Green Power entries, matched in registration order.
+        # Green Power entries, most recently registered first.
         self._gp_registry: list[GreenPowerQuirkRegistryEntry] = []
 
     @overload
@@ -299,7 +299,7 @@ class DeviceRegistry:
     def match_entry(
         self, zigpy_device: zigpy.device.ZigbeeDevice
     ) -> QuirkRegistryEntry | None:
-        """Return the first registered entry matching `zigpy_device`."""
+        """Return the most recently registered entry matching `zigpy_device`."""
         for key in (
             ModelInfo(zigpy_device.manufacturer, zigpy_device.model),
             ModelInfo(zigpy_device.manufacturer, None),
@@ -318,7 +318,7 @@ class DeviceRegistry:
     def match_green_power_entry(
         self, zigpy_device: zigpy.device.GreenPowerDevice
     ) -> GreenPowerQuirkRegistryEntry | None:
-        """Return the first registered entry matching the Green Power device."""
+        """Return the most recently registered entry matching the Green Power device."""
         for entry in self._gp_registry:
             if entry.device_match.matches(zigpy_device):
                 return entry

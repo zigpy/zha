@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Iterator
+from datetime import UTC, datetime
 
 from zigpy.device import (
     GreenPowerCommandReceived,
@@ -125,8 +126,11 @@ async def test_green_power_device_info(zha_gateway: Gateway) -> None:
     assert extended_info.routes == []
     assert extended_info.endpoint_names == []
 
+    zigpy_gpd.last_seen = datetime(2026, 1, 1, tzinfo=UTC)
     diagnostics = zha_device.get_diagnostics_json()
     assert diagnostics["ieee"] == str(zigpy_gpd.ieee)
+    assert diagnostics["last_seen"] == "2026-01-01T00:00:00+00:00"
+    assert diagnostics["active_coordinator"] is False
     assert diagnostics["device_type"] == "GreenPower"
     assert diagnostics["signature"]["device_id"] == 0x02
 
