@@ -906,7 +906,10 @@ async def test_binary_output_cluster(zha_gateway: Gateway) -> None:
     ]
 
 
-async def test_group_state_ignores_unavailable_members(zha_gateway: Gateway) -> None:
+@pytest.mark.parametrize("via_on_network", [False, True])
+async def test_group_state_ignores_unavailable_members(
+    zha_gateway: Gateway, via_on_network: bool
+) -> None:
     """Test that an unavailable member does not keep the group on."""
     device_switch_1 = await device_switch_1_mock(zha_gateway)
     device_switch_2 = await device_switch_2_mock(zha_gateway)
@@ -932,7 +935,10 @@ async def test_group_state_ignores_unavailable_members(zha_gateway: Gateway) -> 
     assert bool(entity.state.is_on) is True
 
     # the second member drops off the network while it is still on
-    device_switch_2.update_available(False)
+    if via_on_network:
+        device_switch_2.on_network = False
+    else:
+        device_switch_2.update_available(False)
     await asyncio.sleep(1)
     await zha_gateway.async_block_till_done()
     assert device_2_entity.state.available is False
@@ -945,7 +951,10 @@ async def test_group_state_ignores_unavailable_members(zha_gateway: Gateway) -> 
     assert bool(entity.state.is_on) is False
 
     # once it is reachable again its state counts, and the group is on
-    device_switch_2.update_available(True)
+    if via_on_network:
+        device_switch_2.on_network = True
+    else:
+        device_switch_2.update_available(True)
     await asyncio.sleep(1)
     await zha_gateway.async_block_till_done()
     assert bool(entity.state.is_on) is True
