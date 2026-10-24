@@ -1,0 +1,633 @@
+{
+  "version": 3,
+  "ieee": "ab:cd:ef:12:0a:9b:ad:f5",
+  "nwk": "0xFA53",
+  "manufacturer": "Aqara",
+  "model": "aqara.feeder.acn001",
+  "friendly_manufacturer": "Aqara",
+  "friendly_model": "aqara.feeder.acn001",
+  "name": "Aqara aqara.feeder.acn001",
+  "quirk_applied": true,
+  "quirk_class": "zhaquirks.xiaomi.aqara.feeder_acn001:AqaraFeederAcn001",
+  "exposes_features": [],
+  "manufacturer_code": 4447,
+  "power_source": "Mains",
+  "lqi": 131,
+  "rssi": null,
+  "last_seen": "2026-09-29T15:12:55.117903+00:00",
+  "available": true,
+  "device_type": "Router",
+  "active_coordinator": false,
+  "node_descriptor": {
+    "logical_type": "Router",
+    "complex_descriptor_available": false,
+    "user_descriptor_available": false,
+    "reserved": 0,
+    "aps_flags": 0,
+    "frequency_band": 8,
+    "mac_capability_flags": 142,
+    "manufacturer_code": 4447,
+    "maximum_buffer_size": 82,
+    "maximum_incoming_transfer_size": 255,
+    "server_mask": 11264,
+    "maximum_outgoing_transfer_size": 255,
+    "descriptor_capability_field": 0
+  },
+  "endpoints": {
+    "1": {
+      "profile_id": 260,
+      "device_type": {
+        "name": "ON_OFF_OUTPUT",
+        "id": 2
+      },
+      "in_clusters": [
+        {
+          "cluster_id": "0x0000",
+          "endpoint_attribute": "basic",
+          "attributes": [
+            {
+              "id": "0x0004",
+              "name": "manufacturer",
+              "zcl_type": "string",
+              "unsupported": true
+            },
+            {
+              "id": "0x0005",
+              "name": "model",
+              "zcl_type": "string",
+              "value": "aqara.feeder.acn001"
+            }
+          ]
+        },
+        {
+          "cluster_id": "0x0003",
+          "endpoint_attribute": "identify",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0004",
+          "endpoint_attribute": "groups",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0005",
+          "endpoint_attribute": "scenes",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x000a",
+          "endpoint_attribute": "time",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0xfcc0",
+          "endpoint_attribute": "opple_cluster",
+          "attributes": [
+            {
+              "id": "0x138f",
+              "name": "child_lock",
+              "zcl_type": "bool",
+              "value": 0
+            },
+            {
+              "id": "0x138e",
+              "name": "disable_led_indicator",
+              "zcl_type": "bool",
+              "value": 0
+            },
+            {
+              "id": "0x138d",
+              "name": "error_detected",
+              "zcl_type": "bool",
+              "value": 0
+            },
+            {
+              "id": "0xfff1",
+              "name": "feeder_attr",
+              "zcl_type": "octstr",
+              "value": {
+                "__type": "<class 'bytes'>",
+                "repr": "b'\\x00\\x05G\\x08\\x00\\x08\\xc8 7F06000201,7F0B000201,7F14000200'"
+              }
+            },
+            {
+              "id": "0x1388",
+              "name": "feeding",
+              "zcl_type": "bool",
+              "value": 1
+            },
+            {
+              "id": "0x1390",
+              "name": "feeding_mode",
+              "zcl_type": "enum8",
+              "value": 1
+            },
+            {
+              "id": "0x138a",
+              "name": "last_feeding_size",
+              "zcl_type": "uint8",
+              "value": 2
+            },
+            {
+              "id": "0x1389",
+              "name": "last_feeding_source",
+              "zcl_type": "enum8",
+              "value": 0
+            },
+            {
+              "id": "0x1392",
+              "name": "portion_weight",
+              "zcl_type": "uint8",
+              "value": 5
+            },
+            {
+              "id": "0x138b",
+              "name": "portions_dispensed",
+              "zcl_type": "uint16",
+              "value": 4
+            },
+            {
+              "id": "0x1391",
+              "name": "serving_size",
+              "zcl_type": "uint8",
+              "value": 1
+            },
+            {
+              "id": "0x138c",
+              "name": "weight_dispensed",
+              "zcl_type": "uint32",
+              "value": 20
+            }
+          ]
+        }
+      ],
+      "out_clusters": [
+        {
+          "cluster_id": "0x0003",
+          "endpoint_attribute": "identify",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0019",
+          "endpoint_attribute": "ota",
+          "attributes": [
+            {
+              "id": "0x0002",
+              "name": "current_file_version",
+              "zcl_type": "uint32",
+              "value": 9761
+            }
+          ]
+        }
+      ]
+    },
+    "242": {
+      "profile_id": 41440,
+      "device_type": {
+        "name": "PROXY_BASIC",
+        "id": 97
+      },
+      "in_clusters": [],
+      "out_clusters": [
+        {
+          "cluster_id": "0x0021",
+          "endpoint_attribute": "green_power",
+          "attributes": []
+        }
+      ]
+    }
+  },
+  "original_signature": {
+    "model": "aqara.feeder.acn001",
+    "node_desc": {
+      "logical_type": 1,
+      "complex_descriptor_available": 0,
+      "user_descriptor_available": 0,
+      "reserved": 0,
+      "aps_flags": 0,
+      "frequency_band": 8,
+      "mac_capability_flags": 142,
+      "manufacturer_code": 4447,
+      "maximum_buffer_size": 82,
+      "maximum_incoming_transfer_size": 255,
+      "server_mask": 11264,
+      "maximum_outgoing_transfer_size": 255,
+      "descriptor_capability_field": 0
+    },
+    "endpoints": {
+      "1": {
+        "profile_id": "0x0104",
+        "device_type": "0x0002",
+        "input_clusters": [
+          "0x0000",
+          "0x0003",
+          "0x0004",
+          "0x0005",
+          "0x0006",
+          "0xfcc0"
+        ],
+        "output_clusters": [
+          "0x0003",
+          "0x0019"
+        ]
+      },
+      "242": {
+        "profile_id": "0xa1e0",
+        "device_type": "0x0061",
+        "input_clusters": [],
+        "output_clusters": [
+          "0x0021"
+        ]
+      }
+    }
+  },
+  "zha_lib_entities": {
+    "binary_sensor": [
+      {
+        "fallback_name": null,
+        "unique_id": "ab:cd:ef:12:0a:9b:ad:f5-1-64704-error_detected",
+        "migrate_unique_ids": [],
+        "platform": "binary_sensor",
+        "class_name": "AqaraPetFeederErrorDetected",
+        "translation_key": null,
+        "translation_placeholders": null,
+        "device_class": "problem",
+        "state_class": null,
+        "entity_category": null,
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:0a:9b:ad:f5",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "is_on": false,
+        "attribute_name": "error_detected"
+      }
+    ],
+    "button": [
+      {
+        "fallback_name": null,
+        "unique_id": "ab:cd:ef:12:0a:9b:ad:f5-1-3",
+        "migrate_unique_ids": [],
+        "platform": "button",
+        "class_name": "IdentifyButton",
+        "translation_key": null,
+        "translation_placeholders": null,
+        "device_class": "identify",
+        "state_class": null,
+        "entity_category": "diagnostic",
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:0a:9b:ad:f5",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "command": "identify",
+        "args": [
+          5
+        ],
+        "kwargs": {}
+      },
+      {
+        "fallback_name": null,
+        "unique_id": "ab:cd:ef:12:0a:9b:ad:f5-1-64704-feeding",
+        "migrate_unique_ids": [],
+        "platform": "button",
+        "class_name": "AqaraPetFeederFeedButton",
+        "translation_key": "feed",
+        "translation_placeholders": null,
+        "device_class": null,
+        "state_class": null,
+        "entity_category": null,
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:0a:9b:ad:f5",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "attribute_name": "feeding",
+        "attribute_value": 1
+      }
+    ],
+    "number": [
+      {
+        "fallback_name": null,
+        "unique_id": "ab:cd:ef:12:0a:9b:ad:f5-1-64704-portion_weight",
+        "migrate_unique_ids": [],
+        "platform": "number",
+        "class_name": "AqaraPetFeederPortionWeight",
+        "translation_key": "portion_weight",
+        "translation_placeholders": null,
+        "device_class": null,
+        "state_class": null,
+        "entity_category": "config",
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:0a:9b:ad:f5",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "native_value": 5,
+        "mode": "box",
+        "native_max_value": 100,
+        "native_min_value": 1,
+        "native_step": 1.0,
+        "native_unit_of_measurement": "g"
+      },
+      {
+        "fallback_name": null,
+        "unique_id": "ab:cd:ef:12:0a:9b:ad:f5-1-64704-serving_size",
+        "migrate_unique_ids": [],
+        "platform": "number",
+        "class_name": "AqaraPetFeederServingSize",
+        "translation_key": "serving_size",
+        "translation_placeholders": null,
+        "device_class": null,
+        "state_class": null,
+        "entity_category": "config",
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:0a:9b:ad:f5",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "native_value": 1,
+        "mode": "box",
+        "native_max_value": 10,
+        "native_min_value": 1,
+        "native_step": 1.0,
+        "native_unit_of_measurement": null
+      }
+    ],
+    "select": [
+      {
+        "fallback_name": null,
+        "unique_id": "ab:cd:ef:12:0a:9b:ad:f5-1-64704-feeding_mode",
+        "migrate_unique_ids": [],
+        "platform": "select",
+        "class_name": "AqaraPetFeederMode",
+        "translation_key": "feeding_mode",
+        "translation_placeholders": null,
+        "device_class": null,
+        "state_class": null,
+        "entity_category": "config",
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:0a:9b:ad:f5",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "current_option": "Schedule",
+        "enum": "AqaraFeedingMode",
+        "options": [
+          "Manual",
+          "Schedule"
+        ]
+      }
+    ],
+    "sensor": [
+      {
+        "fallback_name": null,
+        "unique_id": "ab:cd:ef:12:0a:9b:ad:f5-1-0-lqi",
+        "migrate_unique_ids": [],
+        "platform": "sensor",
+        "class_name": "LQISensor",
+        "translation_key": "lqi",
+        "translation_placeholders": null,
+        "device_class": null,
+        "state_class": "measurement",
+        "entity_category": "diagnostic",
+        "entity_registry_enabled_default": false,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:0a:9b:ad:f5",
+        "endpoint_id": null,
+        "available": true,
+        "group_id": null,
+        "native_value": 131,
+        "suggested_display_precision": null,
+        "unit": null
+      },
+      {
+        "fallback_name": null,
+        "unique_id": "ab:cd:ef:12:0a:9b:ad:f5-1-0-rssi",
+        "migrate_unique_ids": [],
+        "platform": "sensor",
+        "class_name": "RSSISensor",
+        "translation_key": "rssi",
+        "translation_placeholders": null,
+        "device_class": "signal_strength",
+        "state_class": "measurement",
+        "entity_category": "diagnostic",
+        "entity_registry_enabled_default": false,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:0a:9b:ad:f5",
+        "endpoint_id": null,
+        "available": true,
+        "group_id": null,
+        "native_value": null,
+        "suggested_display_precision": null,
+        "unit": "dBm"
+      },
+      {
+        "fallback_name": null,
+        "unique_id": "ab:cd:ef:12:0a:9b:ad:f5-1-64704-last_feeding_size",
+        "migrate_unique_ids": [],
+        "platform": "sensor",
+        "class_name": "AqaraPetFeederLastFeedingSize",
+        "translation_key": "last_feeding_size",
+        "translation_placeholders": null,
+        "device_class": null,
+        "state_class": null,
+        "entity_category": null,
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:0a:9b:ad:f5",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "native_value": 2,
+        "suggested_display_precision": null,
+        "unit": null
+      },
+      {
+        "fallback_name": null,
+        "unique_id": "ab:cd:ef:12:0a:9b:ad:f5-1-64704-last_feeding_source",
+        "migrate_unique_ids": [],
+        "platform": "sensor",
+        "class_name": "AqaraPetFeederLastFeedingSource",
+        "translation_key": "last_feeding_source",
+        "translation_placeholders": null,
+        "device_class": "enum",
+        "state_class": null,
+        "entity_category": null,
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:0a:9b:ad:f5",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "native_value": "undefined_0x00",
+        "suggested_display_precision": null,
+        "unit": null,
+        "options": [
+          "Feeder",
+          "HomeAssistant"
+        ]
+      },
+      {
+        "fallback_name": null,
+        "unique_id": "ab:cd:ef:12:0a:9b:ad:f5-1-64704-portions_dispensed",
+        "migrate_unique_ids": [],
+        "platform": "sensor",
+        "class_name": "AqaraPetFeederPortionsDispensed",
+        "translation_key": "portions_dispensed_today",
+        "translation_placeholders": null,
+        "device_class": null,
+        "state_class": "total_increasing",
+        "entity_category": null,
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:0a:9b:ad:f5",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "native_value": 4,
+        "suggested_display_precision": null,
+        "unit": null
+      },
+      {
+        "fallback_name": null,
+        "unique_id": "ab:cd:ef:12:0a:9b:ad:f5-1-64704-weight_dispensed",
+        "migrate_unique_ids": [],
+        "platform": "sensor",
+        "class_name": "AqaraPetFeederWeightDispensed",
+        "translation_key": "weight_dispensed_today",
+        "translation_placeholders": null,
+        "device_class": null,
+        "state_class": "total_increasing",
+        "entity_category": null,
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:0a:9b:ad:f5",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "native_value": 20,
+        "suggested_display_precision": null,
+        "unit": "g"
+      }
+    ],
+    "switch": [
+      {
+        "fallback_name": null,
+        "unique_id": "ab:cd:ef:12:0a:9b:ad:f5-1-64704-child_lock",
+        "migrate_unique_ids": [],
+        "platform": "switch",
+        "class_name": "AqaraPetFeederChildLock",
+        "translation_key": "child_lock",
+        "translation_placeholders": null,
+        "device_class": null,
+        "state_class": null,
+        "entity_category": "config",
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:0a:9b:ad:f5",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "is_on": false,
+        "inverted": false,
+        "attribute_name": "child_lock",
+        "invert_attribute_name": null,
+        "force_inverted": false,
+        "off_value": 0,
+        "on_value": 1
+      },
+      {
+        "fallback_name": null,
+        "unique_id": "ab:cd:ef:12:0a:9b:ad:f5-1-64704-disable_led_indicator",
+        "migrate_unique_ids": [],
+        "platform": "switch",
+        "class_name": "AqaraPetFeederLEDIndicator",
+        "translation_key": "led_indicator",
+        "translation_placeholders": null,
+        "device_class": null,
+        "state_class": null,
+        "entity_category": "config",
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:0a:9b:ad:f5",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "is_on": true,
+        "inverted": true,
+        "attribute_name": "disable_led_indicator",
+        "invert_attribute_name": null,
+        "force_inverted": true,
+        "off_value": 0,
+        "on_value": 1
+      }
+    ],
+    "update": [
+      {
+        "fallback_name": null,
+        "unique_id": "ab:cd:ef:12:0a:9b:ad:f5-1-25-firmware_update",
+        "migrate_unique_ids": [],
+        "platform": "update",
+        "class_name": "FirmwareUpdateEntity",
+        "translation_key": null,
+        "translation_placeholders": null,
+        "device_class": "firmware",
+        "state_class": null,
+        "entity_category": "config",
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:0a:9b:ad:f5",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "installed_version": "0x00002621",
+        "in_progress": false,
+        "update_percentage": null,
+        "latest_version": null,
+        "release_summary": null,
+        "release_notes": null,
+        "release_url": null,
+        "supported_features": 23
+      }
+    ]
+  },
+  "neighbors": [],
+  "routes": []
+}

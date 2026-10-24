@@ -319,8 +319,12 @@ def zigpy_device_from_diagnostics(
 
     zha_data = data["data"]
 
-    if "version" not in zha_data:
+    if "signature" in zha_data:
         return zigpy_device_from_legacy_diagnostics(app, data, patch_cluster)
+
+    # Diagnostics pasted inline into issues are sometimes trimmed
+    if "version" not in zha_data:
+        return None
 
     if not has_original_signature(zha_data):
         return None
@@ -346,17 +350,27 @@ def has_original_signature(zha_data: dict) -> bool:
 
 def sanitize_device_data(zha_data: dict) -> dict:
     """Replace redacted and identifying fields in modern diagnostics JSON."""
-    # Some diagnostics are hand-redacted (e.g. nwk "0xREDACTED"), fake a NWK instead
-    if "REDACTED" in zha_data["nwk"]:
+    # Some diagnostics are hand-redacted (e.g. nwk "0xREDACTED") or lack the NWK,
+    # fake a NWK instead
+    if "nwk" not in zha_data or "REDACTED" in zha_data["nwk"]:
         zha_data["nwk"] = "0x1234"
 
     # Home Assistant diagnostics contain redacted IEEE info, fake an IEEE instead
-    if "REDACTED" in zha_data["ieee"]:
+    if "ieee" not in zha_data or "REDACTED" in zha_data["ieee"]:
         zha_data["ieee"] = str(
             ieee_from_manufacturer_model(
                 manufacturer=zha_data["manufacturer"], model=zha_data["model"]
             )
         )
+
+    # Some diagnostics also redact or lack the last seen time
+    if "last_seen" not in zha_data or "REDACTED" in zha_data["last_seen"]:
+        zha_data["last_seen"] = "1970-01-01T00:00:00+00:00"
+
+    # Trimmed or redacted diagnostics can lack the link quality, it is optional anyway
+    for key in ("lqi", "rssi"):
+        if key not in zha_data or "REDACTED" in str(zha_data[key]):
+            zha_data[key] = None
 
     # Neighbors contain EUI64 addresses and EPIDs
     zha_data["neighbors"] = []
