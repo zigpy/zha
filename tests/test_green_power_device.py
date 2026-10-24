@@ -316,6 +316,7 @@ async def test_green_power_device_not_zigbee(zha_gateway: Gateway) -> None:
 
     assert not async_is_bindable_target(remote_zha_device, zha_device)
     assert not async_is_bindable_target(zha_device, remote_zha_device)
+    assert not async_is_bindable_target(zha_device, zha_gateway.coordinator_zha_device)
     assert await get_matched_clusters(remote_zha_device, zha_device) == []
     assert await get_matched_clusters(zha_device, remote_zha_device) == []
 

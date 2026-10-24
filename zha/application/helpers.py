@@ -234,10 +234,15 @@ def async_is_bindable_target(
     source_zha_device: BaseDevice, target_zha_device: BaseDevice
 ) -> bool:
     """Determine if target is bindable to source."""
+    source_clusters = source_zha_device.async_get_std_clusters()
+
+    # A source without clusters, such as a Green Power device, has nothing to bind
+    if not source_clusters:
+        return False
+
     if target_zha_device.nwk == 0x0000:
         return True
 
-    source_clusters = source_zha_device.async_get_std_clusters()
     target_clusters = target_zha_device.async_get_std_clusters()
 
     for endpoint_id in source_clusters:
