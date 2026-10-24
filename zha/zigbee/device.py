@@ -343,6 +343,7 @@ class BaseDevice[ZigpyDeviceT: ZigpyBaseDevice](LogMixin, EventBase):
         "skip_configuration",
         "device_automation_commands",
         "device_automation_triggers",
+        "is_coordinator",
     )
 
     def __init__(
@@ -588,6 +589,15 @@ class BaseDevice[ZigpyDeviceT: ZigpyBaseDevice](LogMixin, EventBase):
     def is_active_coordinator(self) -> bool:
         """Return true if this device is the active coordinator."""
         return False
+
+    @property
+    def is_groupable(self) -> bool:
+        """Return true if this device has a group cluster."""
+        return False
+
+    def async_get_std_clusters(self) -> dict[int, dict[str, dict[int, Cluster]]]:
+        """Get ZHA and ZLL clusters for this device."""
+        return {}
 
     @cached_property
     def skip_configuration(self) -> bool:
@@ -1141,7 +1151,6 @@ class ZigbeeDevice(BaseDevice[ZigpyDevice]):
         "is_mains_powered",
         "device_type",
         "is_router",
-        "is_coordinator",
         "is_end_device",
         "zigbee_signature",
     )

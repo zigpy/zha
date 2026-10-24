@@ -199,7 +199,7 @@ class DeviceRemovedEvent:
 
 
 def _device_factory(zigpy_device: zigpy.device.BaseDevice) -> Callable[..., BaseDevice]:
-    """Return the ZHA device class `Device.new` creates for a zigpy device."""
+    """Return the ZHA device class `Device.new` creates for a non-coordinator."""
     entry: QuirkRegistryEntry | GreenPowerQuirkRegistryEntry | None = getattr(
         zigpy_device, QUIRK_REGISTRY_ENTRY_ATTR, None
     )
@@ -752,7 +752,8 @@ class Gateway(AsyncUtilMixin, EventBase):
     def get_zigbee_device(self, ieee: EUI64) -> Device:
         """Look up a Zigbee device by IEEE address."""
         device = self._devices[ieee]
-        assert isinstance(device, Device)
+        if not isinstance(device, Device):
+            raise ZHAException(f"Device {ieee} is not a Zigbee device")
         return device
 
     def get_or_create_device(self, zigpy_device: zigpy.device.BaseDevice) -> BaseDevice:
