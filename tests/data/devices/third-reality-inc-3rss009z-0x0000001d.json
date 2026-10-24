@@ -182,6 +182,36 @@
     }
   },
   "zha_lib_entities": {
+    "event": [
+      {
+        "fallback_name": null,
+        "unique_id": "28:2c:02:bf:ff:e9:77:95-1-6",
+        "migrate_unique_ids": [],
+        "platform": "event",
+        "class_name": "OnOffEvent",
+        "translation_key": "on_off",
+        "translation_placeholders": null,
+        "device_class": null,
+        "state_class": null,
+        "entity_category": null,
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "28:2c:02:bf:ff:e9:77:95",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "event_types": [
+          "off",
+          "on",
+          "toggle",
+          "off_with_effect",
+          "on_with_recall_global_scene",
+          "on_with_timed_off"
+        ]
+      }
+    ],
     "number": [
       {
         "fallback_name": "Turn on delay",
