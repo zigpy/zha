@@ -2238,3 +2238,38 @@ async def test_sonoff_s60_electrical_measurement_reporting(
     assert configured[EMAttrs.active_power] == ReportingConfig(
         min_interval=5, max_interval=900, reportable_change=1
     )
+
+
+@pytest.mark.parametrize(
+    ("device_file", "expected_changes"),
+    [
+        # Tongou TO-Q-SY1-JZT: raw 5 / 100 / 10 are 5 V / 0.1 A / 10 W
+        ("tz3000-qeuvnohg-ts011f-0x00000045.json", (5, 100, 10)),
+        # Other breakers using the same Plug_CB_Metering quirk are unaffected
+        ("tz3000-6l1pjfqe-ts011f.json", (1, 1, 1)),
+    ],
+)
+async def test_tongou_breaker_electrical_measurement_reporting(
+    zha_gateway: Gateway,
+    device_file: str,
+    expected_changes: tuple[int, int, int],
+) -> None:
+    """The Tongou TO-Q-SY1-JZT breakers get relaxed EM reporting configured."""
+    zigpy_device = await zigpy_device_from_json(
+        zha_gateway.application_controller, f"tests/data/devices/{device_file}"
+    )
+    cluster = zigpy_device.endpoints[1].electrical_measurement
+    await join_zigpy_device(zha_gateway, zigpy_device)
+
+    assert len(cluster.configure_reporting_multiple.mock_calls) == 1
+    configured = cluster.configure_reporting_multiple.call_args.args[0]
+    voltage_change, current_change, power_change = expected_changes
+    assert configured[EMAttrs.rms_voltage] == ReportingConfig(
+        min_interval=5, max_interval=900, reportable_change=voltage_change
+    )
+    assert configured[EMAttrs.rms_current] == ReportingConfig(
+        min_interval=5, max_interval=900, reportable_change=current_change
+    )
+    assert configured[EMAttrs.active_power] == ReportingConfig(
+        min_interval=5, max_interval=900, reportable_change=power_change
+    )

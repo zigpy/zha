@@ -1294,3 +1294,56 @@ class SonoffS60RelaxedElectricalMeasurementReporting(VirtualEntity):
             },
         ),
     }
+
+
+@register_entity(ElectricalMeasurement.cluster_id)
+class TongouRelaxedElectricalMeasurementReporting(VirtualEntity):
+    """Relaxed voltage/current/power reporting for the Tongou TO-Q-SY1-JZT breakers.
+
+    These breakers (`_TZ3000_qeuvnohg`) report `rms_voltage` in volts and
+    `active_power` in watts (the voltage/power divisors are unsupported), and
+    `rms_current` in milliamps (`ac_current_divisor` of 1000 is set by the quirk,
+    consistent with the values reported on firmware 0x00000045). The default raw
+    reportable change of 1 means 1 V / 1 mA / 1 W, so with mains voltage
+    and load drift the breakers report at the 5-second minimum interval. Override
+    with 5 V / 0.1 A / 10 W.
+
+    Quirks cannot declare reporting overrides yet. If the quirk for this device
+    starts declaring its own, remove this entry in the same release, as overriding
+    configs are merged with each other (tightest wins).
+    """
+
+    _unique_id_suffix = "tongou_breaker_em_reporting"
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({ElectricalMeasurement.cluster_id}),
+        manufacturers=frozenset({"_TZ3000_qeuvnohg"}),
+        models=frozenset({"TS011F"}),
+    )
+    _server_cluster_config = {
+        ElectricalMeasurement.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                ElectricalMeasurement.AttributeDefs.rms_voltage: AttrConfig(
+                    read_on_startup=False,
+                    reporting=ReportingConfig(
+                        min_interval=5, max_interval=900, reportable_change=5
+                    ),
+                    reporting_override=True,
+                ),
+                ElectricalMeasurement.AttributeDefs.rms_current: AttrConfig(
+                    read_on_startup=False,
+                    reporting=ReportingConfig(
+                        min_interval=5, max_interval=900, reportable_change=100
+                    ),
+                    reporting_override=True,
+                ),
+                ElectricalMeasurement.AttributeDefs.active_power: AttrConfig(
+                    read_on_startup=False,
+                    reporting=ReportingConfig(
+                        min_interval=5, max_interval=900, reportable_change=10
+                    ),
+                    reporting_override=True,
+                ),
+            },
+        ),
+    }
