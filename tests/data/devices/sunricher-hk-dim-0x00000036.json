@@ -448,12 +448,6 @@
               "value": 1
             },
             {
-              "id": "0x0001",
-              "name": "occupancy_sensor_type_bitmap",
-              "zcl_type": "map8",
-              "value": 0
-            },
-            {
               "id": "0x0030",
               "name": "physical_contact_o_to_u_delay",
               "zcl_type": "uint16",

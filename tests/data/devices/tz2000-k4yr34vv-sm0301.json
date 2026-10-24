@@ -181,12 +181,6 @@
               "value": 17800
             },
             {
-              "id": "0x0012",
-              "name": "mode",
-              "zcl_type": "enum8",
-              "unsupported": true
-            },
-            {
               "id": "0x0001",
               "name": "motor_step_size",
               "zcl_type": "uint8",
