@@ -2069,6 +2069,61 @@ async def test_turn_on_during_off_transition(zha_gateway: Gateway) -> None:
     assert bool(entity.state.on) is False
 
 
+@patch(
+    "zigpy.zcl.clusters.general.OnOff.request",
+    new=AsyncMock(return_value=[sentinel.data, zcl_f.Status.SUCCESS]),
+)
+async def test_on_off_only_rapid_toggle_does_not_revert(
+    zha_gateway: Gateway,
+) -> None:
+    """Test rapid turn_off then turn_on on an on/off-only light does not revert to off.
+
+    On/off-only lights have no brightness transition to wait for, so turn_off
+    must not arm the transitioning flag/timer. Otherwise a buffered on_off=False
+    report from the off command would override the optimistic on-state when
+    the timer fires after the follow-up turn_on.
+    """
+    zigpy_device = create_mock_zigpy_device(zha_gateway, LIGHT_ON_OFF)
+    on_off_cluster = zigpy_device.endpoints[1].on_off
+    on_off_cluster.PLUGGED_ATTR_READS = {"on_off": 1}
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
+
+    entity = get_entity(zha_device, platform=Platform.LIGHT)
+    assert bool(entity.state["on"]) is True
+
+    # Turn off, then immediately turn back on (within the default ~1.5s window).
+    await entity.async_turn_off()
+    await zha_gateway.async_block_till_done()
+    assert bool(entity.state["on"]) is False
+    # On/off-only lights have no transition to wait for.
+    assert not entity.is_transitioning
+
+    # The device's on_off=False report from the off command arrives.
+    await send_attributes_report(
+        zha_gateway,
+        on_off_cluster,
+        {general.OnOff.AttributeDefs.on_off.id: 0},
+    )
+    await zha_gateway.async_block_till_done()
+
+    await entity.async_turn_on()
+    await zha_gateway.async_block_till_done()
+    assert bool(entity.state["on"]) is True
+
+    # The device's on_off=True report from the on command arrives.
+    await send_attributes_report(
+        zha_gateway,
+        on_off_cluster,
+        {general.OnOff.AttributeDefs.on_off.id: 1},
+    )
+    await zha_gateway.async_block_till_done()
+
+    # Wait past the old 1.5s timer window. State must remain on.
+    await asyncio.sleep(2)
+    await zha_gateway.async_block_till_done()
+    assert bool(entity.state["on"]) is True
+
+
 async def test_light_state_restoration(zha_gateway: Gateway) -> None:
     """Test the light state restoration function."""
     device_light_3 = await device_light_3_mock(zha_gateway)
