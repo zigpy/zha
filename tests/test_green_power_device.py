@@ -5,13 +5,24 @@ from __future__ import annotations
 from collections.abc import Iterator
 from datetime import UTC, datetime
 
+import pytest
 from zigpy.device import (
     GreenPowerCommandReceived,
     GreenPowerDevice as ZigpyGreenPowerDevice,
 )
+from zigpy.profiles import zha
 from zigpy.types import EUI64
+from zigpy.zcl.clusters.general import Basic, OnOff
 from zigpy.zgp.types import ApplicationID, DeviceID, GPDCommandID, SrcID
 
+from tests.common import (
+    SIG_EP_INPUT,
+    SIG_EP_OUTPUT,
+    SIG_EP_PROFILE,
+    SIG_EP_TYPE,
+    create_mock_zigpy_device,
+    join_zigpy_device,
+)
 from zha.application import Platform
 from zha.application.const import (
     UNKNOWN_MANUFACTURER,
@@ -22,12 +33,14 @@ from zha.application.const import (
     ZHA_GW_MSG_RAW_INIT,
 )
 from zha.application.gateway import Gateway
+from zha.application.helpers import async_is_bindable_target, get_matched_clusters
 from zha.application.platforms import PlatformEntity
 from zha.application.platforms.event import (
     BaseEvent,
     EntityEventTriggeredEvent,
     TriggeredEvent,
 )
+from zha.exceptions import ZHAException
 from zha.quirks import (
     DEVICE_REGISTRY,
     QUIRK_REGISTRY_ENTRY_ATTR,
@@ -82,6 +95,8 @@ async def test_green_power_device_properties(zha_gateway: Gateway) -> None:
     assert zha_device.model == UNKNOWN_MODEL
     assert zha_device.manufacturer_code is None
     assert zha_device.skip_configuration is False
+    assert zha_device.is_groupable is False
+    assert zha_device.async_get_std_clusters() == {}
     assert zha_device.signature["device_id"] == DeviceID.OnOffSwitch
     assert zha_device.signature["src_id"] == 0x12345678
     assert zha_device.signature["commands"] == [
@@ -278,6 +293,34 @@ async def test_green_power_quirk_specificity(zha_gateway: Gateway) -> None:
         DEVICE_REGISTRY.register(src_id_entry)
         DEVICE_REGISTRY.register(two_field_entry)
         assert DEVICE_REGISTRY.match_green_power_entry(zigpy_gpd) is src_id_entry
+
+
+async def test_green_power_device_not_zigbee(zha_gateway: Gateway) -> None:
+    """Test that Zigbee-only helpers reject or skip a Green Power device."""
+    zha_device = zha_gateway.get_or_create_device(make_zigpy_gpd(zha_gateway))
+
+    remote_zha_device = await join_zigpy_device(
+        zha_gateway,
+        create_mock_zigpy_device(
+            zha_gateway,
+            {
+                1: {
+                    SIG_EP_INPUT: [Basic.cluster_id],
+                    SIG_EP_OUTPUT: [OnOff.cluster_id],
+                    SIG_EP_TYPE: zha.DeviceType.REMOTE_CONTROL,
+                    SIG_EP_PROFILE: zha.PROFILE_ID,
+                }
+            },
+        ),
+    )
+
+    assert not async_is_bindable_target(remote_zha_device, zha_device)
+    assert not async_is_bindable_target(zha_device, remote_zha_device)
+    assert await get_matched_clusters(remote_zha_device, zha_device) == []
+    assert await get_matched_clusters(zha_device, remote_zha_device) == []
+
+    with pytest.raises(ZHAException, match="is not a Zigbee device"):
+        zha_gateway.get_zigbee_device(zha_device.ieee)
 
 
 async def test_green_power_device_raw_initialized(zha_gateway: Gateway) -> None:
