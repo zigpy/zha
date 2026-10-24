@@ -6,7 +6,7 @@ import asyncio
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager, suppress
 from dataclasses import dataclass
-from datetime import timedelta
+from datetime import timedelta, tzinfo
 from enum import Enum
 import logging
 import random
@@ -262,6 +262,9 @@ class Gateway(AsyncUtilMixin, EventBase):
         self.shutting_down = False
 
         app_controller_cls, app_config = self.get_application_controller_data()
+        # local_timezone is captured once at controller creation time.  For runtime
+        # changes (e.g. the host's timezone setting changes) call update_local_timezone()
+        # so that both ZHAData and the ControllerApplication stay in sync.
         self.application_controller = await app_controller_cls.new(
             config=app_config,
             auto_form=False,
@@ -270,6 +273,7 @@ class Gateway(AsyncUtilMixin, EventBase):
             uninitialized_packet_handler=(
                 self.config.config.quirks_configuration.uninitialized_packet_handler
             ),
+            local_timezone=self.config.local_timezone,
         )
 
         await self.application_controller.startup(auto_form=True)
@@ -293,6 +297,12 @@ class Gateway(AsyncUtilMixin, EventBase):
         except Exception:
             await self.shutdown()
             raise
+
+    def update_local_timezone(self, tz: tzinfo | None) -> None:
+        """Update the local timezone used for ZCL Time cluster attributes."""
+        self.config.local_timezone = tz
+        if self.application_controller is not None:
+            self.application_controller.local_timezone = tz
 
     @asynccontextmanager
     async def request_priority(

@@ -3,6 +3,7 @@
 import asyncio
 from contextlib import suppress
 from unittest.mock import AsyncMock, MagicMock, PropertyMock, call, patch
+import zoneinfo
 
 import pytest
 from zhaquirks.builder import QuirkBuilder
@@ -762,6 +763,76 @@ async def test_startup_concurrency_limit(
         assert 1 <= max(concurrencies) < zha_gw.radio_concurrency
     else:
         assert 1 == max(concurrencies) == zha_gw.radio_concurrency
+
+
+@pytest.mark.parametrize(
+    "tz",
+    [
+        None,
+        zoneinfo.ZoneInfo("America/New_York"),
+    ],
+)
+async def test_configured_timezone_passed_to_controller(
+    tz: zoneinfo.ZoneInfo | None,
+    zigpy_app_controller: ControllerApplication,
+    zha_data: ZHAData,
+) -> None:
+    """Test that the configured timezone is forwarded to ControllerApplication.new."""
+    zha_data.local_timezone = tz
+    zha_gw = Gateway(zha_data)
+
+    async def _mock_new(*args, **kwargs):
+        # Simulate what zigpy does: store local_timezone on the controller instance.
+        zigpy_app_controller.local_timezone = kwargs.get("local_timezone")
+        return zigpy_app_controller
+
+    with patch(
+        "bellows.zigbee.application.ControllerApplication.new",
+        side_effect=_mock_new,
+    ) as mock_new:
+        await zha_gw.async_initialize()
+
+    assert mock_new.call_args.kwargs["local_timezone"] == tz
+    assert zha_gw.application_controller.local_timezone == tz
+
+    await zha_gw.shutdown()
+
+
+async def test_update_local_timezone_syncs_controller(
+    zha_gateway: Gateway,
+) -> None:
+    """Test that update_local_timezone keeps ZHAData and the controller in sync."""
+    new_tz = zoneinfo.ZoneInfo("Europe/London")
+
+    zha_gateway.update_local_timezone(new_tz)
+
+    assert zha_gateway.config.local_timezone is new_tz
+    assert zha_gateway.application_controller.local_timezone is new_tz
+
+    # Also verify clearing to None propagates.
+    zha_gateway.update_local_timezone(None)
+
+    assert zha_gateway.config.local_timezone is None
+    assert zha_gateway.application_controller.local_timezone is None
+
+
+async def test_update_local_timezone_before_init(
+    zha_data: ZHAData,
+) -> None:
+    """Test update_local_timezone before and after controller lifecycle."""
+    tz = zoneinfo.ZoneInfo("America/Chicago")
+    gw = Gateway(zha_data)
+
+    # Before async_initialize: controller is None; must not raise.
+    gw.update_local_timezone(tz)
+    assert gw.config.local_timezone is tz
+    assert gw.application_controller is None
+
+    # After shutdown: controller is reset to None; must not raise.
+    await gw.shutdown()
+    gw.update_local_timezone(zoneinfo.ZoneInfo("Europe/Paris"))
+    assert gw.config.local_timezone == zoneinfo.ZoneInfo("Europe/Paris")
+    assert gw.application_controller is None
 
 
 async def test_gateway_device_removed(zha_gateway: Gateway) -> None:

@@ -391,7 +391,8 @@ async def test_sinope_time(
 
     write_attributes.reset_mock()
 
-    # Default time zone of UTC
+    # No configured timezone (local_timezone is None): falls back to UTC.
+    assert zha_gateway.config.local_timezone is None
     with freeze_time("2000-01-02 00:00:00"):
         await entity._async_update_time()
         secs_since_2k = write_attributes.mock_calls[0].args[0]["secs_since_2k"]
@@ -400,7 +401,7 @@ async def test_sinope_time(
     write_attributes.reset_mock()
 
     # New time zone
-    zha_gateway.config.local_timezone = zoneinfo.ZoneInfo("America/New_York")
+    zha_gateway.update_local_timezone(zoneinfo.ZoneInfo("America/New_York"))
 
     with freeze_time("2000-01-02 00:00:00"):
         await entity._async_update_time()
