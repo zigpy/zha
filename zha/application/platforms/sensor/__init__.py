@@ -278,6 +278,15 @@ class Sensor(BaseSensor, ZclPlatformEntity):
 
         self.recompute_capabilities()
 
+    @property
+    def _scaling_attribute_names(self) -> frozenset[str]:
+        """Return the names of the attributes scaling this sensor's value.
+
+        Cluster pollers skip these: they are read on startup and are expected
+        to be reported when they change.
+        """
+        return frozenset()
+
     def on_add(self) -> None:
         """Run when entity is added."""
         super().on_add()
@@ -902,6 +911,20 @@ class BaseElectricalMeasurement(Sensor):
     def _divisor(self, value: int | float | None) -> None:
         raise AttributeError("Cannot set divisor directly")
 
+    @property
+    def _scaling_attribute_names(self) -> frozenset[str]:
+        """Return the multiplier and divisor attribute names, incl. fallbacks."""
+        return frozenset(
+            name
+            for name in (
+                self._multiplier_attribute_name,
+                self._multiplier_fallback_attribute_name,
+                self._divisor_attribute_name,
+                self._divisor_fallback_attribute_name,
+            )
+            if name is not None
+        )
+
 
 class AggregatedClusterPoller(VirtualEntity):
     """Polls a cluster on behalf of sibling entities that need updates.
@@ -948,13 +971,17 @@ class AggregatedClusterPoller(VirtualEntity):
             cfg = entity._server_cluster_config.get(self._cluster_id)
             if cfg is None:
                 continue
+            scaling_attrs = entity._scaling_attribute_names
             for attr_def, attr_cfg in cfg.attributes.items():
                 if attr_cfg.reporting is None:
+                    continue
+                attr_name = attr_def if isinstance(attr_def, str) else attr_def.name
+                if attr_name in scaling_attrs:
                     continue
                 if self._cluster.is_attribute_unsupported(attr_def):
                     continue
 
-                attrs.add(attr_def if isinstance(attr_def, str) else attr_def.name)
+                attrs.add(attr_name)
 
         if not attrs:
             return
