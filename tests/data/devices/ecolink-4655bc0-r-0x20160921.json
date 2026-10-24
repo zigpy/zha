@@ -90,19 +90,19 @@
             {
               "id": "0x0037",
               "name": "battery_volt_thres1",
-              "zcl_type": "uint16",
+              "zcl_type": "uint8",
               "value": 25
             },
             {
               "id": "0x0038",
               "name": "battery_volt_thres2",
-              "zcl_type": "uint16",
+              "zcl_type": "uint8",
               "value": 32
             },
             {
               "id": "0x0039",
               "name": "battery_volt_thres3",
-              "zcl_type": "uint16",
+              "zcl_type": "uint8",
               "value": 26
             },
             {
