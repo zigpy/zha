@@ -315,6 +315,32 @@ async def test_check_available_no_basic_cluster(
     assert "does not have a mandatory basic cluster" in caplog.text
 
 
+async def test_check_available_skips_stale_coordinator(
+    zha_gateway: Gateway,
+) -> None:
+    """Check that a former coordinator is not marked unavailable."""
+    old_coord_dev = zigpy_device(
+        zha_gateway,
+        with_basic_cluster=False,
+        ieee="aa:bb:cc:dd:ee:ff:00:12",
+        nwk=0x0000,
+    )
+    old_coord_dev.node_desc = old_coord_dev.node_desc.replace(
+        logical_type=zdo_t.LogicalType.Coordinator
+    )
+    zha_device = await join_zigpy_device(zha_gateway, old_coord_dev)
+
+    assert not zha_device.is_active_coordinator
+    assert zha_device.available is True
+
+    old_coord_dev.last_seen = time.time() - zha_device.consider_unavailable_time - 2
+    await _send_time_changed(
+        zha_gateway, zha_gateway._device_availability_checker.__polling_interval + 1
+    )
+
+    assert zha_device.available is True
+
+
 async def test_device_is_active_coordinator(
     zha_gateway: Gateway,
 ) -> None:

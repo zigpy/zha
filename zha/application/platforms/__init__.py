@@ -5,7 +5,7 @@ from __future__ import annotations
 from abc import abstractmethod
 import asyncio
 from collections import defaultdict
-from collections.abc import Callable, Mapping
+from collections.abc import Callable, Collection, Mapping
 from contextlib import suppress
 import dataclasses
 from dataclasses import dataclass, field
@@ -31,7 +31,7 @@ from zha.event import EventBase
 from zha.mixins import LogMixin
 
 if TYPE_CHECKING:
-    from zha.zigbee.device import Device
+    from zha.zigbee.device import BaseDevice, Device
     from zha.zigbee.endpoint import Endpoint
     from zha.zigbee.group import Group
 
@@ -327,7 +327,7 @@ class BaseEntity(LogMixin, EventBase):
         """Return if the entity is supported for the device, internal."""
         return True
 
-    def is_supported_in_list(self, entities: list[BaseEntity]) -> bool:
+    def is_supported_in_list(self, entities: Collection[BaseEntity]) -> bool:
         """Return if the entity is supported given all other entities."""
         return True
 
@@ -529,7 +529,7 @@ class PlatformEntity(BaseEntity):
 
     def __init__(
         self,
-        device: Device,
+        device: BaseDevice,
         *,
         unique_id: str,
         from_quirk: bool = False,
@@ -564,7 +564,7 @@ class PlatformEntity(BaseEntity):
 
         super().__init__(unique_id=unique_id, **kwargs)
 
-        self._device: Device = device
+        self._device: BaseDevice = device
 
     def _apply_quirk_entity_config(
         self,
@@ -607,7 +607,7 @@ class PlatformEntity(BaseEntity):
             self._attr_primary = primary
 
     @property
-    def device(self) -> Device:
+    def device(self) -> BaseDevice:
         """Return the device."""
         return self._device
 
@@ -666,6 +666,8 @@ class ZclPlatformEntity(PlatformEntity):
 
     _client_cluster_config: Mapping[int, ClusterConfig] = MappingProxyType({})
 
+    _device: Device
+
     def __init__(
         self,
         endpoint: Endpoint,
@@ -697,6 +699,11 @@ class ZclPlatformEntity(PlatformEntity):
             from_quirk=from_quirk,
             **kwargs,
         )
+
+    @property
+    def device(self) -> Device:
+        """Return the device."""
+        return self._device
 
     @property
     def endpoint(self) -> Endpoint:
