@@ -253,6 +253,7 @@
         "device_ieee": "ab:cd:ef:12:37:1f:21:53",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "command": "identify",
         "args": [
@@ -280,6 +281,7 @@
         "device_ieee": "ab:cd:ef:12:37:1f:21:53",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "on": true,
         "brightness": null,
@@ -319,6 +321,7 @@
         "device_ieee": "ab:cd:ef:12:37:1f:21:53",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "current_option": "Off",
         "enum": "TuyaBacklightMode",
@@ -346,6 +349,7 @@
         "device_ieee": "ab:cd:ef:12:37:1f:21:53",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "current_option": "LastState",
         "enum": "TuyaPowerOnState",
@@ -375,6 +379,7 @@
         "device_ieee": "ab:cd:ef:12:37:1f:21:53",
         "endpoint_id": null,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "native_value": 212,
         "suggested_display_precision": null,
@@ -398,6 +403,7 @@
         "device_ieee": "ab:cd:ef:12:37:1f:21:53",
         "endpoint_id": null,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "native_value": -58,
         "suggested_display_precision": null,
@@ -423,6 +429,7 @@
         "device_ieee": "ab:cd:ef:12:37:1f:21:53",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "installed_version": "0x00000053",
         "in_progress": false,
@@ -435,6 +442,7 @@
       }
     ]
   },
+  "child_devices": [],
   "neighbors": [],
   "routes": []
 }

@@ -452,6 +452,7 @@
         "device_ieee": "ab:cd:ef:12:ae:99:5e:c4",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "command": "identify",
         "args": [
@@ -479,6 +480,7 @@
         "device_ieee": "ab:cd:ef:12:ae:99:5e:c4",
         "endpoint_id": null,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "native_value": 176,
         "suggested_display_precision": null,
@@ -502,6 +504,7 @@
         "device_ieee": "ab:cd:ef:12:ae:99:5e:c4",
         "endpoint_id": null,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "native_value": -67,
         "suggested_display_precision": null,
@@ -529,6 +532,7 @@
         "device_ieee": "ab:cd:ef:12:ae:99:5e:c4",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "native_value": 0.0,
         "suggested_display_precision": 0,
@@ -555,6 +559,7 @@
         "device_ieee": "ab:cd:ef:12:ae:99:5e:c4",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "native_value": 0,
         "suggested_display_precision": null,
@@ -578,6 +583,7 @@
         "device_ieee": "ab:cd:ef:12:ae:99:5e:c4",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "native_value": 23.65,
         "suggested_display_precision": null,
@@ -601,6 +607,7 @@
         "device_ieee": "ab:cd:ef:12:ae:99:5e:c4",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "native_value": 52.0,
         "suggested_display_precision": null,
@@ -626,6 +633,7 @@
         "device_ieee": "ab:cd:ef:12:ae:99:5e:c4",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "installed_version": "0x00003422",
         "in_progress": false,
@@ -638,6 +646,7 @@
       }
     ]
   },
+  "child_devices": [],
   "neighbors": [],
   "routes": []
 }

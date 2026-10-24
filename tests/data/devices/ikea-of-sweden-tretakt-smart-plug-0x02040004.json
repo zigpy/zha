@@ -233,6 +233,7 @@
         "device_ieee": "ab:cd:ef:12:a1:09:54:7e",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "command": "identify",
         "args": [
@@ -260,6 +261,7 @@
         "device_ieee": "ab:cd:ef:12:a1:09:54:7e",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "current_option": "PreviousValue",
         "enum": "StartUpOnOff",
@@ -290,6 +292,7 @@
         "device_ieee": "ab:cd:ef:12:a1:09:54:7e",
         "endpoint_id": null,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "native_value": 42,
         "suggested_display_precision": null,
@@ -313,6 +316,7 @@
         "device_ieee": "ab:cd:ef:12:a1:09:54:7e",
         "endpoint_id": null,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "native_value": null,
         "suggested_display_precision": null,
@@ -338,6 +342,7 @@
         "device_ieee": "ab:cd:ef:12:a1:09:54:7e",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "is_on": 1
       },
@@ -359,6 +364,7 @@
         "device_ieee": "ab:cd:ef:12:a1:09:54:7e",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "is_on": false,
         "inverted": false,
@@ -386,6 +392,7 @@
         "device_ieee": "ab:cd:ef:12:a1:09:54:7e",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "is_on": true,
         "inverted": false,
@@ -415,6 +422,7 @@
         "device_ieee": "ab:cd:ef:12:a1:09:54:7e",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "installed_version": "0x02040004",
         "in_progress": false,
@@ -427,6 +435,7 @@
       }
     ]
   },
+  "child_devices": [],
   "neighbors": [],
   "routes": []
 }

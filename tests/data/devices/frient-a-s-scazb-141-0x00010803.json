@@ -483,6 +483,7 @@
         "device_ieee": "ab:cd:ef:12:18:f2:e7:e6",
         "endpoint_id": 35,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "is_on": false,
         "attribute_name": "zone_status"
@@ -505,6 +506,7 @@
         "device_ieee": "ab:cd:ef:12:18:f2:e7:e6",
         "endpoint_id": 35,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "is_on": false,
         "attribute_name": "zone_status"
@@ -527,6 +529,7 @@
         "device_ieee": "ab:cd:ef:12:18:f2:e7:e6",
         "endpoint_id": 35,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "is_on": false,
         "attribute_name": "zone_status"
@@ -549,6 +552,7 @@
         "device_ieee": "ab:cd:ef:12:18:f2:e7:e6",
         "endpoint_id": 46,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "is_on": false,
         "attribute_name": "zone_status"
@@ -573,6 +577,7 @@
         "device_ieee": "ab:cd:ef:12:18:f2:e7:e6",
         "endpoint_id": 35,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "command": "identify",
         "args": [
@@ -600,6 +605,7 @@
         "device_ieee": "ab:cd:ef:12:18:f2:e7:e6",
         "endpoint_id": null,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "native_value": 204,
         "suggested_display_precision": null,
@@ -623,6 +629,7 @@
         "device_ieee": "ab:cd:ef:12:18:f2:e7:e6",
         "endpoint_id": null,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "native_value": -49,
         "suggested_display_precision": null,
@@ -650,6 +657,7 @@
         "device_ieee": "ab:cd:ef:12:18:f2:e7:e6",
         "endpoint_id": 35,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "native_value": null,
         "suggested_display_precision": 0,
@@ -676,6 +684,7 @@
         "device_ieee": "ab:cd:ef:12:18:f2:e7:e6",
         "endpoint_id": 38,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "native_value": 20.37,
         "suggested_display_precision": null,
@@ -699,6 +708,7 @@
         "device_ieee": "ab:cd:ef:12:18:f2:e7:e6",
         "endpoint_id": 46,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "native_value": 0.0,
         "suggested_display_precision": 0,
@@ -724,6 +734,7 @@
         "device_ieee": "ab:cd:ef:12:18:f2:e7:e6",
         "endpoint_id": 35,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "is_on": false,
         "available_tones": {},
@@ -749,6 +760,7 @@
         "device_ieee": "ab:cd:ef:12:18:f2:e7:e6",
         "endpoint_id": 35,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "installed_version": "0x00010803",
         "in_progress": false,
@@ -761,6 +773,7 @@
       }
     ]
   },
+  "child_devices": [],
   "neighbors": [],
   "routes": []
 }
