@@ -223,10 +223,10 @@ async def test_green_power_quirk_resolution(zha_gateway: Gateway) -> None:
     )
 
     with DEVICE_REGISTRY.preserve_state():
-        DEVICE_REGISTRY.register(generic_entry)
         DEVICE_REGISTRY.register(entry)
+        DEVICE_REGISTRY.register(generic_entry)
 
-        # The most recently registered matching entry wins
+        # The more specific entry wins regardless of registration order
         assert DEVICE_REGISTRY.match_green_power_entry(zigpy_gpd) is entry
 
         resolved = DEVICE_REGISTRY.resolve(zigpy_gpd)
@@ -236,6 +236,48 @@ async def test_green_power_quirk_resolution(zha_gateway: Gateway) -> None:
         zha_device = zha_gateway.get_or_create_device(resolved)
         assert isinstance(zha_device, QuirkedGreenPowerDevice)
         assert zha_device.quirk_applied
+
+
+async def test_green_power_quirk_specificity(zha_gateway: Gateway) -> None:
+    """Test that Green Power quirks are ranked by specificity, then recency."""
+    zigpy_gpd = make_zigpy_gpd(zha_gateway)
+    zigpy_gpd.gpd_manufacturer_id = 0x1234
+
+    device_id_entry = GreenPowerQuirkRegistryEntry(
+        device_match=GreenPowerDeviceMatch(device_id=DeviceID.OnOffSwitch),
+    )
+    two_field_entry = GreenPowerQuirkRegistryEntry(
+        device_match=GreenPowerDeviceMatch(
+            device_id=DeviceID.OnOffSwitch, manufacturer_id=0x1234
+        ),
+    )
+    src_id_entry = GreenPowerQuirkRegistryEntry(
+        device_match=GreenPowerDeviceMatch(src_id_ranges=((0x12000000, 0x12FFFFFF),)),
+    )
+    later_device_id_entry = GreenPowerQuirkRegistryEntry(
+        device_match=GreenPowerDeviceMatch(
+            device_id=DeviceID.OnOffSwitch, filters=(lambda device: True,)
+        ),
+    )
+
+    # Equally specific entries fall back to the most recently registered one
+    with DEVICE_REGISTRY.preserve_state():
+        DEVICE_REGISTRY.register(device_id_entry)
+        DEVICE_REGISTRY.register(later_device_id_entry)
+        assert DEVICE_REGISTRY.match_green_power_entry(zigpy_gpd) is (
+            later_device_id_entry
+        )
+
+    with DEVICE_REGISTRY.preserve_state():
+        DEVICE_REGISTRY.register(two_field_entry)
+        DEVICE_REGISTRY.register(device_id_entry)
+        assert DEVICE_REGISTRY.match_green_power_entry(zigpy_gpd) is two_field_entry
+
+    # An identity criterion outranks any number of signature fields
+    with DEVICE_REGISTRY.preserve_state():
+        DEVICE_REGISTRY.register(src_id_entry)
+        DEVICE_REGISTRY.register(two_field_entry)
+        assert DEVICE_REGISTRY.match_green_power_entry(zigpy_gpd) is src_id_entry
 
 
 async def test_green_power_device_raw_initialized(zha_gateway: Gateway) -> None:

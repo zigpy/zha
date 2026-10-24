@@ -165,10 +165,9 @@ class QuirkRegistryEntry:
 class GreenPowerDeviceMatch:
     """Criteria matching a Green Power quirk to a GPD's commissioning signature.
 
-    Every specified field must match. `src_id_ranges` and `ieee_prefixes`
-    together form the identity criterion: when either is present, the device's
-    SrcID must fall within one of the ranges or its IEEE address must begin
-    with one of the prefixes.
+    Every specified field must match. `src_id_ranges` and `ieee_prefixes` together form
+    the identity criterion: when either is present, the device's SrcID must fall within
+    one of the ranges or its IEEE address must begin with one of the prefixes.
     """
 
     device_id: int | None = None
@@ -205,6 +204,16 @@ class GreenPowerDeviceMatch:
 
         return all(matcher(device) for matcher in self.filters)
 
+    @property
+    def specificity(self) -> tuple[bool, int]:
+        """Rank by identity criterion first, then by the number of fields specified."""
+        has_identity = bool(self.src_id_ranges) or bool(self.ieee_prefixes)
+        num_fields = sum(
+            map(bool, (self.device_id, self.manufacturer_id, self.model_id))
+        )
+
+        return (has_identity, num_fields)
+
 
 @dataclass(frozen=True)
 class GreenPowerQuirkRegistryEntry:
@@ -224,7 +233,8 @@ class DeviceRegistry:
     """Registry of quirk entries for all device types.
 
     Zigbee entries are indexed by (manufacturer, model); Green Power entries
-    are kept in a flat list. The most recently registered matching entry wins.
+    are kept in a flat list and ranked by specificity. The most recently
+    registered entry wins among equally specific matches.
     """
 
     def __init__(self) -> None:
@@ -237,7 +247,7 @@ class DeviceRegistry:
         # Matched against every device by their filters alone, used mostly for legacy v1
         # quirks without model/manufacturer filters.
         self._wildcard_registry: list[QuirkRegistryEntry] = []
-        # Green Power entries, most recently registered first.
+        # Green Power entries, most specific first, then most recently registered.
         self._gp_registry: list[GreenPowerQuirkRegistryEntry] = []
 
     @overload
@@ -255,6 +265,10 @@ class DeviceRegistry:
         if isinstance(entry, GreenPowerQuirkRegistryEntry):
             if entry not in self._gp_registry:
                 self._gp_registry.insert(0, entry)
+                # The sort is stable, so the new entry stays ahead of equal ones
+                self._gp_registry.sort(
+                    key=lambda entry: entry.device_match.specificity, reverse=True
+                )
             return entry
 
         if not entry.device_match.applies_to:
@@ -319,7 +333,7 @@ class DeviceRegistry:
     def match_green_power_entry(
         self, zigpy_device: zigpy.device.GreenPowerDevice
     ) -> GreenPowerQuirkRegistryEntry | None:
-        """Return the most recently registered entry matching the Green Power device."""
+        """Return the most specific entry matching the Green Power device."""
         for entry in self._gp_registry:
             if entry.device_match.matches(zigpy_device):
                 return entry
