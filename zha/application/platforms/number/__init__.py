@@ -863,28 +863,6 @@ class AqaraPetFeederPortionWeight(NumberConfigurationEntity):
     )
 
 
-@register_entity(AQARA_OPPLE_CLUSTER)
-class AqaraThermostatAwayTemp(NumberConfigurationEntity):
-    """Aqara away preset temperature configuration entity."""
-
-    _unique_id_suffix = "away_preset_temperature"
-    _attr_entity_category = EntityCategory.CONFIG
-    _attr_native_min_value: float = 5
-    _attr_native_max_value: float = 30
-    _multiplier: float = 0.01
-    _attribute_name = "away_preset_temperature"
-    _attr_translation_key: str = "away_preset_temperature"
-    _cluster_id = AQARA_OPPLE_CLUSTER
-
-    _attr_mode: NumberMode = NumberMode.SLIDER
-    _attr_native_unit_of_measurement: str = UnitOfTemperature.CELSIUS
-
-    _cluster_match = ClusterMatch(
-        server_clusters=frozenset({AQARA_OPPLE_CLUSTER}),
-        models=frozenset({"lumi.airrtc.agl001"}),
-    )
-
-
 @register_entity(Thermostat.cluster_id)
 class ThermostatLocalTempCalibration(NumberConfigurationEntity):
     """Local temperature calibration."""

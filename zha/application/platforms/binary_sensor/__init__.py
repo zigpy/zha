@@ -548,69 +548,6 @@ class XiaomiPlugConsumerConnected(BinarySensor):
 
 
 @register_entity(AQARA_OPPLE_CLUSTER)
-class AqaraThermostatWindowOpen(BinarySensor):
-    """ZHA Aqara thermostat window open binary sensor."""
-
-    _attribute_name = "window_open"
-    _unique_id_suffix = "window_open"
-    _attr_device_class: BinarySensorDeviceClass = BinarySensorDeviceClass.WINDOW
-    _cluster_id = AQARA_OPPLE_CLUSTER
-
-    _cluster_match = ClusterMatch(
-        server_clusters=frozenset({AQARA_OPPLE_CLUSTER}),
-        models=frozenset({"lumi.airrtc.agl001"}),
-    )
-
-
-@register_entity(AQARA_OPPLE_CLUSTER)
-class AqaraThermostatValveAlarm(BinarySensor):
-    """ZHA Aqara thermostat valve alarm binary sensor."""
-
-    _attribute_name = "valve_alarm"
-    _unique_id_suffix = "valve_alarm"
-    _attr_device_class: BinarySensorDeviceClass = BinarySensorDeviceClass.PROBLEM
-    _attr_translation_key: str = "valve_alarm"
-    _cluster_id = AQARA_OPPLE_CLUSTER
-
-    _cluster_match = ClusterMatch(
-        server_clusters=frozenset({AQARA_OPPLE_CLUSTER}),
-        models=frozenset({"lumi.airrtc.agl001"}),
-    )
-
-
-@register_entity(AQARA_OPPLE_CLUSTER)
-class AqaraThermostatCalibrated(BinarySensor):
-    """ZHA Aqara thermostat calibrated binary sensor."""
-
-    _attribute_name = "calibrated"
-    _unique_id_suffix = "calibrated"
-    _attr_entity_category: EntityCategory = EntityCategory.DIAGNOSTIC
-    _attr_translation_key: str = "calibrated"
-    _cluster_id = AQARA_OPPLE_CLUSTER
-
-    _cluster_match = ClusterMatch(
-        server_clusters=frozenset({AQARA_OPPLE_CLUSTER}),
-        models=frozenset({"lumi.airrtc.agl001"}),
-    )
-
-
-@register_entity(AQARA_OPPLE_CLUSTER)
-class AqaraThermostatExternalSensor(BinarySensor):
-    """ZHA Aqara thermostat external sensor binary sensor."""
-
-    _attribute_name = "sensor"
-    _unique_id_suffix = "sensor"
-    _attr_entity_category: EntityCategory = EntityCategory.DIAGNOSTIC
-    _attr_translation_key: str = "external_sensor"
-    _cluster_id = AQARA_OPPLE_CLUSTER
-
-    _cluster_match = ClusterMatch(
-        server_clusters=frozenset({AQARA_OPPLE_CLUSTER}),
-        models=frozenset({"lumi.airrtc.agl001"}),
-    )
-
-
-@register_entity(AQARA_OPPLE_CLUSTER)
 class AqaraLinkageAlarmState(BinarySensor):
     """ZHA Aqara linkage alarm state binary sensor."""
 

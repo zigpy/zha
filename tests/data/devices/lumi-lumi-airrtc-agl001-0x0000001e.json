@@ -8,7 +8,7 @@
   "friendly_model": "lumi.airrtc.agl001",
   "name": "LUMI lumi.airrtc.agl001",
   "quirk_applied": true,
-  "quirk_class": "zhaquirks.xiaomi.aqara.thermostat_agl001:AGL001",
+  "quirk_class": "zhaquirks.xiaomi.aqara.thermostat_agl001:(LUMI / lumi.airrtc.agl001)",
   "exposes_features": [],
   "manufacturer_code": 4447,
   "power_source": "Battery or Unknown",
@@ -380,11 +380,11 @@
   "zha_lib_entities": {
     "binary_sensor": [
       {
-        "fallback_name": null,
+        "fallback_name": "Calibrated",
         "unique_id": "ab:cd:ef:12:ce:61:df:4c-1-64704-calibrated",
         "migrate_unique_ids": [],
         "platform": "binary_sensor",
-        "class_name": "AqaraThermostatCalibrated",
+        "class_name": "BinarySensor",
         "translation_key": "calibrated",
         "translation_placeholders": null,
         "device_class": null,
@@ -402,11 +402,11 @@
         "attribute_name": "calibrated"
       },
       {
-        "fallback_name": null,
+        "fallback_name": "External sensor",
         "unique_id": "ab:cd:ef:12:ce:61:df:4c-1-64704-sensor",
         "migrate_unique_ids": [],
         "platform": "binary_sensor",
-        "class_name": "AqaraThermostatExternalSensor",
+        "class_name": "BinarySensor",
         "translation_key": "external_sensor",
         "translation_placeholders": null,
         "device_class": null,
@@ -424,11 +424,11 @@
         "attribute_name": "sensor"
       },
       {
-        "fallback_name": null,
+        "fallback_name": "Valve alarm",
         "unique_id": "ab:cd:ef:12:ce:61:df:4c-1-64704-valve_alarm",
         "migrate_unique_ids": [],
         "platform": "binary_sensor",
-        "class_name": "AqaraThermostatValveAlarm",
+        "class_name": "BinarySensor",
         "translation_key": "valve_alarm",
         "translation_placeholders": null,
         "device_class": "problem",
@@ -446,11 +446,11 @@
         "attribute_name": "valve_alarm"
       },
       {
-        "fallback_name": null,
+        "fallback_name": "Window open",
         "unique_id": "ab:cd:ef:12:ce:61:df:4c-1-64704-window_open",
         "migrate_unique_ids": [],
         "platform": "binary_sensor",
-        "class_name": "AqaraThermostatWindowOpen",
+        "class_name": "BinarySensor",
         "translation_key": null,
         "translation_placeholders": null,
         "device_class": "window",
@@ -545,11 +545,11 @@
     ],
     "number": [
       {
-        "fallback_name": null,
+        "fallback_name": "Away preset temperature",
         "unique_id": "ab:cd:ef:12:ce:61:df:4c-1-64704-away_preset_temperature",
         "migrate_unique_ids": [],
         "platform": "number",
-        "class_name": "AqaraThermostatAwayTemp",
+        "class_name": "NumberConfigurationEntity",
         "translation_key": "away_preset_temperature",
         "translation_placeholders": null,
         "device_class": null,
@@ -573,11 +573,11 @@
     ],
     "select": [
       {
-        "fallback_name": null,
+        "fallback_name": "Preset",
         "unique_id": "ab:cd:ef:12:ce:61:df:4c-1-64704-preset",
         "migrate_unique_ids": [],
         "platform": "select",
-        "class_name": "AqaraThermostatPreset",
+        "class_name": "ZCLEnumSelectEntity",
         "translation_key": "preset",
         "translation_placeholders": null,
         "device_class": null,
@@ -592,7 +592,7 @@
         "available": true,
         "group_id": null,
         "current_option": "Manual",
-        "enum": "AqaraThermostatPresetMode",
+        "enum": "AqaraThermostatPreset",
         "options": [
           "Manual",
           "Auto",
@@ -749,11 +749,11 @@
     ],
     "switch": [
       {
-        "fallback_name": null,
+        "fallback_name": "Child lock",
         "unique_id": "ab:cd:ef:12:ce:61:df:4c-1-64704-child_lock",
         "migrate_unique_ids": [],
         "platform": "switch",
-        "class_name": "AqaraThermostatChildLock",
+        "class_name": "ConfigurableAttributeSwitch",
         "translation_key": "child_lock",
         "translation_placeholders": null,
         "device_class": null,
@@ -776,11 +776,11 @@
         "on_value": 1
       },
       {
-        "fallback_name": null,
+        "fallback_name": "Valve detection",
         "unique_id": "ab:cd:ef:12:ce:61:df:4c-1-64704-valve_detection",
         "migrate_unique_ids": [],
         "platform": "switch",
-        "class_name": "AqaraThermostatValveDetection",
+        "class_name": "ConfigurableAttributeSwitch",
         "translation_key": "valve_detection",
         "translation_placeholders": null,
         "device_class": null,
@@ -803,11 +803,11 @@
         "on_value": 1
       },
       {
-        "fallback_name": null,
+        "fallback_name": "Open window detection",
         "unique_id": "ab:cd:ef:12:ce:61:df:4c-1-64704-window_detection",
         "migrate_unique_ids": [],
         "platform": "switch",
-        "class_name": "AqaraThermostatWindowDetection",
+        "class_name": "ConfigurableAttributeSwitch",
         "translation_key": "window_detection",
         "translation_placeholders": null,
         "device_class": null,

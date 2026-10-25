@@ -739,30 +739,6 @@ class AqaraPetFeederMode(ZCLEnumSelectEntity):
     )
 
 
-class AqaraThermostatPresetMode(types.enum8):
-    """Thermostat preset mode."""
-
-    Manual = 0x00
-    Auto = 0x01
-    Away = 0x02
-
-
-@register_entity(AQARA_OPPLE_CLUSTER)
-class AqaraThermostatPreset(ZCLEnumSelectEntity):
-    """Representation of an Aqara thermostat preset configuration entity."""
-
-    _unique_id_suffix = "preset"
-    _attribute_name = "preset"
-    _enum = AqaraThermostatPresetMode
-    _attr_translation_key: str = "preset"
-    _cluster_id = AQARA_OPPLE_CLUSTER
-
-    _cluster_match = ClusterMatch(
-        server_clusters=frozenset({AQARA_OPPLE_CLUSTER}),
-        models=frozenset({"lumi.airrtc.agl001"}),
-    )
-
-
 class SonoffPresenceDetectionSensitivityEnum(types.enum8):
     """Enum for detection sensitivity select entity."""
 
