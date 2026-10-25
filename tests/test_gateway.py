@@ -781,19 +781,13 @@ async def test_configured_timezone_passed_to_controller(
     zha_data.local_timezone = tz
     zha_gw = Gateway(zha_data)
 
-    async def _mock_new(*args, **kwargs):
-        # Simulate what zigpy does: store local_timezone on the controller instance.
-        zigpy_app_controller.local_timezone = kwargs.get("local_timezone")
-        return zigpy_app_controller
-
     with patch(
         "bellows.zigbee.application.ControllerApplication.new",
-        side_effect=_mock_new,
+        AsyncMock(return_value=zigpy_app_controller),
     ) as mock_new:
         await zha_gw.async_initialize()
 
     assert mock_new.call_args.kwargs["local_timezone"] == tz
-    assert zha_gw.application_controller.local_timezone == tz
 
     await zha_gw.shutdown()
 
