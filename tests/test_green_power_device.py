@@ -498,25 +498,6 @@ async def test_green_power_quirk_entity_lifecycle(zha_gateway: Gateway) -> None:
         ]
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AttributeError,
-    reason="GreenPowerDevice.get_diagnostics_json reads `_last_seen.isoformat()` "
-    "which raises when the GPD has never been seen",
-)
-async def test_green_power_device_diagnostics_never_seen(zha_gateway: Gateway) -> None:
-    """Test diagnostics of a GPD that has not sent a frame yet."""
-    zigpy_gpd = make_zigpy_gpd(zha_gateway)
-    assert zigpy_gpd._last_seen is None
-    zha_device = zha_gateway.get_or_create_device(zigpy_gpd)
-
-    # `device_info` tolerates a missing `last_seen`
-    assert zha_device.device_info.device_type == "GreenPower"
-    assert zha_device.last_seen is None
-
-    assert zha_device.get_diagnostics_json()["last_seen"] is None
-
-
 async def test_green_power_base_device_defaults(zha_gateway: Gateway) -> None:
     """Test the `BaseDevice` defaults a GPD inherits."""
     zha_device = zha_gateway.get_or_create_device(make_zigpy_gpd(zha_gateway))

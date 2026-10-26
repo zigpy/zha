@@ -1804,7 +1804,11 @@ class ZigbeeDevice(BaseDevice[ZigpyDevice]):
         info["power_source"] = self.power_source
         info["lqi"] = self.lqi
         info["rssi"] = self.rssi
-        info["last_seen"] = self.device._last_seen.isoformat()
+        info["last_seen"] = (
+            self.device._last_seen.isoformat()
+            if self.device._last_seen is not None
+            else None
+        )
         info["available"] = self.available
         info["device_type"] = self.device_type
         info["active_coordinator"] = self.is_active_coordinator
@@ -2066,7 +2070,11 @@ class GreenPowerDevice(BaseDevice[ZigpyGreenPowerDevice]):
         info["power_source"] = self.power_source
         info["lqi"] = self.lqi
         info["rssi"] = self.rssi
-        info["last_seen"] = self.device._last_seen.isoformat()
+        info["last_seen"] = (
+            self.device._last_seen.isoformat()
+            if self.device._last_seen is not None
+            else None
+        )
         info["available"] = self.available
         info["device_type"] = self.device_type
         info["active_coordinator"] = self.is_active_coordinator
