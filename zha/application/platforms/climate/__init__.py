@@ -610,9 +610,7 @@ class Thermostat(BaseThermostat, ZclPlatformEntity):
             current = self._fan_cluster.get(FanCluster.AttributeDefs.fan_mode.name)
             if current is not None:
                 mode = ZCL_TO_FAN_MODE.get(current)
-                if mode is not None and mode in (self.fan_modes or ()):
-                    return mode
-                return None
+                return mode if mode in (self.fan_modes or ()) else None
 
         running_state = self._running_state
         if running_state is None:
