@@ -17,7 +17,7 @@ import logging
 import time
 from typing import TYPE_CHECKING, Any, Final
 
-from zigpy.device import Device as ZigpyDevice
+from zigpy.device import ZigbeeDevice
 import zigpy.exceptions
 from zigpy.profiles import PROFILES
 from zigpy.types import uint1_t, uint8_t, uint16_t
@@ -80,6 +80,7 @@ from zha.application.platforms import (
     BaseEntityState,
     EntityStateChangedEvent,
     PlatformEntity,
+    ZclPlatformEntity,
     sensor,
 )
 from zha.application.platforms.update import BaseFirmwareUpdateEntity
@@ -111,7 +112,7 @@ def get_cluster_attr_data(cluster: Cluster) -> list[dict]:
     """Return cluster attribute data."""
     attributes_info = []
 
-    for attr_def in cluster.attributes.values():
+    for attr_def in cluster.AttributeDefs:
         info = {
             "id": f"0x{attr_def.id:04x}",
             "name": attr_def.name,
@@ -147,7 +148,7 @@ def _cluster_entry(cluster_id: int, cluster: Cluster) -> dict[str, Any]:
 
 
 def get_device_automation_triggers(
-    device: zigpy.device.Device,
+    device: zigpy.device.ZigbeeDevice,
 ) -> dict[tuple[str, str], dict[str, str]]:
     """Get the supported device automation triggers for a zigpy device."""
     return {
@@ -336,7 +337,7 @@ class Device(LogMixin, EventBase):
     _device_match: DeviceMatch | None = None
     _zigpy_device_cls: ReplacingZigpyDeviceFactory | None = None
     _zigpy_device_transforms: tuple[
-        Callable[[zigpy.device.Device], zigpy.device.Device], ...
+        Callable[[zigpy.device.ZigbeeDevice], zigpy.device.ZigbeeDevice], ...
     ] = ()
 
     # Cached properties that depend on the zigpy device and must be invalidated
@@ -360,7 +361,7 @@ class Device(LogMixin, EventBase):
 
     def __init__(
         self,
-        zigpy_device: zigpy.device.Device,
+        zigpy_device: zigpy.device.ZigbeeDevice,
         _gateway: Gateway,
     ) -> None:
         """Initialize the gateway."""
@@ -388,7 +389,7 @@ class Device(LogMixin, EventBase):
 
         self._init_from_zigpy_device(zigpy_device)
 
-    def _init_from_zigpy_device(self, zigpy_device: zigpy.device.Device) -> None:
+    def _init_from_zigpy_device(self, zigpy_device: zigpy.device.ZigbeeDevice) -> None:
         """(Re-)initialize device state from a zigpy device.
 
         Sets up the zigpy device reference, quirk metadata, cluster handlers,
@@ -404,7 +405,7 @@ class Device(LogMixin, EventBase):
         self._pending_entities.clear()
         self._discovered_entities.clear()
 
-        self._zigpy_device: ZigpyDevice = zigpy_device
+        self._zigpy_device: ZigbeeDevice = zigpy_device
 
         # Invalidate cached properties that depend on the zigpy device before
         # they are read below (e.g. is_mains_powered, is_coordinator).
@@ -462,7 +463,7 @@ class Device(LogMixin, EventBase):
         )
 
     @property
-    def device(self) -> zigpy.device.Device:
+    def device(self) -> zigpy.device.ZigbeeDevice:
         """Return underlying Zigpy device."""
         return self._zigpy_device
 
@@ -771,10 +772,13 @@ class Device(LogMixin, EventBase):
         for entity in self._platform_entities.values():
             if platform != entity.PLATFORM:
                 continue
-            if endpoint_id is not None and entity.endpoint.id != endpoint_id:
-                continue
-            if cluster_id is not None and entity.cluster.cluster_id != cluster_id:
-                continue
+            if endpoint_id is not None or cluster_id is not None:
+                if not isinstance(entity, ZclPlatformEntity):
+                    continue
+                if endpoint_id is not None and entity.endpoint.id != endpoint_id:
+                    continue
+                if cluster_id is not None and entity.cluster.cluster_id != cluster_id:
+                    continue
             matches.append(entity)
         if not matches or (not pick_first and len(matches) != 1):
             raise LookupError(
@@ -787,7 +791,7 @@ class Device(LogMixin, EventBase):
     @classmethod
     def new(
         cls,
-        zigpy_dev: zigpy.device.Device,
+        zigpy_dev: zigpy.device.ZigbeeDevice,
         gateway: Gateway,
     ) -> Device:
         """Create new device, dispatching to the factory matched during resolution."""
@@ -1035,7 +1039,7 @@ class Device(LogMixin, EventBase):
             )
 
     async def async_rebuild_from_zigpy_device(
-        self, zigpy_device: zigpy.device.Device
+        self, zigpy_device: zigpy.device.ZigbeeDevice
     ) -> None:
         """Tear down and rebuild this device from a new zigpy device.
 
@@ -1057,7 +1061,7 @@ class Device(LogMixin, EventBase):
             DeviceConfiguredEvent(device_ieee=self.ieee),
         )
 
-    def discover_entities(self) -> Iterator[BaseEntity]:
+    def discover_entities(self) -> Iterator[PlatformEntity]:
         """Yield the default (ZCL) entities for this device.
 
         Declarative quirks add their exposed entities by overriding this in
@@ -1066,6 +1070,16 @@ class Device(LogMixin, EventBase):
         # TODO: purge old coordinator entities
         if self.is_coordinator:
             return
+
+        # TODO: detach these entities from the `Basic` cluster once we finish
+        # implementing unique ID migrations in the Core integration
+        if (basic_cluster := sensor.RSSISensor.legacy_basic_cluster(self)) is not None:
+            unique_id_base = (
+                f"{self.ieee}-{basic_cluster.endpoint.endpoint_id}-{Basic.cluster_id}"
+            )
+
+            yield sensor.RSSISensor(self, unique_id=unique_id_base)
+            yield sensor.LQISensor(self, unique_id=unique_id_base)
 
         for ep_id, endpoint in self.endpoints.items():
             if ep_id == 0:
@@ -1834,7 +1848,7 @@ class Device(LogMixin, EventBase):
 class CoordinatorDevice(Device):
     """ZHA wrapper for the active coordinator device."""
 
-    def discover_entities(self) -> Iterator[BaseEntity]:
+    def discover_entities(self) -> Iterator[PlatformEntity]:
         """Yield counter sensors for the active coordinator."""
         state = self.gateway.application_controller.state
         for counter_groups in (
@@ -1846,7 +1860,7 @@ class CoordinatorDevice(Device):
             for counter_group, counters in getattr(state, counter_groups).items():
                 for counter in counters:
                     yield sensor.DeviceCounterSensor(
-                        zha_device=self,
+                        device=self,
                         counter_groups=counter_groups,
                         counter_group=counter_group,
                         counter=counter,

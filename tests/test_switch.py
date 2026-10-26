@@ -904,3 +904,48 @@ async def test_binary_output_cluster(zha_gateway: Gateway) -> None:
             manufacturer=UNDEFINED,
         )
     ]
+
+
+async def test_group_state_ignores_unavailable_members(zha_gateway: Gateway) -> None:
+    """Test that an unavailable member does not keep the group on."""
+    device_switch_1 = await device_switch_1_mock(zha_gateway)
+    device_switch_2 = await device_switch_2_mock(zha_gateway)
+    members = [
+        GroupMemberReference(ieee=device_switch_1.ieee, endpoint_id=1),
+        GroupMemberReference(ieee=device_switch_2.ieee, endpoint_id=1),
+    ]
+    zha_group: Group = await zha_gateway.async_create_zigpy_group("Test Group", members)
+    await zha_gateway.async_block_till_done()
+
+    entity: GroupEntity = get_group_entity(zha_group, platform=Platform.SWITCH)
+    device_2_entity = get_entity(device_switch_2, platform=Platform.SWITCH)
+
+    dev1_cluster_on_off = device_switch_1.device.endpoints[1].on_off
+    dev2_cluster_on_off = device_switch_2.device.endpoints[1].on_off
+
+    # both members on, so the group is on
+    await send_attributes_report(zha_gateway, dev1_cluster_on_off, {0: 1})
+    await send_attributes_report(zha_gateway, dev2_cluster_on_off, {0: 1})
+    # group member updates are debounced
+    await asyncio.sleep(1)
+    await zha_gateway.async_block_till_done()
+    assert bool(entity.state.is_on) is True
+
+    # the second member drops off the network while it is still on
+    device_switch_2.update_available(False)
+    await asyncio.sleep(1)
+    await zha_gateway.async_block_till_done()
+    assert device_2_entity.state.available is False
+    assert bool(device_2_entity.state.is_on) is True
+
+    # turning the reachable member off turns the group off
+    await send_attributes_report(zha_gateway, dev1_cluster_on_off, {0: 0})
+    await asyncio.sleep(1)
+    await zha_gateway.async_block_till_done()
+    assert bool(entity.state.is_on) is False
+
+    # once it is reachable again its state counts, and the group is on
+    device_switch_2.update_available(True)
+    await asyncio.sleep(1)
+    await zha_gateway.async_block_till_done()
+    assert bool(entity.state.is_on) is True

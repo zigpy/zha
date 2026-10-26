@@ -71,11 +71,11 @@ from zha.zigbee.device import (
     ZHAEvent,
     get_device_automation_triggers,
 )
-from zha.zigbee.group import Group, GroupMemberReference
+from zha.zigbee.group import Group
 
 
 def zigpy_device(zha_gateway: Gateway, with_basic_cluster: bool = True, **kwargs):
-    """Return a ZigpyDevice with a switch cluster."""
+    """Return a ZigbeeDevice with a switch cluster."""
     in_clusters = [general.OnOff.cluster_id]
     if with_basic_cluster:
         in_clusters.append(general.Basic.cluster_id)
@@ -92,7 +92,7 @@ def zigpy_device(zha_gateway: Gateway, with_basic_cluster: bool = True, **kwargs
 
 
 def zigpy_device_mains(zha_gateway: Gateway, with_basic_cluster: bool = True):
-    """Return a ZigpyDevice with a switch cluster."""
+    """Return a ZigbeeDevice with a switch cluster."""
     in_clusters = [general.OnOff.cluster_id]
     if with_basic_cluster:
         in_clusters.append(general.Basic.cluster_id)
@@ -799,7 +799,7 @@ async def test_async_add_to_group_remove_from_group(
 
     assert (zha_device.ieee, 3) not in group.zigpy_group.members
 
-    with patch("zigpy.device.Device.add_to_group", side_effect=ZigbeeException):
+    with patch("zigpy.device.ZigbeeDevice.add_to_group", side_effect=ZigbeeException):
         await zha_device.async_add_to_group(group.group_id)
         assert (zha_device.ieee, 3) not in group.zigpy_group.members
         assert (
@@ -820,7 +820,9 @@ async def test_async_add_to_group_remove_from_group(
     await zha_device.async_add_to_group(group.group_id)
     assert (zha_device.ieee, 3) in group.zigpy_group.members
 
-    with patch("zigpy.device.Device.remove_from_group", side_effect=ZigbeeException):
+    with patch(
+        "zigpy.device.ZigbeeDevice.remove_from_group", side_effect=ZigbeeException
+    ):
         await zha_device.async_remove_from_group(group.group_id)
         assert (zha_device.ieee, 3) in group.zigpy_group.members
         assert (
@@ -1351,7 +1353,6 @@ async def test_quirks_v2_change_entity_metadata(zha_gateway: Gateway) -> None:
     (
         QuirkBuilder("CentraLite", "3405-L")
         .change_entity_metadata(
-            endpoint_id=1,
             unique_id_suffix="-lqi",
             new_device_class=SensorDeviceClass.POWER,
             new_state_class=SensorStateClass.MEASUREMENT,
@@ -1407,7 +1408,7 @@ async def test_quirks_v2_change_entity_metadata(zha_gateway: Gateway) -> None:
 
     assert lqi_entity is not None, "LQI sensor entity should exist"
 
-    # Verify metadata changes were applied - first filter matches by endpoint_id=1 and unique_id_suffix="-lqi"
+    # Verify metadata changes were applied - first filter matches by endpoint_id=1, cluster_id=Basic and unique_id_suffix="-lqi"
     assert lqi_entity._attr_device_class == SensorDeviceClass.POWER
     assert lqi_entity._attr_state_class == SensorStateClass.MEASUREMENT
     assert lqi_entity._attr_entity_category == EntityType.CONFIG
@@ -2067,15 +2068,13 @@ async def test_gateway_reconfigure_with_swap(
 
     # Create a group containing this device so we can verify that group
     # subscriptions are refreshed after the reinterview rebuild.
-    zha_group = await zha_gateway.async_create_zigpy_group(
-        "Test Group",
-        [GroupMemberReference(ieee=zigpy_dev.ieee, endpoint_id=3)],
-    )
+    zha_group = await zha_gateway.async_create_zigpy_group("Test Group", members=None)
     await zha_gateway.async_block_till_done()
     assert zha_group is not None
 
-    # The mock endpoint.request doesn't actually add to the zigpy group,
-    # so add manually.
+    # The device's endpoint has no `Groups` cluster, so it cannot join a group
+    # itself, and the mock endpoint.request doesn't add it to the zigpy group
+    # either, so add it manually.
     zha_group.zigpy_group.add_member(zigpy_dev.endpoints[3], suppress_event=True)
 
     # Register a mock group entity so the group subscribes to member entities.

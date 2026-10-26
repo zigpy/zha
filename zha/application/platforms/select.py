@@ -36,7 +36,7 @@ from zha.application.platforms import (
     ClusterConfig,
     ClusterMatch,
     EntityCategory,
-    PlatformEntity,
+    ZclPlatformEntity,
     register_entity,
 )
 from zha.application.platforms.const import (
@@ -112,7 +112,7 @@ class BaseSelectEntity(BaseEntity, ABC):
         """Change the selected option."""
 
 
-class SirenDefaultSelectEntity(BaseSelectEntity, PlatformEntity):
+class SirenDefaultSelectEntity(BaseSelectEntity, ZclPlatformEntity):
     """Select entity whose state lives on the AdvancedSiren on the same cluster."""
 
     _attr_entity_category = EntityCategory.CONFIG
@@ -246,7 +246,7 @@ class DefaultStrobeSelectEntity(SirenDefaultSelectEntity):
     )
 
 
-class ZCLEnumSelectEntity(BaseSelectEntity, PlatformEntity):
+class ZCLEnumSelectEntity(BaseSelectEntity, ZclPlatformEntity):
     """Representation of a ZHA ZCL enum select entity."""
 
     _attribute_name: str

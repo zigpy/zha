@@ -34,8 +34,8 @@ from zha.application.platforms import (
     ClusterConfig,
     ClusterMatch,
     GroupEntity,
-    PlatformEntity,
     PlatformFeatureGroup,
+    ZclPlatformEntity,
     register_entity,
     register_group_entity,
 )
@@ -873,7 +873,7 @@ class BaseSharedLight(BaseLight):
 
 
 @register_entity(OnOff.cluster_id)
-class Light(BaseSharedLight, PlatformEntity):
+class Light(BaseSharedLight, ZclPlatformEntity):
     """Representation of a ZHA or ZLL light."""
 
     _attr_translation_key: str = "light"
@@ -1470,7 +1470,8 @@ class LightGroup(BaseSharedLight, GroupEntity):
         self.debug(
             "All platform entity states for group entity members: %s", all_states
         )
-        on_states = [state for state in states if state.on]
+        # Unavailable members keep their last state, don't let them keep the group on
+        on_states = [state for state in states if state.on and state.available]
 
         self._state = len(on_states) > 0
 

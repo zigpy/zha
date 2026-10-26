@@ -8,7 +8,7 @@ from unittest.mock import AsyncMock, call, patch
 
 import pytest
 import zhaquirks
-from zigpy.device import Device as ZigpyDevice
+from zigpy.device import ZigbeeDevice
 from zigpy.exceptions import ZigbeeException
 from zigpy.profiles import zha
 from zigpy.typing import UNDEFINED
@@ -50,7 +50,7 @@ IEEE_GROUPABLE_DEVICE2 = "02:2d:6f:00:0a:90:69:e8"
 _LOGGER = logging.getLogger(__name__)
 
 
-def zigpy_device_mock(zha_gateway: Gateway) -> ZigpyDevice:
+def zigpy_device_mock(zha_gateway: Gateway) -> ZigbeeDevice:
     """Device tracker zigpy device."""
     endpoints = {
         1: {
@@ -497,7 +497,7 @@ async def test_fan_update_entity(
     assert cluster.read_attributes.await_count == 4
 
 
-def zigpy_device_ikea_mock(zha_gateway: Gateway) -> ZigpyDevice:
+def zigpy_device_ikea_mock(zha_gateway: Gateway) -> ZigbeeDevice:
     """Ikea fan zigpy device."""
     endpoints = {
         1: {
@@ -681,7 +681,7 @@ async def test_fan_ikea_update_entity(
     assert entity.percentage_step == 100 / 10
 
 
-def zigpy_device_kof_mock(zha_gateway: Gateway) -> ZigpyDevice:
+def zigpy_device_kof_mock(zha_gateway: Gateway) -> ZigbeeDevice:
     """Fan by King of Fans zigpy device."""
     endpoints = {
         1: {
@@ -838,3 +838,53 @@ async def test_fan_kof_update_entity(
     assert entity.state.percentage == 25
     assert entity.state.preset_mode is None
     assert entity.percentage_step == 100 / 4
+
+
+async def test_group_state_ignores_unavailable_members(zha_gateway: Gateway) -> None:
+    """Test that an unavailable member does not determine the fan group state."""
+    device_fan_1 = await device_fan_1_mock(zha_gateway)
+    device_fan_2 = await device_fan_2_mock(zha_gateway)
+    members = [
+        GroupMemberReference(ieee=device_fan_1.ieee, endpoint_id=1),
+        GroupMemberReference(ieee=device_fan_2.ieee, endpoint_id=1),
+    ]
+    zha_group: Group = await zha_gateway.async_create_zigpy_group("Test Group", members)
+    await zha_gateway.async_block_till_done()
+
+    entity: GroupEntity = get_group_entity(zha_group, platform=Platform.FAN)
+    device_1_entity = get_entity(device_fan_1, platform=Platform.FAN)
+
+    dev1_fan_cluster = device_fan_1.device.endpoints[1].fan
+    dev2_fan_cluster = device_fan_2.device.endpoints[1].fan
+
+    # first member on high, second on low: the first member's speed wins
+    await send_attributes_report(zha_gateway, dev1_fan_cluster, {0: 3})
+    await send_attributes_report(zha_gateway, dev2_fan_cluster, {0: 1})
+    # group member updates are debounced
+    await asyncio.sleep(1)
+    await zha_gateway.async_block_till_done()
+    assert entity.state.percentage == 100
+
+    # the first member drops off the network while it is still on high
+    device_fan_1.update_available(False)
+    await asyncio.sleep(1)
+    await zha_gateway.async_block_till_done()
+    assert device_1_entity.state.available is False
+    assert device_1_entity.state.percentage == 100
+
+    # the reachable member's speed is used instead of the stale one
+    assert entity.state.percentage == 33
+    assert entity.state.is_on is True
+
+    # turning the reachable member off turns the group off
+    await send_attributes_report(zha_gateway, dev2_fan_cluster, {0: 0})
+    await asyncio.sleep(1)
+    await zha_gateway.async_block_till_done()
+    assert entity.state.is_on is False
+
+    # once it is reachable again its state counts
+    device_fan_1.update_available(True)
+    await asyncio.sleep(1)
+    await zha_gateway.async_block_till_done()
+    assert entity.state.percentage == 100
+    assert entity.state.is_on is True

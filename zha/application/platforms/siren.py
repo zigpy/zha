@@ -29,6 +29,7 @@ from zha.application.platforms import (
     ClusterMatch,
     PlatformEntity,
     PlatformFeatureGroup,
+    ZclPlatformEntity,
     register_entity,
 )
 from zha.quirks import SIREN_BASIC
@@ -128,7 +129,7 @@ class BaseSiren(PlatformEntity, ABC):
         """Issue a brief squawk pulse."""
 
 
-class BaseZclSiren(BaseSiren, ABC):
+class BaseZclSiren(BaseSiren, ZclPlatformEntity, ABC):
     """Base class for ZHA IAS WD siren entities with shared ZCL logic."""
 
     _off_listener: asyncio.TimerHandle | None
@@ -185,7 +186,7 @@ class BaseZclSiren(BaseSiren, ABC):
             warning=warning,
             warning_duration=5,
             strobe_duty_cycle=0,
-            stobe_level=StrobeLevel.High_level_strobe,
+            strobe_level=StrobeLevel.High_level_strobe,
         )
         self._cancel_off_listener()
         self._attr_is_on = False
@@ -313,7 +314,7 @@ class AdvancedSiren(BaseZclSiren):
             warning=warning,
             warning_duration=siren_duration,
             strobe_duty_cycle=duty_cycle,
-            stobe_level=strobe_level,
+            strobe_level=strobe_level,
         )
         self._attr_is_on = True
         self._off_listener = asyncio.get_running_loop().call_later(
@@ -374,7 +375,7 @@ class BasicSiren(BaseZclSiren):
             warning=warning,
             warning_duration=siren_duration,
             strobe_duty_cycle=0,
-            stobe_level=StrobeLevel.High_level_strobe,
+            strobe_level=StrobeLevel.High_level_strobe,
         )
         self._attr_is_on = True
         self._off_listener = asyncio.get_running_loop().call_later(

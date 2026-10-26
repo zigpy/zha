@@ -3,17 +3,18 @@
 from __future__ import annotations
 
 import dataclasses
-from typing import TYPE_CHECKING, Any, Final
+from typing import Any, Final
 
 from zigpy.types.named import EUI64
 
 from zha.application import Platform
 from zha.application.platforms import BaseEntityState, PlatformEntity
-from zha.application.platforms.event.const import DoorbellEventType, EventDeviceClass
-
-if TYPE_CHECKING:
-    from zha.zigbee.device import Device
-    from zha.zigbee.endpoint import Endpoint
+from zha.application.platforms.event.const import (
+    ATTR_PRESS_COUNT,
+    ButtonEventType,
+    DoorbellEventType,
+    EventDeviceClass,
+)
 
 
 @dataclasses.dataclass(frozen=True, kw_only=True)
@@ -53,9 +54,9 @@ class BaseEvent(PlatformEntity):
     _attr_device_class: EventDeviceClass | None = None
     _attr_event_types: list[str]
 
-    def __init__(self, endpoint: Endpoint, device: Device, **kwargs: Any) -> None:
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         """Initialize the event entity."""
-        super().__init__(endpoint=endpoint, device=device, **kwargs)
+        super().__init__(*args, **kwargs)
 
         # Doorbells are expected to ring: the `doorbell.rang` trigger matches on it
         if (
@@ -65,6 +66,18 @@ class BaseEvent(PlatformEntity):
             raise ValueError(
                 f"Doorbell event entity {self.unique_id} does not support the"
                 f" '{DoorbellEventType.RING}' event type"
+            )
+
+        # `multi_press` keeps `button.pressed` exclusive only next to `single_press`
+        if (
+            self.device_class == EventDeviceClass.BUTTON
+            and ButtonEventType.MULTI_PRESS in self.event_types
+            and ButtonEventType.SINGLE_PRESS not in self.event_types
+        ):
+            raise ValueError(
+                f"Button event entity {self.unique_id} supports the"
+                f" '{ButtonEventType.MULTI_PRESS}' event type without"
+                f" '{ButtonEventType.SINGLE_PRESS}'"
             )
 
     @property
@@ -83,6 +96,22 @@ class BaseEvent(PlatformEntity):
         """Trigger an event, to be called by subclasses."""
         if event_type not in self.event_types:
             raise ValueError(f"Invalid event type {event_type} for {self.unique_id}")
+
+        if (
+            self.device_class == EventDeviceClass.BUTTON
+            and event_type == ButtonEventType.MULTI_PRESS
+        ):
+            press_count = (event_attributes or {}).get(ATTR_PRESS_COUNT)
+            if (
+                not isinstance(press_count, int)
+                or isinstance(press_count, bool)
+                or press_count < 2
+            ):
+                raise ValueError(
+                    f"Invalid {ATTR_PRESS_COUNT} {press_count!r} for"
+                    f" '{ButtonEventType.MULTI_PRESS}' on {self.unique_id}:"
+                    " it must be an integer of at least 2"
+                )
 
         self.emit(
             EntityEventTriggeredEvent.event,
