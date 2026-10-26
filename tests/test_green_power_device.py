@@ -294,6 +294,10 @@ async def test_green_power_quirk_specificity(zha_gateway: Gateway) -> None:
         DEVICE_REGISTRY.register(two_field_entry)
         assert DEVICE_REGISTRY.match_green_power_entry(zigpy_gpd) is src_id_entry
 
+    # Specificity counts field presence, not value
+    assert GreenPowerDeviceMatch(device_id=0).specificity == 1
+    assert GreenPowerDeviceMatch().specificity == 0
+
 
 async def test_green_power_device_not_zigbee(zha_gateway: Gateway) -> None:
     """Test that Zigbee-only helpers reject or skip a Green Power device."""

@@ -209,7 +209,11 @@ class GreenPowerDeviceMatch:
         """Rank by identity criterion first, then by the number of fields specified."""
         has_identity = bool(self.src_id_ranges) or bool(self.ieee_prefixes)
         num_fields = sum(
-            map(bool, (self.device_id, self.manufacturer_id, self.model_id))
+            [
+                self.device_id is not None,
+                self.manufacturer_id is not None,
+                self.model_id is not None,
+            ]
         )
 
         return (has_identity, num_fields)
