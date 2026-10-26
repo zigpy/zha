@@ -250,6 +250,7 @@
         "device_ieee": "ab:cd:ef:12:39:bc:b5:2d",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "is_on": false,
         "attribute_name": "present_value"
@@ -274,6 +275,7 @@
         "device_ieee": "ab:cd:ef:12:39:bc:b5:2d",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "command": "identify",
         "args": [
@@ -301,6 +303,7 @@
         "device_ieee": "ab:cd:ef:12:39:bc:b5:2d",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "on": false,
         "brightness": null,
@@ -340,6 +343,7 @@
         "device_ieee": "ab:cd:ef:12:39:bc:b5:2d",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "current_option": "PreviousValue",
         "enum": "StartUpOnOff",
@@ -370,6 +374,7 @@
         "device_ieee": "ab:cd:ef:12:39:bc:b5:2d",
         "endpoint_id": null,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "native_value": 220,
         "suggested_display_precision": null,
@@ -393,6 +398,7 @@
         "device_ieee": "ab:cd:ef:12:39:bc:b5:2d",
         "endpoint_id": null,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "native_value": -67,
         "suggested_display_precision": null,
@@ -418,6 +424,7 @@
         "device_ieee": "ab:cd:ef:12:39:bc:b5:2d",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "is_on": false,
         "inverted": false,
@@ -445,6 +452,7 @@
         "device_ieee": "ab:cd:ef:12:39:bc:b5:2d",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "is_on": false,
         "inverted": false,
@@ -474,6 +482,7 @@
         "device_ieee": "ab:cd:ef:12:39:bc:b5:2d",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "installed_version": "0x001c4203",
         "in_progress": false,
@@ -486,6 +495,7 @@
       }
     ]
   },
+  "child_devices": [],
   "neighbors": [],
   "routes": []
 }

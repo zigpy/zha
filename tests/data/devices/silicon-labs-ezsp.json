@@ -166,6 +166,7 @@
     }
   },
   "zha_lib_entities": {},
+  "child_devices": [],
   "neighbors": [],
   "routes": []
 }
