@@ -4,8 +4,12 @@ from __future__ import annotations
 
 from collections.abc import Iterator
 from datetime import UTC, datetime
+import logging
+from pathlib import Path
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
+import zigpy.device
 from zigpy.device import (
     GreenPowerCommandReceived,
     GreenPowerDevice as ZigpyGreenPowerDevice,
@@ -30,9 +34,20 @@ from zha.application.const import (
     ZHA_DEVICE_CONFIGURED_EVENT,
     ZHA_DEVICE_ENTITY_ADDED_EVENT,
     ZHA_DEVICE_ENTITY_REMOVED_EVENT,
+    ZHA_GW_MSG_DEVICE_FULL_INIT,
+    ZHA_GW_MSG_DEVICE_JOINED,
+    ZHA_GW_MSG_DEVICE_LEFT,
+    ZHA_GW_MSG_DEVICE_REMOVED,
     ZHA_GW_MSG_RAW_INIT,
 )
-from zha.application.gateway import Gateway
+from zha.application.gateway import (
+    DeviceFullInitEvent,
+    DeviceJoinedEvent,
+    DeviceLeftEvent,
+    DevicePairingStatus,
+    DeviceRemovedEvent,
+    Gateway,
+)
 from zha.application.helpers import async_is_bindable_target, get_matched_clusters
 from zha.application.platforms import PlatformEntity
 from zha.application.platforms.event import (
@@ -44,10 +59,17 @@ from zha.exceptions import ZHAException
 from zha.quirks import (
     DEVICE_REGISTRY,
     QUIRK_REGISTRY_ENTRY_ATTR,
+    DeviceMatch,
+    DeviceRegistry,
     GreenPowerDeviceMatch,
     GreenPowerQuirkRegistryEntry,
+    ModelInfo,
+    QuirkRegistryEntry,
+    QuirkSource,
 )
 from zha.zigbee.device import (
+    BaseDevice,
+    Device,
     DeviceEntityAddedEvent,
     DeviceEntityRemovedEvent,
     GreenPowerDevice,
@@ -474,3 +496,405 @@ async def test_green_power_quirk_entity_lifecycle(zha_gateway: Gateway) -> None:
         assert [event.triggered for event in new_triggered] == [
             TriggeredEvent(event_type="toggle", event_attributes={})
         ]
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AttributeError,
+    reason="GreenPowerDevice.get_diagnostics_json reads `_last_seen.isoformat()` "
+    "which raises when the GPD has never been seen",
+)
+async def test_green_power_device_diagnostics_never_seen(zha_gateway: Gateway) -> None:
+    """Test diagnostics of a GPD that has not sent a frame yet."""
+    zigpy_gpd = make_zigpy_gpd(zha_gateway)
+    assert zigpy_gpd._last_seen is None
+    zha_device = zha_gateway.get_or_create_device(zigpy_gpd)
+
+    # `device_info` tolerates a missing `last_seen`
+    assert zha_device.device_info.device_type == "GreenPower"
+    assert zha_device.last_seen is None
+
+    assert zha_device.get_diagnostics_json()["last_seen"] is None
+
+
+async def test_green_power_base_device_defaults(zha_gateway: Gateway) -> None:
+    """Test the `BaseDevice` defaults a GPD inherits."""
+    zha_device = zha_gateway.get_or_create_device(make_zigpy_gpd(zha_gateway))
+
+    assert zha_device.quirk_metadata is None
+    assert zha_device.is_coordinator is False
+    assert zha_device.device_alerts == []
+    assert zha_device.device_automation_triggers == {
+        ("device_offline", "device_offline"): {"device_event_type": "device_offline"}
+    }
+    assert zha_device.device_automation_commands == {}
+    assert zha_device._quirk_exposes_features() == set()
+    assert zha_device._quirk_skip_configuration() is False
+    assert zha_device._quirk_device_automation_triggers() == {}
+    assert zha_device.power_source == "Battery or Unknown"
+    assert zha_device.gateway is zha_gateway
+
+
+async def test_base_device_abstract_resolvers(zha_gateway: Gateway) -> None:
+    """Test the `BaseDevice` hooks that subclasses must implement."""
+    zha_device = zha_gateway.get_or_create_device(make_zigpy_gpd(zha_gateway))
+
+    for method in (
+        BaseDevice._resolve_manufacturer,
+        BaseDevice._resolve_model,
+    ):
+        with pytest.raises(NotImplementedError):
+            method(zha_device)
+
+    for prop in (
+        BaseDevice.manufacturer_code,
+        BaseDevice.is_mains_powered,
+        BaseDevice.device_type,
+    ):
+        with pytest.raises(NotImplementedError):
+            prop.fget(zha_device)
+
+
+async def test_green_power_device_join(zha_gateway: Gateway) -> None:
+    """Test the join sequence of a GPD through the gateway."""
+    zigpy_gpd = make_zigpy_gpd(zha_gateway)
+
+    joined: list[DeviceJoinedEvent] = []
+    raw: list = []
+    full: list[DeviceFullInitEvent] = []
+    zha_gateway.on_event(ZHA_GW_MSG_DEVICE_JOINED, joined.append)
+    zha_gateway.on_event(ZHA_GW_MSG_RAW_INIT, raw.append)
+    zha_gateway.on_event(ZHA_GW_MSG_DEVICE_FULL_INIT, full.append)
+
+    zha_gateway.device_joined(zigpy_gpd)
+    assert len(joined) == 1
+    assert joined[0].device_info.ieee == zigpy_gpd.ieee
+    assert joined[0].device_info.nwk == zigpy_gpd.nwk
+    assert joined[0].device_info.pairing_status is DevicePairingStatus.PAIRED
+
+    zha_gateway.raw_device_initialized(zigpy_gpd)
+    assert len(raw) == 1
+
+    zha_gateway.device_initialized(zigpy_gpd)
+    await zha_gateway.async_block_till_done()
+
+    zha_device = zha_gateway.devices[zigpy_gpd.ieee]
+    assert isinstance(zha_device, GreenPowerDevice)
+    assert zha_device.available is True
+    assert zha_device.on_network is True
+
+    assert [e.device_info.pairing_status for e in full] == [
+        DevicePairingStatus.CONFIGURED,
+        DevicePairingStatus.INITIALIZED,
+    ]
+    assert full[0].new_join is True
+    assert full[0].device_info.ieee == zigpy_gpd.ieee
+    assert full[0].device_info.device_type == "GreenPower"
+
+    # Initializing it again is a rejoin of a known device
+    zha_gateway.device_initialized(zigpy_gpd)
+    await zha_gateway.async_block_till_done()
+
+    assert zha_gateway.devices[zigpy_gpd.ieee] is zha_device
+    assert [e.device_info.pairing_status for e in full[2:]] == [
+        DevicePairingStatus.CONFIGURED,
+        DevicePairingStatus.INITIALIZED,
+    ]
+    assert full[2].new_join is False
+
+
+async def test_green_power_device_left(zha_gateway: Gateway) -> None:
+    """Test that a GPD leaving the network is flagged off-network and unavailable."""
+    zigpy_gpd = make_zigpy_gpd(zha_gateway)
+    zha_device = zha_gateway.get_or_create_device(zigpy_gpd)
+    assert zha_device.on_network is True
+
+    left: list[DeviceLeftEvent] = []
+    zha_gateway.on_event(ZHA_GW_MSG_DEVICE_LEFT, left.append)
+
+    zha_gateway.device_left(zigpy_gpd)
+    await zha_gateway.async_block_till_done()
+
+    assert zha_device.on_network is False
+    assert zha_device.available is False
+    assert left == [DeviceLeftEvent(ieee=zigpy_gpd.ieee, nwk=zigpy_gpd.nwk)]
+
+
+async def test_green_power_device_removed(zha_gateway: Gateway) -> None:
+    """Test removal of a GPD, from zigpy and via the gateway API."""
+    zigpy_gpd = make_zigpy_gpd(zha_gateway)
+    zha_device = zha_gateway.get_or_create_device(zigpy_gpd)
+
+    removed: list[DeviceRemovedEvent] = []
+    zha_gateway.on_event(ZHA_GW_MSG_DEVICE_REMOVED, removed.append)
+
+    # No groups: the gateway just asks zigpy to remove the device
+    zha_gateway.application_controller.remove = AsyncMock()
+    await zha_gateway.async_remove_device(zigpy_gpd.ieee)
+    zha_gateway.application_controller.remove.assert_called_once_with(zigpy_gpd.ieee)
+
+    # zigpy then announces the removal
+    zha_gateway.device_removed(zigpy_gpd)
+    await zha_gateway.async_block_till_done()
+
+    assert zigpy_gpd.ieee not in zha_gateway.devices
+    assert zha_gateway.get_device(zigpy_gpd.ieee) is None
+    assert len(removed) == 1
+    assert removed[0].device_info.ieee == zha_device.ieee
+    assert removed[0].device_info.device_type == "GreenPower"
+
+    # Removing an unknown device is a no-op
+    zha_gateway.device_removed(zigpy_gpd)
+    assert len(removed) == 1
+
+
+async def test_green_power_recommissioned_factory_change(zha_gateway: Gateway) -> None:
+    """Test that a quirk resolving on re-commissioning replaces the ZHA device."""
+    zha_device = zha_gateway.get_or_create_device(make_zigpy_gpd(zha_gateway))
+    assert type(zha_device) is GreenPowerDevice
+
+    entry = GreenPowerQuirkRegistryEntry(
+        device_match=GreenPowerDeviceMatch(device_id=DeviceID.OnOffSwitch),
+        zha_device_factory=QuirkGreenPowerDevice,
+    )
+
+    with DEVICE_REGISTRY.preserve_state():
+        DEVICE_REGISTRY.register(entry)
+
+        new_zigpy_gpd = DEVICE_REGISTRY.resolve(make_zigpy_gpd(zha_gateway))
+        assert getattr(new_zigpy_gpd, QUIRK_REGISTRY_ENTRY_ATTR) is entry
+
+        full: list[DeviceFullInitEvent] = []
+        zha_gateway.on_event(ZHA_GW_MSG_DEVICE_FULL_INIT, full.append)
+
+        zha_gateway.application_controller.listener_event(
+            "device_reinterviewed", new_zigpy_gpd
+        )
+        await zha_gateway.async_block_till_done()
+
+        new_zha_device = zha_gateway.devices[new_zigpy_gpd.ieee]
+        assert new_zha_device is not zha_device
+        assert isinstance(new_zha_device, QuirkGreenPowerDevice)
+        assert new_zha_device.device is new_zigpy_gpd
+        assert new_zha_device.available is True
+        assert new_zha_device.on_network is True
+        assert len(new_zha_device.platform_entities) == 1
+        assert [e.device_info.pairing_status for e in full] == [
+            DevicePairingStatus.CONFIGURED
+        ]
+
+        # The same entry on both sides is rebuilt in place
+        newer_zigpy_gpd = DEVICE_REGISTRY.resolve(make_zigpy_gpd(zha_gateway))
+        zha_gateway.application_controller.listener_event(
+            "device_reinterviewed", newer_zigpy_gpd
+        )
+        await zha_gateway.async_block_till_done()
+        assert zha_gateway.devices[newer_zigpy_gpd.ieee] is new_zha_device
+        assert new_zha_device.device is newer_zigpy_gpd
+
+
+async def test_bindable_target_source_without_clusters(zha_gateway: Gateway) -> None:
+    """Test bindability with sources that do and do not have clusters."""
+    gpd = zha_gateway.get_or_create_device(make_zigpy_gpd(zha_gateway))
+    remote = await join_zigpy_device(
+        zha_gateway,
+        create_mock_zigpy_device(
+            zha_gateway,
+            {
+                1: {
+                    SIG_EP_INPUT: [Basic.cluster_id],
+                    SIG_EP_OUTPUT: [OnOff.cluster_id],
+                    SIG_EP_TYPE: zha.DeviceType.REMOTE_CONTROL,
+                    SIG_EP_PROFILE: zha.PROFILE_ID,
+                }
+            },
+        ),
+    )
+
+    # A source with clusters can bind to the coordinator
+    assert async_is_bindable_target(remote, zha_gateway.coordinator_zha_device)
+
+    # A source without clusters never can, not even to the coordinator
+    assert not async_is_bindable_target(gpd, zha_gateway.coordinator_zha_device)
+    assert not async_is_bindable_target(gpd, remote)
+
+
+# Registry tests, using private registries so the global one is untouched
+def make_gp_entry(
+    match: GreenPowerDeviceMatch | None = None, file: str | None = None
+) -> GreenPowerQuirkRegistryEntry:
+    """Create a GP registry entry, optionally defined in `file`."""
+    return GreenPowerQuirkRegistryEntry(
+        device_match=match or GreenPowerDeviceMatch(device_id=DeviceID.OnOffSwitch),
+        source=None
+        if file is None
+        else QuirkSource(module="custom", file=file, line=1, label="Custom"),
+    )
+
+
+def test_registry_gp_entries_iterate_remove_and_dedupe() -> None:
+    """Test that GP entries are listed, deduplicated and removable."""
+    registry = DeviceRegistry()
+    generic = make_gp_entry()
+    specific = make_gp_entry(GreenPowerDeviceMatch(device_id=1, model_id=2))
+    zigbee = QuirkRegistryEntry(
+        device_match=DeviceMatch(applies_to=(ModelInfo("m", "x"), ModelInfo("m", None)))
+    )
+    wildcard = QuirkRegistryEntry(device_match=DeviceMatch(applies_to=()))
+
+    for entry in (generic, zigbee, wildcard, specific):
+        assert registry.register(entry) is entry
+        # Exact duplicates are ignored
+        registry.register(entry)
+
+    # Zigbee entries are listed once, then GP entries by specificity
+    assert list(registry) == [zigbee, wildcard, specific, generic]
+
+    registry.remove(generic)
+    assert list(registry) == [zigbee, wildcard, specific]
+    registry.remove(wildcard)
+    registry.remove(zigbee)
+    assert list(registry) == [specific]
+
+    with pytest.raises(ValueError):
+        registry.remove(generic)
+
+
+def test_registry_purge_custom_quirks(tmp_path: Path) -> None:
+    """Test that quirks defined under the custom quirks root are purged."""
+    registry = DeviceRegistry()
+    root = tmp_path / "custom_zha_quirks"
+
+    def source(file: str | None) -> QuirkSource:
+        return QuirkSource(module="m", file=file, line=1, label="Q")
+
+    custom_gp = make_gp_entry(file=str(root / "gp.py"))
+    other_gp = make_gp_entry(
+        GreenPowerDeviceMatch(device_id=1), file=str(tmp_path / "builtin.py")
+    )
+    sourceless_gp = make_gp_entry(GreenPowerDeviceMatch(device_id=3))
+    custom_zigbee = QuirkRegistryEntry(
+        device_match=DeviceMatch(applies_to=(ModelInfo("a", "b"),)),
+        source=source(str(root / "zigbee.py")),
+    )
+    custom_wildcard = QuirkRegistryEntry(
+        device_match=DeviceMatch(applies_to=()), source=source(str(root / "w.py"))
+    )
+    builtin_zigbee = QuirkRegistryEntry(
+        device_match=DeviceMatch(applies_to=(ModelInfo("c", "d"),)),
+        source=source(str(tmp_path / "builtin.py")),
+    )
+    no_file_zigbee = QuirkRegistryEntry(
+        device_match=DeviceMatch(applies_to=(ModelInfo("e", "f"),)),
+        source=source(None),
+    )
+
+    entries = [
+        custom_gp,
+        other_gp,
+        sourceless_gp,
+        custom_zigbee,
+        custom_wildcard,
+        builtin_zigbee,
+        no_file_zigbee,
+    ]
+    for entry in entries:
+        registry.register(entry)
+
+    registry.purge_custom_quirks(root)
+
+    assert set(map(id, registry)) == {
+        id(other_gp),
+        id(sourceless_gp),
+        id(builtin_zigbee),
+        id(no_file_zigbee),
+    }
+
+
+def test_registry_register_validation() -> None:
+    """Test that unusable entries and classes are rejected."""
+    registry = DeviceRegistry()
+
+    with pytest.raises(ValueError, match="manufacturer and/or model"):
+        registry.register(
+            QuirkRegistryEntry(
+                device_match=DeviceMatch(applies_to=(ModelInfo(None, None),))
+            )
+        )
+
+    class NoMatch(Device):
+        _device_match = None
+
+    with pytest.raises(ValueError, match="does not define `_device_match`"):
+        registry.register_device(NoMatch)
+
+
+def test_registry_register_device_transforms() -> None:
+    """Test that `register_device` collects the zigpy device transforms."""
+    registry = DeviceRegistry()
+
+    def extra_transform(device: zigpy.device.ZigbeeDevice) -> zigpy.device.ZigbeeDevice:
+        return device
+
+    class Replacement:
+        pass
+
+    class QuirkedDevice(Device):
+        _device_match = DeviceMatch(applies_to=(ModelInfo("mfg", "mdl"),))
+        _zigpy_device_cls = Replacement  # type: ignore[assignment]
+        _zigpy_device_transforms = (extra_transform,)
+
+    assert registry.register_device(QuirkedDevice) is QuirkedDevice
+
+    (entry,) = list(registry)
+    assert entry.zha_device_factory is QuirkedDevice
+    assert entry.zigpy_transforms[1:] == (extra_transform,)
+    assert entry.zigpy_transforms[0].device_cls is Replacement
+    assert entry.source is not None
+    assert entry.source.label.endswith("QuirkedDevice")
+
+
+def test_device_match_applies_to_mismatch() -> None:
+    """Test that a device matching none of the `applies_to` pairs is rejected."""
+    zigpy_device = MagicMock(spec=zigpy.device.ZigbeeDevice)
+    zigpy_device.manufacturer = "mfg"
+    zigpy_device.model = "mdl"
+
+    assert DeviceMatch(applies_to=(ModelInfo("mfg", "mdl"),)).matches(zigpy_device)
+    assert DeviceMatch(applies_to=(ModelInfo(None, "mdl"),)).matches(zigpy_device)
+    assert not DeviceMatch(applies_to=(ModelInfo("mfg", "other"),)).matches(
+        zigpy_device
+    )
+    assert not DeviceMatch(applies_to=(ModelInfo("other", None),)).matches(zigpy_device)
+
+
+def test_registry_resolve_edge_cases(caplog: pytest.LogCaptureFixture) -> None:
+    """Test resolving devices that are not matched or whose transform fails."""
+    registry = DeviceRegistry()
+
+    # Neither a Zigbee nor a Green Power device
+    other_device = MagicMock(spec=zigpy.device.BaseDevice)
+    assert registry.resolve(other_device) is other_device
+
+    # A Zigbee device with no matching entry
+    zigbee_device = MagicMock(spec=zigpy.device.ZigbeeDevice)
+    zigbee_device.manufacturer = "mfg"
+    zigbee_device.model = "mdl"
+    assert registry.resolve(zigbee_device) is zigbee_device
+
+    # A failing transform falls back to the bare device, untagged
+    def broken(device: zigpy.device.ZigbeeDevice) -> zigpy.device.ZigbeeDevice:
+        raise RuntimeError("boom")
+
+    registry.register(
+        QuirkRegistryEntry(
+            device_match=DeviceMatch(applies_to=(ModelInfo("mfg", "mdl"),)),
+            zigpy_transforms=(broken,),
+        )
+    )
+
+    with caplog.at_level(logging.ERROR):
+        assert registry.resolve(zigbee_device) is zigbee_device
+
+    assert "Failed to load quirk" in caplog.text
+    assert not hasattr(zigbee_device, QUIRK_REGISTRY_ENTRY_ATTR)
