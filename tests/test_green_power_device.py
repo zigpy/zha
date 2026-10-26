@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Iterator
 from datetime import UTC, datetime
+import json
 import logging
 from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock
@@ -24,6 +25,7 @@ from tests.common import (
     SIG_EP_OUTPUT,
     SIG_EP_PROFILE,
     SIG_EP_TYPE,
+    ZhaJsonEncoder,
     create_mock_zigpy_device,
     join_zigpy_device,
 )
@@ -496,6 +498,44 @@ async def test_green_power_quirk_entity_lifecycle(zha_gateway: Gateway) -> None:
         assert [event.triggered for event in new_triggered] == [
             TriggeredEvent(event_type="toggle", event_attributes={})
         ]
+
+
+async def test_green_power_device_diagnostics_entities(zha_gateway: Gateway) -> None:
+    """Test that diagnostics serialize entities and skip virtual ones."""
+    entry = GreenPowerQuirkRegistryEntry(
+        device_match=GreenPowerDeviceMatch(device_id=DeviceID.OnOffSwitch),
+        zha_device_factory=QuirkGreenPowerDevice,
+    )
+
+    with DEVICE_REGISTRY.preserve_state():
+        DEVICE_REGISTRY.register(entry)
+
+        zigpy_gpd = DEVICE_REGISTRY.resolve(make_zigpy_gpd(zha_gateway))
+        zigpy_gpd.last_seen = datetime(2026, 1, 1, tzinfo=UTC)
+        zha_device = zha_gateway.get_or_create_device(zigpy_gpd)
+        await zha_device.async_initialize(from_cache=True)
+
+        unique_id = f"{zigpy_gpd.ieee}-toggle"
+        event_entity = zha_device.get_platform_entity(Platform.EVENT, unique_id)
+
+        # Virtual entities have no state surface and are left out of diagnostics
+        zha_device.platform_entities[(Platform.VIRTUAL, "virtual")] = MagicMock(
+            PLATFORM=Platform.VIRTUAL, unique_id="virtual", on_remove=AsyncMock()
+        )
+
+        diagnostics = json.loads(
+            json.dumps(zha_device.get_diagnostics_json(), cls=ZhaJsonEncoder)
+        )
+
+    assert list(diagnostics["zha_lib_entities"]) == [Platform.EVENT]
+    (state,) = diagnostics["zha_lib_entities"][Platform.EVENT]
+    assert state["unique_id"] == event_entity.state.unique_id
+    assert state["event_types"] == ["toggle"]
+    assert state["device_ieee"] == str(zigpy_gpd.ieee)
+    assert isinstance(state["migrate_unique_ids"], list)
+    assert state["extra_state_attribute_names"] == sorted(
+        state["extra_state_attribute_names"]
+    )
 
 
 async def test_green_power_base_device_defaults(zha_gateway: Gateway) -> None:
