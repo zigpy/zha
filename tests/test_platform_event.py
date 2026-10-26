@@ -539,7 +539,7 @@ async def test_zha_event_button_matching_error_keeps_zha_event(
     caplog: pytest.LogCaptureFixture,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    """Test that an error while firing an event does not keep the zha_event from others."""
+    """Test that an error while firing an event is logged by the entity."""
     entity = create_event_button(
         zha_device,
         [ZhaEventMatch(event_type=ButtonEventType.PRESS_END, event_data=TOGGLE)],

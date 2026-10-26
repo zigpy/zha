@@ -287,8 +287,8 @@ class ZhaEventButton(BaseEvent, ZclPlatformEntity):
 
     def _handle_zha_event(self, event: ZHAEvent) -> None:
         """Fire the event type of the first match for a `zha_event`."""
-        # The device's `zha_event` listeners, such as device triggers, come after
-        # this one and must still get the event
+        # `emit()` keeps the `zha_event` flowing to the device's other listeners
+        # either way. Catching here logs the error with this entity and the event
         try:
             self._fire_first_match(event)
         except Exception:  # pylint: disable=broad-except
