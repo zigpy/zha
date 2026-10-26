@@ -1616,18 +1616,61 @@ async def test_group_entities_removed_when_group_shrinks(
         == baseline_listener_count + 1
     )
 
-    await zha_group.async_remove_members(
-        [GroupMemberReference(ieee=device_light_2.ieee, endpoint_id=1)]
-    )
-    await zha_gateway.async_block_till_done()
+    # a membership change reported by zigpy, e.g. read from the device
+    with patch.object(
+        group_entity, "on_remove", wraps=group_entity.on_remove
+    ) as on_remove:
+        zha_group.zigpy_group.remove_member(device_light_2.device.endpoints[1])
+        await zha_gateway.async_block_till_done()
 
     assert len(zha_group.members) == 1
     assert not zha_group.group_entities
+    on_remove.assert_awaited_once()
     # all entity subscriptions are released
     assert not zha_group._entity_unsubs
     assert (
         len(device_1_light_entity._listeners[STATE_CHANGED]) == baseline_listener_count
     )
+
+
+async def test_group_shrink_during_transition_clears_member_flag(
+    zha_gateway: Gateway,
+) -> None:
+    """Test a light group removed mid-transition still ends the transition."""
+    device_light_1 = await device_light_1_mock(zha_gateway)
+    device_light_2 = await device_light_2_mock(zha_gateway)
+
+    zha_group: Group = await zha_gateway.async_create_zigpy_group(
+        "Test Group",
+        [
+            GroupMemberReference(ieee=device_light_1.ieee, endpoint_id=1),
+            GroupMemberReference(ieee=device_light_2.ieee, endpoint_id=1),
+        ],
+    )
+    await zha_gateway.async_block_till_done()
+
+    group_entity = get_group_entity(zha_group, platform=Platform.LIGHT)
+    assert group_entity is not None
+    member_light = get_entity(device_light_1, platform=Platform.LIGHT)
+
+    group_entity.async_transition_set_flag()
+    group_entity.async_transition_start_timer(0.1)
+    assert member_light.is_transitioning
+
+    with patch.object(member_light, "async_update") as update:
+        zha_group.zigpy_group.remove_member(device_light_2.device.endpoints[1])
+        await zha_gateway.async_block_till_done()
+
+        assert not zha_group.group_entities
+        # an in-flight command finishing must not end the transition early
+        group_entity._async_cleanup_transition_if_stuck(guarded=True)
+        # the member is released, and its state refreshed, when the transition ends
+        assert member_light.is_transitioning
+        await asyncio.sleep(0.2)
+        await zha_gateway.async_block_till_done()
+
+    assert not member_light.is_transitioning
+    update.assert_awaited_once()
 
 
 async def test_group_platform_entity_removed_when_platform_drops_below_two(
