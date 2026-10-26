@@ -205,7 +205,7 @@ class GreenPowerDeviceMatch:
         return all(matcher(device) for matcher in self.filters)
 
     @property
-    def specificity(self) -> tuple[bool, int]:
+    def specificity(self) -> int:
         """Rank by identity criterion first, then by the number of fields specified."""
         has_identity = bool(self.src_id_ranges) or bool(self.ieee_prefixes)
         num_fields = sum(
@@ -216,7 +216,7 @@ class GreenPowerDeviceMatch:
             ]
         )
 
-        return (has_identity, num_fields)
+        return 10 * has_identity + num_fields
 
 
 @dataclass(frozen=True)
