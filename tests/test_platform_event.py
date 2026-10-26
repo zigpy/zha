@@ -513,7 +513,7 @@ async def test_zha_event_button_release_while_held_any_order(
 async def test_zha_event_button_error_keeps_zha_event(
     zha_device: Device, caplog: pytest.LogCaptureFixture
 ) -> None:
-    """Test that an error firing an event does not keep the zha_event from others."""
+    """Test that an error in an event listener does not keep the zha_event from others."""
     entity = create_event_button(
         zha_device,
         [ZhaEventMatch(event_type=ButtonEventType.PRESS_END, event_data=TOGGLE)],
@@ -530,8 +530,34 @@ async def test_zha_event_button_error_keeps_zha_event(
     emit_zha_event(zha_device, TOGGLE)
 
     assert len(zha_events) == 1
-    assert "Failed to handle zha_event" in caplog.text
+    assert "Error calling listener" in caplog.text
     assert "listener failed" in caplog.text
+
+
+async def test_zha_event_button_matching_error_keeps_zha_event(
+    zha_device: Device,
+    caplog: pytest.LogCaptureFixture,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Test that an error while firing an event does not keep the zha_event from others."""
+    entity = create_event_button(
+        zha_device,
+        [ZhaEventMatch(event_type=ButtonEventType.PRESS_END, event_data=TOGGLE)],
+    )
+
+    def fail(*args: Any, **kwargs: Any) -> None:
+        raise RuntimeError("trigger failed")
+
+    monkeypatch.setattr(entity, "_trigger_event", fail)
+
+    zha_events: list[Any] = []
+    zha_device.on_all_events(zha_events.append)
+
+    emit_zha_event(zha_device, TOGGLE)
+
+    assert len(zha_events) == 1
+    assert "Failed to handle zha_event" in caplog.text
+    assert "trigger failed" in caplog.text
 
 
 async def test_zha_event_button_release_of_held_button(zha_device: Device) -> None:
