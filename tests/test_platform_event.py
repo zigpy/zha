@@ -24,7 +24,7 @@ from zha.application.platforms.event import (
     TriggeredEvent,
 )
 from zha.application.platforms.event.const import (
-    ATTR_MULTI_PRESS_COUNT,
+    ATTR_PRESS_COUNT,
     ButtonEventType,
     EventDeviceClass,
 )
@@ -38,7 +38,8 @@ class FakeEvent(BaseEvent, ZclPlatformEntity):
     _attr_device_class = EventDeviceClass.BUTTON
     _attr_event_types = [
         ButtonEventType.PRESS_END,
-        ButtonEventType.MULTI_PRESS_END,
+        ButtonEventType.SINGLE_PRESS,
+        ButtonEventType.MULTI_PRESS,
     ]
 
     def trigger(
@@ -52,6 +53,19 @@ class FakeDoorbellEvent(FakeEvent):
     """Doorbell event entity that cannot ring."""
 
     _attr_device_class = EventDeviceClass.DOORBELL
+
+
+class FakeMultiPressOnlyEvent(FakeEvent):
+    """Button event entity with a multi press but no single press."""
+
+    _attr_event_types = [ButtonEventType.PRESS_END, ButtonEventType.MULTI_PRESS]
+
+
+class FakeMultiPressExtraEvent(FakeEvent):
+    """Event entity without a device class using `multi_press` as its own type."""
+
+    _attr_device_class = None
+    _attr_event_types = [ButtonEventType.MULTI_PRESS]
 
 
 @pytest.fixture
@@ -92,11 +106,11 @@ async def test_event_state(entity: FakeEvent) -> None:
     """Test that the state of an event entity only describes its capabilities."""
     assert entity.PLATFORM == Platform.EVENT
     assert entity.device_class == EventDeviceClass.BUTTON
-    assert entity.event_types == ["press_end", "multi_press_end"]
+    assert entity.event_types == ["press_end", "single_press", "multi_press"]
 
     state = entity.state
     assert isinstance(state, EventState)
-    assert state.event_types == ["press_end", "multi_press_end"]
+    assert state.event_types == ["press_end", "single_press", "multi_press"]
 
 
 async def test_trigger_event(entity: FakeEvent) -> None:
@@ -107,7 +121,7 @@ async def test_trigger_event(entity: FakeEvent) -> None:
     # Nothing is delivered until an event is actually triggered
     assert events == []
 
-    entity.trigger(ButtonEventType.MULTI_PRESS_END, {ATTR_MULTI_PRESS_COUNT: 2})
+    entity.trigger(ButtonEventType.MULTI_PRESS, {ATTR_PRESS_COUNT: 2})
     assert events == [
         EntityEventTriggeredEvent(
             platform=Platform.EVENT,
@@ -115,14 +129,14 @@ async def test_trigger_event(entity: FakeEvent) -> None:
             device_ieee=entity.device.ieee,
             endpoint_id=1,
             triggered=TriggeredEvent(
-                event_type="multi_press_end",
-                event_attributes={"multi_press_count": 2},
+                event_type="multi_press",
+                event_attributes={"press_count": 2},
             ),
         )
     ]
 
     # An event identical to the previous one is still delivered
-    entity.trigger(ButtonEventType.MULTI_PRESS_END, {ATTR_MULTI_PRESS_COUNT: 2})
+    entity.trigger(ButtonEventType.MULTI_PRESS, {ATTR_PRESS_COUNT: 2})
     assert len(events) == 2
     assert events[0] == events[1]
 
@@ -162,3 +176,48 @@ async def test_trigger_unsupported_event(entity: FakeEvent) -> None:
         entity.trigger(ButtonEventType.LONG_PRESS_END)
 
     assert events == []
+
+
+async def test_multi_press_requires_single_press(zha_device: Device) -> None:
+    """Test that a button only declares `multi_press` together with `single_press`."""
+    with pytest.raises(
+        ValueError,
+        match="supports the 'multi_press' event type without 'single_press'",
+    ):
+        create_event_entity(zha_device, FakeMultiPressOnlyEvent)
+
+
+@pytest.mark.parametrize(
+    "event_attributes",
+    [
+        None,
+        {},
+        {ATTR_PRESS_COUNT: 1},
+        {ATTR_PRESS_COUNT: 0},
+        {ATTR_PRESS_COUNT: "2"},
+        {ATTR_PRESS_COUNT: True},
+        {ATTR_PRESS_COUNT: 2.0},
+    ],
+)
+async def test_multi_press_requires_press_count(
+    entity: FakeEvent, event_attributes: dict[str, Any] | None
+) -> None:
+    """Test that a button `multi_press` carries a press count of at least 2."""
+    events: list[EntityEventTriggeredEvent] = []
+    entity.on_event(EntityEventTriggeredEvent.event, events.append)
+
+    with pytest.raises(ValueError, match="Invalid press_count"):
+        entity.trigger(ButtonEventType.MULTI_PRESS, event_attributes)
+
+    assert events == []
+
+
+async def test_multi_press_rules_only_apply_to_buttons(zha_device: Device) -> None:
+    """Test that the button rules leave other event entities alone."""
+    entity = create_event_entity(zha_device, FakeMultiPressExtraEvent)
+
+    events: list[EntityEventTriggeredEvent] = []
+    entity.on_event(EntityEventTriggeredEvent.event, events.append)
+    entity.trigger(ButtonEventType.MULTI_PRESS)
+
+    assert [event.triggered.event_type for event in events] == ["multi_press"]

@@ -9,7 +9,12 @@ from zigpy.types.named import EUI64
 
 from zha.application import Platform
 from zha.application.platforms import BaseEntityState, PlatformEntity
-from zha.application.platforms.event.const import DoorbellEventType, EventDeviceClass
+from zha.application.platforms.event.const import (
+    ATTR_PRESS_COUNT,
+    ButtonEventType,
+    DoorbellEventType,
+    EventDeviceClass,
+)
 
 
 @dataclasses.dataclass(frozen=True, kw_only=True)
@@ -63,6 +68,18 @@ class BaseEvent(PlatformEntity):
                 f" '{DoorbellEventType.RING}' event type"
             )
 
+        # `multi_press` keeps `button.pressed` exclusive only next to `single_press`
+        if (
+            self.device_class == EventDeviceClass.BUTTON
+            and ButtonEventType.MULTI_PRESS in self.event_types
+            and ButtonEventType.SINGLE_PRESS not in self.event_types
+        ):
+            raise ValueError(
+                f"Button event entity {self.unique_id} supports the"
+                f" '{ButtonEventType.MULTI_PRESS}' event type without"
+                f" '{ButtonEventType.SINGLE_PRESS}'"
+            )
+
     @property
     def event_types(self) -> list[str]:
         """Return the event types this entity can trigger."""
@@ -79,6 +96,22 @@ class BaseEvent(PlatformEntity):
         """Trigger an event, to be called by subclasses."""
         if event_type not in self.event_types:
             raise ValueError(f"Invalid event type {event_type} for {self.unique_id}")
+
+        if (
+            self.device_class == EventDeviceClass.BUTTON
+            and event_type == ButtonEventType.MULTI_PRESS
+        ):
+            press_count = (event_attributes or {}).get(ATTR_PRESS_COUNT)
+            if (
+                not isinstance(press_count, int)
+                or isinstance(press_count, bool)
+                or press_count < 2
+            ):
+                raise ValueError(
+                    f"Invalid {ATTR_PRESS_COUNT} {press_count!r} for"
+                    f" '{ButtonEventType.MULTI_PRESS}' on {self.unique_id}:"
+                    " it must be an integer of at least 2"
+                )
 
         self.emit(
             EntityEventTriggeredEvent.event,
