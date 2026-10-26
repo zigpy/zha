@@ -275,6 +275,9 @@ class Gateway(AsyncUtilMixin, EventBase):
             ),
             local_timezone=self.config.local_timezone,
         )
+        # `new()` awaits (database load), so `update_local_timezone()` may have run
+        # while `application_controller` was still None: re-apply the current value.
+        self.application_controller.local_timezone = self.config.local_timezone
 
         await self.application_controller.startup(auto_form=True)
 

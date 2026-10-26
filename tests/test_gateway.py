@@ -2,6 +2,7 @@
 
 import asyncio
 from contextlib import suppress
+from typing import Any
 from unittest.mock import AsyncMock, MagicMock, PropertyMock, call, patch
 import zoneinfo
 
@@ -827,6 +828,32 @@ async def test_update_local_timezone_before_init(
     gw.update_local_timezone(zoneinfo.ZoneInfo("Europe/Paris"))
     assert gw.config.local_timezone == zoneinfo.ZoneInfo("Europe/Paris")
     assert gw.application_controller is None
+
+
+async def test_update_local_timezone_during_controller_creation(
+    zigpy_app_controller: ControllerApplication,
+    zha_data: ZHAData,
+) -> None:
+    """Test a timezone update while ControllerApplication.new() is suspended."""
+    new_tz = zoneinfo.ZoneInfo("Europe/London")
+    zha_data.local_timezone = None
+    zha_gw = Gateway(zha_data)
+
+    async def slow_new(*args: Any, **kwargs: Any) -> ControllerApplication:
+        # Simulates the awaited database load: the update lands mid-creation.
+        zha_gw.update_local_timezone(new_tz)
+        zigpy_app_controller.local_timezone = kwargs["local_timezone"]
+        return zigpy_app_controller
+
+    with patch(
+        "bellows.zigbee.application.ControllerApplication.new",
+        AsyncMock(side_effect=slow_new),
+    ):
+        await zha_gw.async_initialize()
+
+    assert zha_gw.application_controller.local_timezone is new_tz
+
+    await zha_gw.shutdown()
 
 
 async def test_gateway_device_removed(zha_gateway: Gateway) -> None:
