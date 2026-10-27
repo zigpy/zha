@@ -666,6 +666,10 @@ class ZclPlatformEntity(PlatformEntity):
 
     _client_cluster_config: Mapping[int, ClusterConfig] = MappingProxyType({})
 
+    # Set by entity classes driven by the clusters their platform's group entity
+    # sends commands to. Only these entities can be part of a group.
+    _attr_group_member: bool = False
+
     def __init__(
         self,
         endpoint: Endpoint,
@@ -707,6 +711,11 @@ class ZclPlatformEntity(PlatformEntity):
     def cluster(self) -> zigpy.zcl.Cluster:
         """Return the ZCL cluster backing this entity."""
         return self._cluster
+
+    @property
+    def group_member(self) -> bool:
+        """Return if the entity can be part of a group."""
+        return self._attr_group_member
 
     def targets_cluster(
         self,

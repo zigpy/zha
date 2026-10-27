@@ -245,6 +245,8 @@ class BaseFan(BaseEntity, ABC):
 class Fan(BaseFan, ZclPlatformEntity):
     """Representation of a ZHA fan."""
 
+    _attr_group_member = True
+
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({hvac.Fan.cluster_id}),
         # We prefer Thermostat entities if possible
