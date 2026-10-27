@@ -619,6 +619,11 @@ class PlatformEntity(BaseEntity):
         return self._unique_id_base
 
     @property
+    def unique_id_suffix(self) -> str | None:
+        """Return the suffix appended to the unique ID base, if any."""
+        return self._unique_id_suffix
+
+    @property
     def primary(self) -> bool:
         """Return if the entity is the primary device control."""
         if self._attr_primary is not None:

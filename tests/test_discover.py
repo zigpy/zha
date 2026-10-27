@@ -808,6 +808,14 @@ async def test_devices_from_files(
         for entity in zha_device.platform_entities.values():
             unique_id_collisions[entity.unique_id].append(entity)
 
+            if entity.unique_id_suffix is None:
+                assert entity.unique_id == entity.unique_id_base
+            else:
+                assert (
+                    entity.unique_id
+                    == f"{entity.unique_id_base}-{entity.unique_id_suffix}"
+                )
+
         for unique_id, entities in unique_id_collisions.items():
             if len(entities) == 1:
                 continue
