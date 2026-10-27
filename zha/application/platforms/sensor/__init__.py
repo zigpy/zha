@@ -3188,6 +3188,13 @@ class RSSISensor(BaseSensor):
     _attr_entity_registry_enabled_default = False
     _attr_translation_key: str = "rssi"
 
+    _device: Device
+
+    @property
+    def device(self) -> Device:
+        """Return the device."""
+        return self._device
+
     @staticmethod
     def legacy_basic_cluster(device: Device) -> Cluster | None:
         """Return the Basic cluster the legacy RSSI/LQI unique IDs were derived from."""

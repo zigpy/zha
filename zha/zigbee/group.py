@@ -142,7 +142,7 @@ class GroupMember(LogMixin):
                 str(ex),
             )
 
-    def log(self, level: int, msg: str, *args: Any, **kwargs) -> None:
+    def log(self, level: int, msg: str, *args: Any, **kwargs: Any) -> None:
         """Log a message."""
         msg = f"[%s](%s): {msg}"
         args = (f"0x{self._group.group_id:04x}", self.endpoint_id) + args
@@ -174,7 +174,7 @@ class Group(LogMixin):
         return self._zigpy_group.group_id
 
     @property
-    def endpoint(self) -> zigpy.endpoint.Endpoint:
+    def endpoint(self) -> GroupEndpoint:
         """Return the endpoint for this group."""
         return self._zigpy_group.endpoint
 
@@ -197,7 +197,7 @@ class Group(LogMixin):
     def members(self) -> list[GroupMember]:
         """Return the ZHA devices that are members of this group."""
         return [
-            GroupMember(self, self._gateway.devices[member_ieee], endpoint_id)
+            GroupMember(self, self._gateway.get_zigbee_device(member_ieee), endpoint_id)
             for (member_ieee, endpoint_id) in self._zigpy_group.members
             if member_ieee in self._gateway.devices
         ]
@@ -241,7 +241,9 @@ class Group(LogMixin):
             self._group_entities.pop(group_entity.unique_id)
             self._entity_unsubs.pop(group_entity.unique_id)()
 
-    def _handle_maybe_update_group_members(self, event: EntityStateChangedEvent):
+    def _handle_maybe_update_group_members(
+        self, event: EntityStateChangedEvent
+    ) -> None:
         """Handle the maybe update group members event."""
         self.gateway.async_create_task(self._maybe_update_group_members(event))
 
@@ -294,40 +296,40 @@ class Group(LogMixin):
 
     async def async_add_members(self, members: list[GroupMemberReference]) -> None:
         """Add members to this group."""
-        devices: dict[EUI64, Device] = self._gateway.devices
         if len(members) > 1:
             tasks = []
             for member in members:
                 tasks.append(
-                    devices[member.ieee].async_add_endpoint_to_group(
-                        member.endpoint_id, self.group_id
-                    )
+                    self._gateway.get_zigbee_device(
+                        member.ieee
+                    ).async_add_endpoint_to_group(member.endpoint_id, self.group_id)
                 )
             await asyncio.gather(*tasks)
         else:
             member = members[0]
-            await devices[member.ieee].async_add_endpoint_to_group(
-                member.endpoint_id, self.group_id
-            )
+            await self._gateway.get_zigbee_device(
+                member.ieee
+            ).async_add_endpoint_to_group(member.endpoint_id, self.group_id)
         self.update_entity_subscriptions()
 
     async def async_remove_members(self, members: list[GroupMemberReference]) -> None:
         """Remove members from this group."""
-        devices: dict[EUI64, Device] = self._gateway.devices
         if len(members) > 1:
             tasks = []
             for member in members:
                 tasks.append(
-                    devices[member.ieee].async_remove_endpoint_from_group(
+                    self._gateway.get_zigbee_device(
+                        member.ieee
+                    ).async_remove_endpoint_from_group(
                         member.endpoint_id, self.group_id
                     )
                 )
             await asyncio.gather(*tasks)
         else:
             member = members[0]
-            await devices[member.ieee].async_remove_endpoint_from_group(
-                member.endpoint_id, self.group_id
-            )
+            await self._gateway.get_zigbee_device(
+                member.ieee
+            ).async_remove_endpoint_from_group(member.endpoint_id, self.group_id)
         self.update_entity_subscriptions()
 
     def get_platform_entities(self, platform: str) -> list[PlatformEntity]:
@@ -342,7 +344,7 @@ class Group(LogMixin):
 
         return platform_entities
 
-    def log(self, level: int, msg: str, *args: Any, **kwargs) -> None:
+    def log(self, level: int, msg: str, *args: Any, **kwargs: Any) -> None:
         """Log a message."""
         msg = f"[%s](%s): {msg}"
         args = (self.name, self.group_id) + args
