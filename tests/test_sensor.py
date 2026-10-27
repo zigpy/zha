@@ -2238,3 +2238,72 @@ async def test_sonoff_s60_electrical_measurement_reporting(
     assert configured[EMAttrs.active_power] == ReportingConfig(
         min_interval=5, max_interval=900, reportable_change=1
     )
+
+
+async def test_em_poller_skips_multiplier_and_divisor_attributes(
+    zha_gateway: Gateway,
+) -> None:
+    """The EM poller reads the measured values, not their multipliers/divisors."""
+    zigpy_device = await zigpy_device_from_json(
+        zha_gateway.application_controller,
+        "tests/data/devices/sonoff-s60zbtpg-0x00001002.json",
+    )
+    cluster = zigpy_device.endpoints[1].electrical_measurement
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
+
+    scaling_attrs = {
+        "ac_current_divisor",
+        "ac_current_multiplier",
+        "ac_power_divisor",
+        "ac_power_multiplier",
+        "ac_voltage_divisor",
+        "ac_voltage_multiplier",
+    }
+
+    # Multipliers and divisors are still read on startup and configured for reporting
+    startup_reads = {
+        attr for call in cluster.read_attributes.call_args_list for attr in call[0][0]
+    }
+    assert scaling_attrs <= startup_reads
+    configured = cluster.configure_reporting_multiple.call_args.args[0]
+    assert scaling_attrs <= {attr.name for attr in configured}
+
+    poller = get_entity(
+        zha_device,
+        platform=Platform.VIRTUAL,
+        exact_entity_type=sensor.ElectricalMeasurementPoller,
+    )
+
+    cluster.read_attributes.reset_mock()
+    await poller.async_update()
+    await zha_gateway.async_block_till_done()
+
+    # But they are not polled
+    assert len(cluster.read_attributes.call_args_list) == 1
+    polled = set(cluster.read_attributes.call_args_list[0][0][0])
+    assert polled == {"active_power", "rms_current", "rms_voltage"}
+
+
+async def test_em_poller_skips_fallback_multiplier_and_divisor_attributes(
+    zha_gateway: Gateway,
+) -> None:
+    """The fallback `power_multiplier`/`power_divisor` are not polled either."""
+    zigpy_dev = elec_measurement_zigpy_device_mock(zha_gateway)
+    zha_dev = await join_zigpy_device(zha_gateway, zigpy_dev)
+    cluster = zigpy_dev.endpoints[1].electrical_measurement
+
+    poller = get_entity(
+        zha_dev,
+        platform=Platform.VIRTUAL,
+        exact_entity_type=sensor.ElectricalMeasurementPoller,
+    )
+
+    cluster.read_attributes.reset_mock()
+    await poller.async_update()
+    await zha_gateway.async_block_till_done()
+
+    polled = {
+        attr for call in cluster.read_attributes.call_args_list for attr in call[0][0]
+    }
+    assert polled
+    assert not {attr for attr in polled if "multiplier" in attr or "divisor" in attr}
