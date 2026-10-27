@@ -54,7 +54,7 @@ from zha.application.const import (
 from zha.application.gateway import Gateway
 from zha.application.platforms import EntityCategory, PlatformEntity
 from zha.application.platforms.binary_sensor import IASZone
-from zha.application.platforms.light import Light
+from zha.application.platforms.light import HueLight, Light
 from zha.application.platforms.number import (
     OnLevelConfigurationEntity,
     StartUpCurrentLevelConfigurationEntity,
@@ -1389,6 +1389,30 @@ async def test_entity_type_overrides_class_category(zha_gateway: Gateway) -> Non
     assert create(EntityType.STANDARD).entity_category is None
     assert create(EntityType.CONFIG).entity_category == EntityCategory.CONFIG
     assert create(EntityType.DIAGNOSTIC).entity_category == EntityCategory.DIAGNOSTIC
+
+
+async def test_unique_id_overrides_legacy_unique_id(zha_gateway: Gateway) -> None:
+    """Test that an explicit `unique_id` overrides a class's legacy unique ID."""
+    zigpy_dev = await zigpy_device_from_json(
+        zha_gateway.application_controller,
+        "tests/data/devices/philips-lct014-0x01001a02.json",
+    )
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
+    endpoint = zha_device.endpoints[11]
+
+    legacy = HueLight(
+        endpoint=endpoint, device=zha_device, cluster=endpoint.zigpy_endpoint.on_off
+    )
+    overridden = HueLight(
+        endpoint=endpoint,
+        device=zha_device,
+        cluster=endpoint.zigpy_endpoint.on_off,
+        unique_id=f"{zigpy_dev.ieee}-11-override",
+    )
+
+    assert legacy.unique_id == f"{zigpy_dev.ieee}-11"
+    assert overridden.unique_id == f"{zigpy_dev.ieee}-11-override"
+    assert overridden.unique_id_base == f"{zigpy_dev.ieee}-11-override"
 
 
 async def test_primary_entity_election_ignores_enabled(zha_gateway: Gateway) -> None:
