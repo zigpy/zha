@@ -1,7 +1,9 @@
 """Test zha switch."""
 
 import asyncio
+import json
 import logging
+import pathlib
 from unittest.mock import call, patch
 
 import pytest
@@ -36,11 +38,13 @@ from tests.common import (
     join_zigpy_device,
     send_attributes_report,
     update_attribute_cache,
+    zigpy_device_from_device_data,
     zigpy_device_from_json,
 )
 from zha.application import Platform
 from zha.application.gateway import Gateway
 from zha.application.platforms import GroupEntity, PlatformEntity
+from zha.application.platforms.switch import Switch
 from zha.exceptions import ZHAException
 from zha.quirks import QUIRK_REGISTRY_ENTRY_ATTR, DeviceRegistry
 from zha.zigbee.device import Device
@@ -946,6 +950,71 @@ async def test_group_state_ignores_unavailable_members(zha_gateway: Gateway) -> 
 
     # once it is reachable again its state counts, and the group is on
     device_switch_2.update_available(True)
+    await asyncio.sleep(1)
+    await zha_gateway.async_block_till_done()
+    assert bool(entity.state.is_on) is True
+
+
+async def test_group_ignores_config_switches(zha_gateway: Gateway) -> None:
+    """Test that config switches of group members are not part of the group."""
+    device_data_text = await asyncio.get_running_loop().run_in_executor(
+        None,
+        pathlib.Path("tests/data/devices/sonoff-s60zbtpf-0x00002103.json").read_text,
+    )
+
+    devices: list[Device] = []
+    for ieee in (IEEE_GROUPABLE_DEVICE, IEEE_GROUPABLE_DEVICE2):
+        device_data = json.loads(device_data_text)
+        device_data["ieee"] = ieee
+        zigpy_device = zigpy_device_from_device_data(
+            app=zha_gateway.application_controller, device_data=device_data
+        )
+        devices.append(await join_zigpy_device(zha_gateway, zigpy_device))
+
+    zha_group: Group = await zha_gateway.async_create_zigpy_group(
+        "Test Group",
+        [GroupMemberReference(ieee=device.ieee, endpoint_id=1) for device in devices],
+    )
+    await zha_gateway.async_block_till_done()
+
+    entity: GroupEntity = get_group_entity(zha_group, platform=Platform.SWITCH)
+
+    relay_entities = [
+        get_entity(device, platform=Platform.SWITCH, exact_entity_type=Switch)
+        for device in devices
+    ]
+    led_entities = [
+        get_entity(device, platform=Platform.SWITCH, qualifier="network_led")
+        for device in devices
+    ]
+
+    # only the relays are group members, not the "Network LED" config switches
+    assert zha_group.get_platform_entities(Platform.SWITCH) == relay_entities
+    for member in zha_group.members:
+        assert member.associated_entities
+        assert all(e.entity_category is None for e in member.associated_entities)
+    for led_entity in led_entities:
+        assert led_entity.unique_id not in zha_group.all_member_entity_unique_ids
+
+    # relays off, but the network LEDs on: the group is off
+    for device in devices:
+        await send_attributes_report(
+            zha_gateway, device.device.endpoints[1].on_off, {0: 0}
+        )
+        await send_attributes_report(
+            zha_gateway, device.device.endpoints[1].ewelink, {"network_led": 1}
+        )
+    await asyncio.sleep(1)
+    await zha_gateway.async_block_till_done()
+
+    assert all(led_entity.state.is_on for led_entity in led_entities)
+    assert all(not relay_entity.state.is_on for relay_entity in relay_entities)
+    assert bool(entity.state.is_on) is False
+
+    # turning a relay on turns the group on
+    await send_attributes_report(
+        zha_gateway, devices[0].device.endpoints[1].on_off, {0: 1}
+    )
     await asyncio.sleep(1)
     await zha_gateway.async_block_till_done()
     assert bool(entity.state.is_on) is True

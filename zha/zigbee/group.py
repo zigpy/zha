@@ -111,12 +111,17 @@ class GroupMember(LogMixin):
 
     @cached_property
     def associated_entities(self) -> list[ZclPlatformEntity]:
-        """Return the list of entities that were derived from this endpoint."""
+        """Return the list of entities that were derived from this endpoint.
+
+        Config and diagnostic entities (e.g. an LED indicator switch) are not
+        controlled by group commands, so they are not part of the group.
+        """
         return [
             platform_entity
             for platform_entity in self._device.platform_entities.values()
             if isinstance(platform_entity, ZclPlatformEntity)
             and platform_entity.endpoint.id == self.endpoint_id
+            and platform_entity.entity_category is None
         ]
 
     async def async_remove_from_group(self) -> None:
