@@ -700,6 +700,9 @@ class ZclPlatformEntity(PlatformEntity):
         """
 
         if from_quirk:
+            assert unique_id is None
+            assert "force_create" not in kwargs
+
             unique_id = f"{device.ieee}-{endpoint.id}"
             kwargs["force_create"] = True
 
