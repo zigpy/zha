@@ -16,6 +16,7 @@ import zhaquirks.sinope.thermostat
 from zhaquirks.sinope.thermostat import SinopeTechnologiesThermostatCluster
 import zhaquirks.tuya.ts0601_trv
 import zigpy.profiles
+from zigpy.typing import UNDEFINED
 import zigpy.zcl.clusters
 from zigpy.zcl.clusters.hvac import FanMode, FanModeSequence, Thermostat
 import zigpy.zcl.foundation as zcl_f
@@ -1916,6 +1917,28 @@ async def test_thermostat_default_local_temperature_calibration_config(
     assert local_temperature_calibration_entity.state.native_max_value == 2.5
     assert local_temperature_calibration_entity.state.native_step == 0.1
     assert local_temperature_calibration_entity._multiplier == 0.1
+
+
+@pytest.mark.parametrize(
+    ("value", "raw_value"),
+    [(0.3, 3), (-0.3, -3), (0.7, 7), (-1.9, -19), (2.4, 24)],
+)
+async def test_thermostat_local_temperature_calibration_write(
+    zha_gateway: Gateway, value: float, raw_value: int
+) -> None:
+    """Test that a scaled number writes the nearest raw value, not a truncated one."""
+
+    zha_device = await device_climate_mock(zha_gateway, CLIMATE)
+    thrm_cluster = zha_device.device.endpoints[1].thermostat
+    entity = get_entity(
+        zha_device, platform=Platform.NUMBER, qualifier="local_temperature_calibration"
+    )
+
+    await entity.async_set_native_value(value)
+
+    assert thrm_cluster.write_attributes.mock_calls == [
+        call({"local_temperature_calibration": raw_value}, manufacturer=UNDEFINED)
+    ]
 
 
 async def test_thermostat_quirkv2_local_temperature_calibration_config_overwrite(
