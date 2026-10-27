@@ -131,6 +131,7 @@ async def test_device_override_entities(zha_gateway: Gateway) -> None:
     # And has been replaced by a switch with the same unique ID
     switch = get_entity(zha_device, platform=Platform.SWITCH)
     assert switch.unique_id == f"{zigpy_device.ieee}-1"
+    assert switch.unique_id_base == f"{zigpy_device.ieee}-1"
 
     # All other entities and diagnostics stay the same
     loaded_device_data = json.loads(

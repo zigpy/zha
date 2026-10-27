@@ -557,6 +557,8 @@ class PlatformEntity(BaseEntity):
             initially_disabled=initially_disabled,
         )
 
+        self._unique_id_base = unique_id
+
         if self._unique_id_suffix is not None:
             unique_id = f"{unique_id}-{self._unique_id_suffix}"
 
@@ -610,6 +612,11 @@ class PlatformEntity(BaseEntity):
     def discovered(self) -> bool:
         """Return if the entity was created by ZHA's discovery."""
         return self._discovered
+
+    @property
+    def unique_id_base(self) -> str:
+        """Return the unique ID the entity was created with, without its suffix."""
+        return self._unique_id_base
 
     @property
     def primary(self) -> bool:
