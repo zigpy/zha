@@ -52,10 +52,13 @@ from zha.application.const import (
     UNKNOWN,
 )
 from zha.application.gateway import Gateway
-from zha.application.platforms import PlatformEntity
+from zha.application.platforms import EntityCategory, PlatformEntity
 from zha.application.platforms.binary_sensor import IASZone
 from zha.application.platforms.light import Light
-from zha.application.platforms.number import OnLevelConfigurationEntity
+from zha.application.platforms.number import (
+    OnLevelConfigurationEntity,
+    StartUpCurrentLevelConfigurationEntity,
+)
 from zha.application.platforms.sensor import Battery, LQISensor, RSSISensor
 from zha.application.platforms.sensor.device_class import (
     SensorDeviceClass,
@@ -1361,6 +1364,31 @@ async def test_force_create_skips_support_check(zha_gateway: Gateway) -> None:
 
     assert default_key not in zha_device.platform_entities
     assert forced_key in zha_device.platform_entities
+
+
+async def test_entity_type_overrides_class_category(zha_gateway: Gateway) -> None:
+    """Test that `entity_type` only overrides the class's category when given."""
+    zigpy_dev = await zigpy_device_from_json(
+        zha_gateway.application_controller,
+        "tests/data/devices/philips-lct014-0x01001a02.json",
+    )
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
+    endpoint = zha_device.endpoints[11]
+
+    def create(
+        entity_type: EntityType | None,
+    ) -> StartUpCurrentLevelConfigurationEntity:
+        return StartUpCurrentLevelConfigurationEntity(
+            endpoint=endpoint,
+            device=zha_device,
+            cluster=endpoint.zigpy_endpoint.level,
+            entity_type=entity_type,
+        )
+
+    assert create(None).entity_category == EntityCategory.CONFIG
+    assert create(EntityType.STANDARD).entity_category is None
+    assert create(EntityType.CONFIG).entity_category == EntityCategory.CONFIG
+    assert create(EntityType.DIAGNOSTIC).entity_category == EntityCategory.DIAGNOSTIC
 
 
 async def test_primary_entity_election_ignores_enabled(zha_gateway: Gateway) -> None:
