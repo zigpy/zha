@@ -409,7 +409,6 @@ class ConfigurableAttributeSwitch(ZclPlatformEntity):
         device: Device,
         *,
         cluster: zigpy.zcl.Cluster,
-        from_quirk: bool = False,
         attribute_name: str | None = None,
         invert_attribute_name: str | None = None,
         force_inverted: bool = False,
@@ -419,7 +418,7 @@ class ConfigurableAttributeSwitch(ZclPlatformEntity):
         **kwargs: Any,
     ) -> None:
         """Init this switch configuration entity."""
-        if legacy_discovery_unique_id is None and not from_quirk:
+        if legacy_discovery_unique_id is None:
             legacy_discovery_unique_id = (
                 f"{endpoint.device.ieee}-{endpoint.id}"
                 if (
@@ -448,7 +447,6 @@ class ConfigurableAttributeSwitch(ZclPlatformEntity):
             endpoint=endpoint,
             device=device,
             cluster=cluster,
-            from_quirk=from_quirk,
             legacy_discovery_unique_id=legacy_discovery_unique_id,
             **kwargs,
         )

@@ -80,7 +80,10 @@ class VirtualEntity(ZclPlatformEntity):
     """
 
     PLATFORM = Platform.VIRTUAL
-    _attr_always_supported = True
+
+    def _is_supported(self) -> bool:
+        """Return True, virtual entities drive background work and are always supported."""
+        return True
 
     def on_add(self) -> None:
         """Subscribe to incoming cluster commands and attribute events."""

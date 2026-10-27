@@ -415,7 +415,6 @@ class QuirkGreenPowerDevice(GreenPowerDevice):
         yield ToggleEvent(
             self,
             unique_id=str(self.ieee),
-            from_quirk=True,
             unique_id_suffix="toggle",
             fallback_name="Toggle",
         )
