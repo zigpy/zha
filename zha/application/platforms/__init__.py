@@ -528,7 +528,7 @@ class PlatformEntity(BaseEntity):
         device: BaseDevice,
         *,
         unique_id: str,
-        discovered: bool = False,
+        force_create: bool = False,
         fallback_name: str | None = None,
         translation_key: str | None = None,
         translation_placeholders: Mapping[str, str] | None = None,
@@ -542,10 +542,10 @@ class PlatformEntity(BaseEntity):
 
         The generic config keywords (`fallback_name`, `translation_key`, `entity_type`,
         etc.) override the class's values when given; the platform subclasses add their
-        own keywords. Entities created by ZHA's discovery pass `discovered=True`, only
-        their support is checked.
+        own keywords. `force_create=True` creates the entity without checking if it is
+        supported.
         """
-        self._discovered = discovered
+        self._force_create = force_create
 
         self._apply_entity_config(
             fallback_name=fallback_name,
@@ -609,9 +609,9 @@ class PlatformEntity(BaseEntity):
         return self._device
 
     @property
-    def discovered(self) -> bool:
-        """Return if the entity was created by ZHA's discovery."""
-        return self._discovered
+    def force_create(self) -> bool:
+        """Return if the entity is created without checking if it is supported."""
+        return self._force_create
 
     @property
     def unique_id_base(self) -> str:

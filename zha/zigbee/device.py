@@ -944,8 +944,8 @@ class BaseDevice[ZigpyDeviceT: ZigpyBaseDevice](LogMixin, EventBase):
         for entity in self._pending_entities:
             entity.recompute_capabilities()
 
-            # Ignore unsupported entities, only discovered entities can be unsupported
-            if entity.discovered and (
+            # Ignore unsupported entities, unless they are force-created
+            if not entity.force_create and (
                 not entity.is_supported()
                 or not entity.is_supported_in_list(all_entities.values())
             ):
@@ -994,7 +994,7 @@ class BaseDevice[ZigpyDeviceT: ZigpyBaseDevice](LogMixin, EventBase):
         for entity in entities[:]:
             entity.recompute_capabilities()
 
-            if entity.discovered and (
+            if not entity.force_create and (
                 not entity.is_supported() or not entity.is_supported_in_list(entities)
             ):
                 self.debug("Removing unsupported entity %s", entity)
