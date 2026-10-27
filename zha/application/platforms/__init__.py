@@ -688,6 +688,9 @@ class ZclPlatformEntity(PlatformEntity):
         cluster: zigpy.zcl.Cluster,
         unique_id: str | None = None,
         legacy_discovery_unique_id: str | None = None,
+        # TODO: remove this backwards compatibility shim after zha-device-handlers#5410
+        # is merged
+        from_quirk: bool = False,
         **kwargs: Any,
     ):
         """Initialize the ZCL platform entity.
@@ -695,6 +698,11 @@ class ZclPlatformEntity(PlatformEntity):
         Default-discovery entities pass no config keywords. `unique_id` overrides the
         legacy unique ID base.
         """
+
+        if from_quirk:
+            unique_id = f"{device.ieee}-{endpoint.id}"
+            kwargs["force_create"] = True
+
         if legacy_discovery_unique_id is None:
             legacy_discovery_unique_id = (
                 f"{device.ieee}-{endpoint.id}-{cluster.cluster_id}"
