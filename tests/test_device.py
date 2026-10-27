@@ -315,6 +315,80 @@ async def test_check_available_no_basic_cluster(
     assert "does not have a mandatory basic cluster" in caplog.text
 
 
+async def test_check_available_skips_stale_coordinator(
+    zha_gateway: Gateway,
+) -> None:
+    """Check that a former coordinator is not marked unavailable."""
+    old_coord_dev = zigpy_device(
+        zha_gateway,
+        with_basic_cluster=False,
+        ieee="aa:bb:cc:dd:ee:ff:00:12",
+        nwk=0x0000,
+    )
+    old_coord_dev.node_desc = old_coord_dev.node_desc.replace(
+        logical_type=zdo_t.LogicalType.Coordinator
+    )
+    zha_device = await join_zigpy_device(zha_gateway, old_coord_dev)
+
+    assert not zha_device.is_active_coordinator
+    assert zha_device.available is True
+
+    old_coord_dev.last_seen = time.time() - zha_device.consider_unavailable_time - 2
+    await _send_time_changed(
+        zha_gateway, zha_gateway._device_availability_checker.__polling_interval + 1
+    )
+
+    assert zha_device.available is True
+
+
+async def test_check_available_skips_active_coordinator(
+    zha_gateway: Gateway,
+) -> None:
+    """Check that the active coordinator is never marked unavailable."""
+    coord_dev = zigpy_device(
+        zha_gateway,
+        with_basic_cluster=False,
+        ieee="aa:bb:cc:dd:ee:ff:00:11",
+        nwk=0x0000,
+    )
+    coord_dev.node_desc = coord_dev.node_desc.replace(
+        logical_type=zdo_t.LogicalType.Coordinator
+    )
+    zha_device = await join_zigpy_device(zha_gateway, coord_dev)
+    zha_gateway.application_controller.state.node_info.ieee = coord_dev.ieee
+
+    assert zha_device.is_active_coordinator
+    assert zha_device.available is True
+
+    coord_dev.last_seen = time.time() - zha_device.consider_unavailable_time - 2
+    await zha_device._check_available()
+
+    # `available` is always True for the active coordinator, so check the raw flag
+    assert zha_device._available is True
+    assert zha_device.available is True
+
+
+async def test_discover_entities_skips_zdo_endpoint(
+    zha_gateway: Gateway,
+) -> None:
+    """Check that endpoint 0 is never passed to endpoint entity discovery."""
+    zha_device = await join_zigpy_device(
+        zha_gateway, zigpy_device(zha_gateway, with_basic_cluster=True)
+    )
+    # `Device.endpoints` only holds non-ZDO endpoints, so ep 0 is injected
+    zha_device._endpoints[0] = mock.MagicMock()
+
+    with patch(
+        "zha.zigbee.device.discovery.discover_entities_for_endpoint",
+        return_value=iter(()),
+    ) as discover:
+        list(zha_device.discover_entities())
+
+    discovered = {c.args[0] for c in discover.mock_calls}
+    assert zha_device._endpoints[0] not in discovered
+    assert discovered == {ep for i, ep in zha_device._endpoints.items() if i != 0}
+
+
 async def test_device_is_active_coordinator(
     zha_gateway: Gateway,
 ) -> None:

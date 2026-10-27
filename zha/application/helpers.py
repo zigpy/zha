@@ -42,7 +42,7 @@ from zha.exceptions import ZHAException
 
 if TYPE_CHECKING:
     from zha.application.gateway import Gateway
-    from zha.zigbee.device import Device
+    from zha.zigbee.device import BaseDevice
 
 _T = TypeVar("_T")
 _R = TypeVar("_R")
@@ -125,7 +125,7 @@ async def write_attributes_safe(
 
 
 async def get_matched_clusters(
-    source_zha_device: Device, target_zha_device: Device
+    source_zha_device: BaseDevice, target_zha_device: BaseDevice
 ) -> list[BindingPair]:
     """Get matched input/output cluster pairs for 2 devices."""
     source_clusters = source_zha_device.async_get_std_clusters()
@@ -209,7 +209,7 @@ def convert_zcl_value(value: Any, field_type: Any) -> Any:
 
 
 def convert_to_zcl_values(
-    fields: dict[str, Any], schema: CommandSchema
+    fields: dict[str, Any], schema: type[CommandSchema]
 ) -> dict[str, Any]:
     """Convert user input to ZCL values."""
     converted_fields: dict[str, Any] = {}
@@ -230,12 +230,19 @@ def convert_to_zcl_values(
     return converted_fields
 
 
-def async_is_bindable_target(source_zha_device: Device, target_zha_device: Device):
+def async_is_bindable_target(
+    source_zha_device: BaseDevice, target_zha_device: BaseDevice
+) -> bool:
     """Determine if target is bindable to source."""
+    source_clusters = source_zha_device.async_get_std_clusters()
+
+    # A source without clusters, such as a Green Power device, has nothing to bind
+    if not source_clusters:
+        return False
+
     if target_zha_device.nwk == 0x0000:
         return True
 
-    source_clusters = source_zha_device.async_get_std_clusters()
     target_clusters = target_zha_device.async_get_std_clusters()
 
     for endpoint_id in source_clusters:
@@ -448,7 +455,7 @@ class GlobalUpdater:
         self._update_listeners: list[Callable] = []
         self._gateway: Gateway = gateway
 
-    def start(self):
+    def start(self) -> None:
         """Start the global updater."""
         self._updater_task_handle = self._gateway.async_create_background_task(
             self.update_listeners(),
@@ -461,7 +468,7 @@ class GlobalUpdater:
             getattr(self, "__polling_interval"),
         )
 
-    def stop(self):
+    def stop(self) -> None:
         """Stop the global updater."""
         _LOGGER.debug("stopping global updater")
         if self._updater_task_handle:
@@ -513,7 +520,7 @@ class DeviceAvailabilityChecker:
         self._gateway: Gateway = gateway
         self._device_availability_task_handle: asyncio.Task | None = None
 
-    def start(self):
+    def start(self) -> None:
         """Start the device availability checker."""
         self._device_availability_task_handle = (
             self._gateway.async_create_background_task(
@@ -528,7 +535,7 @@ class DeviceAvailabilityChecker:
             getattr(self, "__polling_interval"),
         )
 
-    def stop(self):
+    def stop(self) -> None:
         """Stop the device availability checker."""
         _LOGGER.debug("stopping device availability checker")
         if self._device_availability_task_handle:
