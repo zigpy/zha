@@ -1056,7 +1056,10 @@ class SinopeTechnologiesThermostat(Thermostat):
     async def _async_update_time(self) -> None:
         """Update thermostat's time display."""
 
-        now = dt.datetime.now(self._device.gateway.config.local_timezone)
+        # Fall back to UTC when no timezone is configured; datetime.now(None) would
+        # return a naive system-local datetime and produce wrong secs_since_2k values.
+        tz = self._device.gateway.config.local_timezone or dt.UTC
+        now = dt.datetime.now(tz)
         secs_2k = (
             now.replace(tzinfo=None) - dt.datetime(2000, 1, 1, 0, 0, 0, 0)
         ).total_seconds()
