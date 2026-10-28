@@ -2313,6 +2313,7 @@
           "RemoteDemandOverride",
           "WindowOpen",
           "LocalForceOn",
+          "Off",
           "Maintenance",
           "OutputTemporalLimit",
           "SensorFault"

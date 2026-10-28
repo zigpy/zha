@@ -1460,7 +1460,7 @@
         "endpoint_id": 1,
         "available": true,
         "group_id": null,
-        "native_value": "undefined_0x80",
+        "native_value": "Off",
         "suggested_display_precision": null,
         "unit": null,
         "options": [
@@ -1469,6 +1469,7 @@
           "RemoteDemandOverride",
           "WindowOpen",
           "LocalForceOn",
+          "Off",
           "Maintenance",
           "OutputTemporalLimit",
           "SensorFault"

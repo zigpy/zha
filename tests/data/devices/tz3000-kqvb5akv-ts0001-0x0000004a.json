@@ -8,8 +8,10 @@
   "friendly_model": "TS0001",
   "name": "_TZ3000_kqvb5akv TS0001",
   "quirk_applied": true,
-  "quirk_class": "zhaquirks.tuya.ts0001_switch:(_TZ3000_xkap8wtb / TS0001)",
-  "exposes_features": [],
+  "quirk_class": "zhaquirks.tuya.builder:(_TZ3000_xkap8wtb / TS0001)",
+  "exposes_features": [
+    "tuya.plug_on_off_attributes"
+  ],
   "manufacturer_code": 4417,
   "power_source": "Mains",
   "lqi": 200,
@@ -601,6 +603,35 @@
         "off_brightness": null,
         "min_mireds": 153,
         "max_mireds": 500
+      }
+    ],
+    "select": [
+      {
+        "fallback_name": null,
+        "unique_id": "ab:cd:ef:12:c3:82:cb:22-1-6-power_on_state",
+        "migrate_unique_ids": [],
+        "platform": "select",
+        "class_name": "TuyaPowerOnStateSelectEntity",
+        "translation_key": "power_on_state",
+        "translation_placeholders": null,
+        "device_class": null,
+        "state_class": null,
+        "entity_category": "config",
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:c3:82:cb:22",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "current_option": "LastState",
+        "enum": "TuyaPowerOnState",
+        "options": [
+          "Off",
+          "On",
+          "LastState"
+        ]
       }
     ],
     "sensor": [

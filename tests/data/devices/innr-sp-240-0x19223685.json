@@ -123,11 +123,6 @@
           ]
         },
         {
-          "cluster_id": "0x0008",
-          "endpoint_attribute": "level",
-          "attributes": []
-        },
-        {
           "cluster_id": "0x0702",
           "endpoint_attribute": "smartenergy_metering",
           "attributes": [

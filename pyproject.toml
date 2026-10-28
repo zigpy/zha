@@ -18,7 +18,7 @@ dependencies = [
     "frozendict",
     "bellows==1.2.1",
     "zigpy-znp==1.1.1",
-    "zigpy-deconz==1.1.0",
+    "zigpy-deconz==1.1.1",
     "zigpy-xbee==0.22.0",
     "zigpy-zigate==0.14.0",
     "zigpy-ziggurat==1.2.0",
@@ -53,7 +53,7 @@ testing = [
     "python-slugify",
     "ruff==0.17.1",
     "uv>=0.11.16",
-    "zha-quirks>=2.0.0",
+    "zha-quirks>=2.4.0",
 ]
 ci = [
     {include-group = "testing"},
@@ -67,9 +67,9 @@ default-groups = ["testing"]
 [tool.setuptools-git-versioning]
 enabled = true
 # Fallback version for tagless checkouts (e.g. Dependabot). zha-quirks depends
-# on zha>=<its own minor> (2.3.0 requires zha>=2.3.0), so the version must
+# on zha>=<its own minor> (2.4.0 requires zha>=2.4.0), so the version must
 # satisfy that or the lock is unsatisfiable. Bump whenever zha-quirks raises it.
-starting_version = "2.3.0"
+starting_version = "2.4.0"
 
 [tool.codespell]
 skip = ["tests/data/devices/*"]

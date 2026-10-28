@@ -5,10 +5,10 @@
   "manufacturer": "Philips",
   "model": "915005987101",
   "friendly_manufacturer": "Philips",
-  "friendly_model": "915005987101",
-  "name": "Philips 915005987101",
-  "quirk_applied": false,
-  "quirk_class": "zigpy.device.ZigbeeDevice",
+  "friendly_model": "Hue Signe gradient floor lamp",
+  "name": "Philips Hue Signe gradient floor lamp",
+  "quirk_applied": true,
+  "quirk_class": "zhaquirks.philips.hue_light:(Signify Netherlands B.V. / 4080248U9)",
   "exposes_features": [],
   "manufacturer_code": 4107,
   "power_source": "Mains",
@@ -230,7 +230,7 @@
         },
         {
           "cluster_id": "0xfc03",
-          "endpoint_attribute": "manufacturer_specific",
+          "endpoint_attribute": "philips_hue_light_cluster",
           "attributes": []
         }
       ],
