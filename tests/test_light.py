@@ -2089,12 +2089,12 @@ async def test_on_off_only_rapid_toggle_does_not_revert(
     zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
 
     entity = get_entity(zha_device, platform=Platform.LIGHT)
-    assert bool(entity.state["on"]) is True
+    assert bool(entity.state.on) is True
 
     # Turn off, then immediately turn back on (within the default ~1.5s window).
     await entity.async_turn_off()
     await zha_gateway.async_block_till_done()
-    assert bool(entity.state["on"]) is False
+    assert bool(entity.state.on) is False
     # On/off-only lights have no transition to wait for.
     assert not entity.is_transitioning
 
@@ -2108,7 +2108,7 @@ async def test_on_off_only_rapid_toggle_does_not_revert(
 
     await entity.async_turn_on()
     await zha_gateway.async_block_till_done()
-    assert bool(entity.state["on"]) is True
+    assert bool(entity.state.on) is True
 
     # The device's on_off=True report from the on command arrives.
     await send_attributes_report(
@@ -2121,7 +2121,7 @@ async def test_on_off_only_rapid_toggle_does_not_revert(
     # Wait past the old 1.5s timer window. State must remain on.
     await asyncio.sleep(2)
     await zha_gateway.async_block_till_done()
-    assert bool(entity.state["on"]) is True
+    assert bool(entity.state.on) is True
 
 
 async def test_light_state_restoration(zha_gateway: Gateway) -> None:
