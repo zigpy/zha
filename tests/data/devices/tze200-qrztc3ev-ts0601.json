@@ -520,7 +520,7 @@
         "available": true,
         "group_id": null,
         "native_value": null,
-        "suggested_display_precision": null,
+        "suggested_display_precision": 1,
         "unit": "%"
       },
       {
