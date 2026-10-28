@@ -34,8 +34,8 @@ from zha.application.platforms import (
     ClusterConfig,
     ClusterMatch,
     GroupEntity,
-    PlatformEntity,
     PlatformFeatureGroup,
+    ZclPlatformEntity,
     register_entity,
     register_group_entity,
 )
@@ -691,8 +691,13 @@ class BaseSharedLight(BaseLight):
             else DEFAULT_ON_OFF_TRANSITION
         ) + DEFAULT_EXTRA_TRANSITION_DELAY_SHORT
 
-        # Start pausing attribute report parsing
-        if self._zha_config_enable_light_transitioning_flag:
+        # Start pausing attribute report parsing, but not for on/off-only
+        # lights (they have no transition to wait for, and a follow-up
+        # turn_on would not clear the buffered off-report).
+        set_transition_flag = (
+            brightness_supported and self._zha_config_enable_light_transitioning_flag
+        )
+        if set_transition_flag:
             self.async_transition_set_flag()
 
         try:
@@ -712,7 +717,7 @@ class BaseSharedLight(BaseLight):
                 result = await self._on_off_cluster.off()
 
             # Pause parsing attribute reports until transition is complete
-            if self._zha_config_enable_light_transitioning_flag:
+            if set_transition_flag:
                 self.async_transition_start_timer(transition_time)
             self.debug("turned off: %s", result)
             if result[1] is not Status.SUCCESS:
@@ -734,9 +739,7 @@ class BaseSharedLight(BaseLight):
         finally:
             # If the task was cancelled before the transition timer was started,
             # clean up the transitioning flag so the light does not get stuck.
-            self._async_cleanup_transition_if_stuck(
-                self._zha_config_enable_light_transitioning_flag
-            )
+            self._async_cleanup_transition_if_stuck(set_transition_flag)
 
     async def async_handle_color_commands(
         self,
@@ -873,10 +876,11 @@ class BaseSharedLight(BaseLight):
 
 
 @register_entity(OnOff.cluster_id)
-class Light(BaseSharedLight, PlatformEntity):
+class Light(BaseSharedLight, ZclPlatformEntity):
     """Representation of a ZHA or ZLL light."""
 
     _attr_translation_key: str = "light"
+    _attr_group_member = True
     _REFRESH_INTERVAL = (2700, 4500)
     __polling_interval: int
 
@@ -1353,8 +1357,6 @@ class MinTransitionLight(Light):
 @register_group_entity
 class LightGroup(BaseSharedLight, GroupEntity):
     """Representation of a light group."""
-
-    _attr_always_supported = True
 
     def __init__(self, group: Group):
         """Initialize a light group."""

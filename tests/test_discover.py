@@ -131,6 +131,7 @@ async def test_device_override_entities(zha_gateway: Gateway) -> None:
     # And has been replaced by a switch with the same unique ID
     switch = get_entity(zha_device, platform=Platform.SWITCH)
     assert switch.unique_id == f"{zigpy_device.ieee}-1"
+    assert switch.unique_id_base == f"{zigpy_device.ieee}-1"
 
     # All other entities and diagnostics stay the same
     loaded_device_data = json.loads(
@@ -806,6 +807,14 @@ async def test_devices_from_files(
         unique_id_collisions = defaultdict(list)
         for entity in zha_device.platform_entities.values():
             unique_id_collisions[entity.unique_id].append(entity)
+
+            if entity.unique_id_suffix is None:
+                assert entity.unique_id == entity.unique_id_base
+            else:
+                assert (
+                    entity.unique_id
+                    == f"{entity.unique_id_base}-{entity.unique_id_suffix}"
+                )
 
         for unique_id, entities in unique_id_collisions.items():
             if len(entities) == 1:

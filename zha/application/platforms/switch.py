@@ -32,8 +32,8 @@ from zha.application.platforms import (
     ClusterMatch,
     EntityCategory,
     GroupEntity,
-    PlatformEntity,
     PlatformFeatureGroup,
+    ZclPlatformEntity,
     register_entity,
     register_group_entity,
 )
@@ -102,11 +102,12 @@ class BaseSwitch(BaseEntity, ABC):
 
 
 @register_entity(OnOff.cluster_id)
-class Switch(PlatformEntity, BaseSwitch):  # type: ignore[misc]
+class Switch(ZclPlatformEntity, BaseSwitch):  # type: ignore[misc]
     """ZHA switch."""
 
     _attr_translation_key = "switch"
     _attr_primary_weight = 10
+    _attr_group_member = True
     _attribute_name = OnOff.AttributeDefs.on_off.name
 
     _cluster_match = ClusterMatch(
@@ -243,7 +244,7 @@ class Switch(PlatformEntity, BaseSwitch):  # type: ignore[misc]
 
 
 @register_entity(BinaryOutput.cluster_id)
-class BinaryOutputSwitch(PlatformEntity, BaseSwitch):  # type: ignore[misc]
+class BinaryOutputSwitch(ZclPlatformEntity, BaseSwitch):  # type: ignore[misc]
     """BinaryOutputCluster switch."""
 
     _attr_primary_weight = 10
@@ -391,7 +392,7 @@ class SwitchGroup(GroupEntity, BaseSwitch):  # type: ignore[misc]
         self.maybe_emit_state_changed_event()
 
 
-class ConfigurableAttributeSwitch(PlatformEntity):
+class ConfigurableAttributeSwitch(ZclPlatformEntity):
     """Representation of a ZHA switch configuration entity."""
 
     PLATFORM = Platform.SWITCH
@@ -409,7 +410,6 @@ class ConfigurableAttributeSwitch(PlatformEntity):
         device: Device,
         *,
         cluster: zigpy.zcl.Cluster,
-        from_quirk: bool = False,
         attribute_name: str | None = None,
         invert_attribute_name: str | None = None,
         force_inverted: bool = False,
@@ -419,7 +419,7 @@ class ConfigurableAttributeSwitch(PlatformEntity):
         **kwargs: Any,
     ) -> None:
         """Init this switch configuration entity."""
-        if legacy_discovery_unique_id is None and not from_quirk:
+        if legacy_discovery_unique_id is None:
             legacy_discovery_unique_id = (
                 f"{endpoint.device.ieee}-{endpoint.id}"
                 if (
@@ -448,7 +448,6 @@ class ConfigurableAttributeSwitch(PlatformEntity):
             endpoint=endpoint,
             device=device,
             cluster=cluster,
-            from_quirk=from_quirk,
             legacy_discovery_unique_id=legacy_discovery_unique_id,
             **kwargs,
         )
@@ -660,37 +659,6 @@ class DisableLed(ConfigurableAttributeSwitch):
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({IKEA_AIR_PURIFIER_CLUSTER}),
         models=frozenset({"STARKVIND Air purifier", "STARKVIND Air purifier table"}),
-    )
-
-
-@register_entity(AQARA_OPPLE_CLUSTER)
-class AqaraPetFeederLEDIndicator(ConfigurableAttributeSwitch):
-    """Representation of a LED indicator configuration entity."""
-
-    _unique_id_suffix = "disable_led_indicator"
-    _attribute_name = "disable_led_indicator"
-    _attr_translation_key = "led_indicator"
-    _force_inverted = True
-    _cluster_id = AQARA_OPPLE_CLUSTER
-
-    _cluster_match = ClusterMatch(
-        server_clusters=frozenset({AQARA_OPPLE_CLUSTER}),
-        models=frozenset({"aqara.feeder.acn001"}),
-    )
-
-
-@register_entity(AQARA_OPPLE_CLUSTER)
-class AqaraPetFeederChildLock(ConfigurableAttributeSwitch):
-    """Representation of a child lock configuration entity."""
-
-    _unique_id_suffix = "child_lock"
-    _attribute_name = "child_lock"
-    _attr_translation_key = "child_lock"
-    _cluster_id = AQARA_OPPLE_CLUSTER
-
-    _cluster_match = ClusterMatch(
-        server_clusters=frozenset({AQARA_OPPLE_CLUSTER}),
-        models=frozenset({"aqara.feeder.acn001"}),
     )
 
 

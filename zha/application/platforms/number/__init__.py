@@ -4,8 +4,8 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-import functools
 import logging
+import math
 from typing import TYPE_CHECKING, Any
 
 from zigpy.zcl import (
@@ -30,6 +30,7 @@ from zha.application.platforms import (
     EntityCategory,
     PlatformEntity,
     PlatformFeatureGroup,
+    ZclPlatformEntity,
     register_entity,
 )
 from zha.application.platforms.const import (
@@ -42,7 +43,7 @@ from zha.application.platforms.legacy_quirks import AQARA_OPPLE_CLUSTER
 from zha.application.platforms.number.bacnet import BACNET_UNITS_TO_HA_UNITS
 from zha.application.platforms.number.const import ICONS, NumberDeviceClass, NumberMode
 from zha.quirks import DANFOSS_ALLY_THERMOSTAT
-from zha.units import UnitOfMass, UnitOfTemperature, UnitOfTime
+from zha.units import UnitOfTemperature, UnitOfTime
 
 if TYPE_CHECKING:
     from zha.zigbee.device import Device
@@ -110,12 +111,12 @@ class BaseNumber(PlatformEntity, ABC):
         """Return the value step."""
         return self._attr_native_step
 
-    @functools.cached_property
+    @property
     def native_unit_of_measurement(self) -> str | None:
         """Return the unit the value is expressed in."""
         return self._attr_native_unit_of_measurement
 
-    @functools.cached_property
+    @property
     def mode(self) -> NumberMode:
         """Return the mode of the entity."""
         return self._attr_mode
@@ -126,7 +127,7 @@ class BaseNumber(PlatformEntity, ABC):
 
 
 @register_entity(AnalogOutput.cluster_id)
-class AnalogOutputNumber(BaseNumber):
+class AnalogOutputNumber(BaseNumber, ZclPlatformEntity):
     """Representation of a ZHA Number entity."""
 
     _cluster_match = ClusterMatch(
@@ -168,17 +169,44 @@ class AnalogOutputNumber(BaseNumber):
         ),
     }
 
+    _capability_attribute_ids = frozenset(
+        {
+            AnalogOutput.AttributeDefs.min_present_value.id,
+            AnalogOutput.AttributeDefs.max_present_value.id,
+            AnalogOutput.AttributeDefs.resolution.id,
+            AnalogOutput.AttributeDefs.description.id,
+            AnalogOutput.AttributeDefs.engineering_units.id,
+            AnalogOutput.AttributeDefs.application_type.id,
+        }
+    )
+
+    def __init__(self, endpoint: Endpoint, device: Device, **kwargs: Any) -> None:
+        """Init this number."""
+        super().__init__(endpoint=endpoint, device=device, **kwargs)
+        self.recompute_capabilities()
+
     def recompute_capabilities(self) -> None:
         """Recompute capabilities."""
         super().recompute_capabilities()
 
         min_val = self._cluster.get(AnalogOutput.AttributeDefs.min_present_value.name)
         max_val = self._cluster.get(AnalogOutput.AttributeDefs.max_present_value.name)
-        self._attr_native_min_value = min_val or 0
-        self._attr_native_max_value = max_val or 1023
-        self._attr_native_step = self._cluster.get(
-            AnalogOutput.AttributeDefs.resolution.name
+        # NaN is the non-value of the single precision type (ZCL 2.6.2), so treat it
+        # and unusable infinite bounds as not set
+        self._attr_native_min_value = (
+            min_val if min_val is not None and math.isfinite(min_val) else 0
         )
+        self._attr_native_max_value = (
+            max_val if max_val is not None and math.isfinite(max_val) else 1023
+        )
+
+        # Guard against 0 resolution reported by some devices
+        resolution = self._cluster.get(AnalogOutput.AttributeDefs.resolution.name)
+        if resolution is not None and math.isfinite(resolution) and resolution > 0:
+            self._attr_native_step = resolution
+        else:
+            self._attr_native_step = None
+
         self._attr_native_unit_of_measurement = BACNET_UNITS_TO_HA_UNITS.get(
             self._cluster.get(AnalogOutput.AttributeDefs.engineering_units.name)
         )
@@ -214,7 +242,11 @@ class AnalogOutputNumber(BaseNumber):
     @property
     def native_value(self) -> float | None:
         """Return the current value."""
-        return self._cluster.get(AnalogOutput.AttributeDefs.present_value.name)
+        value = self._cluster.get(AnalogOutput.AttributeDefs.present_value.name)
+        if isinstance(value, float) and math.isnan(value):
+            # NaN is the non-value of the single precision type
+            return None
+        return value
 
     async def async_set_native_value(self, value: float) -> None:
         """Update the current value from HA."""
@@ -242,10 +274,12 @@ class AnalogOutputNumber(BaseNumber):
         | AttributeWrittenEvent,
     ) -> None:
         """Handle value update from cluster."""
+        if event.attribute_id in self._capability_attribute_ids:
+            self.recompute_capabilities()
         self.maybe_emit_state_changed_event()
 
 
-class NumberConfigurationEntity(BaseNumber):
+class NumberConfigurationEntity(BaseNumber, ZclPlatformEntity):
     """Representation of a ZHA number configuration entity."""
 
     _attr_entity_category = EntityCategory.CONFIG
@@ -337,7 +371,7 @@ class NumberConfigurationEntity(BaseNumber):
     async def async_set_native_value(self, value: float) -> None:
         """Update the current value from HA."""
         await write_attributes_safe(
-            self._cluster, {self._attribute_name: int(value / self._multiplier)}
+            self._cluster, {self._attribute_name: round(value / self._multiplier)}
         )
         self.maybe_emit_state_changed_event()
 
@@ -786,47 +820,6 @@ class TiRouterTransmitPower(NumberConfigurationEntity):
             },
         ),
     }
-
-
-@register_entity(AQARA_OPPLE_CLUSTER)
-class AqaraPetFeederServingSize(NumberConfigurationEntity):
-    """Aqara pet feeder serving size configuration entity."""
-
-    _unique_id_suffix = "serving_size"
-    _attr_entity_category = EntityCategory.CONFIG
-    _attr_native_min_value: float = 1
-    _attr_native_max_value: float = 10
-    _attribute_name = "serving_size"
-    _attr_translation_key: str = "serving_size"
-    _cluster_id = AQARA_OPPLE_CLUSTER
-
-    _attr_mode: NumberMode = NumberMode.BOX
-
-    _cluster_match = ClusterMatch(
-        server_clusters=frozenset({AQARA_OPPLE_CLUSTER}),
-        models=frozenset({"aqara.feeder.acn001"}),
-    )
-
-
-@register_entity(AQARA_OPPLE_CLUSTER)
-class AqaraPetFeederPortionWeight(NumberConfigurationEntity):
-    """Aqara pet feeder portion weight configuration entity."""
-
-    _unique_id_suffix = "portion_weight"
-    _attr_entity_category = EntityCategory.CONFIG
-    _attr_native_min_value: float = 1
-    _attr_native_max_value: float = 100
-    _attribute_name = "portion_weight"
-    _attr_translation_key: str = "portion_weight"
-    _cluster_id = AQARA_OPPLE_CLUSTER
-
-    _attr_mode: NumberMode = NumberMode.BOX
-    _attr_native_unit_of_measurement: str = UnitOfMass.GRAMS
-
-    _cluster_match = ClusterMatch(
-        server_clusters=frozenset({AQARA_OPPLE_CLUSTER}),
-        models=frozenset({"aqara.feeder.acn001"}),
-    )
 
 
 @register_entity(AQARA_OPPLE_CLUSTER)

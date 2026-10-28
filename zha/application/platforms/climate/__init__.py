@@ -19,7 +19,6 @@ from zigpy.zcl import (
 )
 from zigpy.zcl.clusters.hvac import (
     Fan as FanCluster,
-    FanMode,
     RunningState,
     SystemMode,
     Thermostat as ThermostatCluster,
@@ -34,24 +33,29 @@ from zha.application.platforms import (
     ClusterMatch,
     PlatformEntity,
     PlatformFeatureGroup,
+    ZclPlatformEntity,
     register_entity,
 )
 from zha.application.platforms.climate.const import (
     ATTR_OCCP_COOL_SETPT,
     ATTR_OCCP_HEAT_SETPT,
     FAN_AUTO,
+    FAN_MODE_TO_ZCL,
     FAN_ON,
     HVAC_MODE_2_SYSTEM,
     PRECISION_TENTHS,
+    SEQ_FAN_MODES,
     SEQ_OF_OPERATION,
     SYSTEM_MODE_2_HVAC,
     ZCL_TEMP,
+    ZCL_TO_FAN_MODE,
     ClimateEntityFeature,
     HVACAction,
     HVACMode,
     Preset,
 )
 from zha.decorators import periodic
+from zha.quirks import THERMOSTAT_FAN_ONLY_HVAC
 from zha.units import UnitOfTemperature
 
 if TYPE_CHECKING:
@@ -220,7 +224,7 @@ class BaseThermostat(PlatformEntity, ABC):
 
 
 @register_entity(ThermostatCluster.cluster_id)
-class Thermostat(BaseThermostat):
+class Thermostat(BaseThermostat, ZclPlatformEntity):
     """Representation of a ZHA Thermostat device."""
 
     DEFAULT_MAX_TEMP = 35
@@ -546,17 +550,21 @@ class Thermostat(BaseThermostat):
     def on_add(self) -> None:
         """Run when entity is added."""
         super().on_add()
-        for event_type in (
-            AttributeReadEvent,
-            AttributeReportedEvent,
-            AttributeUpdatedEvent,
-            AttributeWrittenEvent,
-        ):
-            self._on_remove_callbacks.append(
-                self._cluster.on_event(
-                    event_type.event_type, self.handle_attribute_updated
+        clusters = [self._cluster]
+        if self._fan_cluster is not None:
+            clusters.append(self._fan_cluster)
+        for cluster in clusters:
+            for event_type in (
+                AttributeReadEvent,
+                AttributeReportedEvent,
+                AttributeUpdatedEvent,
+                AttributeWrittenEvent,
+            ):
+                self._on_remove_callbacks.append(
+                    cluster.on_event(
+                        event_type.event_type, self.handle_attribute_updated
+                    )
                 )
-            )
 
     @property
     def state(self) -> ThermostatState:
@@ -598,24 +606,47 @@ class Thermostat(BaseThermostat):
     @property
     def fan_mode(self) -> str | None:
         """Return current FAN mode."""
+        if self._fan_cluster is not None:
+            current = self._fan_cluster.get(FanCluster.AttributeDefs.fan_mode.name)
+            if current is not None:
+                mode = ZCL_TO_FAN_MODE.get(current)
+                return mode if mode in (self.fan_modes or ()) else None
+
         running_state = self._running_state
         if running_state is None:
-            return FAN_AUTO
-
-        if running_state & (
+            mode = FAN_AUTO
+        elif running_state & (
             RunningState.Fan_State_On
             | RunningState.Fan_2nd_Stage_On
             | RunningState.Fan_3rd_Stage_On
         ):
-            return FAN_ON
-        return FAN_AUTO
+            mode = FAN_ON
+        else:
+            mode = FAN_AUTO
 
-    @functools.cached_property
+        # Only clamp when the device exposes a concrete fan_modes list. Devices
+        # without a Fan cluster keep the historical running_state heuristic.
+        fan_modes = self.fan_modes
+        if fan_modes is None or mode in fan_modes:
+            return mode
+        return None
+
+    @property
     def fan_modes(self) -> list[str] | None:
         """Return supported FAN modes."""
         if self._fan_cluster is None:
             return None
-        return [FAN_AUTO, FAN_ON]
+        seq = self._fan_cluster.get(FanCluster.AttributeDefs.fan_mode_sequence.name)
+        modes = list(SEQ_FAN_MODES.get(seq, [FAN_AUTO, FAN_ON]))
+        # Devices may report a FanMode outside their advertised sequence
+        # (e.g. On with Low_Med_High_Auto). Union it in so fan_mode stays
+        # selectable and the fan_mode-in-fan_modes invariant holds.
+        current = ZCL_TO_FAN_MODE.get(
+            self._fan_cluster.get(FanCluster.AttributeDefs.fan_mode.name)
+        )
+        if current is not None and current not in modes:
+            modes.append(current)
+        return modes
 
     @property
     def hvac_action(self) -> HVACAction | None:
@@ -673,7 +704,14 @@ class Thermostat(BaseThermostat):
     @property
     def hvac_modes(self) -> list[HVACMode]:
         """Return the list of available HVAC operation modes."""
-        return SEQ_OF_OPERATION.get(self._ctrl_sequence_of_oper, [HVACMode.OFF])
+        modes = SEQ_OF_OPERATION.get(self._ctrl_sequence_of_oper, [HVACMode.OFF])
+        if (
+            self._fan_cluster is not None
+            and THERMOSTAT_FAN_ONLY_HVAC in self._device.exposes_features
+            and HVACMode.FAN_ONLY not in modes
+        ):
+            modes = [*modes, HVACMode.FAN_ONLY]
+        return modes
 
     @property
     def preset_mode(self) -> str:
@@ -804,10 +842,13 @@ class Thermostat(BaseThermostat):
             self.warning("Unsupported '%s' fan mode", fan_mode)
             return
 
-        mode = FanMode.On if fan_mode == FAN_ON else FanMode.Auto
+        zcl_mode = FAN_MODE_TO_ZCL.get(fan_mode)
+        if zcl_mode is None:
+            self.warning("No ZCL mapping for fan mode '%s'", fan_mode)
+            return
 
         await write_attributes_safe(
-            self._fan_cluster, {FanCluster.AttributeDefs.fan_mode.name: mode}
+            self._fan_cluster, {FanCluster.AttributeDefs.fan_mode.name: zcl_mode}
         )
 
     async def async_set_hvac_mode(self, hvac_mode: HVACMode) -> None:
@@ -1015,7 +1056,10 @@ class SinopeTechnologiesThermostat(Thermostat):
     async def _async_update_time(self) -> None:
         """Update thermostat's time display."""
 
-        now = dt.datetime.now(self._device.gateway.config.local_timezone)
+        # Fall back to UTC when no timezone is configured; datetime.now(None) would
+        # return a naive system-local datetime and produce wrong secs_since_2k values.
+        tz = self._device.gateway.config.local_timezone or dt.UTC
+        now = dt.datetime.now(tz)
         secs_2k = (
             now.replace(tzinfo=None) - dt.datetime(2000, 1, 1, 0, 0, 0, 0)
         ).total_seconds()

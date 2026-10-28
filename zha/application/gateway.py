@@ -3,12 +3,13 @@
 from __future__ import annotations
 
 import asyncio
-from collections.abc import AsyncGenerator
+from collections.abc import AsyncGenerator, Callable
 from contextlib import asynccontextmanager, suppress
 from dataclasses import dataclass
-from datetime import timedelta
+from datetime import timedelta, tzinfo
 from enum import Enum
 import logging
+import random
 import time
 from typing import Any, Final, Self, TypeVar, cast
 
@@ -28,6 +29,7 @@ import zigpy.group
 from zigpy.state import State
 import zigpy.types as t
 from zigpy.types.named import EUI64
+from zigpy.zgp import GP_GROUP_ID
 
 from zha.application import discovery
 from zha.application.const import (
@@ -53,12 +55,39 @@ from zha.async_ import (
     gather_with_limited_concurrency,
 )
 from zha.event import EventBase
-from zha.quirks import DEVICE_REGISTRY, QUIRK_REGISTRY_ENTRY_ATTR
-from zha.zigbee.device import Device, DeviceInfo, DeviceStatus, ExtendedDeviceInfo
+from zha.exceptions import ZHAException
+from zha.quirks import (
+    DEVICE_REGISTRY,
+    QUIRK_REGISTRY_ENTRY_ATTR,
+    GreenPowerQuirkRegistryEntry,
+    QuirkRegistryEntry,
+)
+from zha.zigbee.device import (
+    BaseDevice,
+    Device,
+    DeviceInfo,
+    DeviceStatus,
+    ExtendedDeviceInfo,
+    GreenPowerDevice,
+)
 from zha.zigbee.group import Group, GroupInfo, GroupMemberReference
 
 BLOCK_LOG_TIMEOUT: Final[int] = 60
 SHUT_DOWN_DELAY_S: Final[float] = 0.1
+
+# Valid Zigbee group identifiers, per ZCL R8 section 3.6.1. A device answers
+# `INVALID_VALUE` to an `AddGroup` for anything outside this range, per ZCL R8
+# section 3.6.2.3.2.2
+MIN_GROUP_ID: Final[int] = 0x0001
+MAX_GROUP_ID: Final[int] = 0xFFF7
+# Group IDs we pick ourselves: touchlink initiators hand out IDs upward from 0x0001
+# and reserve 0xff00 and up (ZCL R8 section 13.3.4.8.2)
+MIN_ALLOCATED_GROUP_ID: Final[int] = 0x0100
+MAX_ALLOCATED_GROUP_ID: Final[int] = 0xFEFF
+GROUP_ID_ALLOCATION_ATTEMPTS: Final[int] = 10
+# Never allocated: the coordinator joins the Green Power sink group itself, so it
+# never shows up as a zigpy group
+RESERVED_GROUP_IDS: Final[frozenset[int]] = frozenset({GP_GROUP_ID})
 _R = TypeVar("_R")
 _LOGGER = logging.getLogger(__name__)
 
@@ -90,7 +119,7 @@ class ExtendedDeviceInfoWithPairingStatus(ExtendedDeviceInfo):
 class DeviceJoinedDeviceInfo:
     """Information about a device."""
 
-    ieee: str
+    ieee: EUI64
     nwk: int
     pairing_status: DevicePairingStatus
 
@@ -169,6 +198,20 @@ class DeviceRemovedEvent:
     event: Final[str] = ZHA_GW_MSG_DEVICE_REMOVED
 
 
+def _device_factory(zigpy_device: zigpy.device.BaseDevice) -> Callable[..., BaseDevice]:
+    """Return the ZHA device class `Device.new` creates for a non-coordinator."""
+    entry: QuirkRegistryEntry | GreenPowerQuirkRegistryEntry | None = getattr(
+        zigpy_device, QUIRK_REGISTRY_ENTRY_ATTR, None
+    )
+    if entry is not None and entry.zha_device_factory:
+        return entry.zha_device_factory
+
+    if isinstance(zigpy_device, zigpy.device.GreenPowerDevice):
+        return GreenPowerDevice
+
+    return Device
+
+
 class Gateway(AsyncUtilMixin, EventBase):
     """Gateway that handles events that happen on the ZHA Zigbee network."""
 
@@ -176,7 +219,7 @@ class Gateway(AsyncUtilMixin, EventBase):
         """Initialize the gateway."""
         super().__init__()
         self.config: ZHAData = config
-        self._devices: dict[EUI64, Device] = {}
+        self._devices: dict[EUI64, BaseDevice] = {}
         self._groups: dict[int, Group] = {}
         self.application_controller: ControllerApplication = None
         self.coordinator_zha_device: Device | None = None
@@ -195,7 +238,9 @@ class Gateway(AsyncUtilMixin, EventBase):
         """Get the current radio type."""
         return RadioType[self.config.config.coordinator_configuration.radio_type]
 
-    def get_application_controller_data(self) -> tuple[ControllerApplication, dict]:
+    def get_application_controller_data(
+        self,
+    ) -> tuple[type[ControllerApplication], dict[str, Any]]:
         """Get an uninitialized instance of a zigpy `ControllerApplication`."""
         app_config = self.config.zigpy_config
         app_config[CONF_DEVICE] = {
@@ -245,6 +290,9 @@ class Gateway(AsyncUtilMixin, EventBase):
         self.shutting_down = False
 
         app_controller_cls, app_config = self.get_application_controller_data()
+        # local_timezone is captured once at controller creation time.  For runtime
+        # changes (e.g. the host's timezone setting changes) call update_local_timezone()
+        # so that both ZHAData and the ControllerApplication stay in sync.
         self.application_controller = await app_controller_cls.new(
             config=app_config,
             auto_form=False,
@@ -253,13 +301,17 @@ class Gateway(AsyncUtilMixin, EventBase):
             uninitialized_packet_handler=(
                 self.config.config.quirks_configuration.uninitialized_packet_handler
             ),
+            local_timezone=self.config.local_timezone,
         )
+        # `new()` awaits (database load), so `update_local_timezone()` may have run
+        # while `application_controller` was still None: re-apply the current value.
+        self.application_controller.local_timezone = self.config.local_timezone
 
         await self.application_controller.startup(auto_form=True)
 
-        self.coordinator_zha_device = self.get_or_create_device(
-            self._find_coordinator_device()
-        )
+        coordinator = self.get_or_create_device(self._find_coordinator_device())
+        assert isinstance(coordinator, Device)
+        self.coordinator_zha_device = coordinator
 
         await self.load_devices()
         self.load_groups()
@@ -273,13 +325,21 @@ class Gateway(AsyncUtilMixin, EventBase):
         """Initialize controller and connect radio."""
         try:
             await self._async_initialize()
-        except Exception:
+        except (Exception, asyncio.CancelledError):
+            # Also tear down on cancellation (e.g. a setup timeout), otherwise the
+            # radio connection and zigpy's background tasks are left running
             await self.shutdown()
             raise
 
+    def update_local_timezone(self, tz: tzinfo | None) -> None:
+        """Update the local timezone used for ZCL Time cluster attributes."""
+        self.config.local_timezone = tz
+        if self.application_controller is not None:
+            self.application_controller.local_timezone = tz
+
     @asynccontextmanager
     async def request_priority(
-        self, priority: t.PacketPriority | None
+        self, priority: t.PacketPriority
     ) -> AsyncGenerator[None, None]:
         """Context manager to request a priority for radio access."""
         async with self.application_controller.request_priority(priority):
@@ -290,7 +350,7 @@ class Gateway(AsyncUtilMixin, EventBase):
         _LOGGER.debug("Connection to the radio was lost: %r", exc)
         self.emit(ZHA_GW_MSG_CONNECTION_LOST, ConnectionLostEvent(exception=exc))
 
-    def _find_coordinator_device(self) -> zigpy.device.ZigbeeDevice:
+    def _find_coordinator_device(self) -> zigpy.device.BaseDevice:
         zigpy_coordinator = self.application_controller.get_device(nwk=0x0000)
 
         if last_backup := self.application_controller.backups.most_recent_backup():
@@ -395,7 +455,7 @@ class Gateway(AsyncUtilMixin, EventBase):
             fetch_updated_state(), "zha.gateway-fetch_updated_state"
         )
 
-    def device_joined(self, device: zigpy.device.ZigbeeDevice) -> None:
+    def device_joined(self, device: zigpy.device.BaseDevice) -> None:
         """Handle device joined.
 
         At this point, no information about the device is known other than its
@@ -413,8 +473,14 @@ class Gateway(AsyncUtilMixin, EventBase):
             ),
         )
 
-    def raw_device_initialized(self, device: zigpy.device.ZigbeeDevice) -> None:  # pylint: disable=unused-argument
+    def raw_device_initialized(self, device: zigpy.device.BaseDevice) -> None:  # pylint: disable=unused-argument
         """Handle a device initialization without quirks loaded."""
+
+        # A GPD has no model or manufacturer strings
+        if isinstance(device, zigpy.device.ZigbeeDevice):
+            model, manufacturer = device.model, device.manufacturer
+        else:
+            model, manufacturer = None, None
 
         self.emit(
             ZHA_GW_MSG_RAW_INIT,
@@ -423,16 +489,14 @@ class Gateway(AsyncUtilMixin, EventBase):
                     ieee=device.ieee,
                     nwk=device.nwk,
                     pairing_status=DevicePairingStatus.INTERVIEW_COMPLETE,
-                    model=device.model if device.model else UNKNOWN_MODEL,
-                    manufacturer=device.manufacturer
-                    if device.manufacturer
-                    else UNKNOWN_MANUFACTURER,
+                    model=model if model else UNKNOWN_MODEL,
+                    manufacturer=manufacturer if manufacturer else UNKNOWN_MANUFACTURER,
                     signature=device.get_signature(),
                 )
             ),
         )
 
-    def device_initialized(self, device: zigpy.device.ZigbeeDevice) -> None:
+    def device_initialized(self, device: zigpy.device.BaseDevice) -> None:
         """Handle device joined and basic information discovered."""
         if device.ieee in self._device_init_tasks:
             _LOGGER.warning(
@@ -454,7 +518,7 @@ class Gateway(AsyncUtilMixin, EventBase):
 
         init_task.add_done_callback(_remove_init_task)
 
-    def device_reinterviewed(self, device: zigpy.device.ZigbeeDevice) -> None:
+    def device_reinterviewed(self, device: zigpy.device.BaseDevice) -> None:
         """Handle zigpy device_reinterviewed event (e.g. after OTA or reconfigure)."""
         if device.ieee in self._device_init_tasks:
             _LOGGER.debug(
@@ -477,7 +541,7 @@ class Gateway(AsyncUtilMixin, EventBase):
         init_task.add_done_callback(_remove_init_task)
 
     async def _async_device_reinterviewed(
-        self, new_zigpy_device: zigpy.device.ZigbeeDevice
+        self, new_zigpy_device: zigpy.device.BaseDevice
     ) -> None:
         """Rebuild a ZHA device after zigpy swapped the underlying device."""
         zha_device = self._devices.get(new_zigpy_device.ieee)
@@ -488,19 +552,9 @@ class Gateway(AsyncUtilMixin, EventBase):
             )
             return
 
-        old_entry = getattr(zha_device.device, QUIRK_REGISTRY_ENTRY_ATTR, None)
-        old_factory = (
-            old_entry.zha_device_factory
-            if old_entry is not None and old_entry.zha_device_factory
-            else Device
-        )
-
-        new_entry = getattr(new_zigpy_device, QUIRK_REGISTRY_ENTRY_ATTR, None)
-        new_factory = (
-            new_entry.zha_device_factory
-            if new_entry is not None and new_entry.zha_device_factory
-            else Device
-        )
+        # A re-commissioned GPD is announced like a re-interview
+        old_factory = _device_factory(zha_device.device)
+        new_factory = _device_factory(new_zigpy_device)
 
         # Only a `Device` swap requires a new object
         if new_factory is old_factory:
@@ -665,7 +719,7 @@ class Gateway(AsyncUtilMixin, EventBase):
                 ),
             )
 
-    def device_removed(self, device: zigpy.device.ZigbeeDevice) -> None:
+    def device_removed(self, device: zigpy.device.BaseDevice) -> None:
         """Handle device being removed from the network."""
         _LOGGER.info("Removing device %s - %s", device.ieee, f"0x{device.nwk:04x}")
         zha_device = self._devices.pop(device.ieee, None)
@@ -682,7 +736,7 @@ class Gateway(AsyncUtilMixin, EventBase):
                     DeviceRemovedEvent(device_info=device_info),
                 )
 
-    def get_device(self, ieee: EUI64) -> Device | None:
+    def get_device(self, ieee: EUI64) -> BaseDevice | None:
         """Return Device for given ieee."""
         return self._devices.get(ieee)
 
@@ -701,7 +755,7 @@ class Gateway(AsyncUtilMixin, EventBase):
         return self.application_controller.state
 
     @property
-    def devices(self) -> dict[EUI64, Device]:
+    def devices(self) -> dict[EUI64, BaseDevice]:
         """Return devices."""
         return self._devices
 
@@ -710,7 +764,14 @@ class Gateway(AsyncUtilMixin, EventBase):
         """Return groups."""
         return self._groups
 
-    def get_or_create_device(self, zigpy_device: zigpy.device.ZigbeeDevice) -> Device:
+    def get_zigbee_device(self, ieee: EUI64) -> Device:
+        """Look up a Zigbee device by IEEE address."""
+        device = self._devices[ieee]
+        if not isinstance(device, Device):
+            raise ZHAException(f"Device {ieee} is not a Zigbee device")
+        return device
+
+    def get_or_create_device(self, zigpy_device: zigpy.device.BaseDevice) -> BaseDevice:
         """Get or create a ZHA device."""
         if (zha_device := self._devices.get(zigpy_device.ieee)) is None:
             zha_device = Device.new(zigpy_device, self)
@@ -738,7 +799,7 @@ class Gateway(AsyncUtilMixin, EventBase):
             if device.status is DeviceStatus.INITIALIZED:
                 device.update_available(available)
 
-    async def async_device_initialized(self, device: zigpy.device.ZigbeeDevice) -> None:
+    async def async_device_initialized(self, device: zigpy.device.BaseDevice) -> None:
         """Handle device joined and basic information discovered (async)."""
         zha_device = self.get_or_create_device(device)
         _LOGGER.debug(
@@ -774,7 +835,7 @@ class Gateway(AsyncUtilMixin, EventBase):
             DeviceFullInitEvent(device_info=device_info),
         )
 
-    async def _async_device_joined(self, zha_device: Device) -> None:
+    async def _async_device_joined(self, zha_device: BaseDevice) -> None:
         zha_device.available = True
         zha_device.on_network = True
 
@@ -793,7 +854,7 @@ class Gateway(AsyncUtilMixin, EventBase):
             ),
         )
 
-    async def _async_device_rejoined(self, zha_device: Device) -> None:
+    async def _async_device_rejoined(self, zha_device: BaseDevice) -> None:
         _LOGGER.debug(
             "skipping discovery for previously discovered device - %s:%s",
             zha_device.nwk,
@@ -816,44 +877,106 @@ class Gateway(AsyncUtilMixin, EventBase):
         zha_device.available = False
         zha_device.on_network = True
 
+    def _is_groupable_member(self, member: GroupMemberReference) -> bool:
+        """Return whether a group member refers to an endpoint that can join a group."""
+        device = self.devices.get(member.ieee)
+
+        # Only Zigbee devices can be group members
+        if not isinstance(device, Device):
+            return False
+
+        # the endpoints with a `Groups` cluster to join, which is also what Home
+        # Assistant offers in its "Add group" page (not a coroutine, despite the
+        # name)
+        return member.endpoint_id in device.async_get_groupable_endpoints()
+
+    def _get_unused_group_id(self) -> int:
+        """Return a random group ID that is not in use."""
+        # Random rather than filling gaps, so a freed ID is not handed out again: an
+        # offline device may still hold it in its `Groups` cluster, and Home Assistant
+        # restores a deleted group entity (unique ID derived from the group ID)
+        zigpy_groups = self.application_controller.groups
+
+        for _ in range(GROUP_ID_ALLOCATION_ATTEMPTS):
+            candidate = random.randint(MIN_ALLOCATED_GROUP_ID, MAX_ALLOCATED_GROUP_ID)
+
+            if candidate not in zigpy_groups and candidate not in RESERVED_GROUP_IDS:
+                return candidate
+
+        raise ZHAException("No unused Zigbee group ID is available")
+
     async def async_create_zigpy_group(
         self,
         name: str,
         members: list[GroupMemberReference] | None,
         group_id: int | None = None,
-    ) -> Group | None:
+    ) -> Group:
         """Create a new Zigpy Zigbee group."""
-
-        # we start with two to fill any gaps from a user removing existing groups
+        # zigpy's groups are the source of truth: a group we do not know about yet
+        # would be silently reused by `Groups.add_group`
+        zigpy_groups = self.application_controller.groups
 
         if group_id is None:
-            group_id = 2
-            while group_id in self.groups:
-                group_id += 1
+            group_id = self._get_unused_group_id()
+        elif not MIN_GROUP_ID <= group_id <= MAX_GROUP_ID:
+            raise ZHAException(
+                f"Group ID 0x{group_id:04x} is not a valid Zigbee group ID,"
+                f" it must be between 0x{MIN_GROUP_ID:04x} and 0x{MAX_GROUP_ID:04x}"
+            )
+        elif group_id in zigpy_groups:
+            raise ZHAException(
+                f"Group ID 0x{group_id:04x} is already used by group"
+                f" '{zigpy_groups[group_id].name}'"
+            )
 
-        # guard against group already existing
-        if self.get_group(name) is None:
-            self.application_controller.groups.add_group(group_id, name)
-            if members is not None:
-                tasks = []
-                for member in members:
-                    _LOGGER.debug(
-                        (
-                            "Adding member with IEEE: %s and endpoint ID: %s to group:"
-                            " %s:0x%04x"
-                        ),
-                        member.ieee,
-                        member.endpoint_id,
-                        name,
-                        group_id,
+        # the name only has to be unique among the groups ZHA presents: it is the
+        # group ID that `Groups.add_group` keys on
+        if self.get_group(name) is not None:
+            raise ZHAException(f"A group named '{name}' already exists")
+
+        if members is not None and (
+            ungroupable_members := dict.fromkeys(
+                f"{member.ieee} endpoint {member.endpoint_id}"
+                for member in members
+                if not self._is_groupable_member(member)
+            )
+        ):
+            raise ZHAException(
+                f"Cannot add members to group '{name}' that are not groupable device"
+                f" endpoints: {', '.join(ungroupable_members)}"
+            )
+
+        zigpy_group = zigpy_groups.add_group(group_id, name)
+
+        if members is not None:
+            tasks = []
+            for member in members:
+                _LOGGER.debug(
+                    (
+                        "Adding member with IEEE: %s and endpoint ID: %s to group:"
+                        " %s:0x%04x"
+                    ),
+                    member.ieee,
+                    member.endpoint_id,
+                    name,
+                    group_id,
+                )
+                member_device = self.devices[member.ieee]
+                assert isinstance(member_device, Device)
+                tasks.append(
+                    member_device.async_add_endpoint_to_group(
+                        member.endpoint_id, group_id
                     )
-                    tasks.append(
-                        self.devices[member.ieee].async_add_endpoint_to_group(
-                            member.endpoint_id, group_id
-                        )
-                    )
-                await asyncio.gather(*tasks)
-        return self.groups.get(group_id)
+                )
+            await asyncio.gather(*tasks)
+
+        if zigpy_groups.get(group_id) is not zigpy_group:
+            # adding the members is awaited, so the group can be removed in the
+            # meantime: returning it would leave a group behind that zigpy, and
+            # therefore no device, knows anything about
+            raise ZHAException(f"Group '{name}' was removed while it was being created")
+
+        return self.get_or_create_group(zigpy_group)
 
     async def async_remove_device(self, ieee: EUI64) -> None:
         """Remove a device from ZHA."""
@@ -866,6 +989,8 @@ class Gateway(AsyncUtilMixin, EventBase):
         for group_id, group in self.groups.items():
             for member_ieee_endpoint_id in list(group.zigpy_group.members.keys()):
                 if member_ieee_endpoint_id[0] == ieee:
+                    # Only Zigbee devices can be group members
+                    assert isinstance(device, Device)
                     await device.async_remove_from_group(group_id)
 
         await self.application_controller.remove(ieee)

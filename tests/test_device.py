@@ -1,6 +1,7 @@
 """Test ZHA device switch."""
 
 import asyncio
+from collections.abc import Iterator
 import logging
 import time
 from unittest import mock
@@ -51,17 +52,22 @@ from zha.application.const import (
     UNKNOWN,
 )
 from zha.application.gateway import Gateway
-from zha.application.platforms import PlatformEntity
+from zha.application.platforms import EntityCategory, PlatformEntity
 from zha.application.platforms.binary_sensor import IASZone
-from zha.application.platforms.light import Light
+from zha.application.platforms.light import HueLight, Light
+from zha.application.platforms.number import (
+    OnLevelConfigurationEntity,
+    StartUpCurrentLevelConfigurationEntity,
+)
 from zha.application.platforms.sensor import Battery, LQISensor, RSSISensor
 from zha.application.platforms.sensor.device_class import (
     SensorDeviceClass,
     SensorStateClass,
 )
 from zha.application.platforms.switch import Switch
+from zha.const import STATE_CHANGED
 from zha.exceptions import ZHAException
-from zha.quirks import DeviceRegistry
+from zha.quirks import DeviceMatch, DeviceRegistry, ModelInfo
 from zha.zigbee.device import (
     ClusterBinding,
     Device,
@@ -71,7 +77,7 @@ from zha.zigbee.device import (
     ZHAEvent,
     get_device_automation_triggers,
 )
-from zha.zigbee.group import Group, GroupMemberReference
+from zha.zigbee.group import Group
 
 
 def zigpy_device(zha_gateway: Gateway, with_basic_cluster: bool = True, **kwargs):
@@ -225,6 +231,50 @@ async def test_check_available_success(
         entity.emit.reset_mock()
 
 
+@pytest.mark.parametrize("seen_while_off_network", [False, True])
+async def test_on_network_emits_entity_availability(
+    zha_gateway: Gateway, seen_while_off_network: bool
+) -> None:
+    """Test entities emit their availability when the device leaves and returns."""
+    zigpy_dev = zigpy_device_mains(zha_gateway, with_basic_cluster=True)
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
+
+    # we want to test the device availability handling alone
+    zha_gateway.global_updater.stop()
+
+    entities = list(zha_device.platform_entities.values())
+    assert entities
+    diffs: dict[str, list[dict]] = {entity.unique_id: [] for entity in entities}
+    for entity in entities:
+        entity.on_event(
+            STATE_CHANGED,
+            lambda event, uid=entity.unique_id: diffs[uid].append(event.state_diff),
+        )
+
+    zha_device.on_network = False
+    await zha_gateway.async_block_till_done()
+    assert zha_device.available is False
+    for entity in entities:
+        assert any(diff.get("available") is False for diff in diffs[entity.unique_id])
+        diffs[entity.unique_id].clear()
+
+    if seen_while_off_network:
+        # the availability checker saw recent traffic, but the device is still
+        # not on the network, so it stays unavailable
+        zha_device.update_available(True)
+        await zha_gateway.async_block_till_done()
+        assert zha_device.available is False
+        for entity in entities:
+            assert all("available" not in diff for diff in diffs[entity.unique_id])
+
+    zha_device.on_network = True
+    await zha_gateway.async_block_till_done()
+    assert zha_device.available is True
+    for entity in entities:
+        assert entity.state.available is True
+        assert any(diff.get("available") is True for diff in diffs[entity.unique_id])
+
+
 async def test_check_available_unsuccessful(
     zha_gateway: Gateway,
 ) -> None:
@@ -313,6 +363,80 @@ async def test_check_available_no_basic_cluster(
 
     assert zha_device.available is False
     assert "does not have a mandatory basic cluster" in caplog.text
+
+
+async def test_check_available_skips_stale_coordinator(
+    zha_gateway: Gateway,
+) -> None:
+    """Check that a former coordinator is not marked unavailable."""
+    old_coord_dev = zigpy_device(
+        zha_gateway,
+        with_basic_cluster=False,
+        ieee="aa:bb:cc:dd:ee:ff:00:12",
+        nwk=0x0000,
+    )
+    old_coord_dev.node_desc = old_coord_dev.node_desc.replace(
+        logical_type=zdo_t.LogicalType.Coordinator
+    )
+    zha_device = await join_zigpy_device(zha_gateway, old_coord_dev)
+
+    assert not zha_device.is_active_coordinator
+    assert zha_device.available is True
+
+    old_coord_dev.last_seen = time.time() - zha_device.consider_unavailable_time - 2
+    await _send_time_changed(
+        zha_gateway, zha_gateway._device_availability_checker.__polling_interval + 1
+    )
+
+    assert zha_device.available is True
+
+
+async def test_check_available_skips_active_coordinator(
+    zha_gateway: Gateway,
+) -> None:
+    """Check that the active coordinator is never marked unavailable."""
+    coord_dev = zigpy_device(
+        zha_gateway,
+        with_basic_cluster=False,
+        ieee="aa:bb:cc:dd:ee:ff:00:11",
+        nwk=0x0000,
+    )
+    coord_dev.node_desc = coord_dev.node_desc.replace(
+        logical_type=zdo_t.LogicalType.Coordinator
+    )
+    zha_device = await join_zigpy_device(zha_gateway, coord_dev)
+    zha_gateway.application_controller.state.node_info.ieee = coord_dev.ieee
+
+    assert zha_device.is_active_coordinator
+    assert zha_device.available is True
+
+    coord_dev.last_seen = time.time() - zha_device.consider_unavailable_time - 2
+    await zha_device._check_available()
+
+    # `available` is always True for the active coordinator, so check the raw flag
+    assert zha_device._available is True
+    assert zha_device.available is True
+
+
+async def test_discover_entities_skips_zdo_endpoint(
+    zha_gateway: Gateway,
+) -> None:
+    """Check that endpoint 0 is never passed to endpoint entity discovery."""
+    zha_device = await join_zigpy_device(
+        zha_gateway, zigpy_device(zha_gateway, with_basic_cluster=True)
+    )
+    # `Device.endpoints` only holds non-ZDO endpoints, so ep 0 is injected
+    zha_device._endpoints[0] = mock.MagicMock()
+
+    with patch(
+        "zha.zigbee.device.discovery.discover_entities_for_endpoint",
+        return_value=iter(()),
+    ) as discover:
+        list(zha_device.discover_entities())
+
+    discovered = {c.args[0] for c in discover.mock_calls}
+    assert zha_device._endpoints[0] not in discovered
+    assert discovered == {ep for i, ep in zha_device._endpoints.items() if i != 0}
 
 
 async def test_device_is_active_coordinator(
@@ -1196,6 +1320,101 @@ async def test_primary_entity_reelection(zha_gateway: Gateway) -> None:
     assert not ias_zone.primary
 
 
+async def test_force_create_skips_support_check(zha_gateway: Gateway) -> None:
+    """Test that a force-created entity is kept while its attribute is unsupported."""
+
+    registry = DeviceRegistry()
+
+    @registry.register_device
+    class ForcedOnLevelQuirk(Device):
+        _device_match = DeviceMatch(applies_to=(ModelInfo("Philips", "LCT014"),))
+
+        def discover_entities(self) -> Iterator[PlatformEntity]:
+            yield from super().discover_entities()
+
+            endpoint = self.endpoints[11]
+            yield OnLevelConfigurationEntity(
+                endpoint=endpoint,
+                device=self,
+                cluster=endpoint.zigpy_endpoint.level,
+                force_create=True,
+                unique_id_suffix="forced",
+            )
+
+    zigpy_dev = registry.resolve(
+        await zigpy_device_from_json(
+            zha_gateway.application_controller,
+            "tests/data/devices/philips-lct014-0x01001a02.json",
+        )
+    )
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
+
+    # The fixture marks `on_level` as unsupported
+    assert zigpy_dev.endpoints[11].level.is_attribute_unsupported(
+        general.LevelControl.AttributeDefs.on_level.name
+    )
+
+    default_key = (Platform.NUMBER, f"{zigpy_dev.ieee}-11-8-on_level")
+    forced_key = (Platform.NUMBER, f"{zigpy_dev.ieee}-11-8-forced")
+
+    assert default_key not in zha_device.platform_entities
+    assert forced_key in zha_device.platform_entities
+
+    await zha_device.recompute_entities()
+
+    assert default_key not in zha_device.platform_entities
+    assert forced_key in zha_device.platform_entities
+
+
+async def test_entity_type_overrides_class_category(zha_gateway: Gateway) -> None:
+    """Test that `entity_type` only overrides the class's category when given."""
+    zigpy_dev = await zigpy_device_from_json(
+        zha_gateway.application_controller,
+        "tests/data/devices/philips-lct014-0x01001a02.json",
+    )
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
+    endpoint = zha_device.endpoints[11]
+
+    def create(
+        entity_type: EntityType | None,
+    ) -> StartUpCurrentLevelConfigurationEntity:
+        return StartUpCurrentLevelConfigurationEntity(
+            endpoint=endpoint,
+            device=zha_device,
+            cluster=endpoint.zigpy_endpoint.level,
+            entity_type=entity_type,
+        )
+
+    assert create(None).entity_category == EntityCategory.CONFIG
+    assert create(EntityType.STANDARD).entity_category is None
+    assert create(EntityType.CONFIG).entity_category == EntityCategory.CONFIG
+    assert create(EntityType.DIAGNOSTIC).entity_category == EntityCategory.DIAGNOSTIC
+
+
+async def test_unique_id_overrides_legacy_unique_id(zha_gateway: Gateway) -> None:
+    """Test that an explicit `unique_id` overrides a class's legacy unique ID."""
+    zigpy_dev = await zigpy_device_from_json(
+        zha_gateway.application_controller,
+        "tests/data/devices/philips-lct014-0x01001a02.json",
+    )
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
+    endpoint = zha_device.endpoints[11]
+
+    legacy = HueLight(
+        endpoint=endpoint, device=zha_device, cluster=endpoint.zigpy_endpoint.on_off
+    )
+    overridden = HueLight(
+        endpoint=endpoint,
+        device=zha_device,
+        cluster=endpoint.zigpy_endpoint.on_off,
+        unique_id=f"{zigpy_dev.ieee}-11-override",
+    )
+
+    assert legacy.unique_id == f"{zigpy_dev.ieee}-11"
+    assert overridden.unique_id == f"{zigpy_dev.ieee}-11-override"
+    assert overridden.unique_id_base == f"{zigpy_dev.ieee}-11-override"
+
+
 async def test_primary_entity_election_ignores_enabled(zha_gateway: Gateway) -> None:
     """Test the election ignores runtime enabled state.
 
@@ -1353,7 +1572,6 @@ async def test_quirks_v2_change_entity_metadata(zha_gateway: Gateway) -> None:
     (
         QuirkBuilder("CentraLite", "3405-L")
         .change_entity_metadata(
-            endpoint_id=1,
             unique_id_suffix="-lqi",
             new_device_class=SensorDeviceClass.POWER,
             new_state_class=SensorStateClass.MEASUREMENT,
@@ -1409,7 +1627,7 @@ async def test_quirks_v2_change_entity_metadata(zha_gateway: Gateway) -> None:
 
     assert lqi_entity is not None, "LQI sensor entity should exist"
 
-    # Verify metadata changes were applied - first filter matches by endpoint_id=1 and unique_id_suffix="-lqi"
+    # Verify metadata changes were applied - first filter matches by endpoint_id=1, cluster_id=Basic and unique_id_suffix="-lqi"
     assert lqi_entity._attr_device_class == SensorDeviceClass.POWER
     assert lqi_entity._attr_state_class == SensorStateClass.MEASUREMENT
     assert lqi_entity._attr_entity_category == EntityType.CONFIG
@@ -2069,15 +2287,13 @@ async def test_gateway_reconfigure_with_swap(
 
     # Create a group containing this device so we can verify that group
     # subscriptions are refreshed after the reinterview rebuild.
-    zha_group = await zha_gateway.async_create_zigpy_group(
-        "Test Group",
-        [GroupMemberReference(ieee=zigpy_dev.ieee, endpoint_id=3)],
-    )
+    zha_group = await zha_gateway.async_create_zigpy_group("Test Group", members=None)
     await zha_gateway.async_block_till_done()
     assert zha_group is not None
 
-    # The mock endpoint.request doesn't actually add to the zigpy group,
-    # so add manually.
+    # The device's endpoint has no `Groups` cluster, so it cannot join a group
+    # itself, and the mock endpoint.request doesn't add it to the zigpy group
+    # either, so add it manually.
     zha_group.zigpy_group.add_member(zigpy_dev.endpoints[3], suppress_event=True)
 
     # Register a mock group entity so the group subscribes to member entities.

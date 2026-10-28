@@ -448,12 +448,6 @@
               "value": 1
             },
             {
-              "id": "0x0001",
-              "name": "occupancy_sensor_type_bitmap",
-              "zcl_type": "map8",
-              "value": 0
-            },
-            {
               "id": "0x0030",
               "name": "physical_contact_o_to_u_delay",
               "zcl_type": "uint16",
@@ -952,7 +946,7 @@
         "primary": false,
         "extra_state_attribute_names": [],
         "device_ieee": "ab:cd:ef:12:55:c3:5a:e0",
-        "endpoint_id": 1,
+        "endpoint_id": null,
         "available": true,
         "group_id": null,
         "native_value": 232,
@@ -975,7 +969,7 @@
         "primary": false,
         "extra_state_attribute_names": [],
         "device_ieee": "ab:cd:ef:12:55:c3:5a:e0",
-        "endpoint_id": 1,
+        "endpoint_id": null,
         "available": true,
         "group_id": null,
         "native_value": -53,
