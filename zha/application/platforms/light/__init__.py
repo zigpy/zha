@@ -275,6 +275,9 @@ class BaseSharedLight(BaseLight):
         self._transition_listener: asyncio.TimerHandle | None = None
         self._transition_brightness_buffer: int | None = None
         self._transition_on_off_buffer: bool | None = None
+        # True while the buffered off came from a level 0 report (a later non-zero
+        # level report cancels it) rather than an on_off report
+        self._transition_off_from_zero_level: bool = False
 
         self._internal_supported_color_modes: set[ColorMode] = set()
 
@@ -800,6 +803,7 @@ class BaseSharedLight(BaseLight):
         self._transitioning_group = False
         self._transition_brightness_buffer = None
         self._transition_on_off_buffer = None
+        self._transition_off_from_zero_level = False
         if isinstance(self, LightGroup):
             for platform_entity in self.group.get_platform_entities(Light.PLATFORM):
                 assert isinstance(platform_entity, Light)
@@ -860,6 +864,7 @@ class BaseSharedLight(BaseLight):
                 self._off_with_transition = False
                 self._off_brightness = None
             self._transition_on_off_buffer = None
+        self._transition_off_from_zero_level = False
 
     def async_transition_complete(self, _=None) -> None:
         """Set _transitioning_individual to False and write HA state."""
@@ -1138,10 +1143,15 @@ class Light(BaseSharedLight, ZclPlatformEntity):
             )
             if value:
                 self._transition_brightness_buffer = value
+                if self._transition_off_from_zero_level:
+                    # the light came back up after reporting level 0
+                    self._transition_on_off_buffer = True
+                    self._transition_off_from_zero_level = False
             else:
                 # Level 0 means off. Buffer it as an on_off report, so the last
                 # report of the window wins regardless of its kind.
                 self._transition_on_off_buffer = False
+                self._transition_off_from_zero_level = True
             return
         self._brightness = value
         self.maybe_emit_state_changed_event()
@@ -1184,6 +1194,7 @@ class Light(BaseSharedLight, ZclPlatformEntity):
         if not self.is_transitioning:
             self._transition_brightness_buffer = None
             self._transition_on_off_buffer = None
+            self._transition_off_from_zero_level = False
         self._transitioning_group = True
 
     def transition_off(self):
@@ -1211,6 +1222,7 @@ class Light(BaseSharedLight, ZclPlatformEntity):
                 event.value,
             )
             self._transition_on_off_buffer = bool(event.value)
+            self._transition_off_from_zero_level = False
             return
         self._state = bool(event.value)
         if event.value:

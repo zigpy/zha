@@ -2774,6 +2774,11 @@ async def test_turn_on_execute_if_off_color_command_failure(
         (("on_off_on", "level_0"), False),
         (("level_0", "on_off_on"), True),
         (("level_0", "on_off_on", "level_0"), False),
+        # a rising level after a late level 0 means the light is on
+        (("level_0", "level_150"), True),
+        (("on_off_on", "level_0", "level_150"), True),
+        # but a genuine on_off=False report is not cancelled by a level report
+        (("on_off_off", "level_150"), False),
     ],
 )
 async def test_zero_level_and_on_off_reports_apply_in_arrival_order(
@@ -2795,12 +2800,13 @@ async def test_zero_level_and_on_off_reports_apply_in_arrival_order(
     assert entity.is_transitioning
 
     for report in reports:
-        if report == "on_off_on":
-            cluster, attr, value = cluster_on_off, general.OnOff.AttributeDefs.on_off, 1
+        if report.startswith("on_off"):
+            cluster, attr = cluster_on_off, general.OnOff.AttributeDefs.on_off
+            value = int(report == "on_off_on")
         else:
             cluster = cluster_level
             attr = general.LevelControl.AttributeDefs.current_level
-            value = 0
+            value = int(report.removeprefix("level_"))
         await send_attributes_report(zha_gateway, cluster, {attr.id: value})
     await zha_gateway.async_block_till_done()
 
