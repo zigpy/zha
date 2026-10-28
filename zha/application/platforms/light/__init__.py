@@ -1191,7 +1191,9 @@ class Light(BaseSharedLight, ZclPlatformEntity):
     def transition_on(self):
         """Handle a transition start event from a group."""
         self.debug("group transition started - setting member transitioning flag")
-        if not self.is_transitioning:
+        if not self._transitioning_individual:
+            # Reports buffered for an earlier group transition are stale now; a
+            # member's own transition keeps its buffer for its completion.
             self._transition_brightness_buffer = None
             self._transition_on_off_buffer = None
             self._transition_off_from_zero_level = False

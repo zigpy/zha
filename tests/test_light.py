@@ -2880,3 +2880,58 @@ async def test_group_member_reports_applied_when_group_transition_ends(
     assert not member_entity.is_transitioning
     assert bool(member_entity.state.on) is True
     assert member_entity.state.brightness == 90
+
+
+@patch(
+    "zigpy.zcl.clusters.general.LevelControl.request",
+    new=AsyncMock(return_value=SUCCESS),
+)
+@patch(
+    "zigpy.zcl.clusters.general.OnOff.request",
+    new=AsyncMock(return_value=SUCCESS),
+)
+async def test_group_member_buffer_dropped_when_group_transition_restarts(
+    zha_gateway: Gateway,
+) -> None:
+    """Test a member's reports for an earlier group transition don't outlive it."""
+    coordinator = await coordinator_mock(zha_gateway)
+    device_light_1 = await device_light_1_mock(zha_gateway)
+    device_light_2 = await device_light_2_mock(zha_gateway)
+
+    zha_gateway.coordinator_zha_device = coordinator
+    coordinator._zha_gateway = zha_gateway
+    device_light_1._zha_gateway = zha_gateway
+    device_light_2._zha_gateway = zha_gateway
+
+    members = [
+        GroupMemberReference(ieee=device_light_1.ieee, endpoint_id=1),
+        GroupMemberReference(ieee=device_light_2.ieee, endpoint_id=1),
+    ]
+    zha_group: Group = await zha_gateway.async_create_zigpy_group("Test Group", members)
+    await zha_gateway.async_block_till_done()
+
+    group_entity: GroupEntity = get_group_entity(zha_group, platform=Platform.LIGHT)
+    member_entity = get_entity(device_light_1, platform=Platform.LIGHT)
+    member_cluster_on_off = device_light_1.device.endpoints[1].on_off
+    assert bool(member_entity.state.on) is False
+
+    await group_entity.async_turn_off()
+    await zha_gateway.async_block_till_done()
+    assert member_entity.is_transitioning
+
+    # A report for the first command is buffered...
+    await send_attributes_report(
+        zha_gateway,
+        member_cluster_on_off,
+        {general.OnOff.AttributeDefs.on_off.id: 1},
+    )
+    await zha_gateway.async_block_till_done()
+
+    # ...and a second group command restarts the window before it ends.
+    await group_entity.async_turn_off()
+    await zha_gateway.async_block_till_done()
+
+    await asyncio.sleep(1.6)
+    await zha_gateway.async_block_till_done()
+    assert not member_entity.is_transitioning
+    assert bool(member_entity.state.on) is False
