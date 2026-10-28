@@ -107,6 +107,7 @@ class Switch(ZclPlatformEntity, BaseSwitch):  # type: ignore[misc]
 
     _attr_translation_key = "switch"
     _attr_primary_weight = 10
+    _attr_group_member = True
     _attribute_name = OnOff.AttributeDefs.on_off.name
 
     _cluster_match = ClusterMatch(

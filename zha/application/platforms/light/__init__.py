@@ -877,6 +877,7 @@ class Light(BaseSharedLight, ZclPlatformEntity):
     """Representation of a ZHA or ZLL light."""
 
     _attr_translation_key: str = "light"
+    _attr_group_member = True
     _REFRESH_INTERVAL = (2700, 4500)
     __polling_interval: int
 
