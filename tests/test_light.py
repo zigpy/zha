@@ -2757,3 +2757,188 @@ async def test_turn_on_execute_if_off_color_command_failure(
 
     assert bool(entity.state.on) is False
     assert not entity.is_transitioning
+
+
+@patch(
+    "zigpy.zcl.clusters.general.LevelControl.request",
+    new=AsyncMock(return_value=SUCCESS),
+)
+@patch(
+    "zigpy.zcl.clusters.general.OnOff.request",
+    new=AsyncMock(return_value=SUCCESS),
+)
+@pytest.mark.parametrize(
+    ("turn_off", "reports", "expected_on"),
+    [
+        # the last report of the window wins, whichever cluster it came from
+        (True, ("on_off_on", "level_0"), False),
+        (True, ("level_0", "on_off_on"), True),
+        (True, ("level_0", "on_off_on", "level_0"), False),
+        # an off command: the level steps to 0 and is restored afterwards
+        (True, ("level_0", "level_150"), False),
+        (True, ("on_off_off", "level_0", "level_150"), False),
+        (True, ("on_off_on", "level_0", "level_150"), True),
+        (True, ("on_off_off", "level_150"), False),
+        # an on command: a late level 0 followed by the rising level is still on
+        (False, ("level_0", "level_150"), True),
+        (False, ("on_off_on", "level_0", "level_150"), True),
+        (False, ("level_0",), False),
+    ],
+)
+async def test_zero_level_and_on_off_reports_apply_in_arrival_order(
+    zha_gateway: Gateway,
+    turn_off: bool,
+    reports: tuple[str, ...],
+    expected_on: bool,
+) -> None:
+    """Test buffered on_off and zero-level reports are resolved by arrival order."""
+    device_light_1 = await device_light_1_mock(zha_gateway)
+    cluster_on_off = device_light_1.device.endpoints[1].on_off
+    cluster_level = device_light_1.device.endpoints[1].level
+    entity = get_entity(device_light_1, platform=Platform.LIGHT)
+
+    await entity.async_turn_on(brightness=200)
+    await zha_gateway.async_block_till_done()
+    if turn_off:
+        await asyncio.sleep(1.6)
+        await zha_gateway.async_block_till_done()
+        await entity.async_turn_off()
+        await zha_gateway.async_block_till_done()
+    assert entity.is_transitioning
+
+    for report in reports:
+        if report.startswith("on_off"):
+            cluster, attr = cluster_on_off, general.OnOff.AttributeDefs.on_off
+            value = int(report == "on_off_on")
+        else:
+            cluster = cluster_level
+            attr = general.LevelControl.AttributeDefs.current_level
+            value = int(report.removeprefix("level_"))
+        await send_attributes_report(zha_gateway, cluster, {attr.id: value})
+    await zha_gateway.async_block_till_done()
+
+    await asyncio.sleep(1.6)
+    await zha_gateway.async_block_till_done()
+    assert not entity.is_transitioning
+    assert bool(entity.state.on) is expected_on
+
+
+@patch(
+    "zigpy.zcl.clusters.general.LevelControl.request",
+    new=AsyncMock(return_value=SUCCESS),
+)
+@patch(
+    "zigpy.zcl.clusters.general.OnOff.request",
+    new=AsyncMock(return_value=SUCCESS),
+)
+async def test_group_member_reports_applied_when_group_transition_ends(
+    zha_gateway: Gateway,
+) -> None:
+    """Test a member's reports during a group transition are applied at its end."""
+    coordinator = await coordinator_mock(zha_gateway)
+    device_light_1 = await device_light_1_mock(zha_gateway)
+    device_light_2 = await device_light_2_mock(zha_gateway)
+
+    zha_gateway.coordinator_zha_device = coordinator
+    coordinator._zha_gateway = zha_gateway
+    device_light_1._zha_gateway = zha_gateway
+    device_light_2._zha_gateway = zha_gateway
+
+    members = [
+        GroupMemberReference(ieee=device_light_1.ieee, endpoint_id=1),
+        GroupMemberReference(ieee=device_light_2.ieee, endpoint_id=1),
+    ]
+    zha_group: Group = await zha_gateway.async_create_zigpy_group("Test Group", members)
+    await zha_gateway.async_block_till_done()
+
+    group_entity: GroupEntity = get_group_entity(zha_group, platform=Platform.LIGHT)
+    member_entity = get_entity(device_light_1, platform=Platform.LIGHT)
+    member_cluster_on_off = device_light_1.device.endpoints[1].on_off
+    member_cluster_level = device_light_1.device.endpoints[1].level
+
+    await group_entity.async_turn_on(brightness=200)
+    await zha_gateway.async_block_till_done()
+    await asyncio.sleep(1.6)
+    await zha_gateway.async_block_till_done()
+    assert not group_entity.is_transitioning
+
+    # The group is turned off; the member is switched on again from outside the
+    # group within the transition window.
+    await group_entity.async_turn_off()
+    await zha_gateway.async_block_till_done()
+    assert group_entity.is_transitioning
+    assert member_entity.is_transitioning
+
+    await send_attributes_report(
+        zha_gateway,
+        member_cluster_on_off,
+        {general.OnOff.AttributeDefs.on_off.id: 1},
+    )
+    await send_attributes_report(
+        zha_gateway,
+        member_cluster_level,
+        {general.LevelControl.AttributeDefs.current_level.id: 90},
+    )
+    await zha_gateway.async_block_till_done()
+    assert bool(member_entity.state.on) is False
+
+    await asyncio.sleep(1.6)
+    await zha_gateway.async_block_till_done()
+    assert not member_entity.is_transitioning
+    assert bool(member_entity.state.on) is True
+    assert member_entity.state.brightness == 90
+
+
+@patch(
+    "zigpy.zcl.clusters.general.LevelControl.request",
+    new=AsyncMock(return_value=SUCCESS),
+)
+@patch(
+    "zigpy.zcl.clusters.general.OnOff.request",
+    new=AsyncMock(return_value=SUCCESS),
+)
+async def test_group_member_buffer_dropped_when_group_transition_restarts(
+    zha_gateway: Gateway,
+) -> None:
+    """Test a member's reports for an earlier group transition don't outlive it."""
+    coordinator = await coordinator_mock(zha_gateway)
+    device_light_1 = await device_light_1_mock(zha_gateway)
+    device_light_2 = await device_light_2_mock(zha_gateway)
+
+    zha_gateway.coordinator_zha_device = coordinator
+    coordinator._zha_gateway = zha_gateway
+    device_light_1._zha_gateway = zha_gateway
+    device_light_2._zha_gateway = zha_gateway
+
+    members = [
+        GroupMemberReference(ieee=device_light_1.ieee, endpoint_id=1),
+        GroupMemberReference(ieee=device_light_2.ieee, endpoint_id=1),
+    ]
+    zha_group: Group = await zha_gateway.async_create_zigpy_group("Test Group", members)
+    await zha_gateway.async_block_till_done()
+
+    group_entity: GroupEntity = get_group_entity(zha_group, platform=Platform.LIGHT)
+    member_entity = get_entity(device_light_1, platform=Platform.LIGHT)
+    member_cluster_on_off = device_light_1.device.endpoints[1].on_off
+    assert bool(member_entity.state.on) is False
+
+    await group_entity.async_turn_off()
+    await zha_gateway.async_block_till_done()
+    assert member_entity.is_transitioning
+
+    # A report for the first command is buffered...
+    await send_attributes_report(
+        zha_gateway,
+        member_cluster_on_off,
+        {general.OnOff.AttributeDefs.on_off.id: 1},
+    )
+    await zha_gateway.async_block_till_done()
+
+    # ...and a second group command restarts the window before it ends.
+    await group_entity.async_turn_off()
+    await zha_gateway.async_block_till_done()
+
+    await asyncio.sleep(1.6)
+    await zha_gateway.async_block_till_done()
+    assert not member_entity.is_transitioning
+    assert bool(member_entity.state.on) is False
