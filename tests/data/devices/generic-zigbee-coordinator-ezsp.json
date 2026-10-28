@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 3,
   "ieee": "ab:cd:ef:12:90:34:24:63",
   "nwk": "0x0000",
   "manufacturer": "",
@@ -8,7 +8,7 @@
   "friendly_model": "Generic Zigbee Coordinator (EZSP)",
   "name": " Generic Zigbee Coordinator (EZSP)",
   "quirk_applied": false,
-  "quirk_class": "zigpy.device.Device",
+  "quirk_class": "zigpy.device.ZigbeeDevice",
   "exposes_features": [],
   "manufacturer_code": 43981,
   "power_source": "Mains",

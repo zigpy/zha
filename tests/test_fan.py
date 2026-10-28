@@ -8,7 +8,7 @@ from unittest.mock import AsyncMock, call, patch
 
 import pytest
 import zhaquirks
-from zigpy.device import Device as ZigpyDevice
+from zigpy.device import ZigbeeDevice
 from zigpy.exceptions import ZigbeeException
 from zigpy.profiles import zha
 from zigpy.typing import UNDEFINED
@@ -32,8 +32,6 @@ from zha.application import Platform
 from zha.application.gateway import Gateway
 from zha.application.platforms import GroupEntity, PlatformEntity
 from zha.application.platforms.fan.const import (
-    ATTR_PERCENTAGE,
-    ATTR_PRESET_MODE,
     PRESET_MODE_AUTO,
     PRESET_MODE_ON,
     PRESET_MODE_SMART,
@@ -43,7 +41,6 @@ from zha.application.platforms.fan.const import (
     SPEED_OFF,
 )
 from zha.application.platforms.fan.helpers import NotValidPresetModeError
-from zha.exceptions import ZHAException
 from zha.zigbee.device import Device
 from zha.zigbee.group import Group, GroupMemberReference
 
@@ -53,7 +50,7 @@ IEEE_GROUPABLE_DEVICE2 = "02:2d:6f:00:0a:90:69:e8"
 _LOGGER = logging.getLogger(__name__)
 
 
-def zigpy_device_mock(zha_gateway: Gateway) -> ZigpyDevice:
+def zigpy_device_mock(zha_gateway: Gateway) -> ZigbeeDevice:
     """Device tracker zigpy device."""
     endpoints = {
         1: {
@@ -145,15 +142,15 @@ async def test_fan(
     cluster = zigpy_device.endpoints.get(1).fan
 
     entity = get_entity(zha_device, platform=Platform.FAN)
-    assert entity.state["is_on"] is False
+    assert entity.state.is_on is False
 
     # turn on at fan
     await send_attributes_report(zha_gateway, cluster, {1: 2, 0: 1, 2: 3})
-    assert entity.state["is_on"] is True
+    assert entity.state.is_on is True
 
     # turn off at fan
     await send_attributes_report(zha_gateway, cluster, {1: 1, 0: 0, 2: 2})
-    assert entity.state["is_on"] is False
+    assert entity.state.is_on is False
 
     # turn on from client
     cluster.write_attributes.reset_mock()
@@ -162,7 +159,7 @@ async def test_fan(
     assert cluster.write_attributes.call_args == call(
         {"fan_mode": 2}, manufacturer=UNDEFINED
     )
-    assert entity.state["is_on"] is True
+    assert entity.state.is_on is True
 
     # turn off from client
     cluster.write_attributes.reset_mock()
@@ -171,7 +168,7 @@ async def test_fan(
     assert cluster.write_attributes.call_args == call(
         {"fan_mode": 0}, manufacturer=UNDEFINED
     )
-    assert entity.state["is_on"] is False
+    assert entity.state.is_on is False
 
     # change speed from client
     cluster.write_attributes.reset_mock()
@@ -180,8 +177,8 @@ async def test_fan(
     assert cluster.write_attributes.call_args == call(
         {"fan_mode": 3}, manufacturer=UNDEFINED
     )
-    assert entity.state["is_on"] is True
-    assert entity.state["speed"] == SPEED_HIGH
+    assert entity.state.is_on is True
+    assert entity.state.speed == SPEED_HIGH
 
     # change preset_mode from client
     cluster.write_attributes.reset_mock()
@@ -190,8 +187,8 @@ async def test_fan(
     assert cluster.write_attributes.call_args == call(
         {"fan_mode": 4}, manufacturer=UNDEFINED
     )
-    assert entity.state["is_on"] is True
-    assert entity.state["preset_mode"] == PRESET_MODE_ON
+    assert entity.state.is_on is True
+    assert entity.state.preset_mode == PRESET_MODE_ON
 
     # test set percentage from client
     cluster.write_attributes.reset_mock()
@@ -202,8 +199,8 @@ async def test_fan(
         {"fan_mode": 2}, manufacturer=UNDEFINED
     )
     # this is converted to a ranged value
-    assert entity.state["percentage"] == 66
-    assert entity.state["is_on"] is True
+    assert entity.state.percentage == 66
+    assert entity.state.is_on is True
 
     # set invalid preset_mode from client
     cluster.write_attributes.reset_mock()
@@ -215,14 +212,14 @@ async def test_fan(
     # test percentage in turn on command
     await entity.async_turn_on(percentage=25)
     await zha_gateway.async_block_till_done()
-    assert entity.state["percentage"] == 33  # this is converted to a ranged value
-    assert entity.state["speed"] == SPEED_LOW
+    assert entity.state.percentage == 33  # this is converted to a ranged value
+    assert entity.state.speed == SPEED_LOW
 
     # test speed in turn on command
     await entity.async_turn_on(speed=SPEED_HIGH)
     await zha_gateway.async_block_till_done()
-    assert entity.state["percentage"] == 100
-    assert entity.state["speed"] == SPEED_HIGH
+    assert entity.state.percentage == 100
+    assert entity.state.speed == SPEED_HIGH
 
 
 async def async_turn_on(
@@ -272,7 +269,7 @@ async def async_set_preset_mode(
 
 @patch(
     "zigpy.zcl.clusters.hvac.Fan.write_attributes",
-    new=AsyncMock(return_value=zcl_f.WriteAttributesResponse.deserialize(b"\x00")[0]),
+    new=AsyncMock(return_value=[zcl_f.WriteAttributesResponse.deserialize(b"\x00")[0]]),
 )
 async def test_zha_group_fan_entity(
     zha_gateway: Gateway,
@@ -301,7 +298,7 @@ async def test_zha_group_fan_entity(
 
     assert entity.group_id == zha_group.group_id
     assert isinstance(entity, GroupEntity)
-    assert entity.info_object.fallback_name == zha_group.name
+    assert entity.state.fallback_name == zha_group.name
 
     group_fan_cluster = zha_group.zigpy_group.endpoint[hvac.Fan.cluster_id]
 
@@ -309,7 +306,7 @@ async def test_zha_group_fan_entity(
     dev2_fan_cluster = device_fan_2.device.endpoints[1].fan
 
     # test that the fan group entity was created and is off
-    assert entity.state["is_on"] is False
+    assert entity.state.is_on is False
 
     # turn on from client
     group_fan_cluster.write_attributes.reset_mock()
@@ -353,32 +350,32 @@ async def test_zha_group_fan_entity(
     await send_attributes_report(zha_gateway, dev2_fan_cluster, {0: 0})
 
     # test that group fan is off
-    assert entity.state["is_on"] is False
+    assert entity.state.is_on is False
 
     await send_attributes_report(zha_gateway, dev2_fan_cluster, {0: 2})
     await zha_gateway.async_block_till_done()
 
     # no update yet because of debouncing
-    assert entity.state["is_on"] is False
+    assert entity.state.is_on is False
 
     # member updates are debounced for .5s
     await asyncio.sleep(1)
     await zha_gateway.async_block_till_done()
 
-    assert entity.state["is_on"] is True
+    assert entity.state.is_on is True
 
     await send_attributes_report(zha_gateway, dev2_fan_cluster, {0: 0})
     await zha_gateway.async_block_till_done()
 
     # no update yet because of debouncing
-    assert entity.state["is_on"] is True
+    assert entity.state.is_on is True
 
     # member updates are debounced for .5s
     await asyncio.sleep(1)
     await zha_gateway.async_block_till_done()
 
     # test that group fan is now off
-    assert entity.state["is_on"] is False
+    assert entity.state.is_on is False
 
     await group_entity_availability_test(
         zha_gateway, device_fan_1, device_fan_2, entity
@@ -420,11 +417,11 @@ async def test_zha_group_fan_entity_failure_state(
     group_fan_cluster = zha_group.zigpy_group.endpoint[hvac.Fan.cluster_id]
 
     # test that the fan group entity was created and is off
-    assert entity.state["is_on"] is False
+    assert entity.state.is_on is False
 
     # turn on from client
     group_fan_cluster.write_attributes.reset_mock()
-    with pytest.raises(ZHAException, match="Failed to send request"):
+    with pytest.raises(ZigbeeException):
         await async_turn_on(zha_gateway, entity)
         await zha_gateway.async_block_till_done()
         assert len(group_fan_cluster.write_attributes.mock_calls) == 1
@@ -458,10 +455,10 @@ async def test_fan_init(
 
     entity = get_entity(zha_device, platform=Platform.FAN)
 
-    assert entity.state["is_on"] == expected_state
-    assert entity.state["speed"] == expected_speed
-    assert entity.state["percentage"] == expected_percentage
-    assert entity.state["preset_mode"] is None
+    assert entity.state.is_on == expected_state
+    assert entity.state.speed == expected_speed
+    assert entity.state.percentage == expected_percentage
+    assert entity.state.preset_mode is None
 
 
 async def test_fan_update_entity(
@@ -476,31 +473,31 @@ async def test_fan_update_entity(
 
     entity = get_entity(zha_device, platform=Platform.FAN)
 
-    assert entity.state["is_on"] is False
-    assert entity.state["speed"] == SPEED_OFF
-    assert entity.state["percentage"] == 0
-    assert entity.state["preset_mode"] is None
+    assert entity.state.is_on is False
+    assert entity.state.speed == SPEED_OFF
+    assert entity.state.percentage == 0
+    assert entity.state.preset_mode is None
     assert entity.percentage_step == 100 / 3
     assert cluster.read_attributes.await_count == 2
 
     await entity.async_update()
     await zha_gateway.async_block_till_done()
-    assert entity.state["is_on"] is False
-    assert entity.state["speed"] == SPEED_OFF
+    assert entity.state.is_on is False
+    assert entity.state.speed == SPEED_OFF
     assert cluster.read_attributes.await_count == 3
 
     cluster.PLUGGED_ATTR_READS = {"fan_mode": 1}
     await entity.async_update()
     await zha_gateway.async_block_till_done()
-    assert entity.state["is_on"] is True
-    assert entity.state["percentage"] == 33
-    assert entity.state["speed"] == SPEED_LOW
-    assert entity.state["preset_mode"] is None
+    assert entity.state.is_on is True
+    assert entity.state.percentage == 33
+    assert entity.state.speed == SPEED_LOW
+    assert entity.state.preset_mode is None
     assert entity.percentage_step == 100 / 3
     assert cluster.read_attributes.await_count == 4
 
 
-def zigpy_device_ikea_mock(zha_gateway: Gateway) -> ZigpyDevice:
+def zigpy_device_ikea_mock(zha_gateway: Gateway) -> ZigbeeDevice:
     """Ikea fan zigpy device."""
     endpoints = {
         1: {
@@ -553,15 +550,15 @@ async def test_fan_ikea(
     cluster = zigpy_device_ikea.endpoints.get(1).ikea_airpurifier
     entity = get_entity(zha_device, platform=Platform.FAN)
 
-    assert entity.state["is_on"] is False
+    assert entity.state.is_on is False
 
     # turn on at fan
     await send_attributes_report(zha_gateway, cluster, {"fan_mode": 1})
-    assert entity.state["is_on"] is True
+    assert entity.state.is_on is True
 
     # turn off at fan
     await send_attributes_report(zha_gateway, cluster, {"fan_mode": 0})
-    assert entity.state["is_on"] is False
+    assert entity.state.is_on is False
 
     # turn on from HA
     cluster.write_attributes.reset_mock()
@@ -652,9 +649,9 @@ async def test_fan_ikea_init(
 
     zha_device = await join_zigpy_device(zha_gateway, zigpy_device_ikea)
     entity = get_entity(zha_device, platform=Platform.FAN)
-    assert entity.state["is_on"] == ikea_expected_state
-    assert entity.state["percentage"] == ikea_expected_percentage
-    assert entity.state["preset_mode"] == ikea_preset_mode
+    assert entity.state.is_on == ikea_expected_state
+    assert entity.state.percentage == ikea_expected_percentage
+    assert entity.state.preset_mode == ikea_preset_mode
 
 
 async def test_fan_ikea_update_entity(
@@ -668,9 +665,9 @@ async def test_fan_ikea_update_entity(
     zha_device = await join_zigpy_device(zha_gateway, zigpy_device_ikea)
     entity = get_entity(zha_device, platform=Platform.FAN)
 
-    assert entity.state["is_on"] is False
-    assert entity.state[ATTR_PERCENTAGE] == 0
-    assert entity.state[ATTR_PRESET_MODE] is None
+    assert entity.state.is_on is False
+    assert entity.state.percentage == 0
+    assert entity.state.preset_mode is None
     assert entity.percentage_step == 100 / 10
 
     cluster.PLUGGED_ATTR_READS = {"fan_mode": 1, "fan_speed": 6}
@@ -678,13 +675,13 @@ async def test_fan_ikea_update_entity(
     await entity.async_update()
     await zha_gateway.async_block_till_done()
 
-    assert entity.state["is_on"] is True
-    assert entity.state[ATTR_PERCENTAGE] == 60
-    assert entity.state[ATTR_PRESET_MODE] is PRESET_MODE_AUTO
+    assert entity.state.is_on is True
+    assert entity.state.percentage == 60
+    assert entity.state.preset_mode is PRESET_MODE_AUTO
     assert entity.percentage_step == 100 / 10
 
 
-def zigpy_device_kof_mock(zha_gateway: Gateway) -> ZigpyDevice:
+def zigpy_device_kof_mock(zha_gateway: Gateway) -> ZigbeeDevice:
     """Fan by King of Fans zigpy device."""
     endpoints = {
         1: {
@@ -737,15 +734,15 @@ async def test_fan_kof(
     cluster = zigpy_device_kof.endpoints.get(1).fan
     entity = get_entity(zha_device, platform=Platform.FAN)
 
-    assert entity.state["is_on"] is False
+    assert entity.state.is_on is False
 
     # turn on at fan
     await send_attributes_report(zha_gateway, cluster, {1: 2, 0: 1, 2: 3})
-    assert entity.state["is_on"] is True
+    assert entity.state.is_on is True
 
     # turn off at fan
     await send_attributes_report(zha_gateway, cluster, {1: 1, 0: 0, 2: 2})
-    assert entity.state["is_on"] is False
+    assert entity.state.is_on is False
 
     # turn on from HA
     cluster.write_attributes.reset_mock()
@@ -810,9 +807,9 @@ async def test_fan_kof_init(
     zha_device = await join_zigpy_device(zha_gateway, zigpy_device_kof)
     entity = get_entity(zha_device, platform=Platform.FAN)
 
-    assert entity.state["is_on"] is expected_state
-    assert entity.state[ATTR_PERCENTAGE] == expected_percentage
-    assert entity.state[ATTR_PRESET_MODE] == expected_preset
+    assert entity.state.is_on is expected_state
+    assert entity.state.percentage == expected_percentage
+    assert entity.state.preset_mode == expected_preset
 
 
 async def test_fan_kof_update_entity(
@@ -827,9 +824,9 @@ async def test_fan_kof_update_entity(
     zha_device = await join_zigpy_device(zha_gateway, zigpy_device_kof)
     entity = get_entity(zha_device, platform=Platform.FAN)
 
-    assert entity.state["is_on"] is False
-    assert entity.state[ATTR_PERCENTAGE] == 0
-    assert entity.state[ATTR_PRESET_MODE] is None
+    assert entity.state.is_on is False
+    assert entity.state.percentage == 0
+    assert entity.state.preset_mode is None
     assert entity.percentage_step == 100 / 4
 
     cluster.PLUGGED_ATTR_READS = {"fan_mode": 1}
@@ -837,7 +834,57 @@ async def test_fan_kof_update_entity(
     await entity.async_update()
     await zha_gateway.async_block_till_done()
 
-    assert entity.state["is_on"] is True
-    assert entity.state[ATTR_PERCENTAGE] == 25
-    assert entity.state[ATTR_PRESET_MODE] is None
+    assert entity.state.is_on is True
+    assert entity.state.percentage == 25
+    assert entity.state.preset_mode is None
     assert entity.percentage_step == 100 / 4
+
+
+async def test_group_state_ignores_unavailable_members(zha_gateway: Gateway) -> None:
+    """Test that an unavailable member does not determine the fan group state."""
+    device_fan_1 = await device_fan_1_mock(zha_gateway)
+    device_fan_2 = await device_fan_2_mock(zha_gateway)
+    members = [
+        GroupMemberReference(ieee=device_fan_1.ieee, endpoint_id=1),
+        GroupMemberReference(ieee=device_fan_2.ieee, endpoint_id=1),
+    ]
+    zha_group: Group = await zha_gateway.async_create_zigpy_group("Test Group", members)
+    await zha_gateway.async_block_till_done()
+
+    entity: GroupEntity = get_group_entity(zha_group, platform=Platform.FAN)
+    device_1_entity = get_entity(device_fan_1, platform=Platform.FAN)
+
+    dev1_fan_cluster = device_fan_1.device.endpoints[1].fan
+    dev2_fan_cluster = device_fan_2.device.endpoints[1].fan
+
+    # first member on high, second on low: the first member's speed wins
+    await send_attributes_report(zha_gateway, dev1_fan_cluster, {0: 3})
+    await send_attributes_report(zha_gateway, dev2_fan_cluster, {0: 1})
+    # group member updates are debounced
+    await asyncio.sleep(1)
+    await zha_gateway.async_block_till_done()
+    assert entity.state.percentage == 100
+
+    # the first member drops off the network while it is still on high
+    device_fan_1.update_available(False)
+    await asyncio.sleep(1)
+    await zha_gateway.async_block_till_done()
+    assert device_1_entity.state.available is False
+    assert device_1_entity.state.percentage == 100
+
+    # the reachable member's speed is used instead of the stale one
+    assert entity.state.percentage == 33
+    assert entity.state.is_on is True
+
+    # turning the reachable member off turns the group off
+    await send_attributes_report(zha_gateway, dev2_fan_cluster, {0: 0})
+    await asyncio.sleep(1)
+    await zha_gateway.async_block_till_done()
+    assert entity.state.is_on is False
+
+    # once it is reachable again its state counts
+    device_fan_1.update_available(True)
+    await asyncio.sleep(1)
+    await zha_gateway.async_block_till_done()
+    assert entity.state.percentage == 100
+    assert entity.state.is_on is True

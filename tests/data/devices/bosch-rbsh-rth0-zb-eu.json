@@ -1,20 +1,20 @@
 {
-  "version": 1,
+  "version": 3,
   "ieee": "ab:cd:ef:12:28:a4:a4:f2",
-  "nwk": "0x8ED4",
+  "nwk": "0x554D",
   "manufacturer": "Bosch",
   "model": "RBSH-RTH0-ZB-EU",
   "friendly_manufacturer": "Bosch",
   "friendly_model": "RBSH-RTH0-ZB-EU",
   "name": "Bosch RBSH-RTH0-ZB-EU",
   "quirk_applied": true,
-  "quirk_class": "zigpy.quirks.v2.CustomDeviceV2",
+  "quirk_class": "zhaquirks.bosch.rbsh_rth0_zb_eu:(Bosch / RBSH-RTH0-ZB-EU)",
   "exposes_features": [],
   "manufacturer_code": 4617,
   "power_source": "Mains",
-  "lqi": 164,
-  "rssi": -70,
-  "last_seen": "2025-09-05T16:21:49.433996+00:00",
+  "lqi": null,
+  "rssi": null,
+  "last_seen": "2026-10-02T22:25:38.686182+00:00",
   "available": true,
   "device_type": "Router",
   "active_coordinator": false,
@@ -46,16 +46,10 @@
           "endpoint_attribute": "basic",
           "attributes": [
             {
-              "id": "0x0013",
-              "name": "alarm_mask",
+              "id": "0x0014",
+              "name": "disable_local_config",
               "zcl_type": "map8",
               "unsupported": true
-            },
-            {
-              "id": "0x0001",
-              "name": "app_version",
-              "zcl_type": "uint8",
-              "value": 1
             },
             {
               "id": "0x0003",
@@ -80,18 +74,6 @@
               "name": "model",
               "zcl_type": "string",
               "value": "RBSH-RTH0-ZB-EU"
-            },
-            {
-              "id": "0x0007",
-              "name": "power_source",
-              "zcl_type": "enum8",
-              "value": 1
-            },
-            {
-              "id": "0x000d",
-              "name": "serial_number",
-              "zcl_type": "string",
-              "unsupported": true
             }
           ]
         },
@@ -100,16 +82,10 @@
           "endpoint_attribute": "identify",
           "attributes": [
             {
-              "id": "0x0000",
-              "name": "identify_time",
+              "id": "0xfffd",
+              "name": "cluster_revision",
               "zcl_type": "uint16",
-              "value": 0
-            },
-            {
-              "id": "0xfffe",
-              "name": "reporting_status",
-              "zcl_type": "enum8",
-              "unsupported": true
+              "value": 2
             }
           ]
         },
@@ -142,24 +118,6 @@
               "unsupported": true
             },
             {
-              "id": "0x0040",
-              "name": "ac_type",
-              "zcl_type": "enum8",
-              "unsupported": true
-            },
-            {
-              "id": "0x001d",
-              "name": "alarm_mask",
-              "zcl_type": "map8",
-              "unsupported": true
-            },
-            {
-              "id": "0x4043",
-              "name": "boost_heating",
-              "zcl_type": "enum8",
-              "value": 0
-            },
-            {
               "id": "0x001b",
               "name": "ctrl_sequence_of_oper",
               "zcl_type": "enum8",
@@ -169,13 +127,7 @@
               "id": "0x0000",
               "name": "local_temperature",
               "zcl_type": "int16",
-              "value": 2295
-            },
-            {
-              "id": "0x0010",
-              "name": "local_temperature_calibration",
-              "zcl_type": "int8",
-              "value": -9
+              "value": 2310
             },
             {
               "id": "0x0018",
@@ -202,18 +154,6 @@
               "value": 500
             },
             {
-              "id": "0x0022",
-              "name": "number_of_daily_transitions",
-              "zcl_type": "uint8",
-              "value": 6
-            },
-            {
-              "id": "0x0021",
-              "name": "number_of_weekly_transitions",
-              "zcl_type": "uint8",
-              "value": 6
-            },
-            {
               "id": "0x0002",
               "name": "occupancy",
               "zcl_type": "map8",
@@ -223,19 +163,13 @@
               "id": "0x0011",
               "name": "occupied_cooling_setpoint",
               "zcl_type": "int16",
-              "value": 2150
+              "value": 2400
             },
             {
               "id": "0x0012",
               "name": "occupied_heating_setpoint",
               "zcl_type": "int16",
-              "value": 2150
-            },
-            {
-              "id": "0x4007",
-              "name": "operating_mode",
-              "zcl_type": "enum8",
-              "value": 1
+              "value": 1800
             },
             {
               "id": "0x0007",
@@ -244,9 +178,9 @@
               "unsupported": true
             },
             {
-              "id": "0x001a",
-              "name": "remote_sensing",
-              "zcl_type": "map8",
+              "id": "0x0008",
+              "name": "pi_heating_demand",
+              "zcl_type": "uint8",
               "unsupported": true
             },
             {
@@ -259,13 +193,7 @@
               "id": "0x0029",
               "name": "running_state",
               "zcl_type": "map16",
-              "value": 2
-            },
-            {
-              "id": "0x0031",
-              "name": "setpoint_change_amount",
-              "zcl_type": "int16",
-              "unsupported": true
+              "value": 0
             },
             {
               "id": "0x0030",
@@ -274,34 +202,10 @@
               "value": 2
             },
             {
-              "id": "0x0020",
-              "name": "start_of_week",
-              "zcl_type": "enum8",
-              "value": 0
-            },
-            {
               "id": "0x001c",
               "name": "system_mode",
               "zcl_type": "enum8",
               "value": 3
-            },
-            {
-              "id": "0x0009",
-              "name": "system_type_config",
-              "zcl_type": "map8",
-              "unsupported": true
-            },
-            {
-              "id": "0x0023",
-              "name": "temp_setpoint_hold",
-              "zcl_type": "enum8",
-              "value": 0
-            },
-            {
-              "id": "0x0024",
-              "name": "temp_setpoint_hold_duration",
-              "zcl_type": "uint16",
-              "unsupported": true
             },
             {
               "id": "0x0013",
@@ -314,84 +218,23 @@
               "name": "unoccupied_heating_setpoint",
               "zcl_type": "int16",
               "unsupported": true
-            },
-            {
-              "id": "0x4042",
-              "name": "window_open",
-              "zcl_type": "enum8",
-              "value": 0
             }
           ]
         },
         {
           "cluster_id": "0x0204",
           "endpoint_attribute": "thermostat_ui",
-          "attributes": [
-            {
-              "id": "0x403b",
-              "name": "display_brightness",
-              "zcl_type": "enum8",
-              "value": 7
-            },
-            {
-              "id": "0x403a",
-              "name": "display_on_time",
-              "zcl_type": "enum8",
-              "value": 5
-            },
-            {
-              "id": "0x0001",
-              "name": "keypad_lockout",
-              "zcl_type": "enum8",
-              "value": 0
-            },
-            {
-              "id": "0x0002",
-              "name": "schedule_programming_visibility",
-              "zcl_type": "enum8",
-              "unsupported": true
-            },
-            {
-              "id": "0x0000",
-              "name": "temperature_display_mode",
-              "zcl_type": "enum8",
-              "value": 0
-            }
-          ]
+          "attributes": []
         },
         {
           "cluster_id": "0x0405",
           "endpoint_attribute": "humidity",
           "attributes": [
             {
-              "id": "0x0002",
-              "name": "max_measured_value",
-              "zcl_type": "uint16",
-              "value": 5016
-            },
-            {
               "id": "0x0000",
               "name": "measured_value",
               "zcl_type": "uint16",
-              "value": 5198
-            },
-            {
-              "id": "0x0001",
-              "name": "min_measured_value",
-              "zcl_type": "uint16",
-              "value": 4036
-            },
-            {
-              "id": "0xfffe",
-              "name": "reporting_status",
-              "zcl_type": "enum8",
-              "unsupported": true
-            },
-            {
-              "id": "0x0003",
-              "name": "tolerance",
-              "zcl_type": "uint16",
-              "unsupported": true
+              "value": 5667
             }
           ]
         },
@@ -400,9 +243,15 @@
           "endpoint_attribute": "diagnostic",
           "attributes": [
             {
-              "id": "0xfffe",
-              "name": "reporting_status",
-              "zcl_type": "enum8",
+              "id": "0xfffd",
+              "name": "cluster_revision",
+              "zcl_type": "uint16",
+              "value": 3
+            },
+            {
+              "id": "0x0000",
+              "name": "number_of_resets",
+              "zcl_type": "uint16",
               "unsupported": true
             }
           ]
@@ -417,14 +266,7 @@
         {
           "cluster_id": "0x0019",
           "endpoint_attribute": "ota",
-          "attributes": [
-            {
-              "id": "0x0002",
-              "name": "current_file_version",
-              "zcl_type": "uint32",
-              "value": 50555440
-            }
-          ]
+          "attributes": []
         }
       ]
     }
@@ -469,1527 +311,772 @@
   "zha_lib_entities": {
     "binary_sensor": [
       {
-        "info_object": {
-          "fallback_name": "Valve state",
-          "unique_id": "ab:cd:ef:12:28:a4:a4:f2-1-valve_state",
-          "migrate_unique_ids": [],
-          "platform": "binary_sensor",
-          "class_name": "BinarySensor",
-          "translation_key": "valve_state",
-          "translation_placeholders": null,
-          "device_class": "running",
-          "state_class": null,
-          "entity_category": "diagnostic",
-          "entity_registry_enabled_default": true,
-          "enabled": true,
-          "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "ThermostatClusterHandler",
-              "generic_id": "cluster_handler_0x0201",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 513,
-                "name": "BoschThermostatCluster",
-                "type": "server"
-              },
-              "id": "1:0x0201",
-              "unique_id": "ab:cd:ef:12:28:a4:a4:f2:1:0x0201",
-              "status": "INITIALIZED",
-              "value_attribute": "local_temperature"
-            }
-          ],
-          "device_ieee": "ab:cd:ef:12:28:a4:a4:f2",
-          "endpoint_id": 1,
-          "available": true,
-          "group_id": null,
-          "attribute_name": "valve_state"
-        },
-        "state": {
-          "class_name": "BinarySensor",
-          "available": true,
-          "state": false
-        }
+        "fallback_name": "Valve state",
+        "unique_id": "ab:cd:ef:12:28:a4:a4:f2-1-valve_state",
+        "migrate_unique_ids": [],
+        "platform": "binary_sensor",
+        "class_name": "BinarySensor",
+        "translation_key": "valve_state",
+        "translation_placeholders": null,
+        "device_class": "running",
+        "state_class": null,
+        "entity_category": "diagnostic",
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:28:a4:a4:f2",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "is_on": false,
+        "attribute_name": "valve_state"
       }
     ],
     "button": [
       {
-        "info_object": {
-          "fallback_name": null,
-          "unique_id": "ab:cd:ef:12:28:a4:a4:f2-1-3",
-          "migrate_unique_ids": [],
-          "platform": "button",
-          "class_name": "IdentifyButton",
-          "translation_key": null,
-          "translation_placeholders": null,
-          "device_class": "identify",
-          "state_class": null,
-          "entity_category": "diagnostic",
-          "entity_registry_enabled_default": true,
-          "enabled": true,
-          "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "IdentifyClusterHandler",
-              "generic_id": "cluster_handler_0x0003",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 3,
-                "name": "Identify",
-                "type": "server"
-              },
-              "id": "1:0x0003",
-              "unique_id": "ab:cd:ef:12:28:a4:a4:f2:1:0x0003",
-              "status": "INITIALIZED",
-              "value_attribute": null
-            }
-          ],
-          "device_ieee": "ab:cd:ef:12:28:a4:a4:f2",
-          "endpoint_id": 1,
-          "available": true,
-          "group_id": null,
-          "command": "identify",
-          "args": [
-            5
-          ],
-          "kwargs": {}
-        },
-        "state": {
-          "class_name": "IdentifyButton",
-          "available": true
-        }
+        "fallback_name": null,
+        "unique_id": "ab:cd:ef:12:28:a4:a4:f2-1-3",
+        "migrate_unique_ids": [],
+        "platform": "button",
+        "class_name": "IdentifyButton",
+        "translation_key": null,
+        "translation_placeholders": null,
+        "device_class": "identify",
+        "state_class": null,
+        "entity_category": "diagnostic",
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:28:a4:a4:f2",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "command": "identify",
+        "args": [
+          5
+        ],
+        "kwargs": {}
       }
     ],
     "climate": [
       {
-        "info_object": {
-          "fallback_name": null,
-          "unique_id": "ab:cd:ef:12:28:a4:a4:f2-1",
-          "migrate_unique_ids": [],
-          "platform": "climate",
-          "class_name": "Thermostat",
-          "translation_key": "thermostat",
-          "translation_placeholders": null,
-          "device_class": null,
-          "state_class": null,
-          "entity_category": null,
-          "entity_registry_enabled_default": true,
-          "enabled": true,
-          "primary": true,
-          "cluster_handlers": [
-            {
-              "class_name": "ThermostatClusterHandler",
-              "generic_id": "cluster_handler_0x0201",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 513,
-                "name": "BoschThermostatCluster",
-                "type": "server"
-              },
-              "id": "1:0x0201",
-              "unique_id": "ab:cd:ef:12:28:a4:a4:f2:1:0x0201",
-              "status": "INITIALIZED",
-              "value_attribute": "local_temperature"
-            }
-          ],
-          "device_ieee": "ab:cd:ef:12:28:a4:a4:f2",
-          "endpoint_id": 1,
-          "available": true,
-          "group_id": null,
-          "max_temp": 30.0,
-          "min_temp": 5.0,
-          "supported_features": 385,
-          "fan_modes": null,
-          "preset_modes": [],
-          "hvac_modes": [
-            "cool",
-            "heat",
-            "off"
-          ]
-        },
-        "state": {
-          "class_name": "Thermostat",
-          "available": true,
-          "current_temperature": 22.95,
-          "outdoor_temperature": null,
-          "target_temperature": 21.5,
-          "target_temperature_high": null,
-          "target_temperature_low": null,
-          "hvac_action": "cooling",
-          "hvac_mode": "cool",
-          "preset_mode": "none",
-          "fan_mode": "auto",
-          "system_mode": "[3]/cool",
-          "occupancy": 0,
-          "occupied_cooling_setpoint": 2150,
-          "occupied_heating_setpoint": 2150,
-          "pi_heating_demand": null,
-          "pi_cooling_demand": null,
-          "unoccupied_cooling_setpoint": null,
-          "unoccupied_heating_setpoint": null
-        },
-        "extra_state_attributes": [
-          "occupancy",
-          "occupied_cooling_setpoint",
-          "occupied_heating_setpoint",
-          "pi_cooling_demand",
-          "pi_heating_demand",
-          "system_mode",
-          "unoccupied_cooling_setpoint",
-          "unoccupied_heating_setpoint"
-        ]
+        "fallback_name": null,
+        "unique_id": "ab:cd:ef:12:28:a4:a4:f2-1",
+        "migrate_unique_ids": [],
+        "platform": "climate",
+        "class_name": "Thermostat",
+        "translation_key": "thermostat",
+        "translation_placeholders": null,
+        "device_class": null,
+        "state_class": null,
+        "entity_category": null,
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": true,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:28:a4:a4:f2",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "current_temperature": 23.1,
+        "outdoor_temperature": null,
+        "target_temperature": 24.0,
+        "target_temperature_high": null,
+        "target_temperature_low": null,
+        "hvac_action": "idle",
+        "hvac_mode": "cool",
+        "preset_mode": "none",
+        "fan_mode": "auto",
+        "max_temp": 30.0,
+        "min_temp": 5.0,
+        "supported_features": 385,
+        "fan_modes": null,
+        "preset_modes": [],
+        "hvac_modes": [
+          "cool",
+          "heat",
+          "off"
+        ],
+        "sys_mode": "[3]/cool",
+        "occupancy": 0,
+        "occupied_cooling_setpoint": 2400,
+        "occupied_heating_setpoint": 1800,
+        "pi_heating_demand": null,
+        "pi_cooling_demand": null,
+        "unoccupied_cooling_setpoint": null,
+        "unoccupied_heating_setpoint": null
       }
     ],
     "number": [
       {
-        "info_object": {
-          "fallback_name": null,
-          "unique_id": "ab:cd:ef:12:28:a4:a4:f2-1-513-local_temperature_calibration",
-          "migrate_unique_ids": [],
-          "platform": "number",
-          "class_name": "BoschThermostatLocalTempCalibration",
-          "translation_key": "local_temperature_calibration",
-          "translation_placeholders": null,
-          "device_class": null,
-          "state_class": null,
-          "entity_category": "config",
-          "entity_registry_enabled_default": true,
-          "enabled": true,
-          "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "ThermostatClusterHandler",
-              "generic_id": "cluster_handler_0x0201",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 513,
-                "name": "BoschThermostatCluster",
-                "type": "server"
-              },
-              "id": "1:0x0201",
-              "unique_id": "ab:cd:ef:12:28:a4:a4:f2:1:0x0201",
-              "status": "INITIALIZED",
-              "value_attribute": "local_temperature"
-            }
-          ],
-          "device_ieee": "ab:cd:ef:12:28:a4:a4:f2",
-          "endpoint_id": 1,
-          "available": true,
-          "group_id": null,
-          "mode": "box",
-          "native_max_value": 5.0,
-          "native_min_value": -5.0,
-          "native_step": 0.1,
-          "native_unit_of_measurement": "\u00b0C"
-        },
-        "state": {
-          "class_name": "BoschThermostatLocalTempCalibration",
-          "available": true,
-          "state": -0.9
-        }
+        "fallback_name": null,
+        "unique_id": "ab:cd:ef:12:28:a4:a4:f2-1-513-max_heat_setpoint_limit",
+        "migrate_unique_ids": [],
+        "platform": "number",
+        "class_name": "MaxHeatSetpointLimit",
+        "translation_key": "max_heat_setpoint_limit",
+        "translation_placeholders": null,
+        "device_class": null,
+        "state_class": null,
+        "entity_category": "config",
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:28:a4:a4:f2",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "native_value": 30.0,
+        "mode": "box",
+        "native_max_value": 327.67,
+        "native_min_value": 5.0,
+        "native_step": 0.5,
+        "native_unit_of_measurement": "\u00b0C"
       },
       {
-        "info_object": {
-          "fallback_name": null,
-          "unique_id": "ab:cd:ef:12:28:a4:a4:f2-1-513-max_heat_setpoint_limit",
-          "migrate_unique_ids": [],
-          "platform": "number",
-          "class_name": "MaxHeatSetpointLimit",
-          "translation_key": "max_heat_setpoint_limit",
-          "translation_placeholders": null,
-          "device_class": null,
-          "state_class": null,
-          "entity_category": "config",
-          "entity_registry_enabled_default": true,
-          "enabled": true,
-          "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "ThermostatClusterHandler",
-              "generic_id": "cluster_handler_0x0201",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 513,
-                "name": "BoschThermostatCluster",
-                "type": "server"
-              },
-              "id": "1:0x0201",
-              "unique_id": "ab:cd:ef:12:28:a4:a4:f2:1:0x0201",
-              "status": "INITIALIZED",
-              "value_attribute": "local_temperature"
-            }
-          ],
-          "device_ieee": "ab:cd:ef:12:28:a4:a4:f2",
-          "endpoint_id": 1,
-          "available": true,
-          "group_id": null,
-          "mode": "box",
-          "native_max_value": 327.67,
-          "native_min_value": 5.0,
-          "native_step": 0.5,
-          "native_unit_of_measurement": "\u00b0C"
-        },
-        "state": {
-          "class_name": "MaxHeatSetpointLimit",
-          "available": true,
-          "state": 30.0
-        }
+        "fallback_name": null,
+        "unique_id": "ab:cd:ef:12:28:a4:a4:f2-1-513-min_heat_setpoint_limit",
+        "migrate_unique_ids": [],
+        "platform": "number",
+        "class_name": "MinHeatSetpointLimit",
+        "translation_key": "min_heat_setpoint_limit",
+        "translation_placeholders": null,
+        "device_class": null,
+        "state_class": null,
+        "entity_category": "config",
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:28:a4:a4:f2",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "native_value": 5.0,
+        "mode": "box",
+        "native_max_value": 30.0,
+        "native_min_value": -273.15000000000003,
+        "native_step": 0.5,
+        "native_unit_of_measurement": "\u00b0C"
       },
       {
-        "info_object": {
-          "fallback_name": null,
-          "unique_id": "ab:cd:ef:12:28:a4:a4:f2-1-513-min_heat_setpoint_limit",
-          "migrate_unique_ids": [],
-          "platform": "number",
-          "class_name": "MinHeatSetpointLimit",
-          "translation_key": "min_heat_setpoint_limit",
-          "translation_placeholders": null,
-          "device_class": null,
-          "state_class": null,
-          "entity_category": "config",
-          "entity_registry_enabled_default": true,
-          "enabled": true,
-          "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "ThermostatClusterHandler",
-              "generic_id": "cluster_handler_0x0201",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 513,
-                "name": "BoschThermostatCluster",
-                "type": "server"
-              },
-              "id": "1:0x0201",
-              "unique_id": "ab:cd:ef:12:28:a4:a4:f2:1:0x0201",
-              "status": "INITIALIZED",
-              "value_attribute": "local_temperature"
-            }
-          ],
-          "device_ieee": "ab:cd:ef:12:28:a4:a4:f2",
-          "endpoint_id": 1,
-          "available": true,
-          "group_id": null,
-          "mode": "box",
-          "native_max_value": 30.0,
-          "native_min_value": -273.15000000000003,
-          "native_step": 0.5,
-          "native_unit_of_measurement": "\u00b0C"
-        },
-        "state": {
-          "class_name": "MinHeatSetpointLimit",
-          "available": true,
-          "state": 5.0
-        }
+        "fallback_name": "Display brightness",
+        "unique_id": "ab:cd:ef:12:28:a4:a4:f2-1-display_brightness",
+        "migrate_unique_ids": [],
+        "platform": "number",
+        "class_name": "NumberConfigurationEntity",
+        "translation_key": "display_brightness",
+        "translation_placeholders": null,
+        "device_class": null,
+        "state_class": null,
+        "entity_category": "config",
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:28:a4:a4:f2",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "native_value": null,
+        "mode": "auto",
+        "native_max_value": 10,
+        "native_min_value": 0,
+        "native_step": 1,
+        "native_unit_of_measurement": null
       },
       {
-        "info_object": {
-          "fallback_name": "Display brightness",
-          "unique_id": "ab:cd:ef:12:28:a4:a4:f2-1-display_brightness",
-          "migrate_unique_ids": [],
-          "platform": "number",
-          "class_name": "NumberConfigurationEntity",
-          "translation_key": "display_brightness",
-          "translation_placeholders": null,
-          "device_class": null,
-          "state_class": null,
-          "entity_category": "config",
-          "entity_registry_enabled_default": true,
-          "enabled": true,
-          "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "UserInterfaceClusterHandler",
-              "generic_id": "cluster_handler_0x0204",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 516,
-                "name": "Thermostat User Interface Configuration",
-                "type": "server"
-              },
-              "id": "1:0x0204",
-              "unique_id": "ab:cd:ef:12:28:a4:a4:f2:1:0x0204",
-              "status": "INITIALIZED",
-              "value_attribute": null
-            }
-          ],
-          "device_ieee": "ab:cd:ef:12:28:a4:a4:f2",
-          "endpoint_id": 1,
-          "available": true,
-          "group_id": null,
-          "mode": "auto",
-          "native_max_value": 10,
-          "native_min_value": 0,
-          "native_step": 1,
-          "native_unit_of_measurement": null
-        },
-        "state": {
-          "class_name": "NumberConfigurationEntity",
-          "available": true,
-          "state": 7
-        }
+        "fallback_name": "Display on-time",
+        "unique_id": "ab:cd:ef:12:28:a4:a4:f2-1-display_on_time",
+        "migrate_unique_ids": [],
+        "platform": "number",
+        "class_name": "NumberConfigurationEntity",
+        "translation_key": "display_on_time",
+        "translation_placeholders": null,
+        "device_class": null,
+        "state_class": null,
+        "entity_category": "config",
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:28:a4:a4:f2",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "native_value": null,
+        "mode": "auto",
+        "native_max_value": 30,
+        "native_min_value": 5,
+        "native_step": 1,
+        "native_unit_of_measurement": null
       },
       {
-        "info_object": {
-          "fallback_name": "Display on-time",
-          "unique_id": "ab:cd:ef:12:28:a4:a4:f2-1-display_on_time",
-          "migrate_unique_ids": [],
-          "platform": "number",
-          "class_name": "NumberConfigurationEntity",
-          "translation_key": "display_on_time",
-          "translation_placeholders": null,
-          "device_class": null,
-          "state_class": null,
-          "entity_category": "config",
-          "entity_registry_enabled_default": true,
-          "enabled": true,
-          "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "UserInterfaceClusterHandler",
-              "generic_id": "cluster_handler_0x0204",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 516,
-                "name": "Thermostat User Interface Configuration",
-                "type": "server"
-              },
-              "id": "1:0x0204",
-              "unique_id": "ab:cd:ef:12:28:a4:a4:f2:1:0x0204",
-              "status": "INITIALIZED",
-              "value_attribute": null
-            }
-          ],
-          "device_ieee": "ab:cd:ef:12:28:a4:a4:f2",
-          "endpoint_id": 1,
-          "available": true,
-          "group_id": null,
-          "mode": "auto",
-          "native_max_value": 30,
-          "native_min_value": 5,
-          "native_step": 1,
-          "native_unit_of_measurement": null
-        },
-        "state": {
-          "class_name": "NumberConfigurationEntity",
-          "available": true,
-          "state": 5
-        }
+        "fallback_name": "Max cool setpoint limit",
+        "unique_id": "ab:cd:ef:12:28:a4:a4:f2-1-max_cool_setpoint_limit",
+        "migrate_unique_ids": [],
+        "platform": "number",
+        "class_name": "NumberConfigurationEntity",
+        "translation_key": "max_cool_setpoint_limit",
+        "translation_placeholders": null,
+        "device_class": "temperature",
+        "state_class": null,
+        "entity_category": "config",
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:28:a4:a4:f2",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "native_value": 30.0,
+        "mode": "auto",
+        "native_max_value": 3000,
+        "native_min_value": -500,
+        "native_step": 0.5,
+        "native_unit_of_measurement": "\u00b0C"
       },
       {
-        "info_object": {
-          "fallback_name": "Max cool setpoint limit",
-          "unique_id": "ab:cd:ef:12:28:a4:a4:f2-1-max_cool_setpoint_limit",
-          "migrate_unique_ids": [],
-          "platform": "number",
-          "class_name": "NumberConfigurationEntity",
-          "translation_key": "max_cool_setpoint_limit",
-          "translation_placeholders": null,
-          "device_class": "temperature",
-          "state_class": null,
-          "entity_category": "config",
-          "entity_registry_enabled_default": true,
-          "enabled": true,
-          "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "ThermostatClusterHandler",
-              "generic_id": "cluster_handler_0x0201",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 513,
-                "name": "BoschThermostatCluster",
-                "type": "server"
-              },
-              "id": "1:0x0201",
-              "unique_id": "ab:cd:ef:12:28:a4:a4:f2:1:0x0201",
-              "status": "INITIALIZED",
-              "value_attribute": "local_temperature"
-            }
-          ],
-          "device_ieee": "ab:cd:ef:12:28:a4:a4:f2",
-          "endpoint_id": 1,
-          "available": true,
-          "group_id": null,
-          "mode": "auto",
-          "native_max_value": 3000,
-          "native_min_value": -500,
-          "native_step": 0.5,
-          "native_unit_of_measurement": "\u00b0C"
-        },
-        "state": {
-          "class_name": "NumberConfigurationEntity",
-          "available": true,
-          "state": 30.0
-        }
+        "fallback_name": "Min cool setpoint limit",
+        "unique_id": "ab:cd:ef:12:28:a4:a4:f2-1-min_cool_setpoint_limit",
+        "migrate_unique_ids": [],
+        "platform": "number",
+        "class_name": "NumberConfigurationEntity",
+        "translation_key": "min_cool_setpoint_limit",
+        "translation_placeholders": null,
+        "device_class": "temperature",
+        "state_class": null,
+        "entity_category": "config",
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:28:a4:a4:f2",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "native_value": 5.0,
+        "mode": "auto",
+        "native_max_value": 3000,
+        "native_min_value": -500,
+        "native_step": 0.5,
+        "native_unit_of_measurement": "\u00b0C"
       },
       {
-        "info_object": {
-          "fallback_name": "Min cool setpoint limit",
-          "unique_id": "ab:cd:ef:12:28:a4:a4:f2-1-min_cool_setpoint_limit",
-          "migrate_unique_ids": [],
-          "platform": "number",
-          "class_name": "NumberConfigurationEntity",
-          "translation_key": "min_cool_setpoint_limit",
-          "translation_placeholders": null,
-          "device_class": "temperature",
-          "state_class": null,
-          "entity_category": "config",
-          "entity_registry_enabled_default": true,
-          "enabled": true,
-          "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "ThermostatClusterHandler",
-              "generic_id": "cluster_handler_0x0201",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 513,
-                "name": "BoschThermostatCluster",
-                "type": "server"
-              },
-              "id": "1:0x0201",
-              "unique_id": "ab:cd:ef:12:28:a4:a4:f2:1:0x0201",
-              "status": "INITIALIZED",
-              "value_attribute": "local_temperature"
-            }
-          ],
-          "device_ieee": "ab:cd:ef:12:28:a4:a4:f2",
-          "endpoint_id": 1,
-          "available": true,
-          "group_id": null,
-          "mode": "auto",
-          "native_max_value": 3000,
-          "native_min_value": -500,
-          "native_step": 0.5,
-          "native_unit_of_measurement": "\u00b0C"
-        },
-        "state": {
-          "class_name": "NumberConfigurationEntity",
-          "available": true,
-          "state": 5.0
-        }
-      },
-      {
-        "info_object": {
-          "fallback_name": "Outdoor temperature",
-          "unique_id": "ab:cd:ef:12:28:a4:a4:f2-1-outdoor_temperature",
-          "migrate_unique_ids": [],
-          "platform": "number",
-          "class_name": "NumberConfigurationEntity",
-          "translation_key": "outdoor_temperature",
-          "translation_placeholders": null,
-          "device_class": "temperature",
-          "state_class": null,
-          "entity_category": "config",
-          "entity_registry_enabled_default": true,
-          "enabled": true,
-          "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "ThermostatClusterHandler",
-              "generic_id": "cluster_handler_0x0201",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 513,
-                "name": "BoschThermostatCluster",
-                "type": "server"
-              },
-              "id": "1:0x0201",
-              "unique_id": "ab:cd:ef:12:28:a4:a4:f2:1:0x0201",
-              "status": "INITIALIZED",
-              "value_attribute": "local_temperature"
-            }
-          ],
-          "device_ieee": "ab:cd:ef:12:28:a4:a4:f2",
-          "endpoint_id": 1,
-          "available": true,
-          "group_id": null,
-          "mode": "auto",
-          "native_max_value": 32767,
-          "native_min_value": -32768,
-          "native_step": 0.1,
-          "native_unit_of_measurement": "\u00b0C"
-        },
-        "state": {
-          "class_name": "NumberConfigurationEntity",
-          "available": true,
-          "state": null
-        }
+        "fallback_name": "Outdoor temperature",
+        "unique_id": "ab:cd:ef:12:28:a4:a4:f2-1-outdoor_temperature",
+        "migrate_unique_ids": [],
+        "platform": "number",
+        "class_name": "NumberConfigurationEntity",
+        "translation_key": "outdoor_temperature",
+        "translation_placeholders": null,
+        "device_class": "temperature",
+        "state_class": null,
+        "entity_category": "config",
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:28:a4:a4:f2",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "native_value": null,
+        "mode": "auto",
+        "native_max_value": 32767,
+        "native_min_value": -32768,
+        "native_step": 0.1,
+        "native_unit_of_measurement": "\u00b0C"
       }
     ],
     "select": [
       {
-        "info_object": {
-          "fallback_name": null,
-          "unique_id": "ab:cd:ef:12:28:a4:a4:f2-1-516-keypad_lockout",
-          "migrate_unique_ids": [],
-          "platform": "select",
-          "class_name": "KeypadLockout",
-          "translation_key": "keypad_lockout",
-          "translation_placeholders": null,
-          "device_class": null,
-          "state_class": null,
-          "entity_category": "config",
-          "entity_registry_enabled_default": true,
-          "enabled": true,
-          "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "UserInterfaceClusterHandler",
-              "generic_id": "cluster_handler_0x0204",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 516,
-                "name": "Thermostat User Interface Configuration",
-                "type": "server"
-              },
-              "id": "1:0x0204",
-              "unique_id": "ab:cd:ef:12:28:a4:a4:f2:1:0x0204",
-              "status": "INITIALIZED",
-              "value_attribute": null
-            }
-          ],
-          "device_ieee": "ab:cd:ef:12:28:a4:a4:f2",
-          "endpoint_id": 1,
-          "available": true,
-          "group_id": null,
-          "enum": "KeypadLockoutEnum",
-          "options": [
-            "Unlock",
-            "Lock1",
-            "Lock2",
-            "Lock3",
-            "Lock4"
-          ]
-        },
-        "state": {
-          "class_name": "KeypadLockout",
-          "available": true,
-          "state": "Unlock"
-        }
+        "fallback_name": "Actuator type",
+        "unique_id": "ab:cd:ef:12:28:a4:a4:f2-1-actuator_type",
+        "migrate_unique_ids": [],
+        "platform": "select",
+        "class_name": "ZCLEnumSelectEntity",
+        "translation_key": "actuator_type",
+        "translation_placeholders": null,
+        "device_class": null,
+        "state_class": null,
+        "entity_category": "config",
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:28:a4:a4:f2",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "current_option": null,
+        "enum": "BoschActuatorType",
+        "options": [
+          "NormallyClosed",
+          "NormallyOpen"
+        ]
       },
       {
-        "info_object": {
-          "fallback_name": "Actuator type",
-          "unique_id": "ab:cd:ef:12:28:a4:a4:f2-1-actuator_type",
-          "migrate_unique_ids": [],
-          "platform": "select",
-          "class_name": "ZCLEnumSelectEntity",
-          "translation_key": "actuator_type",
-          "translation_placeholders": null,
-          "device_class": null,
-          "state_class": null,
-          "entity_category": "config",
-          "entity_registry_enabled_default": true,
-          "enabled": true,
-          "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "ThermostatClusterHandler",
-              "generic_id": "cluster_handler_0x0201",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 513,
-                "name": "BoschThermostatCluster",
-                "type": "server"
-              },
-              "id": "1:0x0201",
-              "unique_id": "ab:cd:ef:12:28:a4:a4:f2:1:0x0201",
-              "status": "INITIALIZED",
-              "value_attribute": "local_temperature"
-            }
-          ],
-          "device_ieee": "ab:cd:ef:12:28:a4:a4:f2",
-          "endpoint_id": 1,
-          "available": true,
-          "group_id": null,
-          "enum": "BoschActuatorType",
-          "options": [
-            "NormallyClosed",
-            "NormallyOpen"
-          ]
-        },
-        "state": {
-          "class_name": "ZCLEnumSelectEntity",
-          "available": true,
-          "state": null
-        }
+        "fallback_name": "Heater type",
+        "unique_id": "ab:cd:ef:12:28:a4:a4:f2-1-heater_type",
+        "migrate_unique_ids": [],
+        "platform": "select",
+        "class_name": "ZCLEnumSelectEntity",
+        "translation_key": "heater_type",
+        "translation_placeholders": null,
+        "device_class": null,
+        "state_class": null,
+        "entity_category": "config",
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:28:a4:a4:f2",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "current_option": null,
+        "enum": "BoschHeaterType",
+        "options": [
+          "UnderfloorHeating",
+          "Boiler",
+          "Radiator",
+          "CentralHeating"
+        ]
       },
       {
-        "info_object": {
-          "fallback_name": "Heater type",
-          "unique_id": "ab:cd:ef:12:28:a4:a4:f2-1-heater_type",
-          "migrate_unique_ids": [],
-          "platform": "select",
-          "class_name": "ZCLEnumSelectEntity",
-          "translation_key": "heater_type",
-          "translation_placeholders": null,
-          "device_class": null,
-          "state_class": null,
-          "entity_category": "config",
-          "entity_registry_enabled_default": true,
-          "enabled": true,
-          "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "ThermostatClusterHandler",
-              "generic_id": "cluster_handler_0x0201",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 513,
-                "name": "BoschThermostatCluster",
-                "type": "server"
-              },
-              "id": "1:0x0201",
-              "unique_id": "ab:cd:ef:12:28:a4:a4:f2:1:0x0201",
-              "status": "INITIALIZED",
-              "value_attribute": "local_temperature"
-            }
-          ],
-          "device_ieee": "ab:cd:ef:12:28:a4:a4:f2",
-          "endpoint_id": 1,
-          "available": true,
-          "group_id": null,
-          "enum": "BoschHeaterType",
-          "options": [
-            "UnderfloorHeating",
-            "Boiler",
-            "Radiator",
-            "CentralHeating"
-          ]
-        },
-        "state": {
-          "class_name": "ZCLEnumSelectEntity",
-          "available": true,
-          "state": null
-        }
+        "fallback_name": "Operating mode",
+        "unique_id": "ab:cd:ef:12:28:a4:a4:f2-1-operating_mode",
+        "migrate_unique_ids": [],
+        "platform": "select",
+        "class_name": "ZCLEnumSelectEntity",
+        "translation_key": "operating_mode",
+        "translation_placeholders": null,
+        "device_class": null,
+        "state_class": null,
+        "entity_category": "config",
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:28:a4:a4:f2",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "current_option": null,
+        "enum": "BoschOperatingMode",
+        "options": [
+          "Schedule",
+          "Manual",
+          "Pause"
+        ]
       },
       {
-        "info_object": {
-          "fallback_name": "Operating mode",
-          "unique_id": "ab:cd:ef:12:28:a4:a4:f2-1-operating_mode",
-          "migrate_unique_ids": [],
-          "platform": "select",
-          "class_name": "ZCLEnumSelectEntity",
-          "translation_key": "operating_mode",
-          "translation_placeholders": null,
-          "device_class": null,
-          "state_class": null,
-          "entity_category": "config",
-          "entity_registry_enabled_default": true,
-          "enabled": true,
-          "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "ThermostatClusterHandler",
-              "generic_id": "cluster_handler_0x0201",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 513,
-                "name": "BoschThermostatCluster",
-                "type": "server"
-              },
-              "id": "1:0x0201",
-              "unique_id": "ab:cd:ef:12:28:a4:a4:f2:1:0x0201",
-              "status": "INITIALIZED",
-              "value_attribute": "local_temperature"
-            }
-          ],
-          "device_ieee": "ab:cd:ef:12:28:a4:a4:f2",
-          "endpoint_id": 1,
-          "available": true,
-          "group_id": null,
-          "enum": "BoschOperatingMode",
-          "options": [
-            "Schedule",
-            "Manual",
-            "Pause"
-          ]
-        },
-        "state": {
-          "class_name": "ZCLEnumSelectEntity",
-          "available": true,
-          "state": "Manual"
-        }
+        "fallback_name": "Sensor connection",
+        "unique_id": "ab:cd:ef:12:28:a4:a4:f2-1-sensor_connection",
+        "migrate_unique_ids": [],
+        "platform": "select",
+        "class_name": "ZCLEnumSelectEntity",
+        "translation_key": "sensor_connection",
+        "translation_placeholders": null,
+        "device_class": null,
+        "state_class": null,
+        "entity_category": "config",
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:28:a4:a4:f2",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "current_option": null,
+        "enum": "BoschSensorConnection",
+        "options": [
+          "NotUsed",
+          "WithoutRegulation",
+          "WithRegulation"
+        ]
       },
       {
-        "info_object": {
-          "fallback_name": "Sensor connection",
-          "unique_id": "ab:cd:ef:12:28:a4:a4:f2-1-sensor_connection",
-          "migrate_unique_ids": [],
-          "platform": "select",
-          "class_name": "ZCLEnumSelectEntity",
-          "translation_key": "sensor_connection",
-          "translation_placeholders": null,
-          "device_class": null,
-          "state_class": null,
-          "entity_category": "config",
-          "entity_registry_enabled_default": true,
-          "enabled": true,
-          "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "ThermostatClusterHandler",
-              "generic_id": "cluster_handler_0x0201",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 513,
-                "name": "BoschThermostatCluster",
-                "type": "server"
-              },
-              "id": "1:0x0201",
-              "unique_id": "ab:cd:ef:12:28:a4:a4:f2:1:0x0201",
-              "status": "INITIALIZED",
-              "value_attribute": "local_temperature"
-            }
-          ],
-          "device_ieee": "ab:cd:ef:12:28:a4:a4:f2",
-          "endpoint_id": 1,
-          "available": true,
-          "group_id": null,
-          "enum": "BoschSensorConnection",
-          "options": [
-            "NotUsed",
-            "WithoutRegulation",
-            "WithRegulation"
-          ]
-        },
-        "state": {
-          "class_name": "ZCLEnumSelectEntity",
-          "available": true,
-          "state": null
-        }
+        "fallback_name": "Temperature display mode",
+        "unique_id": "ab:cd:ef:12:28:a4:a4:f2-1-temperature_display_mode",
+        "migrate_unique_ids": [],
+        "platform": "select",
+        "class_name": "ZCLEnumSelectEntity",
+        "translation_key": "temperature_display_mode",
+        "translation_placeholders": null,
+        "device_class": null,
+        "state_class": null,
+        "entity_category": "config",
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:28:a4:a4:f2",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "current_option": null,
+        "enum": "TemperatureDisplayMode",
+        "options": [
+          "Metric",
+          "Imperial"
+        ]
       },
       {
-        "info_object": {
-          "fallback_name": "Temperature display mode",
-          "unique_id": "ab:cd:ef:12:28:a4:a4:f2-1-temperature_display_mode",
-          "migrate_unique_ids": [],
-          "platform": "select",
-          "class_name": "ZCLEnumSelectEntity",
-          "translation_key": "temperature_display_mode",
-          "translation_placeholders": null,
-          "device_class": null,
-          "state_class": null,
-          "entity_category": "config",
-          "entity_registry_enabled_default": true,
-          "enabled": true,
-          "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "UserInterfaceClusterHandler",
-              "generic_id": "cluster_handler_0x0204",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 516,
-                "name": "Thermostat User Interface Configuration",
-                "type": "server"
-              },
-              "id": "1:0x0204",
-              "unique_id": "ab:cd:ef:12:28:a4:a4:f2:1:0x0204",
-              "status": "INITIALIZED",
-              "value_attribute": null
-            }
-          ],
-          "device_ieee": "ab:cd:ef:12:28:a4:a4:f2",
-          "endpoint_id": 1,
-          "available": true,
-          "group_id": null,
-          "enum": "TemperatureDisplayMode",
-          "options": [
-            "Metric",
-            "Imperial"
-          ]
-        },
-        "state": {
-          "class_name": "ZCLEnumSelectEntity",
-          "available": true,
-          "state": "Metric"
-        }
-      },
-      {
-        "info_object": {
-          "fallback_name": "Valve status LED",
-          "unique_id": "ab:cd:ef:12:28:a4:a4:f2-1-valve_status_led",
-          "migrate_unique_ids": [],
-          "platform": "select",
-          "class_name": "ZCLEnumSelectEntity",
-          "translation_key": "valve_status_led",
-          "translation_placeholders": null,
-          "device_class": null,
-          "state_class": null,
-          "entity_category": "config",
-          "entity_registry_enabled_default": true,
-          "enabled": true,
-          "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "UserInterfaceClusterHandler",
-              "generic_id": "cluster_handler_0x0204",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 516,
-                "name": "Thermostat User Interface Configuration",
-                "type": "server"
-              },
-              "id": "1:0x0204",
-              "unique_id": "ab:cd:ef:12:28:a4:a4:f2:1:0x0204",
-              "status": "INITIALIZED",
-              "value_attribute": null
-            }
-          ],
-          "device_ieee": "ab:cd:ef:12:28:a4:a4:f2",
-          "endpoint_id": 1,
-          "available": true,
-          "group_id": null,
-          "enum": "BoschValveStatusLed",
-          "options": [
-            "Off",
-            "Normal",
-            "On"
-          ]
-        },
-        "state": {
-          "class_name": "ZCLEnumSelectEntity",
-          "available": true,
-          "state": null
-        }
+        "fallback_name": "Valve status LED",
+        "unique_id": "ab:cd:ef:12:28:a4:a4:f2-1-valve_status_led",
+        "migrate_unique_ids": [],
+        "platform": "select",
+        "class_name": "ZCLEnumSelectEntity",
+        "translation_key": "valve_status_led",
+        "translation_placeholders": null,
+        "device_class": null,
+        "state_class": null,
+        "entity_category": "config",
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:28:a4:a4:f2",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "current_option": null,
+        "enum": "BoschValveStatusLed",
+        "options": [
+          "Off",
+          "Normal",
+          "On"
+        ]
       }
     ],
     "sensor": [
       {
-        "info_object": {
-          "fallback_name": null,
-          "unique_id": "ab:cd:ef:12:28:a4:a4:f2-1-0-lqi",
-          "migrate_unique_ids": [],
-          "platform": "sensor",
-          "class_name": "LQISensor",
-          "translation_key": "lqi",
-          "translation_placeholders": null,
-          "device_class": null,
-          "state_class": "measurement",
-          "entity_category": "diagnostic",
-          "entity_registry_enabled_default": false,
-          "enabled": true,
-          "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "BasicClusterHandler",
-              "generic_id": "cluster_handler_0x0000",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 0,
-                "name": "Basic",
-                "type": "server"
-              },
-              "id": "1:0x0000",
-              "unique_id": "ab:cd:ef:12:28:a4:a4:f2:1:0x0000",
-              "status": "INITIALIZED",
-              "value_attribute": null
-            }
-          ],
-          "device_ieee": "ab:cd:ef:12:28:a4:a4:f2",
-          "endpoint_id": 1,
-          "available": true,
-          "group_id": null,
-          "suggested_display_precision": null,
-          "unit": null
-        },
-        "state": {
-          "class_name": "LQISensor",
-          "available": true,
-          "state": 164
-        }
+        "fallback_name": null,
+        "unique_id": "ab:cd:ef:12:28:a4:a4:f2-1-0-lqi",
+        "migrate_unique_ids": [],
+        "platform": "sensor",
+        "class_name": "LQISensor",
+        "translation_key": "lqi",
+        "translation_placeholders": null,
+        "device_class": null,
+        "state_class": "measurement",
+        "entity_category": "diagnostic",
+        "entity_registry_enabled_default": false,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:28:a4:a4:f2",
+        "endpoint_id": null,
+        "available": true,
+        "group_id": null,
+        "native_value": null,
+        "suggested_display_precision": null,
+        "unit": null
       },
       {
-        "info_object": {
-          "fallback_name": null,
-          "unique_id": "ab:cd:ef:12:28:a4:a4:f2-1-0-rssi",
-          "migrate_unique_ids": [],
-          "platform": "sensor",
-          "class_name": "RSSISensor",
-          "translation_key": "rssi",
-          "translation_placeholders": null,
-          "device_class": "signal_strength",
-          "state_class": "measurement",
-          "entity_category": "diagnostic",
-          "entity_registry_enabled_default": false,
-          "enabled": true,
-          "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "BasicClusterHandler",
-              "generic_id": "cluster_handler_0x0000",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 0,
-                "name": "Basic",
-                "type": "server"
-              },
-              "id": "1:0x0000",
-              "unique_id": "ab:cd:ef:12:28:a4:a4:f2:1:0x0000",
-              "status": "INITIALIZED",
-              "value_attribute": null
-            }
-          ],
-          "device_ieee": "ab:cd:ef:12:28:a4:a4:f2",
-          "endpoint_id": 1,
-          "available": true,
-          "group_id": null,
-          "suggested_display_precision": null,
-          "unit": "dBm"
-        },
-        "state": {
-          "class_name": "RSSISensor",
-          "available": true,
-          "state": -70
-        }
+        "fallback_name": null,
+        "unique_id": "ab:cd:ef:12:28:a4:a4:f2-1-0-rssi",
+        "migrate_unique_ids": [],
+        "platform": "sensor",
+        "class_name": "RSSISensor",
+        "translation_key": "rssi",
+        "translation_placeholders": null,
+        "device_class": "signal_strength",
+        "state_class": "measurement",
+        "entity_category": "diagnostic",
+        "entity_registry_enabled_default": false,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:28:a4:a4:f2",
+        "endpoint_id": null,
+        "available": true,
+        "group_id": null,
+        "native_value": null,
+        "suggested_display_precision": null,
+        "unit": "dBm"
       },
       {
-        "info_object": {
-          "fallback_name": null,
-          "unique_id": "ab:cd:ef:12:28:a4:a4:f2-1-1029",
-          "migrate_unique_ids": [],
-          "platform": "sensor",
-          "class_name": "Humidity",
-          "translation_key": null,
-          "translation_placeholders": null,
-          "device_class": "humidity",
-          "state_class": "measurement",
-          "entity_category": null,
-          "entity_registry_enabled_default": true,
-          "enabled": true,
-          "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "RelativeHumidityClusterHandler",
-              "generic_id": "cluster_handler_0x0405",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 1029,
-                "name": "Relative Humidity Measurement",
-                "type": "server"
-              },
-              "id": "1:0x0405",
-              "unique_id": "ab:cd:ef:12:28:a4:a4:f2:1:0x0405",
-              "status": "INITIALIZED",
-              "value_attribute": "measured_value"
-            }
-          ],
-          "device_ieee": "ab:cd:ef:12:28:a4:a4:f2",
-          "endpoint_id": 1,
-          "available": true,
-          "group_id": null,
-          "suggested_display_precision": null,
-          "unit": "%"
-        },
-        "state": {
-          "class_name": "Humidity",
-          "available": true,
-          "state": 51.98
-        }
+        "fallback_name": null,
+        "unique_id": "ab:cd:ef:12:28:a4:a4:f2-1-1029",
+        "migrate_unique_ids": [],
+        "platform": "sensor",
+        "class_name": "Humidity",
+        "translation_key": null,
+        "translation_placeholders": null,
+        "device_class": "humidity",
+        "state_class": "measurement",
+        "entity_category": null,
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:28:a4:a4:f2",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "native_value": 56.67,
+        "suggested_display_precision": null,
+        "unit": "%"
       },
       {
-        "info_object": {
-          "fallback_name": null,
-          "unique_id": "ab:cd:ef:12:28:a4:a4:f2-1-513-hvac_action",
-          "migrate_unique_ids": [],
-          "platform": "sensor",
-          "class_name": "ThermostatHVACAction",
-          "translation_key": "hvac_action",
-          "translation_placeholders": null,
-          "device_class": null,
-          "state_class": null,
-          "entity_category": null,
-          "entity_registry_enabled_default": true,
-          "enabled": true,
-          "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "ThermostatClusterHandler",
-              "generic_id": "cluster_handler_0x0201",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 513,
-                "name": "BoschThermostatCluster",
-                "type": "server"
-              },
-              "id": "1:0x0201",
-              "unique_id": "ab:cd:ef:12:28:a4:a4:f2:1:0x0201",
-              "status": "INITIALIZED",
-              "value_attribute": "local_temperature"
-            }
-          ],
-          "device_ieee": "ab:cd:ef:12:28:a4:a4:f2",
-          "endpoint_id": 1,
-          "available": true,
-          "group_id": null,
-          "suggested_display_precision": null,
-          "unit": null
-        },
-        "state": {
-          "class_name": "ThermostatHVACAction",
-          "available": true,
-          "state": "cooling"
-        }
+        "fallback_name": null,
+        "unique_id": "ab:cd:ef:12:28:a4:a4:f2-1-513-hvac_action",
+        "migrate_unique_ids": [],
+        "platform": "sensor",
+        "class_name": "ThermostatHVACAction",
+        "translation_key": "hvac_action",
+        "translation_placeholders": null,
+        "device_class": null,
+        "state_class": null,
+        "entity_category": null,
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:28:a4:a4:f2",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "native_value": "idle",
+        "suggested_display_precision": null,
+        "unit": null
       },
       {
-        "info_object": {
-          "fallback_name": null,
-          "unique_id": "ab:cd:ef:12:28:a4:a4:f2-1-513-pi_heating_demand",
-          "migrate_unique_ids": [],
-          "platform": "sensor",
-          "class_name": "PiHeatingDemand",
-          "translation_key": "pi_heating_demand",
-          "translation_placeholders": null,
-          "device_class": null,
-          "state_class": "measurement",
-          "entity_category": "diagnostic",
-          "entity_registry_enabled_default": true,
-          "enabled": true,
-          "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "ThermostatClusterHandler",
-              "generic_id": "cluster_handler_0x0201",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 513,
-                "name": "BoschThermostatCluster",
-                "type": "server"
-              },
-              "id": "1:0x0201",
-              "unique_id": "ab:cd:ef:12:28:a4:a4:f2:1:0x0201",
-              "status": "INITIALIZED",
-              "value_attribute": "local_temperature"
-            }
-          ],
-          "device_ieee": "ab:cd:ef:12:28:a4:a4:f2",
-          "endpoint_id": 1,
-          "available": true,
-          "group_id": null,
-          "suggested_display_precision": 0,
-          "unit": "%"
-        },
-        "state": {
-          "class_name": "PiHeatingDemand",
-          "available": true,
-          "state": null
-        }
+        "fallback_name": null,
+        "unique_id": "ab:cd:ef:12:28:a4:a4:f2-1-513-setpoint_change_source",
+        "migrate_unique_ids": [],
+        "platform": "sensor",
+        "class_name": "SetpointChangeSource",
+        "translation_key": "setpoint_change_source",
+        "translation_placeholders": null,
+        "device_class": "enum",
+        "state_class": null,
+        "entity_category": "diagnostic",
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:28:a4:a4:f2",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "native_value": "External",
+        "suggested_display_precision": null,
+        "unit": null,
+        "options": [
+          "Manual",
+          "Schedule",
+          "External"
+        ]
       },
       {
-        "info_object": {
-          "fallback_name": null,
-          "unique_id": "ab:cd:ef:12:28:a4:a4:f2-1-513-setpoint_change_source",
-          "migrate_unique_ids": [],
-          "platform": "sensor",
-          "class_name": "SetpointChangeSource",
-          "translation_key": "setpoint_change_source",
-          "translation_placeholders": null,
-          "device_class": "enum",
-          "state_class": null,
-          "entity_category": "diagnostic",
-          "entity_registry_enabled_default": true,
-          "enabled": true,
-          "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "ThermostatClusterHandler",
-              "generic_id": "cluster_handler_0x0201",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 513,
-                "name": "BoschThermostatCluster",
-                "type": "server"
-              },
-              "id": "1:0x0201",
-              "unique_id": "ab:cd:ef:12:28:a4:a4:f2:1:0x0201",
-              "status": "INITIALIZED",
-              "value_attribute": "local_temperature"
-            }
-          ],
-          "device_ieee": "ab:cd:ef:12:28:a4:a4:f2",
-          "endpoint_id": 1,
-          "available": true,
-          "group_id": null,
-          "suggested_display_precision": null,
-          "unit": null
-        },
-        "state": {
-          "class_name": "SetpointChangeSource",
-          "available": true,
-          "state": "External"
-        }
+        "fallback_name": null,
+        "unique_id": "ab:cd:ef:12:28:a4:a4:f2-1-513-setpoint_change_source_timestamp",
+        "migrate_unique_ids": [],
+        "platform": "sensor",
+        "class_name": "SetpointChangeSourceTimestamp",
+        "translation_key": "setpoint_change_source_timestamp",
+        "translation_placeholders": null,
+        "device_class": "timestamp",
+        "state_class": null,
+        "entity_category": "diagnostic",
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:28:a4:a4:f2",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "native_value": null,
+        "suggested_display_precision": null,
+        "unit": null
       },
       {
-        "info_object": {
-          "fallback_name": null,
-          "unique_id": "ab:cd:ef:12:28:a4:a4:f2-1-513-setpoint_change_source_timestamp",
-          "migrate_unique_ids": [],
-          "platform": "sensor",
-          "class_name": "SetpointChangeSourceTimestamp",
-          "translation_key": "setpoint_change_source_timestamp",
-          "translation_placeholders": null,
-          "device_class": "timestamp",
-          "state_class": null,
-          "entity_category": "diagnostic",
-          "entity_registry_enabled_default": true,
-          "enabled": true,
-          "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "ThermostatClusterHandler",
-              "generic_id": "cluster_handler_0x0201",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 513,
-                "name": "BoschThermostatCluster",
-                "type": "server"
-              },
-              "id": "1:0x0201",
-              "unique_id": "ab:cd:ef:12:28:a4:a4:f2:1:0x0201",
-              "status": "INITIALIZED",
-              "value_attribute": "local_temperature"
-            }
-          ],
-          "device_ieee": "ab:cd:ef:12:28:a4:a4:f2",
-          "endpoint_id": 1,
-          "available": true,
-          "group_id": null,
-          "suggested_display_precision": null,
-          "unit": null
-        },
-        "state": {
-          "class_name": "SetpointChangeSourceTimestamp",
-          "available": true,
-          "state": null
-        }
+        "fallback_name": "Error code",
+        "unique_id": "ab:cd:ef:12:28:a4:a4:f2-1-error_code",
+        "migrate_unique_ids": [],
+        "platform": "sensor",
+        "class_name": "Sensor",
+        "translation_key": "error_code",
+        "translation_placeholders": null,
+        "device_class": null,
+        "state_class": null,
+        "entity_category": "diagnostic",
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:28:a4:a4:f2",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "native_value": null,
+        "suggested_display_precision": null,
+        "unit": null
       },
       {
-        "info_object": {
-          "fallback_name": "Error code",
-          "unique_id": "ab:cd:ef:12:28:a4:a4:f2-1-error_code",
-          "migrate_unique_ids": [],
-          "platform": "sensor",
-          "class_name": "Sensor",
-          "translation_key": "error_code",
-          "translation_placeholders": null,
-          "device_class": null,
-          "state_class": null,
-          "entity_category": "diagnostic",
-          "entity_registry_enabled_default": true,
-          "enabled": true,
-          "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "ThermostatClusterHandler",
-              "generic_id": "cluster_handler_0x0201",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 513,
-                "name": "BoschThermostatCluster",
-                "type": "server"
-              },
-              "id": "1:0x0201",
-              "unique_id": "ab:cd:ef:12:28:a4:a4:f2:1:0x0201",
-              "status": "INITIALIZED",
-              "value_attribute": "local_temperature"
-            }
-          ],
-          "device_ieee": "ab:cd:ef:12:28:a4:a4:f2",
-          "endpoint_id": 1,
-          "available": true,
-          "group_id": null,
-          "suggested_display_precision": null,
-          "unit": null
-        },
-        "state": {
-          "class_name": "Sensor",
-          "available": true,
-          "state": null
-        }
+        "fallback_name": "External temperature",
+        "unique_id": "ab:cd:ef:12:28:a4:a4:f2-1-external_temperature",
+        "migrate_unique_ids": [],
+        "platform": "sensor",
+        "class_name": "Sensor",
+        "translation_key": "external_temperature",
+        "translation_placeholders": null,
+        "device_class": "temperature",
+        "state_class": null,
+        "entity_category": null,
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:28:a4:a4:f2",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "native_value": null,
+        "suggested_display_precision": null,
+        "unit": "\u00b0C"
       },
       {
-        "info_object": {
-          "fallback_name": "External temperature",
-          "unique_id": "ab:cd:ef:12:28:a4:a4:f2-1-external_temperature",
-          "migrate_unique_ids": [],
-          "platform": "sensor",
-          "class_name": "Sensor",
-          "translation_key": "external_temperature",
-          "translation_placeholders": null,
-          "device_class": "temperature",
-          "state_class": null,
-          "entity_category": null,
-          "entity_registry_enabled_default": true,
-          "enabled": true,
-          "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "ThermostatClusterHandler",
-              "generic_id": "cluster_handler_0x0201",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 513,
-                "name": "BoschThermostatCluster",
-                "type": "server"
-              },
-              "id": "1:0x0201",
-              "unique_id": "ab:cd:ef:12:28:a4:a4:f2:1:0x0201",
-              "status": "INITIALIZED",
-              "value_attribute": "local_temperature"
-            }
-          ],
-          "device_ieee": "ab:cd:ef:12:28:a4:a4:f2",
-          "endpoint_id": 1,
-          "available": true,
-          "group_id": null,
-          "suggested_display_precision": null,
-          "unit": "\u00b0C"
-        },
-        "state": {
-          "class_name": "Sensor",
-          "available": true,
-          "state": null
-        }
+        "fallback_name": "Heating demand",
+        "unique_id": "ab:cd:ef:12:28:a4:a4:f2-1-heating_demand",
+        "migrate_unique_ids": [],
+        "platform": "sensor",
+        "class_name": "Sensor",
+        "translation_key": "heating_demand",
+        "translation_placeholders": null,
+        "device_class": null,
+        "state_class": "measurement",
+        "entity_category": "diagnostic",
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:28:a4:a4:f2",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "native_value": null,
+        "suggested_display_precision": null,
+        "unit": "%"
       },
       {
-        "info_object": {
-          "fallback_name": "Heating demand",
-          "unique_id": "ab:cd:ef:12:28:a4:a4:f2-1-heating_demand",
-          "migrate_unique_ids": [],
-          "platform": "sensor",
-          "class_name": "Sensor",
-          "translation_key": "heating_demand",
-          "translation_placeholders": null,
-          "device_class": null,
-          "state_class": "measurement",
-          "entity_category": "diagnostic",
-          "entity_registry_enabled_default": true,
-          "enabled": true,
-          "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "ThermostatClusterHandler",
-              "generic_id": "cluster_handler_0x0201",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 513,
-                "name": "BoschThermostatCluster",
-                "type": "server"
-              },
-              "id": "1:0x0201",
-              "unique_id": "ab:cd:ef:12:28:a4:a4:f2:1:0x0201",
-              "status": "INITIALIZED",
-              "value_attribute": "local_temperature"
-            }
-          ],
-          "device_ieee": "ab:cd:ef:12:28:a4:a4:f2",
-          "endpoint_id": 1,
-          "available": true,
-          "group_id": null,
-          "suggested_display_precision": null,
-          "unit": "%"
-        },
-        "state": {
-          "class_name": "Sensor",
-          "available": true,
-          "state": null
-        }
-      },
-      {
-        "info_object": {
-          "fallback_name": "Local temperature",
-          "unique_id": "ab:cd:ef:12:28:a4:a4:f2-1-local_temperature",
-          "migrate_unique_ids": [],
-          "platform": "sensor",
-          "class_name": "Sensor",
-          "translation_key": "local_temperature",
-          "translation_placeholders": null,
-          "device_class": "temperature",
-          "state_class": null,
-          "entity_category": null,
-          "entity_registry_enabled_default": true,
-          "enabled": true,
-          "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "ThermostatClusterHandler",
-              "generic_id": "cluster_handler_0x0201",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 513,
-                "name": "BoschThermostatCluster",
-                "type": "server"
-              },
-              "id": "1:0x0201",
-              "unique_id": "ab:cd:ef:12:28:a4:a4:f2:1:0x0201",
-              "status": "INITIALIZED",
-              "value_attribute": "local_temperature"
-            }
-          ],
-          "device_ieee": "ab:cd:ef:12:28:a4:a4:f2",
-          "endpoint_id": 1,
-          "available": true,
-          "group_id": null,
-          "suggested_display_precision": null,
-          "unit": "\u00b0C"
-        },
-        "state": {
-          "class_name": "Sensor",
-          "available": true,
-          "state": 22.95
-        }
+        "fallback_name": "Local temperature",
+        "unique_id": "ab:cd:ef:12:28:a4:a4:f2-1-local_temperature",
+        "migrate_unique_ids": [],
+        "platform": "sensor",
+        "class_name": "Sensor",
+        "translation_key": "local_temperature",
+        "translation_placeholders": null,
+        "device_class": "temperature",
+        "state_class": null,
+        "entity_category": null,
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:28:a4:a4:f2",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "native_value": 23.1,
+        "suggested_display_precision": null,
+        "unit": "\u00b0C"
       }
     ],
     "switch": [
       {
-        "info_object": {
-          "fallback_name": "Boost heating",
-          "unique_id": "ab:cd:ef:12:28:a4:a4:f2-1-boost_heating",
-          "migrate_unique_ids": [],
-          "platform": "switch",
-          "class_name": "ConfigurableAttributeSwitch",
-          "translation_key": "boost_heating",
-          "translation_placeholders": null,
-          "device_class": null,
-          "state_class": null,
-          "entity_category": "config",
-          "entity_registry_enabled_default": true,
-          "enabled": true,
-          "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "ThermostatClusterHandler",
-              "generic_id": "cluster_handler_0x0201",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 513,
-                "name": "BoschThermostatCluster",
-                "type": "server"
-              },
-              "id": "1:0x0201",
-              "unique_id": "ab:cd:ef:12:28:a4:a4:f2:1:0x0201",
-              "status": "INITIALIZED",
-              "value_attribute": "local_temperature"
-            }
-          ],
-          "device_ieee": "ab:cd:ef:12:28:a4:a4:f2",
-          "endpoint_id": 1,
-          "available": true,
-          "group_id": null,
-          "attribute_name": "boost_heating",
-          "invert_attribute_name": null,
-          "force_inverted": false,
-          "off_value": 0,
-          "on_value": 1
-        },
-        "state": {
-          "class_name": "ConfigurableAttributeSwitch",
-          "available": true,
-          "state": false,
-          "inverted": false
-        }
+        "fallback_name": "Boost heating",
+        "unique_id": "ab:cd:ef:12:28:a4:a4:f2-1-boost_heating",
+        "migrate_unique_ids": [],
+        "platform": "switch",
+        "class_name": "ConfigurableAttributeSwitch",
+        "translation_key": "boost_heating",
+        "translation_placeholders": null,
+        "device_class": null,
+        "state_class": null,
+        "entity_category": "config",
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:28:a4:a4:f2",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "is_on": false,
+        "inverted": false,
+        "attribute_name": "boost_heating",
+        "invert_attribute_name": null,
+        "force_inverted": false,
+        "off_value": 0,
+        "on_value": 1
       },
       {
-        "info_object": {
-          "fallback_name": "Window open",
-          "unique_id": "ab:cd:ef:12:28:a4:a4:f2-1-window_open",
-          "migrate_unique_ids": [],
-          "platform": "switch",
-          "class_name": "ConfigurableAttributeSwitch",
-          "translation_key": "window_open",
-          "translation_placeholders": null,
-          "device_class": null,
-          "state_class": null,
-          "entity_category": "config",
-          "entity_registry_enabled_default": true,
-          "enabled": true,
-          "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "ThermostatClusterHandler",
-              "generic_id": "cluster_handler_0x0201",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 513,
-                "name": "BoschThermostatCluster",
-                "type": "server"
-              },
-              "id": "1:0x0201",
-              "unique_id": "ab:cd:ef:12:28:a4:a4:f2:1:0x0201",
-              "status": "INITIALIZED",
-              "value_attribute": "local_temperature"
-            }
-          ],
-          "device_ieee": "ab:cd:ef:12:28:a4:a4:f2",
-          "endpoint_id": 1,
-          "available": true,
-          "group_id": null,
-          "attribute_name": "window_open",
-          "invert_attribute_name": null,
-          "force_inverted": false,
-          "off_value": 0,
-          "on_value": 1
-        },
-        "state": {
-          "class_name": "ConfigurableAttributeSwitch",
-          "available": true,
-          "state": false,
-          "inverted": false
-        }
+        "fallback_name": "Window open",
+        "unique_id": "ab:cd:ef:12:28:a4:a4:f2-1-window_open",
+        "migrate_unique_ids": [],
+        "platform": "switch",
+        "class_name": "ConfigurableAttributeSwitch",
+        "translation_key": "window_open",
+        "translation_placeholders": null,
+        "device_class": null,
+        "state_class": null,
+        "entity_category": "config",
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:28:a4:a4:f2",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "is_on": false,
+        "inverted": false,
+        "attribute_name": "window_open",
+        "invert_attribute_name": null,
+        "force_inverted": false,
+        "off_value": 0,
+        "on_value": 1
       }
     ],
     "update": [
       {
-        "info_object": {
-          "fallback_name": null,
-          "unique_id": "ab:cd:ef:12:28:a4:a4:f2-1-25-firmware_update",
-          "migrate_unique_ids": [],
-          "platform": "update",
-          "class_name": "FirmwareUpdateEntity",
-          "translation_key": null,
-          "translation_placeholders": null,
-          "device_class": "firmware",
-          "state_class": null,
-          "entity_category": "config",
-          "entity_registry_enabled_default": true,
-          "enabled": true,
-          "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "OtaClientClusterHandler",
-              "generic_id": "cluster_handler_0x0019_client",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 25,
-                "name": "Ota",
-                "type": "client"
-              },
-              "id": "1:0x0019_client",
-              "unique_id": "ab:cd:ef:12:28:a4:a4:f2:1:0x0019_CLIENT",
-              "status": "INITIALIZED",
-              "value_attribute": null
-            }
-          ],
-          "device_ieee": "ab:cd:ef:12:28:a4:a4:f2",
-          "endpoint_id": 1,
-          "available": true,
-          "group_id": null,
-          "supported_features": 7
-        },
-        "state": {
-          "class_name": "FirmwareUpdateEntity",
-          "available": true,
-          "installed_version": "0x03036a30",
-          "in_progress": false,
-          "update_percentage": null,
-          "latest_version": null,
-          "release_summary": null,
-          "release_notes": null,
-          "release_url": null
-        }
+        "fallback_name": null,
+        "unique_id": "ab:cd:ef:12:28:a4:a4:f2-1-25-firmware_update",
+        "migrate_unique_ids": [],
+        "platform": "update",
+        "class_name": "FirmwareUpdateEntity",
+        "translation_key": null,
+        "translation_placeholders": null,
+        "device_class": "firmware",
+        "state_class": null,
+        "entity_category": "config",
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:28:a4:a4:f2",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "installed_version": null,
+        "in_progress": false,
+        "update_percentage": null,
+        "latest_version": null,
+        "release_summary": null,
+        "release_notes": null,
+        "release_url": null,
+        "supported_features": 23
       }
     ]
   },

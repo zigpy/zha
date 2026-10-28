@@ -1,31 +1,34 @@
 """Test ZHA device switch."""
 
 import asyncio
+from collections.abc import Iterator
 import logging
 import time
 from unittest import mock
 from unittest.mock import AsyncMock, call, patch
 
 import pytest
-from zigpy.exceptions import ZigbeeException
-import zigpy.profiles.zha
-from zigpy.quirks.registry import DeviceRegistry
-from zigpy.quirks.v2 import (
+from zhaquirks.builder import QuirkBuilder
+from zhaquirks.builder.metadata import (
     DeviceAlertLevel,
     DeviceAlertMetadata,
     ExposesFeatureMetadata,
-    QuirkBuilder,
 )
-from zigpy.quirks.v2.homeassistant import EntityType
-from zigpy.quirks.v2.homeassistant.sensor import SensorDeviceClass, SensorStateClass
+from zigpy.exceptions import ZigbeeException
+import zigpy.profiles.zha
 import zigpy.types
 from zigpy.typing import UNDEFINED
 from zigpy.zcl import ClusterType
-from zigpy.zcl.clusters import general
+from zigpy.zcl.clusters import general, lightlink, security
 from zigpy.zcl.clusters.general import Ota, PowerConfiguration
 from zigpy.zcl.clusters.lighting import Color
 from zigpy.zcl.clusters.measurement import CarbonDioxideConcentration
-from zigpy.zcl.foundation import Status, WriteAttributesResponse
+from zigpy.zcl.foundation import (
+    GENERAL_COMMANDS,
+    GeneralCommand,
+    Status,
+    WriteAttributesResponse,
+)
 from zigpy.zcl.helpers import ReportingConfig
 import zigpy.zdo.types as zdo_t
 
@@ -39,7 +42,7 @@ from tests.common import (
     join_zigpy_device,
     zigpy_device_from_json,
 )
-from zha.application import Platform
+from zha.application import EntityType, Platform
 from zha.application.const import (
     CLUSTER_COMMAND_SERVER,
     CLUSTER_COMMANDS_CLIENT,
@@ -49,12 +52,22 @@ from zha.application.const import (
     UNKNOWN,
 )
 from zha.application.gateway import Gateway
-from zha.application.platforms import PlatformEntity
+from zha.application.platforms import EntityCategory, PlatformEntity
 from zha.application.platforms.binary_sensor import IASZone
-from zha.application.platforms.light import Light
-from zha.application.platforms.sensor import LQISensor, RSSISensor
+from zha.application.platforms.light import HueLight, Light
+from zha.application.platforms.number import (
+    OnLevelConfigurationEntity,
+    StartUpCurrentLevelConfigurationEntity,
+)
+from zha.application.platforms.sensor import Battery, LQISensor, RSSISensor
+from zha.application.platforms.sensor.device_class import (
+    SensorDeviceClass,
+    SensorStateClass,
+)
 from zha.application.platforms.switch import Switch
+from zha.const import STATE_CHANGED
 from zha.exceptions import ZHAException
+from zha.quirks import DeviceMatch, DeviceRegistry, ModelInfo
 from zha.zigbee.device import (
     ClusterBinding,
     Device,
@@ -64,15 +77,13 @@ from zha.zigbee.device import (
     ZHAEvent,
     get_device_automation_triggers,
 )
-from zha.zigbee.group import Group, GroupMemberReference
+from zha.zigbee.group import Group
 
 
-def zigpy_device(
-    zha_gateway: Gateway, with_basic_cluster_handler: bool = True, **kwargs
-):
-    """Return a ZigpyDevice with a switch cluster."""
+def zigpy_device(zha_gateway: Gateway, with_basic_cluster: bool = True, **kwargs):
+    """Return a ZigbeeDevice with a switch cluster."""
     in_clusters = [general.OnOff.cluster_id]
-    if with_basic_cluster_handler:
+    if with_basic_cluster:
         in_clusters.append(general.Basic.cluster_id)
 
     endpoints = {
@@ -86,10 +97,10 @@ def zigpy_device(
     return create_mock_zigpy_device(zha_gateway, endpoints, **kwargs)
 
 
-def zigpy_device_mains(zha_gateway: Gateway, with_basic_cluster_handler: bool = True):
-    """Return a ZigpyDevice with a switch cluster."""
+def zigpy_device_mains(zha_gateway: Gateway, with_basic_cluster: bool = True):
+    """Return a ZigbeeDevice with a switch cluster."""
     in_clusters = [general.OnOff.cluster_id]
-    if with_basic_cluster_handler:
+    if with_basic_cluster:
         in_clusters.append(general.Basic.cluster_id)
 
     endpoints = {
@@ -130,41 +141,35 @@ async def _send_time_changed(zha_gateway: Gateway, seconds: int):
     await zha_gateway.async_block_till_done(wait_background_tasks=True)
 
 
-@patch(
-    "zha.zigbee.cluster_handlers.general.BasicClusterHandler.async_initialize",
-    new=mock.AsyncMock(),
-)
 async def test_check_available_success(
     zha_gateway: Gateway,
     caplog: pytest.LogCaptureFixture,
 ) -> None:
     """Check device availability success on 1st try."""
-    device_with_basic_cluster_handler = zigpy_device_mains(
-        zha_gateway, with_basic_cluster_handler=True
-    )
-    zha_device = await join_zigpy_device(zha_gateway, device_with_basic_cluster_handler)
-    basic_ch = device_with_basic_cluster_handler.endpoints[3].basic
+    device_with_basic_cluster = zigpy_device_mains(zha_gateway, with_basic_cluster=True)
+    zha_device = await join_zigpy_device(zha_gateway, device_with_basic_cluster)
+    basic_cluster = device_with_basic_cluster.endpoints[3].basic
 
     assert not zha_device.is_coordinator
     assert not zha_device.is_active_coordinator
 
-    basic_ch.read_attributes.reset_mock()
-    device_with_basic_cluster_handler.last_seen = None
+    basic_cluster.read_attributes.reset_mock()
+    device_with_basic_cluster.last_seen = None
     assert zha_device.available is True
     await _send_time_changed(zha_gateway, zha_device.consider_unavailable_time + 2)
     assert zha_device.available is False
-    assert basic_ch.read_attributes.await_count == 0
+    assert basic_cluster.read_attributes.await_count == 0
 
-    device_with_basic_cluster_handler.last_seen = (
+    device_with_basic_cluster.last_seen = (
         time.time() - zha_device.consider_unavailable_time - 100
     )
-    _seens = [time.time(), device_with_basic_cluster_handler.last_seen]
+    _seens = [time.time(), device_with_basic_cluster.last_seen]
 
     def _update_last_seen(*args, **kwargs):  # pylint: disable=unused-argument
         new_last_seen = _seens.pop()
-        device_with_basic_cluster_handler.last_seen = new_last_seen
+        device_with_basic_cluster.last_seen = new_last_seen
 
-    basic_ch.read_attributes.side_effect = _update_last_seen
+    basic_cluster.read_attributes.side_effect = _update_last_seen
 
     for entity in zha_device.platform_entities.values():
         entity.emit = mock.MagicMock(wraps=entity.emit)
@@ -176,8 +181,8 @@ async def test_check_available_success(
     await _send_time_changed(
         zha_gateway, zha_gateway._device_availability_checker.__polling_interval + 1
     )
-    assert basic_ch.read_attributes.await_count == 1
-    assert basic_ch.read_attributes.await_args[0][0] == ["manufacturer"]
+    assert basic_cluster.read_attributes.await_count == 1
+    assert basic_cluster.read_attributes.await_args[0][0] == ["manufacturer"]
     assert zha_device.available is False
 
     for entity in zha_device.platform_entities.values():
@@ -189,8 +194,8 @@ async def test_check_available_success(
     await _send_time_changed(
         zha_gateway, zha_gateway._device_availability_checker.__polling_interval + 1
     )
-    assert basic_ch.read_attributes.await_count == 2
-    assert basic_ch.read_attributes.await_args[0][0] == ["manufacturer"]
+    assert basic_cluster.read_attributes.await_count == 2
+    assert basic_cluster.read_attributes.await_args[0][0] == ["manufacturer"]
     assert zha_device.available is False
 
     for entity in zha_device.platform_entities.values():
@@ -202,8 +207,8 @@ async def test_check_available_success(
     await _send_time_changed(
         zha_gateway, zha_gateway._device_availability_checker.__polling_interval + 1
     )
-    assert basic_ch.read_attributes.await_count == 2
-    assert basic_ch.read_attributes.await_args[0][0] == ["manufacturer"]
+    assert basic_cluster.read_attributes.await_count == 2
+    assert basic_cluster.read_attributes.await_args[0][0] == ["manufacturer"]
     assert zha_device.available is True
     assert zha_device.on_network is True
 
@@ -226,25 +231,63 @@ async def test_check_available_success(
         entity.emit.reset_mock()
 
 
-@patch(
-    "zha.zigbee.cluster_handlers.general.BasicClusterHandler.async_initialize",
-    new=mock.AsyncMock(),
-)
+@pytest.mark.parametrize("seen_while_off_network", [False, True])
+async def test_on_network_emits_entity_availability(
+    zha_gateway: Gateway, seen_while_off_network: bool
+) -> None:
+    """Test entities emit their availability when the device leaves and returns."""
+    zigpy_dev = zigpy_device_mains(zha_gateway, with_basic_cluster=True)
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
+
+    # we want to test the device availability handling alone
+    zha_gateway.global_updater.stop()
+
+    entities = list(zha_device.platform_entities.values())
+    assert entities
+    diffs: dict[str, list[dict]] = {entity.unique_id: [] for entity in entities}
+    for entity in entities:
+        entity.on_event(
+            STATE_CHANGED,
+            lambda event, uid=entity.unique_id: diffs[uid].append(event.state_diff),
+        )
+
+    zha_device.on_network = False
+    await zha_gateway.async_block_till_done()
+    assert zha_device.available is False
+    for entity in entities:
+        assert any(diff.get("available") is False for diff in diffs[entity.unique_id])
+        diffs[entity.unique_id].clear()
+
+    if seen_while_off_network:
+        # the availability checker saw recent traffic, but the device is still
+        # not on the network, so it stays unavailable
+        zha_device.update_available(True)
+        await zha_gateway.async_block_till_done()
+        assert zha_device.available is False
+        for entity in entities:
+            assert all("available" not in diff for diff in diffs[entity.unique_id])
+
+    zha_device.on_network = True
+    await zha_gateway.async_block_till_done()
+    assert zha_device.available is True
+    for entity in entities:
+        assert entity.state.available is True
+        assert any(diff.get("available") is True for diff in diffs[entity.unique_id])
+
+
 async def test_check_available_unsuccessful(
     zha_gateway: Gateway,
 ) -> None:
     """Check device availability all tries fail."""
 
-    device_with_basic_cluster_handler = zigpy_device_mains(
-        zha_gateway, with_basic_cluster_handler=True
-    )
-    zha_device = await join_zigpy_device(zha_gateway, device_with_basic_cluster_handler)
-    basic_ch = device_with_basic_cluster_handler.endpoints[3].basic
+    device_with_basic_cluster = zigpy_device_mains(zha_gateway, with_basic_cluster=True)
+    zha_device = await join_zigpy_device(zha_gateway, device_with_basic_cluster)
+    basic_cluster = device_with_basic_cluster.endpoints[3].basic
 
     assert zha_device.available is True
-    assert basic_ch.read_attributes.await_count == 0
+    assert basic_cluster.read_attributes.await_count == 0
 
-    device_with_basic_cluster_handler.last_seen = (
+    device_with_basic_cluster.last_seen = (
         time.time() - zha_device.consider_unavailable_time - 2
     )
 
@@ -259,8 +302,8 @@ async def test_check_available_unsuccessful(
         zha_gateway, zha_gateway._device_availability_checker.__polling_interval + 1
     )
 
-    assert basic_ch.read_attributes.await_count == 1
-    assert basic_ch.read_attributes.await_args[0][0] == ["manufacturer"]
+    assert basic_cluster.read_attributes.await_count == 1
+    assert basic_cluster.read_attributes.await_args[0][0] == ["manufacturer"]
     assert zha_device.available is True
 
     for entity in zha_device.platform_entities.values():
@@ -273,8 +316,8 @@ async def test_check_available_unsuccessful(
         zha_gateway, zha_gateway._device_availability_checker.__polling_interval + 1
     )
 
-    assert basic_ch.read_attributes.await_count == 2
-    assert basic_ch.read_attributes.await_args[0][0] == ["manufacturer"]
+    assert basic_cluster.read_attributes.await_count == 2
+    assert basic_cluster.read_attributes.await_args[0][0] == ["manufacturer"]
     assert zha_device.available is True
 
     for entity in zha_device.platform_entities.values():
@@ -287,8 +330,8 @@ async def test_check_available_unsuccessful(
         zha_gateway, zha_gateway._device_availability_checker.__polling_interval + 1
     )
 
-    assert basic_ch.read_attributes.await_count == 2
-    assert basic_ch.read_attributes.await_args[0][0] == ["manufacturer"]
+    assert basic_cluster.read_attributes.await_count == 2
+    assert basic_cluster.read_attributes.await_args[0][0] == ["manufacturer"]
     assert zha_device.available is False
 
     for entity in zha_device.platform_entities.values():
@@ -297,27 +340,19 @@ async def test_check_available_unsuccessful(
         entity.emit.reset_mock()
 
 
-@patch(
-    "zha.zigbee.cluster_handlers.general.BasicClusterHandler.async_initialize",
-    new=mock.AsyncMock(),
-)
-async def test_check_available_no_basic_cluster_handler(
+async def test_check_available_no_basic_cluster(
     zha_gateway: Gateway,
     caplog: pytest.LogCaptureFixture,
 ) -> None:
     """Check device availability for a device without basic cluster."""
-    device_without_basic_cluster_handler = zigpy_device(
-        zha_gateway, with_basic_cluster_handler=False
-    )
+    device_without_basic = zigpy_device(zha_gateway, with_basic_cluster=False)
     caplog.set_level(logging.DEBUG, logger="homeassistant.components.zha")
 
-    zha_device = await join_zigpy_device(
-        zha_gateway, device_without_basic_cluster_handler
-    )
+    zha_device = await join_zigpy_device(zha_gateway, device_without_basic)
 
     assert zha_device.available is True
 
-    device_without_basic_cluster_handler.last_seen = (
+    device_without_basic.last_seen = (
         time.time() - zha_device.consider_unavailable_time - 2
     )
 
@@ -328,6 +363,80 @@ async def test_check_available_no_basic_cluster_handler(
 
     assert zha_device.available is False
     assert "does not have a mandatory basic cluster" in caplog.text
+
+
+async def test_check_available_skips_stale_coordinator(
+    zha_gateway: Gateway,
+) -> None:
+    """Check that a former coordinator is not marked unavailable."""
+    old_coord_dev = zigpy_device(
+        zha_gateway,
+        with_basic_cluster=False,
+        ieee="aa:bb:cc:dd:ee:ff:00:12",
+        nwk=0x0000,
+    )
+    old_coord_dev.node_desc = old_coord_dev.node_desc.replace(
+        logical_type=zdo_t.LogicalType.Coordinator
+    )
+    zha_device = await join_zigpy_device(zha_gateway, old_coord_dev)
+
+    assert not zha_device.is_active_coordinator
+    assert zha_device.available is True
+
+    old_coord_dev.last_seen = time.time() - zha_device.consider_unavailable_time - 2
+    await _send_time_changed(
+        zha_gateway, zha_gateway._device_availability_checker.__polling_interval + 1
+    )
+
+    assert zha_device.available is True
+
+
+async def test_check_available_skips_active_coordinator(
+    zha_gateway: Gateway,
+) -> None:
+    """Check that the active coordinator is never marked unavailable."""
+    coord_dev = zigpy_device(
+        zha_gateway,
+        with_basic_cluster=False,
+        ieee="aa:bb:cc:dd:ee:ff:00:11",
+        nwk=0x0000,
+    )
+    coord_dev.node_desc = coord_dev.node_desc.replace(
+        logical_type=zdo_t.LogicalType.Coordinator
+    )
+    zha_device = await join_zigpy_device(zha_gateway, coord_dev)
+    zha_gateway.application_controller.state.node_info.ieee = coord_dev.ieee
+
+    assert zha_device.is_active_coordinator
+    assert zha_device.available is True
+
+    coord_dev.last_seen = time.time() - zha_device.consider_unavailable_time - 2
+    await zha_device._check_available()
+
+    # `available` is always True for the active coordinator, so check the raw flag
+    assert zha_device._available is True
+    assert zha_device.available is True
+
+
+async def test_discover_entities_skips_zdo_endpoint(
+    zha_gateway: Gateway,
+) -> None:
+    """Check that endpoint 0 is never passed to endpoint entity discovery."""
+    zha_device = await join_zigpy_device(
+        zha_gateway, zigpy_device(zha_gateway, with_basic_cluster=True)
+    )
+    # `Device.endpoints` only holds non-ZDO endpoints, so ep 0 is injected
+    zha_device._endpoints[0] = mock.MagicMock()
+
+    with patch(
+        "zha.zigbee.device.discovery.discover_entities_for_endpoint",
+        return_value=iter(()),
+    ) as discover:
+        list(zha_device.discover_entities())
+
+    discovered = {c.args[0] for c in discover.mock_calls}
+    assert zha_device._endpoints[0] not in discovered
+    assert discovered == {ep for i, ep in zha_device._endpoints.items() if i != 0}
 
 
 async def test_device_is_active_coordinator(
@@ -427,7 +536,7 @@ async def test_async_get_clusters(
     zha_gateway: Gateway,
 ) -> None:
     """Test async_get_clusters method."""
-    zigpy_dev = zigpy_device(zha_gateway, with_basic_cluster_handler=True)
+    zigpy_dev = zigpy_device(zha_gateway, with_basic_cluster=True)
     zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
 
     assert zha_device.async_get_clusters() == {
@@ -449,7 +558,7 @@ async def test_async_get_groupable_endpoints(
     zha_gateway: Gateway,
 ) -> None:
     """Test async_get_groupable_endpoints method."""
-    zigpy_dev = zigpy_device(zha_gateway, with_basic_cluster_handler=True)
+    zigpy_dev = zigpy_device(zha_gateway, with_basic_cluster=True)
     zigpy_dev.endpoints[3].add_input_cluster(general.Groups.cluster_id)
     zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
 
@@ -460,7 +569,7 @@ async def test_async_get_std_clusters(
     zha_gateway: Gateway,
 ) -> None:
     """Test async_get_std_clusters method."""
-    zigpy_dev = zigpy_device(zha_gateway, with_basic_cluster_handler=True)
+    zigpy_dev = zigpy_device(zha_gateway, with_basic_cluster=True)
     zigpy_dev.endpoints[3].profile_id = zigpy.profiles.zha.PROFILE_ID
     zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
 
@@ -483,7 +592,7 @@ async def test_async_get_cluster(
     zha_gateway: Gateway,
 ) -> None:
     """Test async_get_cluster method."""
-    zigpy_dev = zigpy_device(zha_gateway, with_basic_cluster_handler=True)
+    zigpy_dev = zigpy_device(zha_gateway, with_basic_cluster=True)
     zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
 
     assert zha_device.async_get_cluster(3, general.OnOff.cluster_id) == (
@@ -495,7 +604,7 @@ async def test_async_get_cluster_attributes(
     zha_gateway: Gateway,
 ) -> None:
     """Test async_get_cluster_attributes method."""
-    zigpy_dev = zigpy_device(zha_gateway, with_basic_cluster_handler=True)
+    zigpy_dev = zigpy_device(zha_gateway, with_basic_cluster=True)
     zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
 
     assert (
@@ -514,7 +623,7 @@ async def test_async_get_cluster_commands(
     zha_gateway: Gateway,
 ) -> None:
     """Test async_get_cluster_commands method."""
-    zigpy_dev = zigpy_device(zha_gateway, with_basic_cluster_handler=True)
+    zigpy_dev = zigpy_device(zha_gateway, with_basic_cluster=True)
     zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
 
     assert zha_device.async_get_cluster_commands(3, general.OnOff.cluster_id) == {
@@ -527,7 +636,7 @@ async def test_write_zigbee_attribute(
     zha_gateway: Gateway,
 ) -> None:
     """Test write_zigbee_attribute method."""
-    zigpy_dev = zigpy_device(zha_gateway, with_basic_cluster_handler=True)
+    zigpy_dev = zigpy_device(zha_gateway, with_basic_cluster=True)
     zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
 
     with pytest.raises(
@@ -587,7 +696,7 @@ async def test_issue_cluster_command(
     zha_gateway: Gateway,
 ) -> None:
     """Test issue_cluster_command method."""
-    zigpy_dev = zigpy_device(zha_gateway, with_basic_cluster_handler=True)
+    zigpy_dev = zigpy_device(zha_gateway, with_basic_cluster=True)
     zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
 
     with pytest.raises(
@@ -605,7 +714,15 @@ async def test_issue_cluster_command(
 
     cluster = zigpy_dev.endpoints[3].on_off
 
-    with patch("zigpy.zcl.Cluster.request", return_value=[0x5, Status.SUCCESS]):
+    default_response = GENERAL_COMMANDS[GeneralCommand.Default_Response].schema
+
+    with patch(
+        "zigpy.zcl.Cluster.request",
+        return_value=default_response(
+            command_id=general.OnOff.ServerCommandDefs.on.id,
+            status=Status.SUCCESS,
+        ),
+    ):
         await zha_device.issue_cluster_command(
             3,
             general.OnOff.cluster_id,
@@ -617,13 +734,172 @@ async def test_issue_cluster_command(
 
         assert cluster.request.await_count == 1
 
+    # A failing Default Response is still reported
+    with (
+        patch(
+            "zigpy.zcl.Cluster.request",
+            return_value=default_response(
+                command_id=general.OnOff.ServerCommandDefs.on.id,
+                status=Status.UNSUP_CLUSTER_COMMAND,
+            ),
+        ),
+        pytest.raises(
+            ZHAException,
+            match="Failed to issue cluster command with status: "
+            r"<Status.UNSUP_CLUSTER_COMMAND: 129>",
+        ),
+    ):
+        await zha_device.issue_cluster_command(
+            3,
+            general.OnOff.cluster_id,
+            general.OnOff.ServerCommandDefs.on.id,
+            CLUSTER_COMMAND_SERVER,
+            None,
+            {},
+        )
+
+
+async def test_issue_cluster_command_specific_response(
+    zha_gateway: Gateway,
+) -> None:
+    """Test issue_cluster_command with a cluster-specific command response."""
+    zigpy_dev = create_mock_zigpy_device(
+        zha_gateway,
+        {
+            3: {
+                SIG_EP_INPUT: [general.Basic.cluster_id, general.Groups.cluster_id],
+                SIG_EP_OUTPUT: [],
+                SIG_EP_TYPE: zigpy.profiles.zha.DeviceType.ON_OFF_SWITCH,
+                SIG_EP_PROFILE: zigpy.profiles.zha.PROFILE_ID,
+            }
+        },
+    )
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
+    cluster = zigpy_dev.endpoints[3].groups
+
+    add_response = general.Groups.ClientCommandDefs.add_response.schema
+    get_membership_response = (
+        general.Groups.ClientCommandDefs.get_membership_response.schema
+    )
+
+    # A cluster-specific response is not a Default Response: its second field is a
+    # command-specific value (here `group_id`), not a status. Reading it as a status
+    # made successful commands look like failures (zigpy/zha#869): `group_id` 0x0085
+    # was reported as `Status.INVALID_FIELD` (133).
+    cluster.add = AsyncMock(
+        return_value=add_response(status=Status.SUCCESS, group_id=0x0085)
+    )
+    await zha_device.issue_cluster_command(
+        3,
+        general.Groups.cluster_id,
+        general.Groups.ServerCommandDefs.add.id,
+        CLUSTER_COMMAND_SERVER,
+        None,
+        {"group_id": 0x0085, "group_name": "test"},
+    )
+    assert cluster.add.await_count == 1
+
+    # A genuine failure status in a cluster-specific response is still reported
+    cluster.add = AsyncMock(
+        return_value=add_response(status=Status.INSUFFICIENT_SPACE, group_id=0x0085)
+    )
+    with pytest.raises(
+        ZHAException,
+        match="Failed to issue cluster command with status: "
+        r"<Status.INSUFFICIENT_SPACE: 137>",
+    ):
+        await zha_device.issue_cluster_command(
+            3,
+            general.Groups.cluster_id,
+            general.Groups.ServerCommandDefs.add.id,
+            CLUSTER_COMMAND_SERVER,
+            None,
+            {"group_id": 0x0085, "group_name": "test"},
+        )
+
+    # A response without a `status` field at all is not checked
+    cluster.get_membership = AsyncMock(
+        return_value=get_membership_response(capacity=3, groups=[])
+    )
+    await zha_device.issue_cluster_command(
+        3,
+        general.Groups.cluster_id,
+        general.Groups.ServerCommandDefs.get_membership.id,
+        CLUSTER_COMMAND_SERVER,
+        None,
+        {"groups": []},
+    )
+    assert cluster.get_membership.await_count == 1
+
+
+async def test_issue_cluster_command_lightlink_status(
+    zha_gateway: Gateway,
+) -> None:
+    """Test issue_cluster_command with a response using a non-ZCL status enum."""
+    zigpy_dev = create_mock_zigpy_device(
+        zha_gateway,
+        {
+            3: {
+                SIG_EP_INPUT: [
+                    general.Basic.cluster_id,
+                    lightlink.LightLink.cluster_id,
+                ],
+                SIG_EP_OUTPUT: [],
+                SIG_EP_TYPE: zigpy.profiles.zha.DeviceType.ON_OFF_SWITCH,
+                SIG_EP_PROFILE: zigpy.profiles.zha.PROFILE_ID,
+            }
+        },
+    )
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
+    cluster = zigpy_dev.endpoints[3].lightlink
+
+    network_start_rsp = lightlink.LightLink.ClientCommandDefs.network_start_rsp.schema
+
+    def _response(status: lightlink.Status) -> network_start_rsp:
+        return network_start_rsp(
+            inter_pan_transaction_id=0x12345678,
+            status=status,
+            epid=zigpy.types.EUI64.convert("11:22:33:44:55:66:77:88"),
+            nwk_update_id=0,
+            logical_channel=15,
+            pan_id=0x1234,
+        )
+
+    # LightLink defines its own `Status` enum, so the response status is not a
+    # `foundation.Status`. The comparison is numeric, so both outcomes are still
+    # reported correctly.
+    cluster.network_start = AsyncMock(return_value=_response(lightlink.Status.Success))
+    await zha_device.issue_cluster_command(
+        3,
+        lightlink.LightLink.cluster_id,
+        lightlink.LightLink.ServerCommandDefs.network_start.id,
+        CLUSTER_COMMAND_SERVER,
+        None,
+        {},
+    )
+    assert cluster.network_start.await_count == 1
+
+    cluster.network_start = AsyncMock(return_value=_response(lightlink.Status.Failure))
+    with pytest.raises(
+        ZHAException,
+        match="Failed to issue cluster command with status: <Status.Failure: 1>",
+    ):
+        await zha_device.issue_cluster_command(
+            3,
+            lightlink.LightLink.cluster_id,
+            lightlink.LightLink.ServerCommandDefs.network_start.id,
+            CLUSTER_COMMAND_SERVER,
+            None,
+            {},
+        )
+
 
 async def test_async_add_to_group_remove_from_group(
     zha_gateway: Gateway,
     caplog: pytest.LogCaptureFixture,
 ) -> None:
     """Test async_add_to_group and async_remove_from_group methods."""
-    zigpy_dev = zigpy_device(zha_gateway, with_basic_cluster_handler=True)
+    zigpy_dev = zigpy_device(zha_gateway, with_basic_cluster=True)
     zigpy_dev.endpoints[3].add_input_cluster(general.Groups.cluster_id)
     zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
 
@@ -647,7 +923,7 @@ async def test_async_add_to_group_remove_from_group(
 
     assert (zha_device.ieee, 3) not in group.zigpy_group.members
 
-    with patch("zigpy.device.Device.add_to_group", side_effect=ZigbeeException):
+    with patch("zigpy.device.ZigbeeDevice.add_to_group", side_effect=ZigbeeException):
         await zha_device.async_add_to_group(group.group_id)
         assert (zha_device.ieee, 3) not in group.zigpy_group.members
         assert (
@@ -668,7 +944,9 @@ async def test_async_add_to_group_remove_from_group(
     await zha_device.async_add_to_group(group.group_id)
     assert (zha_device.ieee, 3) in group.zigpy_group.members
 
-    with patch("zigpy.device.Device.remove_from_group", side_effect=ZigbeeException):
+    with patch(
+        "zigpy.device.ZigbeeDevice.remove_from_group", side_effect=ZigbeeException
+    ):
         await zha_device.async_remove_from_group(group.group_id)
         assert (zha_device.ieee, 3) in group.zigpy_group.members
         assert (
@@ -692,11 +970,11 @@ async def test_async_bind_to_group(
     caplog: pytest.LogCaptureFixture,
 ) -> None:
     """Test async_bind_to_group method."""
-    zigpy_dev = zigpy_device(zha_gateway, with_basic_cluster_handler=True)
+    zigpy_dev = zigpy_device(zha_gateway, with_basic_cluster=True)
     zigpy_dev.endpoints[3].add_input_cluster(general.Groups.cluster_id)
     zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
 
-    zigpy_dev_remote = zigpy_device(zha_gateway, with_basic_cluster_handler=True)
+    zigpy_dev_remote = zigpy_device(zha_gateway, with_basic_cluster=True)
     zigpy_dev_remote._ieee = zigpy.types.EUI64.convert("00:0d:7f:00:0a:90:69:e8")
     zigpy_dev_remote.endpoints[3].add_output_cluster(general.OnOff.cluster_id)
     zha_device_remote = await join_zigpy_device(zha_gateway, zigpy_dev_remote)
@@ -731,7 +1009,7 @@ async def test_device_automation_triggers(
     zha_gateway: Gateway,
 ) -> None:
     """Test device automation triggers."""
-    zigpy_dev = zigpy_device(zha_gateway, with_basic_cluster_handler=True)
+    zigpy_dev = zigpy_device(zha_gateway, with_basic_cluster=True)
     zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
 
     assert get_device_automation_triggers(zha_device) == {
@@ -748,7 +1026,7 @@ async def test_device_properties(
     zha_gateway: Gateway,
 ) -> None:
     """Test device properties."""
-    zigpy_dev = zigpy_device(zha_gateway, with_basic_cluster_handler=True)
+    zigpy_dev = zigpy_device(zha_gateway, with_basic_cluster=True)
     zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
 
     assert zha_device.is_mains_powered is False
@@ -771,8 +1049,7 @@ async def test_device_properties(
     assert zha_device.model == "FakeModel"
     assert zha_device.is_groupable is False
 
-    assert zha_device.power_configuration_ch is None
-    assert zha_device.basic_ch is not None
+    assert zha_device.basic_cluster is not None
     assert zha_device.firmware_version is None
 
     assert len(zha_device.platform_entities) == 3
@@ -816,7 +1093,7 @@ async def test_device_firmware_version_syncing(zha_gateway: Gateway) -> None:
     """Test device firmware version syncing."""
     zigpy_dev = await zigpy_device_from_json(
         zha_gateway.application_controller,
-        "tests/data/devices/philips-sml001.json",
+        "tests/data/devices/philips-sml001-0x42006bb7.json",
     )
 
     zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
@@ -830,7 +1107,7 @@ async def test_device_firmware_version_syncing(zha_gateway: Gateway) -> None:
 
     # If we update the entity, the device updates as well
     update_entity = get_entity(zha_device, platform=Platform.UPDATE)
-    update_entity._ota_cluster_handler.cluster.update_attribute(
+    update_entity._cluster.update_attribute(
         Ota.AttributeDefs.current_file_version.id,
         zigpy.types.uint32_t(0xABCD1234),
     )
@@ -838,7 +1115,7 @@ async def test_device_firmware_version_syncing(zha_gateway: Gateway) -> None:
     assert zha_device.firmware_version == "0xabcd1234"
 
     # Duplicate updates are ignored
-    update_entity._ota_cluster_handler.cluster.update_attribute(
+    update_entity._cluster.update_attribute(
         Ota.AttributeDefs.current_file_version.id,
         zigpy.types.uint32_t(0xABCD1234),
     )
@@ -859,15 +1136,15 @@ async def test_quirks_v2_device_renaming(zha_gateway: Gateway) -> None:
     registry = DeviceRegistry()
 
     (
-        QuirkBuilder("CentraLite", "3405-L", registry=registry)
+        QuirkBuilder("CentraLite", "3405-L")
         .friendly_name(manufacturer="Lowe's", model="IRIS Keypad V2")
-        .add_to_registry()
+        .add_to_registry(registry)
     )
 
-    zigpy_dev = registry.get_device(
+    zigpy_dev = registry.resolve(
         await zigpy_device_from_json(
             zha_gateway.application_controller,
-            "tests/data/devices/centralite-3405-l.json",
+            "tests/data/devices/centralite-3405-l-0x10025310.json",
         )
     )
 
@@ -882,7 +1159,7 @@ async def test_quirks_v2_device_alerts(zha_gateway: Gateway) -> None:
     # Normal device, no alerts
     zigpy_dev = await zigpy_device_from_json(
         zha_gateway.application_controller,
-        "tests/data/devices/ikea-of-sweden-tradfri-bulb-e26-opal-1000lm.json",
+        "tests/data/devices/ikea-of-sweden-tradfri-bulb-e26-opal-1000lm-0x23094631.json",
     )
     zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
     assert not zha_device.device_alerts
@@ -891,15 +1168,15 @@ async def test_quirks_v2_device_alerts(zha_gateway: Gateway) -> None:
     registry = DeviceRegistry()
 
     (
-        QuirkBuilder("CentraLite", "3405-L", registry=registry)
+        QuirkBuilder("CentraLite", "3405-L")
         .device_alert(level=DeviceAlertLevel.WARNING, message="Test warning")
-        .add_to_registry()
+        .add_to_registry(registry)
     )
 
-    zigpy_dev = registry.get_device(
+    zigpy_dev = registry.resolve(
         await zigpy_device_from_json(
             zha_gateway.application_controller,
-            "tests/data/devices/centralite-3405-l.json",
+            "tests/data/devices/centralite-3405-l-0x10025310.json",
         )
     )
 
@@ -914,13 +1191,13 @@ async def test_quirks_v2_device_alerts(zha_gateway: Gateway) -> None:
     [
         # Light bulb
         (
-            "tests/data/devices/ikea-of-sweden-tradfri-bulb-gu10-ws-400lm.json",
+            "tests/data/devices/ikea-of-sweden-tradfri-bulb-gu10-ws-400lm-0x23095631.json",
             Platform.LIGHT,
             Light,
         ),
         # Night light with a bulb and a motion sensor
         (
-            "tests/data/devices/third-reality-inc-3rsnl02043z.json",
+            "tests/data/devices/third-reality-inc-3rsnl02043z-0x0000003c.json",
             Platform.LIGHT,
             Light,
         ),
@@ -932,7 +1209,7 @@ async def test_quirks_v2_device_alerts(zha_gateway: Gateway) -> None:
         ),
         # Smart plug with energy monitoring
         (
-            "tests/data/devices/innr-sp-234.json",
+            "tests/data/devices/innr-sp-234-0x31016610.json",
             Platform.SWITCH,
             Switch,
         ),
@@ -969,12 +1246,261 @@ async def test_primary_entity_computation(
         ]
 
 
+async def test_primary_entity_weight_0_not_elected(zha_gateway: Gateway) -> None:
+    """Test a weight-0 entity is not elected primary, even as the sole candidate."""
+
+    # Without the `Basic` cluster, no LQI/RSSI entities are created, so the
+    # battery entity is the only entity of this device
+    zigpy_dev = create_mock_zigpy_device(
+        zha_gateway,
+        {
+            1: {
+                SIG_EP_INPUT: [general.PowerConfiguration.cluster_id],
+                SIG_EP_OUTPUT: [],
+                SIG_EP_TYPE: zigpy.profiles.zha.DeviceType.SIMPLE_SENSOR,
+                SIG_EP_PROFILE: zigpy.profiles.zha.PROFILE_ID,
+            }
+        },
+    )
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
+
+    battery = get_entity(zha_device, Platform.SENSOR, entity_type=Battery)
+    assert list(zha_device.platform_entities.values()) == [battery]
+
+    # The weight-0 battery entity is not elected as the primary entity
+    assert not battery.primary
+
+
+async def test_primary_entity_reelection(zha_gateway: Gateway) -> None:
+    """Test election losers are not permanently excluded from later elections."""
+
+    # A smart plug with an IAS zone
+    zigpy_dev = create_mock_zigpy_device(
+        zha_gateway,
+        {
+            1: {
+                SIG_EP_INPUT: [
+                    general.OnOff.cluster_id,
+                    security.IasZone.cluster_id,
+                ],
+                SIG_EP_OUTPUT: [],
+                SIG_EP_TYPE: zigpy.profiles.zha.DeviceType.SMART_PLUG,
+                SIG_EP_PROFILE: zigpy.profiles.zha.PROFILE_ID,
+            }
+        },
+    )
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
+
+    switch = get_entity(zha_device, Platform.SWITCH, entity_type=Switch)
+    ias_zone = get_entity(zha_device, Platform.BINARY_SENSOR, entity_type=IASZone)
+
+    assert switch.primary
+    assert not ias_zone.primary
+
+    # When the `on_off` attribute becomes unsupported, the switch is removed and a
+    # re-election elects the runner-up instead of permanently leaving the device
+    # without a primary entity
+    zigpy_dev.endpoints[1].on_off.add_unsupported_attribute(
+        general.OnOff.AttributeDefs.on_off.id
+    )
+    await zha_device.recompute_entities()
+
+    assert (Platform.SWITCH, switch.unique_id) not in zha_device.platform_entities
+    assert ias_zone.primary
+
+    # Writing a value clears the unsupported flag; the rediscovered switch wins
+    # back the election
+    zigpy_dev.endpoints[1].on_off.update_attribute(
+        general.OnOff.AttributeDefs.on_off.id, zigpy.types.Bool.false
+    )
+    await zha_device.recompute_entities()
+
+    switch = get_entity(zha_device, Platform.SWITCH, entity_type=Switch)
+    assert switch.primary
+    assert not ias_zone.primary
+
+
+async def test_force_create_skips_support_check(zha_gateway: Gateway) -> None:
+    """Test that a force-created entity is kept while its attribute is unsupported."""
+
+    registry = DeviceRegistry()
+
+    @registry.register_device
+    class ForcedOnLevelQuirk(Device):
+        _device_match = DeviceMatch(applies_to=(ModelInfo("Philips", "LCT014"),))
+
+        def discover_entities(self) -> Iterator[PlatformEntity]:
+            yield from super().discover_entities()
+
+            endpoint = self.endpoints[11]
+            yield OnLevelConfigurationEntity(
+                endpoint=endpoint,
+                device=self,
+                cluster=endpoint.zigpy_endpoint.level,
+                force_create=True,
+                unique_id_suffix="forced",
+            )
+
+    zigpy_dev = registry.resolve(
+        await zigpy_device_from_json(
+            zha_gateway.application_controller,
+            "tests/data/devices/philips-lct014-0x01001a02.json",
+        )
+    )
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
+
+    # The fixture marks `on_level` as unsupported
+    assert zigpy_dev.endpoints[11].level.is_attribute_unsupported(
+        general.LevelControl.AttributeDefs.on_level.name
+    )
+
+    default_key = (Platform.NUMBER, f"{zigpy_dev.ieee}-11-8-on_level")
+    forced_key = (Platform.NUMBER, f"{zigpy_dev.ieee}-11-8-forced")
+
+    assert default_key not in zha_device.platform_entities
+    assert forced_key in zha_device.platform_entities
+
+    await zha_device.recompute_entities()
+
+    assert default_key not in zha_device.platform_entities
+    assert forced_key in zha_device.platform_entities
+
+
+async def test_entity_type_overrides_class_category(zha_gateway: Gateway) -> None:
+    """Test that `entity_type` only overrides the class's category when given."""
+    zigpy_dev = await zigpy_device_from_json(
+        zha_gateway.application_controller,
+        "tests/data/devices/philips-lct014-0x01001a02.json",
+    )
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
+    endpoint = zha_device.endpoints[11]
+
+    def create(
+        entity_type: EntityType | None,
+    ) -> StartUpCurrentLevelConfigurationEntity:
+        return StartUpCurrentLevelConfigurationEntity(
+            endpoint=endpoint,
+            device=zha_device,
+            cluster=endpoint.zigpy_endpoint.level,
+            entity_type=entity_type,
+        )
+
+    assert create(None).entity_category == EntityCategory.CONFIG
+    assert create(EntityType.STANDARD).entity_category is None
+    assert create(EntityType.CONFIG).entity_category == EntityCategory.CONFIG
+    assert create(EntityType.DIAGNOSTIC).entity_category == EntityCategory.DIAGNOSTIC
+
+
+async def test_unique_id_overrides_legacy_unique_id(zha_gateway: Gateway) -> None:
+    """Test that an explicit `unique_id` overrides a class's legacy unique ID."""
+    zigpy_dev = await zigpy_device_from_json(
+        zha_gateway.application_controller,
+        "tests/data/devices/philips-lct014-0x01001a02.json",
+    )
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
+    endpoint = zha_device.endpoints[11]
+
+    legacy = HueLight(
+        endpoint=endpoint, device=zha_device, cluster=endpoint.zigpy_endpoint.on_off
+    )
+    overridden = HueLight(
+        endpoint=endpoint,
+        device=zha_device,
+        cluster=endpoint.zigpy_endpoint.on_off,
+        unique_id=f"{zigpy_dev.ieee}-11-override",
+    )
+
+    assert legacy.unique_id == f"{zigpy_dev.ieee}-11"
+    assert overridden.unique_id == f"{zigpy_dev.ieee}-11-override"
+    assert overridden.unique_id_base == f"{zigpy_dev.ieee}-11-override"
+
+
+async def test_primary_entity_election_ignores_enabled(zha_gateway: Gateway) -> None:
+    """Test the election ignores runtime enabled state.
+
+    The primary entity describes the main feature of the device, which does not
+    change when its entity is disabled (via the entity registry in HA).
+    """
+
+    # A smart plug with an IAS zone
+    zigpy_dev = create_mock_zigpy_device(
+        zha_gateway,
+        {
+            1: {
+                SIG_EP_INPUT: [
+                    general.OnOff.cluster_id,
+                    security.IasZone.cluster_id,
+                ],
+                SIG_EP_OUTPUT: [],
+                SIG_EP_TYPE: zigpy.profiles.zha.DeviceType.SMART_PLUG,
+                SIG_EP_PROFILE: zigpy.profiles.zha.PROFILE_ID,
+            }
+        },
+    )
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
+
+    switch = get_entity(zha_device, Platform.SWITCH, entity_type=Switch)
+    ias_zone = get_entity(zha_device, Platform.BINARY_SENSOR, entity_type=IASZone)
+
+    assert switch.primary
+    assert not ias_zone.primary
+
+    # A disabled entity stays primary, the runner-up does not take its spot
+    switch.disable()
+    await zha_device.recompute_entities()
+
+    assert switch.primary
+    assert not ias_zone.primary
+
+    # Re-enabling changes nothing
+    switch.enable()
+    await zha_device.recompute_entities()
+
+    assert switch.primary
+    assert not ias_zone.primary
+
+    # An explicitly primary entity also keeps its spot when disabled
+    ias_zone._attr_primary = True
+    await zha_device.recompute_entities()
+
+    ias_zone.disable()
+    await zha_device.recompute_entities()
+
+    assert ias_zone.primary
+    assert not switch.primary
+
+
+async def test_primary_entity_election_explicit_primary_takes_over(
+    zha_gateway: Gateway,
+) -> None:
+    """Test an explicitly primary entity replaces a previously computed winner."""
+
+    # Night light with a bulb and a motion sensor
+    zigpy_dev = await zigpy_device_from_json(
+        zha_gateway.application_controller,
+        "tests/data/devices/third-reality-inc-3rsnl02043z-0x0000003c.json",
+    )
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
+
+    light = get_entity(zha_device, Platform.LIGHT, entity_type=Light)
+    motion = get_entity(zha_device, Platform.BINARY_SENSOR, entity_type=IASZone)
+    assert light.primary
+
+    # Mark the motion sensor as explicitly primary, like a quirk would.
+    # Recomputing the entities re-runs the primary entity election.
+    motion._attr_primary = True
+    await zha_device.recompute_entities()
+
+    assert motion.primary
+    assert not light.primary
+
+
 async def test_quirks_v2_primary_entity(zha_gateway: Gateway) -> None:
     """Test quirks v2 primary entity."""
     registry = DeviceRegistry()
 
     (
-        QuirkBuilder("CentraLite", "3405-L", registry=registry)
+        QuirkBuilder("CentraLite", "3405-L")
         .sensor(
             attribute_name=PowerConfiguration.AttributeDefs.battery_quantity.id,
             cluster_id=PowerConfiguration.cluster_id,
@@ -982,13 +1508,13 @@ async def test_quirks_v2_primary_entity(zha_gateway: Gateway) -> None:
             fallback_name="Battery quantity",
             primary=True,
         )
-        .add_to_registry()
+        .add_to_registry(registry)
     )
 
-    zigpy_dev = registry.get_device(
+    zigpy_dev = registry.resolve(
         await zigpy_device_from_json(
             zha_gateway.application_controller,
-            "tests/data/devices/centralite-3405-l.json",
+            "tests/data/devices/centralite-3405-l-0x10025310.json",
         )
     )
 
@@ -1003,7 +1529,7 @@ async def test_quirks_v2_prevent_default_entities(zha_gateway: Gateway) -> None:
     registry = DeviceRegistry()
 
     (
-        QuirkBuilder("CentraLite", "3405-L", registry=registry)
+        QuirkBuilder("CentraLite", "3405-L")
         .prevent_default_entity_creation(endpoint_id=123)
         .prevent_default_entity_creation(cluster_id=0x4567)
         .prevent_default_entity_creation(unique_id_suffix="_something")
@@ -1011,13 +1537,13 @@ async def test_quirks_v2_prevent_default_entities(zha_gateway: Gateway) -> None:
         .prevent_default_entity_creation(
             function=lambda entity: entity.__class__.__name__ == "IdentifyButton"
         )
-        .add_to_registry()
+        .add_to_registry(registry)
     )
 
-    zigpy_dev = registry.get_device(
+    zigpy_dev = registry.resolve(
         await zigpy_device_from_json(
             zha_gateway.application_controller,
-            "tests/data/devices/centralite-3405-l.json",
+            "tests/data/devices/centralite-3405-l-0x10025310.json",
         )
     )
 
@@ -1028,7 +1554,12 @@ async def test_quirks_v2_prevent_default_entities(zha_gateway: Gateway) -> None:
             Platform.BUTTON, unique_id="00:0d:6f:00:05:65:83:f2-1-3"
         )
 
-    assert len(zha_device.platform_entities) == 7
+    non_virtual = [
+        e
+        for e in zha_device.platform_entities.values()
+        if e.PLATFORM != Platform.VIRTUAL
+    ]
+    assert len(non_virtual) == 7
 
 
 async def test_quirks_v2_change_entity_metadata(zha_gateway: Gateway) -> None:
@@ -1039,9 +1570,8 @@ async def test_quirks_v2_change_entity_metadata(zha_gateway: Gateway) -> None:
         return entity.__class__.__name__ == "LQISensor"
 
     (
-        QuirkBuilder("CentraLite", "3405-L", registry=registry)
+        QuirkBuilder("CentraLite", "3405-L")
         .change_entity_metadata(
-            endpoint_id=1,
             unique_id_suffix="-lqi",
             new_device_class=SensorDeviceClass.POWER,
             new_state_class=SensorStateClass.MEASUREMENT,
@@ -1061,13 +1591,30 @@ async def test_quirks_v2_change_entity_metadata(zha_gateway: Gateway) -> None:
             cluster_type=ClusterType.Server,
             new_primary=True,
         )
-        .add_to_registry()
+        # A generated quirks-v2 entity has no class-level `_cluster_match`, but
+        # does have a concrete backing cluster. A cluster_id-filtered metadata
+        # change must still reach it.
+        .sensor(
+            PowerConfiguration.AttributeDefs.battery_voltage.name,
+            PowerConfiguration.cluster_id,
+            translation_key="generated_battery_voltage",
+            fallback_name="Generated battery voltage",
+            unique_id_suffix="generated_battery_voltage",
+        )
+        .change_entity_metadata(
+            endpoint_id=1,
+            cluster_id=PowerConfiguration.cluster_id,
+            cluster_type=ClusterType.Server,
+            unique_id_suffix="generated_battery_voltage",
+            new_translation_key="changed_via_cluster_id",
+        )
+        .add_to_registry(registry)
     )
 
-    zigpy_dev = registry.get_device(
+    zigpy_dev = registry.resolve(
         await zigpy_device_from_json(
             zha_gateway.application_controller,
-            "tests/data/devices/centralite-3405-l.json",
+            "tests/data/devices/centralite-3405-l-0x10025310.json",
         )
     )
 
@@ -1080,7 +1627,7 @@ async def test_quirks_v2_change_entity_metadata(zha_gateway: Gateway) -> None:
 
     assert lqi_entity is not None, "LQI sensor entity should exist"
 
-    # Verify metadata changes were applied - first filter matches by endpoint_id=1 and unique_id_suffix="-lqi"
+    # Verify metadata changes were applied - first filter matches by endpoint_id=1, cluster_id=Basic and unique_id_suffix="-lqi"
     assert lqi_entity._attr_device_class == SensorDeviceClass.POWER
     assert lqi_entity._attr_state_class == SensorStateClass.MEASUREMENT
     assert lqi_entity._attr_entity_category == EntityType.CONFIG
@@ -1095,13 +1642,20 @@ async def test_quirks_v2_change_entity_metadata(zha_gateway: Gateway) -> None:
     button_entity = get_entity(zha_device, platform=Platform.BUTTON)
     assert button_entity._attr_primary is True
 
+    # The cluster_id-filtered change must have reached the generated entity,
+    # even though it has no class-level `_cluster_match`.
+    generated_sensor = get_entity(
+        zha_device, platform=Platform.SENSOR, qualifier="generated_battery_voltage"
+    )
+    assert generated_sensor._attr_translation_key == "changed_via_cluster_id"
+
 
 async def test_quirks_v2_translation_placeholders(zha_gateway: Gateway) -> None:
     """Test quirks v2 translation_placeholders on entities."""
     registry = DeviceRegistry()
 
     (
-        QuirkBuilder("CentraLite", "3405-L", registry=registry)
+        QuirkBuilder("CentraLite", "3405-L")
         .sensor(
             PowerConfiguration.AttributeDefs.battery_voltage.name,
             PowerConfiguration.cluster_id,
@@ -1109,13 +1663,13 @@ async def test_quirks_v2_translation_placeholders(zha_gateway: Gateway) -> None:
             translation_placeholders={"sensor_index": "1"},
             fallback_name="Some battery sensor {sensor_index}",
         )
-        .add_to_registry()
+        .add_to_registry(registry)
     )
 
-    zigpy_dev = registry.get_device(
+    zigpy_dev = registry.resolve(
         await zigpy_device_from_json(
             zha_gateway.application_controller,
-            "tests/data/devices/centralite-3405-l.json",
+            "tests/data/devices/centralite-3405-l-0x10025310.json",
         )
     )
 
@@ -1127,7 +1681,7 @@ async def test_quirks_v2_translation_placeholders(zha_gateway: Gateway) -> None:
 
     assert (
         entity.translation_placeholders
-        == entity.info_object.translation_placeholders
+        == entity.state.translation_placeholders
         == {"sensor_index": "1"}
     )
 
@@ -1137,16 +1691,16 @@ async def test_quirks_v2_exposed_features(zha_gateway: Gateway) -> None:
     registry = DeviceRegistry()
 
     (
-        QuirkBuilder("CentraLite", "3405-L", registry=registry)
+        QuirkBuilder("CentraLite", "3405-L")
         .exposes_feature("some_feature")
         .exposes_feature("another_feature", config={"option": True})
-        .add_to_registry()
+        .add_to_registry(registry)
     )
 
-    zigpy_dev = registry.get_device(
+    zigpy_dev = registry.resolve(
         await zigpy_device_from_json(
             zha_gateway.application_controller,
-            "tests/data/devices/centralite-3405-l.json",
+            "tests/data/devices/centralite-3405-l-0x10025310.json",
         )
     )
 
@@ -1197,7 +1751,7 @@ async def test_endpoint_none_profile(
     caplog: pytest.LogCaptureFixture,
 ) -> None:
     """Test endpoint with None profile id being skipped."""
-    zigpy_dev = zigpy_device(zha_gateway, with_basic_cluster_handler=True)
+    zigpy_dev = zigpy_device(zha_gateway, with_basic_cluster=True)
     zigpy_dev.endpoints[3].profile_id = None
     zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
 
@@ -1205,12 +1759,186 @@ async def test_endpoint_none_profile(
     assert "Skipping endpoint, profile is None" in caplog.text
 
 
+async def test_styrbar_press_events(zha_gateway: Gateway) -> None:
+    """Test that the STYRBAR `press` scene command becomes a well-formed zha_event."""
+
+    zigpy_dev = await zigpy_device_from_json(
+        zha_gateway.application_controller,
+        "tests/data/devices/ikea-of-sweden-remote-control-n2.json",
+    )
+
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
+
+    listener = mock.Mock()
+    zha_device.on_all_events(listener)
+
+    zigpy_dev.packet_received(
+        zigpy.types.ZigbeePacket(
+            src_ep=1,
+            dst_ep=1,
+            tsn=64,
+            profile_id=260,
+            cluster_id=5,
+            data=zigpy.types.SerializableBytes(b"\x05|\x11@\x07\x01\x01\r\x00"),
+        )
+    )
+
+    assert listener.mock_calls == [
+        call(
+            ZHAEvent(
+                device_ieee=zigpy.types.EUI64.convert("ab:cd:ef:12:6b:e7:d0:70"),
+                unique_id="ab:cd:ef:12:6b:e7:d0:70",
+                data={
+                    "unique_id": "ab:cd:ef:12:6b:e7:d0:70:1:0x0005_CLIENT",
+                    "endpoint_id": 1,
+                    "cluster_id": 5,
+                    "command": "press",
+                    "args": [257, 13, 0],
+                    "params": {"param1": 257, "param2": 13, "param3": 0},
+                },
+                event_type="zha_event",
+                event="zha_event",
+            )
+        )
+    ]
+
+
+async def test_unquirked_client_cluster_events(zha_gateway: Gateway) -> None:
+    """Test zha_events for OnOff/LevelControl client commands on a non-quirked remote."""
+
+    zigpy_dev = await zigpy_device_from_json(
+        zha_gateway.application_controller,
+        "tests/data/devices/innr-rc-250-0x21086500.json",
+    )
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
+
+    listener = mock.Mock()
+    zha_device.on_all_events(listener)
+
+    # OnOff toggle (command_id=0x02, no args)
+    zigpy_dev.packet_received(
+        zigpy.types.ZigbeePacket(
+            src_ep=1,
+            dst_ep=1,
+            tsn=1,
+            profile_id=zigpy.profiles.zha.PROFILE_ID,
+            cluster_id=general.OnOff.cluster_id,
+            data=zigpy.types.SerializableBytes(b"\x01\x01\x02"),
+        )
+    )
+
+    # LevelControl move(move_mode=Up, rate=50) (command_id=0x01)
+    zigpy_dev.packet_received(
+        zigpy.types.ZigbeePacket(
+            src_ep=1,
+            dst_ep=1,
+            tsn=2,
+            profile_id=zigpy.profiles.zha.PROFILE_ID,
+            cluster_id=general.LevelControl.cluster_id,
+            data=zigpy.types.SerializableBytes(b"\x01\x02\x01\x00\x32"),
+        )
+    )
+
+    # LevelControl stop (command_id=0x03, no args)
+    zigpy_dev.packet_received(
+        zigpy.types.ZigbeePacket(
+            src_ep=1,
+            dst_ep=1,
+            tsn=3,
+            profile_id=zigpy.profiles.zha.PROFILE_ID,
+            cluster_id=general.LevelControl.cluster_id,
+            data=zigpy.types.SerializableBytes(b"\x01\x03\x03"),
+        )
+    )
+
+    device_ieee = zigpy.types.EUI64.convert("ab:cd:ef:12:25:3a:b6:6f")
+    assert listener.mock_calls == [
+        call(
+            ZHAEvent(
+                device_ieee=device_ieee,
+                unique_id="ab:cd:ef:12:25:3a:b6:6f",
+                data={
+                    "unique_id": "ab:cd:ef:12:25:3a:b6:6f:1:0x0006_CLIENT",
+                    "endpoint_id": 1,
+                    "cluster_id": general.OnOff.cluster_id,
+                    "command": "attribute_updated",
+                    "args": {
+                        "attribute_id": 0,
+                        "attribute_name": "on_off",
+                        "attribute_value": True,
+                        "value": True,
+                    },
+                    "params": {},
+                },
+                event_type="zha_event",
+                event="zha_event",
+            )
+        ),
+        call(
+            ZHAEvent(
+                device_ieee=device_ieee,
+                unique_id="ab:cd:ef:12:25:3a:b6:6f",
+                data={
+                    "unique_id": "ab:cd:ef:12:25:3a:b6:6f:1:0x0006_CLIENT",
+                    "endpoint_id": 1,
+                    "cluster_id": general.OnOff.cluster_id,
+                    "command": "toggle",
+                    "args": [],
+                    "params": {},
+                },
+                event_type="zha_event",
+                event="zha_event",
+            )
+        ),
+        call(
+            ZHAEvent(
+                device_ieee=device_ieee,
+                unique_id="ab:cd:ef:12:25:3a:b6:6f",
+                data={
+                    "unique_id": "ab:cd:ef:12:25:3a:b6:6f:1:0x0008_CLIENT",
+                    "endpoint_id": 1,
+                    "cluster_id": general.LevelControl.cluster_id,
+                    "command": "move",
+                    "args": [general.LevelControl.MoveMode.Up, 50],
+                    "params": {
+                        "move_mode": general.LevelControl.MoveMode.Up,
+                        "rate": 50,
+                        "options_mask": None,
+                        "options_override": None,
+                    },
+                },
+                event_type="zha_event",
+                event="zha_event",
+            )
+        ),
+        call(
+            ZHAEvent(
+                device_ieee=device_ieee,
+                unique_id="ab:cd:ef:12:25:3a:b6:6f",
+                data={
+                    "unique_id": "ab:cd:ef:12:25:3a:b6:6f:1:0x0008_CLIENT",
+                    "endpoint_id": 1,
+                    "cluster_id": general.LevelControl.cluster_id,
+                    "command": "stop",
+                    "args": [],
+                    "params": {
+                        "options_mask": None,
+                        "options_override": None,
+                    },
+                },
+                event_type="zha_event",
+                event="zha_event",
+            )
+        ),
+    ]
+
+
 async def test_somrig_events(zha_gateway: Gateway) -> None:
     """Test that Somrig events are handled correctly."""
 
     zigpy_dev = await zigpy_device_from_json(
         zha_gateway.application_controller,
-        "tests/data/devices/ikea-of-sweden-somrig-shortcut-button.json",
+        "tests/data/devices/ikea-of-sweden-somrig-shortcut-button-0x01000021.json",
     )
 
     zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
@@ -1257,7 +1985,7 @@ async def test_symfonisk_events(
 
     zigpy_dev = await zigpy_device_from_json(
         zha_gateway.application_controller,
-        "tests/data/devices/ikea-of-sweden-symfonisk-sound-remote-gen2.json",
+        "tests/data/devices/ikea-of-sweden-symfonisk-sound-remote-gen2-0x00010012.json",
     )
 
     zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
@@ -1304,7 +2032,7 @@ async def test_device_on_remove_callback_failure(
     """Test that device.on_remove continues when callback fails."""
     zigpy_dev = await zigpy_device_from_json(
         zha_gateway.application_controller,
-        "tests/data/devices/philips-sml001.json",
+        "tests/data/devices/philips-sml001-0x43007401.json",
     )
     zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
 
@@ -1325,7 +2053,7 @@ async def test_device_on_remove_platform_entity_failure(
     """Test that device.on_remove continues when platform entity removal fails."""
     zigpy_dev = await zigpy_device_from_json(
         zha_gateway.application_controller,
-        "tests/data/devices/philips-sml001.json",
+        "tests/data/devices/philips-sml001-0x43007401.json",
     )
     zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
 
@@ -1346,7 +2074,7 @@ async def test_device_on_remove_pending_entity_failure(
     """Test that device.on_remove continues when pending entity removal fails."""
     zigpy_dev = await zigpy_device_from_json(
         zha_gateway.application_controller,
-        "tests/data/devices/philips-sml001.json",
+        "tests/data/devices/philips-sml001-0x43007401.json",
     )
     zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
 
@@ -1370,7 +2098,7 @@ async def test_initial_entity_discovery_does_not_emit_events(
     """Test that first device initialization does not emit entity events."""
     zigpy_dev = await zigpy_device_from_json(
         zha_gateway.application_controller,
-        "tests/data/devices/ikea-of-sweden-tradfri-bulb-gu10-ws-400lm.json",
+        "tests/data/devices/ikea-of-sweden-tradfri-bulb-gu10-ws-400lm-0x23095631.json",
     )
     zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
 
@@ -1395,7 +2123,7 @@ async def test_reinitialize_emits_events_for_new_entities(
     """Test that re-initializing a device emits events for new entities."""
     zigpy_dev = await zigpy_device_from_json(
         zha_gateway.application_controller,
-        "tests/data/devices/ikea-of-sweden-tradfri-bulb-gu10-ws-400lm.json",
+        "tests/data/devices/ikea-of-sweden-tradfri-bulb-gu10-ws-400lm-0x23095631.json",
     )
     zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
 
@@ -1422,7 +2150,7 @@ async def test_reinitialize_after_on_remove_emits_events(
     """Test that re-init after on_remove (all entities cleared) still emits events."""
     zigpy_dev = await zigpy_device_from_json(
         zha_gateway.application_controller,
-        "tests/data/devices/ikea-of-sweden-tradfri-bulb-gu10-ws-400lm.json",
+        "tests/data/devices/ikea-of-sweden-tradfri-bulb-gu10-ws-400lm-0x23095631.json",
     )
     zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
     entity_count = len(zha_device.platform_entities)
@@ -1444,7 +2172,7 @@ async def test_remove_entity_no_event(zha_gateway: Gateway) -> None:
     """Test that _remove_entity with emit_event=False does not emit."""
     zigpy_dev = await zigpy_device_from_json(
         zha_gateway.application_controller,
-        "tests/data/devices/ikea-of-sweden-tradfri-bulb-gu10-ws-400lm.json",
+        "tests/data/devices/ikea-of-sweden-tradfri-bulb-gu10-ws-400lm-0x23095631.json",
     )
     zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
 
@@ -1457,29 +2185,11 @@ async def test_remove_entity_no_event(zha_gateway: Gateway) -> None:
     assert event_listener.call_count == 0
 
 
-async def test_initialize_endpoint_failure(zha_gateway: Gateway) -> None:
-    """Test that a failing endpoint doesn't prevent device initialization."""
-    zigpy_dev = await zigpy_device_from_json(
-        zha_gateway.application_controller,
-        "tests/data/devices/ikea-of-sweden-tradfri-bulb-gu10-ws-400lm.json",
-    )
-    zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
-
-    with patch.object(
-        zha_device.endpoints[1],
-        "async_initialize",
-        side_effect=Exception("endpoint init failed"),
-    ) as mock_async_initialize:
-        await zha_device.async_initialize(from_cache=True)
-
-    assert mock_async_initialize.call_count == 1
-
-
 async def test_entity_recomputation(zha_gateway: Gateway) -> None:
     """Test entity recomputation."""
     zigpy_dev = await zigpy_device_from_json(
         zha_gateway.application_controller,
-        "tests/data/devices/ikea-of-sweden-tradfri-bulb-gu10-ws-400lm.json",
+        "tests/data/devices/ikea-of-sweden-tradfri-bulb-gu10-ws-400lm-0x23095631.json",
     )
     zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
 
@@ -1540,7 +2250,7 @@ async def test_add_entity_duplicate(zha_gateway: Gateway) -> None:
     """Test that adding a duplicate entity raises an error."""
     zigpy_dev = await zigpy_device_from_json(
         zha_gateway.application_controller,
-        "tests/data/devices/ikea-of-sweden-tradfri-bulb-gu10-ws-400lm.json",
+        "tests/data/devices/ikea-of-sweden-tradfri-bulb-gu10-ws-400lm-0x23095631.json",
     )
     zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
 
@@ -1554,7 +2264,7 @@ async def test_remove_entity_nonexistent(zha_gateway: Gateway) -> None:
     """Test that removing a nonexistent entity raises an error."""
     zigpy_dev = await zigpy_device_from_json(
         zha_gateway.application_controller,
-        "tests/data/devices/ikea-of-sweden-tradfri-bulb-gu10-ws-400lm.json",
+        "tests/data/devices/ikea-of-sweden-tradfri-bulb-gu10-ws-400lm-0x23095631.json",
     )
     zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
 
@@ -1569,7 +2279,7 @@ async def test_gateway_reconfigure_with_swap(
     zha_gateway: Gateway,
 ) -> None:
     """Test gateway.async_reinterview_device rebuilds when reinterview swaps."""
-    zigpy_dev = zigpy_device(zha_gateway, with_basic_cluster_handler=True)
+    zigpy_dev = zigpy_device(zha_gateway, with_basic_cluster=True)
     zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
 
     assert zha_device.status.name == "INITIALIZED"
@@ -1577,15 +2287,13 @@ async def test_gateway_reconfigure_with_swap(
 
     # Create a group containing this device so we can verify that group
     # subscriptions are refreshed after the reinterview rebuild.
-    zha_group = await zha_gateway.async_create_zigpy_group(
-        "Test Group",
-        [GroupMemberReference(ieee=zigpy_dev.ieee, endpoint_id=3)],
-    )
+    zha_group = await zha_gateway.async_create_zigpy_group("Test Group", members=None)
     await zha_gateway.async_block_till_done()
     assert zha_group is not None
 
-    # The mock endpoint.request doesn't actually add to the zigpy group,
-    # so add manually.
+    # The device's endpoint has no `Groups` cluster, so it cannot join a group
+    # itself, and the mock endpoint.request doesn't add it to the zigpy group
+    # either, so add it manually.
     zha_group.zigpy_group.add_member(zigpy_dev.endpoints[3], suppress_event=True)
 
     # Register a mock group entity so the group subscribes to member entities.
@@ -1621,9 +2329,10 @@ async def test_gateway_reconfigure_with_swap(
         patch.object(zha_device, "emit_reconfigure_done") as mock_emit,
     ):
         await zha_gateway.async_reinterview_device(zigpy_dev.ieee)
-        # On swap, async_reinterview_device must not emit reconfigure_done
-        # itself — the rebuild path emits via async_configure().
-        assert mock_emit.call_count == 0
+        await zha_gateway.async_block_till_done()
+        # On swap, the rebuild path emits reconfigure_done exactly once via
+        # async_configure() — async_reinterview_device does not emit itself.
+        assert mock_emit.call_count == 1
 
     await zha_gateway.async_block_till_done()
 
@@ -1635,9 +2344,12 @@ async def test_gateway_reconfigure_with_swap(
     assert len(zha_device.platform_entities) > 0
 
     # Verify the group is subscribed to the NEW entity, not the old one.
-    # Emit a state change on the new entity and check the group got it.
+    # Cause a real state change on the new entity and check the group got it.
     new_switch = get_entity(zha_device, platform=Platform.SWITCH)
     mock_group_entity.debounced_update.reset_mock()
+    new_switch._cluster.update_attribute(
+        general.OnOff.AttributeDefs.on_off.id, zigpy.types.Bool.true
+    )
     new_switch.maybe_emit_state_changed_event()
     assert mock_group_entity.debounced_update.called
 
@@ -1646,7 +2358,7 @@ async def test_gateway_reconfigure_no_swap(
     zha_gateway: Gateway,
 ) -> None:
     """Test gateway.async_reinterview_device does normal configure when no swap."""
-    zigpy_dev = zigpy_device(zha_gateway, with_basic_cluster_handler=True)
+    zigpy_dev = zigpy_device(zha_gateway, with_basic_cluster=True)
     zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
 
     old_zigpy_dev = zha_device.device
@@ -1674,7 +2386,7 @@ async def test_remove_entity_drops_mapping_on_on_remove_failure(
     would silently drop the replacement and the stale entity would shadow
     it indefinitely.
     """
-    zigpy_dev = zigpy_device(zha_gateway, with_basic_cluster_handler=True)
+    zigpy_dev = zigpy_device(zha_gateway, with_basic_cluster=True)
     zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
 
     entity = next(iter(zha_device.platform_entities.values()))
@@ -1701,7 +2413,7 @@ async def test_gateway_reconfigure_with_swap_rebuild_failure(
     is suppressed because entities are partial — reporting CONFIGURED would
     mislead the frontend's pairing-status display.
     """
-    zigpy_dev = zigpy_device(zha_gateway, with_basic_cluster_handler=True)
+    zigpy_dev = zigpy_device(zha_gateway, with_basic_cluster=True)
     zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
 
     new_zigpy_dev = create_mock_zigpy_device(
@@ -1748,7 +2460,7 @@ async def test_gateway_reconfigure_with_swap_initialize_failure(
     `async_initialize()` then raises, the gateway must NOT emit a second
     `reconfigure_done`.
     """
-    zigpy_dev = zigpy_device(zha_gateway, with_basic_cluster_handler=True)
+    zigpy_dev = zigpy_device(zha_gateway, with_basic_cluster=True)
     zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
 
     new_zigpy_dev = create_mock_zigpy_device(
@@ -1797,7 +2509,7 @@ async def test_gateway_reconfigure_reinterview_raises_still_emits(
     Without the `finally`, an exception left the HA frontend stuck on
     "reconfiguring" indefinitely.
     """
-    zigpy_dev = zigpy_device(zha_gateway, with_basic_cluster_handler=True)
+    zigpy_dev = zigpy_device(zha_gateway, with_basic_cluster=True)
     zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
 
     with (
@@ -1818,7 +2530,7 @@ async def test_gateway_device_reinterviewed_ota_path(
     zha_gateway: Gateway,
 ) -> None:
     """Test that the gateway handles device_reinterviewed from OTA/zigpy."""
-    zigpy_dev = zigpy_device(zha_gateway, with_basic_cluster_handler=True)
+    zigpy_dev = zigpy_device(zha_gateway, with_basic_cluster=True)
     zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
 
     assert zha_device.status.name == "INITIALIZED"
@@ -1856,7 +2568,7 @@ async def test_device_reinterviewed_cancels_pending_init_task(
     zha_gateway: Gateway,
 ) -> None:
     """Test that device_reinterviewed cancels an in-flight init task for the device."""
-    zigpy_dev = zigpy_device(zha_gateway, with_basic_cluster_handler=True)
+    zigpy_dev = zigpy_device(zha_gateway, with_basic_cluster=True)
     zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
 
     pending_task = mock.MagicMock()
@@ -1899,7 +2611,7 @@ async def test_device_reinterviewed_configure_failure(
     zha_gateway: Gateway, caplog: pytest.LogCaptureFixture
 ) -> None:
     """Test that a configure failure during reinterview is logged but not raised."""
-    zigpy_dev = zigpy_device(zha_gateway, with_basic_cluster_handler=True)
+    zigpy_dev = zigpy_device(zha_gateway, with_basic_cluster=True)
     zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
 
     new_zigpy_dev = create_mock_zigpy_device(
@@ -1947,7 +2659,7 @@ async def test_async_reinterview_device_active_coordinator(
     zha_gateway: Gateway, caplog: pytest.LogCaptureFixture
 ) -> None:
     """Test that async_reinterview_device skips the active coordinator."""
-    zigpy_dev = zigpy_device(zha_gateway, with_basic_cluster_handler=True)
+    zigpy_dev = zigpy_device(zha_gateway, with_basic_cluster=True)
     zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
 
     with (

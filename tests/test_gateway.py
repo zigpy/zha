@@ -2,17 +2,21 @@
 
 import asyncio
 from contextlib import suppress
+from typing import Any
 from unittest.mock import AsyncMock, MagicMock, PropertyMock, call, patch
+import zoneinfo
 
 import pytest
+from zhaquirks.builder import QuirkBuilder
 from zigpy.application import ControllerApplication
 from zigpy.config import CONF_NWK, CONF_NWK_COUNTRY_CODE
 from zigpy.profiles import zha
 import zigpy.types
-from zigpy.zcl.clusters import general, lighting
+from zigpy.zcl.clusters import general, lighting, measurement
 import zigpy.zdo.types
 import zigpy.zdo.types as zdo_t
 from zigpy.zdo.types import LogicalType, NodeDescriptor
+from zigpy.zgp import GP_GROUP_ID
 
 from tests.common import (
     SIG_EP_INPUT,
@@ -28,7 +32,11 @@ from tests.common import (
 from zha.application import Platform
 from zha.application.const import ZHA_GW_MSG, ZHA_GW_MSG_CONNECTION_LOST, RadioType
 from zha.application.gateway import (
+    GROUP_ID_ALLOCATION_ATTEMPTS,
+    MAX_ALLOCATED_GROUP_ID,
+    MIN_ALLOCATED_GROUP_ID,
     ConnectionLostEvent,
+    DeviceFullInitEvent,
     DeviceJoinedDeviceInfo,
     DeviceJoinedEvent,
     DevicePairingStatus,
@@ -39,7 +47,9 @@ from zha.application.gateway import (
 from zha.application.helpers import ZHAData
 from zha.application.platforms import GroupEntity
 from zha.application.platforms.light.const import EFFECT_OFF, LightEntityFeature
-from zha.zigbee.device import Device
+from zha.exceptions import ZHAException
+from zha.quirks import DeviceMatch, DeviceRegistry, ModelInfo, QuirkRegistryEntry
+from zha.zigbee.device import Device, DeviceEntityAddedEvent, DeviceEntityRemovedEvent
 from zha.zigbee.group import Group, GroupMemberReference
 
 IEEE_GROUPABLE_DEVICE = "01:2d:6f:00:0a:90:69:e8"
@@ -178,6 +188,52 @@ async def test_gateway_startup_failure(
     assert zha_gateway.shutdown.await_count == 1
 
 
+@pytest.mark.parametrize("blocking_call", ["start_network", "load_devices"])
+async def test_gateway_startup_cancelled(
+    zha_data: ZHAData,
+    zigpy_app_controller: ControllerApplication,
+    blocking_call: str,
+) -> None:
+    """Test shutdown called when gateway init is cancelled, e.g. by a setup timeout."""
+
+    entered = asyncio.Event()
+
+    async def block_forever(*args, **kwargs) -> None:
+        entered.set()
+        await asyncio.Future()
+
+    with (
+        patch(
+            "bellows.zigbee.application.ControllerApplication.new",
+            return_value=zigpy_app_controller,
+        ),
+        patch.object(
+            zigpy_app_controller,
+            "shutdown",
+            AsyncMock(wraps=zigpy_app_controller.shutdown),
+        ) as app_shutdown,
+    ):
+        zha_gateway = await Gateway.async_from_config(zha_data)
+        zha_gateway.shutdown = AsyncMock(wraps=zha_gateway.shutdown)
+
+        with patch.object(
+            zigpy_app_controller if blocking_call == "start_network" else zha_gateway,
+            blocking_call,
+            block_forever,
+        ):
+            init_task = asyncio.create_task(zha_gateway.async_initialize())
+            await entered.wait()
+            init_task.cancel()
+
+            with pytest.raises(asyncio.CancelledError):
+                await init_task
+
+    assert zha_gateway.shutdown.await_count == 1
+    assert app_shutdown.await_count == 1
+    assert zha_gateway.application_controller is None
+    assert zigpy_app_controller._watchdog_task.cancelled()
+
+
 async def test_gateway_starts_entity_exception(
     zha_data: ZHAData,
     zigpy_app_controller: ControllerApplication,
@@ -277,10 +333,10 @@ async def test_gateway_group_methods(
     entity: GroupEntity | None = get_group_entity(zha_group, platform=Platform.LIGHT)
     assert entity is not None
 
-    info = entity.info_object
+    info = entity.state
     assert info.class_name == "LightGroup"
     assert info.platform == Platform.LIGHT
-    assert info.unique_id == "light_zha_group_0x0002"
+    assert info.unique_id == f"light_zha_group_0x{zha_group.group_id:04x}"
     assert info.fallback_name == "Test Group"
     assert info.group_id == zha_group.group_id
     assert info.supported_features == LightEntityFeature.TRANSITION
@@ -367,7 +423,7 @@ async def test_gateway_create_group_with_id_without_id(zha_gateway: Gateway) -> 
 
     assert len(zha_group2.members) == 1
     assert zha_group2.members[0].device is device_light_1
-    assert zha_group2.group_id == 0x0002
+    assert MIN_ALLOCATED_GROUP_ID <= zha_group2.group_id <= MAX_ALLOCATED_GROUP_ID
 
     # create group with no group id passed in
     zha_group3 = await zha_gateway.async_create_zigpy_group(
@@ -377,7 +433,253 @@ async def test_gateway_create_group_with_id_without_id(zha_gateway: Gateway) -> 
 
     assert len(zha_group3.members) == 1
     assert zha_group3.members[0].device is device_light_1
-    assert zha_group3.group_id == 0x0003
+    assert MIN_ALLOCATED_GROUP_ID <= zha_group3.group_id <= MAX_ALLOCATED_GROUP_ID
+
+    assert len({zha_group.group_id, zha_group2.group_id, zha_group3.group_id}) == 3
+
+
+@pytest.mark.parametrize("group_id", [0x0000, 0xFFF8, 0xFFFF])
+async def test_gateway_create_group_invalid_id(
+    zha_gateway: Gateway, group_id: int
+) -> None:
+    """Test creating a group with an invalid group ID."""
+
+    with pytest.raises(ZHAException, match="is not a valid Zigbee group ID"):
+        await zha_gateway.async_create_zigpy_group(
+            "Test Group", members=None, group_id=group_id
+        )
+
+    assert zha_gateway.get_group("Test Group") is None
+    assert len(zha_gateway.application_controller.groups) == 1
+
+
+@pytest.mark.parametrize("group_id", [0x0001, 0xFFF7])
+async def test_gateway_create_group_valid_id(
+    zha_gateway: Gateway, group_id: int
+) -> None:
+    """Test creating a group with a group ID at the edges of the valid range."""
+
+    zha_group = await zha_gateway.async_create_zigpy_group(
+        "Test Group", members=None, group_id=group_id
+    )
+    await zha_gateway.async_block_till_done()
+
+    assert zha_group.group_id == group_id
+    assert zha_gateway.get_group(group_id) is zha_group
+
+
+NOT_GROUPABLE_MATCH = (
+    "Cannot add members to group 'Test Group' that are not groupable device endpoints"
+)
+
+
+async def test_gateway_create_group_unknown_device(zha_gateway: Gateway) -> None:
+    """Test creating a group with a member that is not a known device."""
+
+    unknown_ieee = zigpy.types.EUI64.convert("11:22:33:44:55:66:77:88")
+    member = GroupMemberReference(ieee=unknown_ieee, endpoint_id=1)
+
+    # a member that is passed twice is only named once
+    with pytest.raises(
+        ZHAException, match=f"{NOT_GROUPABLE_MATCH}: {unknown_ieee} endpoint 1$"
+    ):
+        await zha_gateway.async_create_zigpy_group("Test Group", [member, member])
+
+    # the group is not created at all, instead of being left without its members
+    assert zha_gateway.get_group("Test Group") is None
+    assert len(zha_gateway.application_controller.groups) == 1
+
+
+@pytest.mark.parametrize("endpoint_id", [0, 1, 99])
+async def test_gateway_create_group_not_groupable_endpoint(
+    zha_gateway: Gateway, endpoint_id: int
+) -> None:
+    """Test creating a group with an endpoint that cannot join a group."""
+
+    # endpoint 1 exists, but has no `Groups` cluster to join; 0 is the ZDO and 99
+    # does not exist at all
+    zigpy_device = create_mock_zigpy_device(
+        zha_gateway,
+        {
+            1: {
+                SIG_EP_INPUT: [general.OnOff.cluster_id],
+                SIG_EP_OUTPUT: [],
+                SIG_EP_TYPE: zha.DeviceType.ON_OFF_LIGHT,
+                SIG_EP_PROFILE: zha.PROFILE_ID,
+            }
+        },
+        ieee="00:11:22:33:44:55:66:77",
+    )
+    device = await join_zigpy_device(zha_gateway, zigpy_device)
+    device._zha_gateway = zha_gateway
+    assert general.Groups.cluster_id not in device.device.endpoints[1].in_clusters
+
+    with pytest.raises(ZHAException, match=NOT_GROUPABLE_MATCH):
+        await zha_gateway.async_create_zigpy_group(
+            "Test Group",
+            [GroupMemberReference(ieee=device.ieee, endpoint_id=endpoint_id)],
+        )
+
+    # the group is not created at all, instead of being left without its members
+    assert zha_gateway.get_group("Test Group") is None
+    assert len(zha_gateway.application_controller.groups) == 1
+
+
+async def test_gateway_create_group_unknown_zigpy_group(zha_gateway: Gateway) -> None:
+    """Test a group ID zigpy knows about but ZHA does not is not silently reused."""
+
+    zha_gateway.application_controller.groups.add_group(
+        0x4321, "ghost", suppress_event=True
+    )
+    assert 0x4321 not in zha_gateway.groups
+
+    with pytest.raises(ZHAException, match="already used by group 'ghost'"):
+        await zha_gateway.async_create_zigpy_group(
+            "Test Group", members=None, group_id=0x4321
+        )
+
+    # the group zigpy knows about is untouched, and no second one was created
+    assert zha_gateway.application_controller.groups[0x4321].name == "ghost"
+    assert len(zha_gateway.application_controller.groups) == 2
+
+
+async def test_gateway_create_group_without_group_added_listener(
+    zha_gateway: Gateway,
+) -> None:
+    """Test the group is returned without relying on the `group_added` listener."""
+
+    zha_gateway.application_controller.groups.remove_listener(zha_gateway)
+
+    zha_group = await zha_gateway.async_create_zigpy_group("Test Group", members=None)
+    await zha_gateway.async_block_till_done()
+
+    assert zha_gateway.groups[zha_group.group_id] is zha_group
+
+
+@pytest.mark.parametrize("late_acknowledgement", [False, True])
+async def test_gateway_create_group_removed_while_creating(
+    zha_gateway: Gateway, late_acknowledgement: bool
+) -> None:
+    """Test a group that is removed while its members are still being added."""
+
+    coordinator = await coordinator_mock(zha_gateway)
+    zha_gateway.coordinator_zha_device = coordinator
+    coordinator._zha_gateway = zha_gateway
+    device_light_1 = await device_light_1_mock(zha_gateway)
+    device_light_1._zha_gateway = zha_gateway
+
+    async def _remove_group_while_adding(
+        self: Device, endpoint_id: int, group_id: int
+    ) -> None:
+        await zha_gateway.async_remove_zigpy_group(group_id)
+        if late_acknowledgement:
+            # the device's `AddGroup` response arrives after the removal
+            await self.device.endpoints[endpoint_id].add_to_group(
+                group_id, name=f"0x{group_id:04X}"
+            )
+
+    with (
+        patch.object(Device, "async_add_endpoint_to_group", _remove_group_while_adding),
+        pytest.raises(
+            ZHAException,
+            match="Group 'Test Group' was removed while it was being created",
+        ),
+    ):
+        await zha_gateway.async_create_zigpy_group(
+            "Test Group",
+            [GroupMemberReference(ieee=device_light_1.ieee, endpoint_id=1)],
+            group_id=0x1234,
+        )
+
+    if late_acknowledgement:
+        # a late response recreates the group, under the name that was sent with
+        # the `AddGroup` command, and it is left alone: the group ID is no longer
+        # ours to remove
+        assert zha_gateway.application_controller.groups[0x1234].name == "0x1234"
+        assert zha_gateway.groups[0x1234].name == "0x1234"
+        assert len(zha_gateway.groups[0x1234].members) == 1
+    else:
+        # the group is gone on both sides, rather than only in zigpy
+        assert 0x1234 not in zha_gateway.application_controller.groups
+        assert 0x1234 not in zha_gateway.groups
+
+
+async def test_gateway_create_group_duplicate(zha_gateway: Gateway) -> None:
+    """Test creating a group with an already used group ID or name."""
+
+    zha_group = await zha_gateway.async_create_zigpy_group(
+        "Test Group", members=None, group_id=0x1234
+    )
+    await zha_gateway.async_block_till_done()
+
+    with pytest.raises(
+        ZHAException, match="Group ID 0x1234 is already used by group 'Test Group'"
+    ):
+        await zha_gateway.async_create_zigpy_group(
+            "Test Group2", members=None, group_id=0x1234
+        )
+
+    with pytest.raises(ZHAException, match="A group named 'Test Group' already exists"):
+        await zha_gateway.async_create_zigpy_group("Test Group", members=None)
+
+    # the existing group is untouched and no second group was created
+    assert zha_gateway.groups[0x1234] is zha_group
+    assert zha_group.name == "Test Group"
+    assert zha_gateway.get_group("Test Group2") is None
+    # the fixture group and this one
+    assert len(zha_gateway.application_controller.groups) == 2
+
+
+async def test_gateway_create_group_allocates_unused_id(
+    zha_gateway: Gateway,
+) -> None:
+    """Test that a group ID is allocated at random from the valid range."""
+
+    existing_group_id = next(iter(zha_gateway.application_controller.groups))
+    # both are inside the allocation range, so rejecting them is not vacuous
+    assert MIN_ALLOCATED_GROUP_ID <= GP_GROUP_ID <= MAX_ALLOCATED_GROUP_ID
+    assert MIN_ALLOCATED_GROUP_ID <= existing_group_id <= MAX_ALLOCATED_GROUP_ID
+
+    # IDs in use or reserved are rejected
+    with patch(
+        "zha.application.gateway.random.randint",
+        side_effect=[existing_group_id, GP_GROUP_ID, 0x1234],
+    ) as randint:
+        zha_group = await zha_gateway.async_create_zigpy_group("Test Group", None)
+        await zha_gateway.async_block_till_done()
+
+    assert (
+        randint.call_args_list
+        == [call(MIN_ALLOCATED_GROUP_ID, MAX_ALLOCATED_GROUP_ID)] * 3
+    )
+    assert MIN_ALLOCATED_GROUP_ID == 0x0100
+    assert MAX_ALLOCATED_GROUP_ID == 0xFEFF
+    assert zha_group.group_id == 0x1234
+
+    # the group that was just created is rejected as well
+    with patch(
+        "zha.application.gateway.random.randint",
+        side_effect=[zha_group.group_id, 0x1235],
+    ):
+        zha_group2 = await zha_gateway.async_create_zigpy_group("Test Group2", None)
+        await zha_gateway.async_block_till_done()
+
+    assert zha_group2.group_id == 0x1235
+
+
+async def test_gateway_create_group_without_unused_id(zha_gateway: Gateway) -> None:
+    """Test creating a group when no unused group ID is found."""
+
+    with (
+        patch(
+            "zha.application.gateway.random.randint",
+            return_value=next(iter(zha_gateway.application_controller.groups)),
+        ) as randint,
+        pytest.raises(ZHAException, match="No unused Zigbee group ID is available"),
+    ):
+        await zha_gateway.async_create_zigpy_group("Test Group", None)
+
+    assert randint.call_count == GROUP_ID_ALLOCATION_ATTEMPTS
 
 
 async def test_remove_device_cleans_up_group_membership(
@@ -510,6 +812,96 @@ async def test_startup_concurrency_limit(
         assert 1 == max(concurrencies) == zha_gw.radio_concurrency
 
 
+@pytest.mark.parametrize(
+    "tz",
+    [
+        None,
+        zoneinfo.ZoneInfo("America/New_York"),
+    ],
+)
+async def test_configured_timezone_passed_to_controller(
+    tz: zoneinfo.ZoneInfo | None,
+    zigpy_app_controller: ControllerApplication,
+    zha_data: ZHAData,
+) -> None:
+    """Test that the configured timezone is forwarded to ControllerApplication.new."""
+    zha_data.local_timezone = tz
+    zha_gw = Gateway(zha_data)
+
+    with patch(
+        "bellows.zigbee.application.ControllerApplication.new",
+        AsyncMock(return_value=zigpy_app_controller),
+    ) as mock_new:
+        await zha_gw.async_initialize()
+
+    assert mock_new.call_args.kwargs["local_timezone"] == tz
+
+    await zha_gw.shutdown()
+
+
+async def test_update_local_timezone_syncs_controller(
+    zha_gateway: Gateway,
+) -> None:
+    """Test that update_local_timezone keeps ZHAData and the controller in sync."""
+    new_tz = zoneinfo.ZoneInfo("Europe/London")
+
+    zha_gateway.update_local_timezone(new_tz)
+
+    assert zha_gateway.config.local_timezone is new_tz
+    assert zha_gateway.application_controller.local_timezone is new_tz
+
+    # Also verify clearing to None propagates.
+    zha_gateway.update_local_timezone(None)
+
+    assert zha_gateway.config.local_timezone is None
+    assert zha_gateway.application_controller.local_timezone is None
+
+
+async def test_update_local_timezone_before_init(
+    zha_data: ZHAData,
+) -> None:
+    """Test update_local_timezone before and after controller lifecycle."""
+    tz = zoneinfo.ZoneInfo("America/Chicago")
+    gw = Gateway(zha_data)
+
+    # Before async_initialize: controller is None; must not raise.
+    gw.update_local_timezone(tz)
+    assert gw.config.local_timezone is tz
+    assert gw.application_controller is None
+
+    # After shutdown: controller is reset to None; must not raise.
+    await gw.shutdown()
+    gw.update_local_timezone(zoneinfo.ZoneInfo("Europe/Paris"))
+    assert gw.config.local_timezone == zoneinfo.ZoneInfo("Europe/Paris")
+    assert gw.application_controller is None
+
+
+async def test_update_local_timezone_during_controller_creation(
+    zigpy_app_controller: ControllerApplication,
+    zha_data: ZHAData,
+) -> None:
+    """Test a timezone update while ControllerApplication.new() is suspended."""
+    new_tz = zoneinfo.ZoneInfo("Europe/London")
+    zha_data.local_timezone = None
+    zha_gw = Gateway(zha_data)
+
+    async def slow_new(*args: Any, **kwargs: Any) -> ControllerApplication:
+        # Simulates the awaited database load: the update lands mid-creation.
+        zha_gw.update_local_timezone(new_tz)
+        zigpy_app_controller.local_timezone = kwargs["local_timezone"]
+        return zigpy_app_controller
+
+    with patch(
+        "bellows.zigbee.application.ControllerApplication.new",
+        AsyncMock(side_effect=slow_new),
+    ):
+        await zha_gw.async_initialize()
+
+    assert zha_gw.application_controller.local_timezone is new_tz
+
+    await zha_gw.shutdown()
+
+
 async def test_gateway_device_removed(zha_gateway: Gateway) -> None:
     """Test ZHA device removal."""
 
@@ -610,26 +1002,282 @@ async def test_gateway_device_reinterviewed_no_bookkeeping_loss_on_rapid_event(
     in-flight task.
     """
     zigpy_dev = create_mock_zigpy_device(zha_gateway, ZIGPY_DEVICE_BASIC)
-    await join_zigpy_device(zha_gateway, zigpy_dev)
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
 
-    zha_gateway.device_reinterviewed(zigpy_dev)
-    task_1 = zha_gateway._device_init_tasks[zigpy_dev.ieee]
+    # Keep the replacement task in-flight by stalling configure on an event
+    # we control. Without this, the reinterview task completes synchronously
+    # under eager_start and exits the dict before we get to assert.
+    proceed = asyncio.Event()
+    original_configure = zha_device.async_configure
 
-    zha_gateway.device_reinterviewed(zigpy_dev)
-    task_2 = zha_gateway._device_init_tasks[zigpy_dev.ieee]
-    assert task_2 is not task_1
+    async def stalled_configure() -> None:
+        await proceed.wait()
+        await original_configure()
 
-    # Let task_1's cancellation propagate and its done-callback run.
-    with suppress(asyncio.CancelledError):
-        await task_1
-    await asyncio.sleep(0)
+    with patch.object(zha_device, "async_configure", side_effect=stalled_configure):
+        zha_gateway.device_reinterviewed(zigpy_dev)
+        task_1 = zha_gateway._device_init_tasks[zigpy_dev.ieee]
 
-    # The cancelled task's done-callback must not have cleared the dict;
-    # the replacement task is still in flight.
-    assert zha_gateway._device_init_tasks.get(zigpy_dev.ieee) is task_2
+        zha_gateway.device_reinterviewed(zigpy_dev)
+        task_2 = zha_gateway._device_init_tasks[zigpy_dev.ieee]
+        assert task_2 is not task_1
+
+        # Let task_1's cancellation propagate and its done-callback run.
+        with suppress(asyncio.CancelledError):
+            await task_1
+        await asyncio.sleep(0)
+
+        # The cancelled task's done-callback must not have cleared the dict;
+        # the replacement task is still in flight.
+        assert zha_gateway._device_init_tasks.get(zigpy_dev.ieee) is task_2
+
+        proceed.set()
 
     await zha_gateway.async_block_till_done()
     assert zigpy_dev.ieee not in zha_gateway._device_init_tasks
+
+
+async def test_reinterview_replaces_device_when_quirk_changes(
+    zha_gateway: Gateway,
+) -> None:
+    """A re-interview resolving a different quirk replaces the device object."""
+    registry = DeviceRegistry()
+    (
+        QuirkBuilder("Fake_Manufacturer", "Model_A")
+        .friendly_name(model="Quirk A", manufacturer="Fake_Manufacturer")
+        .add_to_registry(registry)
+    )
+    (
+        QuirkBuilder("Fake_Manufacturer", "Model_B")
+        .friendly_name(model="Quirk B", manufacturer="Fake_Manufacturer")
+        .add_to_registry(registry)
+    )
+
+    zigpy_device = create_mock_zigpy_device(
+        zha_gateway,
+        ZIGPY_DEVICE_BASIC,
+        manufacturer="Fake_Manufacturer",
+        model="Model_A",
+        registry=registry,
+    )
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
+    assert zha_device.quirk_applied
+    assert zha_device.model == "Quirk A"
+
+    reinterviewed = create_mock_zigpy_device(
+        zha_gateway,
+        ZIGPY_DEVICE_BASIC,
+        manufacturer="Fake_Manufacturer",
+        model="Model_B",
+        registry=registry,
+    )
+    zha_gateway.device_reinterviewed(reinterviewed)
+    await zha_gateway.async_block_till_done()
+
+    new_zha_device = zha_gateway.get_device(zigpy_device.ieee)
+    assert new_zha_device is not zha_device
+    assert new_zha_device.quirk_applied
+    assert new_zha_device.model == "Quirk B"
+
+
+async def test_reinterview_swap_emits_full_init_configured(
+    zha_gateway: Gateway,
+) -> None:
+    """A re-interview that replaces the device emits a CONFIGURED full-init event.
+
+    HA repoints its (IEEE-keyed) device proxy off this event, so the swap must
+    still surface it with `CONFIGURED` status and `new_join=False`.
+    """
+    registry = DeviceRegistry()
+    (
+        QuirkBuilder("Fake_Manufacturer", "Model_A")
+        .friendly_name(model="Quirk A", manufacturer="Fake_Manufacturer")
+        .add_to_registry(registry)
+    )
+    (
+        QuirkBuilder("Fake_Manufacturer", "Model_B")
+        .friendly_name(model="Quirk B", manufacturer="Fake_Manufacturer")
+        .add_to_registry(registry)
+    )
+
+    zigpy_device = create_mock_zigpy_device(
+        zha_gateway,
+        ZIGPY_DEVICE_BASIC,
+        manufacturer="Fake_Manufacturer",
+        model="Model_A",
+        registry=registry,
+    )
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
+
+    events = []
+    zha_gateway.on_all_events(events.append)
+
+    reinterviewed = create_mock_zigpy_device(
+        zha_gateway,
+        ZIGPY_DEVICE_BASIC,
+        manufacturer="Fake_Manufacturer",
+        model="Model_B",
+        registry=registry,
+    )
+    zha_gateway.device_reinterviewed(reinterviewed)
+    await zha_gateway.async_block_till_done()
+
+    assert zha_gateway.get_device(zigpy_device.ieee) is not zha_device
+
+    full_inits = [e for e in events if isinstance(e, DeviceFullInitEvent)]
+    assert len(full_inits) == 1
+    assert full_inits[0].device_info.pairing_status is DevicePairingStatus.CONFIGURED
+    assert full_inits[0].new_join is False
+
+
+async def test_reinterview_rebuilds_in_place_when_quirk_unchanged(
+    zha_gateway: Gateway,
+) -> None:
+    """A re-interview resolving the same quirk rebuilds in place, preserving identity."""
+    registry = DeviceRegistry()
+    (
+        QuirkBuilder("Fake_Manufacturer", "Model_A")
+        .friendly_name(model="Quirk A", manufacturer="Fake_Manufacturer")
+        .add_to_registry(registry)
+    )
+
+    zigpy_device = create_mock_zigpy_device(
+        zha_gateway,
+        ZIGPY_DEVICE_BASIC,
+        manufacturer="Fake_Manufacturer",
+        model="Model_A",
+        registry=registry,
+    )
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
+
+    reinterviewed = create_mock_zigpy_device(
+        zha_gateway,
+        ZIGPY_DEVICE_BASIC,
+        manufacturer="Fake_Manufacturer",
+        model="Model_A",
+        registry=registry,
+    )
+    zha_gateway.device_reinterviewed(reinterviewed)
+    await zha_gateway.async_block_till_done()
+
+    assert zha_gateway.get_device(zigpy_device.ieee) is zha_device
+
+
+async def test_reinterview_in_place_events(zha_gateway: Gateway) -> None:
+    """An in-place reinterview that changes the entity set emits add/remove events."""
+
+    # For simplicity, assume the device changes its model during a reinterview
+    registry = DeviceRegistry()
+    registry.register(
+        QuirkRegistryEntry(
+            device_match=DeviceMatch(
+                applies_to=(ModelInfo("Fake_Manufacturer", "Model_A"),)
+            )
+        )
+    )
+    registry.register(
+        QuirkRegistryEntry(
+            device_match=DeviceMatch(
+                applies_to=(ModelInfo("Fake_Manufacturer", "Model_B"),)
+            )
+        )
+    )
+
+    zigpy_device = create_mock_zigpy_device(
+        zha_gateway,
+        {
+            1: {
+                SIG_EP_INPUT: [
+                    general.Basic.cluster_id,
+                    general.OnOff.cluster_id,
+                    measurement.TemperatureMeasurement.cluster_id,
+                ],
+                SIG_EP_OUTPUT: [],
+                SIG_EP_TYPE: zha.DeviceType.ON_OFF_SWITCH,
+                SIG_EP_PROFILE: zha.PROFILE_ID,
+            }
+        },
+        manufacturer="Fake_Manufacturer",
+        model="Model_A",
+        registry=registry,
+    )
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
+    assert zha_device._initialized is True
+
+    ieee = zigpy_device.ieee
+
+    before = {e.unique_id for e in zha_device.platform_entities.values()}
+    assert "00:0d:6f:00:0a:90:69:e7-1-1026" in before
+    assert "00:0d:6f:00:0a:90:69:e7-1-1029" not in before
+
+    events = []
+    zha_device.on_all_events(events.append)
+
+    # Re-interview into a device that drops the temperature sensor and adds a humidity
+    # sensor (the OnOff switch is unchanged).
+    reinterviewed = create_mock_zigpy_device(
+        zha_gateway,
+        {
+            1: {
+                SIG_EP_INPUT: [
+                    general.Basic.cluster_id,
+                    general.OnOff.cluster_id,
+                    measurement.RelativeHumidity.cluster_id,
+                ],
+                SIG_EP_OUTPUT: [],
+                SIG_EP_TYPE: zha.DeviceType.ON_OFF_SWITCH,
+                SIG_EP_PROFILE: zha.PROFILE_ID,
+            }
+        },
+        manufacturer="Fake_Manufacturer",
+        model="Model_B",
+        registry=registry,
+    )
+    zha_gateway.device_reinterviewed(reinterviewed)
+    await zha_gateway.async_block_till_done()
+
+    # Rebuilt in place: same object, still initialized, new zigpy device bound.
+    assert zha_gateway.get_device(ieee) is zha_device
+    assert zha_device.device is reinterviewed
+    assert zha_device._initialized is True
+
+    after = {e.unique_id for e in zha_device.platform_entities.values()}
+    assert "00:0d:6f:00:0a:90:69:e7-1-1029" in after
+    assert "00:0d:6f:00:0a:90:69:e7-1-1026" not in after
+
+    entity_events = [
+        e
+        for e in events
+        if isinstance(e, (DeviceEntityAddedEvent, DeviceEntityRemovedEvent))
+    ]
+    assert entity_events == [
+        # Old ones were removed
+        DeviceEntityRemovedEvent(
+            platform=Platform.SENSOR, unique_id="00:0d:6f:00:0a:90:69:e7-1-0-rssi"
+        ),
+        DeviceEntityRemovedEvent(
+            platform=Platform.SENSOR, unique_id="00:0d:6f:00:0a:90:69:e7-1-0-lqi"
+        ),
+        DeviceEntityRemovedEvent(
+            platform=Platform.SENSOR, unique_id="00:0d:6f:00:0a:90:69:e7-1-1026"
+        ),
+        DeviceEntityRemovedEvent(
+            platform=Platform.SWITCH, unique_id="00:0d:6f:00:0a:90:69:e7-1-6"
+        ),
+        # And new ones added
+        DeviceEntityAddedEvent(
+            platform=Platform.SENSOR, unique_id="00:0d:6f:00:0a:90:69:e7-1-0-rssi"
+        ),
+        DeviceEntityAddedEvent(
+            platform=Platform.SENSOR, unique_id="00:0d:6f:00:0a:90:69:e7-1-0-lqi"
+        ),
+        DeviceEntityAddedEvent(
+            platform=Platform.SENSOR, unique_id="00:0d:6f:00:0a:90:69:e7-1-1029"
+        ),
+        DeviceEntityAddedEvent(
+            platform=Platform.SWITCH, unique_id="00:0d:6f:00:0a:90:69:e7-1-6"
+        ),
+    ]
 
 
 def test_gateway_raw_device_initialized(
@@ -820,6 +1468,7 @@ def test_radio_type():
         "EZSP = Silicon Labs EmberZNet protocol: Elelabs, HUSBZB-1, Telegesis",
         "ZNP = Texas Instruments Z-Stack ZNP protocol: CC253x, CC26x2, CC13x2",
         "deCONZ = dresden elektronik deCONZ protocol: ConBee I/II, RaspBee I/II",
+        "Ziggurat = Open source host-side Zigbee stack in Rust",
         "ZiGate = ZiGate Zigbee radios: PiZiGate, ZiGate USB-TTL, ZiGate WiFi",
         "XBee = Digi XBee Zigbee radios: Digi XBee Series 2, 2C, 3",
     ]
@@ -972,7 +1621,7 @@ async def test_gateway_shutdown_group_on_remove_failure(
     """Test that gateway shutdown continues when group.on_remove fails."""
     zigpy_dev_1 = await zigpy_device_from_json(
         zha_gateway.application_controller,
-        "tests/data/devices/ikea-of-sweden-tradfri-bulb-gu10-ws-400lm.json",
+        "tests/data/devices/ikea-of-sweden-tradfri-bulb-gu10-ws-400lm-0x23095631.json",
     )
     zha_device_1 = await join_zigpy_device(zha_gateway, zigpy_dev_1)
 
@@ -999,11 +1648,11 @@ async def test_group_on_remove_entity_failure(
     """Test that group.on_remove continues when group entity removal fails."""
     zigpy_dev_1 = await zigpy_device_from_json(
         zha_gateway.application_controller,
-        "tests/data/devices/ikea-of-sweden-tradfri-bulb-gu10-ws-400lm.json",
+        "tests/data/devices/ikea-of-sweden-tradfri-bulb-gu10-ws-400lm-0x23095631.json",
     )
     zigpy_dev_2 = await zigpy_device_from_json(
         zha_gateway.application_controller,
-        "tests/data/devices/ikea-of-sweden-tradfri-bulb-e26-opal-1000lm.json",
+        "tests/data/devices/ikea-of-sweden-tradfri-bulb-e26-opal-1000lm-0x23094631.json",
     )
     zha_device_1 = await join_zigpy_device(zha_gateway, zigpy_dev_1)
     zha_device_2 = await join_zigpy_device(zha_gateway, zigpy_dev_2)

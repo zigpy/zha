@@ -1,9 +1,9 @@
 """Constants for the binary_sensor platform."""
 
-from zigpy.quirks.v2.homeassistant.binary_sensor import BinarySensorDeviceClass
 from zigpy.zcl.clusters.security import IasZone
 
-# Re-exported from zigpy for use throughout ZHA
+from zha.application.platforms.binary_sensor.device_class import BinarySensorDeviceClass
+
 __all__ = ["BinarySensorDeviceClass"]
 
 
