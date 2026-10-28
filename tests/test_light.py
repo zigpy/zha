@@ -2547,3 +2547,213 @@ async def test_group_state_ignores_unavailable_members(zha_gateway: Gateway) -> 
     await asyncio.sleep(0.1)
     await zha_gateway.async_block_till_done()
     assert bool(entity.state.on) is True
+
+
+FAILURE = [sentinel.data, zcl_f.Status.FAILURE]
+SUCCESS = [sentinel.data, zcl_f.Status.SUCCESS]
+
+
+@pytest.mark.parametrize(
+    "turn_on_kwargs",
+    [
+        {"brightness": 100},
+        {"transition": 2},
+    ],
+)
+@patch(
+    "zigpy.zcl.clusters.general.LevelControl.request",
+    new=AsyncMock(return_value=FAILURE),
+)
+@patch(
+    "zigpy.zcl.clusters.general.OnOff.request",
+    new=AsyncMock(return_value=SUCCESS),
+)
+async def test_turn_on_level_command_failure_clears_transition_flag(
+    zha_gateway: Gateway, turn_on_kwargs: dict[str, Any]
+) -> None:
+    """Test a failed move_to_level does not leave the light transitioning."""
+    device_light_1 = await device_light_1_mock(zha_gateway)
+    entity = get_entity(device_light_1, platform=Platform.LIGHT)
+    assert bool(entity.state.on) is False
+
+    await entity.async_turn_on(**turn_on_kwargs)
+    await zha_gateway.async_block_till_done()
+
+    # The device refused the command: no optimistic state, and attribute
+    # reports are not ignored until some timer fires.
+    assert bool(entity.state.on) is False
+    assert not entity.is_transitioning
+
+
+@patch(
+    "zigpy.zcl.clusters.general.LevelControl.request",
+    new=AsyncMock(return_value=SUCCESS),
+)
+@patch(
+    "zigpy.zcl.clusters.general.OnOff.request",
+    new=AsyncMock(return_value=FAILURE),
+)
+async def test_turn_on_command_failure_leaves_light_off(
+    zha_gateway: Gateway,
+) -> None:
+    """Test a failed on command does not mark the light on."""
+    device_light_1 = await device_light_1_mock(zha_gateway)
+    entity = get_entity(device_light_1, platform=Platform.LIGHT)
+
+    await entity.async_turn_on()
+    await zha_gateway.async_block_till_done()
+    assert bool(entity.state.on) is False
+
+    # The transition window still runs out and the flag is released.
+    await asyncio.sleep(1.6)
+    await zha_gateway.async_block_till_done()
+    assert not entity.is_transitioning
+    assert bool(entity.state.on) is False
+
+
+@pytest.mark.parametrize("turn_off_kwargs", [{}, {"transition": 1}])
+async def test_turn_off_command_failure_keeps_light_on(
+    zha_gateway: Gateway, turn_off_kwargs: dict[str, Any]
+) -> None:
+    """Test a failed off command leaves the light on."""
+    device_light_1 = await device_light_1_mock(zha_gateway)
+    entity = get_entity(device_light_1, platform=Platform.LIGHT)
+
+    with (
+        patch(
+            "zigpy.zcl.clusters.general.LevelControl.request",
+            new=AsyncMock(return_value=SUCCESS),
+        ),
+        patch(
+            "zigpy.zcl.clusters.general.OnOff.request",
+            new=AsyncMock(return_value=SUCCESS),
+        ),
+    ):
+        await entity.async_turn_on(brightness=200)
+        await zha_gateway.async_block_till_done()
+        await asyncio.sleep(1.6)
+        await zha_gateway.async_block_till_done()
+    assert bool(entity.state.on) is True
+
+    with (
+        patch(
+            "zigpy.zcl.clusters.general.LevelControl.request",
+            new=AsyncMock(return_value=FAILURE),
+        ),
+        patch(
+            "zigpy.zcl.clusters.general.OnOff.request",
+            new=AsyncMock(return_value=FAILURE),
+        ),
+    ):
+        await entity.async_turn_off(**turn_off_kwargs)
+        await zha_gateway.async_block_till_done()
+
+    assert bool(entity.state.on) is True
+
+
+@pytest.mark.parametrize(
+    "color_kwargs",
+    [
+        {"color_temp": 300},
+        {"xy_color": (0.3, 0.4)},
+    ],
+)
+@patch(
+    "zigpy.zcl.clusters.general.LevelControl.request",
+    new=AsyncMock(return_value=SUCCESS),
+)
+@patch(
+    "zigpy.zcl.clusters.general.OnOff.request",
+    new=AsyncMock(return_value=SUCCESS),
+)
+@patch(
+    "zigpy.zcl.clusters.lighting.Color.request",
+    new=AsyncMock(return_value=FAILURE),
+)
+async def test_turn_on_color_command_failure_keeps_color(
+    zha_gateway: Gateway, color_kwargs: dict[str, Any]
+) -> None:
+    """Test a failed color command does not change the entity's color."""
+    device_light_1 = await device_light_1_mock(zha_gateway)
+    entity = get_entity(device_light_1, platform=Platform.LIGHT)
+    color_before = (entity.state.color_temp, entity.state.xy_color)
+
+    await entity.async_turn_on(brightness=100, **color_kwargs)
+    await zha_gateway.async_block_till_done()
+
+    assert (entity.state.color_temp, entity.state.xy_color) == color_before
+
+
+def enable_enhanced_light_transition(zha_gateway: Gateway) -> None:
+    """Enable the enhanced light transition option."""
+    zha_gateway.config.config.light_options.enable_enhanced_light_transition = True
+
+
+@patch(
+    "zigpy.zcl.clusters.general.OnOff.request",
+    new=AsyncMock(return_value=SUCCESS),
+)
+@pytest.mark.parametrize(
+    ("level_results", "expected_requests"),
+    [
+        # the initial low-brightness move_to_level_with_on_off fails
+        ([FAILURE], 1),
+        # the color is set, but the final move_to_level fails
+        ([SUCCESS, FAILURE], 2),
+    ],
+)
+async def test_enhanced_turn_on_level_command_failure(
+    zha_gateway: Gateway,
+    level_results: list[list],
+    expected_requests: int,
+) -> None:
+    """Test a failed level command during an enhanced turn on releases the flag."""
+    enable_enhanced_light_transition(zha_gateway)
+    device_light_1 = await device_light_1_mock(zha_gateway)
+    entity = get_entity(device_light_1, platform=Platform.LIGHT)
+    assert bool(entity.state.on) is False
+
+    level_request = AsyncMock(side_effect=level_results)
+    with (
+        patch("zigpy.zcl.clusters.general.LevelControl.request", new=level_request),
+        patch(
+            "zigpy.zcl.clusters.lighting.Color.request",
+            new=AsyncMock(return_value=SUCCESS),
+        ),
+    ):
+        await entity.async_turn_on(brightness=100, color_temp=300)
+        await zha_gateway.async_block_till_done()
+
+    assert level_request.await_count == expected_requests
+    assert not entity.is_transitioning
+
+
+@patch(
+    "zigpy.zcl.clusters.general.LevelControl.request",
+    new=AsyncMock(return_value=SUCCESS),
+)
+@patch(
+    "zigpy.zcl.clusters.general.OnOff.request",
+    new=AsyncMock(return_value=SUCCESS),
+)
+@patch(
+    "zigpy.zcl.clusters.lighting.Color.request",
+    new=AsyncMock(return_value=FAILURE),
+)
+async def test_turn_on_execute_if_off_color_command_failure(
+    zha_gateway: Gateway,
+) -> None:
+    """Test a failed color command sent before turning on releases the flag."""
+    device_light_1 = await device_light_1_mock(zha_gateway)
+    entity = get_entity(device_light_1, platform=Platform.LIGHT)
+    color_cluster = device_light_1.device.endpoints[1].light_color
+    color_cluster.update_attribute(
+        lighting.Color.AttributeDefs.options.id,
+        lighting.Color.Options.Execute_if_off,
+    )
+
+    await entity.async_turn_on(brightness=100, color_temp=300)
+    await zha_gateway.async_block_till_done()
+
+    assert bool(entity.state.on) is False
+    assert not entity.is_transitioning
