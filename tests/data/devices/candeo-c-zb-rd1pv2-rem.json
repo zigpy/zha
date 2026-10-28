@@ -7,8 +7,8 @@
   "friendly_manufacturer": "Candeo",
   "friendly_model": "C-ZB-RD1Pv2-REM",
   "name": "Candeo C-ZB-RD1Pv2-REM",
-  "quirk_applied": false,
-  "quirk_class": "zigpy.device.ZigbeeDevice",
+  "quirk_applied": true,
+  "quirk_class": "zhaquirks.candeo.rotary_dimmer_switches:(Candeo / C-ZB-RD1P-REM)",
   "exposes_features": [],
   "manufacturer_code": 4714,
   "power_source": "Mains",
@@ -58,11 +58,6 @@
               "value": "C-ZB-RD1Pv2-REM"
             }
           ]
-        },
-        {
-          "cluster_id": "0x0003",
-          "endpoint_attribute": "identify",
-          "attributes": []
         },
         {
           "cluster_id": "0x0702",
@@ -479,11 +474,6 @@
           "cluster_id": "0x0000",
           "endpoint_attribute": "basic",
           "attributes": []
-        },
-        {
-          "cluster_id": "0x0003",
-          "endpoint_attribute": "identify",
-          "attributes": []
         }
       ],
       "out_clusters": [
@@ -607,7 +597,7 @@
     "button": [
       {
         "fallback_name": null,
-        "unique_id": "ab:cd:ef:12:5f:10:f8:28-1-3",
+        "unique_id": "ab:cd:ef:12:5f:10:f8:28-3-3",
         "migrate_unique_ids": [],
         "platform": "button",
         "class_name": "IdentifyButton",
@@ -621,7 +611,7 @@
         "primary": false,
         "extra_state_attribute_names": [],
         "device_ieee": "ab:cd:ef:12:5f:10:f8:28",
-        "endpoint_id": 1,
+        "endpoint_id": 3,
         "available": true,
         "group_id": null,
         "command": "identify",

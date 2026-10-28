@@ -7,8 +7,8 @@
   "friendly_manufacturer": "Candeo",
   "friendly_model": "C-ZB-RD1Pv2-DIM",
   "name": "Candeo C-ZB-RD1Pv2-DIM",
-  "quirk_applied": false,
-  "quirk_class": "zigpy.device.ZigbeeDevice",
+  "quirk_applied": true,
+  "quirk_class": "zhaquirks.candeo.rotary_dimmer_switches:(Candeo / C-ZB-RD1Pv2-DIM)",
   "exposes_features": [],
   "manufacturer_code": 4714,
   "power_source": "Mains",
@@ -1027,6 +1027,35 @@
         "measurement_type": null,
         "max_value": null,
         "max_attribute_name": "rms_voltage_max"
+      }
+    ],
+    "switch": [
+      {
+        "fallback_name": "Extra button commands",
+        "unique_id": "ab:cd:ef:12:1f:92:2b:77-1-extra_button_commands",
+        "migrate_unique_ids": [],
+        "platform": "switch",
+        "class_name": "ConfigurableAttributeSwitch",
+        "translation_key": "extra_button_commands",
+        "translation_placeholders": null,
+        "device_class": null,
+        "state_class": null,
+        "entity_category": "config",
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:1f:92:2b:77",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "is_on": false,
+        "inverted": false,
+        "attribute_name": "extra_button_commands",
+        "invert_attribute_name": null,
+        "force_inverted": false,
+        "off_value": 0,
+        "on_value": 1
       }
     ],
     "update": [

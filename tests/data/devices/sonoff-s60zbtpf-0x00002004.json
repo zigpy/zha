@@ -477,7 +477,7 @@
         },
         {
           "cluster_id": "0xfc11",
-          "endpoint_attribute": "manufacturer_specific",
+          "endpoint_attribute": "ewelink",
           "attributes": []
         },
         {
@@ -821,6 +821,33 @@
         "available": true,
         "group_id": null,
         "is_on": 0
+      },
+      {
+        "fallback_name": "Network LED",
+        "unique_id": "ab:cd:ef:12:88:55:4d:2b-1-network_led",
+        "migrate_unique_ids": [],
+        "platform": "switch",
+        "class_name": "ConfigurableAttributeSwitch",
+        "translation_key": "network_led",
+        "translation_placeholders": null,
+        "device_class": null,
+        "state_class": null,
+        "entity_category": "config",
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:88:55:4d:2b",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "is_on": false,
+        "inverted": false,
+        "attribute_name": "network_led",
+        "invert_attribute_name": null,
+        "force_inverted": false,
+        "off_value": 0,
+        "on_value": 1
       }
     ],
     "update": [

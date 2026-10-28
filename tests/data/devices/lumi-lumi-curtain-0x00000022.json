@@ -604,12 +604,6 @@
               "value": 0
             },
             {
-              "id": "0x0001",
-              "name": "occupancy_sensor_type_bitmap",
-              "zcl_type": "map8",
-              "value": 0
-            },
-            {
               "id": "0x0010",
               "name": "pir_o_to_u_delay",
               "zcl_type": "uint16",
@@ -860,7 +854,7 @@
         "native_value": 100.0,
         "mode": "auto",
         "native_max_value": 100.0,
-        "native_min_value": 0,
+        "native_min_value": 0.0,
         "native_step": null,
         "native_unit_of_measurement": null
       }

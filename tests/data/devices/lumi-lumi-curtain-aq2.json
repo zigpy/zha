@@ -349,7 +349,7 @@
         "native_value": 100.0,
         "mode": "auto",
         "native_max_value": 100.0,
-        "native_min_value": 0,
+        "native_min_value": 0.0,
         "native_step": 1.0,
         "native_unit_of_measurement": null
       }

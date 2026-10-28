@@ -95,50 +95,7 @@
         {
           "cluster_id": "0x0008",
           "endpoint_attribute": "level",
-          "attributes": [
-            {
-              "id": "0x0000",
-              "name": "current_level",
-              "zcl_type": "uint8",
-              "value": 1
-            },
-            {
-              "id": "0x0014",
-              "name": "default_move_rate",
-              "zcl_type": "uint8",
-              "unsupported": true
-            },
-            {
-              "id": "0x0013",
-              "name": "off_transition_time",
-              "zcl_type": "uint16",
-              "unsupported": true
-            },
-            {
-              "id": "0x0011",
-              "name": "on_level",
-              "zcl_type": "uint8",
-              "unsupported": true
-            },
-            {
-              "id": "0x0010",
-              "name": "on_off_transition_time",
-              "zcl_type": "uint16",
-              "unsupported": true
-            },
-            {
-              "id": "0x0012",
-              "name": "on_transition_time",
-              "zcl_type": "uint16",
-              "unsupported": true
-            },
-            {
-              "id": "0x4000",
-              "name": "start_up_current_level",
-              "zcl_type": "uint8",
-              "unsupported": true
-            }
-          ]
+          "attributes": []
         },
         {
           "cluster_id": "0x0702",
