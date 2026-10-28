@@ -7,8 +7,8 @@
   "friendly_manufacturer": "innr",
   "friendly_model": "SP 242",
   "name": "innr SP 242",
-  "quirk_applied": false,
-  "quirk_class": "zigpy.device.ZigbeeDevice",
+  "quirk_applied": true,
+  "quirk_class": "zhaquirks.innr.innr_sp240_plug:(innr / SP 240)",
   "exposes_features": [],
   "manufacturer_code": 4454,
   "power_source": "Mains",
@@ -91,11 +91,6 @@
               "value": 0
             }
           ]
-        },
-        {
-          "cluster_id": "0x0008",
-          "endpoint_attribute": "level",
-          "attributes": []
         },
         {
           "cluster_id": "0x0702",

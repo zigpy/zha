@@ -7,8 +7,8 @@
   "friendly_manufacturer": "_TZ3218_hdc8bbha",
   "friendly_model": "TS000F",
   "name": "_TZ3218_hdc8bbha TS000F",
-  "quirk_applied": false,
-  "quirk_class": "zigpy.device.ZigbeeDevice",
+  "quirk_applied": true,
+  "quirk_class": "zhaquirks.tuya.builder:(_TZ3218_hdc8bbha / TS000F)",
   "exposes_features": [],
   "manufacturer_code": 4417,
   "power_source": "Mains",
@@ -100,7 +100,7 @@
         },
         {
           "cluster_id": "0xe000",
-          "endpoint_attribute": null,
+          "endpoint_attribute": "tuya_manufacturer_specific_57344",
           "attributes": []
         },
         {
@@ -256,6 +256,62 @@
         "off_brightness": null,
         "min_mireds": 153,
         "max_mireds": 500
+      }
+    ],
+    "select": [
+      {
+        "fallback_name": "Power on state",
+        "unique_id": "ab:cd:ef:12:8b:e6:a7:36-1-power_on_state",
+        "migrate_unique_ids": [],
+        "platform": "select",
+        "class_name": "ZCLEnumSelectEntity",
+        "translation_key": "power_on_state",
+        "translation_placeholders": null,
+        "device_class": null,
+        "state_class": null,
+        "entity_category": "config",
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:8b:e6:a7:36",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "current_option": null,
+        "enum": "PowerOnState",
+        "options": [
+          "Off",
+          "On",
+          "LastState"
+        ]
+      },
+      {
+        "fallback_name": "External switch type",
+        "unique_id": "ab:cd:ef:12:8b:e6:a7:36-1-switch_type",
+        "migrate_unique_ids": [],
+        "platform": "select",
+        "class_name": "ZCLEnumSelectEntity",
+        "translation_key": "external_switch_type",
+        "translation_placeholders": null,
+        "device_class": null,
+        "state_class": null,
+        "entity_category": "config",
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:8b:e6:a7:36",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "current_option": null,
+        "enum": "Ts000fExternalSwitchType",
+        "options": [
+          "Momentary",
+          "Toggle",
+          "State"
+        ]
       }
     ],
     "sensor": [

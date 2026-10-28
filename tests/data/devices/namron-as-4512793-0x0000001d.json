@@ -7,8 +7,8 @@
   "friendly_manufacturer": "Namron AS",
   "friendly_model": "4512793",
   "name": "Namron AS 4512793",
-  "quirk_applied": false,
-  "quirk_class": "zigpy.device.ZigbeeDevice",
+  "quirk_applied": true,
+  "quirk_class": "zhaquirks.namron.remote_4512793:(Namron AS / 4512793)",
   "exposes_features": [],
   "manufacturer_code": 4714,
   "power_source": "Battery or Unknown",
@@ -108,7 +108,7 @@
         },
         {
           "cluster_id": "0xe004",
-          "endpoint_attribute": null,
+          "endpoint_attribute": "namron_private_remote",
           "attributes": []
         }
       ],

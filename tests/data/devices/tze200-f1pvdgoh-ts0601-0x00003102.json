@@ -7,8 +7,8 @@
   "friendly_manufacturer": "_TZE200_f1pvdgoh",
   "friendly_model": "TS0601",
   "name": "_TZE200_f1pvdgoh TS0601",
-  "quirk_applied": false,
-  "quirk_class": "zigpy.device.ZigbeeDevice",
+  "quirk_applied": true,
+  "quirk_class": "zhaquirks.tuya.builder:(_TZE200_f1pvdgoh / TS0601)",
   "exposes_features": [],
   "manufacturer_code": 4742,
   "power_source": "Battery or Unknown",
@@ -113,6 +113,18 @@
           ]
         },
         {
+          "cluster_id": "0x0400",
+          "endpoint_attribute": "illuminance",
+          "attributes": [
+            {
+              "id": "0x0004",
+              "name": "light_sensor_type",
+              "zcl_type": "enum8",
+              "value": 0
+            }
+          ]
+        },
+        {
           "cluster_id": "0x0500",
           "endpoint_attribute": "ias_zone",
           "attributes": [
@@ -147,7 +159,7 @@
         },
         {
           "cluster_id": "0xef00",
-          "endpoint_attribute": null,
+          "endpoint_attribute": "tuya_manufacturer",
           "attributes": []
         }
       ],
@@ -310,6 +322,29 @@
         "battery_size": "AA",
         "battery_quantity": 2,
         "battery_voltage": null
+      },
+      {
+        "fallback_name": null,
+        "unique_id": "ab:cd:ef:12:6f:fa:d5:b9-1-1024",
+        "migrate_unique_ids": [],
+        "platform": "sensor",
+        "class_name": "Illuminance",
+        "translation_key": null,
+        "translation_placeholders": null,
+        "device_class": "illuminance",
+        "state_class": "measurement",
+        "entity_category": null,
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:6f:fa:d5:b9",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "native_value": null,
+        "suggested_display_precision": null,
+        "unit": "lx"
       }
     ],
     "update": [

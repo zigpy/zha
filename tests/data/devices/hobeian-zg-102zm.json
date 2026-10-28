@@ -7,8 +7,8 @@
   "friendly_manufacturer": "HOBEIAN",
   "friendly_model": "ZG-102ZM",
   "name": "HOBEIAN ZG-102ZM",
-  "quirk_applied": false,
-  "quirk_class": "zigpy.device.ZigbeeDevice",
+  "quirk_applied": true,
+  "quirk_class": "zhaquirks.tuya.builder:(HOBEIAN / ZG-102ZM)",
   "exposes_features": [],
   "manufacturer_code": 4742,
   "power_source": "Battery or Unknown",
@@ -141,7 +141,7 @@
         },
         {
           "cluster_id": "0xef00",
-          "endpoint_attribute": null,
+          "endpoint_attribute": "tuya_manufacturer",
           "attributes": []
         }
       ],
@@ -194,7 +194,7 @@
         "device_class": "opening",
         "state_class": null,
         "entity_category": null,
-        "entity_registry_enabled_default": true,
+        "entity_registry_enabled_default": false,
         "enabled": true,
         "primary": true,
         "extra_state_attribute_names": [],
@@ -204,6 +204,50 @@
         "group_id": null,
         "is_on": false,
         "attribute_name": "zone_status"
+      },
+      {
+        "fallback_name": "Contact",
+        "unique_id": "ab:cd:ef:12:be:26:37:f4-1-contact",
+        "migrate_unique_ids": [],
+        "platform": "binary_sensor",
+        "class_name": "BinarySensor",
+        "translation_key": null,
+        "translation_placeholders": null,
+        "device_class": "opening",
+        "state_class": null,
+        "entity_category": null,
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:be:26:37:f4",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "is_on": false,
+        "attribute_name": "contact"
+      },
+      {
+        "fallback_name": "Vibration",
+        "unique_id": "ab:cd:ef:12:be:26:37:f4-1-vibration",
+        "migrate_unique_ids": [],
+        "platform": "binary_sensor",
+        "class_name": "BinarySensor",
+        "translation_key": null,
+        "translation_placeholders": null,
+        "device_class": "vibration",
+        "state_class": null,
+        "entity_category": null,
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:be:26:37:f4",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "is_on": false,
+        "attribute_name": "vibration"
       }
     ],
     "button": [
@@ -231,6 +275,34 @@
           5
         ],
         "kwargs": {}
+      }
+    ],
+    "number": [
+      {
+        "fallback_name": "Sensitivity level",
+        "unique_id": "ab:cd:ef:12:be:26:37:f4-1-sensitivity_level",
+        "migrate_unique_ids": [],
+        "platform": "number",
+        "class_name": "NumberConfigurationEntity",
+        "translation_key": "sensitivity_level",
+        "translation_placeholders": null,
+        "device_class": null,
+        "state_class": null,
+        "entity_category": "config",
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:be:26:37:f4",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "native_value": null,
+        "mode": "auto",
+        "native_max_value": 50,
+        "native_min_value": 1,
+        "native_step": 1,
+        "native_unit_of_measurement": null
       }
     ],
     "sensor": [
