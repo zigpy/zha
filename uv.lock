@@ -2021,7 +2021,7 @@ requires-dist = [
     { name = "pytest", marker = "extra == 'testing'" },
     { name = "python-slugify", marker = "extra == 'testing'" },
     { name = "zigpy", specifier = "==2.4.1" },
-    { name = "zigpy-deconz", specifier = "==1.1.0" },
+    { name = "zigpy-deconz", specifier = "==1.1.1" },
     { name = "zigpy-xbee", specifier = "==0.22.0" },
     { name = "zigpy-zigate", specifier = "==0.14.0" },
     { name = "zigpy-ziggurat", specifier = "==1.2.0" },
@@ -2107,15 +2107,15 @@ wheels = [
 
 [[package]]
 name = "zigpy-deconz"
-version = "1.1.0"
+version = "1.1.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "voluptuous" },
     { name = "zigpy" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/02/6a/c7da552ff5341e45465bc91d25d49606704df928dadeeb41a81c014c416c/zigpy_deconz-1.1.0.tar.gz", hash = "sha256:831afe3e086080b45bda1339d2940d8503dfd67c4f052030a13c8b380bde3304", size = 50265, upload-time = "2026-10-23T14:58:56.617Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/9f/77/87df78947f47fd4f2a7bf6a7a2776f12f4d7e8136abae727fdb21da1fe1a/zigpy_deconz-1.1.1.tar.gz", hash = "sha256:d7f41e4cfe5f7f144c4584b5eb61d034bbe28f5ea94c0e4a4241da3b4f4129f5", size = 51928, upload-time = "2026-10-28T23:31:14.537Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/8a/17/7b661800b23ebc59dedfecd84caabe512b9df4fc773fb1ad38b4503c9676/zigpy_deconz-1.1.0-py3-none-any.whl", hash = "sha256:0310038b816e839337dfadbe7c71e02a4418629981d71e3e5086c6140d0385c1", size = 34124, upload-time = "2026-10-23T14:58:55.581Z" },
+    { url = "https://files.pythonhosted.org/packages/4a/cb/c1f2381f6e72488d83943a6673645d9a332d8565fcc5ae9fa9465eee7458/zigpy_deconz-1.1.1-py3-none-any.whl", hash = "sha256:33c86990fafa2bfcf455831d983702f7108ea9b33c914d0d7d52f8595c10cb4c", size = 34731, upload-time = "2026-10-28T23:31:13.544Z" },
 ]
 
 [[package]]
