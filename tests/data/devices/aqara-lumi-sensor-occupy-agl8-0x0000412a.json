@@ -73,13 +73,13 @@
               "id": "0x0033",
               "name": "battery_quantity",
               "zcl_type": "uint8",
-              "value": 1
+              "value": 2
             },
             {
               "id": "0x0031",
               "name": "battery_size",
               "zcl_type": "enum8",
-              "value": 255
+              "value": 9
             },
             {
               "id": "0x0020",
@@ -302,8 +302,8 @@
         "native_value": 100.0,
         "suggested_display_precision": 0,
         "unit": "%",
-        "battery_size": "Unknown",
-        "battery_quantity": 1,
+        "battery_size": "CR2450",
+        "battery_quantity": 2,
         "battery_voltage": 0.32
       },
       {

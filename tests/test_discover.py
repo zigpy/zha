@@ -67,8 +67,8 @@ from zha.units import UnitOfTime
 
 def _get_identify_cluster(zigpy_device):
     for endpoint in list(zigpy_device.endpoints.values())[1:]:
-        if hasattr(endpoint, "identify"):
-            return endpoint.identify
+        if zigpy.zcl.clusters.general.Identify.cluster_id in endpoint.in_clusters:
+            return endpoint.in_clusters[zigpy.zcl.clusters.general.Identify.cluster_id]
 
 
 @pytest.mark.parametrize("override_platform", [Platform.SWITCH, Platform.LIGHT])

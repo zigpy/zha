@@ -1,0 +1,387 @@
+{
+  "version": 3,
+  "ieee": "ab:cd:ef:12:ca:f7:82:76",
+  "nwk": "0x37ED",
+  "manufacturer": "Yale",
+  "model": "YRD220/240 TSDB",
+  "friendly_manufacturer": "Yale",
+  "friendly_model": "YRD220/240 TSDB",
+  "name": "Yale YRD220/240 TSDB",
+  "quirk_applied": true,
+  "quirk_class": "zhaquirks.yale.realliving:YRD220240TSDB",
+  "exposes_features": [],
+  "manufacturer_code": 43690,
+  "power_source": "Battery or Unknown",
+  "lqi": 255,
+  "rssi": -68,
+  "last_seen": "2026-09-11T06:11:11.505842+00:00",
+  "available": true,
+  "device_type": "EndDevice",
+  "active_coordinator": false,
+  "node_descriptor": {
+    "logical_type": "EndDevice",
+    "complex_descriptor_available": false,
+    "user_descriptor_available": false,
+    "reserved": 0,
+    "aps_flags": 0,
+    "frequency_band": 8,
+    "mac_capability_flags": 128,
+    "manufacturer_code": 43690,
+    "maximum_buffer_size": 82,
+    "maximum_incoming_transfer_size": 255,
+    "server_mask": 0,
+    "maximum_outgoing_transfer_size": 255,
+    "descriptor_capability_field": 0
+  },
+  "endpoints": {
+    "1": {
+      "profile_id": 260,
+      "device_type": {
+        "name": "DOOR_LOCK",
+        "id": 10
+      },
+      "in_clusters": [
+        {
+          "cluster_id": "0x0000",
+          "endpoint_attribute": "basic",
+          "attributes": [
+            {
+              "id": "0x0004",
+              "name": "manufacturer",
+              "zcl_type": "string",
+              "value": "Yale"
+            },
+            {
+              "id": "0x0005",
+              "name": "model",
+              "zcl_type": "string",
+              "value": "YRD220/240 TSDB"
+            }
+          ]
+        },
+        {
+          "cluster_id": "0x0001",
+          "endpoint_attribute": "power",
+          "attributes": [
+            {
+              "id": "0x0021",
+              "name": "battery_percentage_remaining",
+              "zcl_type": "uint8",
+              "value": 126
+            },
+            {
+              "id": "0x0033",
+              "name": "battery_quantity",
+              "zcl_type": "uint8",
+              "unsupported": true
+            },
+            {
+              "id": "0x0031",
+              "name": "battery_size",
+              "zcl_type": "enum8",
+              "unsupported": true
+            },
+            {
+              "id": "0x0020",
+              "name": "battery_voltage",
+              "zcl_type": "uint8",
+              "unsupported": true
+            }
+          ]
+        },
+        {
+          "cluster_id": "0x0009",
+          "endpoint_attribute": "alarms",
+          "attributes": [
+            {
+              "id": "0xfffe",
+              "name": "reporting_status",
+              "zcl_type": "enum8",
+              "unsupported": true
+            }
+          ]
+        },
+        {
+          "cluster_id": "0x000a",
+          "endpoint_attribute": "time",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0020",
+          "endpoint_attribute": "poll_control",
+          "attributes": [
+            {
+              "id": "0x0003",
+              "name": "fast_poll_timeout",
+              "zcl_type": "uint16",
+              "value": 120
+            }
+          ]
+        },
+        {
+          "cluster_id": "0x0101",
+          "endpoint_attribute": "door_lock",
+          "attributes": [
+            {
+              "id": "0x0023",
+              "name": "auto_relock_time",
+              "zcl_type": "uint32",
+              "value": 0
+            },
+            {
+              "id": "0x002a",
+              "name": "enable_inside_status_led",
+              "zcl_type": "bool",
+              "value": 0
+            },
+            {
+              "id": "0x0028",
+              "name": "enable_local_programming",
+              "zcl_type": "bool",
+              "unsupported": true
+            },
+            {
+              "id": "0x0029",
+              "name": "enable_one_touch_locking",
+              "zcl_type": "bool",
+              "value": 1
+            },
+            {
+              "id": "0x002b",
+              "name": "enable_privacy_mode_button",
+              "zcl_type": "bool",
+              "value": 0
+            },
+            {
+              "id": "0x0021",
+              "name": "language",
+              "zcl_type": "string",
+              "value": "en"
+            },
+            {
+              "id": "0x0000",
+              "name": "lock_state",
+              "zcl_type": "enum8",
+              "value": 1
+            },
+            {
+              "id": "0x0025",
+              "name": "operating_mode",
+              "zcl_type": "enum8",
+              "value": 0
+            },
+            {
+              "id": "0x0033",
+              "name": "require_pin_for_rf_operation",
+              "zcl_type": "bool",
+              "unsupported": true
+            },
+            {
+              "id": "0x0046",
+              "name": "rf_programming_event_mask",
+              "zcl_type": "map16",
+              "value": 65535
+            },
+            {
+              "id": "0x0024",
+              "name": "sound_volume",
+              "zcl_type": "uint8",
+              "value": 0
+            }
+          ]
+        }
+      ],
+      "out_clusters": [
+        {
+          "cluster_id": "0x0019",
+          "endpoint_attribute": "ota",
+          "attributes": [
+            {
+              "id": "0x0002",
+              "name": "current_file_version",
+              "zcl_type": "uint32",
+              "value": 7997520
+            }
+          ]
+        },
+        {
+          "cluster_id": "0x0101",
+          "endpoint_attribute": "door_lock",
+          "attributes": []
+        }
+      ]
+    }
+  },
+  "original_signature": {
+    "manufacturer": "Yale",
+    "model": "YRD220/240 TSDB",
+    "node_desc": {
+      "logical_type": 2,
+      "complex_descriptor_available": 0,
+      "user_descriptor_available": 0,
+      "reserved": 0,
+      "aps_flags": 0,
+      "frequency_band": 8,
+      "mac_capability_flags": 128,
+      "manufacturer_code": 43690,
+      "maximum_buffer_size": 82,
+      "maximum_incoming_transfer_size": 255,
+      "server_mask": 0,
+      "maximum_outgoing_transfer_size": 255,
+      "descriptor_capability_field": 0
+    },
+    "endpoints": {
+      "1": {
+        "profile_id": "0x0104",
+        "device_type": "0x000a",
+        "input_clusters": [
+          "0x0000",
+          "0x0001",
+          "0x0009",
+          "0x000a",
+          "0x0101",
+          "0x0020"
+        ],
+        "output_clusters": [
+          "0x000a",
+          "0x0019"
+        ]
+      }
+    }
+  },
+  "zha_lib_entities": {
+    "lock": [
+      {
+        "fallback_name": null,
+        "unique_id": "ab:cd:ef:12:ca:f7:82:76-1-257",
+        "migrate_unique_ids": [],
+        "platform": "lock",
+        "class_name": "DoorLock",
+        "translation_key": "door_lock",
+        "translation_placeholders": null,
+        "device_class": null,
+        "state_class": null,
+        "entity_category": null,
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": true,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:ca:f7:82:76",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "is_locked": true
+      }
+    ],
+    "sensor": [
+      {
+        "fallback_name": null,
+        "unique_id": "ab:cd:ef:12:ca:f7:82:76-1-0-lqi",
+        "migrate_unique_ids": [],
+        "platform": "sensor",
+        "class_name": "LQISensor",
+        "translation_key": "lqi",
+        "translation_placeholders": null,
+        "device_class": null,
+        "state_class": "measurement",
+        "entity_category": "diagnostic",
+        "entity_registry_enabled_default": false,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:ca:f7:82:76",
+        "endpoint_id": null,
+        "available": true,
+        "group_id": null,
+        "native_value": 255,
+        "suggested_display_precision": null,
+        "unit": null
+      },
+      {
+        "fallback_name": null,
+        "unique_id": "ab:cd:ef:12:ca:f7:82:76-1-0-rssi",
+        "migrate_unique_ids": [],
+        "platform": "sensor",
+        "class_name": "RSSISensor",
+        "translation_key": "rssi",
+        "translation_placeholders": null,
+        "device_class": "signal_strength",
+        "state_class": "measurement",
+        "entity_category": "diagnostic",
+        "entity_registry_enabled_default": false,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:ca:f7:82:76",
+        "endpoint_id": null,
+        "available": true,
+        "group_id": null,
+        "native_value": -68,
+        "suggested_display_precision": null,
+        "unit": "dBm"
+      },
+      {
+        "fallback_name": null,
+        "unique_id": "ab:cd:ef:12:ca:f7:82:76-1-1",
+        "migrate_unique_ids": [],
+        "platform": "sensor",
+        "class_name": "Battery",
+        "translation_key": null,
+        "translation_placeholders": null,
+        "device_class": "battery",
+        "state_class": "measurement",
+        "entity_category": "diagnostic",
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [
+          "battery_quantity",
+          "battery_size",
+          "battery_voltage"
+        ],
+        "device_ieee": "ab:cd:ef:12:ca:f7:82:76",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "native_value": 63.0,
+        "suggested_display_precision": 0,
+        "unit": "%",
+        "battery_size": null,
+        "battery_quantity": null,
+        "battery_voltage": null
+      }
+    ],
+    "update": [
+      {
+        "fallback_name": null,
+        "unique_id": "ab:cd:ef:12:ca:f7:82:76-1-25-firmware_update",
+        "migrate_unique_ids": [],
+        "platform": "update",
+        "class_name": "FirmwareUpdateEntity",
+        "translation_key": null,
+        "translation_placeholders": null,
+        "device_class": "firmware",
+        "state_class": null,
+        "entity_category": "config",
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:ca:f7:82:76",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "installed_version": "0x007a0850",
+        "in_progress": false,
+        "update_percentage": null,
+        "latest_version": null,
+        "release_summary": null,
+        "release_notes": null,
+        "release_url": null,
+        "supported_features": 23
+      }
+    ]
+  },
+  "neighbors": [],
+  "routes": []
+}
