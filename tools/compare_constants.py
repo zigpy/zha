@@ -1,8 +1,12 @@
 #!/usr/bin/env python3
 """Compare ZHA's local copies of HA constants against the canonical `homeassistant` package.
 
-Run this whenever `homeassistant` is bumped to surface drift in unit enums,
-device-class enums, and module-level constants that ZHA mirrors.
+Run this periodically against a recent `homeassistant` release to surface
+drift in unit enums, device-class enums, and module-level constants that ZHA
+mirrors. `homeassistant` is not a project dependency (it requires Python
+3.14.2+), so install it on the fly:
+
+    uv run --with 'homeassistant>=2026.7.0' python tools/compare_constants.py
 
 Exits 1 on drift, 0 if fully in sync.
 """

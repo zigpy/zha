@@ -1,9 +1,10 @@
 """Test zha number platform."""
 
+import logging
 from unittest.mock import call
 
 import pytest
-from zigpy.device import Device as ZigpyDevice
+from zigpy.device import ZigbeeDevice
 from zigpy.exceptions import ZigbeeException
 from zigpy.profiles import zha
 import zigpy.types
@@ -37,7 +38,7 @@ ZIGPY_ANALOG_OUTPUT_DEVICE = {
 }
 
 
-async def light_mock(zha_gateway: Gateway) -> ZigpyDevice:
+async def light_mock(zha_gateway: Gateway) -> ZigbeeDevice:
     """Siren fixture."""
 
     zigpy_device = create_mock_zigpy_device(
@@ -79,10 +80,17 @@ async def light_mock(zha_gateway: Gateway) -> ZigpyDevice:
     return zigpy_device
 
 
+@pytest.mark.parametrize("cached", [True, False])
 async def test_number(
     zha_gateway: Gateway,
+    cached: bool,
+    caplog: pytest.LogCaptureFixture,
 ) -> None:
-    """Test zha number platform."""
+    """Test zha number platform.
+
+    Without a cached value, everything has to be read from the device, as on the
+    (re-)interview of a device.
+    """
     zigpy_analog_output_device = create_mock_zigpy_device(
         zha_gateway, ZIGPY_ANALOG_OUTPUT_DEVICE
     )
@@ -98,10 +106,13 @@ async def test_number(
         "engineering_units": 98,
         "application_type": 4 * 0x10000,
     }
-    update_attribute_cache(cluster)
+    if cached:
+        update_attribute_cache(cluster)
     cluster.PLUGGED_ATTR_READS["present_value"] = 15.0
 
+    caplog.set_level(logging.DEBUG, logger="zha.zigbee.cluster_config")
     zha_device = await join_zigpy_device(zha_gateway, zigpy_analog_output_device)
+    assert "Failed to read attributes" not in caplog.text
     # one for present_value and one for the rest configuration attributes
     assert cluster.read_attributes.call_count == 2
     attr_reads = set()
@@ -123,13 +134,13 @@ async def test_number(
     assert entity.fallback_name == "PWM1"
 
     # test that the state is 15.0
-    assert entity.state["state"] == 15.0
+    assert entity.state.native_value == 15.0
 
     # test attributes
-    assert entity.info_object.native_min_value == 1.0
-    assert entity.info_object.native_max_value == 100.0
-    assert entity.info_object.native_step == 1.1
-    assert entity.info_object.mode == NumberMode.AUTO
+    assert entity.state.native_min_value == 1.0
+    assert entity.state.native_max_value == 100.0
+    assert entity.state.native_step == 1.1
+    assert entity.state.mode == NumberMode.AUTO
 
     assert entity.icon == "mdi:percent"
     assert entity.native_unit_of_measurement == "%"
@@ -141,12 +152,12 @@ async def test_number(
     assert cluster.read_attributes.call_count == 2
     await send_attributes_report(zha_gateway, cluster, {0x0055: 15})
     await zha_gateway.async_block_till_done()
-    assert entity.state["state"] == 15.0
+    assert entity.state.native_value == 15.0
 
     # update value from device
     await send_attributes_report(zha_gateway, cluster, {0x0055: 20})
     await zha_gateway.async_block_till_done()
-    assert entity.state["state"] == 20.0
+    assert entity.state.native_value == 20.0
 
     # change value from client
     await entity.async_set_native_value(30.0)
@@ -156,11 +167,11 @@ async def test_number(
     assert cluster.write_attributes.call_args == call(
         {"present_value": 30.0}, manufacturer=UNDEFINED
     )
-    assert entity.state["state"] == 30.0
+    assert entity.state.native_value == 30.0
 
     # test updating entity state from client
     cluster.read_attributes.reset_mock()
-    assert entity.state["state"] == 30.0
+    assert entity.state.native_value == 30.0
     cluster.PLUGGED_ATTR_READS = {"present_value": 20}
     await entity.async_update()
     await zha_gateway.async_block_till_done()
@@ -168,7 +179,7 @@ async def test_number(
     assert cluster.read_attributes.await_args == call(
         ["present_value"], allow_cache=False, only_cache=False, manufacturer=UNDEFINED
     )
-    assert entity.state["state"] == 20.0
+    assert entity.state.native_value == 20.0
 
     await entity.async_set_native_value(30)
     await zha_gateway.async_block_till_done()
@@ -176,7 +187,185 @@ async def test_number(
     assert cluster.write_attributes.call_args == call(
         {"present_value": 30}, manufacturer=UNDEFINED
     )
-    assert entity.state["state"] == 30.0
+    assert entity.state.native_value == 30.0
+
+
+async def test_number_capabilities_updated(
+    zha_gateway: Gateway,
+) -> None:
+    """Test the range, step and unit follow the device after the entity was added.
+
+    A device paired with an incomplete cache only gets the missing values later, e.g.
+    from the startup poll or a report.
+    """
+    zigpy_analog_output_device = create_mock_zigpy_device(
+        zha_gateway, ZIGPY_ANALOG_OUTPUT_DEVICE
+    )
+    cluster: general.AnalogOutput = zigpy_analog_output_device.endpoints.get(
+        1
+    ).analog_output
+    cluster.PLUGGED_ATTR_READS = {"min_present_value": 5.0, "present_value": 50.0}
+    update_attribute_cache(cluster)
+
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_analog_output_device)
+    entity: PlatformEntity = get_entity(zha_device, platform=Platform.NUMBER)
+
+    assert entity.state.native_min_value == 5.0
+    assert entity.state.native_max_value == 1023
+    assert entity.state.native_step is None
+    assert entity.state.native_unit_of_measurement is None
+    assert entity.fallback_name is None
+
+    await send_attributes_report(
+        zha_gateway,
+        cluster,
+        {
+            "max_present_value": 100.0,
+            "resolution": 10.0,
+            "engineering_units": 98,
+            "description": "Power Limit",
+        },
+    )
+    await zha_gateway.async_block_till_done()
+
+    assert entity.state.native_min_value == 5.0
+    assert entity.state.native_max_value == 100.0
+    assert entity.state.native_step == 10.0
+    assert entity.state.native_unit_of_measurement == "%"
+    assert entity.fallback_name == "Power Limit"
+
+
+async def test_number_zero_max_value(
+    zha_gateway: Gateway,
+) -> None:
+    """Test a maximum of 0 is not replaced by the default."""
+    zigpy_analog_output_device = create_mock_zigpy_device(
+        zha_gateway, ZIGPY_ANALOG_OUTPUT_DEVICE
+    )
+    cluster: general.AnalogOutput = zigpy_analog_output_device.endpoints.get(
+        1
+    ).analog_output
+    cluster.PLUGGED_ATTR_READS = {
+        "min_present_value": -100.0,
+        "max_present_value": 0.0,
+        "present_value": -50.0,
+    }
+    update_attribute_cache(cluster)
+
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_analog_output_device)
+    entity: PlatformEntity = get_entity(zha_device, platform=Platform.NUMBER)
+
+    assert entity.state.native_min_value == -100.0
+    assert entity.state.native_max_value == 0.0
+
+
+@pytest.mark.parametrize("resolution", [0.0, float("inf"), float("nan")])
+async def test_number_invalid_resolution(
+    zha_gateway: Gateway,
+    resolution: float,
+) -> None:
+    """Test an invalid resolution is not used as step."""
+    zigpy_analog_output_device = create_mock_zigpy_device(
+        zha_gateway, ZIGPY_ANALOG_OUTPUT_DEVICE
+    )
+    cluster: general.AnalogOutput = zigpy_analog_output_device.endpoints.get(
+        1
+    ).analog_output
+    cluster.PLUGGED_ATTR_READS = {
+        "min_present_value": 0.0,
+        "max_present_value": 1.0,
+        "resolution": resolution,
+        "present_value": 0.5,
+    }
+    update_attribute_cache(cluster)
+
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_analog_output_device)
+    entity: PlatformEntity = get_entity(zha_device, platform=Platform.NUMBER)
+
+    assert entity.state.native_step is None
+
+
+@pytest.mark.parametrize("bound", [float("nan"), float("inf"), float("-inf")])
+async def test_number_non_finite_range(
+    zha_gateway: Gateway,
+    bound: float,
+) -> None:
+    """Test a NaN or infinite minimum and maximum fall back to the defaults."""
+    zigpy_analog_output_device = create_mock_zigpy_device(
+        zha_gateway, ZIGPY_ANALOG_OUTPUT_DEVICE
+    )
+    cluster: general.AnalogOutput = zigpy_analog_output_device.endpoints.get(
+        1
+    ).analog_output
+    cluster.PLUGGED_ATTR_READS = {
+        "min_present_value": bound,
+        "max_present_value": bound,
+        "present_value": 5.0,
+    }
+    update_attribute_cache(cluster)
+
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_analog_output_device)
+    entity: PlatformEntity = get_entity(zha_device, platform=Platform.NUMBER)
+
+    assert entity.state.native_min_value == 0
+    assert entity.state.native_max_value == 1023
+
+
+async def test_number_non_finite_max_reported(
+    zha_gateway: Gateway,
+) -> None:
+    """Test a NaN maximum reported after joining falls back to the default."""
+    zigpy_analog_output_device = create_mock_zigpy_device(
+        zha_gateway, ZIGPY_ANALOG_OUTPUT_DEVICE
+    )
+    cluster: general.AnalogOutput = zigpy_analog_output_device.endpoints.get(
+        1
+    ).analog_output
+    cluster.PLUGGED_ATTR_READS = {
+        "min_present_value": 5.0,
+        "max_present_value": 100.0,
+        "present_value": 50.0,
+    }
+    update_attribute_cache(cluster)
+
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_analog_output_device)
+    entity: PlatformEntity = get_entity(zha_device, platform=Platform.NUMBER)
+
+    assert entity.state.native_min_value == 5.0
+    assert entity.state.native_max_value == 100.0
+
+    await send_attributes_report(
+        zha_gateway, cluster, {"max_present_value": float("nan")}
+    )
+
+    assert entity.state.native_min_value == 5.0
+    assert entity.state.native_max_value == 1023
+
+
+async def test_number_nan_present_value(
+    zha_gateway: Gateway,
+) -> None:
+    """Test a NaN present value is reported as unknown."""
+    zigpy_analog_output_device = create_mock_zigpy_device(
+        zha_gateway, ZIGPY_ANALOG_OUTPUT_DEVICE
+    )
+    cluster: general.AnalogOutput = zigpy_analog_output_device.endpoints.get(
+        1
+    ).analog_output
+    cluster.PLUGGED_ATTR_READS = {
+        "min_present_value": 0.0,
+        "max_present_value": 100.0,
+        "present_value": float("nan"),
+    }
+    update_attribute_cache(cluster)
+
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_analog_output_device)
+    entity: PlatformEntity = get_entity(zha_device, platform=Platform.NUMBER)
+
+    assert entity.state.native_value is None
+
+    await send_attributes_report(zha_gateway, cluster, {"present_value": 42.0})
+    assert entity.state.native_value == 42.0
 
 
 async def test_number_missing_description_attr(
@@ -205,6 +394,44 @@ async def test_number_missing_description_attr(
 
     assert entity.fallback_name is None
     assert entity.translation_key is None
+
+
+@pytest.mark.parametrize(
+    ("application_type", "icon"),
+    [
+        (0x00040000, "mdi:percent"),
+        (0x01040000, "mdi:percent"),
+        (0x0106FFFF, "mdi:fan"),
+        (0x01FF0000, None),
+    ],
+)
+async def test_number_icon(
+    zha_gateway: Gateway,
+    application_type: int,
+    icon: str | None,
+) -> None:
+    """Test the icon is taken from the type of the application type.
+
+    The group in bits 24 to 31 is ignored, it is `0x01` for analog outputs.
+    """
+    zigpy_analog_output_device = create_mock_zigpy_device(
+        zha_gateway, ZIGPY_ANALOG_OUTPUT_DEVICE
+    )
+    cluster: general.AnalogOutput = zigpy_analog_output_device.endpoints.get(
+        1
+    ).analog_output
+    cluster.PLUGGED_ATTR_READS = {
+        "max_present_value": 100.0,
+        "min_present_value": 0.0,
+        "application_type": application_type,
+        "present_value": 50.0,
+    }
+    update_attribute_cache(cluster)
+
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_analog_output_device)
+    entity: PlatformEntity = get_entity(zha_device, platform=Platform.NUMBER)
+
+    assert entity.icon == icon
 
 
 @pytest.mark.parametrize(
@@ -258,7 +485,7 @@ async def test_level_control_number(
         ),
     ]
 
-    assert entity.state["state"] == initial_value
+    assert entity.state.native_value == initial_value
     assert entity._attr_entity_category == EntityCategory.CONFIG
 
     assert entity.icon is None
@@ -274,12 +501,12 @@ async def test_level_control_number(
         call({attr: new_value}, manufacturer=UNDEFINED)
     ]
 
-    assert entity.state["state"] == new_value
+    assert entity.state.native_value == new_value
 
     level_control_cluster.read_attributes.reset_mock()
     await entity.async_update()
     # the mocking doesn't update the attr cache so this flips back to initial value
-    assert entity.state["state"] == initial_value
+    assert entity.state.native_value == initial_value
     assert level_control_cluster.read_attributes.mock_calls == [
         call(
             [attr],
@@ -298,11 +525,11 @@ async def test_level_control_number(
     assert level_control_cluster.write_attributes.mock_calls == [
         call({attr: new_value}, manufacturer=UNDEFINED),
     ]
-    assert entity.state["state"] == initial_value
+    assert entity.state.native_value == initial_value
 
     # test updating entity state from client
     level_control_cluster.read_attributes.reset_mock()
-    assert entity.state["state"] == initial_value
+    assert entity.state.native_value == initial_value
     level_control_cluster.PLUGGED_ATTR_READS = {attr: new_value}
     await entity.async_update()
     await zha_gateway.async_block_till_done()
@@ -317,7 +544,7 @@ async def test_level_control_number(
             manufacturer=UNDEFINED,
         ),
     ]
-    assert entity.state["state"] == new_value
+    assert entity.state.native_value == new_value
 
     # update value from device
     await send_attributes_report(
@@ -326,7 +553,7 @@ async def test_level_control_number(
         {level_control_cluster.attributes_by_name[attr].id: initial_value},
     )
     await zha_gateway.async_block_till_done()
-    assert entity.state["state"] == initial_value
+    assert entity.state.native_value == initial_value
 
 
 @pytest.mark.parametrize(
@@ -366,7 +593,7 @@ async def test_color_number(
         in color_cluster.read_attributes.call_args_list
     )
 
-    assert entity.state["state"] == initial_value
+    assert entity.state.native_value == initial_value
     assert entity._attr_entity_category == EntityCategory.CONFIG
 
     await entity.async_set_native_value(new_value)
@@ -375,12 +602,12 @@ async def test_color_number(
         attr: new_value,
     }
 
-    assert entity.state["state"] == new_value
+    assert entity.state.native_value == new_value
 
     color_cluster.read_attributes.reset_mock()
     await entity.async_update()
     # the mocking doesn't update the attr cache so this flips back to initial value
-    assert entity.state["state"] == initial_value
+    assert entity.state.native_value == initial_value
     assert color_cluster.read_attributes.call_count == 1
     assert (
         call(
@@ -401,11 +628,11 @@ async def test_color_number(
     assert color_cluster.write_attributes.mock_calls == [
         call({attr: new_value}, manufacturer=UNDEFINED),
     ]
-    assert entity.state["state"] == initial_value
+    assert entity.state.native_value == initial_value
 
     # test updating entity state from client
     color_cluster.read_attributes.reset_mock()
-    assert entity.state["state"] == initial_value
+    assert entity.state.native_value == initial_value
     color_cluster.PLUGGED_ATTR_READS = {attr: new_value}
     await entity.async_update()
     await zha_gateway.async_block_till_done()
@@ -420,7 +647,7 @@ async def test_color_number(
             manufacturer=UNDEFINED,
         ),
     ]
-    assert entity.state["state"] == new_value
+    assert entity.state.native_value == new_value
 
     # update value from device
     await send_attributes_report(
@@ -429,4 +656,4 @@ async def test_color_number(
         {color_cluster.attributes_by_name[attr].id: initial_value},
     )
     await zha_gateway.async_block_till_done()
-    assert entity.state["state"] == initial_value
+    assert entity.state.native_value == initial_value

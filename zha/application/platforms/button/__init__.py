@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from collections.abc import Collection
 from dataclasses import dataclass
 import functools
 import logging
@@ -14,10 +15,11 @@ from zha.application import Platform
 from zha.application.helpers import write_attributes_safe
 from zha.application.platforms import (
     BaseEntity,
-    BaseEntityInfo,
+    BaseEntityState,
     ClusterMatch,
     EntityCategory,
     PlatformEntity,
+    ZclPlatformEntity,
     register_entity,
 )
 from zha.application.platforms.button.const import DEFAULT_DURATION, ButtonDeviceClass
@@ -32,13 +34,15 @@ _LOGGER = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True, kw_only=True)
-class ButtonEntityInfo(BaseEntityInfo):
-    """Button entity info."""
+class ButtonState(BaseEntityState):
+    """State for button entities."""
+
+    pass
 
 
 @dataclass(frozen=True, kw_only=True)
-class CommandButtonEntityInfo(ButtonEntityInfo):
-    """Command button entity info."""
+class CommandButtonState(ButtonState):
+    """State for command button entities."""
 
     command: str
     args: list[Any]
@@ -46,8 +50,8 @@ class CommandButtonEntityInfo(ButtonEntityInfo):
 
 
 @dataclass(frozen=True, kw_only=True)
-class WriteAttributeButtonEntityInfo(ButtonEntityInfo):
-    """Write attribute button entity info."""
+class WriteAttributeButtonState(ButtonState):
+    """State for write attribute button entities."""
 
     attribute_name: str
     attribute_value: Any
@@ -58,17 +62,17 @@ class BaseButton(PlatformEntity, ABC):
 
     PLATFORM = Platform.BUTTON
 
-    @functools.cached_property
-    def info_object(self) -> ButtonEntityInfo:
-        """Return a representation of the button."""
-        return ButtonEntityInfo(**super().info_object.__dict__)
+    @property
+    def state(self) -> ButtonState:
+        """Return the state of the button."""
+        return ButtonState(**super().state.__dict__)
 
     @abstractmethod
     async def async_press(self) -> None:
         """Send out a press command."""
 
 
-class Button(BaseButton):
+class Button(BaseButton, ZclPlatformEntity):
     """Defines a ZHA button."""
 
     _command_name: str
@@ -81,7 +85,7 @@ class Button(BaseButton):
         device: Device,
         *,
         command_name: str | None = None,
-        command_args: tuple | None = None,
+        command_args: list[Any] | None = None,
         command_kwargs: dict[str, Any] | None = None,
         **kwargs: Any,
     ) -> None:
@@ -95,11 +99,11 @@ class Button(BaseButton):
 
         super().__init__(endpoint=endpoint, device=device, **kwargs)
 
-    @functools.cached_property
-    def info_object(self) -> CommandButtonEntityInfo:
-        """Return a representation of the button."""
-        return CommandButtonEntityInfo(
-            **super().info_object.__dict__,
+    @property
+    def state(self) -> CommandButtonState:
+        """Return the state of the button."""
+        return CommandButtonState(
+            **super().state.__dict__,
             command=self._command_name,
             args=self._args,
             kwargs=self._kwargs,
@@ -138,13 +142,13 @@ class IdentifyButton(Button):
         server_clusters=frozenset({Identify.cluster_id}),
     )
 
-    def is_supported_in_list(self, entities: list[BaseEntity]) -> bool:
+    def is_supported_in_list(self, entities: Collection[BaseEntity]) -> bool:
         """Check if this button is supported given the list of entities."""
         cls = type(self)
         return not any(type(entity) is cls for entity in entities if entity is not self)
 
 
-class WriteAttributeButton(BaseButton):
+class WriteAttributeButton(BaseButton, ZclPlatformEntity):
     """Defines a ZHA button, which writes a value to an attribute."""
 
     _attribute_name: str
@@ -168,11 +172,11 @@ class WriteAttributeButton(BaseButton):
         super().__init__(endpoint=endpoint, device=device, **kwargs)
         self.recompute_capabilities()
 
-    @functools.cached_property
-    def info_object(self) -> WriteAttributeButtonEntityInfo:
-        """Return a representation of the button."""
-        return WriteAttributeButtonEntityInfo(
-            **super().info_object.__dict__,
+    @property
+    def state(self) -> WriteAttributeButtonState:
+        """Return the state of the button."""
+        return WriteAttributeButtonState(
+            **super().state.__dict__,
             attribute_name=self._attribute_name,
             attribute_value=self._attribute_value,
         )
@@ -217,22 +221,6 @@ class NoPresenceStatusResetButton(WriteAttributeButton):
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({AQARA_OPPLE_CLUSTER}),
         models=frozenset({"lumi.motion.ac01"}),
-    )
-
-
-@register_entity(AQARA_OPPLE_CLUSTER)
-class AqaraPetFeederFeedButton(WriteAttributeButton):
-    """Defines a feed button for the aqara c1 pet feeder."""
-
-    _unique_id_suffix = "feeding"
-    _attribute_name = "feeding"
-    _attribute_value = 1
-    _attr_translation_key = "feed"
-    _cluster_id = AQARA_OPPLE_CLUSTER
-
-    _cluster_match = ClusterMatch(
-        server_clusters=frozenset({AQARA_OPPLE_CLUSTER}),
-        models=frozenset({"aqara.feeder.acn001"}),
     )
 
 

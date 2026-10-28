@@ -3,10 +3,11 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+import dataclasses
 from enum import StrEnum
 import functools
 import time
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from zigpy.profiles import zha
 from zigpy.zcl import (
@@ -21,9 +22,11 @@ from zigpy.zcl.clusters.general import PowerConfiguration
 from zha.application import Platform
 from zha.application.platforms import (
     AttrConfig,
+    BaseEntityState,
     ClusterConfig,
     ClusterMatch,
     PlatformEntity,
+    ZclPlatformEntity,
     register_entity,
 )
 from zha.application.platforms.sensor import Battery
@@ -48,22 +51,27 @@ class SourceType(StrEnum):
     BLUETOOTH_LE = "bluetooth_le"
 
 
+@dataclasses.dataclass(frozen=True, kw_only=True)
+class DeviceTrackerState(BaseEntityState):
+    """State for device tracker entities."""
+
+    connected: bool
+    battery_level: float | None
+
+
 class BaseDeviceTracker(PlatformEntity, ABC):
     """Abstract base class for ZHA device tracker entities."""
 
     PLATFORM = Platform.DEVICE_TRACKER
 
     @property
-    def state(self) -> dict[str, Any]:
+    def state(self) -> DeviceTrackerState:
         """Return the state of the device."""
-        response = super().state
-        response.update(
-            {
-                "connected": self.is_connected,
-                "battery_level": self.battery_level,
-            }
+        return DeviceTrackerState(
+            **super().state.__dict__,
+            connected=self.is_connected,
+            battery_level=self.battery_level,
         )
-        return response
 
     @property
     @abstractmethod
@@ -82,7 +90,7 @@ class BaseDeviceTracker(PlatformEntity, ABC):
 
 
 @register_entity(PowerConfiguration.cluster_id)
-class DeviceScannerEntity(BaseDeviceTracker):
+class DeviceScannerEntity(BaseDeviceTracker, ZclPlatformEntity):
     """Represent a tracked device."""
 
     _attr_should_poll = True  # BaseZhaEntity defaults to False

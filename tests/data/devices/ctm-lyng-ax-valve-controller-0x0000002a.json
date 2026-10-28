@@ -7,8 +7,8 @@
   "friendly_manufacturer": "CTM Lyng",
   "friendly_model": "AX Valve Controller",
   "name": "CTM Lyng AX Valve Controller",
-  "quirk_applied": true,
-  "quirk_class": "zhaquirks.ctm.valve:(CTM Lyng / AX Valve Controller)",
+  "quirk_applied": false,
+  "quirk_class": "zigpy.device.ZigbeeDevice",
   "exposes_features": [],
   "manufacturer_code": 4919,
   "power_source": "Mains",
@@ -37,8 +37,8 @@
     "1": {
       "profile_id": 260,
       "device_type": {
-        "name": "ON_OFF_OUTPUT",
-        "id": 2
+        "name": "undefined_0xffff",
+        "id": 65535
       },
       "in_clusters": [
         {
@@ -110,13 +110,7 @@
               "zcl_type": "uint32",
               "value": 42
             }
-          ],
-          "last_query_cmd": {
-            "manufacturer_code": 4919,
-            "image_type": 4105,
-            "current_file_version": 42,
-            "hardware_version": 19
-          }
+          ]
         },
         {
           "cluster_id": "0x0500",
@@ -248,60 +242,16 @@
   "zha_lib_entities": {
     "binary_sensor": [
       {
-        "fallback_name": "Water leak",
+        "fallback_name": null,
         "unique_id": "ab:cd:ef:12:21:bb:ce:df-2-1280",
         "migrate_unique_ids": [],
         "platform": "binary_sensor",
-        "class_name": "BinarySensor",
-        "translation_key": "water_leak",
-        "translation_placeholders": null,
-        "device_class": "moisture",
-        "state_class": null,
-        "entity_category": null,
-        "entity_registry_enabled_default": true,
-        "enabled": true,
-        "primary": false,
-        "extra_state_attribute_names": [],
-        "device_ieee": "ab:cd:ef:12:21:bb:ce:df",
-        "endpoint_id": 2,
-        "available": true,
-        "group_id": null,
-        "is_on": false,
-        "attribute_name": "zone_status"
-      },
-      {
-        "fallback_name": "Active water leak",
-        "unique_id": "ab:cd:ef:12:21:bb:ce:df-2-active_water_leak",
-        "migrate_unique_ids": [],
-        "platform": "binary_sensor",
-        "class_name": "BinarySensor",
-        "translation_key": "active_water_leak",
-        "translation_placeholders": null,
-        "device_class": "moisture",
-        "state_class": null,
-        "entity_category": null,
-        "entity_registry_enabled_default": true,
-        "enabled": true,
-        "primary": false,
-        "extra_state_attribute_names": [],
-        "device_ieee": "ab:cd:ef:12:21:bb:ce:df",
-        "endpoint_id": 2,
-        "available": true,
-        "group_id": null,
-        "is_on": false,
-        "attribute_name": "zone_status"
-      },
-      {
-        "fallback_name": "Power",
-        "unique_id": "ab:cd:ef:12:21:bb:ce:df-2-mains_power",
-        "migrate_unique_ids": [],
-        "platform": "binary_sensor",
-        "class_name": "BinarySensor",
+        "class_name": "IASZone",
         "translation_key": null,
         "translation_placeholders": null,
-        "device_class": "power",
+        "device_class": "moisture",
         "state_class": null,
-        "entity_category": "diagnostic",
+        "entity_category": null,
         "entity_registry_enabled_default": true,
         "enabled": true,
         "primary": false,
@@ -310,7 +260,7 @@
         "endpoint_id": 2,
         "available": true,
         "group_id": null,
-        "is_on": true,
+        "is_on": false,
         "attribute_name": "zone_status"
       }
     ],

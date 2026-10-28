@@ -1,5 +1,5 @@
 {
-  "version": 2,
+  "version": 3,
   "ieee": "ab:cd:ef:12:68:c2:d6:5d",
   "nwk": "0x0000",
   "manufacturer": "Silicon Labs",
@@ -8,7 +8,7 @@
   "friendly_model": "EZSP",
   "name": "Silicon Labs EZSP",
   "quirk_applied": false,
-  "quirk_class": "zigpy.device.Device",
+  "quirk_class": "zigpy.device.ZigbeeDevice",
   "exposes_features": [],
   "manufacturer_code": 43981,
   "power_source": "Mains",

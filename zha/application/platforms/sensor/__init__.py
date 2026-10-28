@@ -7,20 +7,24 @@ import contextlib
 from dataclasses import dataclass
 from datetime import date, datetime, timedelta
 import enum
-import functools
 import logging
 import math
 import numbers
 import typing
 from typing import TYPE_CHECKING, Any, cast
+import warnings
 
 from zigpy import types
+from zigpy.profiles.zha import PROFILE_ID as ZHA_PROFILE_ID
+from zigpy.profiles.zll import PROFILE_ID as ZLL_PROFILE_ID
 from zigpy.state import Counter, State
 from zigpy.zcl import (
     AttributeReadEvent,
     AttributeReportedEvent,
     AttributeUpdatedEvent,
     AttributeWrittenEvent,
+    Cluster,
+    ClusterType,
     ReportingConfig,
     foundation,
 )
@@ -59,20 +63,18 @@ from zha.application import Platform
 from zha.application.helpers import safe_read
 from zha.application.platforms import (
     AttrConfig,
-    BaseEntity,
-    BaseEntityInfo,
-    BaseIdentifiers,
+    BaseEntityState,
     ClusterConfig,
     ClusterMatch,
     EntityCategory,
     PlatformEntity,
     PlatformFeatureGroup,
+    ZclPlatformEntity,
     register_entity,
 )
 from zha.application.platforms.climate.const import HVACAction
 from zha.application.platforms.const import (
     IKEA_AIR_PURIFIER_CLUSTER,
-    INOVELLI_CLUSTER,
     SMARTTHINGS_HUMIDITY_CLUSTER,
     SONOFF_CLUSTER,
     TUYA_MANUFACTURER_CLUSTER,
@@ -124,7 +126,6 @@ from zha.units import (
     UnitOfElectricPotential,
     UnitOfEnergy,
     UnitOfFrequency,
-    UnitOfMass,
     UnitOfPower,
     UnitOfPressure,
     UnitOfSpeed,
@@ -164,33 +165,24 @@ _LOGGER = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True, kw_only=True)
-class SensorEntityInfo(BaseEntityInfo):
-    """Sensor entity info."""
+class SensorState(BaseEntityState):
+    """State for sensor entities."""
 
+    native_value: date | datetime | str | int | float | None
     suggested_display_precision: int | None = None
     unit: str | None = None
-    device_class: SensorDeviceClass | None = None
-    state_class: SensorStateClass | None = None
 
 
 @dataclass(frozen=True, kw_only=True)
-class DeviceCounterEntityInfo(BaseEntityInfo):
-    """Device counter entity info."""
+class DeviceCounterSensorState(BaseEntityState):
+    """State for device counter sensor entities."""
 
-    device_ieee: str
+    native_value: int | None
     suggested_display_precision: int
-    available: bool
     counter: str
     counter_value: int
     counter_groups: str
     counter_group: str
-
-
-@dataclass(frozen=True, kw_only=True)
-class DeviceCounterSensorIdentifiers(BaseIdentifiers):
-    """Device counter sensor identifiers."""
-
-    device_ieee: str
 
 
 class BaseSensor(PlatformEntity, ABC):
@@ -213,21 +205,15 @@ class BaseSensor(PlatformEntity, ABC):
         """Return the unit of measurement."""
         return self._attr_native_unit_of_measurement
 
-    @functools.cached_property
-    def info_object(self) -> SensorEntityInfo:
-        """Return a representation of the sensor."""
-        return SensorEntityInfo(
-            **super().info_object.__dict__,
+    @property
+    def state(self) -> SensorState:
+        """Return the state for this sensor."""
+        return SensorState(
+            **super().state.__dict__,
+            native_value=self.native_value,
             suggested_display_precision=self.suggested_display_precision,
             unit=self.native_unit_of_measurement,
         )
-
-    @property
-    def state(self) -> dict:
-        """Return the state for this sensor."""
-        response = super().state
-        response["state"] = self.native_value
-        return response
 
     @property
     @abstractmethod
@@ -235,7 +221,7 @@ class BaseSensor(PlatformEntity, ABC):
         """Return the current sensor value."""
 
 
-class Sensor(BaseSensor):
+class Sensor(BaseSensor, ZclPlatformEntity):
     """Base ZHA sensor."""
 
     _attribute_name: int | str | None = None
@@ -291,6 +277,15 @@ class Sensor(BaseSensor):
 
         self.recompute_capabilities()
 
+    @property
+    def _scaling_attribute_names(self) -> frozenset[str]:
+        """Return the names of the attributes scaling this sensor's value.
+
+        Cluster pollers skip these: they are read on startup and are expected
+        to be reported when they change.
+        """
+        return frozenset()
+
     def on_add(self) -> None:
         """Run when entity is added."""
         super().on_add()
@@ -344,6 +339,8 @@ class Sensor(BaseSensor):
     def native_value(self) -> date | datetime | str | int | float | None:
         """Return the state of the entity."""
         assert self._attribute_name is not None
+        if self._attribute_name not in self._cluster.attributes_by_name:
+            return None
         raw_state = self._cluster.get(self._attribute_name)
         if raw_state is None:
             return None
@@ -364,9 +361,8 @@ class Sensor(BaseSensor):
         if (
             event.attribute_name == self._attribute_name
             or (
-                hasattr(self, "_attr_extra_state_attribute_names")
-                and event.attribute_name
-                in getattr(self, "_attr_extra_state_attribute_names")
+                self._attr_extra_state_attribute_names is not None
+                and event.attribute_name in self._attr_extra_state_attribute_names
             )
             or self._attribute_name is None
         ):
@@ -414,7 +410,7 @@ class TimestampSensor(Sensor):
     """Timestamp ZHA sensor."""
 
 
-class DeviceCounterSensor(BaseEntity):
+class DeviceCounterSensor(PlatformEntity):
     """Device counter sensor."""
 
     PLATFORM = Platform.SENSOR
@@ -425,7 +421,7 @@ class DeviceCounterSensor(BaseEntity):
 
     def __init__(
         self,
-        zha_device: Device,
+        device: Device,
         counter_groups: str,
         counter_group: str,
         counter: str,
@@ -433,12 +429,12 @@ class DeviceCounterSensor(BaseEntity):
         """Init this sensor."""
 
         # XXX: ZHA uses the IEEE address of the device passed through `slugify`!
-        slugified_device_id = zha_device.unique_id.replace(":", "-")
+        slugified_device_id = device.unique_id.replace(":", "-")
         super().__init__(
-            unique_id=f"{slugified_device_id}_{counter_groups}_{counter_group}_{counter}"
+            device,
+            unique_id=f"{slugified_device_id}_{counter_groups}_{counter_group}_{counter}",
         )
 
-        self._device: Device = zha_device
         state: State = self._device.gateway.application_controller.state
         self._zigpy_counter: Counter = (
             getattr(state, counter_groups).get(counter_group, {}).get(counter, None)
@@ -447,7 +443,6 @@ class DeviceCounterSensor(BaseEntity):
         self._zigpy_counter_group: str = counter_group
 
         self._attr_fallback_name: str = self._zigpy_counter.name
-        self._always_supported: bool = True
 
         # TODO: why do entities get created with " None" as a name suffix instead of
         # falling back to `fallback_name`? We should be able to provide translation keys
@@ -464,18 +459,12 @@ class DeviceCounterSensor(BaseEntity):
             )
         )
 
-    @functools.cached_property
-    def identifiers(self) -> DeviceCounterSensorIdentifiers:
-        """Return a dict with the information necessary to identify this entity."""
-        return DeviceCounterSensorIdentifiers(
-            **super().identifiers.__dict__, device_ieee=str(self._device.ieee)
-        )
-
-    @functools.cached_property
-    def info_object(self) -> DeviceCounterEntityInfo:
-        """Return a representation of the platform entity."""
-        return DeviceCounterEntityInfo(
-            **super().info_object.__dict__,
+    @property
+    def state(self) -> DeviceCounterSensorState:
+        """Return the state for this sensor."""
+        return DeviceCounterSensorState(
+            **super().state.__dict__,
+            native_value=self._zigpy_counter.value,
             suggested_display_precision=self._attr_suggested_display_precision,
             counter=self._zigpy_counter.name,
             counter_value=self._zigpy_counter.value,
@@ -484,26 +473,9 @@ class DeviceCounterSensor(BaseEntity):
         )
 
     @property
-    def state(self) -> dict[str, Any]:
-        """Return the state for this sensor."""
-        response = super().state
-        response["state"] = self._zigpy_counter.value
-        return response
-
-    @property
     def native_value(self) -> int | None:
         """Return the state of the entity."""
         return self._zigpy_counter.value
-
-    @property
-    def available(self) -> bool:
-        """Return entity availability."""
-        return self._device.available
-
-    @functools.cached_property
-    def device(self) -> Device:
-        """Return the device."""
-        return self._device
 
     def enable(self) -> None:
         """Enable the entity."""
@@ -528,10 +500,18 @@ class DeviceCounterSensor(BaseEntity):
             )
 
 
+@dataclass(frozen=True, kw_only=True)
+class EnumSensorState(SensorState):
+    """State for enum sensor entities."""
+
+    options: list[str]
+
+
 class EnumSensor(Sensor):
     """Sensor with value from enum."""
 
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.ENUM
+    _attr_options: list[str]
     _enum: type[enum.Enum]
 
     def __init__(
@@ -554,6 +534,19 @@ class EnumSensor(Sensor):
 
         # XXX: This class is not meant to be initialized directly, as `unique_id`
         # depends on the value of `_attribute_name`
+
+    @property
+    def options(self) -> list[str]:
+        """Return the list of possible enum value names."""
+        return self._attr_options
+
+    @property
+    def state(self) -> EnumSensorState:
+        """Return the state for this sensor."""
+        return EnumSensorState(
+            **super().state.__dict__,
+            options=self.options,
+        )
 
     def formatter(self, value: int) -> str | None:
         """Use name of enum."""
@@ -699,9 +692,11 @@ class AnalogInputSensor(Sensor):
                 self._cluster.get(AnalogInput.AttributeDefs.engineering_units.name)
             )
 
-        # Resolution indicates the minimum change in value that can be detected
+        # Resolution indicates the minimum change in value that can be detected.
+        # Guard against 0 resolution reported by some devices.
+        self._attr_suggested_display_precision = None
         resolution = self._cluster.get(AnalogInput.AttributeDefs.resolution.name)
-        if resolution is not None:
+        if resolution is not None and math.isfinite(resolution) and resolution > 0:
             self._attr_suggested_display_precision = resolution_to_decimal_precision(
                 resolution
             )
@@ -720,6 +715,15 @@ class AnalogInputSensor(Sensor):
             return False
 
         return super()._is_supported()
+
+
+@dataclass(frozen=True, kw_only=True)
+class BatterySensorState(SensorState):
+    """State for battery sensor entities."""
+
+    battery_size: str | None = None
+    battery_quantity: int | None = None
+    battery_voltage: float | None = None
 
 
 @register_entity(PowerConfiguration.cluster_id)
@@ -771,7 +775,9 @@ class Battery(Sensor):
 
     def _is_supported(self) -> bool:
         # XXX: We intentionally ignore the presence of this attribute
-        return PlatformEntity._is_supported(self) and not self.device.is_mains_powered
+        return (
+            ZclPlatformEntity._is_supported(self) and not self.device.is_mains_powered
+        )
 
     @staticmethod
     def formatter(value: int) -> float | None:  # pylint: disable=arguments-differ
@@ -782,19 +788,44 @@ class Battery(Sensor):
         return value / 2
 
     @property
-    def state(self) -> dict[str, Any]:
+    def state(self) -> BatterySensorState:
         """Return the state for battery sensors."""
-        response = super().state
-        battery_size = self._cluster.get("battery_size")
-        if battery_size is not None:
-            response["battery_size"] = BATTERY_SIZES.get(battery_size, "Unknown")
+        battery_size_raw = self._cluster.get("battery_size")
+        battery_size = (
+            BATTERY_SIZES.get(battery_size_raw, "Unknown")
+            if battery_size_raw is not None
+            else None
+        )
         battery_quantity = self._cluster.get("battery_quantity")
-        if battery_quantity is not None:
-            response["battery_quantity"] = battery_quantity
-        battery_voltage = self._cluster.get("battery_voltage")
-        if battery_voltage is not None:
-            response["battery_voltage"] = round(battery_voltage / 10, 2)
-        return response
+        battery_voltage_raw = self._cluster.get("battery_voltage")
+        battery_voltage = (
+            round(battery_voltage_raw / 10, 2)
+            if battery_voltage_raw is not None
+            else None
+        )
+        return BatterySensorState(
+            **super().state.__dict__,
+            battery_size=battery_size,
+            battery_quantity=battery_quantity,
+            battery_voltage=battery_voltage,
+        )
+
+
+@dataclass(frozen=True, kw_only=True)
+class ElectricalMeasurementState(SensorState):
+    """State for electrical measurement sensor entities."""
+
+    measurement_type: str | None = None
+    max_value: float | int | None = None
+    max_attribute_name: str | None = None
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any]:
+        """Return the extra state attributes as a name to value mapping."""
+        attributes: dict[str, Any] = {"measurement_type": self.measurement_type}
+        if self.max_attribute_name is not None:
+            attributes[self.max_attribute_name] = self.max_value
+        return attributes
 
 
 class BaseElectricalMeasurement(Sensor):
@@ -837,20 +868,19 @@ class BaseElectricalMeasurement(Sensor):
         )
 
     @property
-    def state(self) -> dict[str, Any]:
+    def state(self) -> ElectricalMeasurementState:
         """Return the state for this sensor."""
-        response = super().state
-        meas_type = self._measurement_type
-        if meas_type is not None:
-            response["measurement_type"] = meas_type
-
-        if (max_attr_name := self._attr_max_attribute_name) is None:
-            return response
-
-        if (max_v := self._cluster.get(max_attr_name)) is not None:
-            response[max_attr_name] = self.formatter(max_v)
-
-        return response
+        max_value = None
+        if (max_attr_name := self._attr_max_attribute_name) is not None:
+            max_v = self._cluster.get(max_attr_name)
+            if max_v is not None:
+                max_value = self.formatter(max_v)
+        return ElectricalMeasurementState(
+            **super().state.__dict__,
+            measurement_type=self._measurement_type,
+            max_value=max_value,
+            max_attribute_name=self._attr_max_attribute_name,
+        )
 
     @property
     def _multiplier(self) -> int | float | None:
@@ -879,6 +909,20 @@ class BaseElectricalMeasurement(Sensor):
     @_divisor.setter
     def _divisor(self, value: int | float | None) -> None:
         raise AttributeError("Cannot set divisor directly")
+
+    @property
+    def _scaling_attribute_names(self) -> frozenset[str]:
+        """Return the multiplier and divisor attribute names, incl. fallbacks."""
+        return frozenset(
+            name
+            for name in (
+                self._multiplier_attribute_name,
+                self._multiplier_fallback_attribute_name,
+                self._divisor_attribute_name,
+                self._divisor_fallback_attribute_name,
+            )
+            if name is not None
+        )
 
 
 class AggregatedClusterPoller(VirtualEntity):
@@ -926,13 +970,17 @@ class AggregatedClusterPoller(VirtualEntity):
             cfg = entity._server_cluster_config.get(self._cluster_id)
             if cfg is None:
                 continue
+            scaling_attrs = entity._scaling_attribute_names
             for attr_def, attr_cfg in cfg.attributes.items():
                 if attr_cfg.reporting is None:
+                    continue
+                attr_name = attr_def if isinstance(attr_def, str) else attr_def.name
+                if attr_name in scaling_attrs:
                     continue
                 if self._cluster.is_attribute_unsupported(attr_def):
                     continue
 
-                attrs.add(attr_def if isinstance(attr_def, str) else attr_def.name)
+                attrs.add(attr_name)
 
         if not attrs:
             return
@@ -2087,6 +2135,15 @@ class SmartEnergyMeteringEntityDescription:
     device_class: SensorDeviceClass | None = None
 
 
+@dataclass(frozen=True, kw_only=True)
+class SmartEnergySensorState(SensorState):
+    """State for smart energy metering sensor entities."""
+
+    device_type: int | None = None
+    status: str | None = None
+    zcl_unit_of_measurement: int | None = None
+
+
 @register_entity(Metering.cluster_id)
 class MeteringPoller(AggregatedClusterPoller):
     """Polls the Metering cluster for models known to need polling.
@@ -2323,20 +2380,22 @@ class SmartEnergyMetering(Sensor):
             )
 
     @property
-    def state(self) -> dict[str, Any]:
+    def state(self) -> SmartEnergySensorState:
         """Return state for this sensor."""
-        response = super().state
-        if self._device_type is not None:
-            response["device_type"] = self._device_type
-        if (status := self._metering_status) is not None:
-            if isinstance(status, enum.IntFlag):
-                response["status"] = str(
-                    status.name if status.name is not None else status.value
+        status = None
+        if (raw_status := self._metering_status) is not None:
+            if isinstance(raw_status, enum.IntFlag):
+                status = str(
+                    raw_status.name if raw_status.name is not None else raw_status.value
                 )
             else:
-                response["status"] = str(status)[len(status.__class__.__name__) + 1 :]
-        response["zcl_unit_of_measurement"] = self._unit_of_measurement
-        return response
+                status = str(raw_status)[len(raw_status.__class__.__name__) + 1 :]
+        return SmartEnergySensorState(
+            **super().state.__dict__,
+            device_type=self._device_type,
+            status=status,
+            zcl_unit_of_measurement=self._unit_of_measurement,
+        )
 
     @property
     def _multiplier(self) -> int | float | None:
@@ -2681,7 +2740,6 @@ class DeviceTemperature(Sensor):
     _divisor = 100
     _attr_native_unit_of_measurement = UnitOfTemperature.CELSIUS
     _attr_entity_category = EntityCategory.DIAGNOSTIC
-    _attr_primary_weight = 1
     _cluster_id = DeviceTemperatureCluster.cluster_id
 
     _cluster_match = ClusterMatch(
@@ -2701,46 +2759,6 @@ class DeviceTemperature(Sensor):
             },
         ),
     }
-
-
-@register_entity(INOVELLI_CLUSTER)
-class InovelliInternalTemperature(Sensor):
-    """Switch Internal Temperature Sensor."""
-
-    _attribute_name = "internal_temp_monitor"
-    _attr_device_class: SensorDeviceClass = SensorDeviceClass.TEMPERATURE
-    _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
-    _attr_translation_key: str = "internal_temp_monitor"
-    _attr_native_unit_of_measurement = UnitOfTemperature.CELSIUS
-    _attr_entity_category = EntityCategory.DIAGNOSTIC
-    _cluster_id = INOVELLI_CLUSTER
-
-    _cluster_match = ClusterMatch(
-        server_clusters=frozenset({INOVELLI_CLUSTER}),
-    )
-
-
-class InovelliOverheatedState(types.enum8):
-    """Inovelli overheat protection state."""
-
-    Normal = 0x00
-    Overheated = 0x01
-
-
-@register_entity(INOVELLI_CLUSTER)
-class InovelliOverheated(EnumSensor):
-    """Sensor that displays the overheat protection state."""
-
-    _attribute_name = "overheated"
-    _unique_id_suffix = "overheated"
-    _attr_translation_key: str = "overheated"
-    _enum = InovelliOverheatedState
-    _attr_entity_category = EntityCategory.DIAGNOSTIC
-    _cluster_id = INOVELLI_CLUSTER
-
-    _cluster_match = ClusterMatch(
-        server_clusters=frozenset({INOVELLI_CLUSTER}),
-    )
 
 
 @register_entity(CarbonDioxideConcentrationCluster.cluster_id)
@@ -3070,7 +3088,7 @@ class ThermostatHVACAction(Sensor):
     }
 
     def _is_supported(self) -> bool:
-        return PlatformEntity._is_supported(self)
+        return ZclPlatformEntity._is_supported(self)
 
     @property
     def _pi_heating_demand(self) -> int | None:
@@ -3091,16 +3109,6 @@ class ThermostatHVACAction(Sensor):
     @property
     def _system_mode(self) -> int | None:
         return self._cluster.get(Thermostat.AttributeDefs.system_mode.name)
-
-    @property
-    def state(self) -> dict:
-        """Return the current HVAC action."""
-        response = super().state
-        if self._pi_heating_demand is None and self._pi_cooling_demand is None:
-            response["state"] = self._rm_rs_action
-        else:
-            response["state"] = self._pi_demand_action
-        return response
 
     @property
     def native_value(self) -> str | None:
@@ -3195,11 +3203,9 @@ class SinopeHVACAction(ThermostatHVACAction):
         return HVACAction.OFF
 
 
-@register_entity(Basic.cluster_id)
-class RSSISensor(Sensor):
+class RSSISensor(BaseSensor):
     """RSSI sensor for a device."""
 
-    # TODO: migrate this away from `PlatformEntity`
     _unique_id_suffix: str = "rssi"
     _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
     _attr_device_class: SensorDeviceClass | None = SensorDeviceClass.SIGNAL_STRENGTH
@@ -3207,20 +3213,55 @@ class RSSISensor(Sensor):
     _attr_entity_category = EntityCategory.DIAGNOSTIC
     _attr_entity_registry_enabled_default = False
     _attr_translation_key: str = "rssi"
-    _cluster_id = Basic.cluster_id
 
-    _cluster_match = ClusterMatch(
-        server_clusters=frozenset({Basic.cluster_id}),
-    )
+    _device: Device
 
-    def __init__(
-        self,
-        endpoint: Endpoint,
-        device: Device,
-        **kwargs: Any,
-    ) -> None:
-        """Init."""
-        super().__init__(endpoint=endpoint, device=device, **kwargs)
+    @property
+    def device(self) -> Device:
+        """Return the device."""
+        return self._device
+
+    @staticmethod
+    def legacy_basic_cluster(device: Device) -> Cluster | None:
+        """Return the Basic cluster the legacy RSSI/LQI unique IDs were derived from."""
+        fallback = None
+        for ep_id, ep in device.device.endpoints.items():
+            if ep_id == 0 or (cluster := ep.in_clusters.get(Basic.cluster_id)) is None:
+                continue
+            if ep.profile_id in (ZHA_PROFILE_ID, ZLL_PROFILE_ID):
+                return cluster
+            fallback = fallback or cluster
+        return fallback
+
+    # TODO: remove once zha-quirks only filters `ZclPlatformEntity` by endpoint/cluster
+    # and HA Core's `websocket_get_groupable_devices` no longer reads `entity.endpoint`
+    @property
+    def endpoint(self) -> Endpoint:
+        """Return the endpoint of the legacy Basic cluster entity, for old quirks."""
+        warnings.warn(
+            f"`{type(self).__name__}.endpoint` is deprecated, device-bound entities"
+            " have no endpoint",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        basic_cluster = self.legacy_basic_cluster(self._device)
+        assert basic_cluster is not None
+        return self._device.endpoints[basic_cluster.endpoint.endpoint_id]
+
+    def targets_cluster(
+        self, cluster_id: int, cluster_type: ClusterType | None = None
+    ) -> bool:
+        """Match the legacy Basic cluster entity, for old quirks."""
+        warnings.warn(
+            f"`{type(self).__name__}.targets_cluster` is deprecated, device-bound"
+            " entities have no cluster",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return cluster_id == Basic.cluster_id and cluster_type in (
+            None,
+            ClusterType.Server,
+        )
 
     def on_add(self) -> None:
         """Run when entity is added."""
@@ -3231,23 +3272,6 @@ class RSSISensor(Sensor):
                 self.update
             )
         )
-
-    def _is_supported(self) -> bool:
-        # This entity is not actually tied to an endpoint or cluster and will always be
-        # supported
-        return True
-
-    def is_supported_in_list(self, entities: list[BaseEntity]) -> bool:
-        """Check if the sensor is supported given the list of entities."""
-        cls = type(self)
-        return not any(type(entity) is cls for entity in entities if entity is not self)
-
-    @property
-    def state(self) -> dict:
-        """Return the state of the sensor."""
-        response = super().state
-        response["state"] = self.device.device.rssi
-        return response
 
     @property
     def native_value(self) -> str | int | float | None:
@@ -3277,27 +3301,13 @@ class RSSISensor(Sensor):
             )
 
 
-@register_entity(Basic.cluster_id)
 class LQISensor(RSSISensor):
     """LQI sensor for a device."""
 
-    # TODO: migrate this away from `PlatformEntity`
     _unique_id_suffix: str = "lqi"
     _attr_device_class = None
     _attr_native_unit_of_measurement = None
     _attr_translation_key = "lqi"
-    _cluster_id = Basic.cluster_id
-
-    _cluster_match = ClusterMatch(
-        server_clusters=frozenset({Basic.cluster_id}),
-    )
-
-    @property
-    def state(self) -> dict:
-        """Return the state of the sensor."""
-        response = super().state
-        response["state"] = self.device.device.lqi
-        return response
 
     @property
     def native_value(self) -> str | int | float | None:
@@ -3353,77 +3363,6 @@ class IkeaFilterRunTime(Sensor):
 
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({IKEA_AIR_PURIFIER_CLUSTER}),
-    )
-
-
-class AqaraFeedingSource(types.enum8):
-    """Aqara pet feeder feeding source."""
-
-    Feeder = 0x01
-    HomeAssistant = 0x02
-
-
-@register_entity(AQARA_OPPLE_CLUSTER)
-class AqaraPetFeederLastFeedingSource(EnumSensor):
-    """Sensor that displays the last feeding source of pet feeder."""
-
-    _attribute_name = "last_feeding_source"
-    _unique_id_suffix = "last_feeding_source"
-    _attr_translation_key: str = "last_feeding_source"
-    _enum = AqaraFeedingSource
-    _cluster_id = AQARA_OPPLE_CLUSTER
-
-    _cluster_match = ClusterMatch(
-        server_clusters=frozenset({AQARA_OPPLE_CLUSTER}),
-        models=frozenset({"aqara.feeder.acn001"}),
-    )
-
-
-@register_entity(AQARA_OPPLE_CLUSTER)
-class AqaraPetFeederLastFeedingSize(Sensor):
-    """Sensor that displays the last feeding size of the pet feeder."""
-
-    _attribute_name = "last_feeding_size"
-    _unique_id_suffix = "last_feeding_size"
-    _attr_translation_key: str = "last_feeding_size"
-    _cluster_id = AQARA_OPPLE_CLUSTER
-
-    _cluster_match = ClusterMatch(
-        server_clusters=frozenset({AQARA_OPPLE_CLUSTER}),
-        models=frozenset({"aqara.feeder.acn001"}),
-    )
-
-
-@register_entity(AQARA_OPPLE_CLUSTER)
-class AqaraPetFeederPortionsDispensed(Sensor):
-    """Sensor that displays the number of portions dispensed by the pet feeder."""
-
-    _attribute_name = "portions_dispensed"
-    _unique_id_suffix = "portions_dispensed"
-    _attr_translation_key: str = "portions_dispensed_today"
-    _attr_state_class: SensorStateClass = SensorStateClass.TOTAL_INCREASING
-    _cluster_id = AQARA_OPPLE_CLUSTER
-
-    _cluster_match = ClusterMatch(
-        server_clusters=frozenset({AQARA_OPPLE_CLUSTER}),
-        models=frozenset({"aqara.feeder.acn001"}),
-    )
-
-
-@register_entity(AQARA_OPPLE_CLUSTER)
-class AqaraPetFeederWeightDispensed(Sensor):
-    """Sensor that displays the weight dispensed by the pet feeder."""
-
-    _attribute_name = "weight_dispensed"
-    _unique_id_suffix = "weight_dispensed"
-    _attr_translation_key: str = "weight_dispensed_today"
-    _attr_native_unit_of_measurement = UnitOfMass.GRAMS
-    _attr_state_class: SensorStateClass = SensorStateClass.TOTAL_INCREASING
-    _cluster_id = AQARA_OPPLE_CLUSTER
-
-    _cluster_match = ClusterMatch(
-        server_clusters=frozenset({AQARA_OPPLE_CLUSTER}),
-        models=frozenset({"aqara.feeder.acn001"}),
     )
 
 
@@ -3620,6 +3559,18 @@ class AqaraCurtainHookStateSensor(EnumSensor):
     )
 
 
+@dataclass(frozen=True, kw_only=True)
+class BitmapSensorState(SensorState):
+    """State for bitmap sensor entities."""
+
+    bit_states: dict[str, bool]
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any]:
+        """Return the extra state attributes as a name to value mapping."""
+        return dict(self.bit_states)
+
+
 class BitMapSensor(Sensor):
     """A sensor with only state attributes.
 
@@ -3640,34 +3591,25 @@ class BitMapSensor(Sensor):
             bit.name for bit in list(self._bitmap)
         }
 
-    @property
-    def state(self) -> dict[str, Any]:
-        """Return the state for this sensor."""
-        response = super().state
-        response["state"] = self.native_value
+    def _bit_states(self) -> dict[str, bool]:
+        """Return the state of every bit in the bitmap."""
         value = self._cluster.get(self._attribute_name)
-        for bit in list(self._bitmap):
-            if value is None:
-                response[bit.name] = False
-            else:
-                response[bit.name] = bit in self._bitmap(value)
-        return response
+        return {
+            bit.name: value is not None and bit in self._bitmap(value)
+            for bit in list(self._bitmap)
+        }
+
+    @property
+    def state(self) -> BitmapSensorState:
+        """Return the state for this sensor."""
+        return BitmapSensorState(
+            **super().state.__dict__,
+            bit_states=self._bit_states(),
+        )
 
     def formatter(self, _value: int) -> str:
         """Summary of all attributes."""
-
-        value = self._cluster.get(self._attribute_name)
-        state_attr = {}
-
-        for bit in list(self._bitmap):
-            if value is None:
-                state_attr[bit.name] = False
-            else:
-                state_attr[bit.name] = bit in self._bitmap(value)
-
-        binary_state_attributes = [key for (key, elem) in state_attr.items() if elem]
-
-        return "something" if binary_state_attributes else "nothing"
+        return "something" if any(self._bit_states().values()) else "nothing"
 
 
 @register_entity(Thermostat.cluster_id)

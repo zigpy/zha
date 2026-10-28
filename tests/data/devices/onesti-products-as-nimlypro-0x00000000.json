@@ -1,0 +1,516 @@
+{
+  "version": 3,
+  "ieee": "ab:cd:ef:12:4f:77:25:d6",
+  "nwk": "0xD1BE",
+  "manufacturer": "Onesti Products AS",
+  "model": "NimlyPRO",
+  "friendly_manufacturer": "Onesti Products AS",
+  "friendly_model": "NimlyPRO",
+  "name": "Onesti Products AS NimlyPRO",
+  "quirk_applied": true,
+  "quirk_class": "zhaquirks.nimly.lock:(Onesti Products AS / NimlyPRO24)",
+  "exposes_features": [],
+  "manufacturer_code": 4660,
+  "power_source": "Battery or Unknown",
+  "lqi": 108,
+  "rssi": -73,
+  "last_seen": "2026-03-30T20:01:07.399106+00:00",
+  "available": true,
+  "device_type": "EndDevice",
+  "active_coordinator": false,
+  "node_descriptor": {
+    "logical_type": "EndDevice",
+    "complex_descriptor_available": false,
+    "user_descriptor_available": false,
+    "reserved": 0,
+    "aps_flags": 0,
+    "frequency_band": 8,
+    "mac_capability_flags": 136,
+    "manufacturer_code": 4660,
+    "maximum_buffer_size": 108,
+    "maximum_incoming_transfer_size": 127,
+    "server_mask": 11264,
+    "maximum_outgoing_transfer_size": 127,
+    "descriptor_capability_field": 0
+  },
+  "endpoints": {
+    "11": {
+      "profile_id": 260,
+      "device_type": {
+        "name": "DOOR_LOCK",
+        "id": 10
+      },
+      "in_clusters": [
+        {
+          "cluster_id": "0x0000",
+          "endpoint_attribute": "basic",
+          "attributes": [
+            {
+              "id": "0x0004",
+              "name": "manufacturer",
+              "zcl_type": "string",
+              "value": "Onesti Products AS"
+            },
+            {
+              "id": "0x0005",
+              "name": "model",
+              "zcl_type": "string",
+              "value": "NimlyPRO"
+            }
+          ]
+        },
+        {
+          "cluster_id": "0x0001",
+          "endpoint_attribute": "power",
+          "attributes": [
+            {
+              "id": "0x0021",
+              "name": "battery_percentage_remaining",
+              "zcl_type": "uint8",
+              "value": 200
+            },
+            {
+              "id": "0x0033",
+              "name": "battery_quantity",
+              "zcl_type": "uint8",
+              "value": 3
+            },
+            {
+              "id": "0x0031",
+              "name": "battery_size",
+              "zcl_type": "enum8",
+              "value": 3
+            },
+            {
+              "id": "0x0020",
+              "name": "battery_voltage",
+              "zcl_type": "uint8",
+              "value": 45
+            }
+          ]
+        },
+        {
+          "cluster_id": "0x0003",
+          "endpoint_attribute": "identify",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0004",
+          "endpoint_attribute": "groups",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0005",
+          "endpoint_attribute": "scenes",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0101",
+          "endpoint_attribute": "door_lock",
+          "attributes": [
+            {
+              "id": "0x0023",
+              "name": "auto_relock_time",
+              "zcl_type": "uint32",
+              "value": 0
+            },
+            {
+              "id": "0x0000",
+              "name": "lock_state",
+              "zcl_type": "enum8",
+              "value": 1
+            },
+            {
+              "id": "0x0100",
+              "name": "nimly_last_lock_unlock_source",
+              "zcl_type": "map32",
+              "value": 167903232
+            },
+            {
+              "id": "0x0101",
+              "name": "nimly_last_pin_code",
+              "zcl_type": "octstr",
+              "value": {
+                "__type": "<class 'bytes'>",
+                "repr": "b''"
+              }
+            },
+            {
+              "id": "0x0024",
+              "name": "sound_volume",
+              "zcl_type": "uint8",
+              "value": 1
+            }
+          ]
+        },
+        {
+          "cluster_id": "0xfea2",
+          "endpoint_attribute": "manufacturer_specific",
+          "attributes": []
+        }
+      ],
+      "out_clusters": [
+        {
+          "cluster_id": "0x0019",
+          "endpoint_attribute": "ota",
+          "attributes": [
+            {
+              "id": "0x0002",
+              "name": "current_file_version",
+              "zcl_type": "uint32",
+              "value": 0
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "original_signature": {
+    "manufacturer": "Onesti Products AS",
+    "model": "NimlyPRO",
+    "node_desc": {
+      "logical_type": 2,
+      "complex_descriptor_available": 0,
+      "user_descriptor_available": 0,
+      "reserved": 0,
+      "aps_flags": 0,
+      "frequency_band": 8,
+      "mac_capability_flags": 136,
+      "manufacturer_code": 4660,
+      "maximum_buffer_size": 108,
+      "maximum_incoming_transfer_size": 127,
+      "server_mask": 11264,
+      "maximum_outgoing_transfer_size": 127,
+      "descriptor_capability_field": 0
+    },
+    "endpoints": {
+      "11": {
+        "profile_id": "0x0104",
+        "device_type": "0x000a",
+        "input_clusters": [
+          "0x0000",
+          "0x0001",
+          "0x0003",
+          "0x0005",
+          "0x0004",
+          "0x0101",
+          "0xfea2"
+        ],
+        "output_clusters": [
+          "0x0019"
+        ]
+      }
+    }
+  },
+  "zha_lib_entities": {
+    "button": [
+      {
+        "fallback_name": null,
+        "unique_id": "ab:cd:ef:12:4f:77:25:d6-11-3",
+        "migrate_unique_ids": [],
+        "platform": "button",
+        "class_name": "IdentifyButton",
+        "translation_key": null,
+        "translation_placeholders": null,
+        "device_class": "identify",
+        "state_class": null,
+        "entity_category": "diagnostic",
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:4f:77:25:d6",
+        "endpoint_id": 11,
+        "available": true,
+        "group_id": null,
+        "command": "identify",
+        "args": [
+          5
+        ],
+        "kwargs": {}
+      }
+    ],
+    "lock": [
+      {
+        "fallback_name": null,
+        "unique_id": "ab:cd:ef:12:4f:77:25:d6-11-257",
+        "migrate_unique_ids": [],
+        "platform": "lock",
+        "class_name": "DoorLock",
+        "translation_key": "door_lock",
+        "translation_placeholders": null,
+        "device_class": null,
+        "state_class": null,
+        "entity_category": null,
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": true,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:4f:77:25:d6",
+        "endpoint_id": 11,
+        "available": true,
+        "group_id": null,
+        "is_locked": true
+      }
+    ],
+    "number": [
+      {
+        "fallback_name": "Sound volume",
+        "unique_id": "ab:cd:ef:12:4f:77:25:d6-11-sound_volume",
+        "migrate_unique_ids": [],
+        "platform": "number",
+        "class_name": "NumberConfigurationEntity",
+        "translation_key": "sound_volume",
+        "translation_placeholders": null,
+        "device_class": null,
+        "state_class": null,
+        "entity_category": "config",
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:4f:77:25:d6",
+        "endpoint_id": 11,
+        "available": true,
+        "group_id": null,
+        "native_value": 1,
+        "mode": "auto",
+        "native_max_value": 2,
+        "native_min_value": 0,
+        "native_step": 1,
+        "native_unit_of_measurement": null
+      }
+    ],
+    "sensor": [
+      {
+        "fallback_name": null,
+        "unique_id": "ab:cd:ef:12:4f:77:25:d6-11-0-lqi",
+        "migrate_unique_ids": [],
+        "platform": "sensor",
+        "class_name": "LQISensor",
+        "translation_key": "lqi",
+        "translation_placeholders": null,
+        "device_class": null,
+        "state_class": "measurement",
+        "entity_category": "diagnostic",
+        "entity_registry_enabled_default": false,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:4f:77:25:d6",
+        "endpoint_id": null,
+        "available": true,
+        "group_id": null,
+        "native_value": 108,
+        "suggested_display_precision": null,
+        "unit": null
+      },
+      {
+        "fallback_name": null,
+        "unique_id": "ab:cd:ef:12:4f:77:25:d6-11-0-rssi",
+        "migrate_unique_ids": [],
+        "platform": "sensor",
+        "class_name": "RSSISensor",
+        "translation_key": "rssi",
+        "translation_placeholders": null,
+        "device_class": "signal_strength",
+        "state_class": "measurement",
+        "entity_category": "diagnostic",
+        "entity_registry_enabled_default": false,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:4f:77:25:d6",
+        "endpoint_id": null,
+        "available": true,
+        "group_id": null,
+        "native_value": -73,
+        "suggested_display_precision": null,
+        "unit": "dBm"
+      },
+      {
+        "fallback_name": null,
+        "unique_id": "ab:cd:ef:12:4f:77:25:d6-11-1",
+        "migrate_unique_ids": [],
+        "platform": "sensor",
+        "class_name": "Battery",
+        "translation_key": null,
+        "translation_placeholders": null,
+        "device_class": "battery",
+        "state_class": "measurement",
+        "entity_category": "diagnostic",
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [
+          "battery_quantity",
+          "battery_size",
+          "battery_voltage"
+        ],
+        "device_ieee": "ab:cd:ef:12:4f:77:25:d6",
+        "endpoint_id": 11,
+        "available": true,
+        "group_id": null,
+        "native_value": 100.0,
+        "suggested_display_precision": 0,
+        "unit": "%",
+        "battery_size": "AA",
+        "battery_quantity": 3,
+        "battery_voltage": 4.5
+      },
+      {
+        "fallback_name": "Last action",
+        "unique_id": "ab:cd:ef:12:4f:77:25:d6-11-last_action",
+        "migrate_unique_ids": [],
+        "platform": "sensor",
+        "class_name": "Sensor",
+        "translation_key": "last_action",
+        "translation_placeholders": null,
+        "device_class": "enum",
+        "state_class": null,
+        "entity_category": null,
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:4f:77:25:d6",
+        "endpoint_id": 11,
+        "available": true,
+        "group_id": null,
+        "native_value": "unlock",
+        "suggested_display_precision": null,
+        "unit": null
+      },
+      {
+        "fallback_name": "Last action source",
+        "unique_id": "ab:cd:ef:12:4f:77:25:d6-11-last_action_source",
+        "migrate_unique_ids": [],
+        "platform": "sensor",
+        "class_name": "Sensor",
+        "translation_key": "last_action_source",
+        "translation_placeholders": null,
+        "device_class": "enum",
+        "state_class": null,
+        "entity_category": null,
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:4f:77:25:d6",
+        "endpoint_id": 11,
+        "available": true,
+        "group_id": null,
+        "native_value": "self",
+        "suggested_display_precision": null,
+        "unit": null
+      },
+      {
+        "fallback_name": "Last action user",
+        "unique_id": "ab:cd:ef:12:4f:77:25:d6-11-last_action_user",
+        "migrate_unique_ids": [],
+        "platform": "sensor",
+        "class_name": "Sensor",
+        "translation_key": "last_action_user",
+        "translation_placeholders": null,
+        "device_class": null,
+        "state_class": null,
+        "entity_category": null,
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:4f:77:25:d6",
+        "endpoint_id": 11,
+        "available": true,
+        "group_id": null,
+        "native_value": 0,
+        "suggested_display_precision": null,
+        "unit": null
+      },
+      {
+        "fallback_name": "Last PIN code",
+        "unique_id": "ab:cd:ef:12:4f:77:25:d6-11-last_pin_code",
+        "migrate_unique_ids": [],
+        "platform": "sensor",
+        "class_name": "Sensor",
+        "translation_key": "last_pin_code",
+        "translation_placeholders": null,
+        "device_class": null,
+        "state_class": null,
+        "entity_category": null,
+        "entity_registry_enabled_default": false,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:4f:77:25:d6",
+        "endpoint_id": 11,
+        "available": true,
+        "group_id": null,
+        "native_value": "",
+        "suggested_display_precision": null,
+        "unit": null
+      }
+    ],
+    "switch": [
+      {
+        "fallback_name": "Autorelock",
+        "unique_id": "ab:cd:ef:12:4f:77:25:d6-11-auto_relock_time",
+        "migrate_unique_ids": [],
+        "platform": "switch",
+        "class_name": "ConfigurableAttributeSwitch",
+        "translation_key": "auto_relock",
+        "translation_placeholders": null,
+        "device_class": null,
+        "state_class": null,
+        "entity_category": "config",
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:4f:77:25:d6",
+        "endpoint_id": 11,
+        "available": true,
+        "group_id": null,
+        "is_on": false,
+        "inverted": false,
+        "attribute_name": "auto_relock_time",
+        "invert_attribute_name": null,
+        "force_inverted": false,
+        "off_value": 0,
+        "on_value": 1
+      }
+    ],
+    "update": [
+      {
+        "fallback_name": null,
+        "unique_id": "ab:cd:ef:12:4f:77:25:d6-11-25-firmware_update",
+        "migrate_unique_ids": [],
+        "platform": "update",
+        "class_name": "FirmwareUpdateEntity",
+        "translation_key": null,
+        "translation_placeholders": null,
+        "device_class": "firmware",
+        "state_class": null,
+        "entity_category": "config",
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:4f:77:25:d6",
+        "endpoint_id": 11,
+        "available": true,
+        "group_id": null,
+        "installed_version": "0x00000000",
+        "in_progress": false,
+        "update_percentage": null,
+        "latest_version": null,
+        "release_summary": null,
+        "release_notes": null,
+        "release_url": null,
+        "supported_features": 23
+      }
+    ]
+  },
+  "neighbors": [],
+  "routes": []
+}

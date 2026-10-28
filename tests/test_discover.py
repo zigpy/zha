@@ -67,8 +67,8 @@ from zha.units import UnitOfTime
 
 def _get_identify_cluster(zigpy_device):
     for endpoint in list(zigpy_device.endpoints.values())[1:]:
-        if hasattr(endpoint, "identify"):
-            return endpoint.identify
+        if zigpy.zcl.clusters.general.Identify.cluster_id in endpoint.in_clusters:
+            return endpoint.in_clusters[zigpy.zcl.clusters.general.Identify.cluster_id]
 
 
 @pytest.mark.parametrize("override_platform", [Platform.SWITCH, Platform.LIGHT])
@@ -131,6 +131,7 @@ async def test_device_override_entities(zha_gateway: Gateway) -> None:
     # And has been replaced by a switch with the same unique ID
     switch = get_entity(zha_device, platform=Platform.SWITCH)
     assert switch.unique_id == f"{zigpy_device.ieee}-1"
+    assert switch.unique_id_base == f"{zigpy_device.ieee}-1"
 
     # All other entities and diagnostics stay the same
     loaded_device_data = json.loads(
@@ -387,7 +388,7 @@ async def test_quirks_v2_entity_discovery_e1_curtain(
         qualifier_func=lambda e: e._enum == BasicCluster.PowerSource,
     )
     assert (
-        power_source_entity.state["state"]
+        power_source_entity.state.native_value
         == BasicCluster.PowerSource.Mains_single_phase.name
     )
 
@@ -397,7 +398,7 @@ async def test_quirks_v2_entity_discovery_e1_curtain(
         exact_entity_type=sensor.EnumSensor,
         qualifier_func=lambda e: e._enum == AqaraE1HookState,
     )
-    assert hook_state_entity.state["state"] == AqaraE1HookState.Unlocked.name
+    assert hook_state_entity.state.native_value == AqaraE1HookState.Unlocked.name
 
     error_detected_entity = get_entity(
         zha_device,
@@ -405,7 +406,7 @@ async def test_quirks_v2_entity_discovery_e1_curtain(
         exact_entity_type=binary_sensor.BinarySensor,
         qualifier_func=lambda e: e._attribute_name == "error_detected",
     )
-    assert error_detected_entity.state["state"] is False
+    assert error_detected_entity.state.is_on is False
 
 
 def _get_test_device(
@@ -806,6 +807,14 @@ async def test_devices_from_files(
         unique_id_collisions = defaultdict(list)
         for entity in zha_device.platform_entities.values():
             unique_id_collisions[entity.unique_id].append(entity)
+
+            if entity.unique_id_suffix is None:
+                assert entity.unique_id == entity.unique_id_base
+            else:
+                assert (
+                    entity.unique_id
+                    == f"{entity.unique_id_base}-{entity.unique_id_suffix}"
+                )
 
         for unique_id, entities in unique_id_collisions.items():
             if len(entities) == 1:

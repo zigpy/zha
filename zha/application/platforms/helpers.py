@@ -7,11 +7,13 @@ from enum import StrEnum
 import logging
 from typing import Any
 
+from zha.application.platforms import BaseEntityState
 
-def find_state_attributes(states: list[dict], key: str) -> Iterator[Any]:
+
+def find_state_attributes(states: list[BaseEntityState], key: str) -> Iterator[Any]:
     """Find attributes with matching key from states."""
     for state in states:
-        if (value := state.get(key)) is not None:
+        if (value := getattr(state, key, None)) is not None:
             yield value
 
 
@@ -26,7 +28,7 @@ def mean_tuple(*args: Any) -> tuple:
 
 
 def reduce_attribute(
-    states: list[dict],
+    states: list[BaseEntityState],
     key: str,
     default: Any | None = None,
     reduce: Callable[..., Any] = mean_int,

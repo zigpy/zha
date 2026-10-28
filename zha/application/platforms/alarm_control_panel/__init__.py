@@ -4,8 +4,7 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from collections.abc import Callable
-from dataclasses import dataclass
-import functools
+import dataclasses
 import logging
 from typing import TYPE_CHECKING, Any
 
@@ -19,10 +18,11 @@ from zigpy.zcl.clusters.security import (
 
 from zha.application import Platform
 from zha.application.platforms import (
-    BaseEntityInfo,
+    BaseEntityState,
     ClusterConfig,
     ClusterMatch,
     PlatformEntity,
+    ZclPlatformEntity,
     register_entity,
 )
 from zha.application.platforms.alarm_control_panel.const import (
@@ -46,14 +46,14 @@ SIGNAL_ARMED_STATE_CHANGED = "zha_armed_state_changed"
 SIGNAL_ALARM_TRIGGERED = "zha_armed_triggered"
 
 
-@dataclass(frozen=True, kw_only=True)
-class AlarmControlPanelEntityInfo(BaseEntityInfo):
-    """Alarm control panel entity info."""
+@dataclasses.dataclass(frozen=True, kw_only=True)
+class AlarmControlPanelState(BaseEntityState):
+    """State for alarm control panel entities."""
 
+    alarm_state: AlarmState
     code_arm_required: bool
     code_format: CodeFormat
     supported_features: int
-    translation_key: str
 
 
 class BaseAlarmControlPanel(PlatformEntity, ABC):
@@ -62,11 +62,15 @@ class BaseAlarmControlPanel(PlatformEntity, ABC):
     PLATFORM = Platform.ALARM_CONTROL_PANEL
 
     @property
-    def state(self) -> dict[str, Any]:
+    def state(self) -> AlarmControlPanelState:
         """Get the state of the alarm control panel."""
-        response = super().state
-        response["state"] = self.alarm_state
-        return response
+        return AlarmControlPanelState(
+            **super().state.__dict__,
+            alarm_state=self.alarm_state,
+            code_arm_required=self.code_arm_required,
+            code_format=self.code_format,
+            supported_features=self.supported_features,
+        )
 
     @property
     @abstractmethod
@@ -91,16 +95,6 @@ class BaseAlarmControlPanel(PlatformEntity, ABC):
         """Return the list of supported features."""
         return self._attr_supported_features
 
-    @functools.cached_property
-    def info_object(self) -> AlarmControlPanelEntityInfo:
-        """Return a representation of the alarm control panel."""
-        return AlarmControlPanelEntityInfo(
-            **super().info_object.__dict__,
-            code_arm_required=self.code_arm_required,
-            code_format=self.code_format,
-            supported_features=self.supported_features,
-        )
-
     @abstractmethod
     async def async_alarm_disarm(self, code: str | None = None) -> None:
         """Send disarm command."""
@@ -123,7 +117,7 @@ class BaseAlarmControlPanel(PlatformEntity, ABC):
 
 
 @register_entity(AceCluster.cluster_id)
-class AlarmControlPanel(BaseAlarmControlPanel):
+class AlarmControlPanel(BaseAlarmControlPanel, ZclPlatformEntity):
     """Entity for ZHA alarm control devices."""
 
     _attr_translation_key: str = "alarm_control_panel"

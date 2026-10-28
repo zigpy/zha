@@ -4,9 +4,8 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-import functools
 import logging
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 
 from zigpy import types as t
 from zigpy.profiles import zha, zll
@@ -28,19 +27,18 @@ from zha.application.helpers import safe_read, write_attributes_safe
 from zha.application.platforms import (
     AttrConfig,
     BaseEntity,
-    BaseEntityInfo,
+    BaseEntityState,
     ClusterConfig,
     ClusterMatch,
     EntityCategory,
     GroupEntity,
-    PlatformEntity,
     PlatformFeatureGroup,
+    ZclPlatformEntity,
     register_entity,
     register_group_entity,
 )
 from zha.application.platforms.const import (
     IKEA_AIR_PURIFIER_CLUSTER,
-    INOVELLI_CLUSTER,
     SINOPE_MANUFACTURER_CLUSTER,
     TUYA_MANUFACTURER_CLUSTER,
 )
@@ -58,9 +56,17 @@ _LOGGER = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True, kw_only=True)
-class ConfigurableAttributeSwitchInfo(BaseEntityInfo):
-    """Switch configuration entity info."""
+class SwitchState(BaseEntityState):
+    """State for switch entities."""
 
+    is_on: bool
+
+
+@dataclass(frozen=True, kw_only=True)
+class ConfigurableAttributeSwitchState(SwitchState):
+    """State for configurable attribute switch entities."""
+
+    inverted: bool
     attribute_name: str
     invert_attribute_name: str | None
     force_inverted: bool
@@ -74,11 +80,12 @@ class BaseSwitch(BaseEntity, ABC):
     PLATFORM = Platform.SWITCH
 
     @property
-    def state(self) -> dict[str, Any]:
+    def state(self) -> SwitchState:
         """Return the state of the switch."""
-        response = super().state
-        response["state"] = self.is_on
-        return response
+        return SwitchState(
+            **super().state.__dict__,
+            is_on=self.is_on,
+        )
 
     @property
     @abstractmethod
@@ -95,11 +102,12 @@ class BaseSwitch(BaseEntity, ABC):
 
 
 @register_entity(OnOff.cluster_id)
-class Switch(PlatformEntity, BaseSwitch):
+class Switch(ZclPlatformEntity, BaseSwitch):  # type: ignore[misc]
     """ZHA switch."""
 
     _attr_translation_key = "switch"
     _attr_primary_weight = 10
+    _attr_group_member = True
     _attribute_name = OnOff.AttributeDefs.on_off.name
 
     _cluster_match = ClusterMatch(
@@ -236,7 +244,7 @@ class Switch(PlatformEntity, BaseSwitch):
 
 
 @register_entity(BinaryOutput.cluster_id)
-class BinaryOutputSwitch(PlatformEntity, BaseSwitch):
+class BinaryOutputSwitch(ZclPlatformEntity, BaseSwitch):  # type: ignore[misc]
     """BinaryOutputCluster switch."""
 
     _attr_primary_weight = 10
@@ -335,7 +343,7 @@ class BinaryOutputSwitch(PlatformEntity, BaseSwitch):
 
 
 @register_group_entity
-class SwitchGroup(GroupEntity, BaseSwitch):
+class SwitchGroup(GroupEntity, BaseSwitch):  # type: ignore[misc]
     """Representation of a switch group."""
 
     _attr_primary_weight = 10
@@ -345,8 +353,6 @@ class SwitchGroup(GroupEntity, BaseSwitch):
         super().__init__(group)
         self._state: bool
         self._cluster = group.zigpy_group.endpoint[OnOff.cluster_id]
-        if hasattr(self, "info_object"):
-            delattr(self, "info_object")
         self.update()
 
     @property
@@ -371,21 +377,22 @@ class SwitchGroup(GroupEntity, BaseSwitch):
         self.maybe_emit_state_changed_event()
 
     def update(self, _: Any | None = None) -> None:
-        """Query all members and determine the light group state."""
+        """Query all members and determine the switch group state."""
         self.debug("Updating switch group entity state")
         platform_entities = self._group.get_platform_entities(self.PLATFORM)
-        all_states = [entity.state for entity in platform_entities]
+        all_states = [cast(SwitchState, entity.state) for entity in platform_entities]
         self.debug(
             "All platform entity states for group entity members: %s", all_states
         )
-        on_states = [state for state in all_states if state["state"]]
+        # Unavailable members keep their last state, don't let them keep the group on
+        on_states = [state for state in all_states if state.is_on and state.available]
 
         self._state = len(on_states) > 0
 
         self.maybe_emit_state_changed_event()
 
 
-class ConfigurableAttributeSwitch(PlatformEntity):
+class ConfigurableAttributeSwitch(ZclPlatformEntity):
     """Representation of a ZHA switch configuration entity."""
 
     PLATFORM = Platform.SWITCH
@@ -403,7 +410,6 @@ class ConfigurableAttributeSwitch(PlatformEntity):
         device: Device,
         *,
         cluster: zigpy.zcl.Cluster,
-        from_quirk: bool = False,
         attribute_name: str | None = None,
         invert_attribute_name: str | None = None,
         force_inverted: bool = False,
@@ -413,7 +419,7 @@ class ConfigurableAttributeSwitch(PlatformEntity):
         **kwargs: Any,
     ) -> None:
         """Init this switch configuration entity."""
-        if legacy_discovery_unique_id is None and not from_quirk:
+        if legacy_discovery_unique_id is None:
             legacy_discovery_unique_id = (
                 f"{endpoint.device.ieee}-{endpoint.id}"
                 if (
@@ -442,7 +448,6 @@ class ConfigurableAttributeSwitch(PlatformEntity):
             endpoint=endpoint,
             device=device,
             cluster=cluster,
-            from_quirk=from_quirk,
             legacy_discovery_unique_id=legacy_discovery_unique_id,
             **kwargs,
         )
@@ -477,25 +482,19 @@ class ConfigurableAttributeSwitch(PlatformEntity):
 
         return super()._is_supported()
 
-    @functools.cached_property
-    def info_object(self) -> ConfigurableAttributeSwitchInfo:
-        """Return representation of the switch configuration entity."""
-        return ConfigurableAttributeSwitchInfo(
-            **super().info_object.__dict__,
+    @property
+    def state(self) -> ConfigurableAttributeSwitchState:
+        """Return the state of the switch."""
+        return ConfigurableAttributeSwitchState(
+            **super().state.__dict__,
+            is_on=self.is_on,
+            inverted=self.inverted,
             attribute_name=self._attribute_name,
             invert_attribute_name=self._inverter_attribute_name,
             force_inverted=self._force_inverted,
             off_value=self._off_value,
             on_value=self._on_value,
         )
-
-    @property
-    def state(self) -> dict[str, Any]:
-        """Return the state of the switch."""
-        response = super().state
-        response["state"] = self.is_on
-        response["inverted"] = self.inverted
-        return response
 
     @property
     def inverted(self) -> bool:
@@ -660,218 +659,6 @@ class DisableLed(ConfigurableAttributeSwitch):
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({IKEA_AIR_PURIFIER_CLUSTER}),
         models=frozenset({"STARKVIND Air purifier", "STARKVIND Air purifier table"}),
-    )
-
-
-@register_entity(INOVELLI_CLUSTER)
-class InovelliInvertSwitch(ConfigurableAttributeSwitch):
-    """Inovelli invert switch control."""
-
-    _unique_id_suffix = "invert_switch"
-    _attribute_name = "invert_switch"
-    _attr_translation_key = "invert_switch"
-
-    _cluster_id = INOVELLI_CLUSTER
-
-    _cluster_match = ClusterMatch(
-        server_clusters=frozenset({INOVELLI_CLUSTER}),
-    )
-
-
-@register_entity(INOVELLI_CLUSTER)
-class InovelliSmartBulbMode(ConfigurableAttributeSwitch):
-    """Inovelli smart bulb mode control."""
-
-    _unique_id_suffix = "smart_bulb_mode"
-    _attribute_name = "smart_bulb_mode"
-    _attr_translation_key = "smart_bulb_mode"
-
-    _cluster_id = INOVELLI_CLUSTER
-
-    _cluster_match = ClusterMatch(
-        server_clusters=frozenset({INOVELLI_CLUSTER}),
-    )
-
-
-@register_entity(INOVELLI_CLUSTER)
-class InovelliSmartFanMode(ConfigurableAttributeSwitch):
-    """Inovelli smart fan mode control."""
-
-    _unique_id_suffix = "smart_fan_mode"
-    _attribute_name = "smart_fan_mode"
-    _attr_translation_key = "smart_fan_mode"
-
-    _cluster_id = INOVELLI_CLUSTER
-
-    _cluster_match = ClusterMatch(
-        server_clusters=frozenset({INOVELLI_CLUSTER}),
-        models=frozenset({"VZM35-SN"}),
-    )
-
-
-@register_entity(INOVELLI_CLUSTER)
-class InovelliDoubleTapUpEnabled(ConfigurableAttributeSwitch):
-    """Inovelli double tap up enabled."""
-
-    _unique_id_suffix = "double_tap_up_enabled"
-    _attribute_name = "double_tap_up_enabled"
-    _attr_translation_key = "double_tap_up_enabled"
-
-    _cluster_id = INOVELLI_CLUSTER
-
-    _cluster_match = ClusterMatch(
-        server_clusters=frozenset({INOVELLI_CLUSTER}),
-    )
-
-
-@register_entity(INOVELLI_CLUSTER)
-class InovelliDoubleTapDownEnabled(ConfigurableAttributeSwitch):
-    """Inovelli double tap down enabled."""
-
-    _unique_id_suffix = "double_tap_down_enabled"
-    _attribute_name = "double_tap_down_enabled"
-    _attr_translation_key = "double_tap_down_enabled"
-
-    _cluster_id = INOVELLI_CLUSTER
-
-    _cluster_match = ClusterMatch(
-        server_clusters=frozenset({INOVELLI_CLUSTER}),
-    )
-
-
-@register_entity(INOVELLI_CLUSTER)
-class InovelliAuxSwitchScenes(ConfigurableAttributeSwitch):
-    """Inovelli unique aux switch scenes."""
-
-    _unique_id_suffix = "aux_switch_scenes"
-    _attribute_name = "aux_switch_scenes"
-    _attr_translation_key = "aux_switch_scenes"
-
-    _cluster_id = INOVELLI_CLUSTER
-
-    _cluster_match = ClusterMatch(
-        server_clusters=frozenset({INOVELLI_CLUSTER}),
-    )
-
-
-@register_entity(INOVELLI_CLUSTER)
-class InovelliBindingOffToOnSyncLevel(ConfigurableAttributeSwitch):
-    """Inovelli send move to level with on/off to bound devices."""
-
-    _unique_id_suffix = "binding_off_to_on_sync_level"
-    _attribute_name = "binding_off_to_on_sync_level"
-    _attr_translation_key = "binding_off_to_on_sync_level"
-
-    _cluster_id = INOVELLI_CLUSTER
-
-    _cluster_match = ClusterMatch(
-        server_clusters=frozenset({INOVELLI_CLUSTER}),
-    )
-
-
-@register_entity(INOVELLI_CLUSTER)
-class InovelliLocalProtection(ConfigurableAttributeSwitch):
-    """Inovelli local protection control."""
-
-    _unique_id_suffix = "local_protection"
-    _attribute_name = "local_protection"
-    _attr_translation_key = "local_protection"
-
-    _cluster_id = INOVELLI_CLUSTER
-
-    _cluster_match = ClusterMatch(
-        server_clusters=frozenset({INOVELLI_CLUSTER}),
-    )
-
-
-@register_entity(INOVELLI_CLUSTER)
-class InovelliOnOffLEDMode(ConfigurableAttributeSwitch):
-    """Inovelli only 1 LED mode control."""
-
-    _unique_id_suffix = "on_off_led_mode"
-    _attribute_name = "on_off_led_mode"
-    _attr_translation_key = "one_led_mode"
-
-    _cluster_id = INOVELLI_CLUSTER
-
-    _cluster_match = ClusterMatch(
-        server_clusters=frozenset({INOVELLI_CLUSTER}),
-    )
-
-
-@register_entity(INOVELLI_CLUSTER)
-class InovelliFirmwareProgressLED(ConfigurableAttributeSwitch):
-    """Inovelli firmware progress LED control."""
-
-    _unique_id_suffix = "firmware_progress_led"
-    _attribute_name = "firmware_progress_led"
-    _attr_translation_key = "firmware_progress_led"
-
-    _cluster_id = INOVELLI_CLUSTER
-
-    _cluster_match = ClusterMatch(
-        server_clusters=frozenset({INOVELLI_CLUSTER}),
-    )
-
-
-@register_entity(INOVELLI_CLUSTER)
-class InovelliRelayClickInOnOffMode(ConfigurableAttributeSwitch):
-    """Inovelli relay click in on off mode control."""
-
-    _unique_id_suffix = "relay_click_in_on_off_mode"
-    _attribute_name = "relay_click_in_on_off_mode"
-    _attr_translation_key = "relay_click_in_on_off_mode"
-
-    _cluster_id = INOVELLI_CLUSTER
-
-    _cluster_match = ClusterMatch(
-        server_clusters=frozenset({INOVELLI_CLUSTER}),
-    )
-
-
-@register_entity(INOVELLI_CLUSTER)
-class InovelliDisableDoubleTapClearNotificationsMode(ConfigurableAttributeSwitch):
-    """Inovelli disable clear notifications double tap control."""
-
-    _unique_id_suffix = "disable_clear_notifications_double_tap"
-    _attribute_name = "disable_clear_notifications_double_tap"
-    _attr_translation_key = "disable_clear_notifications_double_tap"
-
-    _cluster_id = INOVELLI_CLUSTER
-
-    _cluster_match = ClusterMatch(
-        server_clusters=frozenset({INOVELLI_CLUSTER}),
-    )
-
-
-@register_entity(AQARA_OPPLE_CLUSTER)
-class AqaraPetFeederLEDIndicator(ConfigurableAttributeSwitch):
-    """Representation of a LED indicator configuration entity."""
-
-    _unique_id_suffix = "disable_led_indicator"
-    _attribute_name = "disable_led_indicator"
-    _attr_translation_key = "led_indicator"
-    _force_inverted = True
-    _cluster_id = AQARA_OPPLE_CLUSTER
-
-    _cluster_match = ClusterMatch(
-        server_clusters=frozenset({AQARA_OPPLE_CLUSTER}),
-        models=frozenset({"aqara.feeder.acn001"}),
-    )
-
-
-@register_entity(AQARA_OPPLE_CLUSTER)
-class AqaraPetFeederChildLock(ConfigurableAttributeSwitch):
-    """Representation of a child lock configuration entity."""
-
-    _unique_id_suffix = "child_lock"
-    _attribute_name = "child_lock"
-    _attr_translation_key = "child_lock"
-    _cluster_id = AQARA_OPPLE_CLUSTER
-
-    _cluster_match = ClusterMatch(
-        server_clusters=frozenset({AQARA_OPPLE_CLUSTER}),
-        models=frozenset({"aqara.feeder.acn001"}),
     )
 
 
