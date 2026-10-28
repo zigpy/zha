@@ -1623,6 +1623,9 @@ class ZigbeeDevice(BaseDevice[ZigpyDevice]):
             if command_type == CLUSTER_COMMAND_SERVER
             else cluster.client_commands
         )
+        manufacturer_kwargs = (
+            {} if manufacturer is None else {"manufacturer": manufacturer}
+        )
         if args is not None:
             self.warning(
                 (
@@ -1632,11 +1635,14 @@ class ZigbeeDevice(BaseDevice[ZigpyDevice]):
                 args,
                 [field.name for field in commands[command].schema.fields],
             )
-            response = await getattr(cluster, commands[command].name)(*args)
+            response = await getattr(cluster, commands[command].name)(
+                *args, **manufacturer_kwargs
+            )
         else:
             assert params is not None
             response = await getattr(cluster, commands[command].name)(
-                **convert_to_zcl_values(params, commands[command].schema)
+                **convert_to_zcl_values(params, commands[command].schema),
+                **manufacturer_kwargs,
             )
         self.debug(
             "Issued cluster command: %s %s %s %s %s %s %s %s",
