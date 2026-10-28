@@ -2768,21 +2768,28 @@ async def test_turn_on_execute_if_off_color_command_failure(
     new=AsyncMock(return_value=SUCCESS),
 )
 @pytest.mark.parametrize(
-    ("reports", "expected_on"),
+    ("turn_off", "reports", "expected_on"),
     [
         # the last report of the window wins, whichever cluster it came from
-        (("on_off_on", "level_0"), False),
-        (("level_0", "on_off_on"), True),
-        (("level_0", "on_off_on", "level_0"), False),
-        # a rising level after a late level 0 means the light is on
-        (("level_0", "level_150"), True),
-        (("on_off_on", "level_0", "level_150"), True),
-        # but a genuine on_off=False report is not cancelled by a level report
-        (("on_off_off", "level_150"), False),
+        (True, ("on_off_on", "level_0"), False),
+        (True, ("level_0", "on_off_on"), True),
+        (True, ("level_0", "on_off_on", "level_0"), False),
+        # an off command: the level steps to 0 and is restored afterwards
+        (True, ("level_0", "level_150"), False),
+        (True, ("on_off_off", "level_0", "level_150"), False),
+        (True, ("on_off_on", "level_0", "level_150"), True),
+        (True, ("on_off_off", "level_150"), False),
+        # an on command: a late level 0 followed by the rising level is still on
+        (False, ("level_0", "level_150"), True),
+        (False, ("on_off_on", "level_0", "level_150"), True),
+        (False, ("level_0",), False),
     ],
 )
 async def test_zero_level_and_on_off_reports_apply_in_arrival_order(
-    zha_gateway: Gateway, reports: tuple[str, ...], expected_on: bool
+    zha_gateway: Gateway,
+    turn_off: bool,
+    reports: tuple[str, ...],
+    expected_on: bool,
 ) -> None:
     """Test buffered on_off and zero-level reports are resolved by arrival order."""
     device_light_1 = await device_light_1_mock(zha_gateway)
@@ -2792,11 +2799,11 @@ async def test_zero_level_and_on_off_reports_apply_in_arrival_order(
 
     await entity.async_turn_on(brightness=200)
     await zha_gateway.async_block_till_done()
-    await asyncio.sleep(1.6)
-    await zha_gateway.async_block_till_done()
-
-    await entity.async_turn_off()
-    await zha_gateway.async_block_till_done()
+    if turn_off:
+        await asyncio.sleep(1.6)
+        await zha_gateway.async_block_till_done()
+        await entity.async_turn_off()
+        await zha_gateway.async_block_till_done()
     assert entity.is_transitioning
 
     for report in reports:
