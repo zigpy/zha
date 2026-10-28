@@ -869,9 +869,17 @@ class BaseSharedLight(BaseLight):
                     "zha.light-refresh-debounced-member",
                 )
 
+    def _cancel_transition_on_remove(self) -> bool:
+        """Return whether removing the entity cancels a pending transition."""
+        return True
+
     async def on_remove(self) -> None:
         """Clean up when entity is removed."""
-        self._async_unsub_transition_listener()
+        if self._cancel_transition_on_remove():
+            self._async_unsub_transition_listener()
+        elif self._transition_listener is not None:
+            with contextlib.suppress(ValueError):
+                self._tracked_handles.remove(self._transition_listener)
         await super().on_remove()
 
 
@@ -1430,6 +1438,14 @@ class LightGroup(BaseSharedLight, GroupEntity):
         self._internal_supported_color_modes = {ColorMode.ONOFF}
 
         self.update()
+
+    def _cancel_transition_on_remove(self) -> bool:
+        """Return whether removing the entity cancels a pending transition.
+
+        A pending transition still has to release and refresh the member lights
+        when it ends, so it is only cancelled when shutting down.
+        """
+        return self._gateway.shutting_down
 
     async def on_remove(self) -> None:
         """Cancel tasks this entity owns."""
