@@ -613,8 +613,8 @@ class Gateway(AsyncUtilMixin, EventBase):
             # failed rebuild.
             return
 
-        # Like a join, end with `INITIALIZED`: a GPD is re-commissioned from the
-        # pairing UI, which otherwise stays on `CONFIGURED`
+        # Like a join, end with `INITIALIZED`. Besides Reconfigure, re-commissioning a
+        # GPD from the pairing UI lands here, which would otherwise stay on `CONFIGURED`
         for pairing_status in (
             DevicePairingStatus.CONFIGURED,
             DevicePairingStatus.INITIALIZED,
