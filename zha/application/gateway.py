@@ -609,19 +609,25 @@ class Gateway(AsyncUtilMixin, EventBase):
             zha_device.emit_reconfigure_done()
 
         if not all_succeeded:
-            # Don't emit `DeviceFullInitEvent(CONFIGURED)` — entities are
-            # partial after a failed rebuild.
+            # Don't emit `DeviceFullInitEvent` — entities are partial after a
+            # failed rebuild.
             return
 
-        self.emit(
-            ZHA_GW_MSG_DEVICE_FULL_INIT,
-            DeviceFullInitEvent(
-                device_info=ExtendedDeviceInfoWithPairingStatus(
-                    pairing_status=DevicePairingStatus.CONFIGURED,
-                    **zha_device.extended_device_info.__dict__,
+        # Like a join, end with `INITIALIZED`: a GPD is re-commissioned from the
+        # pairing UI, which otherwise stays on `CONFIGURED`
+        for pairing_status in (
+            DevicePairingStatus.CONFIGURED,
+            DevicePairingStatus.INITIALIZED,
+        ):
+            self.emit(
+                ZHA_GW_MSG_DEVICE_FULL_INIT,
+                DeviceFullInitEvent(
+                    device_info=ExtendedDeviceInfoWithPairingStatus(
+                        pairing_status=pairing_status,
+                        **zha_device.extended_device_info.__dict__,
+                    ),
                 ),
-            ),
-        )
+            )
 
     async def async_reinterview_device(self, ieee: EUI64) -> None:
         """Re-interview a device.
