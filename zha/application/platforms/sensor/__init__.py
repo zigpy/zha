@@ -126,7 +126,6 @@ from zha.units import (
     UnitOfElectricPotential,
     UnitOfEnergy,
     UnitOfFrequency,
-    UnitOfMass,
     UnitOfPower,
     UnitOfPressure,
     UnitOfSpeed,
@@ -277,6 +276,15 @@ class Sensor(BaseSensor, ZclPlatformEntity):
                 self._attr_def = self._cluster.find_attribute(self._attribute_name)
 
         self.recompute_capabilities()
+
+    @property
+    def _scaling_attribute_names(self) -> frozenset[str]:
+        """Return the names of the attributes scaling this sensor's value.
+
+        Cluster pollers skip these: they are read on startup and are expected
+        to be reported when they change.
+        """
+        return frozenset()
 
     def on_add(self) -> None:
         """Run when entity is added."""
@@ -902,6 +910,20 @@ class BaseElectricalMeasurement(Sensor):
     def _divisor(self, value: int | float | None) -> None:
         raise AttributeError("Cannot set divisor directly")
 
+    @property
+    def _scaling_attribute_names(self) -> frozenset[str]:
+        """Return the multiplier and divisor attribute names, incl. fallbacks."""
+        return frozenset(
+            name
+            for name in (
+                self._multiplier_attribute_name,
+                self._multiplier_fallback_attribute_name,
+                self._divisor_attribute_name,
+                self._divisor_fallback_attribute_name,
+            )
+            if name is not None
+        )
+
 
 class AggregatedClusterPoller(VirtualEntity):
     """Polls a cluster on behalf of sibling entities that need updates.
@@ -948,13 +970,17 @@ class AggregatedClusterPoller(VirtualEntity):
             cfg = entity._server_cluster_config.get(self._cluster_id)
             if cfg is None:
                 continue
+            scaling_attrs = entity._scaling_attribute_names
             for attr_def, attr_cfg in cfg.attributes.items():
                 if attr_cfg.reporting is None:
+                    continue
+                attr_name = attr_def if isinstance(attr_def, str) else attr_def.name
+                if attr_name in scaling_attrs:
                     continue
                 if self._cluster.is_attribute_unsupported(attr_def):
                     continue
 
-                attrs.add(attr_def if isinstance(attr_def, str) else attr_def.name)
+                attrs.add(attr_name)
 
         if not attrs:
             return
@@ -3337,77 +3363,6 @@ class IkeaFilterRunTime(Sensor):
 
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({IKEA_AIR_PURIFIER_CLUSTER}),
-    )
-
-
-class AqaraFeedingSource(types.enum8):
-    """Aqara pet feeder feeding source."""
-
-    Feeder = 0x01
-    HomeAssistant = 0x02
-
-
-@register_entity(AQARA_OPPLE_CLUSTER)
-class AqaraPetFeederLastFeedingSource(EnumSensor):
-    """Sensor that displays the last feeding source of pet feeder."""
-
-    _attribute_name = "last_feeding_source"
-    _unique_id_suffix = "last_feeding_source"
-    _attr_translation_key: str = "last_feeding_source"
-    _enum = AqaraFeedingSource
-    _cluster_id = AQARA_OPPLE_CLUSTER
-
-    _cluster_match = ClusterMatch(
-        server_clusters=frozenset({AQARA_OPPLE_CLUSTER}),
-        models=frozenset({"aqara.feeder.acn001"}),
-    )
-
-
-@register_entity(AQARA_OPPLE_CLUSTER)
-class AqaraPetFeederLastFeedingSize(Sensor):
-    """Sensor that displays the last feeding size of the pet feeder."""
-
-    _attribute_name = "last_feeding_size"
-    _unique_id_suffix = "last_feeding_size"
-    _attr_translation_key: str = "last_feeding_size"
-    _cluster_id = AQARA_OPPLE_CLUSTER
-
-    _cluster_match = ClusterMatch(
-        server_clusters=frozenset({AQARA_OPPLE_CLUSTER}),
-        models=frozenset({"aqara.feeder.acn001"}),
-    )
-
-
-@register_entity(AQARA_OPPLE_CLUSTER)
-class AqaraPetFeederPortionsDispensed(Sensor):
-    """Sensor that displays the number of portions dispensed by the pet feeder."""
-
-    _attribute_name = "portions_dispensed"
-    _unique_id_suffix = "portions_dispensed"
-    _attr_translation_key: str = "portions_dispensed_today"
-    _attr_state_class: SensorStateClass = SensorStateClass.TOTAL_INCREASING
-    _cluster_id = AQARA_OPPLE_CLUSTER
-
-    _cluster_match = ClusterMatch(
-        server_clusters=frozenset({AQARA_OPPLE_CLUSTER}),
-        models=frozenset({"aqara.feeder.acn001"}),
-    )
-
-
-@register_entity(AQARA_OPPLE_CLUSTER)
-class AqaraPetFeederWeightDispensed(Sensor):
-    """Sensor that displays the weight dispensed by the pet feeder."""
-
-    _attribute_name = "weight_dispensed"
-    _unique_id_suffix = "weight_dispensed"
-    _attr_translation_key: str = "weight_dispensed_today"
-    _attr_native_unit_of_measurement = UnitOfMass.GRAMS
-    _attr_state_class: SensorStateClass = SensorStateClass.TOTAL_INCREASING
-    _cluster_id = AQARA_OPPLE_CLUSTER
-
-    _cluster_match = ClusterMatch(
-        server_clusters=frozenset({AQARA_OPPLE_CLUSTER}),
-        models=frozenset({"aqara.feeder.acn001"}),
     )
 
 

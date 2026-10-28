@@ -435,7 +435,8 @@ class ZHAData:
         default_factory=dict
     )
     allow_polling: bool = dataclasses.field(default=False)
-    local_timezone: dt.tzinfo = dataclasses.field(default=dt.UTC)
+    # Set once at startup; use Gateway.update_local_timezone() for runtime changes.
+    local_timezone: dt.tzinfo | None = None
     country_code: str | None = None
 
 

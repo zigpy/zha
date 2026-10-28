@@ -293,7 +293,6 @@ class BaseEntity(LogMixin, EventBase):
     _attr_state_class: str | None = None
     _attr_enabled: bool = True
     _attr_extra_state_attribute_names: set[str] | None = None
-    _attr_always_supported: bool = False
 
     # Explicitly marks the entity as (not) primary, set by entity classes and quirks.
     # It takes precedence over (and is never overwritten by) the weight-based primary
@@ -318,9 +317,6 @@ class BaseEntity(LogMixin, EventBase):
 
     def is_supported(self) -> bool:
         """Return if the entity is supported for the device."""
-        if self._attr_always_supported:
-            return True
-
         return self._is_supported()
 
     def _is_supported(self) -> bool:
@@ -532,7 +528,7 @@ class PlatformEntity(BaseEntity):
         device: BaseDevice,
         *,
         unique_id: str,
-        from_quirk: bool = False,
+        force_create: bool = False,
         fallback_name: str | None = None,
         translation_key: str | None = None,
         translation_placeholders: Mapping[str, str] | None = None,
@@ -544,20 +540,24 @@ class PlatformEntity(BaseEntity):
     ):
         """Initialize the platform entity.
 
-        Quirk entities are constructed with `from_quirk=True` and the generic
-        config keywords (`fallback_name`, `translation_key`, `entity_type`, etc.);
-        the platform subclasses add their own keywords.
+        The generic config keywords (`fallback_name`, `translation_key`, `entity_type`,
+        etc.) override the class's values when given; the platform subclasses add their
+        own keywords. `force_create=True` creates the entity without checking if it is
+        supported.
         """
-        if from_quirk:
-            self._apply_quirk_entity_config(
-                fallback_name=fallback_name,
-                translation_key=translation_key,
-                translation_placeholders=translation_placeholders,
-                unique_id_suffix=unique_id_suffix,
-                entity_type=entity_type,
-                primary=primary,
-                initially_disabled=initially_disabled,
-            )
+        self._force_create = force_create
+
+        self._apply_entity_config(
+            fallback_name=fallback_name,
+            translation_key=translation_key,
+            translation_placeholders=translation_placeholders,
+            unique_id_suffix=unique_id_suffix,
+            entity_type=entity_type,
+            primary=primary,
+            initially_disabled=initially_disabled,
+        )
+
+        self._unique_id_base = unique_id
 
         if self._unique_id_suffix is not None:
             unique_id = f"{unique_id}-{self._unique_id_suffix}"
@@ -566,7 +566,7 @@ class PlatformEntity(BaseEntity):
 
         self._device: BaseDevice = device
 
-    def _apply_quirk_entity_config(
+    def _apply_entity_config(
         self,
         *,
         fallback_name: str | None,
@@ -577,12 +577,9 @@ class PlatformEntity(BaseEntity):
         primary: bool | None,
         initially_disabled: bool,
     ) -> None:
-        """Apply the generic quirk entity configuration keywords."""
+        """Apply the generic entity configuration keywords that are given."""
         if initially_disabled:
             self._attr_entity_registry_enabled_default = False
-
-        # quirk entities are assumed to always be supported
-        self._attr_always_supported = True
 
         if fallback_name:
             self._attr_fallback_name = fallback_name
@@ -600,7 +597,7 @@ class PlatformEntity(BaseEntity):
             self._attr_entity_category = EntityCategory.CONFIG
         elif entity_type == EntityType.DIAGNOSTIC:
             self._attr_entity_category = EntityCategory.DIAGNOSTIC
-        else:
+        elif entity_type == EntityType.STANDARD:
             self._attr_entity_category = None
 
         if primary is not None:
@@ -610,6 +607,21 @@ class PlatformEntity(BaseEntity):
     def device(self) -> BaseDevice:
         """Return the device."""
         return self._device
+
+    @property
+    def force_create(self) -> bool:
+        """Return if the entity is created without checking if it is supported."""
+        return self._force_create
+
+    @property
+    def unique_id_base(self) -> str:
+        """Return the unique ID the entity was created with, without its suffix."""
+        return self._unique_id_base
+
+    @property
+    def unique_id_suffix(self) -> str | None:
+        """Return the suffix appended to the unique ID base, if any."""
+        return self._unique_id_suffix
 
     @property
     def primary(self) -> bool:
@@ -678,29 +690,40 @@ class ZclPlatformEntity(PlatformEntity):
         device: Device,
         *,
         cluster: zigpy.zcl.Cluster,
-        from_quirk: bool = False,
+        unique_id: str | None = None,
         legacy_discovery_unique_id: str | None = None,
+        # TODO: remove this backwards compatibility shim after zha-device-handlers#5410
+        # is merged
+        from_quirk: bool = False,
         **kwargs: Any,
     ):
         """Initialize the ZCL platform entity.
 
-        Default-discovery entities pass no config keywords.
+        Default-discovery entities pass no config keywords. `unique_id` overrides the
+        legacy unique ID base.
         """
+
+        if from_quirk:
+            assert unique_id is None
+            assert "force_create" not in kwargs
+
+            unique_id = f"{device.ieee}-{endpoint.id}"
+            kwargs["force_create"] = True
+
         if legacy_discovery_unique_id is None:
-            if from_quirk:
-                legacy_discovery_unique_id = f"{device.ieee}-{endpoint.id}"
-            else:
-                legacy_discovery_unique_id = (
-                    f"{device.ieee}-{endpoint.id}-{cluster.cluster_id}"
-                )
+            legacy_discovery_unique_id = (
+                f"{device.ieee}-{endpoint.id}-{cluster.cluster_id}"
+            )
+
+        if unique_id is None:
+            unique_id = legacy_discovery_unique_id
 
         self._endpoint = endpoint
         self._cluster: zigpy.zcl.Cluster = cluster
 
         super().__init__(
             device,
-            unique_id=legacy_discovery_unique_id,
-            from_quirk=from_quirk,
+            unique_id=unique_id,
             **kwargs,
         )
 

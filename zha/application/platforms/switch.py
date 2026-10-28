@@ -410,7 +410,6 @@ class ConfigurableAttributeSwitch(ZclPlatformEntity):
         device: Device,
         *,
         cluster: zigpy.zcl.Cluster,
-        from_quirk: bool = False,
         attribute_name: str | None = None,
         invert_attribute_name: str | None = None,
         force_inverted: bool = False,
@@ -420,7 +419,7 @@ class ConfigurableAttributeSwitch(ZclPlatformEntity):
         **kwargs: Any,
     ) -> None:
         """Init this switch configuration entity."""
-        if legacy_discovery_unique_id is None and not from_quirk:
+        if legacy_discovery_unique_id is None:
             legacy_discovery_unique_id = (
                 f"{endpoint.device.ieee}-{endpoint.id}"
                 if (
@@ -449,7 +448,6 @@ class ConfigurableAttributeSwitch(ZclPlatformEntity):
             endpoint=endpoint,
             device=device,
             cluster=cluster,
-            from_quirk=from_quirk,
             legacy_discovery_unique_id=legacy_discovery_unique_id,
             **kwargs,
         )
@@ -661,37 +659,6 @@ class DisableLed(ConfigurableAttributeSwitch):
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({IKEA_AIR_PURIFIER_CLUSTER}),
         models=frozenset({"STARKVIND Air purifier", "STARKVIND Air purifier table"}),
-    )
-
-
-@register_entity(AQARA_OPPLE_CLUSTER)
-class AqaraPetFeederLEDIndicator(ConfigurableAttributeSwitch):
-    """Representation of a LED indicator configuration entity."""
-
-    _unique_id_suffix = "disable_led_indicator"
-    _attribute_name = "disable_led_indicator"
-    _attr_translation_key = "led_indicator"
-    _force_inverted = True
-    _cluster_id = AQARA_OPPLE_CLUSTER
-
-    _cluster_match = ClusterMatch(
-        server_clusters=frozenset({AQARA_OPPLE_CLUSTER}),
-        models=frozenset({"aqara.feeder.acn001"}),
-    )
-
-
-@register_entity(AQARA_OPPLE_CLUSTER)
-class AqaraPetFeederChildLock(ConfigurableAttributeSwitch):
-    """Representation of a child lock configuration entity."""
-
-    _unique_id_suffix = "child_lock"
-    _attribute_name = "child_lock"
-    _attr_translation_key = "child_lock"
-    _cluster_id = AQARA_OPPLE_CLUSTER
-
-    _cluster_match = ClusterMatch(
-        server_clusters=frozenset({AQARA_OPPLE_CLUSTER}),
-        models=frozenset({"aqara.feeder.acn001"}),
     )
 
 

@@ -643,9 +643,16 @@ class BaseDevice[ZigpyDeviceT: ZigpyBaseDevice](LogMixin, EventBase):
     @on_network.setter
     def on_network(self, new_on_network: bool) -> None:
         """Set device on_network flag."""
-        self.update_available(new_on_network)
-        self._on_network = new_on_network
-        if not new_on_network:
+        if new_on_network:
+            # `available` includes `on_network`, so set it before entities emit
+            # their state, but compare against the availability from before
+            was_available = self.available
+            self._on_network = True
+            self._update_available(True, was_available=was_available)
+        else:
+            # `available` must still include `on_network` here to see the change
+            self.update_available(False)
+            self._on_network = False
             self.debug("Device is not on the network, marking unavailable")
 
     @property
@@ -729,16 +736,20 @@ class BaseDevice[ZigpyDeviceT: ZigpyBaseDevice](LogMixin, EventBase):
 
     def update_available(self, available: bool) -> None:
         """Update device availability and signal entities."""
+        self._update_available(available, was_available=self.available)
+
+    def _update_available(self, available: bool, *, was_available: bool) -> None:
+        """Update device availability, comparing against `was_available`."""
         self.debug(
             (
                 "Update device availability -  device available: %s - new availability:"
                 " %s - changed: %s"
             ),
-            self.available,
+            was_available,
             available,
-            self.available ^ available,
+            was_available ^ available,
         )
-        availability_changed = self.available ^ available
+        availability_changed = was_available ^ available
         self.available = available
         if availability_changed and available:
             # reinit cluster handlers then signal entities
@@ -933,9 +944,10 @@ class BaseDevice[ZigpyDeviceT: ZigpyBaseDevice](LogMixin, EventBase):
         for entity in self._pending_entities:
             entity.recompute_capabilities()
 
-            # Ignore unsupported entities
-            if not entity.is_supported() or not entity.is_supported_in_list(
-                all_entities.values()
+            # Ignore unsupported entities, unless they are force-created
+            if not entity.force_create and (
+                not entity.is_supported()
+                or not entity.is_supported_in_list(all_entities.values())
             ):
                 await entity.on_remove()
                 continue
@@ -982,7 +994,9 @@ class BaseDevice[ZigpyDeviceT: ZigpyBaseDevice](LogMixin, EventBase):
         for entity in entities[:]:
             entity.recompute_capabilities()
 
-            if not entity.is_supported() or not entity.is_supported_in_list(entities):
+            if not entity.force_create and (
+                not entity.is_supported() or not entity.is_supported_in_list(entities)
+            ):
                 self.debug("Removing unsupported entity %s", entity)
                 await self._remove_entity(entity, remove=True)
                 entities.remove(entity)

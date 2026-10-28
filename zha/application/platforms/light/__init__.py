@@ -1355,8 +1355,6 @@ class MinTransitionLight(Light):
 class LightGroup(BaseSharedLight, GroupEntity):
     """Representation of a light group."""
 
-    _attr_always_supported = True
-
     def __init__(self, group: Group):
         """Initialize a light group."""
         super().__init__(group)
