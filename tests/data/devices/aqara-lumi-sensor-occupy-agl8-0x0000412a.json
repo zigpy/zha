@@ -5,10 +5,10 @@
   "manufacturer": "Aqara",
   "model": "lumi.sensor_occupy.agl8",
   "friendly_manufacturer": "Aqara",
-  "friendly_model": "lumi.sensor_occupy.agl8",
-  "name": "Aqara lumi.sensor_occupy.agl8",
-  "quirk_applied": false,
-  "quirk_class": "zigpy.device.ZigbeeDevice",
+  "friendly_model": "Presence Sensor FP300",
+  "name": "Aqara Presence Sensor FP300",
+  "quirk_applied": true,
+  "quirk_class": "zhaquirks.xiaomi.aqara.motion_agl8:(Aqara / lumi.sensor_occupy.agl8)",
   "exposes_features": [],
   "manufacturer_code": 4447,
   "power_source": "Battery or Unknown",
@@ -137,7 +137,7 @@
         },
         {
           "cluster_id": "0xfcc0",
-          "endpoint_attribute": "manufacturer_specific",
+          "endpoint_attribute": "aqara_fp300_manu",
           "attributes": []
         }
       ],
@@ -202,6 +202,52 @@
     }
   },
   "zha_lib_entities": {
+    "binary_sensor": [
+      {
+        "fallback_name": "Motion",
+        "unique_id": "ab:cd:ef:12:ae:99:5e:c4-1-pir_detection",
+        "migrate_unique_ids": [],
+        "platform": "binary_sensor",
+        "class_name": "BinarySensor",
+        "translation_key": null,
+        "translation_placeholders": null,
+        "device_class": "motion",
+        "state_class": null,
+        "entity_category": "diagnostic",
+        "entity_registry_enabled_default": false,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:ae:99:5e:c4",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "is_on": false,
+        "attribute_name": "pir_detection"
+      },
+      {
+        "fallback_name": "Occupancy",
+        "unique_id": "ab:cd:ef:12:ae:99:5e:c4-1-presence",
+        "migrate_unique_ids": [],
+        "platform": "binary_sensor",
+        "class_name": "BinarySensor",
+        "translation_key": null,
+        "translation_placeholders": null,
+        "device_class": "occupancy",
+        "state_class": null,
+        "entity_category": null,
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:ae:99:5e:c4",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "is_on": false,
+        "attribute_name": "presence"
+      }
+    ],
     "button": [
       {
         "fallback_name": null,

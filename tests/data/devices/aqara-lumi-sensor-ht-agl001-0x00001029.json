@@ -5,10 +5,10 @@
   "manufacturer": "Aqara",
   "model": "lumi.sensor_ht.agl001",
   "friendly_manufacturer": "Aqara",
-  "friendly_model": "lumi.sensor_ht.agl001",
-  "name": "Aqara lumi.sensor_ht.agl001",
-  "quirk_applied": false,
-  "quirk_class": "zigpy.device.ZigbeeDevice",
+  "friendly_model": "Climate Sensor W100",
+  "name": "Aqara Climate Sensor W100",
+  "quirk_applied": true,
+  "quirk_class": "zhaquirks.xiaomi.aqara.sensor_ht_agl001:(Aqara / lumi.sensor_ht.agl001)",
   "exposes_features": [],
   "manufacturer_code": 4447,
   "power_source": "Battery or Unknown",
@@ -125,7 +125,7 @@
         },
         {
           "cluster_id": "0xfcc0",
-          "endpoint_attribute": "manufacturer_specific",
+          "endpoint_attribute": "opple_cluster",
           "attributes": []
         }
       ],

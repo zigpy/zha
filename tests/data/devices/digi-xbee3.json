@@ -399,9 +399,9 @@
       ]
     },
     "232": {
-      "profile_id": 49413,
+      "profile_id": 260,
       "device_type": {
-        "name": "unknown",
+        "name": "LEVEL_CONTROL_SWITCH",
         "id": 1
       },
       "in_clusters": [

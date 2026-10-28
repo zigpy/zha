@@ -2049,7 +2049,7 @@ ci = [
     { name = "python-slugify" },
     { name = "ruff", specifier = "==0.17.1" },
     { name = "uv", specifier = ">=0.11.16" },
-    { name = "zha-quirks", specifier = ">=2.0.0" },
+    { name = "zha-quirks", specifier = ">=2.4.0" },
 ]
 testing = [
     { name = "codespell", specifier = "==2.4.3" },
@@ -2068,20 +2068,20 @@ testing = [
     { name = "python-slugify" },
     { name = "ruff", specifier = "==0.17.1" },
     { name = "uv", specifier = ">=0.11.16" },
-    { name = "zha-quirks", specifier = ">=2.0.0" },
+    { name = "zha-quirks", specifier = ">=2.4.0" },
 ]
 
 [[package]]
 name = "zha-quirks"
-version = "2.3.0"
+version = "2.4.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "zha" },
     { name = "zigpy" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/e0/fc/0d85c5e3c9bd4246b949cf53618b32d88ff4d6e8aad2ecea29feb44a4e22/zha_quirks-2.3.0.tar.gz", hash = "sha256:5e1a0b4cb1e2a8e06c3984942989c592d5dade19f59caa0ddc2993b0cc1b7c2f", size = 488686, upload-time = "2026-09-29T23:53:47.932Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/1e/95/c2ffc39b2016fa1424834ea315f51cd45d29f238b6044ad60546bb495303/zha_quirks-2.4.0.tar.gz", hash = "sha256:3b2eee44428762508473d23dbdbea6ec651076c9057d49e59e1fa939150d715b", size = 556040, upload-time = "2026-10-28T06:23:24.313Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/ac/3d/242f5bb2ab831e98f0fa1f4f4c0d2a8cbd38001f44b7a1ea2d3778544525/zha_quirks-2.3.0-py3-none-any.whl", hash = "sha256:34489dfeae18f797137d5a80d935ec521e4ca16eb2c39a05c903d3bac9feaf9a", size = 594194, upload-time = "2026-09-29T23:53:46.565Z" },
+    { url = "https://files.pythonhosted.org/packages/dc/44/2ac41dc724cf45dfaf318c43e36072111f6b9b5d0135a4e1d3cb84833810/zha_quirks-2.4.0-py3-none-any.whl", hash = "sha256:3373bf65d2a2a7a5c8dd944b4df02f5298195ba5fcf3ad1ab8dbaa9b8af7f72d", size = 632376, upload-time = "2026-10-28T06:23:22.914Z" },
 ]
 
 [[package]]
