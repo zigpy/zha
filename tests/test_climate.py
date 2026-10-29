@@ -44,7 +44,6 @@ from zha.application.platforms.climate import (
     HVAC_MODE_2_SYSTEM,
     SEQ_OF_OPERATION,
     Thermostat as ThermostatEntity,
-    ZehnderThermostat,
 )
 from zha.application.platforms.climate.const import SEQ_FAN_MODES, FanState, HVACMode
 from zha.application.platforms.number import NumberConfigurationEntity
@@ -539,56 +538,6 @@ async def test_climate_hvac_action_running_state_zehnder(
         zha_gateway, thrm_cluster, {0x001C: Thermostat.SystemMode.Heat}
     )
     assert entity.state.hvac_action == "idle"
-
-
-@pytest.mark.parametrize(
-    "hvac_mode, sys_mode",
-    (
-        ("heat", Thermostat.SystemMode.Auto),
-        ("off", Thermostat.SystemMode.Off),
-        ("heat_cool", None),
-    ),
-)
-async def test_set_hvac_mode_zehnder(
-    zha_gateway: Gateway,
-    hvac_mode,
-    sys_mode,
-):
-    """Test setting hvac mode."""
-    device_climate_zehnder = await device_climate_mock(
-        zha_gateway, CLIMATE_ZEHNDER, manuf=MANUF_ZEHNDER
-    )
-
-    thrm_cluster = device_climate_zehnder.device.endpoints[1].thermostat
-    entity: ThermostatEntity = get_entity(
-        device_climate_zehnder, platform=Platform.CLIMATE, entity_type=ZehnderThermostat
-    )
-
-    assert entity.state.hvac_mode == "off"
-
-    await entity.async_set_hvac_mode(hvac_mode)
-    await zha_gateway.async_block_till_done()
-
-    if sys_mode is not None:
-        assert entity.state.hvac_mode == hvac_mode
-        assert thrm_cluster.write_attributes.call_count == 1
-        assert thrm_cluster.write_attributes.call_args[0][0] == {
-            "system_mode": sys_mode
-        }
-    else:
-        assert thrm_cluster.write_attributes.call_count == 0
-        assert entity.state.hvac_mode == "off"
-
-    # turn off
-    thrm_cluster.write_attributes.reset_mock()
-    await entity.async_set_hvac_mode("off")
-    await zha_gateway.async_block_till_done()
-
-    assert entity.state.hvac_mode == "off"
-    assert thrm_cluster.write_attributes.call_count == 1
-    assert thrm_cluster.write_attributes.call_args[0][0] == {
-        "system_mode": Thermostat.SystemMode.Off
-    }
 
 
 async def test_climate_hvac_action_pi_demand(

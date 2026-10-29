@@ -1094,71 +1094,6 @@ class ZenWithinThermostat(Thermostat):
 
 
 @register_entity(ThermostatCluster.cluster_id)
-class ZehnderThermostat(Thermostat):
-    """Zehnder thermostat to adapt AUTO mode behavior."""
-
-    _cluster_match = ClusterMatch(
-        server_clusters=frozenset({ThermostatCluster.cluster_id}),
-        manufacturers=frozenset(
-            {"ZEHNDER GROUP VAUX ANDIGNY      ", "ZEHNDER GROUP VAUX ANDIGNY"}
-        ),
-        feature_priority=(PlatformFeatureGroup.THERMOSTAT_FAN, 2),
-    )
-
-    ZEHNDER_HVAC_MODE_2_SYSTEM = {
-        HVACMode.OFF: SystemMode.Off,
-        HVACMode.HEAT: SystemMode.Auto,
-    }
-
-    ZEHNDER_SYSTEM_MODE_2_HVAC = {
-        SystemMode.Off: HVACMode.OFF,
-        SystemMode.Auto: HVACMode.HEAT,
-    }
-
-    hvac_modes = [HVACMode.OFF, HVACMode.HEAT]
-
-    async def async_set_hvac_mode(self, hvac_mode: HVACMode) -> None:
-        """Set new target operation mode."""
-        if hvac_mode not in self.hvac_modes:
-            self.warning(
-                "can't set '%s' mode. Supported modes are: %s",
-                hvac_mode,
-                self.hvac_modes,
-            )
-            return
-
-        await write_attributes_safe(
-            self._cluster,
-            {
-                ThermostatCluster.AttributeDefs.system_mode.name: ZehnderThermostat.ZEHNDER_HVAC_MODE_2_SYSTEM[
-                    hvac_mode
-                ]
-            },
-        )
-        self.maybe_emit_state_changed_event()
-
-    @property
-    def current_temperature(self):
-        """Force no current temperature."""
-        return None
-
-    @property
-    def system_mode_string(self) -> str | None:
-        """Return a formatted system mode string."""
-        if self.hvac_mode is None:
-            return None
-        system_mode = ZehnderThermostat.ZEHNDER_SYSTEM_MODE_2_HVAC.get(
-            self._system_mode, "unknown"
-        )
-        return f"[{self._system_mode}]/{system_mode}"
-
-    @property
-    def hvac_mode(self) -> HVACMode | None:
-        """Return HVAC operation mode."""
-        return ZehnderThermostat.ZEHNDER_SYSTEM_MODE_2_HVAC.get(self._system_mode)
-
-
-@register_entity(ThermostatCluster.cluster_id)
 class CentralitePearl(Thermostat):
     """Centralite Pearl Thermostat implementation."""
 
@@ -1249,20 +1184,3 @@ class BecaThermostat(Thermostat):
             return await write_attributes_safe(
                 self._cluster, {"operation_preset": 7}, manufacturer=mfg_code
             )
-
-
-@register_entity(ThermostatCluster.cluster_id)
-class StelproFanHeater(Thermostat):
-    """Stelpro Fan Heater implementation."""
-
-    _cluster_match = ClusterMatch(
-        server_clusters=frozenset({ThermostatCluster.cluster_id}),
-        manufacturers=frozenset({"Stelpro"}),
-        models=frozenset({"SORB"}),
-        feature_priority=(PlatformFeatureGroup.THERMOSTAT_FAN, 2),
-    )
-
-    @functools.cached_property
-    def hvac_modes(self) -> list[HVACMode]:
-        """Return only the heat mode, because the device can't be turned off."""
-        return [HVACMode.HEAT]
