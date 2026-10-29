@@ -1,7 +1,7 @@
 {
   "version": 3,
   "ieee": "ab:cd:ef:12:d4:2c:7b:64",
-  "nwk": "0x32EF",
+  "nwk": "0xB947",
   "manufacturer": "SONOFF",
   "model": "TRV-ZBT",
   "friendly_manufacturer": "SONOFF",
@@ -12,9 +12,9 @@
   "exposes_features": [],
   "manufacturer_code": 4742,
   "power_source": "Battery or Unknown",
-  "lqi": 174,
-  "rssi": null,
-  "last_seen": "2026-10-19T10:37:15.034430+00:00",
+  "lqi": 244,
+  "rssi": -39,
+  "last_seen": "2026-10-29T00:17:15.206612+00:00",
   "available": true,
   "device_type": "EndDevice",
   "active_coordinator": false,
@@ -46,6 +46,12 @@
           "endpoint_attribute": "basic",
           "attributes": [
             {
+              "id": "0x0006",
+              "name": "date_code",
+              "zcl_type": "string",
+              "unsupported": true
+            },
+            {
               "id": "0x0004",
               "name": "manufacturer",
               "zcl_type": "string",
@@ -62,6 +68,12 @@
               "name": "sw_build_id",
               "zcl_type": "string",
               "value": "1.1.0"
+            },
+            {
+              "id": "0x0000",
+              "name": "zcl_version",
+              "zcl_type": "uint8",
+              "value": 3
             }
           ]
         },
@@ -91,7 +103,7 @@
               "id": "0x0020",
               "name": "battery_voltage",
               "zcl_type": "uint8",
-              "value": 32
+              "value": 31
             }
           ]
         },
@@ -168,7 +180,7 @@
               "id": "0x0000",
               "name": "local_temperature",
               "zcl_type": "int16",
-              "value": 2140
+              "value": 1930
             },
             {
               "id": "0x0010",
@@ -216,7 +228,7 @@
               "id": "0x0012",
               "name": "occupied_heating_setpoint",
               "zcl_type": "int16",
-              "value": 2100
+              "value": 2050
             },
             {
               "id": "0x0007",
@@ -234,13 +246,13 @@
               "id": "0x001e",
               "name": "running_mode",
               "zcl_type": "enum8",
-              "value": 0
+              "value": 4
             },
             {
               "id": "0x0029",
               "name": "running_state",
               "zcl_type": "map16",
-              "value": 0
+              "value": 1
             },
             {
               "id": "0x0030",
@@ -294,13 +306,13 @@
               "id": "0x600e",
               "name": "external_temperature_sensor_enable",
               "zcl_type": "uint8",
-              "value": 1
+              "value": 0
             },
             {
               "id": "0x600d",
               "name": "external_temperature_sensor_value",
               "zcl_type": "int16",
-              "value": 2130
+              "value": 0
             },
             {
               "id": "0x6002",
@@ -327,9 +339,27 @@
               "value": -100
             },
             {
+              "id": "0x6013",
+              "name": "temperature_control_mode",
+              "zcl_type": "enum8",
+              "value": 1
+            },
+            {
+              "id": "0x6014",
+              "name": "temporary_mode",
+              "zcl_type": "uint8",
+              "value": 255
+            },
+            {
               "id": "0x6015",
               "name": "temporary_mode_duration",
               "zcl_type": "uint32",
+              "value": 0
+            },
+            {
+              "id": "0x6016",
+              "name": "timer_mode_target_temperature",
+              "zcl_type": "int16",
               "value": 0
             },
             {
@@ -342,13 +372,13 @@
               "id": "0x6006",
               "name": "valve_closing_limit_voltage",
               "zcl_type": "uint16",
-              "value": 1103
+              "value": 591
             },
             {
               "id": "0x6007",
               "name": "valve_motor_running_voltage",
               "zcl_type": "uint16",
-              "value": 1103
+              "value": 591
             },
             {
               "id": "0x600b",
@@ -360,7 +390,7 @@
               "id": "0x6005",
               "name": "valve_opening_limit_voltage",
               "zcl_type": "uint16",
-              "value": 2665
+              "value": 3069
             }
           ]
         },
@@ -386,7 +416,13 @@
               "zcl_type": "uint32",
               "value": 4352
             }
-          ]
+          ],
+          "last_query_cmd": {
+            "manufacturer_code": 4742,
+            "image_type": 900,
+            "current_file_version": 4352,
+            "hardware_version": null
+          }
         }
       ]
     }
@@ -522,12 +558,12 @@
         "endpoint_id": 1,
         "available": true,
         "group_id": null,
-        "current_temperature": 21.4,
+        "current_temperature": 19.3,
         "outdoor_temperature": null,
-        "target_temperature": 21.0,
+        "target_temperature": 20.5,
         "target_temperature_high": null,
         "target_temperature_low": null,
-        "hvac_action": "idle",
+        "hvac_action": "heating",
         "hvac_mode": "heat",
         "preset_mode": "none",
         "fan_mode": "auto",
@@ -543,7 +579,7 @@
         "sys_mode": "[4]/heat",
         "occupancy": 1,
         "occupied_cooling_setpoint": null,
-        "occupied_heating_setpoint": 2100,
+        "occupied_heating_setpoint": 2050,
         "pi_heating_demand": null,
         "pi_cooling_demand": null,
         "unoccupied_cooling_setpoint": null,
@@ -648,7 +684,7 @@
         "endpoint_id": 1,
         "available": true,
         "group_id": null,
-        "native_value": 21.3,
+        "native_value": 0.0,
         "mode": "auto",
         "native_max_value": 99.9,
         "native_min_value": 0.0,
@@ -752,7 +788,7 @@
         "endpoint_id": 1,
         "available": true,
         "group_id": null,
-        "native_value": null,
+        "native_value": 0.0,
         "mode": "auto",
         "native_max_value": 30.0,
         "native_min_value": 5.0,
@@ -832,7 +868,7 @@
         "endpoint_id": null,
         "available": true,
         "group_id": null,
-        "native_value": 174,
+        "native_value": 244,
         "suggested_display_precision": null,
         "unit": null
       },
@@ -855,7 +891,7 @@
         "endpoint_id": null,
         "available": true,
         "group_id": null,
-        "native_value": null,
+        "native_value": -39,
         "suggested_display_precision": null,
         "unit": "dBm"
       },
@@ -887,7 +923,7 @@
         "unit": "%",
         "battery_size": null,
         "battery_quantity": null,
-        "battery_voltage": 3.2
+        "battery_voltage": 3.1
       },
       {
         "fallback_name": null,
@@ -908,7 +944,7 @@
         "endpoint_id": 1,
         "available": true,
         "group_id": null,
-        "native_value": "idle",
+        "native_value": "heating",
         "suggested_display_precision": null,
         "unit": null
       }
@@ -981,7 +1017,7 @@
         "endpoint_id": 1,
         "available": true,
         "group_id": null,
-        "is_on": true,
+        "is_on": false,
         "inverted": false,
         "attribute_name": "external_temperature_sensor_enable",
         "invert_attribute_name": null,
