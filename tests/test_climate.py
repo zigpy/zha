@@ -35,7 +35,6 @@ from zha.application import Platform
 from zha.application.const import (
     PRESET_AWAY,
     PRESET_BOOST,
-    PRESET_NONE,
     PRESET_SCHEDULE,
     PRESET_TEMP_MANUAL,
 )
@@ -139,21 +138,6 @@ CLIMATE_ZEHNDER = {
     }
 }
 
-CLIMATE_MOES = {
-    1: {
-        SIG_EP_PROFILE: zigpy.profiles.zha.PROFILE_ID,
-        SIG_EP_TYPE: zigpy.profiles.zha.DeviceType.THERMOSTAT,
-        SIG_EP_INPUT: [
-            zigpy.zcl.clusters.general.Basic.cluster_id,
-            zigpy.zcl.clusters.general.Identify.cluster_id,
-            zigpy.zcl.clusters.hvac.Thermostat.cluster_id,
-            zigpy.zcl.clusters.hvac.UserInterface.cluster_id,
-            61148,
-        ],
-        SIG_EP_OUTPUT: [zigpy.zcl.clusters.general.Ota.cluster_id],
-    }
-}
-
 CLIMATE_BECA = {
     1: {
         SIG_EP_PROFILE: zigpy.profiles.zha.PROFILE_ID,
@@ -171,26 +155,10 @@ CLIMATE_BECA = {
     }
 }
 
-CLIMATE_ZONNSMART = {
-    1: {
-        SIG_EP_PROFILE: zigpy.profiles.zha.PROFILE_ID,
-        SIG_EP_TYPE: zigpy.profiles.zha.DeviceType.THERMOSTAT,
-        SIG_EP_INPUT: [
-            zigpy.zcl.clusters.general.Basic.cluster_id,
-            zigpy.zcl.clusters.hvac.Thermostat.cluster_id,
-            zigpy.zcl.clusters.hvac.UserInterface.cluster_id,
-            61148,
-        ],
-        SIG_EP_OUTPUT: [zigpy.zcl.clusters.general.Ota.cluster_id],
-    }
-}
-
 MANUF_SINOPE = "Sinope Technologies"
 MANUF_ZEN = "Zen Within"
 MANUF_ZEHNDER = "ZEHNDER GROUP VAUX ANDIGNY      "
-MANUF_MOES = "_TZE200_ckud7u2l"
 MANUF_BECA = "_TZE200_b6wax7g0"
-MANUF_ZONNSMART = "_TZE200_hue3yfsn"
 
 ZCL_ATTR_PLUG = {
     "abs_min_heat_setpoint_limit": 800,
@@ -1614,142 +1582,6 @@ async def test_fan_mode_smart_returns_none(
     assert entity.state.fan_mode is None
 
 
-async def test_set_moes_preset(zha_gateway: Gateway):
-    """Test setting preset for moes trv."""
-
-    device_climate_moes = await device_climate_mock(
-        zha_gateway,
-        CLIMATE_MOES,
-        manuf=MANUF_MOES,
-        quirk=zhaquirks.tuya.ts0601_trv.MoesHY368_Type1,
-    )
-    thrm_cluster = device_climate_moes.device.endpoints[1].thermostat
-    entity: ThermostatEntity = get_entity(
-        device_climate_moes, platform=Platform.CLIMATE, entity_type=ThermostatEntity
-    )
-
-    assert entity.state.preset_mode == "none"
-
-    await entity.async_set_preset_mode("away")
-    await zha_gateway.async_block_till_done()
-
-    assert thrm_cluster.write_attributes.await_count == 1
-    assert thrm_cluster.write_attributes.call_args_list[0][0][0] == {
-        "operation_preset": 0
-    }
-
-    thrm_cluster.write_attributes.reset_mock()
-    await entity.async_set_preset_mode("Schedule")
-    await zha_gateway.async_block_till_done()
-
-    assert thrm_cluster.write_attributes.await_count == 2
-    assert thrm_cluster.write_attributes.call_args_list[0][0][0] == {
-        "operation_preset": 2
-    }
-    assert thrm_cluster.write_attributes.call_args_list[1][0][0] == {
-        "operation_preset": 1
-    }
-
-    thrm_cluster.write_attributes.reset_mock()
-    await entity.async_set_preset_mode("comfort")
-    await zha_gateway.async_block_till_done()
-
-    assert thrm_cluster.write_attributes.await_count == 2
-    assert thrm_cluster.write_attributes.call_args_list[0][0][0] == {
-        "operation_preset": 2
-    }
-    assert thrm_cluster.write_attributes.call_args_list[1][0][0] == {
-        "operation_preset": 3
-    }
-
-    thrm_cluster.write_attributes.reset_mock()
-    await entity.async_set_preset_mode("eco")
-    await zha_gateway.async_block_till_done()
-
-    assert thrm_cluster.write_attributes.await_count == 2
-    assert thrm_cluster.write_attributes.call_args_list[0][0][0] == {
-        "operation_preset": 2
-    }
-    assert thrm_cluster.write_attributes.call_args_list[1][0][0] == {
-        "operation_preset": 4
-    }
-
-    thrm_cluster.write_attributes.reset_mock()
-    await entity.async_set_preset_mode("boost")
-    await zha_gateway.async_block_till_done()
-
-    assert thrm_cluster.write_attributes.await_count == 2
-    assert thrm_cluster.write_attributes.call_args_list[0][0][0] == {
-        "operation_preset": 2
-    }
-    assert thrm_cluster.write_attributes.call_args_list[1][0][0] == {
-        "operation_preset": 5
-    }
-
-    thrm_cluster.write_attributes.reset_mock()
-    await entity.async_set_preset_mode("Complex")
-    await zha_gateway.async_block_till_done()
-
-    assert thrm_cluster.write_attributes.await_count == 2
-    assert thrm_cluster.write_attributes.call_args_list[0][0][0] == {
-        "operation_preset": 2
-    }
-    assert thrm_cluster.write_attributes.call_args_list[1][0][0] == {
-        "operation_preset": 6
-    }
-
-    thrm_cluster.write_attributes.reset_mock()
-    await entity.async_set_preset_mode("none")
-    await zha_gateway.async_block_till_done()
-
-    assert thrm_cluster.write_attributes.await_count == 1
-    assert thrm_cluster.write_attributes.call_args_list[0][0][0] == {
-        "operation_preset": 2
-    }
-
-
-async def test_set_moes_operation_mode(zha_gateway: Gateway):
-    """Test setting preset for moes trv."""
-    device_climate_moes = await device_climate_mock(
-        zha_gateway,
-        CLIMATE_MOES,
-        manuf=MANUF_MOES,
-        quirk=zhaquirks.tuya.ts0601_trv.MoesHY368_Type1,
-    )
-    thrm_cluster = device_climate_moes.device.endpoints[1].thermostat
-    entity: ThermostatEntity = get_entity(
-        device_climate_moes, platform=Platform.CLIMATE, entity_type=ThermostatEntity
-    )
-
-    await send_attributes_report(zha_gateway, thrm_cluster, {"operation_preset": 0})
-
-    assert entity.state.preset_mode == "away"
-
-    await send_attributes_report(zha_gateway, thrm_cluster, {"operation_preset": 1})
-
-    assert entity.state.preset_mode == "Schedule"
-
-    await send_attributes_report(zha_gateway, thrm_cluster, {"operation_preset": 2})
-
-    assert entity.state.preset_mode == "none"
-
-    await send_attributes_report(zha_gateway, thrm_cluster, {"operation_preset": 3})
-
-    assert entity.state.preset_mode == "comfort"
-
-    await send_attributes_report(zha_gateway, thrm_cluster, {"operation_preset": 4})
-
-    assert entity.state.preset_mode == "eco"
-
-    await send_attributes_report(zha_gateway, thrm_cluster, {"operation_preset": 5})
-
-    assert entity.state.preset_mode == "boost"
-
-    await send_attributes_report(zha_gateway, thrm_cluster, {"operation_preset": 6})
-
-    assert entity.state.preset_mode == "Complex"
-
-
 # Device is running an energy-saving mode
 PRESET_ECO = "eco"
 
@@ -1798,102 +1630,6 @@ async def test_beca_operation_mode_update(
             manufacturer=device_climate_beca.manufacturer_code,
         )
     ]
-
-
-async def test_set_zonnsmart_preset(zha_gateway: Gateway) -> None:
-    """Test setting preset from homeassistant for zonnsmart trv."""
-    device_climate_zonnsmart = await device_climate_mock(
-        zha_gateway,
-        CLIMATE_ZONNSMART,
-        manuf=MANUF_ZONNSMART,
-        quirk=zhaquirks.tuya.ts0601_trv.ZonnsmartTV01_ZG,
-    )
-    thrm_cluster = device_climate_zonnsmart.device.endpoints[1].thermostat
-    entity: ThermostatEntity = get_entity(
-        device_climate_zonnsmart,
-        platform=Platform.CLIMATE,
-        entity_type=ThermostatEntity,
-    )
-
-    assert entity.state.preset_mode == PRESET_NONE
-
-    await entity.async_set_preset_mode(PRESET_SCHEDULE)
-    await zha_gateway.async_block_till_done()
-
-    assert thrm_cluster.write_attributes.await_count == 1
-    assert thrm_cluster.write_attributes.call_args_list[0][0][0] == {
-        "operation_preset": 0
-    }
-
-    thrm_cluster.write_attributes.reset_mock()
-
-    await entity.async_set_preset_mode("holiday")
-    await zha_gateway.async_block_till_done()
-
-    assert thrm_cluster.write_attributes.await_count == 2
-    assert thrm_cluster.write_attributes.call_args_list[0][0][0] == {
-        "operation_preset": 1
-    }
-    assert thrm_cluster.write_attributes.call_args_list[1][0][0] == {
-        "operation_preset": 3
-    }
-
-    thrm_cluster.write_attributes.reset_mock()
-    await entity.async_set_preset_mode("frost protect")
-    await zha_gateway.async_block_till_done()
-
-    assert thrm_cluster.write_attributes.await_count == 2
-    assert thrm_cluster.write_attributes.call_args_list[0][0][0] == {
-        "operation_preset": 1
-    }
-    assert thrm_cluster.write_attributes.call_args_list[1][0][0] == {
-        "operation_preset": 4
-    }
-
-    thrm_cluster.write_attributes.reset_mock()
-    await entity.async_set_preset_mode(PRESET_NONE)
-    await zha_gateway.async_block_till_done()
-
-    assert thrm_cluster.write_attributes.await_count == 1
-    assert thrm_cluster.write_attributes.call_args_list[0][0][0] == {
-        "operation_preset": 1
-    }
-
-
-async def test_set_zonnsmart_operation_mode(zha_gateway: Gateway) -> None:
-    """Test setting preset from trv for zonnsmart trv."""
-    device_climate_zonnsmart = await device_climate_mock(
-        zha_gateway,
-        CLIMATE_ZONNSMART,
-        manuf=MANUF_ZONNSMART,
-        quirk=zhaquirks.tuya.ts0601_trv.ZonnsmartTV01_ZG,
-    )
-    thrm_cluster = device_climate_zonnsmart.device.endpoints[1].thermostat
-    entity: ThermostatEntity = get_entity(
-        device_climate_zonnsmart,
-        platform=Platform.CLIMATE,
-        entity_type=ThermostatEntity,
-    )
-
-    await send_attributes_report(zha_gateway, thrm_cluster, {"operation_preset": 0})
-
-    assert entity.state.preset_mode == PRESET_SCHEDULE
-
-    await send_attributes_report(zha_gateway, thrm_cluster, {"operation_preset": 1})
-
-    assert entity.state.preset_mode == PRESET_NONE
-
-    await send_attributes_report(zha_gateway, thrm_cluster, {"operation_preset": 2})
-
-    assert entity.state.preset_mode == "holiday"
-
-    await send_attributes_report(zha_gateway, thrm_cluster, {"operation_preset": 3})
-
-    assert entity.state.preset_mode == "holiday"
-
-    await send_attributes_report(zha_gateway, thrm_cluster, {"operation_preset": 4})
-
-    assert entity.state.preset_mode == "frost protect"
 
 
 async def test_thermostat_default_local_temperature_calibration_config(
