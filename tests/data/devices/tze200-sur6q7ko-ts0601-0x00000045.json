@@ -8,7 +8,7 @@
   "friendly_model": "TS0601",
   "name": "_TZE200_sur6q7ko TS0601",
   "quirk_applied": true,
-  "quirk_class": "zhaquirks.tuya.ts0601_trv:ZonnsmartTV01_ZG",
+  "quirk_class": "zhaquirks.tuya.ts0601_trv:(_TZE200_7yoranx2 / TS0601)",
   "exposes_features": [],
   "manufacturer_code": 4098,
   "power_source": "Battery or Unknown",
@@ -561,7 +561,7 @@
         "unique_id": "ab:cd:ef:12:a2:68:cb:79-1",
         "migrate_unique_ids": [],
         "platform": "climate",
-        "class_name": "Thermostat",
+        "class_name": "ZonnsmartTV01Climate",
         "translation_key": "thermostat",
         "translation_placeholders": null,
         "device_class": null,
@@ -586,9 +586,14 @@
         "fan_mode": "auto",
         "max_temp": 30.0,
         "min_temp": 5.0,
-        "supported_features": 385,
+        "supported_features": 401,
         "fan_modes": null,
-        "preset_modes": [],
+        "preset_modes": [
+          "none",
+          "holiday",
+          "Schedule",
+          "frost protect"
+        ],
         "hvac_modes": [
           "off",
           "heat"
