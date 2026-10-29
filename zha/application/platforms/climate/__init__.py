@@ -1082,31 +1082,6 @@ class SinopeTechnologiesThermostat(Thermostat):
 
 
 @register_entity(ThermostatCluster.cluster_id)
-class ZenWithinThermostat(Thermostat):
-    """Zen Within Thermostat implementation."""
-
-    _cluster_match = ClusterMatch(
-        server_clusters=frozenset({ThermostatCluster.cluster_id}),
-        optional_server_clusters=frozenset({FanCluster.cluster_id}),
-        manufacturers=frozenset({"Zen Within", "LUX"}),
-        feature_priority=(PlatformFeatureGroup.THERMOSTAT_FAN, 2),
-    )
-
-
-@register_entity(ThermostatCluster.cluster_id)
-class CentralitePearl(Thermostat):
-    """Centralite Pearl Thermostat implementation."""
-
-    _cluster_match = ClusterMatch(
-        server_clusters=frozenset({ThermostatCluster.cluster_id}),
-        optional_server_clusters=frozenset({FanCluster.cluster_id}),
-        manufacturers=frozenset({"Centralite"}),
-        models=frozenset({"3157100", "3157100-E"}),
-        feature_priority=(PlatformFeatureGroup.THERMOSTAT_FAN, 2),
-    )
-
-
-@register_entity(ThermostatCluster.cluster_id)
 class BecaThermostat(Thermostat):
     """Beca Thermostat implementation."""
 
