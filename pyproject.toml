@@ -43,7 +43,7 @@ testing = [
     "coverage",
     "freezegun",
     "looptime>=0.7",
-    "mypy==2.4.0",
+    "mypy==2.4.1",
     "pre-commit==4.7.0",
     "pytest",
     "pytest-asyncio>=1.4.0",
@@ -51,7 +51,7 @@ testing = [
     "pytest-sugar",
     "pytest-timeout",
     "python-slugify",
-    "ruff==0.17.1",
+    "ruff==0.17.3",
     "uv>=0.11.16",
     "zha-quirks>=2.4.0",
 ]
