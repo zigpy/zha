@@ -26,7 +26,7 @@ dependencies = [
 ]
 
 [tool.setuptools.packages.find]
-exclude = ["tests", "tests.*"]
+exclude = ["tests", "tests.*", "tools", "tools.*"]
 
 [project.optional-dependencies]
 testing = [
