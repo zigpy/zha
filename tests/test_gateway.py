@@ -1080,13 +1080,14 @@ async def test_reinterview_replaces_device_when_quirk_changes(
     assert new_zha_device.model == "Quirk B"
 
 
-async def test_reinterview_swap_emits_full_init_configured(
+async def test_reinterview_swap_emits_full_init_events(
     zha_gateway: Gateway,
 ) -> None:
-    """A re-interview that replaces the device emits a CONFIGURED full-init event.
+    """A re-interview that replaces the device emits CONFIGURED, then INITIALIZED.
 
-    HA repoints its (IEEE-keyed) device proxy off this event, so the swap must
-    still surface it with `CONFIGURED` status and `new_join=False`.
+    HA repoints its (IEEE-keyed) device proxy off the first event, so the swap
+    must still surface it with `new_join=False`. The pairing UI only completes
+    on `INITIALIZED`.
     """
     registry = DeviceRegistry()
     (
@@ -1125,9 +1126,11 @@ async def test_reinterview_swap_emits_full_init_configured(
     assert zha_gateway.get_device(zigpy_device.ieee) is not zha_device
 
     full_inits = [e for e in events if isinstance(e, DeviceFullInitEvent)]
-    assert len(full_inits) == 1
-    assert full_inits[0].device_info.pairing_status is DevicePairingStatus.CONFIGURED
-    assert full_inits[0].new_join is False
+    assert [e.device_info.pairing_status for e in full_inits] == [
+        DevicePairingStatus.CONFIGURED,
+        DevicePairingStatus.INITIALIZED,
+    ]
+    assert all(e.new_join is False for e in full_inits)
 
 
 async def test_reinterview_rebuilds_in_place_when_quirk_unchanged(
