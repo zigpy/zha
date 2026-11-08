@@ -2070,6 +2070,113 @@ async def test_turn_on_during_off_transition(zha_gateway: Gateway) -> None:
 
 
 @patch(
+    "zigpy.zcl.clusters.general.LevelControl.request",
+    new=AsyncMock(return_value=[sentinel.data, zcl_f.Status.SUCCESS]),
+)
+@patch(
+    "zigpy.zcl.clusters.general.OnOff.request",
+    new=AsyncMock(return_value=[sentinel.data, zcl_f.Status.SUCCESS]),
+)
+async def test_zero_level_report_during_transition_turns_light_off(
+    zha_gateway: Gateway,
+) -> None:
+    """Test a current_level=0 report buffered during a transition ends the light off.
+
+    A device that reports level 0 within the transition window is actually off,
+    so the optimistic on-state is overridden when the window ends.
+    """
+    device_light_1 = await device_light_1_mock(zha_gateway)
+    dev1_cluster_level = device_light_1.device.endpoints[1].level
+    entity = get_entity(device_light_1, platform=Platform.LIGHT)
+
+    await entity.async_turn_on(brightness=200)
+    await zha_gateway.async_block_till_done()
+    assert bool(entity.state.on) is True
+    assert entity.is_transitioning
+
+    await send_attributes_report(
+        zha_gateway,
+        dev1_cluster_level,
+        {general.LevelControl.AttributeDefs.current_level.id: 0},
+    )
+    await zha_gateway.async_block_till_done()
+
+    # Still optimistically on while the window is open.
+    assert bool(entity.state.on) is True
+
+    await asyncio.sleep(1.6)
+    await zha_gateway.async_block_till_done()
+    assert not entity.is_transitioning
+    assert bool(entity.state.on) is False
+
+
+@patch(
+    "zigpy.zcl.clusters.general.LevelControl.request",
+    new=AsyncMock(return_value=[sentinel.data, zcl_f.Status.SUCCESS]),
+)
+@patch(
+    "zigpy.zcl.clusters.general.OnOff.request",
+    new=AsyncMock(return_value=[sentinel.data, zcl_f.Status.SUCCESS]),
+)
+@pytest.mark.parametrize(
+    ("on_off_reports", "expected_on"),
+    [
+        ([1], True),
+        ([1, 0], False),
+    ],
+)
+async def test_on_off_report_during_off_transition_is_applied(
+    zha_gateway: Gateway, on_off_reports: list[int], expected_on: bool
+) -> None:
+    """Test an on_off report received during an off transition is applied when it ends.
+
+    Something other than this entity (a bound remote, or a cluster command sent
+    through the ZHA service) can turn the light on within the transition window
+    of a turn_off. The device's on_off=True report must be buffered like an off
+    report, not discarded, or the entity stays off while the light is on. The
+    last report in the window wins.
+    """
+    device_light_1 = await device_light_1_mock(zha_gateway)
+    dev1_cluster_on_off = device_light_1.device.endpoints[1].on_off
+    dev1_cluster_level = device_light_1.device.endpoints[1].level
+    entity = get_entity(device_light_1, platform=Platform.LIGHT)
+
+    await entity.async_turn_on(brightness=200)
+    await zha_gateway.async_block_till_done()
+    await asyncio.sleep(1.6)  # let the turn_on transition window end
+    await zha_gateway.async_block_till_done()
+    assert not entity.is_transitioning
+
+    # Turn it off; the transition window opens (default 1 + 0.5s = 1.5s).
+    await entity.async_turn_off()
+    await zha_gateway.async_block_till_done()
+    assert bool(entity.state.on) is False
+    assert entity.is_transitioning
+
+    # Within the window, the light is turned on from outside this entity.
+    for value in on_off_reports:
+        await send_attributes_report(
+            zha_gateway,
+            dev1_cluster_on_off,
+            {general.OnOff.AttributeDefs.on_off.id: value},
+        )
+    await send_attributes_report(
+        zha_gateway,
+        dev1_cluster_level,
+        {general.LevelControl.AttributeDefs.current_level.id: 128},
+    )
+    await zha_gateway.async_block_till_done()
+    assert bool(entity.state.on) is False
+
+    # Once the transition timer fires, the buffered reports are applied.
+    await asyncio.sleep(1.6)
+    await zha_gateway.async_block_till_done()
+    assert not entity.is_transitioning
+    assert bool(entity.state.on) is expected_on
+    assert entity.state.brightness == 128
+
+
+@patch(
     "zigpy.zcl.clusters.general.OnOff.request",
     new=AsyncMock(return_value=[sentinel.data, zcl_f.Status.SUCCESS]),
 )
