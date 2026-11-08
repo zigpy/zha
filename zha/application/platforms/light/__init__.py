@@ -275,6 +275,9 @@ class BaseSharedLight(BaseLight):
         self._transition_listener: asyncio.TimerHandle | None = None
         self._transition_brightness_buffer: int | None = None
         self._transition_on_off_buffer: bool | None = None
+        # Set while the buffered off comes from a level 0 report: holds the on_off
+        # buffer that report replaced, which a later non-zero level report restores
+        self._transition_on_off_before_zero_level: tuple[bool | None] | None = None
 
         self._internal_supported_color_modes: set[ColorMode] = set()
 
@@ -800,6 +803,7 @@ class BaseSharedLight(BaseLight):
         self._transitioning_group = False
         self._transition_brightness_buffer = None
         self._transition_on_off_buffer = None
+        self._transition_on_off_before_zero_level = None
         if isinstance(self, LightGroup):
             for platform_entity in self.group.get_platform_entities(Light.PLATFORM):
                 assert isinstance(platform_entity, Light)
@@ -841,21 +845,14 @@ class BaseSharedLight(BaseLight):
         if guarded and self._transitioning_individual and not self._transition_listener:
             self.async_transition_complete()
 
-    def async_transition_complete(self, _=None) -> None:
-        """Set _transitioning_individual to False and write HA state."""
-        self.debug("transition complete - future attribute reports will write HA state")
-        self._transitioning_individual = False
-        self._async_unsub_transition_listener()
+    def _apply_transition_buffers(self) -> None:
+        """Apply the reports buffered while transitioning (the last one wins)."""
         if self._transition_brightness_buffer is not None:
             self.debug(
                 "applying buffered brightness %s from transition",
                 self._transition_brightness_buffer,
             )
-            if self._transition_brightness_buffer == 0:
-                # The device is actually off; override the optimistic on-state.
-                self._state = False
-            else:
-                self._brightness = self._transition_brightness_buffer
+            self._brightness = self._transition_brightness_buffer
             self._transition_brightness_buffer = None
         if self._transition_on_off_buffer is not None:
             self.debug(
@@ -867,6 +864,14 @@ class BaseSharedLight(BaseLight):
                 self._off_with_transition = False
                 self._off_brightness = None
             self._transition_on_off_buffer = None
+        self._transition_on_off_before_zero_level = None
+
+    def async_transition_complete(self, _=None) -> None:
+        """Set _transitioning_individual to False and write HA state."""
+        self.debug("transition complete - future attribute reports will write HA state")
+        self._transitioning_individual = False
+        self._async_unsub_transition_listener()
+        self._apply_transition_buffers()
         self.maybe_emit_state_changed_event()
         if isinstance(self, LightGroup):
             for platform_entity in self.group.get_platform_entities(Light.PLATFORM):
@@ -1136,7 +1141,22 @@ class Light(BaseSharedLight, ZclPlatformEntity):
                 "received level change event %s while transitioning - buffering",
                 event,
             )
-            self._transition_brightness_buffer = value
+            if value:
+                self._transition_brightness_buffer = value
+                if self._transition_on_off_before_zero_level is not None:
+                    # the level is back up: the zero was a step of the transition
+                    (self._transition_on_off_buffer,) = (
+                        self._transition_on_off_before_zero_level
+                    )
+                    self._transition_on_off_before_zero_level = None
+            else:
+                # Level 0 means off. Buffer it as an on_off report, so the last
+                # report of the window wins regardless of its kind.
+                if self._transition_on_off_before_zero_level is None:
+                    self._transition_on_off_before_zero_level = (
+                        self._transition_on_off_buffer,
+                    )
+                self._transition_on_off_buffer = False
             return
         self._brightness = value
         self.maybe_emit_state_changed_event()
@@ -1176,12 +1196,22 @@ class Light(BaseSharedLight, ZclPlatformEntity):
     def transition_on(self):
         """Handle a transition start event from a group."""
         self.debug("group transition started - setting member transitioning flag")
+        if not self._transitioning_individual:
+            # Reports buffered for an earlier group transition are stale now; a
+            # member's own transition keeps its buffer for its completion.
+            self._transition_brightness_buffer = None
+            self._transition_on_off_buffer = None
+            self._transition_on_off_before_zero_level = None
         self._transitioning_group = True
 
     def transition_off(self):
         """Handle a transition finished event from a group."""
         self.debug("group transition completed - unsetting member transitioning flag")
         self._transitioning_group = False
+        if not self._transitioning_individual:
+            # Apply what the member reported during the group's transition.
+            self._apply_transition_buffers()
+            self.maybe_emit_state_changed_event()
 
     def handle_attribute_updated(
         self,
@@ -1199,6 +1229,7 @@ class Light(BaseSharedLight, ZclPlatformEntity):
                 event.value,
             )
             self._transition_on_off_buffer = bool(event.value)
+            self._transition_on_off_before_zero_level = None
             return
         self._state = bool(event.value)
         if event.value:
