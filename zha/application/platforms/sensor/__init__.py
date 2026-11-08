@@ -1967,6 +1967,7 @@ class Humidity(Sensor):
     _attribute_name = "measured_value"
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.HUMIDITY
     _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
+    _attr_suggested_display_precision = 1
     _divisor = 100
     _attr_native_unit_of_measurement = PERCENTAGE
     _attr_primary_weight = 1
@@ -1998,6 +1999,7 @@ class SmartThingsHumidity(Sensor):
     _attribute_name = "measured_value"
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.HUMIDITY
     _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
+    _attr_suggested_display_precision = 1
     _divisor = 100
     _attr_native_unit_of_measurement = PERCENTAGE
     _attr_primary_weight = 1
@@ -2029,6 +2031,7 @@ class SoilMoisture(Sensor):
     _attribute_name = "measured_value"
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.MOISTURE
     _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
+    _attr_suggested_display_precision = 1
     _attr_translation_key: str = "soil_moisture"
     _divisor = 100
     _attr_native_unit_of_measurement = PERCENTAGE
@@ -2061,6 +2064,7 @@ class LeafWetness(Sensor):
     _attribute_name = "measured_value"
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.HUMIDITY
     _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
+    _attr_suggested_display_precision = 1
     _attr_translation_key: str = "leaf_wetness"
     _divisor = 100
     _attr_native_unit_of_measurement = PERCENTAGE
