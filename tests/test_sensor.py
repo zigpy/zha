@@ -57,6 +57,7 @@ from zha.units import (
     UnitOfMass,
     UnitOfPressure,
     UnitOfVolume,
+    UnitOfVolumeFlowRate,
 )
 from zha.zigbee.device import Device
 
@@ -281,6 +282,63 @@ async def async_test_smart_energy_summation(
     assert_state(entity, 12.32, "m³")
     assert entity.state.status == "NO_ALARMS"
     assert entity.state.device_type == "Electric Metering"
+
+
+@pytest.mark.parametrize(
+    ("unit_of_measure", "native_unit_of_measurement"),
+    [
+        (0x00, "W"),
+        (0x01, UnitOfVolumeFlowRate.CUBIC_METERS_PER_HOUR),
+        (0x02, UnitOfVolumeFlowRate.CUBIC_FEET_PER_MINUTE),
+        (0x03, UnitOfVolumeFlowRate.CUBIC_METERS_PER_HOUR),
+        (0x04, UnitOfVolumeFlowRate.GALLONS_PER_HOUR),
+        (0x07, UnitOfVolumeFlowRate.LITERS_PER_HOUR),
+    ],
+)
+async def test_smart_energy_metering_instantaneous_demand_device_class(
+    zha_gateway: Gateway,
+    unit_of_measure: int,
+    native_unit_of_measurement: str,
+) -> None:
+    """Test instantaneous demand gets a volume flow rate device class, when supported."""
+    zigpy_device = create_mock_zigpy_device(
+        zha_gateway,
+        {
+            1: {
+                SIG_EP_INPUT: [
+                    smartenergy.Metering.cluster_id,
+                    general.Basic.cluster_id,
+                ],
+                SIG_EP_OUTPUT: [],
+                SIG_EP_TYPE: zigpy.profiles.zha.DeviceType.ON_OFF_SWITCH,
+                SIG_EP_PROFILE: zigpy.profiles.zha.PROFILE_ID,
+            }
+        },
+    )
+    cluster = zigpy_device.endpoints[1].in_clusters[smartenergy.Metering.cluster_id]
+    # this one is mains powered
+    zigpy_device.node_desc.mac_capability_flags |= 0b_0000_0100
+    cluster.PLUGGED_ATTR_READS = {
+        "unit_of_measure": unit_of_measure,
+        "multiplier": 1,
+        "divisor": 1,
+        "metering_device_type": 2,  # water
+    }
+
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
+    entity = get_entity(
+        zha_device,
+        platform=Platform.SENSOR,
+        exact_entity_type=sensor.SmartEnergyMetering,
+    )
+
+    expected_device_class = (
+        SensorDeviceClass.POWER
+        if unit_of_measure == 0x00
+        else SensorDeviceClass.VOLUME_FLOW_RATE
+    )
+    assert entity.state.device_class == expected_device_class
+    assert entity.state.unit == native_unit_of_measurement
 
 
 async def async_test_electrical_measurement(
