@@ -47,13 +47,19 @@ from zha.application.platforms.climate import (
     Thermostat as ThermostatEntity,
     ZehnderThermostat,
 )
-from zha.application.platforms.climate.const import SEQ_FAN_MODES, FanState, HVACMode
+from zha.application.platforms.climate.const import (
+    SEQ_FAN_MODES,
+    FanState,
+    HVACAction,
+    HVACMode,
+)
 from zha.application.platforms.number import NumberConfigurationEntity
 from zha.application.platforms.sensor import (
     Sensor,
     SinopeHVACAction,
     ThermostatHVACAction,
 )
+from zha.application.platforms.sensor.const import SensorDeviceClass
 from zha.const import STATE_CHANGED
 from zha.exceptions import ZHAException
 from zha.quirks import THERMOSTAT_FAN_ONLY_HVAC, DeviceMatch, DeviceRegistry, ModelInfo
@@ -318,6 +324,8 @@ async def test_climate_hvac_action_running_state(
 
     assert entity.state.hvac_action == "off"
     assert sensor_entity.state.native_value == "off"
+    assert sensor_entity.state.device_class == SensorDeviceClass.ENUM
+    assert sensor_entity.state.options == [action.value for action in HVACAction]
 
     await send_attributes_report(
         zha_gateway, thrm_cluster, {0x001E: Thermostat.RunningMode.Off}

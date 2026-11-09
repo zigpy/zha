@@ -471,7 +471,7 @@
         "class_name": "ThermostatHVACAction",
         "translation_key": "hvac_action",
         "translation_placeholders": null,
-        "device_class": null,
+        "device_class": "enum",
         "state_class": null,
         "entity_category": null,
         "entity_registry_enabled_default": true,
@@ -484,7 +484,17 @@
         "group_id": null,
         "native_value": null,
         "suggested_display_precision": null,
-        "unit": null
+        "unit": null,
+        "options": [
+          "cooling",
+          "defrosting",
+          "drying",
+          "fan",
+          "heating",
+          "idle",
+          "off",
+          "preheating"
+        ]
       },
       {
         "fallback_name": null,

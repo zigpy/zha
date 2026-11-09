@@ -2970,6 +2970,8 @@ class ThermostatHVACAction(Sensor):
 
     _unique_id_suffix = "hvac_action"
     _attr_translation_key: str = "hvac_action"
+    _attr_device_class: SensorDeviceClass = SensorDeviceClass.ENUM
+    _attr_options: list[str] = [action.value for action in HVACAction]
     _cluster_id = Thermostat.cluster_id
 
     _cluster_match = ClusterMatch(
@@ -3089,6 +3091,19 @@ class ThermostatHVACAction(Sensor):
 
     def _is_supported(self) -> bool:
         return ZclPlatformEntity._is_supported(self)
+
+    @property
+    def options(self) -> list[str]:
+        """Return the list of possible HVAC action values."""
+        return list(self._attr_options)
+
+    @property
+    def state(self) -> EnumSensorState:
+        """Return the state for this sensor."""
+        return EnumSensorState(
+            **super().state.__dict__,
+            options=self.options,
+        )
 
     @property
     def _pi_heating_demand(self) -> int | None:
