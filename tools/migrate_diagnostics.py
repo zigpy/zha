@@ -29,7 +29,7 @@ def zigpy_device_from_legacy_device_data(
     device_data: dict,
     patch_cluster: bool = True,
     quirk: Callable | None = None,
-) -> zigpy.device.Device:
+) -> zigpy.device.ZigbeeDevice:
     """Make a fake device using the specified cluster classes."""
     ieee = zigpy.types.EUI64.convert(device_data["ieee"])
     nwk = device_data["nwk"]
@@ -39,7 +39,7 @@ def zigpy_device_from_legacy_device_data(
     endpoints = device_data["signature"]["endpoints"]
     cluster_data = device_data["cluster_details"]
 
-    device = zigpy.device.Device(app, ieee, nwk)
+    device = zigpy.device.ZigbeeDevice(app, ieee, nwk)
     device.manufacturer = manufacturer
     device.model = model
 

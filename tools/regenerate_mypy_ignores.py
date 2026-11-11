@@ -77,8 +77,11 @@ def generate_overrides(errors_by_module: dict[str, dict[str, int]]) -> str:
         errors_by_module.items(), key=lambda x: (sum(x[1].values()), x[0])
     )
 
+    total = sum(sum(codes.values()) for codes in errors_by_module.values())
+    header = f"# Total ignored errors: {total} across {len(errors_by_module)} modules"
+
     sections = [format_override(module, codes) for module, codes in sorted_modules]
-    return "\n\n".join(sections)
+    return header + "\n" + "\n\n".join(sections)
 
 
 def main() -> None:

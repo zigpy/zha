@@ -21,7 +21,6 @@ from unittest.mock import AsyncMock, patch
 
 from slugify import slugify
 from zigpy.application import ControllerApplication
-from zigpy.quirks import get_device as quirks_get_device
 import zigpy.zcl
 import zigpy.zdo.types as zdo_t
 
@@ -32,6 +31,7 @@ from tests.common import (
     zigpy_device_from_device_data,
 )
 from tests.conftest import TestGateway, make_zha_data, make_zigpy_app_controller
+from zha.quirks import DEVICE_REGISTRY
 
 _LOGGER = logging.getLogger(__name__)
 REPO_ROOT = pathlib.Path(__file__).parent.parent
@@ -81,7 +81,7 @@ def zigpy_device_from_legacy_diagnostics(  # noqa: C901
     app: ControllerApplication,
     data: dict,
     patch_cluster: bool = True,
-) -> zigpy.device.Device | None:
+) -> zigpy.device.ZigbeeDevice | None:
     """Make a fake device using the specified cluster classes."""
     device_data = data["data"]
 
@@ -149,13 +149,17 @@ def zigpy_device_from_legacy_diagnostics(  # noqa: C901
     if "cluster_details" not in device_data:
         return None
 
+    # The legacy signature is taken after quirks are applied, the original is lost
+    if device_data["quirk_applied"]:
+        return None
+
     cluster_data = device_data["cluster_details"]
 
     # Generate a unique IEEE address based on the manufacturer and model, since the
     # real (unique) IEEE is redacted
     ieee = ieee_from_manufacturer_model(manufacturer, model)
 
-    device = zigpy.device.Device(app, ieee, nwk)
+    device = zigpy.device.ZigbeeDevice(app, ieee, nwk)
     device.manufacturer = manufacturer
     device.model = model
 
@@ -193,7 +197,8 @@ def zigpy_device_from_legacy_diagnostics(  # noqa: C901
         for cluster_id in ep["output_clusters"]:
             endpoint.add_output_cluster(int(cluster_id, 16))
 
-    device = quirks_get_device(device)
+    device.original_signature = device.get_signature()
+    device = DEVICE_REGISTRY.resolve(device)
 
     for epid, ep in cluster_data.items():
         endpoint.request = AsyncMock(return_value=[0])
@@ -307,34 +312,71 @@ def zigpy_device_from_diagnostics(
     app: ControllerApplication,
     data: dict,
     patch_cluster: bool = True,
-) -> zigpy.device.Device | None:
+) -> zigpy.device.ZigbeeDevice | None:
     """Create a zigpy device from diagnostics JSON, both modern and legacy formats."""
     if "data" not in data:
         return None
 
     zha_data = data["data"]
 
-    if "version" not in zha_data:
+    if "signature" in zha_data:
         return zigpy_device_from_legacy_diagnostics(app, data, patch_cluster)
 
-    # Some diagnostics are hand-redacted (e.g. nwk "0xREDACTED"), fake a NWK instead
-    if "REDACTED" in zha_data["nwk"]:
+    # Diagnostics pasted inline into issues are sometimes trimmed
+    if "version" not in zha_data:
+        return None
+
+    if not has_original_signature(zha_data):
+        return None
+
+    # Use our normal testing function to load the data
+    return zigpy_device_from_device_data(
+        app, sanitize_device_data(zha_data), patch_cluster
+    )
+
+
+def has_original_signature(zha_data: dict) -> bool:
+    """Check if modern diagnostics JSON describes the device before quirks."""
+    if not zha_data["quirk_applied"]:
+        return True
+
+    if "original_signature" not in zha_data:
+        return False
+
+    # Older versions of ZHA stored the quirk's signature instead of the device's
+    original_signature = zha_data["original_signature"]
+    return "node_desc" in original_signature and "models_info" not in original_signature
+
+
+def sanitize_device_data(zha_data: dict) -> dict:
+    """Replace redacted and identifying fields in modern diagnostics JSON."""
+    # Some diagnostics are hand-redacted (e.g. nwk "0xREDACTED") or lack the NWK,
+    # fake a NWK instead
+    if "nwk" not in zha_data or "REDACTED" in zha_data["nwk"]:
         zha_data["nwk"] = "0x1234"
 
     # Home Assistant diagnostics contain redacted IEEE info, fake an IEEE instead
-    if "REDACTED" in zha_data["ieee"]:
+    if "ieee" not in zha_data or "REDACTED" in zha_data["ieee"]:
         zha_data["ieee"] = str(
             ieee_from_manufacturer_model(
                 manufacturer=zha_data["manufacturer"], model=zha_data["model"]
             )
         )
 
+    # Some diagnostics also redact or lack the last seen time
+    if "last_seen" not in zha_data or "REDACTED" in zha_data["last_seen"]:
+        zha_data["last_seen"] = "1970-01-01T00:00:00+00:00"
+
+    # Trimmed or redacted diagnostics can lack the link quality, it is optional anyway
+    for key in ("lqi", "rssi"):
+        if key not in zha_data or "REDACTED" in str(zha_data[key]):
+            zha_data[key] = None
+
     # Neighbors contain EUI64 addresses and EPIDs
     zha_data["neighbors"] = []
     zha_data["routes"] = []
 
-    # Use our normal testing function to load the data
-    return zigpy_device_from_device_data(app, zha_data, patch_cluster)
+    return zha_data
 
 
 @contextlib.asynccontextmanager
@@ -363,10 +405,14 @@ async def main(paths: list[str]):
                 continue
 
             if "version" in data and "node_descriptor" in data and "endpoints" in data:
+                if not has_original_signature(data):
+                    _LOGGER.debug("Skipping, original signature is missing")
+                    continue
+
                 # Directly parse the diagnostics JSON
                 zigpy_device = zigpy_device_from_device_data(
                     app=zha_gateway.application_controller,
-                    device_data=data,
+                    device_data=sanitize_device_data(data),
                 )
             else:
                 # Otherwise, try to import one of the many legacy ZHA formats

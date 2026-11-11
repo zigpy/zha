@@ -105,7 +105,7 @@ async def device_cover_mock(
     current_position_lift_percentage: int | None,
     current_position_tilt_percentage: int | None,
     window_covering_type: WCT,
-) -> tuple[Device, zigpy.device.Device]:
+) -> tuple[Device, zigpy.device.ZigbeeDevice]:
     """Return a mock zha cover device and its corresponding zipgy device."""
 
     zigpy_device = create_mock_zigpy_device(zha_gateway, ZIGPY_COVER_DEVICE)

@@ -26,8 +26,8 @@ from zha.application.platforms import (
     ClusterConfig,
     ClusterMatch,
     GroupEntity,
-    PlatformEntity,
     PlatformFeatureGroup,
+    ZclPlatformEntity,
     register_entity,
     register_group_entity,
 )
@@ -242,8 +242,10 @@ class BaseFan(BaseEntity, ABC):
 
 
 @register_entity(hvac.Fan.cluster_id)
-class Fan(BaseFan, PlatformEntity):
+class Fan(BaseFan, ZclPlatformEntity):
     """Representation of a ZHA fan."""
+
+    _attr_group_member = True
 
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({hvac.Fan.cluster_id}),
@@ -368,8 +370,10 @@ class FanGroup(BaseFan, GroupEntity):
             "All platform entity states for group entity members: %s", all_states
         )
 
-        percentage_states = [state for state in all_states if state.percentage]
-        preset_mode_states = [state for state in all_states if state.preset_mode]
+        # Unavailable members keep their last state, ignore them
+        states = [state for state in all_states if state.available]
+        percentage_states = [state for state in states if state.percentage]
+        preset_mode_states = [state for state in states if state.preset_mode]
 
         if percentage_states:
             self._percentage = percentage_states[0].percentage
@@ -385,7 +389,7 @@ class FanGroup(BaseFan, GroupEntity):
 
 
 @register_entity(IKEA_AIR_PURIFIER_CLUSTER)
-class IkeaFan(BaseFan, PlatformEntity):
+class IkeaFan(BaseFan, ZclPlatformEntity):
     """Representation of an Ikea fan."""
 
     _attr_supported_features: FanEntityFeature = (

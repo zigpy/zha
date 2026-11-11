@@ -230,7 +230,7 @@ async def test_on_off_select_attribute_report_v2(
 
     with (
         patch(
-            "zigpy.device.Device.request",
+            "zigpy.device.ZigbeeDevice.request",
             return_value=Write_Attributes_rsp(
                 status_records=[
                     foundation.WriteAttributesStatusRecord(
@@ -318,7 +318,7 @@ async def test_bega_color_temperature_channel_select(zha_gateway: Gateway) -> No
 
     with (
         patch(
-            "zigpy.device.Device.request",
+            "zigpy.device.ZigbeeDevice.request",
             return_value=Write_Attributes_rsp(
                 status_records=[
                     foundation.WriteAttributesStatusRecord(

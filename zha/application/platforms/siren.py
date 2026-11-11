@@ -14,7 +14,6 @@ from zigpy.zcl.clusters.security import (
     IasWd,
     SirenLevel,
     Squawk,
-    SquawkLevel,
     SquawkMode,
     Strobe,
     StrobeLevel,
@@ -29,6 +28,7 @@ from zha.application.platforms import (
     ClusterMatch,
     PlatformEntity,
     PlatformFeatureGroup,
+    ZclPlatformEntity,
     register_entity,
 )
 from zha.quirks import SIREN_BASIC
@@ -128,7 +128,7 @@ class BaseSiren(PlatformEntity, ABC):
         """Issue a brief squawk pulse."""
 
 
-class BaseZclSiren(BaseSiren, ABC):
+class BaseZclSiren(BaseSiren, ZclPlatformEntity, ABC):
     """Base class for ZHA IAS WD siren entities with shared ZCL logic."""
 
     _off_listener: asyncio.TimerHandle | None
@@ -177,15 +177,16 @@ class BaseZclSiren(BaseSiren, ABC):
 
     async def async_turn_off(self) -> None:
         """Turn off siren."""
-        warning = WarningType()
-        warning.mode = WarningMode.Stop
-        warning.strobe = Strobe.No_strobe
-        warning.level = SirenLevel.High_level_sound
+        warning = WarningType(
+            mode=WarningMode.Stop,
+            strobe=Strobe.No_strobe,
+            level=SirenLevel.High_level_sound,
+        )
         await self._cluster.start_warning(
             warning=warning,
             warning_duration=5,
             strobe_duty_cycle=0,
-            stobe_level=StrobeLevel.High_level_strobe,
+            strobe_level=StrobeLevel.High_level_strobe,
         )
         self._cancel_off_listener()
         self._attr_is_on = False
@@ -199,10 +200,11 @@ class BaseZclSiren(BaseSiren, ABC):
         squawk_level: int,
     ) -> None:
         """Issue an IAS WD squawk command."""
-        squawk = Squawk()
-        squawk.mode = mode
-        squawk.strobe = Strobe(strobe)  # type:ignore[no-untyped-call]
-        squawk.level = SquawkLevel(squawk_level)  # type:ignore[no-untyped-call]
+        squawk = Squawk(
+            mode=mode,
+            strobe=strobe,
+            level=squawk_level,
+        )
         await self._cluster.squawk(squawk=squawk)
 
     def _async_set_off(self) -> None:
@@ -305,15 +307,16 @@ class AdvancedSiren(BaseZclSiren):
             else (50 if should_strobe else 0)
         )
 
-        warning = WarningType()
-        warning.mode = siren_tone
-        warning.strobe = should_strobe
-        warning.level = siren_level
+        warning = WarningType(
+            mode=siren_tone,
+            strobe=should_strobe,
+            level=siren_level,
+        )
         await self._cluster.start_warning(
             warning=warning,
             warning_duration=siren_duration,
             strobe_duty_cycle=duty_cycle,
-            stobe_level=strobe_level,
+            strobe_level=strobe_level,
         )
         self._attr_is_on = True
         self._off_listener = asyncio.get_running_loop().call_later(
@@ -365,16 +368,17 @@ class BasicSiren(BaseZclSiren):
         self._cancel_off_listener()
         siren_duration = duration if duration is not None else DEFAULT_DURATION
 
-        warning = WarningType()
-        # some Frient sensors send INVALID_VALUE for EMERGENCY
-        warning.mode = WarningMode.Burglar
-        warning.strobe = Strobe.No_strobe
-        warning.level = SirenLevel.High_level_sound
+        warning = WarningType(
+            # some Frient sensors send INVALID_VALUE for EMERGENCY
+            mode=WarningMode.Burglar,
+            strobe=Strobe.No_strobe,
+            level=SirenLevel.High_level_sound,
+        )
         await self._cluster.start_warning(
             warning=warning,
             warning_duration=siren_duration,
             strobe_duty_cycle=0,
-            stobe_level=StrobeLevel.High_level_strobe,
+            strobe_level=StrobeLevel.High_level_strobe,
         )
         self._attr_is_on = True
         self._off_listener = asyncio.get_running_loop().call_later(
