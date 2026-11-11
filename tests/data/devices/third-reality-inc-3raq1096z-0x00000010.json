@@ -1,0 +1,306 @@
+{
+  "version": 3,
+  "ieee": "ab:cd:ef:12:e1:f6:c4:64",
+  "nwk": "0x984A",
+  "manufacturer": "Third Reality, Inc",
+  "model": "3RAQ1096Z",
+  "friendly_manufacturer": "Third Reality, Inc",
+  "friendly_model": "3RAQ1096Z",
+  "name": "Third Reality, Inc 3RAQ1096Z",
+  "quirk_applied": false,
+  "quirk_class": "zigpy.device.ZigbeeDevice",
+  "exposes_features": [],
+  "manufacturer_code": 5127,
+  "power_source": "Battery or Unknown",
+  "lqi": 127,
+  "rssi": null,
+  "last_seen": "2026-06-23T08:21:57.099536+00:00",
+  "available": true,
+  "device_type": "EndDevice",
+  "active_coordinator": false,
+  "node_descriptor": {
+    "logical_type": "EndDevice",
+    "complex_descriptor_available": false,
+    "user_descriptor_available": false,
+    "reserved": 0,
+    "aps_flags": 0,
+    "frequency_band": 8,
+    "mac_capability_flags": 128,
+    "manufacturer_code": 5127,
+    "maximum_buffer_size": 127,
+    "maximum_incoming_transfer_size": 242,
+    "server_mask": 11264,
+    "maximum_outgoing_transfer_size": 242,
+    "descriptor_capability_field": 0
+  },
+  "endpoints": {
+    "1": {
+      "profile_id": 260,
+      "device_type": {
+        "name": "TEMPERATURE_SENSOR",
+        "id": 770
+      },
+      "in_clusters": [
+        {
+          "cluster_id": "0x0000",
+          "endpoint_attribute": "basic",
+          "attributes": [
+            {
+              "id": "0x0004",
+              "name": "manufacturer",
+              "zcl_type": "string",
+              "value": "Third Reality, Inc"
+            },
+            {
+              "id": "0x0005",
+              "name": "model",
+              "zcl_type": "string",
+              "value": "3RAQ1096Z"
+            }
+          ]
+        },
+        {
+          "cluster_id": "0x0402",
+          "endpoint_attribute": "temperature",
+          "attributes": [
+            {
+              "id": "0x0000",
+              "name": "measured_value",
+              "zcl_type": "int16",
+              "value": 2829
+            }
+          ]
+        },
+        {
+          "cluster_id": "0x0405",
+          "endpoint_attribute": "humidity",
+          "attributes": [
+            {
+              "id": "0x0000",
+              "name": "measured_value",
+              "zcl_type": "uint16",
+              "value": 7593
+            }
+          ]
+        },
+        {
+          "cluster_id": "0x040d",
+          "endpoint_attribute": "carbon_dioxide_concentration",
+          "attributes": [
+            {
+              "id": "0x0000",
+              "name": "measured_value",
+              "zcl_type": "single",
+              "value": 0.002032000105828047
+            }
+          ]
+        },
+        {
+          "cluster_id": "0x042e",
+          "endpoint_attribute": null,
+          "attributes": []
+        }
+      ],
+      "out_clusters": [
+        {
+          "cluster_id": "0x0019",
+          "endpoint_attribute": "ota",
+          "attributes": [
+            {
+              "id": "0x0002",
+              "name": "current_file_version",
+              "zcl_type": "uint32",
+              "value": 16
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "original_signature": {
+    "manufacturer": "Third Reality, Inc",
+    "model": "3RAQ1096Z",
+    "node_desc": {
+      "logical_type": 2,
+      "complex_descriptor_available": 0,
+      "user_descriptor_available": 0,
+      "reserved": 0,
+      "aps_flags": 0,
+      "frequency_band": 8,
+      "mac_capability_flags": 128,
+      "manufacturer_code": 5127,
+      "maximum_buffer_size": 127,
+      "maximum_incoming_transfer_size": 242,
+      "server_mask": 11264,
+      "maximum_outgoing_transfer_size": 242,
+      "descriptor_capability_field": 0
+    },
+    "endpoints": {
+      "1": {
+        "profile_id": "0x0104",
+        "device_type": "0x0302",
+        "input_clusters": [
+          "0x0000",
+          "0x0402",
+          "0x0405",
+          "0x040d",
+          "0x042e"
+        ],
+        "output_clusters": [
+          "0x0019"
+        ]
+      }
+    }
+  },
+  "zha_lib_entities": {
+    "sensor": [
+      {
+        "fallback_name": null,
+        "unique_id": "ab:cd:ef:12:e1:f6:c4:64-1-0-lqi",
+        "migrate_unique_ids": [],
+        "platform": "sensor",
+        "class_name": "LQISensor",
+        "translation_key": "lqi",
+        "translation_placeholders": null,
+        "device_class": null,
+        "state_class": "measurement",
+        "entity_category": "diagnostic",
+        "entity_registry_enabled_default": false,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:e1:f6:c4:64",
+        "endpoint_id": null,
+        "available": true,
+        "group_id": null,
+        "native_value": 127,
+        "suggested_display_precision": null,
+        "unit": null
+      },
+      {
+        "fallback_name": null,
+        "unique_id": "ab:cd:ef:12:e1:f6:c4:64-1-0-rssi",
+        "migrate_unique_ids": [],
+        "platform": "sensor",
+        "class_name": "RSSISensor",
+        "translation_key": "rssi",
+        "translation_placeholders": null,
+        "device_class": "signal_strength",
+        "state_class": "measurement",
+        "entity_category": "diagnostic",
+        "entity_registry_enabled_default": false,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:e1:f6:c4:64",
+        "endpoint_id": null,
+        "available": true,
+        "group_id": null,
+        "native_value": null,
+        "suggested_display_precision": null,
+        "unit": "dBm"
+      },
+      {
+        "fallback_name": null,
+        "unique_id": "ab:cd:ef:12:e1:f6:c4:64-1-1026",
+        "migrate_unique_ids": [],
+        "platform": "sensor",
+        "class_name": "Temperature",
+        "translation_key": null,
+        "translation_placeholders": null,
+        "device_class": "temperature",
+        "state_class": "measurement",
+        "entity_category": null,
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:e1:f6:c4:64",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "native_value": 28.29,
+        "suggested_display_precision": null,
+        "unit": "\u00b0C"
+      },
+      {
+        "fallback_name": null,
+        "unique_id": "ab:cd:ef:12:e1:f6:c4:64-1-1029",
+        "migrate_unique_ids": [],
+        "platform": "sensor",
+        "class_name": "Humidity",
+        "translation_key": null,
+        "translation_placeholders": null,
+        "device_class": "humidity",
+        "state_class": "measurement",
+        "entity_category": null,
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:e1:f6:c4:64",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "native_value": 75.93,
+        "suggested_display_precision": null,
+        "unit": "%"
+      },
+      {
+        "fallback_name": null,
+        "unique_id": "ab:cd:ef:12:e1:f6:c4:64-1-1037",
+        "migrate_unique_ids": [],
+        "platform": "sensor",
+        "class_name": "CarbonDioxideConcentration",
+        "translation_key": null,
+        "translation_placeholders": null,
+        "device_class": "carbon_dioxide",
+        "state_class": "measurement",
+        "entity_category": null,
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:e1:f6:c4:64",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "native_value": 2032.0001058280468,
+        "suggested_display_precision": 0,
+        "unit": "ppm"
+      }
+    ],
+    "update": [
+      {
+        "fallback_name": null,
+        "unique_id": "ab:cd:ef:12:e1:f6:c4:64-1-25-firmware_update",
+        "migrate_unique_ids": [],
+        "platform": "update",
+        "class_name": "FirmwareUpdateEntity",
+        "translation_key": null,
+        "translation_placeholders": null,
+        "device_class": "firmware",
+        "state_class": null,
+        "entity_category": "config",
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:e1:f6:c4:64",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "installed_version": "0x00000010",
+        "in_progress": false,
+        "update_percentage": null,
+        "latest_version": null,
+        "release_summary": null,
+        "release_notes": null,
+        "release_url": null,
+        "supported_features": 23
+      }
+    ]
+  },
+  "neighbors": [],
+  "routes": []
+}

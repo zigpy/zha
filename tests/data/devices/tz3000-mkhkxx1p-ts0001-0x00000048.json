@@ -8,8 +8,10 @@
   "friendly_model": "TS0001",
   "name": "_TZ3000_mkhkxx1p TS0001",
   "quirk_applied": true,
-  "quirk_class": "zhaquirks.tuya.ts0001_switch:(_TZ3000_xkap8wtb / TS0001)",
-  "exposes_features": [],
+  "quirk_class": "zhaquirks.tuya.builder:(_TZ3000_xkap8wtb / TS0001)",
+  "exposes_features": [
+    "tuya.plug_on_off_attributes"
+  ],
   "manufacturer_code": 4417,
   "power_source": "Mains",
   "lqi": null,
@@ -526,6 +528,62 @@
         "max_mireds": 500
       }
     ],
+    "select": [
+      {
+        "fallback_name": null,
+        "unique_id": "ab:cd:ef:12:36:44:eb:16-1-6-backlight_mode",
+        "migrate_unique_ids": [],
+        "platform": "select",
+        "class_name": "TuyaBacklightModeSelectEntity",
+        "translation_key": "backlight_mode",
+        "translation_placeholders": null,
+        "device_class": null,
+        "state_class": null,
+        "entity_category": "config",
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:36:44:eb:16",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "current_option": "Off",
+        "enum": "TuyaBacklightMode",
+        "options": [
+          "Off",
+          "LightWhenOn",
+          "LightWhenOff"
+        ]
+      },
+      {
+        "fallback_name": null,
+        "unique_id": "ab:cd:ef:12:36:44:eb:16-1-6-power_on_state",
+        "migrate_unique_ids": [],
+        "platform": "select",
+        "class_name": "TuyaPowerOnStateSelectEntity",
+        "translation_key": "power_on_state",
+        "translation_placeholders": null,
+        "device_class": null,
+        "state_class": null,
+        "entity_category": "config",
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:36:44:eb:16",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "current_option": "LastState",
+        "enum": "TuyaPowerOnState",
+        "options": [
+          "Off",
+          "On",
+          "LastState"
+        ]
+      }
+    ],
     "sensor": [
       {
         "fallback_name": null,
@@ -543,7 +601,7 @@
         "primary": false,
         "extra_state_attribute_names": [],
         "device_ieee": "ab:cd:ef:12:36:44:eb:16",
-        "endpoint_id": 1,
+        "endpoint_id": null,
         "available": true,
         "group_id": null,
         "native_value": null,
@@ -566,7 +624,7 @@
         "primary": false,
         "extra_state_attribute_names": [],
         "device_ieee": "ab:cd:ef:12:36:44:eb:16",
-        "endpoint_id": 1,
+        "endpoint_id": null,
         "available": true,
         "group_id": null,
         "native_value": null,

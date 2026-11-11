@@ -540,6 +540,11 @@
               "value": 16973834
             }
           ]
+        },
+        {
+          "cluster_id": "0x0025",
+          "endpoint_attribute": "keep_alive",
+          "attributes": []
         }
       ]
     },
@@ -2073,7 +2078,7 @@
         "primary": false,
         "extra_state_attribute_names": [],
         "device_ieee": "ab:cd:ef:12:59:98:78:6f",
-        "endpoint_id": 1,
+        "endpoint_id": null,
         "available": true,
         "group_id": null,
         "native_value": null,
@@ -2096,7 +2101,7 @@
         "primary": false,
         "extra_state_attribute_names": [],
         "device_ieee": "ab:cd:ef:12:59:98:78:6f",
-        "endpoint_id": 1,
+        "endpoint_id": null,
         "available": true,
         "group_id": null,
         "native_value": null,

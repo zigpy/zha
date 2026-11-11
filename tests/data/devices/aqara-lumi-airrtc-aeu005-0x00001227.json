@@ -8,7 +8,7 @@
   "friendly_model": "lumi.airrtc.aeu005",
   "name": "Aqara lumi.airrtc.aeu005",
   "quirk_applied": false,
-  "quirk_class": "zigpy.device.Device",
+  "quirk_class": "zigpy.device.ZigbeeDevice",
   "exposes_features": [],
   "manufacturer_code": 4447,
   "power_source": "Battery or Unknown",
@@ -98,7 +98,7 @@
               "name": "product_code",
               "zcl_type": "octstr",
               "value": {
-                "__type": "<class 'zigpy.types.basic.LVBytes'>",
+                "__type": "<class 'bytes'>",
                 "repr": "b''"
               }
             },
@@ -603,7 +603,7 @@
         "primary": false,
         "extra_state_attribute_names": [],
         "device_ieee": "ab:cd:ef:12:a8:b1:ca:04",
-        "endpoint_id": 1,
+        "endpoint_id": null,
         "available": true,
         "group_id": null,
         "native_value": 168,
@@ -626,7 +626,7 @@
         "primary": false,
         "extra_state_attribute_names": [],
         "device_ieee": "ab:cd:ef:12:a8:b1:ca:04",
-        "endpoint_id": 1,
+        "endpoint_id": null,
         "available": true,
         "group_id": null,
         "native_value": -69,

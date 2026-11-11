@@ -8,7 +8,7 @@
   "friendly_model": "ACmidea",
   "name": "enktro ACmidea",
   "quirk_applied": false,
-  "quirk_class": "zigpy.device.Device",
+  "quirk_class": "zigpy.device.ZigbeeDevice",
   "exposes_features": [],
   "manufacturer_code": 4660,
   "power_source": "Mains",
@@ -325,8 +325,10 @@
         "min_temp": 17.0,
         "supported_features": 395,
         "fan_modes": [
-          "auto",
-          "on"
+          "low",
+          "medium",
+          "high",
+          "auto"
         ],
         "preset_modes": [],
         "hvac_modes": [
@@ -362,7 +364,7 @@
         "primary": false,
         "extra_state_attribute_names": [],
         "device_ieee": "ab:cd:ef:12:f9:10:2d:81",
-        "endpoint_id": 1,
+        "endpoint_id": null,
         "available": true,
         "group_id": null,
         "native_value": null,
@@ -385,7 +387,7 @@
         "primary": false,
         "extra_state_attribute_names": [],
         "device_ieee": "ab:cd:ef:12:f9:10:2d:81",
-        "endpoint_id": 1,
+        "endpoint_id": null,
         "available": true,
         "group_id": null,
         "native_value": null,

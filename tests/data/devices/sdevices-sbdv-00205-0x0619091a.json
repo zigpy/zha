@@ -1,0 +1,758 @@
+{
+  "version": 3,
+  "ieee": "ab:cd:ef:12:01:10:be:37",
+  "nwk": "0x5600",
+  "manufacturer": "SDevices",
+  "model": "SBDV-00205",
+  "friendly_manufacturer": "SDevices",
+  "friendly_model": "SBDV-00205",
+  "name": "SDevices SBDV-00205",
+  "quirk_applied": false,
+  "quirk_class": "zigpy.device.ZigbeeDevice",
+  "exposes_features": [],
+  "manufacturer_code": 5423,
+  "power_source": "Mains",
+  "lqi": null,
+  "rssi": null,
+  "last_seen": "2026-08-24T06:10:13.853563+00:00",
+  "available": true,
+  "device_type": "Router",
+  "active_coordinator": false,
+  "node_descriptor": {
+    "logical_type": "Router",
+    "complex_descriptor_available": false,
+    "user_descriptor_available": false,
+    "reserved": 0,
+    "aps_flags": 0,
+    "frequency_band": 8,
+    "mac_capability_flags": 142,
+    "manufacturer_code": 5423,
+    "maximum_buffer_size": 82,
+    "maximum_incoming_transfer_size": 82,
+    "server_mask": 11264,
+    "maximum_outgoing_transfer_size": 82,
+    "descriptor_capability_field": 0
+  },
+  "endpoints": {
+    "1": {
+      "profile_id": 260,
+      "device_type": {
+        "name": "THERMOSTAT",
+        "id": 769
+      },
+      "in_clusters": [
+        {
+          "cluster_id": "0x0000",
+          "endpoint_attribute": "basic",
+          "attributes": [
+            {
+              "id": "0x0004",
+              "name": "manufacturer",
+              "zcl_type": "string",
+              "value": "SDevices"
+            },
+            {
+              "id": "0x0005",
+              "name": "model",
+              "zcl_type": "string",
+              "value": "SBDV-00205"
+            }
+          ]
+        },
+        {
+          "cluster_id": "0x0002",
+          "endpoint_attribute": "device_temperature",
+          "attributes": [
+            {
+              "id": "0x0000",
+              "name": "current_temperature",
+              "zcl_type": "int16",
+              "value": 49
+            }
+          ]
+        },
+        {
+          "cluster_id": "0x0003",
+          "endpoint_attribute": "identify",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0004",
+          "endpoint_attribute": "groups",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0005",
+          "endpoint_attribute": "scenes",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0201",
+          "endpoint_attribute": "thermostat",
+          "attributes": [
+            {
+              "id": "0x0006",
+              "name": "abs_max_cool_setpoint_limit",
+              "zcl_type": "int16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0004",
+              "name": "abs_max_heat_setpoint_limit",
+              "zcl_type": "int16",
+              "value": 5000
+            },
+            {
+              "id": "0x0005",
+              "name": "abs_min_cool_setpoint_limit",
+              "zcl_type": "int16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0003",
+              "name": "abs_min_heat_setpoint_limit",
+              "zcl_type": "int16",
+              "value": 100
+            },
+            {
+              "id": "0x001b",
+              "name": "ctrl_sequence_of_oper",
+              "zcl_type": "enum8",
+              "value": 2
+            },
+            {
+              "id": "0x0000",
+              "name": "local_temperature",
+              "zcl_type": "int16",
+              "value": 960
+            },
+            {
+              "id": "0x0010",
+              "name": "local_temperature_calibration",
+              "zcl_type": "int8",
+              "value": 0
+            },
+            {
+              "id": "0x0018",
+              "name": "max_cool_setpoint_limit",
+              "zcl_type": "int16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0016",
+              "name": "max_heat_setpoint_limit",
+              "zcl_type": "int16",
+              "value": 3500
+            },
+            {
+              "id": "0x0017",
+              "name": "min_cool_setpoint_limit",
+              "zcl_type": "int16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0015",
+              "name": "min_heat_setpoint_limit",
+              "zcl_type": "int16",
+              "value": 500
+            },
+            {
+              "id": "0x0002",
+              "name": "occupancy",
+              "zcl_type": "map8",
+              "unsupported": true
+            },
+            {
+              "id": "0x0011",
+              "name": "occupied_cooling_setpoint",
+              "zcl_type": "int16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0012",
+              "name": "occupied_heating_setpoint",
+              "zcl_type": "int16",
+              "value": 2600
+            },
+            {
+              "id": "0x0007",
+              "name": "pi_cooling_demand",
+              "zcl_type": "uint8",
+              "unsupported": true
+            },
+            {
+              "id": "0x0008",
+              "name": "pi_heating_demand",
+              "zcl_type": "uint8",
+              "unsupported": true
+            },
+            {
+              "id": "0x0025",
+              "name": "programing_oper_mode",
+              "zcl_type": "map8",
+              "value": 0
+            },
+            {
+              "id": "0x001e",
+              "name": "running_mode",
+              "zcl_type": "enum8",
+              "value": 4
+            },
+            {
+              "id": "0x0029",
+              "name": "running_state",
+              "zcl_type": "map16",
+              "value": 1
+            },
+            {
+              "id": "0x0030",
+              "name": "setpoint_change_source",
+              "zcl_type": "enum8",
+              "unsupported": true
+            },
+            {
+              "id": "0x0032",
+              "name": "setpoint_change_source_timestamp",
+              "zcl_type": "UTC",
+              "unsupported": true
+            },
+            {
+              "id": "0x001c",
+              "name": "system_mode",
+              "zcl_type": "enum8",
+              "value": 4
+            },
+            {
+              "id": "0x0013",
+              "name": "unoccupied_cooling_setpoint",
+              "zcl_type": "int16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0014",
+              "name": "unoccupied_heating_setpoint",
+              "zcl_type": "int16",
+              "unsupported": true
+            }
+          ]
+        },
+        {
+          "cluster_id": "0x0204",
+          "endpoint_attribute": "thermostat_ui",
+          "attributes": [
+            {
+              "id": "0x0001",
+              "name": "keypad_lockout",
+              "zcl_type": "enum8",
+              "value": 0
+            }
+          ]
+        },
+        {
+          "cluster_id": "0x0402",
+          "endpoint_attribute": "temperature",
+          "attributes": [
+            {
+              "id": "0x0000",
+              "name": "measured_value",
+              "zcl_type": "int16",
+              "value": 960
+            }
+          ]
+        },
+        {
+          "cluster_id": "0x0b05",
+          "endpoint_attribute": "diagnostic",
+          "attributes": [
+            {
+              "id": "0x010b",
+              "name": "aps_tx_ucast_fail",
+              "zcl_type": "uint16",
+              "value": 0
+            },
+            {
+              "id": "0x010a",
+              "name": "aps_tx_ucast_retry",
+              "zcl_type": "uint16",
+              "value": 5
+            },
+            {
+              "id": "0x0109",
+              "name": "aps_tx_ucast_success",
+              "zcl_type": "uint16",
+              "value": 11362
+            },
+            {
+              "id": "0x011b",
+              "name": "average_mac_retry_per_aps_message_sent",
+              "zcl_type": "uint16",
+              "value": 0
+            },
+            {
+              "id": "0x0103",
+              "name": "mac_tx_ucast",
+              "zcl_type": "uint32",
+              "value": 14004
+            },
+            {
+              "id": "0x0105",
+              "name": "mac_tx_ucast_fail",
+              "zcl_type": "uint16",
+              "value": 0
+            },
+            {
+              "id": "0x0104",
+              "name": "mac_tx_ucast_retry",
+              "zcl_type": "uint16",
+              "value": 64
+            },
+            {
+              "id": "0x0000",
+              "name": "number_of_resets",
+              "zcl_type": "uint16",
+              "value": 60
+            },
+            {
+              "id": "0x0117",
+              "name": "packet_buffer_allocate_failures",
+              "zcl_type": "uint16",
+              "value": 0
+            },
+            {
+              "id": "0x0119",
+              "name": "phy_to_mac_queue_limit_reached",
+              "zcl_type": "uint16",
+              "value": 0
+            }
+          ]
+        },
+        {
+          "cluster_id": "0xfccf",
+          "endpoint_attribute": "manufacturer_specific",
+          "attributes": []
+        }
+      ],
+      "out_clusters": [
+        {
+          "cluster_id": "0x0003",
+          "endpoint_attribute": "identify",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x000a",
+          "endpoint_attribute": "time",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0019",
+          "endpoint_attribute": "ota",
+          "attributes": [
+            {
+              "id": "0x0002",
+              "name": "current_file_version",
+              "zcl_type": "uint32",
+              "value": 102304026
+            }
+          ]
+        },
+        {
+          "cluster_id": "0x0201",
+          "endpoint_attribute": "thermostat",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0402",
+          "endpoint_attribute": "temperature",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0704",
+          "endpoint_attribute": "smartenergy_tunneling",
+          "attributes": []
+        }
+      ]
+    }
+  },
+  "original_signature": {
+    "manufacturer": "SDevices",
+    "model": "SBDV-00205",
+    "node_desc": {
+      "logical_type": 1,
+      "complex_descriptor_available": 0,
+      "user_descriptor_available": 0,
+      "reserved": 0,
+      "aps_flags": 0,
+      "frequency_band": 8,
+      "mac_capability_flags": 142,
+      "manufacturer_code": 5423,
+      "maximum_buffer_size": 82,
+      "maximum_incoming_transfer_size": 82,
+      "server_mask": 11264,
+      "maximum_outgoing_transfer_size": 82,
+      "descriptor_capability_field": 0
+    },
+    "endpoints": {
+      "1": {
+        "profile_id": "0x0104",
+        "device_type": "0x0301",
+        "input_clusters": [
+          "0x0000",
+          "0x0002",
+          "0x0003",
+          "0x0004",
+          "0x0005",
+          "0x0201",
+          "0x0204",
+          "0x0402",
+          "0x0b05",
+          "0xfccf"
+        ],
+        "output_clusters": [
+          "0x0003",
+          "0x000a",
+          "0x0019",
+          "0x0201",
+          "0x0402",
+          "0x0704"
+        ]
+      }
+    }
+  },
+  "zha_lib_entities": {
+    "button": [
+      {
+        "fallback_name": null,
+        "unique_id": "ab:cd:ef:12:01:10:be:37-1-3",
+        "migrate_unique_ids": [],
+        "platform": "button",
+        "class_name": "IdentifyButton",
+        "translation_key": null,
+        "translation_placeholders": null,
+        "device_class": "identify",
+        "state_class": null,
+        "entity_category": "diagnostic",
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:01:10:be:37",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "command": "identify",
+        "args": [
+          5
+        ],
+        "kwargs": {}
+      }
+    ],
+    "climate": [
+      {
+        "fallback_name": null,
+        "unique_id": "ab:cd:ef:12:01:10:be:37-1",
+        "migrate_unique_ids": [],
+        "platform": "climate",
+        "class_name": "Thermostat",
+        "translation_key": "thermostat",
+        "translation_placeholders": null,
+        "device_class": null,
+        "state_class": null,
+        "entity_category": null,
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": true,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:01:10:be:37",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "current_temperature": 9.6,
+        "outdoor_temperature": null,
+        "target_temperature": 26.0,
+        "target_temperature_high": null,
+        "target_temperature_low": null,
+        "hvac_action": "heating",
+        "hvac_mode": "heat",
+        "preset_mode": "none",
+        "fan_mode": "auto",
+        "max_temp": 35.0,
+        "min_temp": 5.0,
+        "supported_features": 385,
+        "fan_modes": null,
+        "preset_modes": [],
+        "hvac_modes": [
+          "off",
+          "heat"
+        ],
+        "sys_mode": "[4]/heat",
+        "occupancy": null,
+        "occupied_cooling_setpoint": null,
+        "occupied_heating_setpoint": 2600,
+        "pi_heating_demand": null,
+        "pi_cooling_demand": null,
+        "unoccupied_cooling_setpoint": null,
+        "unoccupied_heating_setpoint": null
+      }
+    ],
+    "number": [
+      {
+        "fallback_name": null,
+        "unique_id": "ab:cd:ef:12:01:10:be:37-1-513-local_temperature_calibration",
+        "migrate_unique_ids": [],
+        "platform": "number",
+        "class_name": "ThermostatLocalTempCalibration",
+        "translation_key": "local_temperature_calibration",
+        "translation_placeholders": null,
+        "device_class": null,
+        "state_class": null,
+        "entity_category": "config",
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:01:10:be:37",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "native_value": 0.0,
+        "mode": "box",
+        "native_max_value": 2.5,
+        "native_min_value": -2.5,
+        "native_step": 0.1,
+        "native_unit_of_measurement": "\u00b0C"
+      },
+      {
+        "fallback_name": null,
+        "unique_id": "ab:cd:ef:12:01:10:be:37-1-513-max_heat_setpoint_limit",
+        "migrate_unique_ids": [],
+        "platform": "number",
+        "class_name": "MaxHeatSetpointLimit",
+        "translation_key": "max_heat_setpoint_limit",
+        "translation_placeholders": null,
+        "device_class": null,
+        "state_class": null,
+        "entity_category": "config",
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:01:10:be:37",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "native_value": 35.0,
+        "mode": "box",
+        "native_max_value": 50.0,
+        "native_min_value": 5.0,
+        "native_step": 0.5,
+        "native_unit_of_measurement": "\u00b0C"
+      },
+      {
+        "fallback_name": null,
+        "unique_id": "ab:cd:ef:12:01:10:be:37-1-513-min_heat_setpoint_limit",
+        "migrate_unique_ids": [],
+        "platform": "number",
+        "class_name": "MinHeatSetpointLimit",
+        "translation_key": "min_heat_setpoint_limit",
+        "translation_placeholders": null,
+        "device_class": null,
+        "state_class": null,
+        "entity_category": "config",
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:01:10:be:37",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "native_value": 5.0,
+        "mode": "box",
+        "native_max_value": 35.0,
+        "native_min_value": 1.0,
+        "native_step": 0.5,
+        "native_unit_of_measurement": "\u00b0C"
+      }
+    ],
+    "select": [
+      {
+        "fallback_name": null,
+        "unique_id": "ab:cd:ef:12:01:10:be:37-1-516-keypad_lockout",
+        "migrate_unique_ids": [],
+        "platform": "select",
+        "class_name": "KeypadLockout",
+        "translation_key": "keypad_lockout",
+        "translation_placeholders": null,
+        "device_class": null,
+        "state_class": null,
+        "entity_category": "config",
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:01:10:be:37",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "current_option": "Unlock",
+        "enum": "KeypadLockoutEnum",
+        "options": [
+          "Unlock",
+          "Lock1",
+          "Lock2",
+          "Lock3",
+          "Lock4"
+        ]
+      }
+    ],
+    "sensor": [
+      {
+        "fallback_name": null,
+        "unique_id": "ab:cd:ef:12:01:10:be:37-1-0-lqi",
+        "migrate_unique_ids": [],
+        "platform": "sensor",
+        "class_name": "LQISensor",
+        "translation_key": "lqi",
+        "translation_placeholders": null,
+        "device_class": null,
+        "state_class": "measurement",
+        "entity_category": "diagnostic",
+        "entity_registry_enabled_default": false,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:01:10:be:37",
+        "endpoint_id": null,
+        "available": true,
+        "group_id": null,
+        "native_value": null,
+        "suggested_display_precision": null,
+        "unit": null
+      },
+      {
+        "fallback_name": null,
+        "unique_id": "ab:cd:ef:12:01:10:be:37-1-0-rssi",
+        "migrate_unique_ids": [],
+        "platform": "sensor",
+        "class_name": "RSSISensor",
+        "translation_key": "rssi",
+        "translation_placeholders": null,
+        "device_class": "signal_strength",
+        "state_class": "measurement",
+        "entity_category": "diagnostic",
+        "entity_registry_enabled_default": false,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:01:10:be:37",
+        "endpoint_id": null,
+        "available": true,
+        "group_id": null,
+        "native_value": null,
+        "suggested_display_precision": null,
+        "unit": "dBm"
+      },
+      {
+        "fallback_name": null,
+        "unique_id": "ab:cd:ef:12:01:10:be:37-1-1026",
+        "migrate_unique_ids": [],
+        "platform": "sensor",
+        "class_name": "Temperature",
+        "translation_key": null,
+        "translation_placeholders": null,
+        "device_class": "temperature",
+        "state_class": "measurement",
+        "entity_category": null,
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:01:10:be:37",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "native_value": 9.6,
+        "suggested_display_precision": null,
+        "unit": "\u00b0C"
+      },
+      {
+        "fallback_name": null,
+        "unique_id": "ab:cd:ef:12:01:10:be:37-1-2",
+        "migrate_unique_ids": [],
+        "platform": "sensor",
+        "class_name": "DeviceTemperature",
+        "translation_key": "device_temperature",
+        "translation_placeholders": null,
+        "device_class": "temperature",
+        "state_class": "measurement",
+        "entity_category": "diagnostic",
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:01:10:be:37",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "native_value": 0.49,
+        "suggested_display_precision": null,
+        "unit": "\u00b0C"
+      },
+      {
+        "fallback_name": null,
+        "unique_id": "ab:cd:ef:12:01:10:be:37-1-513-hvac_action",
+        "migrate_unique_ids": [],
+        "platform": "sensor",
+        "class_name": "ThermostatHVACAction",
+        "translation_key": "hvac_action",
+        "translation_placeholders": null,
+        "device_class": null,
+        "state_class": null,
+        "entity_category": null,
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:01:10:be:37",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "native_value": "heating",
+        "suggested_display_precision": null,
+        "unit": null
+      }
+    ],
+    "update": [
+      {
+        "fallback_name": null,
+        "unique_id": "ab:cd:ef:12:01:10:be:37-1-25-firmware_update",
+        "migrate_unique_ids": [],
+        "platform": "update",
+        "class_name": "FirmwareUpdateEntity",
+        "translation_key": null,
+        "translation_placeholders": null,
+        "device_class": "firmware",
+        "state_class": null,
+        "entity_category": "config",
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:01:10:be:37",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "installed_version": "0x0619091a",
+        "in_progress": false,
+        "update_percentage": null,
+        "latest_version": null,
+        "release_summary": null,
+        "release_notes": null,
+        "release_url": null,
+        "supported_features": 23
+      }
+    ]
+  },
+  "neighbors": [],
+  "routes": []
+}
