@@ -286,6 +286,36 @@ async def test_on_off_event(zha_gateway: Gateway) -> None:
     ]
 
 
+async def test_cluster_command_event_unknown_command(zha_gateway: Gateway) -> None:
+    """Test that unknown client cluster commands don't trigger an event."""
+    zigpy_device = create_mock_zigpy_device(
+        zha_gateway,
+        {
+            1: {
+                SIG_EP_INPUT: [],
+                SIG_EP_OUTPUT: [general.OnOff.cluster_id],
+                SIG_EP_TYPE: zha.DeviceType.ON_OFF_SWITCH,
+                SIG_EP_PROFILE: zha.PROFILE_ID,
+            }
+        },
+    )
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
+    cluster = zigpy_device.endpoints[1].out_clusters[general.OnOff.cluster_id]
+
+    entity = get_entity(
+        zha_device, platform=Platform.EVENT, exact_entity_type=OnOffEvent
+    )
+
+    events: list[EntityEventTriggeredEvent] = []
+    entity.on_event(EntityEventTriggeredEvent.event, events.append)
+
+    unknown_command_id = 0xFE
+    assert unknown_command_id not in cluster.server_commands
+    entity.cluster_command(1, unknown_command_id, [])
+
+    assert events == []
+
+
 async def test_color_event(zha_gateway: Gateway) -> None:
     """Test the Color client cluster event entity."""
     zigpy_device = create_mock_zigpy_device(
