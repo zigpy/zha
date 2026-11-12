@@ -1975,10 +1975,15 @@ class CoordinatorDevice(ZigbeeDevice):
         """Yield the coordinator LED (if supported) and the counter sensors."""
         if self.gateway.radio_type is RadioType.ezsp:
             ezsp = getattr(self.gateway.application_controller, "_ezsp", None)
+            # `LED_CONTROL` only exists in bellows releases with XNCP LED support
+            led_control = getattr(FirmwareFeatures, "LED_CONTROL", None)
 
             # TODO: use a public bellows/zigpy API once one exists
-            if ezsp is not None and FirmwareFeatures.LED_CONTROL in getattr(
-                ezsp, "_xncp_features", FirmwareFeatures.NONE
+            if (
+                ezsp is not None
+                and led_control is not None
+                and led_control
+                in getattr(ezsp, "_xncp_features", FirmwareFeatures.NONE)
             ):
                 yield light.CoordinatorLED(device=self)
 

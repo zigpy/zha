@@ -384,34 +384,22 @@ class CoordinatorLED(BaseLight, PlatformEntity):
         except Exception:  # pylint: disable=broad-except
             self.error("Failed to restore coordinator LED state", exc_info=True)
 
-    def _get_rgb_color(
+    def _resolve_led_color(
         self,
         brightness: int | None,
         xy_color: tuple[float, float] | None,
-    ) -> tuple[int, int, int]:
-        """Resolve the RGB color to send to the adapter."""
+    ) -> tuple[int, tuple[float, float], tuple[int, int, int]]:
+        """Resolve brightness, XY color and the RGB value to send, without mutating state."""
         if brightness is not None:
             target_brightness = max(DEFAULT_MIN_BRIGHTNESS, min(255, brightness))
-            self._brightness = target_brightness
         elif self._brightness is None:
             target_brightness = DEFAULT_COORDINATOR_LED_BRIGHTNESS
-            self._brightness = target_brightness
         else:
             target_brightness = self._brightness
 
-        if xy_color is not None:
-            self._xy_color = xy_color
-            return _xy_brightness_to_rgb(xy_color[0], xy_color[1], target_brightness)
-
-        if self._xy_color is not None:
-            return _xy_brightness_to_rgb(
-                self._xy_color[0], self._xy_color[1], target_brightness
-            )
-
-        self._xy_color = DEFAULT_COORDINATOR_LED_XY_COLOR
-        return _xy_brightness_to_rgb(
-            self._xy_color[0], self._xy_color[1], target_brightness
-        )
+        target_xy = xy_color or self._xy_color or DEFAULT_COORDINATOR_LED_XY_COLOR
+        rgb = _xy_brightness_to_rgb(target_xy[0], target_xy[1], target_brightness)
+        return target_brightness, target_xy, rgb
 
     async def _async_set_led_state(self, red: int, green: int, blue: int) -> None:
         """Send the LED state to the coordinator."""
@@ -436,11 +424,15 @@ class CoordinatorLED(BaseLight, PlatformEntity):
         resolved_xy_color: tuple[float, float] | None = None
         if xy_color is not None:
             resolved_xy_color = (float(xy_color[0]), float(xy_color[1]))
-        elif self._xy_color is None and self._color_mode == ColorMode.XY:
-            resolved_xy_color = DEFAULT_COORDINATOR_LED_XY_COLOR
 
-        red, green, blue = self._get_rgb_color(brightness, resolved_xy_color)
+        target_brightness, target_xy, (red, green, blue) = self._resolve_led_color(
+            brightness, resolved_xy_color
+        )
         await self._async_set_led_state(red=red, green=green, blue=blue)
+
+        # Only commit the new values once the adapter accepted them
+        self._brightness = target_brightness
+        self._xy_color = target_xy
         self._state = True
         self.maybe_emit_state_changed_event()
 

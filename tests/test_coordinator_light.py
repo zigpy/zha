@@ -21,16 +21,23 @@ from zha.application.platforms.light.const import ColorMode
 
 
 @pytest.fixture
+def xncp_features() -> FirmwareFeatures:
+    """XNCP features reported by the fake EZSP adapter."""
+    return FirmwareFeatures.LED_CONTROL
+
+
+@pytest.fixture
 async def zbt2_gateway(
     zha_data,
     zigpy_app_controller,
+    xncp_features: FirmwareFeatures,
     caplog,  # pylint: disable=unused-argument
 ) -> AsyncGenerator[Gateway, None]:
     """Set up a ZBT-2-capable gateway."""
     zigpy_app_controller.state.node_info.manufacturer = "Nabu Casa"
     zigpy_app_controller.state.node_info.model = "Home Assistant Connect ZBT-2"
     zigpy_app_controller._ezsp = SimpleNamespace(
-        _xncp_features=FirmwareFeatures.LED_CONTROL,
+        _xncp_features=xncp_features,
         xncp_set_led_state=AsyncMock(),
     )
 
@@ -182,3 +189,36 @@ async def test_coordinator_led_restores_attributes_and_replays_on_state(
     assert entity.state.brightness == 80
     assert entity.state.xy_color == (0.64, 0.33)
     assert entity.state.color_mode == ColorMode.XY
+
+
+async def test_coordinator_led_failed_send_keeps_previous_state(
+    zbt2_gateway: Gateway,
+) -> None:
+    """Test that a failed adapter command does not change the stored state."""
+    entity = get_entity(
+        zbt2_gateway.coordinator_zha_device,
+        platform=Platform.LIGHT,
+        exact_entity_type=CoordinatorLED,
+    )
+    ezsp = zbt2_gateway.application_controller._ezsp
+    ezsp.xncp_set_led_state.side_effect = TimeoutError
+
+    with pytest.raises(TimeoutError):
+        await entity.async_turn_on(xy_color=(0.64, 0.33), brightness=200)
+
+    assert entity.state.on is False
+    assert entity.state.brightness == DEFAULT_COORDINATOR_LED_BRIGHTNESS
+    assert entity.state.xy_color == DEFAULT_COORDINATOR_LED_XY_COLOR
+
+
+@pytest.mark.parametrize("xncp_features", [FirmwareFeatures.NONE])
+async def test_coordinator_led_not_exposed_with_other_xncp_features(
+    zbt2_gateway: Gateway,
+) -> None:
+    """Test that an EZSP adapter without the LED feature bit gets no LED entity."""
+    with pytest.raises(KeyError):
+        get_entity(
+            zbt2_gateway.coordinator_zha_device,
+            platform=Platform.LIGHT,
+            exact_entity_type=CoordinatorLED,
+        )
