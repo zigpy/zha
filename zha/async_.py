@@ -13,16 +13,7 @@ from functools import cached_property
 import inspect
 import logging
 import time
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Final,
-    Generic,
-    ParamSpec,
-    TypeVar,
-    TypeVarTuple,
-    cast,
-)
+from typing import TYPE_CHECKING, Any, Final, Generic, ParamSpec, TypeVar, cast
 
 from zigpy.types.named import EUI64
 
@@ -30,7 +21,6 @@ _T = TypeVar("_T")
 _R = TypeVar("_R")
 _R_co = TypeVar("_R_co", covariant=True)
 _P = ParamSpec("_P")
-_Ts = TypeVarTuple("_Ts")
 BLOCK_LOG_TIMEOUT: Final[int] = 60
 
 _LOGGER = logging.getLogger(__name__)
