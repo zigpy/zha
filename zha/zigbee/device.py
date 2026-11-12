@@ -17,6 +17,7 @@ import logging
 import time
 from typing import TYPE_CHECKING, Any, Final
 
+from bellows.ezsp.xncp import FirmwareFeatures
 from zigpy.device import (
     BaseDevice as ZigpyBaseDevice,
     GreenPowerDevice as ZigpyGreenPowerDevice,
@@ -71,6 +72,7 @@ from zha.application.const import (
     ZHA_DEVICE_ENTITY_REMOVED_EVENT,
     ZHA_DEVICE_UPDATED_EVENT,
     ZHA_EVENT,
+    RadioType,
 )
 from zha.application.helpers import convert_to_zcl_values, convert_zcl_value, safe_read
 from zha.application.platforms import (
@@ -79,6 +81,7 @@ from zha.application.platforms import (
     EntityStateChangedEvent,
     PlatformEntity,
     ZclPlatformEntity,
+    light,
     sensor,
 )
 from zha.application.platforms.update import BaseFirmwareUpdateEntity
@@ -1969,7 +1972,28 @@ class CoordinatorDevice(ZigbeeDevice):
     """ZHA wrapper for the active coordinator device."""
 
     def discover_entities(self) -> Iterator[PlatformEntity]:
-        """Yield counter sensors for the active coordinator."""
+        """Yield the coordinator LED (if supported) and the counter sensors."""
+        if self.gateway.radio_type is RadioType.ezsp:
+            ezsp = getattr(self.gateway.application_controller, "_ezsp", None)
+            # `LED_CONTROL` only exists in bellows releases with XNCP LED support
+            led_control = getattr(FirmwareFeatures, "LED_CONTROL", None)
+
+            # TODO: use a public bellows/zigpy API once one exists
+            if (
+                ezsp is not None
+                and led_control is not None
+                and led_control
+                in getattr(ezsp, "_xncp_features", FirmwareFeatures.NONE)
+            ):
+                yield light.CoordinatorLED(device=self)
+
+                _LOGGER.debug(
+                    "'%s' platform -> '%s' using %s",
+                    Platform.LIGHT,
+                    light.CoordinatorLED.__name__,
+                    "bellows XNCP LED control",
+                )
+
         state = self.gateway.application_controller.state
         for counter_groups in (
             "counters",
