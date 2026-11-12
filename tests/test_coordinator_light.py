@@ -59,9 +59,9 @@ async def test_coordinator_led_entity(zbt2_gateway: Gateway) -> None:
     )
     ezsp = zbt2_gateway.application_controller._ezsp
 
-    assert entity.state["on"] is False
-    assert entity.state["color_mode"] == ColorMode.XY
-    assert entity.state["supported_color_modes"] == {ColorMode.XY}
+    assert entity.state.on is False
+    assert entity.state.color_mode == ColorMode.XY
+    assert entity.state.supported_color_modes == {ColorMode.XY}
 
     await entity.async_turn_on(brightness=128)
     await zbt2_gateway.async_block_till_done()
@@ -76,9 +76,9 @@ async def test_coordinator_led_entity(zbt2_gateway: Gateway) -> None:
         "green": expected_green,
         "blue": expected_blue,
     }
-    assert entity.state["on"] is True
-    assert entity.state["brightness"] == 128
-    assert entity.state["color_mode"] == ColorMode.XY
+    assert entity.state.on is True
+    assert entity.state.brightness == 128
+    assert entity.state.color_mode == ColorMode.XY
 
     await entity.async_turn_off()
     await zbt2_gateway.async_block_till_done()
@@ -88,7 +88,7 @@ async def test_coordinator_led_entity(zbt2_gateway: Gateway) -> None:
         "green": 0,
         "blue": 0,
     }
-    assert entity.state["on"] is False
+    assert entity.state.on is False
 
 
 async def test_coordinator_led_first_turn_on_uses_firmware_dim_white_default(
@@ -115,7 +115,7 @@ async def test_coordinator_led_first_turn_on_uses_firmware_dim_white_default(
         "green": expected_green,
         "blue": expected_blue,
     }
-    assert entity.state["brightness"] == DEFAULT_COORDINATOR_LED_BRIGHTNESS
+    assert entity.state.brightness == DEFAULT_COORDINATOR_LED_BRIGHTNESS
 
 
 async def test_coordinator_led_brightness_uses_current_xy_color(
@@ -141,8 +141,8 @@ async def test_coordinator_led_brightness_uses_current_xy_color(
         "green": 22,
         "blue": 11,
     }
-    assert entity.state["xy_color"] == red_xy
-    assert entity.state["brightness"] == 64
+    assert entity.state.xy_color == red_xy
+    assert entity.state.brightness == 64
 
 
 async def test_coordinator_led_restores_attributes_and_replays_on_state(
@@ -178,7 +178,7 @@ async def test_coordinator_led_restores_attributes_and_replays_on_state(
         "green": expected_green,
         "blue": expected_blue,
     }
-    assert entity.state["on"] is True
-    assert entity.state["brightness"] == 80
-    assert entity.state["xy_color"] == (0.64, 0.33)
-    assert entity.state["color_mode"] == ColorMode.XY
+    assert entity.state.on is True
+    assert entity.state.brightness == 80
+    assert entity.state.xy_color == (0.64, 0.33)
+    assert entity.state.color_mode == ColorMode.XY

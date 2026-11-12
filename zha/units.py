@@ -18,7 +18,7 @@ class UnitOfMass(StrEnum):
     GRAMS = "g"
     KILOGRAMS = "kg"
     MILLIGRAMS = "mg"
-    MICROGRAMS = "µg"
+    MICROGRAMS = "μg"
     OUNCES = "oz"
     POUNDS = "lb"
     STONES = "st"
@@ -27,6 +27,7 @@ class UnitOfMass(StrEnum):
 class UnitOfPressure(StrEnum):
     """Pressure units."""
 
+    MILLIPASCAL = "mPa"
     PA = "Pa"
     HPA = "hPa"
     KPA = "kPa"
@@ -35,6 +36,7 @@ class UnitOfPressure(StrEnum):
     MBAR = "mbar"
     MMHG = "mmHg"
     INHG = "inHg"
+    INH2O = "inH₂O"
     PSI = "psi"
 
 
@@ -60,19 +62,30 @@ class UnitOfPower(StrEnum):
 class UnitOfReactivePower(StrEnum):
     """Reactive power units."""
 
+    MILLIVOLT_AMPERE_REACTIVE = "mvar"
     VOLT_AMPERE_REACTIVE = "var"
     KILO_VOLT_AMPERE_REACTIVE = "kvar"
+
+
+class UnitOfReactiveEnergy(StrEnum):
+    """Reactive energy units."""
+
+    VOLT_AMPERE_REACTIVE_HOUR = "varh"
+    KILO_VOLT_AMPERE_REACTIVE_HOUR = "kvarh"
 
 
 class UnitOfApparentPower(StrEnum):
     """Apparent power units."""
 
+    MILLIVOLT_AMPERE = "mVA"
     VOLT_AMPERE = "VA"
+    KILO_VOLT_AMPERE = "kVA"
 
 
 class UnitOfElectricCurrent(StrEnum):
     """Electric current units."""
 
+    MICROAMPERE = "μA"
     MILLIAMPERE = "mA"
     AMPERE = "A"
 
@@ -81,7 +94,7 @@ class UnitOfElectricCurrent(StrEnum):
 class UnitOfElectricPotential(StrEnum):
     """Electric potential units."""
 
-    MICROVOLT = "µV"
+    MICROVOLT = "μV"
     MILLIVOLT = "mV"
     VOLT = "V"
     KILOVOLT = "kV"
@@ -91,6 +104,7 @@ class UnitOfElectricPotential(StrEnum):
 class UnitOfFrequency(StrEnum):
     """Frequency units."""
 
+    MILLIHERTZ = "mHz"
     HERTZ = "Hz"
     KILOHERTZ = "kHz"
     MEGAHERTZ = "MHz"
@@ -101,12 +115,15 @@ class UnitOfVolumeFlowRate(StrEnum):
     """Volume flow rate units."""
 
     CUBIC_METERS_PER_HOUR = "m³/h"
+    CUBIC_METERS_PER_MINUTE = "m³/min"
     CUBIC_METERS_PER_SECOND = "m³/s"
     CUBIC_FEET_PER_MINUTE = "ft³/min"
     LITERS_PER_HOUR = "L/h"
     LITERS_PER_MINUTE = "L/min"
     LITERS_PER_SECOND = "L/s"
+    GALLONS_PER_HOUR = "gal/h"
     GALLONS_PER_MINUTE = "gal/min"
+    GALLONS_PER_DAY = "gal/d"
     MILLILITERS_PER_SECOND = "mL/s"
 
 
@@ -130,6 +147,7 @@ class UnitOfVolume(StrEnum):
 
     CUBIC_FEET = "ft³"
     CENTUM_CUBIC_FEET = "CCF"
+    MILLE_CUBIC_FEET = "MCF"
     CUBIC_METERS = "m³"
     LITERS = "L"
     MILLILITERS = "mL"
@@ -194,6 +212,7 @@ class UnitOfEnergyDistance(StrEnum):
     """Energy Distance units."""
 
     KILO_WATT_HOUR_PER_100_KM = "kWh/100km"
+    WATT_HOUR_PER_KM = "Wh/km"
     MILES_PER_KILO_WATT_HOUR = "mi/kWh"
     KM_PER_KILO_WATT_HOUR = "km/kWh"
 
@@ -202,7 +221,7 @@ class UnitOfConductivity(StrEnum):
     """Conductivity units."""
 
     SIEMENS_PER_CM = "S/cm"
-    MICROSIEMENS_PER_CM = "µS/cm"
+    MICROSIEMENS_PER_CM = "μS/cm"
     MILLISIEMENS_PER_CM = "mS/cm"
 
 
@@ -212,6 +231,7 @@ class UnitOfSpeed(StrEnum):
     BEAUFORT = "Beaufort"
     FEET_PER_SECOND = "ft/s"
     INCHES_PER_SECOND = "in/s"
+    METERS_PER_MINUTE = "m/min"
     METERS_PER_SECOND = "m/s"
     KILOMETERS_PER_HOUR = "km/h"
     KNOTS = "kn"
@@ -220,12 +240,21 @@ class UnitOfSpeed(StrEnum):
 
 
 # Concentration units
-CONCENTRATION_MICROGRAMS_PER_CUBIC_METER: Final = "µg/m³"
+CONCENTRATION_GRAMS_PER_CUBIC_METER: Final = "g/m³"
+CONCENTRATION_MICROGRAMS_PER_CUBIC_METER: Final = "μg/m³"
 CONCENTRATION_MILLIGRAMS_PER_CUBIC_METER: Final = "mg/m³"
 CONCENTRATION_MICROGRAMS_PER_CUBIC_FOOT: Final = "μg/ft³"
 CONCENTRATION_PARTS_PER_CUBIC_METER: Final = "p/m³"
 CONCENTRATION_PARTS_PER_MILLION: Final = "ppm"
 CONCENTRATION_PARTS_PER_BILLION: Final = "ppb"
+
+
+class UnitOfBloodGlucoseConcentration(StrEnum):
+    """Blood glucose concentration units."""
+
+    MILLIGRAMS_PER_DECILITER = "mg/dL"
+    MILLIMOLE_PER_LITER = "mmol/L"
+
 
 # Signal_strength units
 SIGNAL_STRENGTH_DECIBELS: Final = "dB"
@@ -234,11 +263,19 @@ SIGNAL_STRENGTH_DECIBELS_MILLIWATT: Final = "dBm"
 # Light units
 LIGHT_LUX: Final = "lx"
 
+# UV Index units
+UV_INDEX: Final = "UV index"
+
 # Percentage units
 PERCENTAGE: Final[str] = "%"
 
 # Rotational speed units
 REVOLUTIONS_PER_MINUTE: Final = "rpm"
+
+# Currency units
+CURRENCY_EURO: Final = "€"
+CURRENCY_DOLLAR: Final = "$"
+CURRENCY_CENT: Final = "¢"
 
 
 # Irradiance units
@@ -247,6 +284,86 @@ class UnitOfIrradiance(StrEnum):
 
     WATTS_PER_SQUARE_METER = "W/m²"
     BTUS_PER_HOUR_SQUARE_FOOT = "BTU/(h⋅ft²)"
+
+
+class UnitOfVolumetricFlux(StrEnum):
+    """Volumetric flux, commonly used for precipitation intensity.
+
+    The derivation of these units is a volume of rain amassing in a container
+    with constant cross section in a given time
+    """
+
+    INCHES_PER_DAY = "in/d"
+    """Derived from in³/(in²⋅d)"""
+
+    INCHES_PER_HOUR = "in/h"
+    """Derived from in³/(in²⋅h)"""
+
+    MILLIMETERS_PER_DAY = "mm/d"
+    """Derived from mm³/(mm²⋅d)"""
+
+    MILLIMETERS_PER_HOUR = "mm/h"
+    """Derived from mm³/(mm²⋅h)"""
+
+
+class UnitOfPrecipitationDepth(StrEnum):
+    """Precipitation depth.
+
+    The derivation of these units is a volume of rain amassing in a container
+    with constant cross section
+    """
+
+    INCHES = "in"
+    """Derived from in³/in²"""
+
+    MILLIMETERS = "mm"
+    """Derived from mm³/mm²"""
+
+    CENTIMETERS = "cm"
+    """Derived from cm³/cm²"""
+
+
+# Data units
+class UnitOfInformation(StrEnum):
+    """Information units."""
+
+    BITS = "bit"
+    KILOBITS = "kbit"
+    MEGABITS = "Mbit"
+    GIGABITS = "Gbit"
+    BYTES = "B"
+    KILOBYTES = "kB"
+    MEGABYTES = "MB"
+    GIGABYTES = "GB"
+    TERABYTES = "TB"
+    PETABYTES = "PB"
+    EXABYTES = "EB"
+    ZETTABYTES = "ZB"
+    YOTTABYTES = "YB"
+    KIBIBYTES = "KiB"
+    MEBIBYTES = "MiB"
+    GIBIBYTES = "GiB"
+    TEBIBYTES = "TiB"
+    PEBIBYTES = "PiB"
+    EXBIBYTES = "EiB"
+    ZEBIBYTES = "ZiB"
+    YOBIBYTES = "YiB"
+
+
+class UnitOfDataRate(StrEnum):
+    """Data rate units."""
+
+    BITS_PER_SECOND = "bit/s"
+    KILOBITS_PER_SECOND = "kbit/s"
+    MEGABITS_PER_SECOND = "Mbit/s"
+    GIGABITS_PER_SECOND = "Gbit/s"
+    BYTES_PER_SECOND = "B/s"
+    KILOBYTES_PER_SECOND = "kB/s"
+    MEGABYTES_PER_SECOND = "MB/s"
+    GIGABYTES_PER_SECOND = "GB/s"
+    KIBIBYTES_PER_SECOND = "KiB/s"
+    MEBIBYTES_PER_SECOND = "MiB/s"
+    GIBIBYTES_PER_SECOND = "GiB/s"
 
 
 # Kinetic energy

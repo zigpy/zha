@@ -14,6 +14,7 @@ class Platform(StrEnum):
     DEVICE_TRACKER = "device_tracker"
     EVENT = "event"
     FAN = "fan"
+    INFRARED = "infrared"
     LIGHT = "light"
     LOCK = "lock"
     NUMBER = "number"
@@ -22,5 +23,24 @@ class Platform(StrEnum):
     SIREN = "siren"
     SWITCH = "switch"
     VALVE = "valve"
-    UNKNOWN = "unknown"
+    VIRTUAL = "virtual"
     UPDATE = "update"
+
+
+class EntityType(StrEnum):
+    """Entity type."""
+
+    CONFIG = "config"
+    DIAGNOSTIC = "diagnostic"
+    STANDARD = "standard"
+
+
+class EntityPlatform(StrEnum):
+    """Entity platform exposed by quirks v2 metadata."""
+
+    BINARY_SENSOR = "binary_sensor"
+    BUTTON = "button"
+    NUMBER = "number"
+    SENSOR = "sensor"
+    SELECT = "select"
+    SWITCH = "switch"

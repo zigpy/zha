@@ -10,7 +10,7 @@ from collections.abc import Callable
 import contextlib
 import dataclasses
 from dataclasses import dataclass
-import datetime
+import datetime as dt
 import enum
 import logging
 import re
@@ -23,6 +23,9 @@ from zigpy.typing import UNDEFINED, UndefinedType
 import zigpy.util
 import zigpy.zcl
 from zigpy.zcl import foundation
+from zigpy.zcl.clusters.closures import WindowCovering
+from zigpy.zcl.clusters.general import AnalogOutput, LevelControl, OnOff
+from zigpy.zcl.clusters.lighting import Color
 from zigpy.zcl.foundation import CommandSchema
 import zigpy.zdo.types as zdo_types
 
@@ -35,17 +38,29 @@ from zha.application.const import (
 )
 from zha.async_ import gather_with_limited_concurrency
 from zha.decorators import periodic
+from zha.exceptions import ZHAException
 
 if TYPE_CHECKING:
     from zha.application.gateway import Gateway
-    from zha.zigbee.cluster_handlers import ClusterHandler
-    from zha.zigbee.device import Device
+    from zha.zigbee.device import BaseDevice
 
-_ClusterHandlerT = TypeVar("_ClusterHandlerT", bound="ClusterHandler")
 _T = TypeVar("_T")
 _R = TypeVar("_R")
 _P = ParamSpec("_P")
 _LOGGER = logging.getLogger(__name__)
+
+# Clusters that make sense as direct device-to-device binding pairs (e.g. a
+# remote's out_cluster bound to a light's in_cluster). Consulted by HA's "bind
+# device" UI via `async_is_bindable_target`.
+BINDABLE_CLUSTERS: frozenset[int] = frozenset(
+    {
+        AnalogOutput.cluster_id,
+        OnOff.cluster_id,
+        LevelControl.cluster_id,
+        WindowCovering.cluster_id,
+        Color.cluster_id,
+    }
+)
 
 
 @dataclass
@@ -89,14 +104,30 @@ async def safe_read(
         return {}
 
 
+async def write_attributes_safe(
+    cluster: zigpy.zcl.Cluster,
+    attributes: dict[str, Any],
+    manufacturer: int | UndefinedType | None = UNDEFINED,
+) -> None:
+    """Write attributes and raise on any per-attribute failure."""
+    res = await cluster.write_attributes(attributes, manufacturer=manufacturer)
+    for record in res[0]:
+        if record.status != foundation.Status.SUCCESS:
+            try:
+                name = cluster.attributes[record.attrid].name
+                value = attributes.get(name, "unknown")
+            except KeyError:
+                name = f"0x{record.attrid:04x}"
+                value = "unknown"
+            raise ZHAException(
+                f"Failed to write attribute {name}={value}: {record.status}",
+            )
+
+
 async def get_matched_clusters(
-    source_zha_device: Device, target_zha_device: Device
+    source_zha_device: BaseDevice, target_zha_device: BaseDevice
 ) -> list[BindingPair]:
     """Get matched input/output cluster pairs for 2 devices."""
-    from zha.zigbee.cluster_handlers.registries import (  # pylint: disable=import-outside-toplevel  # noqa: PLC0415
-        BINDABLE_CLUSTERS,
-    )
-
     source_clusters = source_zha_device.async_get_std_clusters()
     target_clusters = target_zha_device.async_get_std_clusters()
     clusters_to_bind = []
@@ -178,7 +209,7 @@ def convert_zcl_value(value: Any, field_type: Any) -> Any:
 
 
 def convert_to_zcl_values(
-    fields: dict[str, Any], schema: CommandSchema
+    fields: dict[str, Any], schema: type[CommandSchema]
 ) -> dict[str, Any]:
     """Convert user input to ZCL values."""
     converted_fields: dict[str, Any] = {}
@@ -199,16 +230,19 @@ def convert_to_zcl_values(
     return converted_fields
 
 
-def async_is_bindable_target(source_zha_device: Device, target_zha_device: Device):
+def async_is_bindable_target(
+    source_zha_device: BaseDevice, target_zha_device: BaseDevice
+) -> bool:
     """Determine if target is bindable to source."""
-    from zha.zigbee.cluster_handlers.registries import (  # pylint: disable=import-outside-toplevel  # noqa: PLC0415
-        BINDABLE_CLUSTERS,
-    )
+    source_clusters = source_zha_device.async_get_std_clusters()
+
+    # A source without clusters, such as a Green Power device, has nothing to bind
+    if not source_clusters:
+        return False
 
     if target_zha_device.nwk == 0x0000:
         return True
 
-    source_clusters = source_zha_device.async_get_std_clusters()
     target_clusters = target_zha_device.async_get_std_clusters()
 
     for endpoint_id in source_clusters:
@@ -347,6 +381,17 @@ class QuirksConfiguration:
 
     enabled: bool = dataclasses.field(default=True)
     custom_quirks_path: str | None = dataclasses.field(default=None)
+    # Injected by the consumer (e.g. the Home Assistant integration) to load the
+    # quirks provider, typically `zhaquirks.setup`. ZHA itself never imports a
+    # quirks package; when `enabled` is True this must be set or no quirks load.
+    setup_function: Callable[[str | None], None] | None = dataclasses.field(
+        default=None
+    )
+    # Injected by the consumer to short-circuit flaky joins (Xiaomi quick-init);
+    # forwarded to the controller as its uninitialized-packet handler.
+    uninitialized_packet_handler: Callable[..., None] | None = dataclasses.field(
+        default=None
+    )
 
 
 @dataclass(kw_only=True, slots=True)
@@ -390,7 +435,8 @@ class ZHAData:
         default_factory=dict
     )
     allow_polling: bool = dataclasses.field(default=False)
-    local_timezone: datetime.tzinfo = dataclasses.field(default=datetime.UTC)
+    # Set once at startup; use Gateway.update_local_timezone() for runtime changes.
+    local_timezone: dt.tzinfo | None = None
     country_code: str | None = None
 
 
@@ -410,7 +456,7 @@ class GlobalUpdater:
         self._update_listeners: list[Callable] = []
         self._gateway: Gateway = gateway
 
-    def start(self):
+    def start(self) -> None:
         """Start the global updater."""
         self._updater_task_handle = self._gateway.async_create_background_task(
             self.update_listeners(),
@@ -423,7 +469,7 @@ class GlobalUpdater:
             getattr(self, "__polling_interval"),
         )
 
-    def stop(self):
+    def stop(self) -> None:
         """Stop the global updater."""
         _LOGGER.debug("stopping global updater")
         if self._updater_task_handle:
@@ -475,7 +521,7 @@ class DeviceAvailabilityChecker:
         self._gateway: Gateway = gateway
         self._device_availability_task_handle: asyncio.Task | None = None
 
-    def start(self):
+    def start(self) -> None:
         """Start the device availability checker."""
         self._device_availability_task_handle = (
             self._gateway.async_create_background_task(
@@ -490,7 +536,7 @@ class DeviceAvailabilityChecker:
             getattr(self, "__polling_interval"),
         )
 
-    def stop(self):
+    def stop(self) -> None:
         """Stop the device availability checker."""
         _LOGGER.debug("stopping device availability checker")
         if self._device_availability_task_handle:

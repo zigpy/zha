@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 3,
   "ieee": "ab:cd:ef:12:6a:30:e1:65",
   "nwk": "0xFF51",
   "manufacturer": "Texas Instruments",
@@ -8,7 +8,7 @@
   "friendly_model": "CC2652",
   "name": "Texas Instruments CC2652",
   "quirk_applied": false,
-  "quirk_class": "zigpy.device.Device",
+  "quirk_class": "zigpy.device.ZigbeeDevice",
   "exposes_features": [],
   "manufacturer_code": 0,
   "power_source": "Mains",

@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 3,
   "ieee": "ab:cd:ef:12:49:9b:6e:bb",
   "nwk": "0x0000",
   "manufacturer": "Nabu Casa",
@@ -8,7 +8,7 @@
   "friendly_model": "HA Connect ZBT-1",
   "name": "HA Connect ZBT-1",
   "quirk_applied": false,
-  "quirk_class": "zigpy.device.Device",
+  "quirk_class": "zigpy.device.ZigbeeDevice",
   "exposes_features": [],
   "manufacturer_code": 43981,
   "power_source": "Mains",

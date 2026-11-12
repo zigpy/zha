@@ -1,9 +1,39 @@
 version: 2
 updates:
-  - package-ecosystem: pip
+  - package-ecosystem: uv
     directory: "/"
     schedule:
-      interval: daily
+      interval: weekly
+    open-pull-requests-limit: 10
+    # Also update transitive dependencies in uv.lock, not only direct ones.
+    allow:
+      - dependency-type: "all"
+    cooldown:
+      default-days: 3
+      # The Zigbee radio stack and zha-quirks skip the cooldown (updated immediately).
+      exclude:
+        - "zigpy*"
+        - "bellows"
+        - "serialx"
+        - "zha-quirks"
+    groups:
+      python-dependencies:
+        patterns:
+          - "*"
+        # The Zigbee radio stack and zha-quirks stay as individual PRs.
+        exclude-patterns:
+          - "zigpy*"
+          - "bellows"
+          - "serialx"
+          - "zha-quirks"
+          # Build requirements aren't in uv.lock (no previous version); a grouped
+          # change mixing them with lock-only bumps is dropped entirely.
+          - "setuptools-git-versioning"
+          - "wheel"
+    ignore:
+      # Both a build requirement and a transitive uv.lock entry; Dependabot fails
+      # the job with "No files have changed!" (dependabot/dependabot-core#14118).
+      - dependency-name: "setuptools"
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
