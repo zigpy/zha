@@ -11,7 +11,7 @@ from enum import Enum
 import logging
 import random
 import time
-from typing import Any, Final, Self, TypeVar, cast
+from typing import Any, Final, Self, cast
 
 from zigpy.application import ControllerApplication
 from zigpy.config import (
@@ -88,7 +88,6 @@ GROUP_ID_ALLOCATION_ATTEMPTS: Final[int] = 10
 # Never allocated: the coordinator joins the Green Power sink group itself, so it
 # never shows up as a zigpy group
 RESERVED_GROUP_IDS: Final[frozenset[int]] = frozenset({GP_GROUP_ID})
-_R = TypeVar("_R")
 _LOGGER = logging.getLogger(__name__)
 
 
