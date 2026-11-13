@@ -9,7 +9,7 @@ from dataclasses import dataclass, field
 import inspect
 import logging
 from pathlib import Path
-from typing import TYPE_CHECKING, NamedTuple, TypeVar, overload
+from typing import TYPE_CHECKING, NamedTuple, overload
 
 from zigpy.application import ControllerApplication
 import zigpy.device
@@ -27,7 +27,6 @@ QUIRK_REGISTRY_ENTRY_ATTR = "_quirk_registry_entry"
 FilterType = Callable[[zigpy.device.ZigbeeDevice], bool]
 GreenPowerFilterType = Callable[[zigpy.device.GreenPowerDevice], bool]
 
-_EntryT = TypeVar("_EntryT", "QuirkRegistryEntry", "GreenPowerQuirkRegistryEntry")
 
 DEVICE_REGISTRY: DeviceRegistry
 
@@ -418,7 +417,9 @@ class DeviceRegistry:
             self._registry[ModelInfo(manufacturer, model)].remove(entry)
 
     @staticmethod
-    def _purge_custom_entries(entries: list[_EntryT], custom_quirks_root: Path) -> None:
+    def _purge_custom_entries[
+        EntryT: ("QuirkRegistryEntry", "GreenPowerQuirkRegistryEntry")
+    ](entries: list[EntryT], custom_quirks_root: Path) -> None:
         """Remove entries defined within `custom_quirks_root` from `entries`."""
         for entry in list(entries):
             if entry.source is None or entry.source.file is None:

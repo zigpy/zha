@@ -14,7 +14,7 @@ import datetime as dt
 import enum
 import logging
 import re
-from typing import TYPE_CHECKING, Any, ParamSpec, TypeVar
+from typing import TYPE_CHECKING, Any
 
 import voluptuous as vol
 import zigpy.exceptions
@@ -44,9 +44,6 @@ if TYPE_CHECKING:
     from zha.application.gateway import Gateway
     from zha.zigbee.device import BaseDevice
 
-_T = TypeVar("_T")
-_R = TypeVar("_R")
-_P = ParamSpec("_P")
 _LOGGER = logging.getLogger(__name__)
 
 # Clusters that make sense as direct device-to-device binding pairs (e.g. a
