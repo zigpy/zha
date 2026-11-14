@@ -1030,18 +1030,23 @@ class ZCLHeatSetpointLimitEntity(ZCLTemperatureEntity):
     def recompute_capabilities(self) -> None:
         """Recompute capabilities."""
         super().recompute_capabilities()
+        abs_min = self._cluster.get(
+            Thermostat.AttributeDefs.abs_min_heat_setpoint_limit.name
+        )
+        abs_max = self._cluster.get(
+            Thermostat.AttributeDefs.abs_max_heat_setpoint_limit.name
+        )
+        if self._device.manufacturer == "BOSCH" and self._device.model == (
+            "RBSH-TRV1-ZB-EU"
+        ):
+            abs_min = 500 if abs_min is None else abs_min
+            abs_max = 3000 if abs_max is None else abs_max
         self._attr_native_min_value = (
-            self._cluster.get(
-                Thermostat.AttributeDefs.abs_min_heat_setpoint_limit.name, -27315
-            )
-            * self._multiplier
-        )
+            -27315 if abs_min is None else abs_min
+        ) * self._multiplier
         self._attr_native_max_value = (
-            self._cluster.get(
-                Thermostat.AttributeDefs.abs_max_heat_setpoint_limit.name, 0x7FFF
-            )
-            * self._multiplier
-        )
+            0x7FFF if abs_max is None else abs_max
+        ) * self._multiplier
 
 
 @register_entity(Thermostat.cluster_id)

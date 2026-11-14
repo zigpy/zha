@@ -156,6 +156,8 @@ class SomeFlag(t.bitmap8):
         ("value_1", SomeEnum, SomeEnum.value_1),
         ("SomeEnum.value_1", SomeEnum, SomeEnum.value_1),
         (0x12, SomeEnum, SomeEnum.value_1),
+        ("18", SomeEnum, SomeEnum.value_1),
+        ("0x12", SomeEnum, SomeEnum.value_1),
         # Flag
         ("flag 1", SomeFlag, SomeFlag.flag_1),
         ("flag_1", SomeFlag, SomeFlag.flag_1),
@@ -177,6 +179,13 @@ class SomeFlag(t.bitmap8):
 def test_convert_zcl_value(text: Any, field_type: Any, result: Any) -> None:
     """Test converting ZCL values."""
     assert convert_zcl_value(text, field_type) == result
+
+
+@pytest.mark.parametrize("text", ["value_9", "SomeEnum.value_9", "abc"])
+def test_convert_zcl_value_invalid_enum(text: str) -> None:
+    """Invalid enum strings raise a ValueError instead of a KeyError."""
+    with pytest.raises(ValueError, match="is not a valid SomeEnum"):
+        convert_zcl_value(text, SomeEnum)
 
 
 def test_convert_to_zcl_values() -> None:

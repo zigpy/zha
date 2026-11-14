@@ -1579,6 +1579,16 @@ class ZigbeeDevice(BaseDevice[ZigpyDevice]):
             response = await cluster.write_attributes(
                 {attribute: value}, manufacturer=manufacturer
             )
+            for record in response[0]:
+                if record.status != ZclStatus.SUCCESS:
+                    raise ZHAException(
+                        f"Failed to set attribute: "
+                        f"{ATTR_VALUE}: {value} "
+                        f"{ATTR_ATTRIBUTE}: {attribute} "
+                        f"{ATTR_CLUSTER_ID}: {cluster_id} "
+                        f"{ATTR_ENDPOINT_ID}: {endpoint_id} "
+                        f"status: {record.status}"
+                    )
             self.debug(
                 "set: %s for attr: %s to cluster: %s for ept: %s - res: %s",
                 value,
@@ -1623,6 +1633,9 @@ class ZigbeeDevice(BaseDevice[ZigpyDevice]):
             if command_type == CLUSTER_COMMAND_SERVER
             else cluster.client_commands
         )
+        manufacturer_kwargs = (
+            {} if manufacturer is None else {"manufacturer": manufacturer}
+        )
         if args is not None:
             self.warning(
                 (
@@ -1632,11 +1645,14 @@ class ZigbeeDevice(BaseDevice[ZigpyDevice]):
                 args,
                 [field.name for field in commands[command].schema.fields],
             )
-            response = await getattr(cluster, commands[command].name)(*args)
+            response = await getattr(cluster, commands[command].name)(
+                *args, **manufacturer_kwargs
+            )
         else:
             assert params is not None
             response = await getattr(cluster, commands[command].name)(
-                **convert_to_zcl_values(params, commands[command].schema)
+                **convert_to_zcl_values(params, commands[command].schema),
+                **manufacturer_kwargs,
             )
         self.debug(
             "Issued cluster command: %s %s %s %s %s %s %s %s",
