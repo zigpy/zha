@@ -835,6 +835,7 @@
         "available": true,
         "group_id": null,
         "current_temperature": 22.01,
+        "current_humidity": 47.0,
         "outdoor_temperature": null,
         "target_temperature": null,
         "target_temperature_high": null,
