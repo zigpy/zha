@@ -126,21 +126,9 @@ class GroupMember(LogMixin):
 
     async def async_remove_from_group(self) -> None:
         """Remove the device endpoint from the provided zigbee group."""
-        try:
-            await self._device.device.endpoints[self._endpoint_id].remove_from_group(
-                self._group.group_id
-            )
-        except (zigpy.exceptions.ZigbeeException, TimeoutError) as ex:
-            self.debug(
-                (
-                    "Failed to remove endpoint: %s for device '%s' from group: 0x%04x"
-                    " ex: %s"
-                ),
-                self._endpoint_id,
-                self._device.ieee,
-                self._group.group_id,
-                str(ex),
-            )
+        await self._device.async_remove_endpoint_from_group(
+            self._endpoint_id, self._group.group_id
+        )
 
     def log(self, level: int, msg: str, *args: Any, **kwargs: Any) -> None:
         """Log a message."""
