@@ -19,6 +19,7 @@ import zigpy.profiles
 from zigpy.typing import UNDEFINED
 import zigpy.zcl.clusters
 from zigpy.zcl.clusters.hvac import FanMode, FanModeSequence, Thermostat
+from zigpy.zcl.clusters.measurement import RelativeHumidity
 import zigpy.zcl.foundation as zcl_f
 
 from tests.common import (
@@ -50,6 +51,7 @@ from zha.application.platforms.climate import (
 from zha.application.platforms.climate.const import SEQ_FAN_MODES, FanState, HVACMode
 from zha.application.platforms.number import NumberConfigurationEntity
 from zha.application.platforms.sensor import (
+    Humidity,
     Sensor,
     SinopeHVACAction,
     ThermostatHVACAction,
@@ -70,6 +72,21 @@ CLIMATE = {
             zigpy.zcl.clusters.general.Identify.cluster_id,
             zigpy.zcl.clusters.hvac.Thermostat.cluster_id,
             zigpy.zcl.clusters.hvac.UserInterface.cluster_id,
+        ],
+        SIG_EP_OUTPUT: [zigpy.zcl.clusters.general.Ota.cluster_id],
+    }
+}
+
+CLIMATE_HUMIDITY = {
+    1: {
+        SIG_EP_PROFILE: zigpy.profiles.zha.PROFILE_ID,
+        SIG_EP_TYPE: zigpy.profiles.zha.DeviceType.THERMOSTAT,
+        SIG_EP_INPUT: [
+            zigpy.zcl.clusters.general.Basic.cluster_id,
+            zigpy.zcl.clusters.general.Identify.cluster_id,
+            zigpy.zcl.clusters.hvac.Thermostat.cluster_id,
+            zigpy.zcl.clusters.hvac.UserInterface.cluster_id,
+            zigpy.zcl.clusters.measurement.RelativeHumidity.cluster_id,
         ],
         SIG_EP_OUTPUT: [zigpy.zcl.clusters.general.Ota.cluster_id],
     }
@@ -295,6 +312,65 @@ async def test_climate_outdoor_temperature(
         {Thermostat.AttributeDefs.outdoor_temperature.id: 2150},
     )
     assert entity.state.outdoor_temperature == 21.5
+
+
+async def test_climate_current_humidity(
+    zha_gateway: Gateway,
+) -> None:
+    """Test current humidity from a humidity cluster on the same endpoint."""
+    device_climate = await device_climate_mock(zha_gateway, CLIMATE_HUMIDITY)
+    humidity_cluster = device_climate.device.endpoints[1].humidity
+    entity: ThermostatEntity = get_entity(
+        device_climate, platform=Platform.CLIMATE, entity_type=ThermostatEntity
+    )
+    assert entity.state.current_humidity is None
+    await zha_gateway.async_block_till_done(wait_background_tasks=True)
+    subscriber = MagicMock()
+    entity.on_event(STATE_CHANGED, subscriber)
+
+    await send_attributes_report(
+        zha_gateway,
+        humidity_cluster,
+        {RelativeHumidity.AttributeDefs.measured_value.id: 4550},
+    )
+    await zha_gateway.async_block_till_done(wait_background_tasks=True)
+    subscriber.assert_called_once()
+    assert subscriber.call_args.args[0].state_diff["current_humidity"] == 45.5
+    assert entity.state.current_humidity == 45.5
+
+    # The humidity sensor entity is still created
+    sensor_entity = get_entity(
+        device_climate, platform=Platform.SENSOR, exact_entity_type=Humidity
+    )
+    assert sensor_entity.state.native_value == 45.5
+
+    # A valid zero reading is kept
+    await send_attributes_report(
+        zha_gateway,
+        humidity_cluster,
+        {RelativeHumidity.AttributeDefs.measured_value.id: 0},
+    )
+    assert entity.state.current_humidity == 0.0
+
+    # The uint16 non-value means the measurement is invalid
+    await send_attributes_report(
+        zha_gateway,
+        humidity_cluster,
+        {RelativeHumidity.AttributeDefs.measured_value.id: 0xFFFF},
+    )
+    assert entity.state.current_humidity is None
+    assert sensor_entity.state.native_value is None
+
+
+async def test_climate_current_humidity_no_cluster(
+    zha_gateway: Gateway,
+) -> None:
+    """Test current humidity without a humidity cluster."""
+    device_climate = await device_climate_mock(zha_gateway, CLIMATE)
+    entity: ThermostatEntity = get_entity(
+        device_climate, platform=Platform.CLIMATE, entity_type=ThermostatEntity
+    )
+    assert entity.state.current_humidity is None
 
 
 async def test_climate_hvac_action_running_state(
