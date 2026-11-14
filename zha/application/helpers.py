@@ -185,11 +185,22 @@ def convert_zcl_value(value: Any, field_type: Any) -> Any:
 
             value = field_type(new_value)
     elif issubclass(field_type, enum.Enum):
-        value = (
-            field_type[value.replace(" ", "_").split(".", 1)[-1]]
-            if isinstance(value, str)
-            else field_type(value)
-        )
+        if isinstance(value, str):
+            enum_name = value.replace(" ", "_").split(".", 1)[-1]
+            try:
+                value = field_type[enum_name]
+            except KeyError as err:
+                try:
+                    value = field_type(int(value, 0))
+                except ValueError:
+                    try:
+                        value = field_type(int(value, 10))
+                    except ValueError:
+                        raise ValueError(
+                            f"{value!r} is not a valid {field_type.__name__}"
+                        ) from err
+        else:
+            value = field_type(value)
     elif issubclass(field_type, zigpy.types.SerializableBytes):
         if value.startswith(("b'", 'b"')):
             value = ast.literal_eval(value)

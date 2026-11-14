@@ -55,6 +55,7 @@ from zha.application.platforms.climate.const import (
     Preset,
 )
 from zha.decorators import periodic
+from zha.exceptions import ZHAException
 from zha.quirks import THERMOSTAT_FAN_ONLY_HVAC
 from zha.units import UnitOfTemperature
 
@@ -958,6 +959,175 @@ class Thermostat(BaseThermostat, ZclPlatformEntity):
 
         handler = getattr(self, f"async_preset_handler_{preset}")
         await handler(enable)
+
+
+@register_entity(ThermostatCluster.cluster_id)
+class BoschThermostat(Thermostat):
+    """Climate entity for Bosch radiator thermostats."""
+
+    BOSCH_MANUFACTURER_CODE = 0x1209
+    HOLIDAY_PRESET = "holiday"
+
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({ThermostatCluster.cluster_id}),
+        models=frozenset({"RBSH-TRV0-ZB-EU", "RBSH-TRV1-ZB-EU"}),
+        feature_priority=(PlatformFeatureGroup.THERMOSTAT_FAN, 2),
+    )
+
+    _hvac_mode_to_system_mode = {
+        HVACMode.OFF: ThermostatCluster.SystemMode.Off,
+        HVACMode.HEAT: ThermostatCluster.SystemMode.Heat,
+        HVACMode.AUTO: ThermostatCluster.SystemMode.Auto,
+    }
+    _operating_mode_to_hvac_mode = {
+        0x00: HVACMode.AUTO,
+        0x01: HVACMode.HEAT,
+        0x02: HVACMode.HEAT,
+        0x03: HVACMode.HEAT,
+        0x04: HVACMode.HEAT,
+        0x05: HVACMode.OFF,
+    }
+    _operating_mode_to_preset = {
+        0x00: Preset.NONE,
+        0x01: Preset.NONE,
+        0x02: Preset.ECO,
+        0x03: Preset.AWAY,
+        0x04: HOLIDAY_PRESET,
+        0x05: Preset.NONE,
+    }
+    _preset_to_operating_mode = {
+        Preset.NONE: 0x01,
+        Preset.ECO: 0x02,
+        Preset.AWAY: 0x03,
+        HOLIDAY_PRESET: 0x04,
+    }
+    _preset_temperature_attributes = {
+        Preset.ECO: "eco_temperature",
+        Preset.AWAY: "away_temperature",
+        HOLIDAY_PRESET: "holiday_temperature",
+    }
+
+    def _operating_mode(self) -> int | None:
+        return self._cluster.get("operating_mode")
+
+    @property
+    def hvac_mode(self) -> HVACMode | None:
+        """Return the Bosch operating mode as an HVAC mode."""
+        operating_mode = self._operating_mode()
+        if operating_mode is None:
+            return None
+        return self._operating_mode_to_hvac_mode.get(operating_mode)
+
+    @property
+    def hvac_modes(self) -> list[HVACMode]:
+        """Return Bosch's heating-only modes."""
+        return [HVACMode.OFF, HVACMode.HEAT, HVACMode.AUTO]
+
+    @property
+    def target_temperature(self) -> float | None:
+        """Return the Bosch setpoint for the active operating mode."""
+        preset_attribute = self._preset_temperature_attributes.get(self.preset_mode)
+        if preset_attribute is not None:
+            temperature = self._cluster.get(preset_attribute)
+            return None if temperature is None else round(temperature / ZCL_TEMP, 1)
+        if self.hvac_mode == HVACMode.AUTO:
+            if self._occupied_heating_setpoint is None:
+                return None
+            return round(self._occupied_heating_setpoint / ZCL_TEMP, 1)
+        return super().target_temperature
+
+    @property
+    def preset_mode(self) -> str:
+        """Return the preset corresponding to Bosch's operating mode."""
+        operating_mode = self._operating_mode()
+        if operating_mode is None:
+            return Preset.NONE
+        return self._operating_mode_to_preset.get(operating_mode, Preset.NONE)
+
+    @property
+    def preset_modes(self) -> list[str]:
+        """Return the Bosch presets exposed by this entity."""
+        return [Preset.NONE, Preset.ECO, Preset.AWAY, self.HOLIDAY_PRESET]
+
+    @property
+    def supported_features(self) -> ClimateEntityFeature:
+        """Return supported features, including Bosch presets."""
+        return super().supported_features | ClimateEntityFeature.PRESET_MODE
+
+    async def async_set_hvac_mode(self, hvac_mode: HVACMode) -> None:
+        """Set the Bosch operating mode through the standard system-mode field."""
+        if hvac_mode not in self.hvac_modes:
+            self.warning(
+                "can't set '%s' mode. Supported modes are: %s",
+                hvac_mode,
+                self.hvac_modes,
+            )
+            return
+
+        await write_attributes_safe(
+            self._cluster,
+            {
+                ThermostatCluster.AttributeDefs.system_mode.name: self._hvac_mode_to_system_mode[
+                    hvac_mode
+                ]
+            },
+        )
+        self.maybe_emit_state_changed_event()
+
+    async def async_set_preset_mode(self, preset_mode: str) -> None:
+        """Set one of the Bosch operating-mode presets."""
+        operating_mode = self._preset_to_operating_mode.get(preset_mode)
+        if operating_mode is None:
+            self.warning("Unsupported '%s' Bosch preset", preset_mode)
+            return
+
+        await write_attributes_safe(
+            self._cluster,
+            {"operating_mode": operating_mode},
+            manufacturer=self.BOSCH_MANUFACTURER_CODE,
+        )
+        self.maybe_emit_state_changed_event()
+
+    async def async_set_temperature(
+        self,
+        target_temp_low: float | None = None,
+        target_temp_high: float | None = None,
+        temperature: float | None = None,
+        hvac_mode: HVACMode | None = None,
+    ) -> None:
+        """Set temperature only in manual heating mode."""
+        has_setpoint = any(
+            value is not None
+            for value in (target_temp_low, target_temp_high, temperature)
+        )
+        if has_setpoint and self.preset_mode in self._preset_temperature_attributes:
+            raise ZHAException(
+                "Change the preset temperature directly or switch to manual mode "
+                "before changing the climate temperature"
+            )
+        if hvac_mode == HVACMode.AUTO and has_setpoint:
+            self.warning(
+                "Temperature overrides are not supported while selecting Bosch Auto mode"
+            )
+            return
+
+        if self.hvac_mode == HVACMode.AUTO and hvac_mode is None and has_setpoint:
+            self.warning(
+                "Temperature overrides are not supported while Bosch schedule mode is active"
+            )
+            return
+
+        if not has_setpoint:
+            if hvac_mode is not None:
+                await self.async_set_hvac_mode(hvac_mode)
+            return
+
+        await super().async_set_temperature(
+            target_temp_low=target_temp_low,
+            target_temp_high=target_temp_high,
+            temperature=temperature,
+            hvac_mode=hvac_mode,
+        )
 
 
 SINOPE_MANUFACTURER_CLUSTER = 0xFF01

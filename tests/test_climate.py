@@ -11,6 +11,7 @@ import zoneinfo
 
 from freezegun import freeze_time
 import pytest
+import zhaquirks.bosch.rbsh_trv0_zb_eu
 from zhaquirks.legacy import CustomDevice
 import zhaquirks.sinope.thermostat
 from zhaquirks.sinope.thermostat import SinopeTechnologiesThermostatCluster
@@ -44,6 +45,7 @@ from zha.application.platforms import PlatformEntity
 from zha.application.platforms.climate import (
     HVAC_MODE_2_SYSTEM,
     SEQ_OF_OPERATION,
+    BoschThermostat as BoschThermostatEntity,
     Thermostat as ThermostatEntity,
     ZehnderThermostat,
 )
@@ -254,6 +256,25 @@ async def device_climate_sinope(zha_gateway: Gateway):
     )
 
 
+async def device_climate_bosch(zha_gateway: Gateway) -> Device:
+    """Create a Bosch TRV with the manufacturer-specific quirk applied."""
+    zigpy_device = create_mock_zigpy_device(
+        zha_gateway,
+        CLIMATE,
+        manufacturer="BOSCH",
+        model="RBSH-TRV1-ZB-EU",
+    )
+    zigpy_device.node_desc.mac_capability_flags |= 0b_0000_0100
+    zigpy_device.endpoints[1].thermostat.PLUGGED_ATTR_READS = {
+        "operating_mode": 0x00,
+        "ctrl_sequence_of_oper": 0x02,
+        "occupied_heating_setpoint": 2050,
+        "min_heat_setpoint_limit": 1600,
+        "max_heat_setpoint_limit": 3000,
+    }
+    return await join_zigpy_device(zha_gateway, zigpy_device)
+
+
 def test_sequence_mappings():
     """Test correct mapping between control sequence -> HVAC Mode -> Sysmode."""
 
@@ -261,6 +282,173 @@ def test_sequence_mappings():
         for hvac_mode in hvac_modes:
             assert hvac_mode in HVAC_MODE_2_SYSTEM
             assert Thermostat.SystemMode(HVAC_MODE_2_SYSTEM[hvac_mode]) is not None
+
+
+async def test_bosch_climate_modes_and_presets(zha_gateway: Gateway) -> None:
+    """Map Bosch operating modes to native heating modes and presets."""
+    zha_device = await device_climate_bosch(zha_gateway)
+    cluster = zha_device.device.endpoints[1].thermostat
+    entity: BoschThermostatEntity = get_entity(
+        zha_device,
+        platform=Platform.CLIMATE,
+        entity_type=BoschThermostatEntity,
+    )
+
+    assert entity.hvac_modes == [HVACMode.OFF, HVACMode.HEAT, HVACMode.AUTO]
+    assert entity.hvac_mode == HVACMode.AUTO
+    assert entity.target_temperature == 20.5
+    assert entity.preset_mode == PRESET_NONE
+    assert entity.preset_modes == [PRESET_NONE, "eco", PRESET_AWAY, "holiday"]
+
+    min_limit = get_entity(
+        zha_device, platform=Platform.NUMBER, qualifier="min_heat_setpoint_limit"
+    )
+    max_limit = get_entity(
+        zha_device, platform=Platform.NUMBER, qualifier="max_heat_setpoint_limit"
+    )
+    assert min_limit.state.native_min_value == 5.0
+    assert min_limit.state.native_max_value == 30.0
+    assert min_limit.state.native_value == 16.0
+    assert max_limit.state.native_min_value == 16.0
+    assert max_limit.state.native_max_value == 30.0
+    assert max_limit.state.native_value == 30.0
+
+    for operating_mode, hvac_mode, preset in (
+        (0x00, HVACMode.AUTO, PRESET_NONE),
+        (0x01, HVACMode.HEAT, PRESET_NONE),
+        (0x02, HVACMode.HEAT, "eco"),
+        (0x03, HVACMode.HEAT, PRESET_AWAY),
+        (0x04, HVACMode.HEAT, "holiday"),
+        (0x05, HVACMode.OFF, PRESET_NONE),
+    ):
+        await send_attributes_report(
+            zha_gateway, cluster, {"operating_mode": operating_mode}
+        )
+        await zha_gateway.async_block_till_done()
+        assert entity.hvac_mode == hvac_mode
+        assert entity.preset_mode == preset
+
+    cluster._write_attributes.reset_mock()
+    await entity.async_set_hvac_mode(HVACMode.AUTO)
+    await zha_gateway.async_block_till_done()
+    assert cluster._write_attributes.await_args.kwargs["manufacturer"] == 0x1209
+
+    cluster._write_attributes.reset_mock()
+    await entity.async_set_temperature(temperature=22.0)
+    assert not cluster._write_attributes.await_count
+
+    cluster._write_attributes.reset_mock()
+    await entity.async_set_temperature(
+        temperature=22.0,
+        hvac_mode=HVACMode.HEAT,
+    )
+    await zha_gateway.async_block_till_done()
+    assert cluster._write_attributes.await_count == 2
+    mode_write, setpoint_write = cluster._write_attributes.await_args_list
+    (mode_attribute,) = mode_write.args[0]
+    (setpoint_attribute,) = setpoint_write.args[0]
+    assert mode_attribute.attrid == cluster.AttributeDefs.operating_mode.id
+    assert mode_attribute.value.value == 0x01
+    assert (
+        setpoint_attribute.attrid
+        == Thermostat.AttributeDefs.occupied_heating_setpoint.id
+    )
+    assert setpoint_attribute.value.value == 2200
+
+    cluster._write_attributes.reset_mock()
+    await entity.async_set_preset_mode("holiday")
+    await zha_gateway.async_block_till_done()
+    assert cluster._write_attributes.await_args.kwargs["manufacturer"] == 0x1209
+    assert entity.hvac_mode == HVACMode.HEAT
+    assert entity.preset_mode == "holiday"
+
+
+@pytest.mark.parametrize(
+    ("mode", "attribute", "value", "preset"),
+    [
+        (0x02, "eco_temperature", 1700, "eco"),
+        (0x03, "away_temperature", 1000, PRESET_AWAY),
+        (0x04, "holiday_temperature", 500, "holiday"),
+    ],
+)
+async def test_bosch_climate_preset_temperature(
+    zha_gateway: Gateway, mode: int, attribute: str, value: int, preset: str
+) -> None:
+    """Use Bosch preset temperatures without writing a different setpoint."""
+    zha_device = await device_climate_bosch(zha_gateway)
+    cluster = zha_device.device.endpoints[1].thermostat
+    entity: BoschThermostatEntity = get_entity(
+        zha_device,
+        platform=Platform.CLIMATE,
+        entity_type=BoschThermostatEntity,
+    )
+    await send_attributes_report(
+        zha_gateway, cluster, {"unoccupied_heating_setpoint": 1200}
+    )
+    await send_attributes_report(zha_gateway, cluster, {"operating_mode": mode})
+    await zha_gateway.async_block_till_done()
+    assert entity.preset_mode == preset
+    assert entity.target_temperature is None
+
+    subscriber = MagicMock()
+    entity.on_event(STATE_CHANGED, subscriber)
+    await send_attributes_report(zha_gateway, cluster, {attribute: value})
+    await zha_gateway.async_block_till_done()
+    assert entity.target_temperature == value / 100
+    subscriber.assert_called_once()
+
+    cluster._write_attributes.reset_mock()
+    with pytest.raises(ZHAException, match="preset temperature"):
+        await entity.async_set_temperature(temperature=22.0)
+    with pytest.raises(ZHAException, match="preset temperature"):
+        await entity.async_set_temperature(temperature=22.0, hvac_mode=HVACMode.HEAT)
+    assert not cluster._write_attributes.await_count
+    assert entity.preset_mode == preset
+
+
+async def test_bosch_climate_error_paths(zha_gateway: Gateway) -> None:
+    """Unknown or failed Bosch operating modes must not report a wrong state."""
+    zha_device = await device_climate_bosch(zha_gateway)
+    cluster = zha_device.device.endpoints[1].thermostat
+    entity: BoschThermostatEntity = get_entity(
+        zha_device,
+        platform=Platform.CLIMATE,
+        entity_type=BoschThermostatEntity,
+    )
+    operating_mode_id = cluster.AttributeDefs.operating_mode.id
+
+    await send_attributes_report(zha_gateway, cluster, {"operating_mode": 0x06})
+    await zha_gateway.async_block_till_done()
+    assert entity.hvac_mode is None
+    assert entity.preset_mode == PRESET_NONE
+
+    cluster._attr_cache.remove(cluster.AttributeDefs.operating_mode)
+    assert entity.hvac_mode is None
+    assert entity.preset_mode == PRESET_NONE
+
+    await send_attributes_report(zha_gateway, cluster, {"operating_mode": 0x01})
+    await zha_gateway.async_block_till_done()
+
+    assert entity.hvac_mode == HVACMode.HEAT
+
+    cluster._write_attributes.reset_mock()
+    await entity.async_set_preset_mode("boost")
+    assert not cluster._write_attributes.await_count
+
+    cluster._write_attributes.reset_mock()
+    cluster._write_attributes.return_value = [
+        [
+            zcl_f.WriteAttributesStatusRecord(
+                status=zcl_f.Status.INVALID_VALUE,
+                attrid=operating_mode_id,
+            )
+        ],
+        [],
+    ]
+    with pytest.raises(ZHAException, match="operating_mode"):
+        await entity.async_set_preset_mode("eco")
+    assert entity.hvac_mode == HVACMode.HEAT
+    assert entity.preset_mode == PRESET_NONE
 
 
 async def test_climate_local_temperature(
