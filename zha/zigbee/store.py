@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable
+from collections.abc import Awaitable, Callable
 from typing import TYPE_CHECKING, Any, Final
 
 from zigpy.store import DEFAULT_VERSION, DeviceStore, JSONValue, StoredValue
@@ -19,6 +19,13 @@ ENTITY_STATE_NAMESPACE: Final = "zha.entity_state"
 # Device values: state of a device that is not a ZCL attribute, such as a Tuya
 # datapoint, written by quirks and shown by value-backed entities
 DEVICE_VALUES_NAMESPACE: Final = "device_values"
+
+# Writes a device value to the device: `writer(device, value)`, with the zigpy device.
+# A quirk gives one to a writable device value entity. The writer decides when the
+# value is set in the store: the Tuya writer stores it when it builds the command,
+# like its attribute path; a transport with acknowledgements may store after them.
+# Its errors propagate to the caller of the entity's write.
+type DeviceValueWriter[T] = Callable[[ZigpyBaseDevice, T], Awaitable[None]]
 
 
 def get_device_store(zigpy_device: ZigpyBaseDevice) -> DeviceStore | None:
