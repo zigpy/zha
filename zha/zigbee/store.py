@@ -24,6 +24,12 @@ if TYPE_CHECKING:
 # Restore records of entities, keyed by `entity_state_key`
 ENTITY_STATE_NAMESPACE: Final = "zha.entity_state"
 
+# Values a successful command set without the attribute cache changing, such as a
+# lock's state after a lock command, keyed by `entity_state_key`. They are kept apart
+# from the restore records: they are beliefs about the device, which a report replaces,
+# not state the host owns.
+ENTITY_ASSUMED_STATE_NAMESPACE: Final = "zha.entity_assumed_state"
+
 # Restore records of group entities, in the network store, keyed by
 # `group_entity_state_key`
 GROUP_ENTITY_STATE_NAMESPACE: Final = "zha.group_entity_state"

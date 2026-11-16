@@ -10,6 +10,7 @@ from collections import Counter
 from collections.abc import Mapping
 import contextlib
 import dataclasses
+from datetime import UTC, datetime
 import itertools
 import logging
 from typing import TYPE_CHECKING, Any
@@ -79,6 +80,9 @@ from zha.debounce import Debouncer
 from zha.decorators import periodic
 
 if TYPE_CHECKING:
+    import zigpy.zcl
+    from zigpy.zcl.foundation import ZCLAttributeDef
+
     from zha.application.gateway import Gateway
     from zha.zigbee.device import Device
     from zha.zigbee.endpoint import Endpoint
@@ -384,6 +388,30 @@ class BaseSharedLight(BaseLight):
         xy_color: tuple[float, float] | None = None,
     ) -> None:
         """Turn the entity on."""
+        await self._async_turn_on_tracked(
+            transition=transition,
+            brightness=brightness,
+            effect=effect,
+            flash=flash,
+            color_temp=color_temp,
+            xy_color=xy_color,
+        )
+
+    async def _async_turn_on_tracked(
+        self,
+        *,
+        transition: float | None = None,
+        brightness: int | None = None,
+        effect: str | None = None,
+        flash: FlashMode | None = None,
+        color_temp: int | None = None,
+        xy_color: tuple[float, float] | None = None,
+    ) -> dict[str, datetime]:
+        """Turn the entity on and return when the fields it set were commanded.
+
+        The result maps `state` and `brightness`, when a successful command set them,
+        to the time that command was sent.
+        """
         duration = (
             transition if transition is not None else self._zha_config_transition
         ) or (
@@ -433,6 +461,8 @@ class BaseSharedLight(BaseLight):
         if set_transition_flag:
             self.async_transition_set_flag()
 
+        commanded: dict[str, datetime] = {}
+
         try:
             await self._async_turn_on_impl(
                 transition=transition,
@@ -446,12 +476,17 @@ class BaseSharedLight(BaseLight):
                 brightness_supported=brightness_supported,
                 set_transition_flag=set_transition_flag,
                 transition_time=transition_time,
+                commanded=commanded,
             )
         finally:
             # If the task was cancelled (e.g. by a mode: restart automation) before
             # the transition timer was started, clean up the transitioning flag so
             # the light does not get stuck in a transitioning state indefinitely.
             self._async_cleanup_transition_if_stuck(set_transition_flag)
+            # Kept even when a later command failed: the ones before it succeeded
+            self._keep_commanded_state(commanded)
+
+        return commanded
 
     async def _async_turn_on_impl(  # noqa: C901
         self,
@@ -467,8 +502,13 @@ class BaseSharedLight(BaseLight):
         brightness_supported: bool,
         set_transition_flag: bool,
         transition_time: float,
+        commanded: dict[str, datetime],
     ) -> None:
-        """Implement the turn on logic."""
+        """Implement the turn on logic.
+
+        The fields that successful commands set are added to `commanded`, with the
+        time the command that set them was sent.
+        """
         # If the light is currently off but a turn_on call with a color/temperature is
         # sent, the light needs to be turned on first at a low brightness level where
         # the light is immediately transitioned to the correct color. Afterwards, the
@@ -521,6 +561,7 @@ class BaseSharedLight(BaseLight):
             # If the light is currently off, we first need to turn it on at a low
             # brightness level with no transition.
             # After that, we set it to the desired color/temperature with no transition.
+            sent = datetime.now(UTC)
             result = await self._level_cluster.move_to_level_with_on_off(
                 level=DEFAULT_MIN_BRIGHTNESS,
                 transition_time=int(10 * self._DEFAULT_MIN_TRANSITION_TIME),
@@ -537,6 +578,7 @@ class BaseSharedLight(BaseLight):
             # Currently only setting it to "on", as the correct level state will
             # be set at the second move_to_level call
             self._state = True
+            commanded["state"] = sent
 
         if execute_if_off_supported:
             self.debug("handling color commands before turning on/level")
@@ -562,6 +604,7 @@ class BaseSharedLight(BaseLight):
         ):
             assert self._level_cluster is not None
 
+            sent = datetime.now(UTC)
             result = await self._level_cluster.move_to_level_with_on_off(
                 level=level,
                 transition_time=int(10 * duration),
@@ -575,8 +618,10 @@ class BaseSharedLight(BaseLight):
                 self.debug("turned on: %s", t_log)
                 return
             self._state = bool(level)
+            commanded["state"] = sent
             if level:
                 self._brightness = level
+                commanded["brightness"] = sent
 
         if (
             (brightness is None and transition is None)
@@ -588,6 +633,7 @@ class BaseSharedLight(BaseLight):
             # since FORCE_ON lights don't turn on with move_to_level_with_on_off,
             # we should call the on command on the on_off cluster
             # if brightness is not 0.
+            sent = datetime.now(UTC)
             result = await self._on_off_cluster.on()
             t_log["on_off"] = result
             if result[1] is not Status.SUCCESS:
@@ -598,6 +644,7 @@ class BaseSharedLight(BaseLight):
                 self.debug("turned on: %s", t_log)
                 return
             self._state = True
+            commanded["state"] = sent
 
         if not execute_if_off_supported:
             self.debug("handling color commands after turning on/level")
@@ -619,6 +666,7 @@ class BaseSharedLight(BaseLight):
 
             # The light has the correct color, so we can now transition
             # it to the correct brightness level.
+            sent = datetime.now(UTC)
             result = await self._level_cluster.move_to_level(
                 level=level, transition_time=int(10 * duration)
             )
@@ -632,8 +680,14 @@ class BaseSharedLight(BaseLight):
                 self.debug("turned on: %s", t_log)
                 return
             self._state = bool(level)
+            # This command sets only the level: the on/off state stays timed by the
+            # first one, which turned the light on. A level of 0 does not turn the
+            # light off, so then no command set the state shown.
             if level:
                 self._brightness = level
+                commanded["brightness"] = sent
+            else:
+                commanded.pop("state", None)
 
         # Our light is guaranteed to have just started the transitioning process
         # if necessary, so we start the delay for the transition (to stop parsing
@@ -681,6 +735,12 @@ class BaseSharedLight(BaseLight):
 
     async def async_turn_off(self, *, transition: float | None = None) -> None:
         """Turn the entity off."""
+        await self._async_turn_off_tracked(transition=transition)
+
+    async def _async_turn_off_tracked(
+        self, *, transition: float | None = None
+    ) -> dict[str, datetime]:
+        """Turn the entity off and return when the fields it set were commanded."""
         brightness_supported = (
             is_brightness_supported(self._internal_supported_color_modes)
             and self._level_cluster is not None
@@ -701,12 +761,15 @@ class BaseSharedLight(BaseLight):
         if set_transition_flag:
             self.async_transition_set_flag()
 
+        commanded: dict[str, datetime] = {}
+
         try:
             # is not none looks odd here, but it will override built in bulb
             # transition times if we pass 0 in here
             if transition is not None and brightness_supported:
                 assert self._level_cluster is not None
 
+                sent = datetime.now(UTC)
                 result = await self._level_cluster.move_to_level_with_on_off(
                     level=0,
                     transition_time=int(
@@ -715,6 +778,7 @@ class BaseSharedLight(BaseLight):
                 )
             else:
                 assert self._on_off_cluster is not None
+                sent = datetime.now(UTC)
                 result = await self._on_off_cluster.off()
 
             # Pause parsing attribute reports until transition is complete
@@ -722,8 +786,9 @@ class BaseSharedLight(BaseLight):
                 self.async_transition_start_timer(transition_time)
             self.debug("turned off: %s", result)
             if result[1] is not Status.SUCCESS:
-                return
+                return commanded
             self._state = False
+            commanded["state"] = sent
 
             if brightness_supported and not self._off_with_transition:
                 # store current brightness so that the next turn_on uses it:
@@ -734,6 +799,7 @@ class BaseSharedLight(BaseLight):
                     # current_level is set to 1 after transitioning to level 0,
                     # needed for correct state with light groups
                     self._brightness = 1
+                    commanded["brightness"] = sent
                     self._off_with_transition = transition is not None
 
             self.maybe_emit_state_changed_event()
@@ -741,6 +807,17 @@ class BaseSharedLight(BaseLight):
             # If the task was cancelled before the transition timer was started,
             # clean up the transitioning flag so the light does not get stuck.
             self._async_cleanup_transition_if_stuck(set_transition_flag)
+            self._keep_commanded_state(commanded)
+
+        return commanded
+
+    def _keep_commanded_state(self, commanded: Mapping[str, datetime]) -> None:
+        """Keep the fields that successful commands set, by when each was sent.
+
+        Only a light on a device keeps them, as assumed values (see
+        `PlatformEntity._assumed_state_fields`). A group's state comes from its
+        members.
+        """
 
     def _apply_persisted_state(self, record: Mapping[str, Any]) -> frozenset[str]:
         """Apply a stored record and return the names of the fields it restored."""
@@ -907,6 +984,11 @@ class Light(BaseSharedLight, ZclPlatformEntity):
     # Turning a light off with a transition dims it to zero, so the brightness to
     # restore is remembered here. No attribute on the device holds it.
     _persisted_state_fields = ("off_brightness", "off_with_transition")
+
+    # On/off and brightness are set after a successful command, before the light
+    # reports them, and kept as assumed values until it does. Color temperature, xy
+    # color, color mode and effect are set by commands as well, but are not kept yet.
+    _assumed_state_fields = ("state", "brightness")
 
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({OnOff.cluster_id}),
@@ -1127,6 +1209,9 @@ class Light(BaseSharedLight, ZclPlatformEntity):
 
         self._effect_list = effect_list
 
+        # The brightness read from the cache above is older than an assumed one
+        self._apply_assumed_state()
+
     def handle_level_attribute_updated(
         self,
         event: AttributeReadEvent
@@ -1320,6 +1405,34 @@ class Light(BaseSharedLight, ZclPlatformEntity):
                     self._effect = EFFECT_OFF
         self.maybe_emit_state_changed_event()
 
+    def _assumed_state_attribute(
+        self, name: str
+    ) -> tuple[zigpy.zcl.Cluster, ZCLAttributeDef] | None:
+        """Return the cluster attribute that reports field `name`, if there is one."""
+        if name == "state" and self._on_off_cluster is not None:
+            return self._on_off_cluster, OnOff.AttributeDefs.on_off
+
+        if name == "brightness" and self._level_cluster is not None:
+            return self._level_cluster, LevelControl.AttributeDefs.current_level
+
+        return None
+
+    def _apply_assumed_value(self, name: str, value: Any) -> bool:
+        """Set field `name` to an assumed value and return whether it was valid."""
+        if name == "state" and type(value) is bool:
+            self._state = value
+            return True
+
+        if name == "brightness" and type(value) is int and 0 <= value <= 255:
+            self._brightness = value
+            return True
+
+        return False
+
+    def _keep_commanded_state(self, commanded: Mapping[str, datetime]) -> None:
+        """Keep the fields that successful commands set, by when each was sent."""
+        self._assume_state(commanded)
+
     def restore_external_state_attributes(
         self,
         *,
@@ -1335,13 +1448,22 @@ class Light(BaseSharedLight, ZclPlatformEntity):
         """Restore extra state attributes that are stored outside of the ZCL cache.
 
         Fields the device's store holds are newer than what Home Assistant kept, so
-        they win. The rest are taken over and stored from now on.
+        they win. The rest are taken over and stored from now on. Assumed values
+        restored from the store, and on/off or brightness the light reported or was
+        read for since loading, win as well. HA's state is not taken over as an
+        assumed value: it is a fallback.
         """
         if "off_with_transition" in self._stored_state_fields:
             off_with_transition = None
 
         if "off_brightness" in self._stored_state_fields:
             off_brightness = None
+
+        if self._restored_value_is_stale("state"):
+            state = None
+
+        if self._restored_value_is_stale("brightness"):
+            brightness = None
 
         super().restore_external_state_attributes(
             state=state,
@@ -1508,10 +1630,14 @@ class LightGroup(BaseSharedLight, GroupEntity):
         # turning on the group, but they are needed for setting the assumed
         # member state correctly, so save them here
         off_brightness = self._off_brightness if self._off_with_transition else None
-        await super().async_turn_on(**kwargs)
-        if self._zha_config_group_members_assume_state:
+        commanded = await self._async_turn_on_tracked(**kwargs)
+        # Members only assume what the group was successfully commanded to do
+        if self._zha_config_group_members_assume_state and "state" in commanded:
             self._make_members_assume_group_state(
-                state=True, off_brightness=off_brightness, **kwargs
+                state=True,
+                commanded=commanded,
+                off_brightness=off_brightness,
+                **kwargs,
             )
         if self.is_transitioning:  # when transitioning, state is refreshed at the end
             return
@@ -1520,9 +1646,11 @@ class LightGroup(BaseSharedLight, GroupEntity):
 
     async def async_turn_off(self, **kwargs: Any) -> None:
         """Turn the entity off."""
-        await super().async_turn_off(**kwargs)
-        if self._zha_config_group_members_assume_state:
-            self._make_members_assume_group_state(state=False, **kwargs)
+        commanded = await self._async_turn_off_tracked(**kwargs)
+        if self._zha_config_group_members_assume_state and "state" in commanded:
+            self._make_members_assume_group_state(
+                state=False, commanded=commanded, **kwargs
+            )
         if self.is_transitioning:
             return
         if self._debounced_member_refresh:
@@ -1625,6 +1753,7 @@ class LightGroup(BaseSharedLight, GroupEntity):
         self,
         *,
         state: bool,
+        commanded: Mapping[str, datetime],
         off_brightness: int | None = None,
         # The rest are service call kwargs
         transition: float | None = None,
@@ -1634,7 +1763,11 @@ class LightGroup(BaseSharedLight, GroupEntity):
         color_temp: int | None = None,
         xy_color: tuple[float, float] | None = None,
     ) -> None:
-        """Send an assume event to all members of the group."""
+        """Send an assume event to all members of the group.
+
+        Members keep the assumed on/off state and brightness like after a command of
+        their own, timed by the group commands in `commanded` that set them.
+        """
 
         # check if the parameters were actually updated
         # in the service call before updating members
@@ -1703,11 +1836,15 @@ class LightGroup(BaseSharedLight, GroupEntity):
 
             # state is always set (turn_on/turn_off)
             platform_entity._state = state
+            assumed = {"state": commanded["state"]}
 
             # before assuming a group state attribute, check if the attribute
             # was actually set in that call
             if assumed_brightness is not None and brightness_supported:
                 platform_entity._brightness = assumed_brightness
+                # Kept only when a group command set it, not the group's old value
+                if "brightness" in commanded:
+                    assumed["brightness"] = commanded["brightness"]
             if assumed_color_mode is not None and assumed_color_mode in supported_modes:
                 platform_entity._color_mode = assumed_color_mode
             if (
@@ -1724,6 +1861,7 @@ class LightGroup(BaseSharedLight, GroupEntity):
             ):
                 platform_entity._effect = assumed_effect
 
+            platform_entity._assume_state(assumed)
             platform_entity.maybe_emit_state_changed_event()
 
     def restore_external_state_attributes(

@@ -9,8 +9,9 @@ from collections.abc import Callable, Collection, Mapping
 from contextlib import suppress
 import dataclasses
 from dataclasses import dataclass, field
+from datetime import UTC, datetime
 from enum import StrEnum
-from functools import cached_property
+from functools import cached_property, partial
 import logging
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, Final, cast, final
@@ -21,8 +22,16 @@ from zigpy.profiles.zll import PROFILE_ID as ZLL_PROFILE_ID
 from zigpy.types import ClusterId
 from zigpy.types.named import EUI64
 import zigpy.zcl
-from zigpy.zcl import ReportingConfig
+from zigpy.zcl import (
+    AttributeReadEvent,
+    AttributeReportedEvent,
+    AttributeUpdatedEvent,
+    AttributeWrittenEvent,
+    ReportingConfig,
+    foundation,
+)
 from zigpy.zcl.foundation import ZCLAttributeDef
+from zigpy.zcl.helpers import UnsupportedAttribute
 
 from zha.application import EntityType, Platform
 from zha.application.const import UniqueIdMigration
@@ -32,6 +41,7 @@ from zha.event import EventBase
 from zha.exceptions import ZHAException
 from zha.mixins import LogMixin
 from zha.zigbee.store import (
+    ENTITY_ASSUMED_STATE_NAMESPACE,
     ENTITY_STATE_NAMESPACE,
     GROUP_ENTITY_STATE_NAMESPACE,
     DeviceValueWriter,
@@ -58,6 +68,10 @@ if TYPE_CHECKING:
 _LOGGER = logging.getLogger(__name__)
 
 DEFAULT_UPDATE_GROUP_FROM_CHILD_DELAY: float = 0.5
+
+# Seconds an assumed value is held before it is saved, so that a command the device
+# confirms within this time causes no store write
+ASSUMED_STATE_SAVE_DELAY: Final = 5
 
 ENTITY_REGISTRY: dict[ClusterId | int, list[type[ZclPlatformEntity]]] = defaultdict(
     list
@@ -289,6 +303,37 @@ def compute_state_diff(
     return {
         name: value for name, value in new_values.items() if old_values[name] != value
     }
+
+
+@dataclass(frozen=True, kw_only=True)
+class AssumedValue:
+    """A value a successful command set, and when the command was sent."""
+
+    value: Any
+    since: datetime
+
+    def to_json(self) -> dict[str, Any]:
+        """Return the value as stored."""
+        return {"value": self.value, "since": self.since.isoformat()}
+
+    @classmethod
+    def from_json(cls, entry: Any) -> AssumedValue | None:
+        """Return a stored value, or `None` if it is malformed."""
+        if not isinstance(entry, dict) or "value" not in entry:
+            return None
+
+        if not isinstance(since := entry.get("since"), str):
+            return None
+
+        try:
+            parsed = datetime.fromisoformat(since)
+        except ValueError:
+            return None
+
+        if parsed.tzinfo is None:
+            return None
+
+        return cls(value=entry["value"], since=parsed.astimezone(UTC))
 
 
 class BaseEntity(LogMixin, EventBase):
@@ -695,6 +740,14 @@ class PlatformEntity(BaseEntity):
 
     _migrate_platform_unique_ids: tuple[tuple[UniqueIdMigration, str]] | None = None
 
+    # Fields of device state that a successful command sets without the attribute
+    # cache changing, such as a lock's state after a lock command. Each has an
+    # attribute behind it (`_assumed_state_attribute`). The commanded value is kept in
+    # the device's store, with the time the command was sent, until that attribute is
+    # reported or read, and is restored when the entity is added unless the attribute
+    # cache holds a newer value. By default, field `x` is attribute `_x`.
+    _assumed_state_fields: tuple[str, ...] = ()
+
     def __init__(
         self,
         device: BaseDevice,
@@ -737,6 +790,15 @@ class PlatformEntity(BaseEntity):
         super().__init__(unique_id=unique_id, **kwargs)
 
         self._device: BaseDevice = device
+
+        # Assumed values of `_assumed_state_fields`, by field
+        self._assumed_state: dict[str, AssumedValue] = {}
+        self._assumed_state_save_handle: asyncio.TimerHandle | None = None
+        # Whether a save ran before the device added the entity, and is still to do
+        self._assumed_state_save_deferred: bool = False
+        # When the assumed values were loaded: a read or report after that is newer
+        # than Home Assistant's restored state
+        self._state_loaded_at: datetime | None = None
 
     def _apply_entity_config(
         self,
@@ -838,6 +900,26 @@ class PlatformEntity(BaseEntity):
             available=self.available,
         )
 
+    def on_add(self) -> None:
+        """Run when entity is added."""
+        super().on_add()
+        self._subscribe_assumed_state()
+
+    async def on_remove(self) -> None:
+        """Save pending assumed values, then cancel tasks and timers."""
+        # The device removes an entity before dropping it, so it still owns its record
+        self._save_assumed_state()
+        await super().on_remove()
+
+    def maybe_emit_state_changed_event(self) -> None:
+        """Send the state of this platform entity."""
+        super().maybe_emit_state_changed_event()
+
+        # The device calls this right after adding the entity: a save that ran before
+        # then, such as the one scheduled at load, is done now
+        if self._assumed_state_save_deferred and self._owns_persisted_state():
+            self._save_assumed_state()
+
     def _persisted_state_namespace(self) -> StoreNamespace | None:
         """Return the store namespace holding restore records, if there is a store."""
         return get_store_namespace(self._device.device, ENTITY_STATE_NAMESPACE)
@@ -851,6 +933,281 @@ class PlatformEntity(BaseEntity):
         return (
             self._device.platform_entities.get((self.PLATFORM, self.unique_id)) is self
         )
+
+    def _load_persisted_state(self) -> None:
+        """Restore persisted fields and assumed values from the device's store."""
+        if self._persisted_state_loaded:
+            return
+
+        super()._load_persisted_state()
+        self._load_assumed_state()
+
+    def _assumed_state_namespace(self) -> StoreNamespace | None:
+        """Return the store namespace holding assumed values, if there is a store."""
+        return get_store_namespace(self._device.device, ENTITY_ASSUMED_STATE_NAMESPACE)
+
+    def _assumed_state_attribute(
+        self, name: str
+    ) -> tuple[zigpy.zcl.Cluster, ZCLAttributeDef] | None:
+        """Return the cluster attribute that reports field `name`, if there is one."""
+        return None
+
+    def _apply_assumed_value(self, name: str, value: Any) -> bool:
+        """Set field `name` to an assumed value and return whether it was valid."""
+        setattr(self, f"_{name}", value)
+        return True
+
+    def _apply_assumed_state(self) -> None:
+        """Set the fields that have assumed values again, after reading the cache."""
+        for name, assumed in self._assumed_state.items():
+            self._apply_assumed_value(name, assumed.value)
+
+    def _assumed_value_is_current(self, name: str, since: datetime) -> bool:
+        """Return whether a value commanded at `since` is newer than the cache.
+
+        A field without an attribute behind it is never kept.
+        """
+        if (source := self._assumed_state_attribute(name)) is None:
+            return False
+
+        cluster, attr_def = source
+
+        try:
+            last_updated: datetime = cluster._attr_cache.get_last_updated(  # noqa: SLF001
+                attr_def
+            )
+        except (KeyError, UnsupportedAttribute):
+            return True
+
+        return last_updated < since
+
+    def _restored_value_is_stale(self, name: str) -> bool:
+        """Return whether Home Assistant's restored copy of field `name` is older.
+
+        It is when the field has an assumed value, or when its attribute was read or
+        reported after the entity loaded its state.
+        """
+        if name in self._assumed_state:
+            return True
+
+        if self._state_loaded_at is None or self._assumed_state_attribute(name) is None:
+            return False
+
+        return not self._assumed_value_is_current(name, self._state_loaded_at)
+
+    def _assume_state(self, sent: Mapping[str, datetime]) -> None:
+        """Keep fields that a successful command set until the device reports them.
+
+        `sent` maps each field to when the command that set it was sent. A field whose
+        attribute was reported or read after that already holds the device's answer,
+        and is not kept. Saving is delayed (`ASSUMED_STATE_SAVE_DELAY`), so a command
+        the device confirms right away writes nothing.
+        """
+        previous = dict(self._assumed_state)
+
+        for name, since in sent.items():
+            if name not in self._assumed_state_fields:
+                continue
+
+            if self._assumed_value_is_current(name, since):
+                self._assumed_state[name] = AssumedValue(
+                    value=getattr(self, f"_{name}"), since=since
+                )
+            else:
+                self._assumed_state.pop(name, None)
+
+        if self._assumed_state != previous:
+            self._schedule_assumed_state_save()
+
+    def _schedule_assumed_state_save(self) -> None:
+        """Save the assumed values after `ASSUMED_STATE_SAVE_DELAY`.
+
+        The delay starts at the first change and is not extended by later ones.
+        """
+        if self._assumed_state_save_handle is not None:
+            return
+
+        try:
+            loop = asyncio.get_running_loop()
+        except RuntimeError:
+            self._save_assumed_state()
+            return
+
+        self._assumed_state_save_handle = loop.call_later(
+            ASSUMED_STATE_SAVE_DELAY, self._save_assumed_state
+        )
+        self._tracked_handles.append(self._assumed_state_save_handle)
+
+    def _subscribe_assumed_state(self) -> None:
+        """Drop an assumed value when its attribute is reported or read."""
+        by_cluster: dict[int, tuple[zigpy.zcl.Cluster, dict[int, str]]] = {}
+
+        for name in self._assumed_state_fields:
+            if (source := self._assumed_state_attribute(name)) is None:
+                continue
+
+            cluster, attr_def = source
+            by_cluster.setdefault(id(cluster), (cluster, {}))[1][attr_def.id] = name
+
+        for cluster, names_by_attribute in by_cluster.values():
+            handler = partial(
+                self._handle_assumed_attribute_event, cluster, names_by_attribute
+            )
+
+            for event_type in (
+                AttributeReadEvent,
+                AttributeReportedEvent,
+                AttributeUpdatedEvent,
+                AttributeWrittenEvent,
+            ):
+                self._on_remove_callbacks.append(
+                    cluster.on_event(event_type.event_type, handler)
+                )
+
+    def _handle_assumed_attribute_event(
+        self,
+        cluster: zigpy.zcl.Cluster,
+        names_by_attribute: Mapping[int, str],
+        event: AttributeReadEvent
+        | AttributeReportedEvent
+        | AttributeUpdatedEvent
+        | AttributeWrittenEvent,
+    ) -> None:
+        """Drop the assumed value of a field whose attribute the device answered for.
+
+        The value read, reported or successfully written confirms or contradicts the
+        assumed one, and is newer either way.
+        """
+        if (name := names_by_attribute.get(event.attribute_id)) is None:
+            return
+
+        if (
+            isinstance(event, AttributeWrittenEvent)
+            and event.status != foundation.Status.SUCCESS
+        ):
+            return
+
+        # A manufacturer-specific attribute can share the ID of a standard one
+        source = self._assumed_state_attribute(name)
+
+        if (
+            source is None
+            or event.manufacturer_code
+            != cluster._get_effective_manufacturer_code(source[1])  # noqa: SLF001
+        ):
+            return
+
+        if self._assumed_state.pop(name, None) is not None:
+            self._schedule_assumed_state_save()
+
+    def _load_assumed_state(self) -> None:
+        """Restore assumed values that are newer than the attribute cache.
+
+        Entries that are not restored are removed by a save scheduled here, which
+        runs once the device has added the entity.
+        """
+        if not self._assumed_state_fields:
+            return
+
+        self._state_loaded_at = datetime.now(UTC)
+
+        namespace = self._assumed_state_namespace()
+
+        if namespace is None:
+            return
+
+        key = self._persisted_state_key(self.unique_id)
+
+        if not self._find_persisted_record(namespace, key):
+            return
+
+        record = namespace[key]
+
+        if not isinstance(record, dict):
+            self.warning("Ignoring invalid assumed state %r", record)
+            self._schedule_assumed_state_save()
+            return
+
+        for name in self._assumed_state_fields:
+            if name not in record:
+                continue
+
+            if (assumed := AssumedValue.from_json(record[name])) is None:
+                self.debug("Ignoring invalid assumed %s: %r", name, record[name])
+                self._schedule_assumed_state_save()
+                continue
+
+            if not self._assumed_value_is_current(name, assumed.since):
+                self.debug("Ignoring assumed %s older than the cache", name)
+                self._schedule_assumed_state_save()
+                continue
+
+            try:
+                valid = self._apply_assumed_value(name, assumed.value)
+            except Exception:  # noqa: BLE001
+                self.error("Failed to restore assumed %s %r", name, assumed.value)
+                self._schedule_assumed_state_save()
+                continue
+
+            if not valid:
+                self.debug("Ignoring invalid assumed %s: %r", name, assumed.value)
+                self._schedule_assumed_state_save()
+                continue
+
+            self._assumed_state[name] = assumed
+
+    def _save_assumed_state(self) -> None:
+        """Store the assumed values if they changed.
+
+        Entries that were not restored (older than the cache, or invalid) and entries
+        that were dropped are removed, and the record with them once it is empty.
+        """
+        if (handle := self._assumed_state_save_handle) is not None:
+            self._assumed_state_save_handle = None
+            handle.cancel()
+
+            with suppress(ValueError):
+                self._tracked_handles.remove(handle)
+
+        if not self._assumed_state_fields or not self._persisted_state_loaded:
+            return
+
+        if not self._owns_persisted_state():
+            # Not added by the device yet, e.g. while it reads attributes at
+            # initialization: saved once it is (`maybe_emit_state_changed_event`)
+            self._assumed_state_save_deferred = True
+            return
+
+        self._assumed_state_save_deferred = False
+        namespace = self._assumed_state_namespace()
+
+        if namespace is None:
+            return
+
+        key = self._persisted_state_key(self.unique_id)
+        stored = namespace.get(key)
+
+        # Fields this version does not know, e.g. from a newer one, are kept
+        record = (
+            {
+                name: entry
+                for name, entry in stored.items()
+                if name not in self._assumed_state_fields
+            }
+            if isinstance(stored, dict)
+            else {}
+        )
+        record.update(
+            {name: assumed.to_json() for name, assumed in self._assumed_state.items()}
+        )
+
+        if record == stored:
+            return
+
+        if record:
+            namespace[key] = record
+        elif key in namespace:
+            del namespace[key]
 
 
 class DeviceValueEntity(PlatformEntity):
