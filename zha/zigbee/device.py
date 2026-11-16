@@ -366,6 +366,8 @@ class BaseDevice[ZigpyDeviceT: ZigpyBaseDevice](LogMixin, EventBase):
         # legacy claim-during-discovery flow (which configured handlers even when
         # the visible entity was filtered out later).
         self._discovered_entities: list[PlatformEntity] = []
+        # Whether creating an entity raised during the last discovery
+        self._discovery_failed: bool = False
         self._initialized: bool = False
         self.semaphore: asyncio.Semaphore = asyncio.Semaphore(3)
         self._on_remove_callbacks: list[Callable[[], None]] = []
@@ -854,8 +856,18 @@ class BaseDevice[ZigpyDeviceT: ZigpyBaseDevice](LogMixin, EventBase):
         """
         raise NotImplementedError
 
+    def note_entity_creation_failed(self) -> None:
+        """Note that an entity of this device could not be created.
+
+        Discovery code that catches an entity's construction error calls this, so the
+        configuration of the next run is known to be incomplete and its records are
+        not marked stale. It holds until the next discovery starts.
+        """
+        self._discovery_failed = True
+
     def _discover_new_entities(self) -> None:
         self._discovered_entities.clear()
+        self._discovery_failed = False
 
         # Iterate defensively so a failure in any single entity construction
         # does not abort discovery for the rest of the device.
@@ -867,6 +879,7 @@ class BaseDevice[ZigpyDeviceT: ZigpyBaseDevice](LogMixin, EventBase):
                 break
             except Exception:  # pylint: disable=broad-except
                 _LOGGER.exception("Failed to create entity during discovery")
+                self.note_entity_creation_failed()
                 continue
 
             self._discovered_entities.append(entity)
@@ -1444,10 +1457,14 @@ class ZigbeeDevice(BaseDevice[ZigpyDevice]):
 
         self._discover_new_entities()
 
-        # Configure binding and reporting from entity-level cluster configs
+        # Configure binding and reporting from entity-level cluster configs. A run
+        # with nothing to configure still marks earlier records as no longer desired,
+        # unless an entity could not be created and its configuration is missing.
         aggregated = aggregate_cluster_configs(self._discovered_entities)
-        if aggregated and not self.skip_configuration:
-            await configure_cluster_configs(self, aggregated)
+        if not self.skip_configuration:
+            await configure_cluster_configs(
+                self, aggregated, mark_stale=not self._discovery_failed
+            )
 
         self.emit_reconfigure_done()
 

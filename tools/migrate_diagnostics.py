@@ -18,7 +18,12 @@ from zigpy.quirks import get_device as quirks_get_device
 import zigpy.zcl
 import zigpy.zdo.types as zdo_t
 
-from tests.common import ZhaJsonEncoder, join_zigpy_device, patch_cluster_for_testing
+from tests.common import (
+    ZhaJsonEncoder,
+    get_fixture_diagnostics_json,
+    join_zigpy_device,
+    patch_cluster_for_testing,
+)
 from tests.conftest import TestGateway, make_zha_data, make_zigpy_app_controller
 
 REPO_ROOT = pathlib.Path(__file__).parent.parent
@@ -178,7 +183,7 @@ async def main():
                 await zha_gateway.async_block_till_done(wait_background_tasks=True)
 
             new_json = json.dumps(
-                zha_device.get_diagnostics_json(), indent=2, cls=ZhaJsonEncoder
+                get_fixture_diagnostics_json(zha_device), indent=2, cls=ZhaJsonEncoder
             )
             device_json.write_text(new_json)
 

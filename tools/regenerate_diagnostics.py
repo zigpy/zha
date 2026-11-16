@@ -13,6 +13,7 @@ from unittest.mock import patch
 
 from tests.common import (
     ZhaJsonEncoder,
+    get_fixture_diagnostics_json,
     join_zigpy_device,
     zigpy_device_from_device_data,
 )
@@ -56,7 +57,7 @@ async def main(files: list[str] | None = None) -> None:
                 zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
 
             new_json = json.dumps(
-                zha_device.get_diagnostics_json(), indent=2, cls=ZhaJsonEncoder
+                get_fixture_diagnostics_json(zha_device), indent=2, cls=ZhaJsonEncoder
             )
 
             if new_json != device_data_text:

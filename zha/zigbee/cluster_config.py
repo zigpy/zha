@@ -3,13 +3,18 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+import functools
 import logging
 from typing import TYPE_CHECKING
 
 import zigpy.exceptions
 import zigpy.util
 import zigpy.zcl
-from zigpy.zcl import ReportingConfig
+from zigpy.zcl import (
+    AttributeReportingConfiguredEvent,
+    AttributeUnsupportedEvent,
+    ReportingConfig,
+)
 from zigpy.zcl.foundation import Status, ZCLAttributeDef
 
 from zha.application.const import (
@@ -17,6 +22,11 @@ from zha.application.const import (
     ZHA_CLUSTER_CONFIGURE_REPORTING_EVENT,
 )
 from zha.application.platforms import AttrConfig, ZclPlatformEntity
+from zha.zigbee.applied_config import (
+    AppliedConfigRecorder,
+    ConfigResult,
+    quirk_replaces,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
@@ -142,24 +152,134 @@ def aggregate_cluster_configs(
     return result
 
 
+def _note_announced(
+    announced: dict[tuple[int, int | None], Status],
+    status: Status,
+    event: AttributeReportingConfiguredEvent | AttributeUnsupportedEvent,
+) -> None:
+    """Collect an attribute outcome zigpy announces while configuring reporting."""
+    announced[(event.attribute_id, event.manufacturer_code)] = status
+
+
+def _effective_manufacturer_code(
+    cluster: zigpy.zcl.Cluster, attr_def: ZCLAttributeDef
+) -> int | None:
+    """Return the manufacturer code zigpy configures an attribute's reporting with."""
+    return cluster._get_effective_manufacturer_code(attr_def)  # noqa: SLF001
+
+
+def _record_binding(
+    recorder: AppliedConfigRecorder,
+    device: Device,
+    endpoint_id: int,
+    agg: AggregatedClusterConfig,
+    is_server: bool,
+    result: ConfigResult,
+) -> None:
+    """Record ZHA's bind of a cluster. A failure is logged, never raised."""
+    if not recorder.enabled:
+        return
+
+    try:
+        # The destination zigpy's bind uses, unless a quirk replaces it
+        destination = device.device.application.get_dst_address(agg.cluster)
+    except Exception:  # pylint: disable=broad-except
+        recorder.note_incomplete()
+        _LOGGER.exception(
+            "[%s] Failed to resolve the binding destination of cluster %s",
+            agg.cluster.endpoint.device.ieee,
+            agg.cluster.ep_attribute,
+        )
+        return
+
+    try:
+        recorder.record_binding(
+            endpoint_id=endpoint_id,
+            cluster_id=agg.cluster.cluster_id,
+            destination=destination,
+            operation="bind",
+            origin="zha",
+            result=result,
+            side="server" if is_server else "client",
+            quirk_handler=quirk_replaces(agg.cluster, "bind"),
+        )
+    except Exception:  # pylint: disable=broad-except
+        _LOGGER.exception(
+            "[%s] Failed to record binding of cluster %s",
+            agg.cluster.endpoint.device.ieee,
+            agg.cluster.ep_attribute,
+        )
+
+
+def _record_reporting(
+    recorder: AppliedConfigRecorder,
+    agg: AggregatedClusterConfig,
+    reporting_attrs: dict[ZCLAttributeDef, ReportingConfig],
+    manufacturer_codes: dict[ZCLAttributeDef, int | None],
+    results: dict[ZCLAttributeDef, ConfigResult],
+) -> None:
+    """Record ZHA's reporting configuration of a cluster, one attribute at a time.
+
+    A failure is logged and does not stop the other attributes. An attribute whose
+    manufacturer code could not be determined has no key and is not recorded, and the
+    run then marks nothing stale.
+    """
+    if not recorder.enabled:
+        return
+
+    quirk_handler = quirk_replaces(
+        agg.cluster, "configure_reporting_multiple", "_configure_reporting"
+    )
+
+    for attr_def, cfg in reporting_attrs.items():
+        if attr_def not in manufacturer_codes:
+            recorder.note_incomplete()
+            continue
+
+        try:
+            recorder.record_reporting(
+                cluster=agg.cluster,
+                attr_def=attr_def,
+                manufacturer_code=manufacturer_codes[attr_def],
+                desired=cfg,
+                result=results[attr_def],
+                quirk_handler=quirk_handler,
+            )
+        except Exception:  # pylint: disable=broad-except
+            _LOGGER.exception(
+                "[%s] Failed to record reporting configuration of %s on cluster %s",
+                agg.cluster.endpoint.device.ieee,
+                attr_def.name,
+                agg.cluster.ep_attribute,
+            )
+
+
 async def configure_cluster_configs(
     device: Device,
     configs: dict[tuple[int, int, bool], AggregatedClusterConfig],
+    *,
+    mark_stale: bool = True,
 ) -> None:
     """Execute binding, reporting, and post-bind hooks from aggregated configs.
 
     Emits `ClusterBindEvent` and `ClusterConfigureReportingEvent` on `device`
     so listeners (HA Core diagnostics, reconfigure dialog) can observe the
-    per-cluster outcomes.
+    per-cluster outcomes, and records each binding and reporting configuration with
+    its status in the device's store (`zha.zigbee.applied_config`). Recording never
+    fails the configuration. Pass `mark_stale=False` when `configs` may be incomplete
+    (an entity failed to be created), so missing items are not marked stale.
     """
     # Imported lazily to avoid a circular import.
     from zha.zigbee.device import ClusterBindEvent, ClusterConfigureReportingEvent  # noqa: PLC0415
 
-    for (endpoint_id, _cluster_id, _is_server), agg in configs.items():
+    recorder = AppliedConfigRecorder(device.device)
+
+    for (endpoint_id, _cluster_id, is_server), agg in configs.items():
         if agg.bind:
             try:
                 res = await agg.cluster.bind()
                 success = res[0] == 0
+                result = ConfigResult.from_status(res[0])
                 _LOGGER.debug(
                     "[%s] Bound cluster %s: %s",
                     agg.cluster.endpoint.device.ieee,
@@ -174,6 +294,9 @@ async def configure_cluster_configs(
                     ex,
                 )
                 success = False
+                result = ConfigResult.from_exception(ex)
+
+            _record_binding(recorder, device, endpoint_id, agg, is_server, result)
 
             device.emit(
                 ZHA_CLUSTER_BIND_EVENT,
@@ -206,6 +329,46 @@ async def configure_cluster_configs(
                 for attr_def, cfg in reporting_attrs.items()
             }
 
+            results: dict[ZCLAttributeDef, ConfigResult] = {}
+            manufacturer_codes: dict[ZCLAttributeDef, int | None] = {}
+
+            for attr_def in reporting_attrs:
+                try:
+                    manufacturer_codes[attr_def] = _effective_manufacturer_code(
+                        agg.cluster, attr_def
+                    )
+                except Exception:  # pylint: disable=broad-except
+                    _LOGGER.debug(
+                        "[%s] No manufacturer code for %s",
+                        agg.cluster.endpoint.device.ieee,
+                        attr_def.name,
+                        exc_info=True,
+                    )
+
+            # zigpy sends one request per manufacturer code (and more if they do not
+            # fit in one frame) and, once a manufacturer code's requests are done,
+            # announces each attribute it configured and each the device reported as
+            # unsupported. When a later request raises, the announcements tell what
+            # the earlier requests achieved. Other per-attribute statuses are not
+            # announced. The same attribute ID can occur under several manufacturer
+            # codes, so announcements are matched on both. The listeners are attached
+            # only around the request; zigpy also announces unsupported attributes
+            # found by a read, so a read of this cluster running concurrently could
+            # still be taken for the outcome of an attribute whose request raised.
+            announced: dict[tuple[int, int | None], Status] = {}
+            unsubscribes = [
+                agg.cluster.on_event(
+                    AttributeReportingConfiguredEvent.event_type,
+                    functools.partial(_note_announced, announced, Status.SUCCESS),
+                ),
+                agg.cluster.on_event(
+                    AttributeUnsupportedEvent.event_type,
+                    functools.partial(
+                        _note_announced, announced, Status.UNSUPPORTED_ATTRIBUTE
+                    ),
+                ),
+            ]
+
             try:
                 res = await agg.cluster.configure_reporting_multiple(reporting_attrs)
                 _LOGGER.debug(
@@ -221,6 +384,13 @@ async def configure_cluster_configs(
                 else:
                     for attr_def, status in res.items():
                         event_data[attr_def.name]["status"] = status.name
+
+                for attr_def in reporting_attrs:
+                    results[attr_def] = (
+                        ConfigResult.from_status(res[attr_def])
+                        if res and attr_def in res
+                        else ConfigResult(error="NoStatus")
+                    )
             except Exception as ex:
                 _LOGGER.debug(
                     "[%s] Failed to configure reporting on cluster %s: %s",
@@ -229,7 +399,21 @@ async def configure_cluster_configs(
                     ex,
                 )
                 for attr_def in reporting_attrs:
-                    event_data[attr_def.name]["status"] = Status.FAILURE.name
+                    key = (attr_def.id, manufacturer_codes.get(attr_def))
+
+                    if attr_def in manufacturer_codes and key in announced:
+                        event_data[attr_def.name]["status"] = announced[key].name
+                        results[attr_def] = ConfigResult.from_status(announced[key])
+                    else:
+                        event_data[attr_def.name]["status"] = Status.FAILURE.name
+                        results[attr_def] = ConfigResult.from_exception(ex)
+            finally:
+                for unsubscribe in unsubscribes:
+                    unsubscribe()
+
+            _record_reporting(
+                recorder, agg, reporting_attrs, manufacturer_codes, results
+            )
 
             device.emit(
                 ZHA_CLUSTER_CONFIGURE_REPORTING_EVENT,
@@ -252,6 +436,14 @@ async def configure_cluster_configs(
                     type(entity).__name__,
                     exc_info=True,
                 )
+
+    if mark_stale:
+        try:
+            recorder.mark_stale()
+        except Exception:  # pylint: disable=broad-except
+            _LOGGER.exception(
+                "[%s] Failed to mark stale configuration records", device.ieee
+            )
 
 
 async def initialize_cluster_configs(

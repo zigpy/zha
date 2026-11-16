@@ -358,5 +358,6 @@ def discover_entities_for_endpoint(endpoint: Endpoint) -> Iterator[ZclPlatformEn
                 )
             except Exception:  # pylint: disable=broad-except
                 _LOGGER.exception("Failed to create %s entity", entity_class.__name__)
+                device.note_entity_creation_failed()
                 continue
             yield entity

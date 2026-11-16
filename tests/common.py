@@ -25,6 +25,7 @@ from zha.application import Platform
 from zha.application.gateway import Gateway
 from zha.application.platforms import BaseEntity, GroupEntity, PlatformEntity
 from zha.quirks import DEVICE_REGISTRY, DeviceRegistry
+from zha.zigbee.applied_config import APPLIED_CONFIG_NAMESPACE
 from zha.zigbee.device import Device
 from zha.zigbee.group import Group
 
@@ -590,6 +591,24 @@ async def zigpy_device_from_json(
         patch_cluster=patch_cluster,
         quirk=quirk,
     )
+
+
+def get_fixture_diagnostics_json(zha_device: Device) -> dict[str, Any]:
+    """Return the device's diagnostics as kept in `tests/data/devices`.
+
+    Records of the configuration applied while the device joined in this run are left
+    out: they describe the run rather than the device, and carry timestamps.
+    """
+    diagnostics = zha_device.get_diagnostics_json()
+    store = diagnostics.get("store")
+
+    if store is not None:
+        store.pop(APPLIED_CONFIG_NAMESPACE, None)
+
+        if not store:
+            del diagnostics["store"]
+
+    return diagnostics
 
 
 async def join_zigpy_device(
