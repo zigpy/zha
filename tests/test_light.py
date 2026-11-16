@@ -26,6 +26,7 @@ from tests.common import (
     get_group_entity,
     group_entity_availability_test,
     join_zigpy_device,
+    rebuild_zha_group,
     rejoin_zha_device,
     send_attributes_report,
     update_attribute_cache,
@@ -36,7 +37,12 @@ from zha.application.platforms import GroupEntity, PlatformEntity
 from zha.application.platforms.light.const import FLASH_EFFECTS, ColorMode, FlashMode
 from zha.zigbee.device import Device
 from zha.zigbee.group import Group, GroupMemberReference
-from zha.zigbee.store import ENTITY_STATE_NAMESPACE, entity_state_key
+from zha.zigbee.store import (
+    ENTITY_STATE_NAMESPACE,
+    GROUP_ENTITY_STATE_NAMESPACE,
+    entity_state_key,
+    group_entity_state_key,
+)
 
 ON = 1
 OFF = 0
@@ -2724,3 +2730,222 @@ async def test_group_state_ignores_unavailable_members(zha_gateway: Gateway) -> 
     await asyncio.sleep(0.1)
     await zha_gateway.async_block_till_done()
     assert bool(entity.state.on) is True
+
+
+async def _create_light_group(zha_gateway: Gateway) -> tuple[Group, Device, Device]:
+    """Create a group of two lights, both on at level 100."""
+    await coordinator_mock(zha_gateway)
+    device_light_1 = await device_light_1_mock(zha_gateway)
+    device_light_2 = await device_light_2_mock(zha_gateway)
+
+    zha_group = await zha_gateway.async_create_zigpy_group(
+        "Test Group",
+        [
+            GroupMemberReference(ieee=device_light_1.ieee, endpoint_id=1),
+            GroupMemberReference(ieee=device_light_2.ieee, endpoint_id=1),
+        ],
+    )
+    await zha_gateway.async_block_till_done()
+
+    for device in (device_light_1, device_light_2):
+        await send_attributes_report(
+            zha_gateway, device.device.endpoints[1].on_off, {0: ON}
+        )
+        await send_attributes_report(
+            zha_gateway, device.device.endpoints[1].level, {0: 100}
+        )
+
+    await _async_shift_time(zha_gateway)
+    return zha_group, device_light_1, device_light_2
+
+
+def _group_records(zha_gateway: Gateway) -> Any:
+    """Return the group entity restore records of the network store."""
+    return zha_gateway.application_controller.network_store.namespace(
+        GROUP_ENTITY_STATE_NAMESPACE
+    )
+
+
+async def test_light_group_off_brightness_persisted(zha_gateway: Gateway) -> None:
+    """A light group's brightness before turning off survives the group being rebuilt."""
+    zha_group, _, _ = await _create_light_group(zha_gateway)
+    entity = get_group_entity(zha_group, platform=Platform.LIGHT)
+    namespace = _group_records(zha_gateway)
+    key = group_entity_state_key(zha_group.group_id, Platform.LIGHT, entity.unique_id)
+
+    assert entity.state.on is True
+    assert entity.state.brightness == 100
+
+    # Nothing is stored for a group that was never turned off with a transition
+    assert len(namespace) == 0
+
+    await entity.async_turn_off(transition=1)
+    await zha_gateway.async_block_till_done()
+
+    assert entity.state.off_brightness == 100
+    assert entity.state.off_with_transition is True
+    assert namespace[key] == {"off_brightness": 100, "off_with_transition": True}
+
+    new_group = await rebuild_zha_group(zha_gateway, zha_group)
+    new_entity = get_group_entity(new_group, platform=Platform.LIGHT)
+
+    assert new_entity is not entity
+    assert new_entity.state.off_brightness == 100
+    assert new_entity.state.off_with_transition is True
+
+    # Home Assistant's restored copy is older than the store and is ignored
+    new_entity.restore_external_state_attributes(
+        state=False,
+        off_with_transition=False,
+        off_brightness=5,
+        brightness=None,
+        color_temp=None,
+        xy_color=None,
+        color_mode=None,
+        effect=None,
+    )
+    assert new_entity.state.off_brightness == 100
+    assert new_entity.state.off_with_transition is True
+    assert namespace[key] == {"off_brightness": 100, "off_with_transition": True}
+
+    # The removed group's entity no longer writes
+    entity._off_brightness = 3
+    entity.maybe_emit_state_changed_event()
+    assert namespace[key] == {"off_brightness": 100, "off_with_transition": True}
+
+
+async def test_light_group_off_brightness_taken_over_from_restore(
+    zha_gateway: Gateway,
+) -> None:
+    """Without a stored record, Home Assistant's restored values are used and stored."""
+    zha_group, _, _ = await _create_light_group(zha_gateway)
+    entity = get_group_entity(zha_group, platform=Platform.LIGHT)
+    namespace = _group_records(zha_gateway)
+    key = group_entity_state_key(zha_group.group_id, Platform.LIGHT, entity.unique_id)
+
+    entity.restore_external_state_attributes(
+        state=None,
+        off_with_transition=True,
+        off_brightness=33,
+        brightness=None,
+        color_temp=None,
+        xy_color=None,
+        color_mode=None,
+        effect=None,
+    )
+
+    assert entity.state.off_brightness == 33
+    assert namespace[key] == {"off_brightness": 33, "off_with_transition": True}
+
+    new_group = await rebuild_zha_group(zha_gateway, zha_group)
+    new_entity = get_group_entity(new_group, platform=Platform.LIGHT)
+    assert new_entity.state.off_brightness == 33
+
+
+async def test_light_group_records_removed_with_group(zha_gateway: Gateway) -> None:
+    """Removing a group deletes its records, and only its records."""
+    zha_group, _, _ = await _create_light_group(zha_gateway)
+    entity = get_group_entity(zha_group, platform=Platform.LIGHT)
+    namespace = _group_records(zha_gateway)
+    key = group_entity_state_key(zha_group.group_id, Platform.LIGHT, entity.unique_id)
+
+    other_key = group_entity_state_key(
+        zha_group.group_id + 1, Platform.LIGHT, "light_zha_group_other"
+    )
+    namespace[other_key] = {"off_brightness": 1}
+
+    await entity.async_turn_off(transition=1)
+    await zha_gateway.async_block_till_done()
+    assert key in namespace
+
+    await zha_gateway.async_remove_zigpy_group(zha_group.group_id)
+    await zha_gateway.async_block_till_done()
+
+    assert key not in namespace
+    assert namespace[other_key] == {"off_brightness": 1}
+
+    # The removed group's entity no longer writes: zigpy removes the members first,
+    # which unregisters the group's entities
+    assert entity.unique_id not in zha_group.group_entities
+    entity._off_brightness = 3
+    entity.maybe_emit_state_changed_event()
+    assert key not in namespace
+
+
+async def test_light_group_without_network_store(zha_gateway: Gateway) -> None:
+    """An application without a network store keeps HA's restore only."""
+    zha_group, _, _ = await _create_light_group(zha_gateway)
+
+    with patch.object(zha_gateway.application_controller, "network_store", None):
+        new_group = await rebuild_zha_group(zha_gateway, zha_group)
+        entity = get_group_entity(new_group, platform=Platform.LIGHT)
+
+        entity.restore_external_state_attributes(
+            state=None,
+            off_with_transition=True,
+            off_brightness=33,
+            brightness=None,
+            color_temp=None,
+            xy_color=None,
+            color_mode=None,
+            effect=None,
+        )
+        await entity.async_turn_off(transition=1)
+        await zha_gateway.async_block_till_done()
+
+    assert entity.state.off_brightness == 33
+    assert len(_group_records(zha_gateway)) == 0
+
+
+@pytest.mark.parametrize("through_zigpy", [True, False])
+async def test_light_group_record_not_written_after_removal(
+    zha_gateway: Gateway, through_zigpy: bool
+) -> None:
+    """A transition finishing after the group was removed does not write a record."""
+    zha_group, _, _ = await _create_light_group(zha_gateway)
+    entity = get_group_entity(zha_group, platform=Platform.LIGHT)
+    namespace = _group_records(zha_gateway)
+    key = group_entity_state_key(zha_group.group_id, Platform.LIGHT, entity.unique_id)
+
+    await entity.async_turn_off(transition=5)
+    assert entity.is_transitioning
+    assert key in namespace
+
+    if through_zigpy:
+        await zha_gateway.async_remove_zigpy_group(zha_group.group_id)
+    else:
+        # The gateway's handler alone: the group entity is still registered
+        zha_gateway.group_removed(zha_group.zigpy_group)
+        assert zha_group.group_entities[entity.unique_id] is entity
+
+    assert key not in namespace
+
+    await _async_shift_time(zha_gateway)
+    assert not entity.is_transitioning
+    assert key not in namespace
+
+
+async def test_light_group_record_follows_unique_id_migration(
+    zha_gateway: Gateway,
+) -> None:
+    """A group record stored under a previous unique ID moves to the current one."""
+    zha_group, _, _ = await _create_light_group(zha_gateway)
+    entity = get_group_entity(zha_group, platform=Platform.LIGHT)
+    namespace = _group_records(zha_gateway)
+    old_key = group_entity_state_key(zha_group.group_id, Platform.LIGHT, "old-id")
+    namespace[old_key] = {"off_brightness": 99, "off_with_transition": True}
+
+    with patch.object(
+        type(entity),
+        "migrate_unique_ids",
+        new_callable=PropertyMock,
+        return_value=frozenset({"old-id"}),
+    ):
+        new_group = await rebuild_zha_group(zha_gateway, zha_group)
+
+    new_entity = get_group_entity(new_group, platform=Platform.LIGHT)
+    assert new_entity.state.off_brightness == 99
+    assert old_key not in namespace
+    assert namespace[
+        group_entity_state_key(zha_group.group_id, Platform.LIGHT, new_entity.unique_id)
+    ] == {"off_brightness": 99, "off_with_transition": True}

@@ -742,6 +742,25 @@ class BaseSharedLight(BaseLight):
             # clean up the transitioning flag so the light does not get stuck.
             self._async_cleanup_transition_if_stuck(set_transition_flag)
 
+    def _apply_persisted_state(self, record: Mapping[str, Any]) -> frozenset[str]:
+        """Apply a stored record and return the names of the fields it restored."""
+        restored = set()
+
+        if "off_brightness" in record:
+            off_brightness = record["off_brightness"]
+
+            if off_brightness is None or (
+                type(off_brightness) is int and 0 <= off_brightness <= 255
+            ):
+                self._off_brightness = off_brightness
+                restored.add("off_brightness")
+
+        if type(record.get("off_with_transition")) is bool:
+            self._off_with_transition = record["off_with_transition"]
+            restored.add("off_with_transition")
+
+        return frozenset(restored)
+
     async def async_handle_color_commands(
         self,
         color_temp,
@@ -1301,25 +1320,6 @@ class Light(BaseSharedLight, ZclPlatformEntity):
                     self._effect = EFFECT_OFF
         self.maybe_emit_state_changed_event()
 
-    def _apply_persisted_state(self, record: Mapping[str, Any]) -> frozenset[str]:
-        """Apply a stored record and return the names of the fields it restored."""
-        restored = set()
-
-        if "off_brightness" in record:
-            off_brightness = record["off_brightness"]
-
-            if off_brightness is None or (
-                type(off_brightness) is int and 0 <= off_brightness <= 255
-            ):
-                self._off_brightness = off_brightness
-                restored.add("off_brightness")
-
-        if type(record.get("off_with_transition")) is bool:
-            self._off_with_transition = record["off_with_transition"]
-            restored.add("off_with_transition")
-
-        return frozenset(restored)
-
     def restore_external_state_attributes(
         self,
         *,
@@ -1418,6 +1418,10 @@ class MinTransitionLight(Light):
 @register_group_entity
 class LightGroup(BaseSharedLight, GroupEntity):
     """Representation of a light group."""
+
+    # As for a light: the brightness to restore after turning the group off with a
+    # transition. The rest of the group's state comes from its members.
+    _persisted_state_fields = ("off_brightness", "off_with_transition")
 
     def __init__(self, group: Group):
         """Initialize a light group."""
@@ -1734,11 +1738,22 @@ class LightGroup(BaseSharedLight, GroupEntity):
         color_mode: ColorMode | None,
         effect: str | None,
     ) -> None:
-        """Restore extra state attributes."""
+        """Restore extra state attributes.
 
-        # Group state is calculated from the members,
-        # except for off_with_transition and off_brightness
-        if off_with_transition is not None:
+        Group state is calculated from the members, except for off_with_transition and
+        off_brightness. Those the network store holds are newer than what Home
+        Assistant kept, so they win; the rest are taken over and stored from now on.
+        """
+        if (
+            off_with_transition is not None
+            and "off_with_transition" not in self._stored_state_fields
+        ):
             self._off_with_transition = off_with_transition
-        if off_brightness is not None:
+        if (
+            off_brightness is not None
+            and "off_brightness" not in self._stored_state_fields
+        ):
             self._off_brightness = off_brightness
+
+        # Written even at the defaults, so that the store is authoritative from now on
+        self._save_persisted_state(take_over=self._persisted_state_fields)

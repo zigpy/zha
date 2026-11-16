@@ -33,10 +33,13 @@ from zha.exceptions import ZHAException
 from zha.mixins import LogMixin
 from zha.zigbee.store import (
     ENTITY_STATE_NAMESPACE,
+    GROUP_ENTITY_STATE_NAMESPACE,
     DeviceValueWriter,
     entity_state_key,
     get_device_store,
+    get_network_store_namespace,
     get_store_namespace,
+    group_entity_state_key,
 )
 
 if TYPE_CHECKING:
@@ -319,6 +322,12 @@ class BaseEntity(LogMixin, EventBase):
     # chosen. If there is a tie, both lose.
     _attr_primary_weight: int = 0
 
+    # Fields of host-side state that no ZCL attribute holds, such as a light's
+    # brightness before it was turned off. They are kept in a store (the device's for
+    # device entities, the network store for group entities) and restored when the
+    # entity is added. By default, field `x` is attribute `_x`.
+    _persisted_state_fields: tuple[str, ...] = ()
+
     def __init__(self, unique_id: str) -> None:
         """Initialize the platform entity."""
         super().__init__()
@@ -330,6 +339,15 @@ class BaseEntity(LogMixin, EventBase):
         self._tracked_tasks: list[asyncio.Task] = []
         self._tracked_handles: list[asyncio.Handle] = []
         self._on_remove_callbacks: list[Callable[[], None]] = []
+
+        # Persisted state is only saved once it has been loaded, so that the defaults
+        # set in `__init__` never overwrite a stored record
+        self._persisted_state_loaded: bool = False
+        # Fields the store holds for this entity: restored from it, or saved to it.
+        # Home Assistant's restored copies of these are older and are ignored.
+        self._stored_state_fields: frozenset[str] = frozenset()
+        # The fields as they were right after loading
+        self._loaded_state: dict[str, Any] | None = None
 
     def is_supported(self) -> bool:
         """Return if the entity is supported for the device."""
@@ -469,7 +487,7 @@ class BaseEntity(LogMixin, EventBase):
 
     def on_add(self) -> None:
         """Run when entity is added."""
-        pass
+        self._load_persisted_state()
 
     async def on_remove(self) -> None:
         """Cancel tasks and timers this entity owns."""
@@ -503,6 +521,8 @@ class BaseEntity(LogMixin, EventBase):
             )
             self.__previous_state = state
 
+        self._save_persisted_state()
+
     def subscribe_state(
         self, callback: Callable[[EntityStateChangedEvent], None]
     ) -> Callable[[], None]:
@@ -523,6 +543,142 @@ class BaseEntity(LogMixin, EventBase):
 
         return unsub
 
+    def _persisted_state_namespace(self) -> StoreNamespace | None:
+        """Return the store namespace holding restore records, if there is a store."""
+        return None
+
+    def _persisted_state_key(self, unique_id: str) -> str:
+        """Return the key of the restore record of this entity under `unique_id`."""
+        raise NotImplementedError
+
+    def _owns_persisted_state(self) -> bool:
+        """Return whether this entity object may write its records.
+
+        Only the entity its device or group has added does: discovery creates
+        candidate copies of live entities, and a removed entity can still finish a
+        command, and neither may overwrite the live entity's records.
+        """
+        return False
+
+    def _dump_persisted_state(self) -> dict[str, Any]:
+        """Return the persisted fields as a JSON-compatible record."""
+        return {
+            name: getattr(self, f"_{name}") for name in self._persisted_state_fields
+        }
+
+    def _apply_persisted_state(self, record: Mapping[str, Any]) -> frozenset[str]:
+        """Apply a stored record and return the names of the fields it restored."""
+        restored = set()
+
+        for name in self._persisted_state_fields:
+            if name in record:
+                setattr(self, f"_{name}", record[name])
+                restored.add(name)
+
+        return frozenset(restored)
+
+    def _load_persisted_state(self) -> None:
+        """Restore persisted fields from the store."""
+        if self._persisted_state_loaded:
+            return
+
+        self._persisted_state_loaded = True
+
+        if not self._persisted_state_fields:
+            return
+
+        namespace = self._persisted_state_namespace()
+
+        if namespace is None:
+            return
+
+        key = self._persisted_state_key(self.unique_id)
+
+        if self._find_persisted_record(namespace, key):
+            self._restore_persisted_record(namespace[key])
+
+        self._loaded_state = self._dump_persisted_state()
+
+    def _find_persisted_record(self, namespace: StoreNamespace, key: str) -> bool:
+        """Return whether `namespace` has a record of this entity under `key`.
+
+        A record stored under a previous unique ID is moved to `key` first, so that it
+        follows the entity when its unique ID changes.
+        """
+        if key in namespace:
+            return True
+
+        for old_unique_id in sorted(self.migrate_unique_ids):
+            old_key = self._persisted_state_key(old_unique_id)
+
+            if old_key in namespace:
+                namespace[key] = namespace[old_key]
+                del namespace[old_key]
+                return True
+
+        return False
+
+    def _restore_persisted_record(self, record: Any) -> None:
+        """Apply the stored record of this entity."""
+        if not isinstance(record, dict):
+            self.warning("Ignoring invalid stored state %r", record)
+            return
+
+        try:
+            self._stored_state_fields = self._apply_persisted_state(record)
+        except Exception:  # noqa: BLE001
+            self.error("Failed to restore stored state %r", record, exc_info=True)
+            return
+
+        if (
+            ignored := (set(record) & set(self._persisted_state_fields))
+            - self._stored_state_fields
+        ):
+            self.debug("Ignoring invalid stored %s in %r", sorted(ignored), record)
+
+    def _save_persisted_state(self, *, take_over: Collection[str] = ()) -> None:
+        """Store the persisted fields if they changed.
+
+        Only the entity its device or group has added saves (`_owns_persisted_state`).
+        A field is only written once it is owned: restored from the record, changed
+        since loading, or named in `take_over` because its value came from Home
+        Assistant. Fields still at their loaded values are left out, and no record is
+        created for them alone.
+        """
+        if not self._persisted_state_fields or not self._persisted_state_loaded:
+            return
+
+        if not self._owns_persisted_state():
+            return
+
+        namespace = self._persisted_state_namespace()
+
+        if namespace is None:
+            return
+
+        key = self._persisted_state_key(self.unique_id)
+        state = self._dump_persisted_state()
+        loaded = self._loaded_state or {}
+
+        # Fields changed since loading are newer than any copy Home Assistant kept.
+        # A field still at its loaded value is not, and is left out of the record, so
+        # that HA can still fill it after a restart.
+        changed = {name for name in state if state[name] != loaded.get(name)}
+        owned = self._stored_state_fields | changed | set(take_over)
+
+        if not owned:
+            return
+
+        # Keys this version does not know, e.g. from a newer one, are kept
+        stored = namespace.get(key)
+        record = dict(stored) if isinstance(stored, dict) else {}
+        record.update({name: state[name] for name in owned})
+
+        if record != stored:
+            namespace[key] = record
+
+        self._stored_state_fields = frozenset(owned)
+
     def log(self, level: int, msg: str, *args: Any, **kwargs: Any) -> None:
         """Log a message."""
         msg = f"%s: {msg}"
@@ -538,11 +694,6 @@ class PlatformEntity(BaseEntity):
     _unique_id_suffix: str | None = None
 
     _migrate_platform_unique_ids: tuple[tuple[UniqueIdMigration, str]] | None = None
-
-    # Fields of host-side state that no ZCL attribute holds, such as a light's
-    # brightness before it was turned off. They are kept in the device's store and
-    # restored when the entity is added. By default, field `x` is attribute `_x`.
-    _persisted_state_fields: tuple[str, ...] = ()
 
     def __init__(
         self,
@@ -586,15 +737,6 @@ class PlatformEntity(BaseEntity):
         super().__init__(unique_id=unique_id, **kwargs)
 
         self._device: BaseDevice = device
-
-        # Persisted state is only saved once it has been loaded, so that the defaults
-        # set in `__init__` never overwrite a stored record
-        self._persisted_state_loaded: bool = False
-        # Fields the store holds for this entity: restored from it, or saved to it.
-        # Home Assistant's restored copies of these are older and are ignored.
-        self._stored_state_fields: frozenset[str] = frozenset()
-        # The fields as they were right after loading
-        self._loaded_state: dict[str, Any] | None = None
 
     def _apply_entity_config(
         self,
@@ -696,130 +838,19 @@ class PlatformEntity(BaseEntity):
             available=self.available,
         )
 
-    def on_add(self) -> None:
-        """Run when entity is added."""
-        super().on_add()
-        self._load_persisted_state()
-
-    def maybe_emit_state_changed_event(self) -> None:
-        """Send the state of this platform entity."""
-        super().maybe_emit_state_changed_event()
-        self._save_persisted_state()
-
     def _persisted_state_namespace(self) -> StoreNamespace | None:
         """Return the store namespace holding restore records, if there is a store."""
         return get_store_namespace(self._device.device, ENTITY_STATE_NAMESPACE)
 
-    def _dump_persisted_state(self) -> dict[str, Any]:
-        """Return the persisted fields as a JSON-compatible record."""
-        return {
-            name: getattr(self, f"_{name}") for name in self._persisted_state_fields
-        }
+    def _persisted_state_key(self, unique_id: str) -> str:
+        """Return the key of the restore record of this entity under `unique_id`."""
+        return entity_state_key(self.PLATFORM, unique_id)
 
-    def _apply_persisted_state(self, record: Mapping[str, Any]) -> frozenset[str]:
-        """Apply a stored record and return the names of the fields it restored."""
-        restored = set()
-
-        for name in self._persisted_state_fields:
-            if name in record:
-                setattr(self, f"_{name}", record[name])
-                restored.add(name)
-
-        return frozenset(restored)
-
-    def _load_persisted_state(self) -> None:
-        """Restore persisted fields from the device's store."""
-        if not self._persisted_state_fields or self._persisted_state_loaded:
-            return
-
-        self._persisted_state_loaded = True
-        namespace = self._persisted_state_namespace()
-
-        if namespace is None:
-            return
-
-        key = entity_state_key(self.PLATFORM, self.unique_id)
-        self._restore_persisted_record(namespace, key)
-        self._loaded_state = self._dump_persisted_state()
-
-    def _restore_persisted_record(self, namespace: StoreNamespace, key: str) -> None:
-        """Apply the stored record of this entity, if there is one."""
-        if key not in namespace:
-            # The record follows the entity when its unique ID changes
-            for old_unique_id in sorted(self.migrate_unique_ids):
-                old_key = entity_state_key(self.PLATFORM, old_unique_id)
-
-                if old_key in namespace:
-                    namespace[key] = namespace[old_key]
-                    del namespace[old_key]
-                    break
-            else:
-                return
-
-        record = namespace[key]
-
-        if not isinstance(record, dict):
-            self.warning("Ignoring invalid stored state %r", record)
-            return
-
-        try:
-            self._stored_state_fields = self._apply_persisted_state(record)
-        except Exception:  # noqa: BLE001
-            self.error("Failed to restore stored state %r", record, exc_info=True)
-            return
-
-        if (
-            ignored := (set(record) & set(self._persisted_state_fields))
-            - self._stored_state_fields
-        ):
-            self.debug("Ignoring invalid stored %s in %r", sorted(ignored), record)
-
-    def _save_persisted_state(self, *, take_over: Collection[str] = ()) -> None:
-        """Store the persisted fields if they changed.
-
-        Only the entity the device has added saves: discovery creates candidate
-        copies of live entities, and a removed entity can still finish a command,
-        and neither may overwrite the live entity's record. A field is only written
-        once it is owned: restored from the record, changed since loading, or named
-        in `take_over` because its value came from Home Assistant. Fields still at
-        their loaded values are left out, and no record is created for them alone.
-        """
-        if not self._persisted_state_fields or not self._persisted_state_loaded:
-            return
-
-        if (
-            self._device.platform_entities.get((self.PLATFORM, self.unique_id))
-            is not self
-        ):
-            return
-
-        namespace = self._persisted_state_namespace()
-
-        if namespace is None:
-            return
-
-        key = entity_state_key(self.PLATFORM, self.unique_id)
-        state = self._dump_persisted_state()
-        loaded = self._loaded_state or {}
-
-        # Fields changed since loading are newer than any copy Home Assistant kept.
-        # A field still at its loaded value is not, and is left out of the record, so
-        # that HA can still fill it after a restart.
-        changed = {name for name in state if state[name] != loaded.get(name)}
-        owned = self._stored_state_fields | changed | set(take_over)
-
-        if not owned:
-            return
-
-        # Keys this version does not know, e.g. from a newer one, are kept
-        stored = namespace.get(key)
-        record = dict(stored) if isinstance(stored, dict) else {}
-        record.update({name: state[name] for name in owned})
-
-        if record != stored:
-            namespace[key] = record
-
-        self._stored_state_fields = frozenset(owned)
+    def _owns_persisted_state(self) -> bool:
+        """Return whether this is the entity the device has added."""
+        return (
+            self._device.platform_entities.get((self.PLATFORM, self.unique_id)) is self
+        )
 
 
 class DeviceValueEntity(PlatformEntity):
@@ -1099,6 +1130,28 @@ class GroupEntity(BaseEntity):
     def group(self) -> Group:
         """Return the group."""
         return self._group
+
+    def _persisted_state_namespace(self) -> StoreNamespace | None:
+        """Return the network store namespace holding restore records, if any."""
+        return get_network_store_namespace(
+            self._group.gateway.application_controller, GROUP_ENTITY_STATE_NAMESPACE
+        )
+
+    def _persisted_state_key(self, unique_id: str) -> str:
+        """Return the key of the restore record of this entity under `unique_id`."""
+        return group_entity_state_key(self.group_id, self.PLATFORM, unique_id)
+
+    def _owns_persisted_state(self) -> bool:
+        """Return whether this is the entity its group has registered.
+
+        A group's entities are unregistered when it is torn down or drops below two
+        members, and stop writing once the gateway no longer has the group, so that
+        nothing writes the records again after the group is removed.
+        """
+        return (
+            self._group.gateway.groups.get(self.group_id) is self._group
+            and self._group.group_entities.get(self.unique_id) is self
+        )
 
     def debounced_update(self, _: Any | None = None) -> None:
         """Debounce updating group entity from member entity updates."""

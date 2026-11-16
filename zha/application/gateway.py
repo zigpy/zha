@@ -72,6 +72,7 @@ from zha.zigbee.device import (
     GreenPowerDevice,
 )
 from zha.zigbee.group import Group, GroupInfo, GroupMemberReference
+from zha.zigbee.store import remove_group_entity_states
 
 BLOCK_LOG_TIMEOUT: Final[int] = 60
 SHUT_DOWN_DELAY_S: Final[float] = 0.1
@@ -702,6 +703,8 @@ class Gateway(AsyncUtilMixin, EventBase):
         """Handle zigpy group removed event."""
         self._emit_group_gateway_message(zigpy_group, ZHA_GW_MSG_GROUP_REMOVED)
         zha_group = self._groups.pop(zigpy_group.group_id)
+        # The group's entities stop writing once the gateway no longer has the group
+        remove_group_entity_states(self.application_controller, zigpy_group.group_id)
         zha_group.info("group_removed")
 
     def _emit_group_gateway_message(  # pylint: disable=unused-argument
