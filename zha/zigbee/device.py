@@ -72,7 +72,12 @@ from zha.application.const import (
     ZHA_DEVICE_UPDATED_EVENT,
     ZHA_EVENT,
 )
-from zha.application.helpers import convert_to_zcl_values, convert_zcl_value, safe_read
+from zha.application.helpers import (
+    convert_to_zcl_values,
+    convert_zcl_value,
+    get_matched_clusters,
+    safe_read,
+)
 from zha.application.platforms import (
     BaseEntity,
     BaseEntityState,
@@ -92,6 +97,13 @@ from zha.quirks import (
     GreenPowerQuirkRegistryEntry,
     QuirkRegistryEntry,
     ReplacingZigpyDeviceFactory,
+)
+from zha.zigbee.applied_config import (
+    ADDR_MODE_GROUP,
+    AppliedConfigRecorder,
+    BindOperation,
+    ConfigResult,
+    destination_json,
 )
 from zha.zigbee.cluster_config import (
     aggregate_cluster_configs,
@@ -166,6 +178,29 @@ class ClusterBinding:
     type: str
     id: int
     endpoint_id: int
+
+
+@dataclass(frozen=True, kw_only=True)
+class BindingResult:
+    """Outcome of a bind or unbind request for one cluster of a device.
+
+    `destination` is `{"ieee", "endpoint"}` (plus `"coordinator": True` for the
+    coordinator) or `{"group"}`, as in the device's records. `status` is the name of the
+    ZDO status the device answered and `error` the class name of the exception raised
+    when it did not answer (a request that timed out may still have been applied). An
+    unbind of a binding the device does not have (`NO_ENTRY`) counts as a success.
+    """
+
+    endpoint_id: int
+    cluster_id: int
+    destination: dict[str, Any]
+    status: str | None
+    error: str | None
+    success: bool
+
+    def as_dict(self) -> dict[str, Any]:
+        """Return the result as JSON-compatible data, e.g. for a websocket reply."""
+        return dataclasses.asdict(self)
 
 
 class DeviceStatus(Enum):
@@ -366,6 +401,8 @@ class BaseDevice[ZigpyDeviceT: ZigpyBaseDevice](LogMixin, EventBase):
         # legacy claim-during-discovery flow (which configured handlers even when
         # the visible entity was filtered out later).
         self._discovered_entities: list[PlatformEntity] = []
+        # Whether creating an entity raised during the last discovery
+        self._discovery_failed: bool = False
         self._initialized: bool = False
         self.semaphore: asyncio.Semaphore = asyncio.Semaphore(3)
         self._on_remove_callbacks: list[Callable[[], None]] = []
@@ -854,8 +891,18 @@ class BaseDevice[ZigpyDeviceT: ZigpyBaseDevice](LogMixin, EventBase):
         """
         raise NotImplementedError
 
+    def note_entity_creation_failed(self) -> None:
+        """Note that an entity of this device could not be created.
+
+        Discovery code that catches an entity's construction error calls this, so the
+        configuration of the next run is known to be incomplete and its records are
+        not marked stale. It holds until the next discovery starts.
+        """
+        self._discovery_failed = True
+
     def _discover_new_entities(self) -> None:
         self._discovered_entities.clear()
+        self._discovery_failed = False
 
         # Iterate defensively so a failure in any single entity construction
         # does not abort discovery for the rest of the device.
@@ -867,6 +914,7 @@ class BaseDevice[ZigpyDeviceT: ZigpyBaseDevice](LogMixin, EventBase):
                 break
             except Exception:  # pylint: disable=broad-except
                 _LOGGER.exception("Failed to create entity during discovery")
+                self.note_entity_creation_failed()
                 continue
 
             self._discovered_entities.append(entity)
@@ -1444,10 +1492,14 @@ class ZigbeeDevice(BaseDevice[ZigpyDevice]):
 
         self._discover_new_entities()
 
-        # Configure binding and reporting from entity-level cluster configs
+        # Configure binding and reporting from entity-level cluster configs. A run
+        # with nothing to configure still marks earlier records as no longer desired,
+        # unless an entity could not be created and its configuration is missing.
         aggregated = aggregate_cluster_configs(self._discovered_entities)
-        if aggregated and not self.skip_configuration:
-            await configure_cluster_configs(self, aggregated)
+        if not self.skip_configuration:
+            await configure_cluster_configs(
+                self, aggregated, mark_stale=not self._discovery_failed
+            )
 
         self.emit_reconfigure_done()
 
@@ -1731,74 +1783,167 @@ class ZigbeeDevice(BaseDevice[ZigpyDevice]):
 
     async def async_bind_to_group(
         self, group_id: int, cluster_bindings: list[ClusterBinding]
-    ) -> None:
-        """Directly bind this device to a group for the given clusters."""
-        await self._async_group_binding_operation(
-            group_id, zdo_types.ZDOCmd.Bind_req, cluster_bindings
+    ) -> list[BindingResult]:
+        """Directly bind this device to a group for the given clusters.
+
+        Only output clusters of the device are bound. Returns the outcome per cluster,
+        and records each binding as user-made in the device's store.
+        """
+        return await self._async_group_binding_operation(
+            group_id, "bind", cluster_bindings
         )
 
     async def async_unbind_from_group(
         self, group_id: int, cluster_bindings: list[ClusterBinding]
-    ) -> None:
+    ) -> list[BindingResult]:
         """Unbind this device from a group for the given clusters."""
-        await self._async_group_binding_operation(
-            group_id, zdo_types.ZDOCmd.Unbind_req, cluster_bindings
+        return await self._async_group_binding_operation(
+            group_id, "unbind", cluster_bindings
         )
 
     async def _async_group_binding_operation(
         self,
         group_id: int,
-        operation: zdo_types.ZDOCmd,
+        operation: BindOperation,
         cluster_bindings: list[ClusterBinding],
-    ) -> None:
+    ) -> list[BindingResult]:
         """Create or remove a direct zigbee binding between a device and a group."""
-
-        zdo = self._zigpy_device.zdo
-        op_msg = "0x%04x: %s %s, ep: %s, cluster: %s to group: 0x%04x"
         destination_address = zdo_types.MultiAddress()
         destination_address.addrmode = uint8_t(1)
         destination_address.nwk = uint16_t(group_id)
 
-        tasks = []
-
-        for cluster_binding in cluster_bindings:
-            if cluster_binding.endpoint_id == 0:
-                continue
-            if (
-                cluster_binding.id
+        return await self._async_binding_requests(
+            operation,
+            [
+                (cluster_binding.endpoint_id, cluster_binding.id, destination_address)
+                for cluster_binding in cluster_bindings
+                if cluster_binding.endpoint_id != 0
+                and cluster_binding.id
                 in self._zigpy_device.endpoints[
                     cluster_binding.endpoint_id
                 ].out_clusters
-            ):
-                op_params = (
-                    self.nwk,
-                    operation.name,
-                    str(self.ieee),
-                    cluster_binding.endpoint_id,
-                    cluster_binding.id,
-                    group_id,
+            ],
+        )
+
+    async def async_bind_to_device(self, target: BaseDevice) -> list[BindingResult]:
+        """Bind this device's output clusters to the matching ones of `target`.
+
+        The clusters are those `get_matched_clusters` pairs: bindable output clusters
+        of this device with the target's input clusters (the coordinator's endpoint
+        for each cluster, if the target is the coordinator). Returns the outcome per
+        binding, and records each binding as user-made in this device's store.
+        """
+        return await self._async_device_binding_operation(target, "bind")
+
+    async def async_unbind_from_device(self, target: BaseDevice) -> list[BindingResult]:
+        """Remove the bindings `async_bind_to_device` makes to `target`."""
+        return await self._async_device_binding_operation(target, "unbind")
+
+    async def _async_device_binding_operation(
+        self, target: BaseDevice, operation: BindOperation
+    ) -> list[BindingResult]:
+        """Create or remove direct zigbee bindings between this device and another."""
+        return await self._async_binding_requests(
+            operation,
+            [
+                (
+                    pair.source_cluster.endpoint.endpoint_id,
+                    pair.source_cluster.cluster_id,
+                    pair.destination_address,
                 )
-                zdo.debug(f"processing {op_msg}", *op_params)
-                tasks.append(
-                    (
-                        zdo.request(
-                            operation,
-                            self.ieee,
-                            cluster_binding.endpoint_id,
-                            cluster_binding.id,
-                            destination_address,
-                        ),
-                        op_msg,
-                        op_params,
-                    )
-                )
-        res = await asyncio.gather(*(t[0] for t in tasks), return_exceptions=True)
-        for outcome, log_msg in zip(res, tasks):
-            if isinstance(outcome, Exception):
-                fmt = f"{log_msg[1]} failed: %s"
+                for pair in await get_matched_clusters(self, target)
+            ],
+        )
+
+    async def _async_binding_requests(
+        self,
+        operation: BindOperation,
+        requests: list[tuple[int, int, zdo_types.MultiAddress]],
+    ) -> list[BindingResult]:
+        """Send bind or unbind requests for `(endpoint, cluster, destination)` items.
+
+        The requests are sent concurrently. Each outcome is returned and recorded as a
+        user-made binding.
+        """
+        zdo = self._zigpy_device.zdo
+        command = (
+            zdo_types.ZDOCmd.Bind_req
+            if operation == "bind"
+            else zdo_types.ZDOCmd.Unbind_req
+        )
+
+        outcomes = await asyncio.gather(
+            *(
+                zdo.request(command, self.ieee, endpoint_id, cluster_id, destination)
+                for endpoint_id, cluster_id, destination in requests
+            ),
+            return_exceptions=True,
+        )
+
+        recorder = AppliedConfigRecorder(self._zigpy_device)
+        coordinator_ieee = self._zigpy_device.application.state.node_info.ieee
+        results: list[BindingResult] = []
+
+        for (endpoint_id, cluster_id, destination), outcome in zip(
+            requests, outcomes, strict=True
+        ):
+            if destination.addrmode == ADDR_MODE_GROUP:
+                target = f"group: 0x{destination.nwk:04x}"
             else:
-                fmt = f"{log_msg[1]} completed: %s"
-            zdo.debug(fmt, *(log_msg[2] + (outcome,)))
+                target = f"{destination.ieee}, ep: {destination.endpoint}"
+
+            if isinstance(outcome, BaseException):
+                result = ConfigResult.from_exception(outcome)
+                state = "failed"
+            else:
+                try:
+                    result = ConfigResult.from_status(outcome[0])
+                except (TypeError, IndexError, ValueError):
+                    result = ConfigResult(error="NoStatus")
+
+                state = "completed"
+
+            zdo.debug(
+                "0x%04x: %s %s, ep: %s, cluster: %s to %s %s: %s",
+                self.nwk,
+                command.name,
+                str(self.ieee),
+                endpoint_id,
+                cluster_id,
+                target,
+                state,
+                outcome,
+            )
+
+            try:
+                recorder.record_binding(
+                    endpoint_id=endpoint_id,
+                    cluster_id=cluster_id,
+                    destination=destination,
+                    operation=operation,
+                    origin="user",
+                    result=result,
+                )
+            except Exception:  # pylint: disable=broad-except
+                _LOGGER.exception(
+                    "[%s] Failed to record binding of cluster %s on endpoint %s",
+                    self.ieee,
+                    cluster_id,
+                    endpoint_id,
+                )
+
+            results.append(
+                BindingResult(
+                    endpoint_id=endpoint_id,
+                    cluster_id=cluster_id,
+                    destination=destination_json(destination, coordinator_ieee),
+                    status=result.status,
+                    error=result.error,
+                    success=result.is_acknowledged(operation),
+                )
+            )
+
+        return results
 
     def get_diagnostics_json(self) -> dict[str, Any]:
         """Get ZHA device information."""

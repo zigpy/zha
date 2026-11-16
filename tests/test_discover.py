@@ -49,6 +49,7 @@ from tests.common import (
     ZhaJsonEncoder,
     create_mock_zigpy_device,
     get_entity,
+    get_fixture_diagnostics_json,
     join_zigpy_device,
     update_attribute_cache,
     zigpy_device_from_device_data,
@@ -135,7 +136,7 @@ async def test_device_override_entities(zha_gateway: Gateway) -> None:
 
     # All other entities and diagnostics stay the same
     loaded_device_data = json.loads(
-        json.dumps(zha_device.get_diagnostics_json(), cls=ZhaJsonEncoder)
+        json.dumps(get_fixture_diagnostics_json(zha_device), cls=ZhaJsonEncoder)
     )
 
     expected_loaded_device_data = device_data
@@ -849,7 +850,7 @@ async def test_devices_from_files(
         # XXX: We re-serialize the JSON because integer enum types are converted when
         # serializing but will not compare properly otherwise
         loaded_device_data = json.loads(
-            json.dumps(zha_device.get_diagnostics_json(), cls=ZhaJsonEncoder)
+            json.dumps(get_fixture_diagnostics_json(zha_device), cls=ZhaJsonEncoder)
         )
 
         # The quirk class path varies with the quirks implementation (v2 quirks

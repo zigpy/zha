@@ -26,6 +26,7 @@ import zigpy.zdo.types as zdo_t
 
 from tests.common import (
     ZhaJsonEncoder,
+    get_fixture_diagnostics_json,
     join_zigpy_device,
     patch_cluster_for_testing,
     zigpy_device_from_device_data,
@@ -443,7 +444,7 @@ async def main(paths: list[str]):
                 await zha_gateway.async_block_till_done(wait_background_tasks=True)
 
             # First, try to join the device
-            initial_json = zha_device.get_diagnostics_json()
+            initial_json = get_fixture_diagnostics_json(zha_device)
 
             await zha_device.on_remove()
             del zha_gateway.devices[zha_device.ieee]
@@ -460,7 +461,7 @@ async def main(paths: list[str]):
                 )
                 await zha_gateway.async_block_till_done(wait_background_tasks=True)
 
-            rejoined_json = rejoined_zha_device.get_diagnostics_json()
+            rejoined_json = get_fixture_diagnostics_json(rejoined_zha_device)
             fw_version = rejoined_zha_device.firmware_version
 
             await rejoined_zha_device.on_remove()
