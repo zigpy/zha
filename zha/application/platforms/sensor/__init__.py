@@ -18,6 +18,7 @@ from zigpy import types
 from zigpy.profiles.zha import PROFILE_ID as ZHA_PROFILE_ID
 from zigpy.profiles.zll import PROFILE_ID as ZLL_PROFILE_ID
 from zigpy.state import Counter, State
+from zigpy.store import StoredValue, StoreValueDeletedEvent, StoreValueUpdatedEvent
 from zigpy.zcl import (
     AttributeReadEvent,
     AttributeReportedEvent,
@@ -134,9 +135,10 @@ from zha.units import (
     UnitOfVolume,
     UnitOfVolumeFlowRate,
 )
+from zha.zigbee.store import get_device_store
 
 if TYPE_CHECKING:
-    from zha.zigbee.device import Device
+    from zha.zigbee.device import BaseDevice, Device
     from zha.zigbee.endpoint import Endpoint
 
 DEFAULT_FORMATTING = NumberFormatting(
@@ -325,15 +327,7 @@ class Sensor(BaseSensor, ZclPlatformEntity):
         state_class_value: SensorStateClass,
     ) -> SensorStateClass | None:
         """Validate and return a state class."""
-        try:
-            return SensorStateClass(state_class_value)
-        except ValueError as ex:
-            _LOGGER.warning(
-                "Quirks provided an invalid state class: %s: %s",
-                state_class_value,
-                ex,
-            )
-            return None
+        return _validate_state_class(state_class_value)
 
     @property
     def native_value(self) -> date | datetime | str | int | float | None:
@@ -404,6 +398,134 @@ class Sensor(BaseSensor, ZclPlatformEntity):
             only_cache=False,
         )
         self.maybe_emit_state_changed_event()
+
+
+def _validate_state_class(
+    state_class: SensorStateClass | str,
+) -> SensorStateClass | None:
+    """Return a valid state class, or `None` with a warning for an invalid one."""
+    try:
+        return SensorStateClass(state_class)
+    except ValueError as ex:
+        _LOGGER.warning(
+            "Quirks provided an invalid state class: %s: %s", state_class, ex
+        )
+        return None
+
+
+class DeviceValueSensor(BaseSensor):
+    """Sensor showing a device value, kept in the device's store.
+
+    A device value is state that is not a ZCL attribute, such as a Tuya datapoint.
+    The entity is bound to the device only, so it needs no endpoint or cluster.
+    """
+
+    _divisor: int | float | None = None
+    _multiplier: int | float | None = None
+    _value_converter: typing.Callable[[typing.Any], typing.Any] | None = None
+
+    def __init__(
+        self,
+        device: BaseDevice,
+        *,
+        value: StoredValue[Any],
+        value_converter: typing.Callable[[typing.Any], typing.Any] | None = None,
+        divisor: int | float | None = None,
+        multiplier: int | float | None = None,
+        suggested_display_precision: int | None = None,
+        device_class: SensorDeviceClass | None = None,
+        state_class: SensorStateClass | None = None,
+        unit: str | None = None,
+        **kwargs: Any,
+    ) -> None:
+        """Init this sensor."""
+        self._value = value
+
+        if value_converter is not None:
+            self._value_converter = value_converter
+        if divisor is not None and divisor != 1:
+            self._divisor = divisor
+        if multiplier is not None and multiplier != 1:
+            self._multiplier = multiplier
+        if suggested_display_precision is not None:
+            self._attr_suggested_display_precision = suggested_display_precision
+        if device_class is not None:
+            self._attr_device_class = validate_device_class(
+                SensorDeviceClass,
+                device_class,
+                Platform.SENSOR.value,
+                _LOGGER,
+            )
+        if state_class is not None:
+            self._attr_state_class = _validate_state_class(state_class)
+        if unit is not None:
+            self._attr_native_unit_of_measurement = unit
+
+        super().__init__(device, **kwargs)
+
+    def on_add(self) -> None:
+        """Run when entity is added."""
+        super().on_add()
+        store = get_device_store(self._device.device)
+
+        if store is not None:
+            self._on_remove_callbacks.append(
+                store.on_change(self._value, self._handle_value_changed)
+            )
+
+    # TODO: remove once HA Core's `websocket_get_groupable_devices` no longer reads
+    # `entity.endpoint` for every entity of a groupable device
+    @property
+    def endpoint(self) -> Endpoint:
+        """Return the device's first endpoint, for code that expects every entity on one.
+
+        A device value has no endpoint. Home Assistant's list of groupable devices
+        reads the endpoint of each entity of a device, and fails without one.
+        """
+        warnings.warn(
+            f"`{type(self).__name__}.endpoint` is deprecated, device-bound entities"
+            " have no endpoint",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        endpoints = cast("Device", self._device).endpoints
+        return endpoints[min(ep_id for ep_id in endpoints if ep_id != 0)]
+
+    def _handle_value_changed(
+        self, event: StoreValueUpdatedEvent | StoreValueDeletedEvent
+    ) -> None:
+        """Handle the value being set or deleted."""
+        self.maybe_emit_state_changed_event()
+
+    @property
+    def native_value(self) -> date | datetime | str | int | float | None:
+        """Return the state of the entity."""
+        store = get_device_store(self._device.device)
+
+        if store is None:
+            return None
+
+        value = store.get(self._value)
+
+        if value is None:
+            return None
+
+        # The store is untyped at rest, so a value can be of a type the converter or
+        # the scaling does not expect. Values are JSON, so there are no NaNs.
+        try:
+            if self._value_converter is not None:
+                return self._value_converter(value)
+
+            if self._multiplier is not None:
+                value *= self._multiplier
+
+            if self._divisor is not None:
+                value /= self._divisor
+        except (ArithmeticError, LookupError, TypeError, ValueError):
+            self.debug("Cannot show value %r", value, exc_info=True)
+            return None
+
+        return value
 
 
 class TimestampSensor(Sensor):

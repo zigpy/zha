@@ -4,6 +4,7 @@ import asyncio
 from collections.abc import Awaitable, Callable
 from datetime import UTC, datetime
 from functools import partial
+import json
 from typing import Any
 from unittest.mock import MagicMock, call, patch
 
@@ -33,6 +34,7 @@ from tests.common import (
     get_entity,
     join_zigpy_device,
     patch_cluster_for_testing,
+    rejoin_zha_device,
     send_attributes_report,
     zigpy_device_from_json,
 )
@@ -49,6 +51,7 @@ from zha.application.platforms.sensor.device_class import (
     SensorDeviceClass as SensorDeviceClassV2,
 )
 from zha.application.platforms.sensor.helpers import resolution_to_decimal_precision
+from zha.const import STATE_CHANGED
 from zha.quirks import DeviceRegistry
 from zha.units import (
     PERCENTAGE,
@@ -57,8 +60,10 @@ from zha.units import (
     UnitOfMass,
     UnitOfPressure,
     UnitOfVolume,
+    UnitOfVolumetricFlux,
 )
 from zha.zigbee.device import Device
+from zha.zigbee.store import device_value
 
 EMAttrs = homeautomation.ElectricalMeasurement.AttributeDefs
 
@@ -2307,3 +2312,190 @@ async def test_em_poller_skips_fallback_multiplier_and_divisor_attributes(
     }
     assert polled
     assert not {attr for attr in polled if "multiplier" in attr or "divisor" in attr}
+
+
+RAIN_INTENSITY = device_value("rain_intensity", int)
+
+(
+    QuirkBuilder("Fake_Manufacturer_value", "Fake_Model_value")
+    .adds_entity(
+        sensor.DeviceValueSensor,
+        value=RAIN_INTENSITY,
+        divisor=10,
+        state_class=SensorStateClass.MEASUREMENT,
+        unit=UnitOfVolumetricFlux.MILLIMETERS_PER_HOUR,
+        unique_id_suffix="1-rain_intensity",
+        translation_key="rain_intensity",
+        fallback_name="Rain intensity",
+    )
+    .add_to_registry()
+)
+
+
+async def test_device_value_sensor(zha_gateway: Gateway) -> None:
+    """A sensor shows a device value from the store, with no ZCL attribute behind it."""
+    zigpy_device = create_mock_zigpy_device(
+        zha_gateway,
+        {
+            1: {
+                SIG_EP_INPUT: [general.Basic.cluster_id],
+                SIG_EP_OUTPUT: [],
+                SIG_EP_TYPE: zigpy.profiles.zha.DeviceType.SIMPLE_SENSOR,
+                SIG_EP_PROFILE: zigpy.profiles.zha.PROFILE_ID,
+            }
+        },
+        manufacturer="Fake_Manufacturer_value",
+        model="Fake_Model_value",
+    )
+    zigpy_device = get_device(zigpy_device)
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
+
+    entity = get_entity(
+        zha_device, platform=Platform.SENSOR, exact_entity_type=sensor.DeviceValueSensor
+    )
+
+    # The unique ID matches that of a quirk entity on endpoint 1
+    assert entity.unique_id == f"{zigpy_device.ieee}-1-rain_intensity"
+    assert entity.state.native_value is None
+
+    listener = MagicMock()
+    entity.on_event(STATE_CHANGED, listener)
+
+    assert "store" not in zha_device.get_diagnostics_json()
+
+    zigpy_device.store[RAIN_INTENSITY] = 25
+    assert_state(entity, 2.5, UnitOfVolumetricFlux.MILLIMETERS_PER_HOUR)
+    assert len(listener.mock_calls) == 1
+
+    store = zha_device.get_diagnostics_json()["store"]
+    assert store == {
+        "device_values": {
+            "rain_intensity": {
+                "value": 25,
+                "version": 1,
+                "last_updated": store["device_values"]["rain_intensity"][
+                    "last_updated"
+                ],
+            }
+        }
+    }
+
+    # A value the declaration cannot decode reads as unknown
+    zigpy_device.store.namespace(RAIN_INTENSITY.namespace)[RAIN_INTENSITY.key] = "x"
+    assert entity.state.native_value is None
+
+    zigpy_device.store[RAIN_INTENSITY] = 30
+    del zigpy_device.store[RAIN_INTENSITY]
+    assert entity.state.native_value is None
+    assert len(listener.mock_calls) == 4
+
+    # The value outlives the ZHA device, as it does a restart
+    zigpy_device.store[RAIN_INTENSITY] = 40
+    zha_device = await rejoin_zha_device(zha_gateway, zha_device)
+    new_entity = get_entity(
+        zha_device, platform=Platform.SENSOR, exact_entity_type=sensor.DeviceValueSensor
+    )
+    assert_state(new_entity, 4.0, UnitOfVolumetricFlux.MILLIMETERS_PER_HOUR)
+
+    # Home Assistant's groupable device list reads an endpoint of every entity
+    with pytest.warns(DeprecationWarning):
+        assert new_entity.endpoint is zha_device.endpoints[1]
+
+    # The removed entity no longer listens
+    listener.reset_mock()
+    zigpy_device.store[RAIN_INTENSITY] = 50
+    assert listener.mock_calls == []
+    assert_state(new_entity, 5.0, UnitOfVolumetricFlux.MILLIMETERS_PER_HOUR)
+
+
+async def test_device_value_sensor_options(zha_gateway: Gateway) -> None:
+    """Device value sensors take the scaling and metadata options quirk sensors do."""
+    zigpy_device = create_mock_zigpy_device(
+        zha_gateway,
+        {
+            1: {
+                SIG_EP_INPUT: [general.Basic.cluster_id],
+                SIG_EP_OUTPUT: [],
+                SIG_EP_TYPE: zigpy.profiles.zha.DeviceType.SIMPLE_SENSOR,
+                SIG_EP_PROFILE: zigpy.profiles.zha.PROFILE_ID,
+            }
+        },
+    )
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
+    value = device_value("energy", float)
+    entity = sensor.DeviceValueSensor(
+        zha_device,
+        unique_id=str(zha_device.ieee),
+        unique_id_suffix="energy",
+        value=value,
+        multiplier=3,
+        divisor=2,
+        suggested_display_precision=1,
+        device_class=SensorDeviceClass.ENERGY,
+        state_class="not a state class",
+        unit=UnitOfEnergy.KILO_WATT_HOUR,
+        translation_key="energy",
+    )
+    entity.on_add()
+
+    assert entity.state_class is None
+    assert entity.device_class == SensorDeviceClass.ENERGY
+    assert entity.state.suggested_display_precision == 1
+
+    zigpy_device.store[value] = 5
+    assert_state(entity, 7.5, UnitOfEnergy.KILO_WATT_HOUR)
+
+    # A value scaling cannot handle reads as unknown instead of raising
+    zigpy_device.store.namespace(value.namespace)[value.key] = "x"
+    assert entity.state.native_value is None
+
+    converted = sensor.DeviceValueSensor(
+        zha_device,
+        unique_id=str(zha_device.ieee),
+        unique_id_suffix="converted",
+        value=value,
+        value_converter=lambda value: 1 / value,
+        translation_key="energy",
+    )
+    zigpy_device.store[value] = 0
+    assert converted.state.native_value is None
+
+    mapped = sensor.DeviceValueSensor(
+        zha_device,
+        unique_id=str(zha_device.ieee),
+        unique_id_suffix="mapped",
+        value=value,
+        value_converter={1: "one"}.__getitem__,
+        translation_key="energy",
+    )
+    assert mapped.state.native_value is None
+    zigpy_device.store[value] = 4
+    assert converted.state.native_value == 0.25
+
+    await entity.on_remove()
+
+
+async def test_store_diagnostics_redacts_ieee(zha_gateway: Gateway) -> None:
+    """Store keys containing the IEEE address are redacted in diagnostics."""
+    zigpy_device = create_mock_zigpy_device(
+        zha_gateway,
+        {
+            1: {
+                SIG_EP_INPUT: [general.Basic.cluster_id],
+                SIG_EP_OUTPUT: [],
+                SIG_EP_TYPE: zigpy.profiles.zha.DeviceType.SIMPLE_SENSOR,
+                SIG_EP_PROFILE: zigpy.profiles.zha.PROFILE_ID,
+            }
+        },
+    )
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
+    zigpy_device.store.namespace("zha.entity_state")[f"light/{zigpy_device.ieee}-1"] = {
+        "off_brightness": 5
+    }
+    zigpy_device.store.namespace("device_values")["rain"] = 3
+
+    store = zha_device.get_diagnostics_json()["store"]
+
+    assert list(store) == ["device_values", "zha.entity_state"]
+    assert list(store["zha.entity_state"]) == ["light/<ieee>-1"]
+    assert str(zigpy_device.ieee) not in json.dumps(store)
