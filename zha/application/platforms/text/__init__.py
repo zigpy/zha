@@ -132,11 +132,13 @@ class TextConfigurationEntity(BaseText, ZclPlatformEntity):
 
         super().__init__(endpoint=endpoint, device=device, **kwargs)
 
-        # Without a limit from the caller or the class, use the attribute's own one
-        if (
-            max_length is None
-            and type(self)._attr_native_max == BaseText._attr_native_max
-        ):
+        # Without a limit from the caller or a subclass, use the attribute's own one
+        class_sets_max = any(
+            "_attr_native_max" in vars(cls)
+            for cls in type(self).__mro__
+            if cls is not BaseText and issubclass(cls, BaseText)
+        )
+        if max_length is None and not class_sets_max:
             attr_def = self._cluster.attributes_by_name.get(self._attribute_name)
             type_max = getattr(attr_def.type, "_max_len", None) if attr_def else None
             if type_max is not None:
@@ -208,12 +210,11 @@ class TextConfigurationEntity(BaseText, ZclPlatformEntity):
 
     async def async_set_value(self, value: str) -> None:
         """Write a new value to the attribute."""
-        new_value: str | bytes = (
-            value.encode("utf-8") if self._is_bytes_attribute else value
-        )
-
         error: str | None = None
         try:
+            new_value: str | bytes = (
+                value.encode("utf-8") if self._is_bytes_attribute else value
+            )
             await write_attributes_safe(
                 self._cluster, {self._attribute_name: new_value}
             )

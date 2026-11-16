@@ -243,8 +243,16 @@ async def test_text_entity_subclass(zha_device: Device) -> None:
     endpoint = zha_device.endpoints[1]
     entity = LocationText(endpoint=endpoint, device=zha_device, cluster=cluster)
     assert entity.state.native_value == "Attic"
-    # The class's limit wins over the attribute type's
+    # The class's limit wins over the attribute type's, even if it is the default
     assert entity.state.native_max == 8
+
+    class LongLocationText(LocationText):
+        _attr_native_max = MAX_LENGTH_STATE_STATE
+
+    long_entity = LongLocationText(
+        endpoint=endpoint, device=zha_device, cluster=cluster
+    )
+    assert long_entity.state.native_max == MAX_LENGTH_STATE_STATE
 
 
 @pytest.mark.parametrize(
@@ -269,9 +277,10 @@ async def test_text_entity_value_too_long(
         await entity.async_set_value(value)
 
     message = str(exc_info.value)
-    assert message.startswith(f"Failed to write attribute {attribute_name}")
-    assert (error is not None and error in message) or message == (
-        f"Failed to write attribute {attribute_name}"
-    )
+    if error is None:
+        assert message == f"Failed to write attribute {attribute_name}"
+    else:
+        assert message.startswith(f"Failed to write attribute {attribute_name}: ")
+        assert error in message
     assert "ä" not in message
     assert exc_info.value.__context__ is None
