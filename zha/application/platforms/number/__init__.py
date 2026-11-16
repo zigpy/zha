@@ -27,6 +27,7 @@ from zha.application.platforms import (
     BaseEntityState,
     ClusterConfig,
     ClusterMatch,
+    DeviceValueEntity,
     EntityCategory,
     PlatformEntity,
     PlatformFeatureGroup,
@@ -46,8 +47,11 @@ from zha.quirks import DANFOSS_ALLY_THERMOSTAT
 from zha.units import UnitOfTemperature, UnitOfTime
 
 if TYPE_CHECKING:
-    from zha.zigbee.device import Device
+    from zigpy.store import StoredValue
+
+    from zha.zigbee.device import BaseDevice, Device
     from zha.zigbee.endpoint import Endpoint
+    from zha.zigbee.store import DeviceValueWriter
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -397,6 +401,79 @@ class NumberConfigurationEntity(BaseNumber, ZclPlatformEntity):
         """Handle value update from cluster."""
         if event.attribute_name == self._attribute_name:
             self.maybe_emit_state_changed_event()
+
+
+class DeviceValueNumber(BaseNumber, DeviceValueEntity):
+    """Number showing and setting a device value, kept in the device's store.
+
+    It takes the options of `NumberConfigurationEntity` and scales the same way: the
+    value is kept unscaled, shown times `multiplier`, and written as the set value
+    divided by it, rounded to an int. A setting with fractions uses a multiplier
+    (0.5 for halves), so what is stored is what a device receives.
+    """
+
+    _attr_entity_category = EntityCategory.CONFIG
+    _attr_native_min_value: float = 0.0
+    _attr_native_max_value: float = 100.0
+    _attr_native_step: float = 1.0
+    _multiplier: float = 1
+
+    def __init__(
+        self,
+        device: BaseDevice,
+        *,
+        value: StoredValue[Any],
+        writer: DeviceValueWriter[Any] | None = None,
+        min_value: float | None = None,
+        max_value: float | None = None,
+        step: float | None = None,
+        multiplier: float | None = None,
+        device_class: NumberDeviceClass | None = None,
+        unit: str | None = None,
+        mode: str | None = None,
+        **kwargs: Any,
+    ) -> None:
+        """Init this number."""
+        if writer is not None:
+            self._writer = writer
+        if min_value is not None:
+            self._attr_native_min_value = min_value
+        if max_value is not None:
+            self._attr_native_max_value = max_value
+        if step is not None:
+            self._attr_native_step = step
+        if multiplier is not None:
+            self._multiplier = multiplier
+        if device_class is not None:
+            self._attr_device_class = validate_device_class(
+                NumberDeviceClass,
+                device_class,
+                Platform.NUMBER.value,
+                _LOGGER,
+            )
+        if unit is not None:
+            self._attr_native_unit_of_measurement = unit
+        if mode is not None and mode in NumberMode:
+            self._attr_mode = NumberMode(mode)
+
+        super().__init__(device, value=value, **kwargs)
+
+    @property
+    def native_value(self) -> float | None:
+        """Return the current value."""
+        value = self._get_value()
+
+        # The store is untyped at rest, so the value need not be a number
+        if isinstance(value, bool) or not isinstance(value, int | float):
+            if value is not None:
+                self.debug("Cannot show value %r", value)
+            return None
+
+        return value * self._multiplier
+
+    async def async_set_native_value(self, value: float) -> None:
+        """Update the current value from HA."""
+        await self._async_write_value(round(value / self._multiplier))
 
 
 @register_entity(AQARA_OPPLE_CLUSTER)

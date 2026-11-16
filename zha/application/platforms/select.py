@@ -35,6 +35,7 @@ from zha.application.platforms import (
     BaseEntityState,
     ClusterConfig,
     ClusterMatch,
+    DeviceValueEntity,
     EntityCategory,
     ZclPlatformEntity,
     register_entity,
@@ -52,6 +53,7 @@ from zha.application.platforms.legacy_quirks import (
     T2RelayOppleCluster,
 )
 from zha.application.platforms.siren import AdvancedSiren
+from zha.exceptions import ZHAException
 from zha.quirks import (
     BEGA_LIGHT_SWITCHABLE_WHITE,
     DANFOSS_ALLY_THERMOSTAT,
@@ -61,8 +63,11 @@ from zha.quirks import (
 )
 
 if TYPE_CHECKING:
-    from zha.zigbee.device import Device
+    from zigpy.store import StoredValue
+
+    from zha.zigbee.device import BaseDevice, Device
     from zha.zigbee.endpoint import Endpoint
+    from zha.zigbee.store import DeviceValueWriter
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -357,6 +362,79 @@ class ZCLEnumSelectEntity(BaseSelectEntity, ZclPlatformEntity):
     ) -> None:
         """Restore extra state attributes."""
         # Select entities backed by the ZCL cache don't need to restore their state!
+
+
+class DeviceValueSelect(BaseSelectEntity, DeviceValueEntity):
+    """Select showing and setting a device value, kept in the device's store.
+
+    Like `ZCLEnumSelectEntity`, the options are the members of `enum`, which must be
+    an int enum: a member is written as itself and stored as its int value.
+    """
+
+    _attr_entity_category = EntityCategory.CONFIG
+
+    def __init__(
+        self,
+        device: BaseDevice,
+        *,
+        value: StoredValue[Any],
+        enum: type[Enum],
+        writer: DeviceValueWriter[Any] | None = None,
+        **kwargs: Any,
+    ) -> None:
+        """Init this select."""
+        # Members are stored as JSON, and datapoints and attributes are ints
+        if not issubclass(enum, int):
+            raise TypeError(f"A device value select needs an int enum: {enum!r}")
+
+        if writer is not None:
+            self._writer = writer
+        self._enum = enum
+
+        super().__init__(device, value=value, **kwargs)
+        self._attr_options = [entry.name.replace("_", " ") for entry in self._enum]
+
+    @property
+    def state(self) -> EnumSelectState:
+        """Return the state of the select."""
+        return EnumSelectState(
+            **super().state.__dict__,
+            enum=self._enum.__name__,
+            options=self.options,
+        )
+
+    @property
+    def current_option(self) -> str | None:
+        """Return the selected option, or `None` for a value that is not a member."""
+        value = self._get_value()
+
+        if value is None:
+            return None
+
+        try:
+            option = self._enum(value)
+        except (LookupError, TypeError, ValueError):
+            self.debug("Cannot show value %r", value)
+            return None
+
+        return option.name.replace("_", " ")
+
+    async def async_select_option(self, option: str) -> None:
+        """Change the selected option."""
+        try:
+            member = self._enum[option.replace(" ", "_")]
+        except KeyError:
+            raise ZHAException(f"Invalid option {option!r}") from None
+
+        await self._async_write_value(member)
+
+    def restore_external_state_attributes(
+        self,
+        *,
+        state: str,
+    ) -> None:
+        """Restore extra state attributes."""
+        # The value is kept in the device's store, so there is nothing to restore
 
 
 @register_entity(OnOff.cluster_id)
