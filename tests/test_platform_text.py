@@ -2,6 +2,7 @@
 
 import pytest
 from zigpy.profiles import zha
+import zigpy.types
 from zigpy.zcl import foundation as zcl_f
 from zigpy.zcl.clusters import general
 
@@ -196,4 +197,53 @@ async def test_text_entity_write_failure(
 
     assert "location_desc" in str(exc_info.value)
     assert ("secret" in str(exc_info.value)) is value_in_error
+    # No chained error carries the value either
+    assert exc_info.value.__context__ is None
     assert entity.state.native_value == "old"
+
+
+@pytest.mark.parametrize(
+    ("value", "options"),
+    [
+        ("Kitchen", {"max_length": 4}),
+        ("", {"min_length": 1}),
+        ("kitchen 2", {"pattern": r"[a-z]+$"}),
+        ("x" * 300, {}),
+    ],
+)
+async def test_text_entity_value_outside_limits(
+    zha_device: Device, value: str, options: dict
+) -> None:
+    """Test that a device value Home Assistant would refuse is shown as unknown."""
+    cluster = zha_device.device.endpoints[1].basic
+    cluster.update_attribute(
+        general.Basic.AttributeDefs.manufacturer_version_details.id, value
+    )
+
+    entity = create_text_entity(zha_device, "manufacturer_version_details", **options)
+    assert entity.state.native_value is None
+
+
+async def test_text_entity_invalid_string(zha_device: Device) -> None:
+    """Test that the ZCL invalid string is shown as unknown."""
+    cluster = zha_device.device.endpoints[1].basic
+    invalid, _ = zigpy.types.CharacterString.deserialize(b"\xff")
+    cluster.update_attribute(general.Basic.AttributeDefs.location_desc.id, invalid)
+
+    entity = create_text_entity(zha_device, "location_desc")
+    assert entity.state.native_value is None
+
+
+async def test_text_entity_subclass(zha_device: Device) -> None:
+    """Test a subclass that sets its attribute on the class."""
+
+    class LocationText(TextConfigurationEntity):
+        _attribute_name = "location_desc"
+        _unique_id_suffix = "location"
+
+    cluster = zha_device.device.endpoints[1].basic
+    cluster.update_attribute(general.Basic.AttributeDefs.location_desc.id, "Attic")
+
+    endpoint = zha_device.endpoints[1]
+    entity = LocationText(endpoint=endpoint, device=zha_device, cluster=cluster)
+    assert entity.state.native_value == "Attic"

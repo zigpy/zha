@@ -5,6 +5,7 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 import logging
+import re
 from typing import TYPE_CHECKING, Any
 
 from zigpy.zcl import (
@@ -170,13 +171,30 @@ class TextConfigurationEntity(BaseText, ZclPlatformEntity):
 
     @property
     def native_value(self) -> str | None:
-        """Return the current value."""
+        """Return the current value, or None if it isn't a valid entity state."""
         value = self._cluster.get(self._attribute_name)
-        if value is None:
+        if value is None or getattr(value, "invalid", False):
             return None
         if isinstance(value, bytes):
-            return value.decode("utf-8", errors="replace")
-        return str(value)
+            value = value.decode("utf-8", errors="replace")
+        else:
+            value = str(value)
+
+        # Home Assistant refuses a state outside the entity's limits, so a value the
+        # device sent that doesn't fit them is shown as unknown
+        if not (
+            self.native_min
+            <= len(value)
+            <= min(self.native_max, MAX_LENGTH_STATE_STATE)
+        ) or (self.pattern is not None and re.match(self.pattern, value) is None):
+            _LOGGER.debug(
+                "%s: the value of %s doesn't fit the entity's length limits or pattern",
+                self.unique_id,
+                self._attribute_name,
+            )
+            return None
+
+        return value
 
     async def async_set_value(self, value: str) -> None:
         """Write a new value to the attribute."""
@@ -184,6 +202,7 @@ class TextConfigurationEntity(BaseText, ZclPlatformEntity):
             value.encode("utf-8") if self._is_bytes_attribute else value
         )
 
+        failed = False
         try:
             await write_attributes_safe(
                 self._cluster, {self._attribute_name: new_value}
@@ -191,10 +210,12 @@ class TextConfigurationEntity(BaseText, ZclPlatformEntity):
         except ZHAException:
             if self.mode is not TextMode.PASSWORD:
                 raise
-            # The error message contains the value, which must not end up in a log
-            raise ZHAException(
-                f"Failed to write attribute {self._attribute_name}"
-            ) from None
+            failed = True
+
+        if failed:
+            # Keep the value out of the error shown to the user. This is raised outside
+            # the `except` block so the original error isn't attached as its context.
+            raise ZHAException(f"Failed to write attribute {self._attribute_name}")
 
         self.maybe_emit_state_changed_event()
 
