@@ -1622,6 +1622,18 @@ async def test_gateway_shutdown_detaches_controller_listeners(
     """Retained controllers and groups must not notify a retired gateway."""
     controller = zha_gateway.application_controller
     original_shutdown = controller.shutdown
+    zigpy_dev = await zigpy_device_from_json(
+        controller, "tests/data/devices/centralite-3320-l.json"
+    )
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
+    original_remove = zha_device.on_remove
+
+    async def remove() -> None:
+        controller.listener_event("connection_lost", None)
+        controller.groups.listener_event("group_added", MagicMock())
+        connection_lost.assert_not_called()
+        group_added.assert_not_called()
+        await original_remove()
 
     async def shutdown() -> None:
         await original_shutdown()
@@ -1632,6 +1644,7 @@ async def test_gateway_shutdown_detaches_controller_listeners(
         patch.object(zha_gateway, "connection_lost") as connection_lost,
         patch.object(zha_gateway, "group_added") as group_added,
         patch.object(controller, "shutdown", side_effect=shutdown),
+        patch.object(zha_device, "on_remove", side_effect=remove) as device_remove,
     ):
         controller.listener_event("connection_lost", None)
         controller.groups.listener_event("group_added", MagicMock())
@@ -1646,6 +1659,7 @@ async def test_gateway_shutdown_detaches_controller_listeners(
         else:
             await zha_gateway.shutdown()
 
+        device_remove.assert_awaited_once()
         controller.listener_event("connection_lost", None)
         controller.groups.listener_event("group_added", MagicMock())
         connection_lost.assert_not_called()
