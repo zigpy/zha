@@ -1,6 +1,6 @@
 """Test ZHA firmware updates."""
 
-from unittest.mock import ANY, AsyncMock, call, patch
+from unittest.mock import ANY, AsyncMock, PropertyMock, call, patch
 
 import pytest
 from zigpy.device import ZigbeeDevice
@@ -494,14 +494,12 @@ async def test_firmware_update_raises(zha_gateway: Gateway) -> None:
         await zha_gateway.async_block_till_done()
 
 
-async def test_firmware_update_empty_exception_message(zha_gateway: Gateway) -> None:
-    """Bare ``TimeoutError()`` from zigpy must still produce an identifiable message."""
+async def _offer_update(zha_gateway: Gateway):
+    """Join a device and have it query for the test firmware image."""
     zigpy_device = zigpy_device_mock(zha_gateway)
     zha_device, ota_cluster, fw_image, installed_fw_version = await setup_test_data(
         zha_gateway, zigpy_device
     )
-
-    entity = get_entity(zha_device, platform=Platform.UPDATE)
 
     await ota_cluster._handle_query_next_image(
         foundation.ZCLHeader.cluster(
@@ -517,23 +515,335 @@ async def test_firmware_update_empty_exception_message(zha_gateway: Gateway) -> 
     )
     await zha_gateway.async_block_till_done()
 
-    raised = TimeoutError()
-    assert str(raised) == ""
+    entity = get_entity(zha_device, platform=Platform.UPDATE)
+
+    return zha_device, entity, fw_image
+
+
+WAKE_UP_HINT = (
+    " If the device is battery powered, wake it up (for example by pressing a button"
+    " on it) right before starting the update."
+)
+
+
+@pytest.mark.parametrize(
+    ("result", "progress", "mains_powered", "expected"),
+    [
+        (
+            foundation.Status.TIMEOUT,
+            None,
+            False,
+            "The device did not start downloading the firmware." + WAKE_UP_HINT,
+        ),
+        (
+            foundation.Status.TIMEOUT,
+            None,
+            True,
+            "The device did not start downloading the firmware.",
+        ),
+        (
+            foundation.Status.TIMEOUT,
+            42.9,
+            False,
+            "The device stopped downloading the firmware at 42%.",
+        ),
+        (
+            foundation.Status.TIMEOUT,
+            100.0,
+            False,
+            "The whole firmware image was sent, but the device did not confirm the"
+            " update.",
+        ),
+        (
+            foundation.Status.FAILURE,
+            None,
+            False,
+            "The update failed: a message to the device could not be delivered, or the"
+            " device reported a failure." + WAKE_UP_HINT,
+        ),
+        (
+            foundation.Status.FAILURE,
+            None,
+            True,
+            "The update failed: a message to the device could not be delivered, or the"
+            " device reported a failure.",
+        ),
+        (
+            foundation.Status.FAILURE,
+            7.0,
+            False,
+            "The update failed: a message to the device could not be delivered, or the"
+            " device reported a failure.",
+        ),
+        (
+            foundation.Status.NO_IMAGE_AVAILABLE,
+            None,
+            True,
+            "The device's firmware request does not match this image. The device may"
+            " already have this version or a newer one, or need a different image.",
+        ),
+        (
+            foundation.Status.ABORT,
+            50.0,
+            True,
+            "The device aborted the update.",
+        ),
+        (
+            foundation.Status.INVALID_IMAGE,
+            100.0,
+            True,
+            "The device rejected the firmware image as invalid.",
+        ),
+        (
+            foundation.Status.MALFORMED_COMMAND,
+            100.0,
+            True,
+            "The update ended with status MALFORMED_COMMAND (0x80).",
+        ),
+        (
+            None,
+            None,
+            True,
+            "A firmware update is already in progress for this device.",
+        ),
+    ],
+)
+async def test_firmware_update_result_message(
+    zha_gateway: Gateway,
+    result: foundation.Status | None,
+    progress: float | None,
+    mains_powered: bool,
+    expected: str,
+) -> None:
+    """An unsuccessful update result is described in words, not as an enum repr."""
+    zha_device, entity, fw_image = await _offer_update(zha_gateway)
+
+    async def update_firmware(image, progress_callback):
+        if progress is not None:
+            progress_callback(1, 1, progress)
+        return result
 
     with (
         patch(
             "zigpy.device.ZigbeeDevice.update_firmware",
-            AsyncMock(side_effect=raised),
+            AsyncMock(side_effect=update_firmware),
+        ),
+        patch.object(
+            type(zha_device),
+            "is_mains_powered",
+            new_callable=PropertyMock,
+            return_value=mains_powered,
         ),
         pytest.raises(ZHAException) as exc_info,
     ):
         await entity.async_install(
             version=f"0x{fw_image.firmware.header.file_version:08x}"
         )
-        await zha_gateway.async_block_till_done()
 
-    assert str(exc_info.value) == "Update was not successful: TimeoutError()"
-    assert exc_info.value.__cause__ is raised
+    assert str(exc_info.value) == expected
+    assert not entity.state.in_progress
+
+
+@pytest.mark.parametrize(
+    ("exception", "progress", "mains_powered", "expected"),
+    [
+        (
+            TimeoutError(),
+            None,
+            False,
+            "The device did not respond." + WAKE_UP_HINT,
+        ),
+        (
+            TimeoutError(),
+            None,
+            None,
+            "The device did not respond." + WAKE_UP_HINT,
+        ),
+        (
+            TimeoutError(),
+            None,
+            True,
+            "The device did not respond.",
+        ),
+        (
+            DeliveryError(
+                "Failed to deliver message: <sl_Status.ZIGBEE_DELIVERY_FAILED: 3074>"
+            ),
+            None,
+            True,
+            "The device could not be reached.",
+        ),
+        (
+            DeliveryError("Failed to deliver message"),
+            None,
+            False,
+            "The device could not be reached." + WAKE_UP_HINT,
+        ),
+        (
+            TimeoutError(),
+            100.0,
+            False,
+            "The device reported a successful update, but its new firmware version"
+            " could not be read back. It may still be restarting; check the firmware"
+            " version again later.",
+        ),
+        (
+            RuntimeError("Failed to download the firmware image: 404"),
+            None,
+            False,
+            "Failed to download the firmware image: 404",
+        ),
+        (
+            ValueError(),
+            None,
+            False,
+            "ValueError()",
+        ),
+    ],
+)
+async def test_firmware_update_exception_message(
+    zha_gateway: Gateway,
+    exception: Exception,
+    progress: float | None,
+    mains_powered: bool | None,
+    expected: str,
+) -> None:
+    """An exception from a firmware update is described in words."""
+    zha_device, entity, fw_image = await _offer_update(zha_gateway)
+
+    async def update_firmware(image, progress_callback):
+        if progress is not None:
+            progress_callback(1, 1, progress)
+        raise exception
+
+    with (
+        patch(
+            "zigpy.device.ZigbeeDevice.update_firmware",
+            AsyncMock(side_effect=update_firmware),
+        ),
+        patch.object(
+            type(zha_device),
+            "is_mains_powered",
+            new_callable=PropertyMock,
+            return_value=mains_powered,
+        ),
+        pytest.raises(ZHAException) as exc_info,
+    ):
+        await entity.async_install(
+            version=f"0x{fw_image.firmware.header.file_version:08x}"
+        )
+
+    assert str(exc_info.value) == expected
+    assert exc_info.value.__cause__ is exception
+    assert not entity.state.in_progress
+
+
+async def test_firmware_update_read_back_fails(zha_gateway: Gateway) -> None:
+    """A failed read-back after a successful transfer is not called a failed update."""
+    zigpy_device = zigpy_device_mock(zha_gateway)
+    zha_device, ota_cluster, fw_image, installed_fw_version = await setup_test_data(
+        zha_gateway, zigpy_device
+    )
+    entity = get_entity(zha_device, platform=Platform.UPDATE)
+
+    await ota_cluster._handle_query_next_image(
+        foundation.ZCLHeader.cluster(
+            tsn=0x12, command_id=general.Ota.ServerCommandDefs.query_next_image.id
+        ),
+        general.QueryNextImageCommand(
+            field_control=fw_image.firmware.header.field_control,
+            manufacturer_code=zha_device.manufacturer_code,
+            image_type=fw_image.firmware.header.image_type,
+            current_file_version=installed_fw_version,
+        ),
+    )
+    await zha_gateway.async_block_till_done()
+
+    image_size = len(fw_image.firmware.serialize())
+    read_back_error = TimeoutError()
+
+    async def endpoint_reply(cluster, sequence, data, **kwargs):
+        if cluster != general.Ota.cluster_id:
+            return
+
+        _, cmd = ota_cluster.deserialize(data)
+
+        if isinstance(cmd, general.Ota.ImageNotifyCommand):
+            zigpy_device.packet_received(
+                make_packet(
+                    zigpy_device,
+                    ota_cluster,
+                    general.Ota.ServerCommandDefs.query_next_image.name,
+                    field_control=general.Ota.QueryNextImageCommand.FieldControl.HardwareVersion,
+                    manufacturer_code=fw_image.firmware.header.manufacturer_id,
+                    image_type=fw_image.firmware.header.image_type,
+                    current_file_version=installed_fw_version,
+                    hardware_version=1,
+                )
+            )
+        elif isinstance(
+            cmd, general.Ota.ClientCommandDefs.query_next_image_response.schema
+        ):
+            assert cmd.status == foundation.Status.SUCCESS
+            zigpy_device.packet_received(
+                make_packet(
+                    zigpy_device,
+                    ota_cluster,
+                    general.Ota.ServerCommandDefs.image_block.name,
+                    field_control=general.Ota.ImageBlockCommand.FieldControl(0),
+                    manufacturer_code=fw_image.firmware.header.manufacturer_id,
+                    image_type=fw_image.firmware.header.image_type,
+                    file_version=fw_image.firmware.header.file_version,
+                    file_offset=0,
+                    maximum_data_size=image_size,
+                )
+            )
+        elif isinstance(cmd, general.Ota.ClientCommandDefs.image_block_response.schema):
+            next_offset = cmd.file_offset + len(cmd.image_data)
+
+            if next_offset < image_size:
+                zigpy_device.packet_received(
+                    make_packet(
+                        zigpy_device,
+                        ota_cluster,
+                        general.Ota.ServerCommandDefs.image_block.name,
+                        field_control=general.Ota.ImageBlockCommand.FieldControl(0),
+                        manufacturer_code=fw_image.firmware.header.manufacturer_id,
+                        image_type=fw_image.firmware.header.image_type,
+                        file_version=fw_image.firmware.header.file_version,
+                        file_offset=next_offset,
+                        maximum_data_size=image_size,
+                    )
+                )
+                return
+
+            # The device has the whole image, verifies it and reports success
+            zigpy_device.packet_received(
+                make_packet(
+                    zigpy_device,
+                    ota_cluster,
+                    general.Ota.ServerCommandDefs.upgrade_end.name,
+                    status=foundation.Status.SUCCESS,
+                    manufacturer_code=fw_image.firmware.header.manufacturer_id,
+                    image_type=fw_image.firmware.header.image_type,
+                    file_version=fw_image.firmware.header.file_version,
+                )
+            )
+        elif isinstance(cmd, general.Ota.ClientCommandDefs.upgrade_end_response.schema):
+            # Then it restarts and does not answer the read of its new version
+            ota_cluster.read_attributes.side_effect = read_back_error
+
+    ota_cluster.endpoint.reply = AsyncMock(side_effect=endpoint_reply)
+
+    with pytest.raises(ZHAException) as exc_info:
+        await entity.async_install(version=None)
+
+    assert str(exc_info.value) == (
+        "The device reported a successful update, but its new firmware version"
+        " could not be read back. It may still be restarting; check the firmware"
+        " version again later."
+    )
+    assert exc_info.value.__cause__ is read_back_error
     assert not entity.state.in_progress
 
 
