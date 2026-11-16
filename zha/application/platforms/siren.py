@@ -284,11 +284,9 @@ class AdvancedSiren(BaseZclSiren):
 
             if value is None:
                 self.defaults[enum] = None
-            elif type(value) is int:
-                try:
-                    self.defaults[enum] = enum(value)
-                except ValueError:
-                    continue
+            elif type(value) is int and any(member.value == value for member in enum):
+                # Checked first: zigpy enums make up members for undefined values
+                self.defaults[enum] = enum(value)
             else:
                 continue
 

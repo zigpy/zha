@@ -281,10 +281,13 @@ async def test_non_zcl_select_state_restoration(zha_gateway: Gateway) -> None:
         entity.state.current_option == security.IasWd.Warning.WarningMode.Burglar.name
     )
 
+    # The default is stored now, so a later restore from HA no longer applies
     entity.restore_external_state_attributes(
         state=security.IasWd.Warning.WarningMode.Fire.name
     )
-    assert entity.state.current_option == security.IasWd.Warning.WarningMode.Fire.name
+    assert (
+        entity.state.current_option == security.IasWd.Warning.WarningMode.Burglar.name
+    )
 
 
 async def test_siren_default_selects_persisted(zha_gateway: Gateway) -> None:
@@ -319,11 +322,12 @@ async def test_siren_default_selects_persisted(zha_gateway: Gateway) -> None:
     await strobe.async_select_option("Strobe")
 
     assert namespace[key] == {
-        "WarningMode": security.IasWd.Warning.WarningMode.Fire,
+        "WarningMode": 2,
         "SirenLevel": None,
-        "Strobe": security.IasWd.Warning.Strobe.Strobe,
+        "Strobe": 1,
         "StrobeLevel": None,
     }
+    assert type(namespace[key]["WarningMode"]) is int
 
     zha_device = await rejoin_zha_device(zha_gateway, zha_device)
     tone = get_entity(zha_device, platform=Platform.SELECT, qualifier="WarningMode")
@@ -370,11 +374,13 @@ async def test_siren_default_selects_taken_over_from_restore(
     siren = get_entity(zha_device, platform=Platform.SIREN)
 
     tone = get_entity(zha_device, platform=Platform.SELECT, qualifier="WarningMode")
+    level = get_entity(zha_device, platform=Platform.SELECT, qualifier="SirenLevel")
     tone.restore_external_state_attributes(state="Police Panic")
+    level.restore_external_state_attributes(state="Medium level sound")
 
     assert namespace[entity_state_key(Platform.SIREN, siren.unique_id)] == {
-        "WarningMode": security.IasWd.Warning.WarningMode.Police_Panic,
-        "SirenLevel": None,
+        "WarningMode": 4,
+        "SirenLevel": 1,
         "Strobe": None,
         "StrobeLevel": None,
     }
@@ -390,6 +396,7 @@ async def test_siren_default_selects_taken_over_from_restore(
     [
         {"WarningMode": 250, "Strobe": "Strobe", "SirenLevel": 1.5},
         {"WarningMode": True},
+        {"WarningMode": 7},
     ],
 )
 async def test_siren_invalid_stored_defaults_ignored(

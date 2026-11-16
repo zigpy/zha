@@ -581,7 +581,10 @@ class PlatformEntity(BaseEntity):
         # Persisted state is only saved once it has been loaded, so that the defaults
         # set in `__init__` never overwrite a stored record
         self._persisted_state_loaded: bool = False
-        self._restored_state_fields: frozenset[str] = frozenset()
+        # Fields the store holds for this entity: restored from it, or saved to it.
+        # Home Assistant's restored copies of these are older and are ignored.
+        self._stored_state_fields: frozenset[str] = frozenset()
+        # The fields as they were right after loading
         self._persisted_state_defaults: dict[str, Any] | None = None
 
     def _apply_entity_config(
@@ -726,11 +729,12 @@ class PlatformEntity(BaseEntity):
         if namespace is None:
             return
 
-        # No record is written while the fields still have these values
+        key = entity_state_key(self.PLATFORM, self.unique_id)
+        self._restore_persisted_record(namespace, key)
         self._persisted_state_defaults = self._dump_persisted_state()
 
-        key = entity_state_key(self.PLATFORM, self.unique_id)
-
+    def _restore_persisted_record(self, namespace: StoreNamespace, key: str) -> None:
+        """Apply the stored record of this entity, if there is one."""
         if key not in namespace:
             # The record follows the entity when its unique ID changes
             for old_unique_id in sorted(self.migrate_unique_ids):
@@ -750,13 +754,26 @@ class PlatformEntity(BaseEntity):
             return
 
         try:
-            self._restored_state_fields = self._apply_persisted_state(record)
+            self._stored_state_fields = self._apply_persisted_state(record)
         except Exception:  # noqa: BLE001
             self.error("Failed to restore stored state %r", record, exc_info=True)
 
-    def _save_persisted_state(self) -> None:
-        """Store the persisted fields if they changed."""
+    def _save_persisted_state(self, *, take_over: Collection[str] = ()) -> None:
+        """Store the persisted fields if they changed.
+
+        Only the entity the device has added saves: discovery creates candidate
+        copies of live entities, and a removed entity can still finish a command,
+        and neither may overwrite the live entity's record. No record is created
+        while the fields have their loaded values, unless `take_over` names fields
+        whose values came from Home Assistant: those are stored from then on.
+        """
         if not self._persisted_state_fields or not self._persisted_state_loaded:
+            return
+
+        if (
+            self._device.platform_entities.get((self.PLATFORM, self.unique_id))
+            is not self
+        ):
             return
 
         namespace = self._persisted_state_namespace()
@@ -766,14 +783,23 @@ class PlatformEntity(BaseEntity):
 
         key = entity_state_key(self.PLATFORM, self.unique_id)
         record = self._dump_persisted_state()
+        defaults = self._persisted_state_defaults or {}
 
-        if key not in namespace:
-            if record == self._persisted_state_defaults:
-                return
-        elif namespace[key] == record:
+        # Fields changed since loading are newer than any copy Home Assistant kept.
+        # A field still at its loaded value is not, so that HA can still fill a field
+        # missing from the record.
+        changed = {name for name in record if record[name] != defaults.get(name)}
+        changed.update(take_over)
+
+        if key in namespace:
+            if namespace[key] != record:
+                namespace[key] = record
+        elif changed:
+            namespace[key] = record
+        else:
             return
 
-        namespace[key] = record
+        self._stored_state_fields |= changed
 
 
 class ZclPlatformEntity(PlatformEntity):

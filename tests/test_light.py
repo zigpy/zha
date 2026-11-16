@@ -8,7 +8,7 @@ import asyncio
 import contextlib
 import logging
 from typing import Any
-from unittest.mock import AsyncMock, call, patch, sentinel
+from unittest.mock import AsyncMock, PropertyMock, call, patch, sentinel
 
 import pytest
 from zigpy.profiles import zha
@@ -2254,6 +2254,7 @@ async def test_light_off_brightness_taken_over_from_restore(
         {"off_brightness": "bright", "off_with_transition": 1},
         {"off_brightness": 300, "off_with_transition": None},
         {"off_brightness": True},
+        {},
     ],
 )
 async def test_light_invalid_stored_state_ignored(
@@ -2285,6 +2286,131 @@ async def test_light_invalid_stored_state_ignored(
 
     assert entity.state.off_brightness == 10
     assert entity.state.off_with_transition is True
+
+
+@patch(
+    "zigpy.zcl.clusters.general.LevelControl.request",
+    new=AsyncMock(return_value=[sentinel.data, zcl_f.Status.SUCCESS]),
+)
+@patch(
+    "zigpy.zcl.clusters.general.OnOff.request",
+    new=AsyncMock(return_value=[sentinel.data, zcl_f.Status.SUCCESS]),
+)
+async def test_light_stored_state_wins_after_own_save(zha_gateway: Gateway) -> None:
+    """Once the light stored its state, a later restore from HA does not replace it."""
+    zha_device = await device_light_3_mock(zha_gateway)
+    entity = get_entity(zha_device, platform=Platform.LIGHT)
+    namespace = zha_device.device.store.namespace(ENTITY_STATE_NAMESPACE)
+    key = entity_state_key(Platform.LIGHT, entity.unique_id)
+
+    await entity.async_turn_on(brightness=120)
+    await entity.async_turn_off(transition=1)
+    await zha_gateway.async_block_till_done()
+
+    # The HA entity is added again, e.g. after being re-enabled
+    entity.restore_external_state_attributes(
+        state=False,
+        off_with_transition=False,
+        off_brightness=5,
+        brightness=None,
+        color_temp=None,
+        xy_color=None,
+        color_mode=None,
+        effect=None,
+    )
+
+    assert entity.state.off_brightness == 120
+    assert namespace[key] == {"off_brightness": 120, "off_with_transition": True}
+
+
+async def test_light_stored_state_partial_record(zha_gateway: Gateway) -> None:
+    """A field missing from the stored record is taken from HA's restored state."""
+    zha_device = await device_light_3_mock(zha_gateway)
+    entity = get_entity(zha_device, platform=Platform.LIGHT)
+    namespace = zha_device.device.store.namespace(ENTITY_STATE_NAMESPACE)
+    key = entity_state_key(Platform.LIGHT, entity.unique_id)
+    namespace[key] = {"off_with_transition": True}
+
+    zha_device = await rejoin_zha_device(zha_gateway, zha_device)
+    entity = get_entity(zha_device, platform=Platform.LIGHT)
+
+    entity.restore_external_state_attributes(
+        state=False,
+        off_with_transition=False,
+        off_brightness=77,
+        brightness=None,
+        color_temp=None,
+        xy_color=None,
+        color_mode=None,
+        effect=None,
+    )
+
+    assert entity.state.off_brightness == 77
+    assert entity.state.off_with_transition is True
+    assert namespace[key] == {"off_brightness": 77, "off_with_transition": True}
+
+
+async def test_light_stored_state_only_saved_by_added_entity(
+    zha_gateway: Gateway,
+) -> None:
+    """Entities the device has not added, or has removed, never write the record."""
+    zha_device = await device_light_3_mock(zha_gateway)
+    old_entity = get_entity(zha_device, platform=Platform.LIGHT)
+    namespace = zha_device.device.store.namespace(ENTITY_STATE_NAMESPACE)
+    key = entity_state_key(Platform.LIGHT, old_entity.unique_id)
+
+    zha_device = await rejoin_zha_device(zha_gateway, zha_device)
+    entity = get_entity(zha_device, platform=Platform.LIGHT)
+    entity._off_brightness = 50
+    entity._off_with_transition = True
+    entity.maybe_emit_state_changed_event()
+    assert namespace[key] == {"off_brightness": 50, "off_with_transition": True}
+
+    # The removed entity finishes a command after the device was rebuilt
+    old_entity._off_brightness = 120
+    old_entity.maybe_emit_state_changed_event()
+    assert namespace[key] == {"off_brightness": 50, "off_with_transition": True}
+
+    # A copy created by discovery, as when the device is initialized again
+    copy = type(entity)(
+        endpoint=entity.endpoint,
+        device=zha_device,
+        cluster=entity.cluster,
+    )
+    copy.on_add()
+    assert copy.state.off_brightness == 50
+    copy._off_brightness = None
+    copy._off_with_transition = False
+    copy.maybe_emit_state_changed_event()
+    assert namespace[key] == {"off_brightness": 50, "off_with_transition": True}
+    await copy.on_remove()
+
+
+async def test_light_stored_state_follows_unique_id_migration(
+    zha_gateway: Gateway,
+) -> None:
+    """A record stored under a previous unique ID moves to the current one."""
+    zha_device = await device_light_3_mock(zha_gateway)
+    entity = get_entity(zha_device, platform=Platform.LIGHT)
+    namespace = zha_device.device.store.namespace(ENTITY_STATE_NAMESPACE)
+    old_key = entity_state_key(Platform.LIGHT, "old-unique-id")
+    namespace[old_key] = {"off_brightness": 99, "off_with_transition": True}
+
+    with patch.object(
+        type(entity),
+        "migrate_unique_ids",
+        new_callable=PropertyMock,
+        return_value=frozenset({"old-unique-id"}),
+    ):
+        zha_device = await rejoin_zha_device(zha_gateway, zha_device)
+
+    entity = get_entity(zha_device, platform=Platform.LIGHT)
+    assert entity.state.off_brightness == 99
+    assert old_key not in namespace
+    assert namespace[entity_state_key(Platform.LIGHT, entity.unique_id)] == {
+        "off_brightness": 99,
+        "off_with_transition": True,
+    }
 
 
 async def test_light_state_restoration_unsupported_color_mode(

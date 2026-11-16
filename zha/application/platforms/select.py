@@ -189,11 +189,11 @@ class SirenDefaultSelectEntity(BaseSelectEntity, ZclPlatformEntity):
         """
         siren = self._siren()
 
-        if self._enum.__name__ in siren._restored_state_fields:
+        if self._enum.__name__ in siren._stored_state_fields:
             return
 
         siren.defaults[self._enum] = self._option_to_member[state]
-        siren._save_persisted_state()
+        siren._save_persisted_state(take_over=(self._enum.__name__,))
 
 
 @register_entity(IasWd.cluster_id)
