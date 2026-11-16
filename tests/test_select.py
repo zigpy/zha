@@ -321,12 +321,8 @@ async def test_siren_default_selects_persisted(zha_gateway: Gateway) -> None:
     await tone.async_select_option(security.IasWd.Warning.WarningMode.Fire.name)
     await strobe.async_select_option("Strobe")
 
-    assert namespace[key] == {
-        "WarningMode": 2,
-        "SirenLevel": None,
-        "Strobe": 1,
-        "StrobeLevel": None,
-    }
+    # Only the defaults that were chosen are stored
+    assert namespace[key] == {"WarningMode": 2, "Strobe": 1}
     assert type(namespace[key]["WarningMode"]) is int
 
     zha_device = await rejoin_zha_device(zha_gateway, zha_device)
@@ -342,16 +338,24 @@ async def test_siren_default_selects_persisted(zha_gateway: Gateway) -> None:
     assert strobe.state.current_option == "Strobe"
     assert level.state.current_option is None
 
-    # Home Assistant's older copies are ignored, also for a default that is unset
+    # Home Assistant's older copy of a stored default is ignored, while a default the
+    # store does not have is still taken from it
     tone.restore_external_state_attributes(
         state=security.IasWd.Warning.WarningMode.Burglar.name
     )
-    level.restore_external_state_attributes(
-        state=security.IasWd.Warning.SirenLevel.Low_level_sound.name.replace("_", " ")
-    )
+    level.restore_external_state_attributes(state="Low level sound")
 
     assert tone.state.current_option == security.IasWd.Warning.WarningMode.Fire.name
-    assert level.state.current_option is None
+    assert level.state.current_option == "Low level sound"
+    assert namespace[key] == {"WarningMode": 2, "SirenLevel": 0, "Strobe": 1}
+
+    # Still true after another rebuild
+    zha_device = await rejoin_zha_device(zha_gateway, zha_device)
+    strobe_level = get_entity(
+        zha_device, platform=Platform.SELECT, qualifier="StrobeLevel"
+    )
+    strobe_level.restore_external_state_attributes(state="High level strobe")
+    assert strobe_level.state.current_option == "High level strobe"
 
 
 async def test_siren_default_selects_taken_over_from_restore(
@@ -381,8 +385,6 @@ async def test_siren_default_selects_taken_over_from_restore(
     assert namespace[entity_state_key(Platform.SIREN, siren.unique_id)] == {
         "WarningMode": 4,
         "SirenLevel": 1,
-        "Strobe": None,
-        "StrobeLevel": None,
     }
 
     zha_device = await rejoin_zha_device(zha_gateway, zha_device)

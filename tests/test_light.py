@@ -2350,6 +2350,42 @@ async def test_light_stored_state_partial_record(zha_gateway: Gateway) -> None:
     assert namespace[key] == {"off_brightness": 77, "off_with_transition": True}
 
 
+async def test_light_stored_state_partial_record_kept(zha_gateway: Gateway) -> None:
+    """Saving keeps unknown keys and leaves out fields that are not stored yet."""
+    zha_device = await device_light_3_mock(zha_gateway)
+    entity = get_entity(zha_device, platform=Platform.LIGHT)
+    namespace = zha_device.device.store.namespace(ENTITY_STATE_NAMESPACE)
+    key = entity_state_key(Platform.LIGHT, entity.unique_id)
+    namespace[key] = {"off_with_transition": True, "future_field": 1}
+
+    zha_device = await rejoin_zha_device(zha_gateway, zha_device)
+    entity = get_entity(zha_device, platform=Platform.LIGHT)
+    entity.maybe_emit_state_changed_event()
+
+    # Without a restore from HA in this run, nothing new was stored
+    assert namespace[key] == {"off_with_transition": True, "future_field": 1}
+
+    zha_device = await rejoin_zha_device(zha_gateway, zha_device)
+    entity = get_entity(zha_device, platform=Platform.LIGHT)
+    entity.restore_external_state_attributes(
+        state=False,
+        off_with_transition=False,
+        off_brightness=77,
+        brightness=None,
+        color_temp=None,
+        xy_color=None,
+        color_mode=None,
+        effect=None,
+    )
+
+    assert entity.state.off_brightness == 77
+    assert namespace[key] == {
+        "off_brightness": 77,
+        "off_with_transition": True,
+        "future_field": 1,
+    }
+
+
 async def test_light_stored_state_only_saved_by_added_entity(
     zha_gateway: Gateway,
 ) -> None:
