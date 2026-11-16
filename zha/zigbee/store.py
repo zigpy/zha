@@ -33,15 +33,22 @@ def get_device_store(zigpy_device: ZigpyBaseDevice) -> DeviceStore | None:
 
 
 def store_diagnostics(zigpy_device: ZigpyBaseDevice) -> dict[str, Any]:
-    """Return the contents of the device's store for diagnostics, by namespace."""
+    """Return the contents of the device's store for diagnostics, by namespace.
+
+    Keys can contain the device's IEEE address (entity restore records are keyed by
+    unique ID). Home Assistant redacts diagnostics by key name only, so the address
+    is replaced here.
+    """
     store = get_device_store(zigpy_device)
 
     if store is None:
         return {}
 
+    ieee = str(zigpy_device.ieee)
+
     return {
         namespace.name: {
-            key: {
+            key.replace(ieee, "<ieee>"): {
                 "value": item.value,
                 "version": item.version,
                 "last_updated": item.last_updated.isoformat(),

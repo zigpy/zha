@@ -327,15 +327,7 @@ class Sensor(BaseSensor, ZclPlatformEntity):
         state_class_value: SensorStateClass,
     ) -> SensorStateClass | None:
         """Validate and return a state class."""
-        try:
-            return SensorStateClass(state_class_value)
-        except ValueError as ex:
-            _LOGGER.warning(
-                "Quirks provided an invalid state class: %s: %s",
-                state_class_value,
-                ex,
-            )
-            return None
+        return _validate_state_class(state_class_value)
 
     @property
     def native_value(self) -> date | datetime | str | int | float | None:
@@ -408,6 +400,19 @@ class Sensor(BaseSensor, ZclPlatformEntity):
         self.maybe_emit_state_changed_event()
 
 
+def _validate_state_class(
+    state_class: SensorStateClass | str,
+) -> SensorStateClass | None:
+    """Return a valid state class, or `None` with a warning for an invalid one."""
+    try:
+        return SensorStateClass(state_class)
+    except ValueError as ex:
+        _LOGGER.warning(
+            "Quirks provided an invalid state class: %s: %s", state_class, ex
+        )
+        return None
+
+
 class DeviceValueSensor(BaseSensor):
     """Sensor showing a device value, kept in the device's store.
 
@@ -452,7 +457,7 @@ class DeviceValueSensor(BaseSensor):
                 _LOGGER,
             )
         if state_class is not None:
-            self._attr_state_class = SensorStateClass(state_class)
+            self._attr_state_class = _validate_state_class(state_class)
         if unit is not None:
             self._attr_native_unit_of_measurement = unit
 
@@ -487,14 +492,20 @@ class DeviceValueSensor(BaseSensor):
         if value is None:
             return None
 
-        if self._value_converter is not None:
-            return self._value_converter(value)
+        # The store is untyped at rest, so a value can be of a type the converter or
+        # the scaling does not expect. Values are JSON, so there are no NaNs.
+        try:
+            if self._value_converter is not None:
+                return self._value_converter(value)
 
-        if self._multiplier is not None:
-            value *= self._multiplier
+            if self._multiplier is not None:
+                value *= self._multiplier
 
-        if self._divisor is not None:
-            value /= self._divisor
+            if self._divisor is not None:
+                value /= self._divisor
+        except (ArithmeticError, LookupError, TypeError, ValueError):
+            self.debug("Cannot show value %r", value, exc_info=True)
+            return None
 
         return value
 
