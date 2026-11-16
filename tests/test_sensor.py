@@ -33,6 +33,7 @@ from tests.common import (
     get_entity,
     join_zigpy_device,
     patch_cluster_for_testing,
+    rejoin_zha_device,
     send_attributes_report,
     zigpy_device_from_json,
 )
@@ -49,6 +50,7 @@ from zha.application.platforms.sensor.device_class import (
     SensorDeviceClass as SensorDeviceClassV2,
 )
 from zha.application.platforms.sensor.helpers import resolution_to_decimal_precision
+from zha.const import STATE_CHANGED
 from zha.quirks import DeviceRegistry
 from zha.units import (
     PERCENTAGE,
@@ -57,8 +59,10 @@ from zha.units import (
     UnitOfMass,
     UnitOfPressure,
     UnitOfVolume,
+    UnitOfVolumetricFlux,
 )
 from zha.zigbee.device import Device
+from zha.zigbee.store import device_value
 
 EMAttrs = homeautomation.ElectricalMeasurement.AttributeDefs
 
@@ -2307,3 +2311,78 @@ async def test_em_poller_skips_fallback_multiplier_and_divisor_attributes(
     }
     assert polled
     assert not {attr for attr in polled if "multiplier" in attr or "divisor" in attr}
+
+
+RAIN_INTENSITY = device_value("rain_intensity", int)
+
+(
+    QuirkBuilder("Fake_Manufacturer_value", "Fake_Model_value")
+    .adds_entity(
+        sensor.DeviceValueSensor,
+        value=RAIN_INTENSITY,
+        divisor=10,
+        state_class=SensorStateClass.MEASUREMENT,
+        unit=UnitOfVolumetricFlux.MILLIMETERS_PER_HOUR,
+        unique_id_suffix="1-rain_intensity",
+        translation_key="rain_intensity",
+        fallback_name="Rain intensity",
+    )
+    .add_to_registry()
+)
+
+
+async def test_device_value_sensor(zha_gateway: Gateway) -> None:
+    """A sensor shows a device value from the store, with no ZCL attribute behind it."""
+    zigpy_device = create_mock_zigpy_device(
+        zha_gateway,
+        {
+            1: {
+                SIG_EP_INPUT: [general.Basic.cluster_id],
+                SIG_EP_OUTPUT: [],
+                SIG_EP_TYPE: zigpy.profiles.zha.DeviceType.SIMPLE_SENSOR,
+                SIG_EP_PROFILE: zigpy.profiles.zha.PROFILE_ID,
+            }
+        },
+        manufacturer="Fake_Manufacturer_value",
+        model="Fake_Model_value",
+    )
+    zigpy_device = get_device(zigpy_device)
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
+
+    entity = get_entity(
+        zha_device, platform=Platform.SENSOR, exact_entity_type=sensor.DeviceValueSensor
+    )
+
+    # The unique ID matches that of a quirk entity on endpoint 1
+    assert entity.unique_id == f"{zigpy_device.ieee}-1-rain_intensity"
+    assert entity.state.native_value is None
+
+    listener = MagicMock()
+    entity.on_event(STATE_CHANGED, listener)
+
+    zigpy_device.store[RAIN_INTENSITY] = 25
+    assert_state(entity, 2.5, UnitOfVolumetricFlux.MILLIMETERS_PER_HOUR)
+    assert len(listener.mock_calls) == 1
+
+    # A value the declaration cannot decode reads as unknown
+    zigpy_device.store.namespace(RAIN_INTENSITY.namespace)[RAIN_INTENSITY.key] = "x"
+    assert entity.state.native_value is None
+
+    zigpy_device.store[RAIN_INTENSITY] = 30
+    del zigpy_device.store[RAIN_INTENSITY]
+    assert entity.state.native_value is None
+    assert len(listener.mock_calls) == 4
+
+    # The value outlives the ZHA device, as it does a restart
+    zigpy_device.store[RAIN_INTENSITY] = 40
+    zha_device = await rejoin_zha_device(zha_gateway, zha_device)
+    new_entity = get_entity(
+        zha_device, platform=Platform.SENSOR, exact_entity_type=sensor.DeviceValueSensor
+    )
+    assert_state(new_entity, 4.0, UnitOfVolumetricFlux.MILLIMETERS_PER_HOUR)
+
+    # The removed entity no longer listens
+    listener.reset_mock()
+    zigpy_device.store[RAIN_INTENSITY] = 50
+    assert listener.mock_calls == []
+    assert_state(new_entity, 5.0, UnitOfVolumetricFlux.MILLIMETERS_PER_HOUR)
