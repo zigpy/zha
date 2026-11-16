@@ -473,6 +473,24 @@ class DeviceValueSensor(BaseSensor):
                 store.on_change(self._value, self._handle_value_changed)
             )
 
+    # TODO: remove once HA Core's `websocket_get_groupable_devices` no longer reads
+    # `entity.endpoint` for every entity of a groupable device
+    @property
+    def endpoint(self) -> Endpoint:
+        """Return the device's first endpoint, for code that expects every entity on one.
+
+        A device value has no endpoint. Home Assistant's list of groupable devices
+        reads the endpoint of each entity of a device, and fails without one.
+        """
+        warnings.warn(
+            f"`{type(self).__name__}.endpoint` is deprecated, device-bound entities"
+            " have no endpoint",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        endpoints = cast("Device", self._device).endpoints
+        return endpoints[min(ep_id for ep_id in endpoints if ep_id != 0)]
+
     def _handle_value_changed(
         self, event: StoreValueUpdatedEvent | StoreValueDeletedEvent
     ) -> None:

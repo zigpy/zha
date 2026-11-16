@@ -2397,6 +2397,10 @@ async def test_device_value_sensor(zha_gateway: Gateway) -> None:
     )
     assert_state(new_entity, 4.0, UnitOfVolumetricFlux.MILLIMETERS_PER_HOUR)
 
+    # Home Assistant's groupable device list reads an endpoint of every entity
+    with pytest.warns(DeprecationWarning):
+        assert new_entity.endpoint is zha_device.endpoints[1]
+
     # The removed entity no longer listens
     listener.reset_mock()
     zigpy_device.store[RAIN_INTENSITY] = 50
