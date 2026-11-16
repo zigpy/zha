@@ -132,6 +132,13 @@ class TextConfigurationEntity(BaseText, ZclPlatformEntity):
 
         super().__init__(endpoint=endpoint, device=device, **kwargs)
 
+        # Without an explicit limit, use the attribute's own one, if it has one
+        if max_length is None:
+            attr_def = self._cluster.attributes_by_name.get(self._attribute_name)
+            type_max = getattr(attr_def.type, "_max_len", None) if attr_def else None
+            if type_max is not None:
+                self._attr_native_max = min(type_max, MAX_LENGTH_STATE_STATE)
+
     def _is_supported(self) -> bool:
         """Return if the entity is supported for the device, internal."""
         if (
@@ -202,7 +209,7 @@ class TextConfigurationEntity(BaseText, ZclPlatformEntity):
             value.encode("utf-8") if self._is_bytes_attribute else value
         )
 
-        failed = False
+        error: str | None = None
         try:
             await write_attributes_safe(
                 self._cluster, {self._attribute_name: new_value}
@@ -210,12 +217,18 @@ class TextConfigurationEntity(BaseText, ZclPlatformEntity):
         except ZHAException:
             if self.mode is not TextMode.PASSWORD:
                 raise
-            failed = True
+            error = f"Failed to write attribute {self._attribute_name}"
+        except ValueError as exc:
+            # zigpy refuses a value its type can't hold, such as a ZCL string longer
+            # than 254 bytes
+            error = f"Failed to write attribute {self._attribute_name}"
+            if self.mode is not TextMode.PASSWORD:
+                error = f"{error}: {exc}"
 
-        if failed:
-            # Keep the value out of the error shown to the user. This is raised outside
-            # the `except` block so the original error isn't attached as its context.
-            raise ZHAException(f"Failed to write attribute {self._attribute_name}")
+        if error is not None:
+            # Raised outside the `except` blocks so the original error, which can hold
+            # the value, isn't attached as its context
+            raise ZHAException(error)
 
         self.maybe_emit_state_changed_event()
 

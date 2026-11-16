@@ -132,9 +132,15 @@ async def test_text_entity_options(zha_device: Device) -> None:
     assert state.pattern == r"[a-z]+"
     assert state.mode == TextMode.PASSWORD
 
+    # The attribute's own limit is the default
     default = create_text_entity(zha_device, "location_desc")
-    assert default.state.native_max == MAX_LENGTH_STATE_STATE
+    assert default.state.native_max == 16
     assert default.state.mode == TextMode.TEXT
+
+    # Without one, it's the longest state Home Assistant allows
+    cluster.update_attribute(general.Basic.AttributeDefs.product_label.id, "abc")
+    unlimited = create_text_entity(zha_device, "product_label")
+    assert unlimited.state.native_max == MAX_LENGTH_STATE_STATE
 
 
 async def test_text_entity_bytes_attribute(zha_device: Device) -> None:
@@ -236,3 +242,33 @@ async def test_text_entity_subclass(zha_device: Device) -> None:
     endpoint = zha_device.endpoints[1]
     entity = LocationText(endpoint=endpoint, device=zha_device, cluster=cluster)
     assert entity.state.native_value == "Attic"
+
+
+@pytest.mark.parametrize(
+    ("mode", "attribute_name", "value", "error"),
+    [
+        (TextMode.TEXT, "product_label", "ä" * 200, "String is too long"),
+        (TextMode.TEXT, "product_code", "x" * 255, "OctetString is too long"),
+        (TextMode.PASSWORD, "product_label", "ä" * 200, None),
+    ],
+)
+async def test_text_entity_value_too_long(
+    zha_device: Device,
+    mode: TextMode,
+    attribute_name: str,
+    value: str,
+    error: str | None,
+) -> None:
+    """Test that a value the attribute type can't hold raises a ZHA error."""
+    entity = create_text_entity(zha_device, attribute_name, mode=mode)
+
+    with pytest.raises(ZHAException) as exc_info:
+        await entity.async_set_value(value)
+
+    message = str(exc_info.value)
+    assert message.startswith(f"Failed to write attribute {attribute_name}")
+    assert (error is not None and error in message) or message == (
+        f"Failed to write attribute {attribute_name}"
+    )
+    assert "ä" not in message
+    assert exc_info.value.__context__ is None
