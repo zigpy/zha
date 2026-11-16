@@ -173,7 +173,7 @@ class TextConfigurationEntity(BaseText, ZclPlatformEntity):
     def native_value(self) -> str | None:
         """Return the current value, or None if it isn't a valid entity state."""
         value = self._cluster.get(self._attribute_name)
-        if value is None or getattr(value, "invalid", False):
+        if value is None:
             return None
         if isinstance(value, bytes):
             value = value.decode("utf-8", errors="replace")

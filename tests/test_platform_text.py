@@ -2,7 +2,6 @@
 
 import pytest
 from zigpy.profiles import zha
-import zigpy.types
 from zigpy.zcl import foundation as zcl_f
 from zigpy.zcl.clusters import general
 
@@ -221,16 +220,6 @@ async def test_text_entity_value_outside_limits(
     )
 
     entity = create_text_entity(zha_device, "manufacturer_version_details", **options)
-    assert entity.state.native_value is None
-
-
-async def test_text_entity_invalid_string(zha_device: Device) -> None:
-    """Test that the ZCL invalid string is shown as unknown."""
-    cluster = zha_device.device.endpoints[1].basic
-    invalid, _ = zigpy.types.CharacterString.deserialize(b"\xff")
-    cluster.update_attribute(general.Basic.AttributeDefs.location_desc.id, invalid)
-
-    entity = create_text_entity(zha_device, "location_desc")
     assert entity.state.native_value is None
 
 
