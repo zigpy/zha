@@ -235,6 +235,7 @@ async def test_text_entity_subclass(zha_device: Device) -> None:
     class LocationText(TextConfigurationEntity):
         _attribute_name = "location_desc"
         _unique_id_suffix = "location"
+        _attr_native_max = 8
 
     cluster = zha_device.device.endpoints[1].basic
     cluster.update_attribute(general.Basic.AttributeDefs.location_desc.id, "Attic")
@@ -242,6 +243,8 @@ async def test_text_entity_subclass(zha_device: Device) -> None:
     endpoint = zha_device.endpoints[1]
     entity = LocationText(endpoint=endpoint, device=zha_device, cluster=cluster)
     assert entity.state.native_value == "Attic"
+    # The class's limit wins over the attribute type's
+    assert entity.state.native_max == 8
 
 
 @pytest.mark.parametrize(

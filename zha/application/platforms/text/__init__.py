@@ -132,8 +132,11 @@ class TextConfigurationEntity(BaseText, ZclPlatformEntity):
 
         super().__init__(endpoint=endpoint, device=device, **kwargs)
 
-        # Without an explicit limit, use the attribute's own one, if it has one
-        if max_length is None:
+        # Without a limit from the caller or the class, use the attribute's own one
+        if (
+            max_length is None
+            and type(self)._attr_native_max == BaseText._attr_native_max
+        ):
             attr_def = self._cluster.attributes_by_name.get(self._attribute_name)
             type_max = getattr(attr_def.type, "_max_len", None) if attr_def else None
             if type_max is not None:
