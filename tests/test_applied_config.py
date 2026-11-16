@@ -40,7 +40,7 @@ from zha.zigbee.cluster_config import (
     AggregatedClusterConfig,
     configure_cluster_configs,
 )
-from zha.zigbee.device import Device, ZigbeeDevice
+from zha.zigbee.device import ClusterBinding, Device, ZigbeeDevice
 from zha.zigbee.store import store_key
 
 LIGHT_IEEE = "01:2d:6f:00:0a:90:69:e8"
@@ -473,6 +473,17 @@ async def test_recording_failure_does_not_stop_configuration(
         },
     )
 
+    # The user bind API returns its results whatever happens to the record
+    remote = await join_remote(zha_gateway)
+    remote.device.zdo.request = AsyncMock(return_value=[zdo_t.Status.SUCCESS])
+
+    with patch.object(
+        AppliedConfigRecorder, "record_binding", side_effect=RuntimeError("user")
+    ):
+        results = await remote.async_bind_to_device(zha_device)
+
+    assert [r.success for r in results] == [True, True]
+
 
 async def test_entity_creation_failure_does_not_mark_stale(
     zha_gateway: Gateway,
@@ -677,6 +688,42 @@ async def test_join_invalidates_acknowledgements(zha_gateway: Gateway) -> None:
     assert "invalidated" not in stored[level_key]["acknowledged"]
 
 
+async def test_coordinator_endpoint_differs(zha_gateway: Gateway) -> None:
+    """Bindings to two coordinator endpoints are separate records.
+
+    The radio library can resolve ZHA's bindings to another coordinator endpoint than
+    the user bind API uses, as zigpy-znp can.
+    """
+    app = zha_gateway.application_controller
+    get_dst_address = type(app).get_dst_address
+
+    def dst_address(self, cluster):
+        destination = get_dst_address(self, cluster)
+        destination.endpoint = 2
+        return destination
+
+    with patch.object(type(app), "get_dst_address", dst_address):
+        light = await join_light(zha_gateway)
+
+    coordinator = zha_gateway.coordinator_zha_device
+    assert coordinator is not None
+    light.device.endpoints[1].add_output_cluster(general.OnOff.cluster_id)
+    light.device.zdo.request = AsyncMock(return_value=[zdo_t.Status.SUCCESS])
+    await light.async_bind_to_device(coordinator)
+
+    stored = records(light)
+    zha_record = stored[binding_key(1, 6, coordinator_destination(endpoint=2))]
+    user_record = stored[binding_key(1, 6, coordinator_destination(endpoint=1))]
+    assert zha_record["desired_by"] == {"zha": {"sides": ["server"]}}
+    assert zha_record["destination"]["endpoint"] == 2
+    assert list(user_record["desired_by"]) == ["user"]
+    assert user_record["destination"] == {
+        "ieee": COORDINATOR_IEEE,
+        "endpoint": 1,
+        "coordinator": True,
+    }
+
+
 async def test_reconfigure_updates_and_marks_stale(zha_gateway: Gateway) -> None:
     """A run updates the desired settings and marks what it no longer wants stale."""
     zha_device = await join_light(zha_gateway)
@@ -837,9 +884,11 @@ async def test_nothing_recorded_without_store(zha_gateway: Gateway) -> None:
     ):
         zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
         await zha_device.async_configure()
+        results = await zha_device.async_bind_to_group(0x1001, [])
 
         assert not AppliedConfigRecorder(zigpy_device).enabled
 
+    assert results == []
     assert zigpy_device.endpoints[1].on_off.bind.mock_calls
     assert mock_store.mock_calls == []
     assert len(zigpy_device.store.namespace(APPLIED_CONFIG_NAMESPACE)) == 0
@@ -855,6 +904,159 @@ async def test_nothing_recorded_without_store(zha_gateway: Gateway) -> None:
         result=ConfigResult(status="SUCCESS"),
     )
     recorder.mark_stale()
+
+
+async def test_bind_to_device(zha_gateway: Gateway) -> None:
+    """Binding a device to another returns and records the outcome per cluster."""
+    light = await join_light(zha_gateway)
+    remote = await join_remote(zha_gateway)
+    destination = zdo_t.MultiAddress(addrmode=3, ieee=light.ieee, endpoint=1)
+    on_off_key = binding_key(1, 6, destination)
+    level_key = binding_key(1, 8, destination)
+
+    remote.device.zdo.request = AsyncMock(
+        side_effect=[[zdo_t.Status.SUCCESS], [zdo_t.Status.TABLE_FULL]]
+    )
+    results = await remote.async_bind_to_device(light)
+
+    assert [(r.cluster_id, r.status, r.error, r.success) for r in results] == [
+        (6, "SUCCESS", None, True),
+        (8, "TABLE_FULL", None, False),
+    ]
+    assert results[0].as_dict() == {
+        "endpoint_id": 1,
+        "cluster_id": 6,
+        "destination": {"ieee": LIGHT_IEEE, "endpoint": 1},
+        "status": "SUCCESS",
+        "error": None,
+        "success": True,
+    }
+    json.dumps([result.as_dict() for result in results])
+    assert [call.args for call in remote.device.zdo.request.mock_calls] == [
+        (zdo_t.ZDOCmd.Bind_req, remote.ieee, 1, 6, destination),
+        (zdo_t.ZDOCmd.Bind_req, remote.ieee, 1, 8, destination),
+    ]
+
+    stored = records(remote)
+    assert stored[on_off_key] == {
+        "kind": "binding",
+        "endpoint": 1,
+        "cluster_id": 6,
+        "destination": {"ieee": LIGHT_IEEE, "endpoint": 1},
+        "desired_by": {
+            "user": {"bound": True, "time": stored[on_off_key]["last_attempt"]["time"]}
+        },
+        "last_attempt": {
+            "time": stored[on_off_key]["last_attempt"]["time"],
+            "operation": "bind",
+            "origin": "user",
+            "status": "SUCCESS",
+        },
+        "acknowledged": {
+            "bound": True,
+            "time": stored[on_off_key]["last_attempt"]["time"],
+        },
+    }
+    assert stored[level_key]["desired_by"]["user"]["bound"] is True
+    assert stored[level_key]["last_attempt"]["status"] == "TABLE_FULL"
+    assert "acknowledged" not in stored[level_key]
+
+    # A user's bindings are not ZHA's to mark stale
+    await remote.async_configure()
+    assert "stale_since" not in json.dumps(records(remote)[on_off_key])
+
+    # Unbinding keeps the intent as a tombstone. A binding the device does not have
+    # is unbound already.
+    remote.device.zdo.request = AsyncMock(
+        side_effect=[
+            [zdo_t.Status.NO_ENTRY],
+            zigpy.exceptions.DeliveryError("failed"),
+        ]
+    )
+    results = await remote.async_unbind_from_device(light)
+
+    assert [(r.cluster_id, r.status, r.error, r.success) for r in results] == [
+        (6, "NO_ENTRY", None, True),
+        (8, None, "DeliveryError", False),
+    ]
+    assert remote.device.zdo.request.mock_calls[0].args[0] == zdo_t.ZDOCmd.Unbind_req
+
+    stored = records(remote)
+    assert stored[on_off_key]["desired_by"]["user"]["bound"] is False
+    assert stored[on_off_key]["acknowledged"]["bound"] is False
+    assert stored[level_key]["desired_by"]["user"]["bound"] is False
+    assert stored[level_key]["last_attempt"]["error"] == "DeliveryError"
+    assert "acknowledged" not in stored[level_key]
+
+
+async def test_bind_to_coordinator_shares_zha_record(zha_gateway: Gateway) -> None:
+    """A user's binding to the coordinator is the same record as ZHA's own."""
+    light = await join_light(zha_gateway)
+    coordinator = zha_gateway.coordinator_zha_device
+    assert coordinator is not None
+
+    # The light has no bindable output clusters; give it an On/Off client
+    light.device.endpoints[1].add_output_cluster(general.OnOff.cluster_id)
+    light.device.zdo.request = AsyncMock(return_value=[zdo_t.Status.SUCCESS])
+    results = await light.async_unbind_from_device(coordinator)
+
+    destination = coordinator_destination()
+    assert [(r.cluster_id, r.destination, r.success) for r in results] == [
+        (6, {"ieee": COORDINATOR_IEEE, "endpoint": 1, "coordinator": True}, True)
+    ]
+
+    record = records(light)[binding_key(1, 6, destination)]
+    assert record["destination"]["coordinator"] is True
+    assert record["desired_by"]["zha"] == {"sides": ["server"]}
+    assert record["desired_by"]["user"]["bound"] is False
+    assert record["acknowledged"]["bound"] is False
+
+
+async def test_bind_to_group(zha_gateway: Gateway) -> None:
+    """Group bindings return their outcome and are recorded as user-made."""
+    remote = await join_remote(zha_gateway)
+    destination = zdo_t.MultiAddress(addrmode=1, nwk=0x1001)
+
+    remote.device.zdo.request = AsyncMock(
+        side_effect=[[zdo_t.Status.SUCCESS], TimeoutError()]
+    )
+    results = await remote.async_bind_to_group(
+        0x1001,
+        [
+            # Endpoint 0 and clusters that are not outputs are skipped
+            _binding("on_off", 6, 1),
+            _binding("level", 8, 1),
+            _binding("basic", 0, 1),
+            _binding("on_off", 6, 0),
+        ],
+    )
+
+    assert [(r.cluster_id, r.status, r.error, r.success) for r in results] == [
+        (6, "SUCCESS", None, True),
+        (8, None, "TimeoutError", False),
+    ]
+    assert results[0].destination == {"group": 0x1001}
+
+    stored = records(remote)
+    record = stored[binding_key(1, 6, destination)]
+    assert record["destination"] == {"group": 0x1001}
+    assert record["desired_by"]["user"]["bound"] is True
+    assert stored[binding_key(1, 8, destination)]["last_attempt"]["error"] == (
+        "TimeoutError"
+    )
+
+    remote.device.zdo.request = AsyncMock(return_value=[zdo_t.Status.SUCCESS])
+    results = await remote.async_unbind_from_group(0x1001, [_binding("on_off", 6, 1)])
+    assert [r.success for r in results] == [True]
+    assert records(remote)[binding_key(1, 6, destination)]["acknowledged"] == {
+        "bound": False,
+        "time": records(remote)[binding_key(1, 6, destination)]["last_attempt"]["time"],
+    }
+
+
+def _binding(name: str, cluster_id: int, endpoint_id: int) -> ClusterBinding:
+    """Return a cluster binding as Home Assistant sends it."""
+    return ClusterBinding(name=name, type="out", id=cluster_id, endpoint_id=endpoint_id)
 
 
 async def test_diagnostics(zha_gateway: Gateway) -> None:
@@ -879,3 +1081,33 @@ async def test_diagnostics(zha_gateway: Gateway) -> None:
 
     # Fixtures in tests/data/devices leave out what a test run configured
     assert "store" not in get_fixture_diagnostics_json(light)
+
+
+async def test_diagnostics_user_bindings(zha_gateway: Gateway) -> None:
+    """Destinations of a user's bindings are replaced in keys too."""
+    light = await join_light(zha_gateway)
+    remote = await join_remote(zha_gateway)
+    remote.device.zdo.request = AsyncMock(return_value=[zdo_t.Status.SUCCESS])
+    await remote.async_bind_to_device(light)
+
+    diagnostics = json.loads(
+        json.dumps(remote.get_diagnostics_json(), cls=ZhaJsonEncoder)
+    )
+    store = diagnostics["store"][APPLIED_CONFIG_NAMESPACE]
+
+    # ZHA binds the remote's client clusters to the coordinator, whose address
+    # sorts first
+    assert sorted(store) == [
+        "binding/0x0001/0x0006/ieee/<ieee 1>/0x0001",
+        "binding/0x0001/0x0006/ieee/<ieee 2>/0x0001",
+        "binding/0x0001/0x0008/ieee/<ieee 1>/0x0001",
+        "binding/0x0001/0x0008/ieee/<ieee 2>/0x0001",
+    ]
+    assert LIGHT_IEEE not in json.dumps(list(store))
+    assert COORDINATOR_IEEE not in json.dumps(list(store))
+    entry = store["binding/0x0001/0x0006/ieee/<ieee 2>/0x0001"]
+    assert entry["value"]["destination"] == {"ieee": LIGHT_IEEE, "endpoint": 1}
+    assert entry["value"]["desired_by"]["user"]["bound"] is True
+    coordinator_entry = store["binding/0x0001/0x0008/ieee/<ieee 1>/0x0001"]
+    assert coordinator_entry["value"]["destination"]["coordinator"] is True
+    assert coordinator_entry["value"]["desired_by"]["zha"] == {"sides": ["client"]}
