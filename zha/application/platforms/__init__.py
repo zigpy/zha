@@ -29,8 +29,15 @@ from zha.const import STATE_CHANGED
 from zha.debounce import Debouncer
 from zha.event import EventBase
 from zha.mixins import LogMixin
+from zha.zigbee.store import (
+    ENTITY_STATE_NAMESPACE,
+    entity_state_key,
+    get_store_namespace,
+)
 
 if TYPE_CHECKING:
+    from zigpy.store import StoreNamespace
+
     from zha.zigbee.device import BaseDevice, Device
     from zha.zigbee.endpoint import Endpoint
     from zha.zigbee.group import Group
@@ -523,6 +530,11 @@ class PlatformEntity(BaseEntity):
 
     _migrate_platform_unique_ids: tuple[tuple[UniqueIdMigration, str]] | None = None
 
+    # Fields of host-side state that no ZCL attribute holds, such as a light's
+    # brightness before it was turned off. They are kept in the device's store and
+    # restored when the entity is added. By default, field `x` is attribute `_x`.
+    _persisted_state_fields: tuple[str, ...] = ()
+
     def __init__(
         self,
         device: BaseDevice,
@@ -565,6 +577,12 @@ class PlatformEntity(BaseEntity):
         super().__init__(unique_id=unique_id, **kwargs)
 
         self._device: BaseDevice = device
+
+        # Persisted state is only saved once it has been loaded, so that the defaults
+        # set in `__init__` never overwrite a stored record
+        self._persisted_state_loaded: bool = False
+        self._restored_state_fields: frozenset[str] = frozenset()
+        self._persisted_state_defaults: dict[str, Any] | None = None
 
     def _apply_entity_config(
         self,
@@ -665,6 +683,97 @@ class PlatformEntity(BaseEntity):
             device_ieee=self._device.ieee,
             available=self.available,
         )
+
+    def on_add(self) -> None:
+        """Run when entity is added."""
+        super().on_add()
+        self._load_persisted_state()
+
+    def maybe_emit_state_changed_event(self) -> None:
+        """Send the state of this platform entity."""
+        super().maybe_emit_state_changed_event()
+        self._save_persisted_state()
+
+    def _persisted_state_namespace(self) -> StoreNamespace | None:
+        """Return the store namespace holding restore records, if there is a store."""
+        return get_store_namespace(self._device.device, ENTITY_STATE_NAMESPACE)
+
+    def _dump_persisted_state(self) -> dict[str, Any]:
+        """Return the persisted fields as a JSON-compatible record."""
+        return {
+            name: getattr(self, f"_{name}") for name in self._persisted_state_fields
+        }
+
+    def _apply_persisted_state(self, record: Mapping[str, Any]) -> frozenset[str]:
+        """Apply a stored record and return the names of the fields it restored."""
+        restored = set()
+
+        for name in self._persisted_state_fields:
+            if name in record:
+                setattr(self, f"_{name}", record[name])
+                restored.add(name)
+
+        return frozenset(restored)
+
+    def _load_persisted_state(self) -> None:
+        """Restore persisted fields from the device's store."""
+        if not self._persisted_state_fields or self._persisted_state_loaded:
+            return
+
+        self._persisted_state_loaded = True
+        namespace = self._persisted_state_namespace()
+
+        if namespace is None:
+            return
+
+        # No record is written while the fields still have these values
+        self._persisted_state_defaults = self._dump_persisted_state()
+
+        key = entity_state_key(self.PLATFORM, self.unique_id)
+
+        if key not in namespace:
+            # The record follows the entity when its unique ID changes
+            for old_unique_id in sorted(self.migrate_unique_ids):
+                old_key = entity_state_key(self.PLATFORM, old_unique_id)
+
+                if old_key in namespace:
+                    namespace[key] = namespace[old_key]
+                    del namespace[old_key]
+                    break
+            else:
+                return
+
+        record = namespace[key]
+
+        if not isinstance(record, dict):
+            self.warning("Ignoring invalid stored state %r", record)
+            return
+
+        try:
+            self._restored_state_fields = self._apply_persisted_state(record)
+        except Exception:  # noqa: BLE001
+            self.error("Failed to restore stored state %r", record, exc_info=True)
+
+    def _save_persisted_state(self) -> None:
+        """Store the persisted fields if they changed."""
+        if not self._persisted_state_fields or not self._persisted_state_loaded:
+            return
+
+        namespace = self._persisted_state_namespace()
+
+        if namespace is None:
+            return
+
+        key = entity_state_key(self.PLATFORM, self.unique_id)
+        record = self._dump_persisted_state()
+
+        if key not in namespace:
+            if record == self._persisted_state_defaults:
+                return
+        elif namespace[key] == record:
+            return
+
+        namespace[key] = record
 
 
 class ZclPlatformEntity(PlatformEntity):

@@ -26,6 +26,7 @@ from tests.common import (
     get_group_entity,
     group_entity_availability_test,
     join_zigpy_device,
+    rejoin_zha_device,
     send_attributes_report,
     update_attribute_cache,
 )
@@ -35,6 +36,7 @@ from zha.application.platforms import GroupEntity, PlatformEntity
 from zha.application.platforms.light.const import FLASH_EFFECTS, ColorMode, FlashMode
 from zha.zigbee.device import Device
 from zha.zigbee.group import Group, GroupMemberReference
+from zha.zigbee.store import ENTITY_STATE_NAMESPACE, entity_state_key
 
 ON = 1
 OFF = 0
@@ -2163,6 +2165,126 @@ async def test_light_state_restoration(zha_gateway: Gateway) -> None:
     assert entity.state.xy_color == (1, 2)
     assert entity.state.color_mode == ColorMode.XY
     assert entity.state.effect == "colorloop"
+
+
+@patch(
+    "zigpy.zcl.clusters.general.LevelControl.request",
+    new=AsyncMock(return_value=[sentinel.data, zcl_f.Status.SUCCESS]),
+)
+@patch(
+    "zigpy.zcl.clusters.general.OnOff.request",
+    new=AsyncMock(return_value=[sentinel.data, zcl_f.Status.SUCCESS]),
+)
+async def test_light_off_brightness_persisted(zha_gateway: Gateway) -> None:
+    """The brightness before a transition to off survives the device being rebuilt."""
+    zha_device = await device_light_3_mock(zha_gateway)
+    entity = get_entity(zha_device, platform=Platform.LIGHT)
+    namespace = zha_device.device.store.namespace(ENTITY_STATE_NAMESPACE)
+    key = entity_state_key(Platform.LIGHT, entity.unique_id)
+
+    # Nothing is stored for a light that was never turned off with a transition
+    assert entity.state.off_brightness is None
+    assert key not in namespace
+
+    await entity.async_turn_on(brightness=120)
+    await entity.async_turn_off(transition=1)
+    await zha_gateway.async_block_till_done()
+
+    assert entity.state.off_brightness == 120
+    assert entity.state.off_with_transition is True
+    assert namespace[key] == {"off_brightness": 120, "off_with_transition": True}
+
+    zha_device = await rejoin_zha_device(zha_gateway, zha_device)
+    new_entity = get_entity(zha_device, platform=Platform.LIGHT)
+
+    assert new_entity is not entity
+    assert new_entity.state.off_brightness == 120
+    assert new_entity.state.off_with_transition is True
+
+    # Home Assistant's restored copy is older than the store and is ignored
+    new_entity.restore_external_state_attributes(
+        state=False,
+        off_with_transition=False,
+        off_brightness=5,
+        brightness=None,
+        color_temp=None,
+        xy_color=None,
+        color_mode=None,
+        effect=None,
+    )
+
+    assert new_entity.state.off_brightness == 120
+    assert new_entity.state.off_with_transition is True
+
+    # Turning on clears the stored brightness
+    await new_entity.async_turn_on()
+    await zha_gateway.async_block_till_done()
+
+    assert namespace[key] == {"off_brightness": None, "off_with_transition": False}
+
+
+async def test_light_off_brightness_taken_over_from_restore(
+    zha_gateway: Gateway,
+) -> None:
+    """Without a stored record, Home Assistant's restored values are used and stored."""
+    zha_device = await device_light_3_mock(zha_gateway)
+    entity = get_entity(zha_device, platform=Platform.LIGHT)
+    namespace = zha_device.device.store.namespace(ENTITY_STATE_NAMESPACE)
+    key = entity_state_key(Platform.LIGHT, entity.unique_id)
+
+    entity.restore_external_state_attributes(
+        state=False,
+        off_with_transition=True,
+        off_brightness=33,
+        brightness=None,
+        color_temp=None,
+        xy_color=None,
+        color_mode=None,
+        effect=None,
+    )
+
+    assert entity.state.off_brightness == 33
+    assert namespace[key] == {"off_brightness": 33, "off_with_transition": True}
+
+
+@pytest.mark.parametrize(
+    "record",
+    [
+        "not a record",
+        {"off_brightness": "bright", "off_with_transition": 1},
+        {"off_brightness": 300, "off_with_transition": None},
+        {"off_brightness": True},
+    ],
+)
+async def test_light_invalid_stored_state_ignored(
+    zha_gateway: Gateway, record: Any
+) -> None:
+    """A stored record with invalid values does not restore those values."""
+    zha_device = await device_light_3_mock(zha_gateway)
+    entity = get_entity(zha_device, platform=Platform.LIGHT)
+    namespace = zha_device.device.store.namespace(ENTITY_STATE_NAMESPACE)
+    namespace[entity_state_key(Platform.LIGHT, entity.unique_id)] = record
+
+    zha_device = await rejoin_zha_device(zha_gateway, zha_device)
+    entity = get_entity(zha_device, platform=Platform.LIGHT)
+
+    assert entity.state.off_brightness is None
+    assert entity.state.off_with_transition is False
+
+    # Fields that were not restored still come from Home Assistant
+    entity.restore_external_state_attributes(
+        state=False,
+        off_with_transition=True,
+        off_brightness=10,
+        brightness=None,
+        color_temp=None,
+        xy_color=None,
+        color_mode=None,
+        effect=None,
+    )
+
+    assert entity.state.off_brightness == 10
+    assert entity.state.off_with_transition is True
 
 
 async def test_light_state_restoration_unsupported_color_mode(

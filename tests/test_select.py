@@ -29,6 +29,7 @@ from tests.common import (
     create_mock_zigpy_device,
     get_entity,
     join_zigpy_device,
+    rejoin_zha_device,
     send_attributes_report,
     zigpy_device_from_json,
 )
@@ -39,6 +40,7 @@ from zha.application.platforms.select import (
     AqaraMotionSensitivities,
     BegaColorTemperatureChannel,
 )
+from zha.zigbee.store import ENTITY_STATE_NAMESPACE, entity_state_key
 
 
 async def test_select(zha_gateway: Gateway) -> None:
@@ -283,6 +285,141 @@ async def test_non_zcl_select_state_restoration(zha_gateway: Gateway) -> None:
         state=security.IasWd.Warning.WarningMode.Fire.name
     )
     assert entity.state.current_option == security.IasWd.Warning.WarningMode.Fire.name
+
+
+async def test_siren_default_selects_persisted(zha_gateway: Gateway) -> None:
+    """Siren defaults survive the device being rebuilt, ahead of HA's restored state."""
+    zigpy_device = create_mock_zigpy_device(
+        zha_gateway,
+        {
+            1: {
+                SIG_EP_INPUT: [general.Basic.cluster_id, security.IasWd.cluster_id],
+                SIG_EP_OUTPUT: [],
+                SIG_EP_TYPE: zha.DeviceType.IAS_WARNING_DEVICE,
+                SIG_EP_PROFILE: zha.PROFILE_ID,
+            }
+        },
+    )
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
+    namespace = zigpy_device.store.namespace(ENTITY_STATE_NAMESPACE)
+    siren = get_entity(zha_device, platform=Platform.SIREN)
+    key = entity_state_key(Platform.SIREN, siren.unique_id)
+
+    tone = get_entity(zha_device, platform=Platform.SELECT, qualifier="WarningMode")
+    strobe = get_entity(
+        zha_device,
+        platform=Platform.SELECT,
+        qualifier_func=lambda e: e.unique_id.endswith("-Strobe"),
+    )
+
+    # Nothing is stored until a default is chosen
+    assert key not in namespace
+
+    await tone.async_select_option(security.IasWd.Warning.WarningMode.Fire.name)
+    await strobe.async_select_option("Strobe")
+
+    assert namespace[key] == {
+        "WarningMode": security.IasWd.Warning.WarningMode.Fire,
+        "SirenLevel": None,
+        "Strobe": security.IasWd.Warning.Strobe.Strobe,
+        "StrobeLevel": None,
+    }
+
+    zha_device = await rejoin_zha_device(zha_gateway, zha_device)
+    tone = get_entity(zha_device, platform=Platform.SELECT, qualifier="WarningMode")
+    level = get_entity(zha_device, platform=Platform.SELECT, qualifier="SirenLevel")
+    strobe = get_entity(
+        zha_device,
+        platform=Platform.SELECT,
+        qualifier_func=lambda e: e.unique_id.endswith("-Strobe"),
+    )
+
+    assert tone.state.current_option == security.IasWd.Warning.WarningMode.Fire.name
+    assert strobe.state.current_option == "Strobe"
+    assert level.state.current_option is None
+
+    # Home Assistant's older copies are ignored, also for a default that is unset
+    tone.restore_external_state_attributes(
+        state=security.IasWd.Warning.WarningMode.Burglar.name
+    )
+    level.restore_external_state_attributes(
+        state=security.IasWd.Warning.SirenLevel.Low_level_sound.name.replace("_", " ")
+    )
+
+    assert tone.state.current_option == security.IasWd.Warning.WarningMode.Fire.name
+    assert level.state.current_option is None
+
+
+async def test_siren_default_selects_taken_over_from_restore(
+    zha_gateway: Gateway,
+) -> None:
+    """Without stored defaults, HA's restored options are used and stored."""
+    zigpy_device = create_mock_zigpy_device(
+        zha_gateway,
+        {
+            1: {
+                SIG_EP_INPUT: [general.Basic.cluster_id, security.IasWd.cluster_id],
+                SIG_EP_OUTPUT: [],
+                SIG_EP_TYPE: zha.DeviceType.IAS_WARNING_DEVICE,
+                SIG_EP_PROFILE: zha.PROFILE_ID,
+            }
+        },
+    )
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
+    namespace = zigpy_device.store.namespace(ENTITY_STATE_NAMESPACE)
+    siren = get_entity(zha_device, platform=Platform.SIREN)
+
+    tone = get_entity(zha_device, platform=Platform.SELECT, qualifier="WarningMode")
+    tone.restore_external_state_attributes(state="Police Panic")
+
+    assert namespace[entity_state_key(Platform.SIREN, siren.unique_id)] == {
+        "WarningMode": security.IasWd.Warning.WarningMode.Police_Panic,
+        "SirenLevel": None,
+        "Strobe": None,
+        "StrobeLevel": None,
+    }
+
+    zha_device = await rejoin_zha_device(zha_gateway, zha_device)
+    tone = get_entity(zha_device, platform=Platform.SELECT, qualifier="WarningMode")
+
+    assert tone.state.current_option == "Police Panic"
+
+
+@pytest.mark.parametrize(
+    "record",
+    [
+        {"WarningMode": 250, "Strobe": "Strobe", "SirenLevel": 1.5},
+        {"WarningMode": True},
+    ],
+)
+async def test_siren_invalid_stored_defaults_ignored(
+    zha_gateway: Gateway, record: dict
+) -> None:
+    """Stored defaults that are not valid members are not restored."""
+    zigpy_device = create_mock_zigpy_device(
+        zha_gateway,
+        {
+            1: {
+                SIG_EP_INPUT: [general.Basic.cluster_id, security.IasWd.cluster_id],
+                SIG_EP_OUTPUT: [],
+                SIG_EP_TYPE: zha.DeviceType.IAS_WARNING_DEVICE,
+                SIG_EP_PROFILE: zha.PROFILE_ID,
+            }
+        },
+    )
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
+    siren = get_entity(zha_device, platform=Platform.SIREN)
+    namespace = zigpy_device.store.namespace(ENTITY_STATE_NAMESPACE)
+    namespace[entity_state_key(Platform.SIREN, siren.unique_id)] = record
+
+    zha_device = await rejoin_zha_device(zha_gateway, zha_device)
+    tone = get_entity(zha_device, platform=Platform.SELECT, qualifier="WarningMode")
+    assert tone.state.current_option is None
+
+    tone.restore_external_state_attributes(
+        state=security.IasWd.Warning.WarningMode.Fire.name
+    )
+    assert tone.state.current_option == security.IasWd.Warning.WarningMode.Fire.name
 
 
 async def test_bega_color_temperature_channel_select(zha_gateway: Gateway) -> None:
