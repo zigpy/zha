@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from typing import TYPE_CHECKING, Final
+from typing import TYPE_CHECKING, Any, Final
 
 from zigpy.store import DEFAULT_VERSION, DeviceStore, JSONValue, StoredValue
 
@@ -30,6 +30,27 @@ def get_device_store(zigpy_device: ZigpyBaseDevice) -> DeviceStore | None:
         return None
 
     return store
+
+
+def store_diagnostics(zigpy_device: ZigpyBaseDevice) -> dict[str, Any]:
+    """Return the contents of the device's store for diagnostics, by namespace."""
+    store = get_device_store(zigpy_device)
+
+    if store is None:
+        return {}
+
+    return {
+        namespace.name: {
+            key: {
+                "value": item.value,
+                "version": item.version,
+                "last_updated": item.last_updated.isoformat(),
+            }
+            for key, item in sorted(namespace.items())
+        }
+        for namespace in sorted(store.namespaces(), key=lambda ns: ns.name)
+        if len(namespace) > 0
+    }
 
 
 def get_store_namespace(

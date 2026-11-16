@@ -2360,9 +2360,24 @@ async def test_device_value_sensor(zha_gateway: Gateway) -> None:
     listener = MagicMock()
     entity.on_event(STATE_CHANGED, listener)
 
+    assert "store" not in zha_device.get_diagnostics_json()
+
     zigpy_device.store[RAIN_INTENSITY] = 25
     assert_state(entity, 2.5, UnitOfVolumetricFlux.MILLIMETERS_PER_HOUR)
     assert len(listener.mock_calls) == 1
+
+    store = zha_device.get_diagnostics_json()["store"]
+    assert store == {
+        "device_values": {
+            "rain_intensity": {
+                "value": 25,
+                "version": 1,
+                "last_updated": store["device_values"]["rain_intensity"][
+                    "last_updated"
+                ],
+            }
+        }
+    }
 
     # A value the declaration cannot decode reads as unknown
     zigpy_device.store.namespace(RAIN_INTENSITY.namespace)[RAIN_INTENSITY.key] = "x"
