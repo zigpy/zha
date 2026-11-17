@@ -17,6 +17,46 @@ ZHA is a versatile and hardware-independent Zigbee gateway implementation, desig
 - **Unified Zigbee Network:** By utilizing ZHA, you can establish a single Zigbee network, simplifying device management and enhancing interoperability.
 - **Low-Bandwidth Communication:** Zigbee operates on a low-bandwidth communication protocol, utilizing small, low-power digital radios to connect devices within local Zigbee wireless private area networks.
 
+## Thermostat weekly schedules
+
+Weekly schedules are opt-in. A quirk exposes a feature registered in
+`zha.zigbee.weekly_schedule.WEEKLY_SCHEDULE_PROVIDERS`; standard ZCL schedules use
+`THERMOSTAT_WEEKLY_SCHEDULE`. Other thermostat families can subclass
+`WeeklyScheduleProvider`, implement its read, write, limit and optional clear
+primitives, declare `WeeklyScheduleCapabilities`, and register their own feature.
+Validation, caching, snapshots, change detection and verification are shared.
+Uploads with `only_changed=True` write only days whose fresh read differs and
+report them in `written_days`.
+
+`has_verified_schedule` is true after a complete, verified upload in the current
+session. It is invalidated by known schedule mutations, cluster replacement, or a
+failed or mismatching fresh read. Consumers can subscribe to
+`EVENT_VERIFIED_CHANGED` on the provider to update their state. Changes made
+outside ZHA may not be detected until the schedule is read again.
+
+Thermostat entities can read a heat-only weekly schedule or explicitly upload a
+complete seven-day schedule. Uploads require fresh heat limits and a complete
+pre-write read, then write and verify each day separately. The in-memory cache may
+be incomplete or stale and is not synchronized with changes made outside ZHA.
+Clearing removes the entire device schedule, including cooling where supported.
+It snapshots and verifies the heat schedule only; cooling is not read back or
+included in the snapshot. An unconfirmed clear may still have changed the device;
+the affected cache is marked unknown. No automatic retry or rollback is attempted.
+The thermostat's operating mode and clock are not changed. Device and radio limits
+can be lower than the protocol's transition-count limit. Large schedules may
+exceed radio frame limits, and a failed upload can leave the week partly updated.
+No unverified device-specific transition limit is enforced.
+
+Uploads take all seven lowercase weekday names, each with ordered `(minute,
+centi-degrees Celsius)` transitions beginning at midnight. Results include
+`days` with `HH:MM`/Celsius transitions and UTC update timestamps, `complete`,
+and `pre_write_snapshot`. A day's `null` transitions are unknown; an empty list
+is a known empty schedule. The snapshot is in-memory only. Upload failures report
+changed, unknown and unattempted days; they do not automatically roll back.
+
+The independent design was informed by Zigbee2MQTT's
+[Bosch BTH-RA converter](https://github.com/Koenkk/zigbee-herdsman-converters/blob/master/src/lib/bosch.ts).
+
 ## Getting Started With Development
 
 To bootstrap a development environment for ZHA, follow these steps:

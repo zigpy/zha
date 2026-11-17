@@ -41,6 +41,7 @@ BEGA_LIGHT_SWITCHABLE_WHITE = "bega.light_switchable_white"
 SE_POLL_SUMMATION = "se_poll_summation"
 SIREN_BASIC = "siren_basic"
 THERMOSTAT_FAN_ONLY_HVAC = "thermostat_fan_only_hvac"
+THERMOSTAT_WEEKLY_SCHEDULE = "thermostat_weekly_schedule"
 
 
 class ModelInfo(NamedTuple):
