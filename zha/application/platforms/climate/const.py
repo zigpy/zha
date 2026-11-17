@@ -205,6 +205,7 @@ SEQ_OF_OPERATION = {
 HVAC_MODE_2_SYSTEM = {
     HVACMode.OFF: SystemMode.Off,
     HVACMode.HEAT_COOL: SystemMode.Auto,
+    HVACMode.AUTO: SystemMode.Auto,
     HVACMode.COOL: SystemMode.Cool,
     HVACMode.HEAT: SystemMode.Heat,
     HVACMode.FAN_ONLY: SystemMode.Fan_only,

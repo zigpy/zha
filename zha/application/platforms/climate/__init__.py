@@ -55,12 +55,18 @@ from zha.application.platforms.climate.const import (
     Preset,
 )
 from zha.decorators import periodic
+from zha.exceptions import ZHAException
 from zha.quirks import THERMOSTAT_FAN_ONLY_HVAC
 from zha.units import UnitOfTemperature
 
 if TYPE_CHECKING:
     from zha.zigbee.device import Device
     from zha.zigbee.endpoint import Endpoint
+    from zha.zigbee.weekly_schedule import (
+        ScheduleInput,
+        ScheduleResult,
+        WeeklyScheduleProvider,
+    )
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -399,6 +405,34 @@ class Thermostat(BaseThermostat, ZclPlatformEntity):
         self.recompute_capabilities()
 
     @property
+    def weekly_schedule(self) -> WeeklyScheduleProvider | None:
+        """Return the weekly schedule provider exposed by the device's quirk."""
+        return self._device.weekly_schedule(self._endpoint.id)
+
+    def _require_weekly_schedule(self) -> WeeklyScheduleProvider:
+        if (provider := self.weekly_schedule) is None:
+            raise ZHAException("This thermostat does not support weekly schedules")
+        return provider
+
+    async def async_get_weekly_schedule(
+        self, *, refresh: bool = True
+    ) -> ScheduleResult:
+        """Return the thermostat's heat schedule or the in-memory cache."""
+        return await self._require_weekly_schedule().async_get(refresh=refresh)
+
+    async def async_set_weekly_schedule(
+        self, schedule: ScheduleInput, *, only_changed: bool = False
+    ) -> ScheduleResult:
+        """Upload and verify a complete heat schedule."""
+        return await self._require_weekly_schedule().async_set(
+            schedule, only_changed=only_changed
+        )
+
+    async def async_clear_weekly_schedule(self) -> ScheduleResult:
+        """Clear the device schedule and verify its heat days."""
+        return await self._require_weekly_schedule().async_clear()
+
+    @property
     def _local_temperature(self) -> int | None:
         return self._cluster.get(ThermostatCluster.AttributeDefs.local_temperature.name)
 
@@ -699,12 +733,27 @@ class Thermostat(BaseThermostat, ZclPlatformEntity):
     @property
     def hvac_mode(self) -> HVACMode | None:
         """Return HVAC operation mode."""
-        return SYSTEM_MODE_2_HVAC.get(self._system_mode)
+        mode = SYSTEM_MODE_2_HVAC.get(self._system_mode)
+        sequence = SEQ_OF_OPERATION.get(self._ctrl_sequence_of_oper, [])
+        if (
+            mode == HVACMode.HEAT_COOL
+            and HVACMode.HEAT in sequence
+            and HVACMode.HEAT_COOL not in sequence
+            and self.weekly_schedule is not None
+        ):
+            return HVACMode.AUTO
+        return mode
 
     @property
     def hvac_modes(self) -> list[HVACMode]:
         """Return the list of available HVAC operation modes."""
         modes = SEQ_OF_OPERATION.get(self._ctrl_sequence_of_oper, [HVACMode.OFF])
+        if (
+            HVACMode.HEAT in modes
+            and HVACMode.HEAT_COOL not in modes
+            and self.weekly_schedule is not None
+        ):
+            modes = [*modes, HVACMode.AUTO]
         if (
             self._fan_cluster is not None
             and THERMOSTAT_FAN_ONLY_HVAC in self._device.exposes_features
@@ -737,7 +786,7 @@ class Thermostat(BaseThermostat, ZclPlatformEntity):
                 temp = self._unoccupied_cooling_setpoint
             else:
                 temp = self._occupied_cooling_setpoint
-        elif self.hvac_mode == HVACMode.HEAT:
+        elif self.hvac_mode in (HVACMode.HEAT, HVACMode.AUTO):
             if self.preset_mode == Preset.AWAY:
                 temp = self._unoccupied_heating_setpoint
             else:
@@ -939,7 +988,7 @@ class Thermostat(BaseThermostat, ZclPlatformEntity):
                     temperature=int(temperature * ZCL_TEMP),
                     is_away=is_away,
                 )
-            elif self.hvac_mode == HVACMode.HEAT:
+            elif self.hvac_mode in (HVACMode.HEAT, HVACMode.AUTO):
                 await self._async_set_heating_setpoint(
                     temperature=int(temperature * ZCL_TEMP),
                     is_away=is_away,
