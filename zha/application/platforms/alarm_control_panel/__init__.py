@@ -45,6 +45,10 @@ _LOGGER = logging.getLogger(__name__)
 SIGNAL_ARMED_STATE_CHANGED = "zha_armed_state_changed"
 SIGNAL_ALARM_TRIGGERED = "zha_armed_triggered"
 
+ALARM_STATE_TO_PANEL_STATUS: dict[AlarmState, PanelStatus] = {
+    alarm_state: panel_status for panel_status, alarm_state in IAS_ACE_STATE_MAP.items()
+}
+
 
 @dataclasses.dataclass(frozen=True, kw_only=True)
 class AlarmControlPanelState(BaseEntityState):
@@ -378,6 +382,30 @@ class AlarmControlPanel(BaseAlarmControlPanel, ZclPlatformEntity):
     def alarm_state(self) -> AlarmState:
         """Return the current alarm state."""
         return IAS_ACE_STATE_MAP.get(self.armed_state, AlarmState.UNKNOWN)
+
+    def restore_external_state_attributes(
+        self,
+        *,
+        state: AlarmState | str | None,
+    ) -> None:
+        """Restore the panel state, which is not stored in the ZCL attribute cache."""
+        if state is None:
+            return
+
+        try:
+            panel_status = ALARM_STATE_TO_PANEL_STATUS.get(AlarmState(state))
+        except ValueError:
+            return
+
+        if panel_status is None:
+            return
+
+        self.armed_state = panel_status
+        if panel_status != AceCluster.PanelStatus.In_Alarm:
+            self.alarm_status = AceCluster.AlarmStatus.No_Alarm
+        elif self.alarm_status == AceCluster.AlarmStatus.No_Alarm:
+            # The original cause (Fire, Panic, ...) isn't part of the restored state
+            self.alarm_status = AceCluster.AlarmStatus.Emergency
 
     @property
     def code_arm_required(self) -> bool:
