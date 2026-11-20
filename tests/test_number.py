@@ -657,3 +657,40 @@ async def test_color_number(
     )
     await zha_gateway.async_block_till_done()
     assert entity.state.native_value == initial_value
+
+
+async def test_parkside_valve_timer_duration_not_duplicated(
+    zha_gateway: Gateway,
+) -> None:
+    """Test the Parkside valve's timer duration number is exposed once, by its quirk."""
+    zigpy_device = create_mock_zigpy_device(
+        zha_gateway,
+        {
+            1: {
+                SIG_EP_INPUT: [
+                    general.Basic.cluster_id,
+                    general.Identify.cluster_id,
+                    general.Groups.cluster_id,
+                    general.Scenes.cluster_id,
+                    general.OnOff.cluster_id,
+                    0xEF00,  # Tuya manufacturer cluster
+                ],
+                SIG_EP_OUTPUT: [general.Time.cluster_id, general.Ota.cluster_id],
+                SIG_EP_TYPE: zha.DeviceType.ON_OFF_SWITCH,
+                SIG_EP_PROFILE: zha.PROFILE_ID,
+            }
+        },
+        manufacturer="_TZE200_htnnfasr",
+        model="TS0601",
+        attributes={1: {"tuya_manufacturer": {"timer_duration": 10}}},
+    )
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
+
+    numbers = [
+        entity
+        for entity in zha_device.platform_entities.values()
+        if entity.PLATFORM == Platform.NUMBER
+        and getattr(entity, "_attribute_name", None) == "timer_duration"
+    ]
+    assert len(numbers) == 1
+    assert numbers[0].state.native_value == 10

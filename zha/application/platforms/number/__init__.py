@@ -36,7 +36,6 @@ from zha.application.platforms import (
 from zha.application.platforms.const import (
     IKEA_AIR_PURIFIER_CLUSTER,
     SINOPE_MANUFACTURER_CLUSTER,
-    TUYA_MANUFACTURER_CLUSTER,
 )
 from zha.application.platforms.helpers import validate_device_class
 from zha.application.platforms.legacy_quirks import AQARA_OPPLE_CLUSTER
@@ -756,25 +755,6 @@ class SonoffPresenceSenorTimeout(NumberConfigurationEntity):
             },
         ),
     }
-
-
-@register_entity(TUYA_MANUFACTURER_CLUSTER)
-class TimerDurationMinutes(NumberConfigurationEntity):
-    """Representation of a ZHA timer duration configuration entity."""
-
-    _unique_id_suffix = "timer_duration"
-    _attr_entity_category = EntityCategory.CONFIG
-    _attr_native_min_value: float = 0x00
-    _attr_native_max_value: float = 0x257
-    _attr_native_unit_of_measurement: str = UnitOfTime.MINUTES
-    _attribute_name = "timer_duration"
-    _attr_translation_key: str = "timer_duration"
-    _cluster_id = TUYA_MANUFACTURER_CLUSTER
-
-    _cluster_match = ClusterMatch(
-        server_clusters=frozenset({TUYA_MANUFACTURER_CLUSTER}),
-        manufacturers=frozenset({"_TZE200_htnnfasr"}),
-    )
 
 
 @register_entity(IKEA_AIR_PURIFIER_CLUSTER)

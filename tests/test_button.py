@@ -39,13 +39,8 @@ from tests.common import (
 )
 from zha.application import Platform
 from zha.application.gateway import Gateway
-from zha.application.platforms import EntityCategory, PlatformEntity
-from zha.application.platforms.button import (
-    Button,
-    FrostLockResetButton,
-    WriteAttributeButton,
-)
-from zha.application.platforms.button.const import ButtonDeviceClass
+from zha.application.platforms import PlatformEntity
+from zha.application.platforms.button import Button, WriteAttributeButton
 from zha.quirks import DeviceRegistry
 from zha.zigbee.device import Device
 
@@ -133,7 +128,7 @@ async def test_button(
 async def test_frost_unlock(
     zha_gateway: Gateway,
 ) -> None:
-    """Test custom frost unlock ZHA button."""
+    """Test the Parkside valve's frost lock reset button, exposed once by its quirk."""
     zigpy_device = create_mock_zigpy_device(
         zha_gateway,
         TUYA_WATER_VALVE,
@@ -143,15 +138,17 @@ async def test_frost_unlock(
     zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
     cluster = zigpy_device.endpoints[1].tuya_manufacturer
     assert cluster is not None
-    entity: PlatformEntity = get_entity(
-        zha_device,
-        platform=Platform.BUTTON,
-        entity_type=FrostLockResetButton,
-    )
-    assert isinstance(entity, FrostLockResetButton)
 
-    assert entity._attr_device_class == ButtonDeviceClass.RESTART
-    assert entity._attr_entity_category == EntityCategory.CONFIG
+    # The v2 quirk exposes the button, ZHA must not add a second one
+    buttons = [
+        entity
+        for entity in zha_device.platform_entities.values()
+        if entity.PLATFORM == Platform.BUTTON
+        and isinstance(entity, WriteAttributeButton)
+        and entity.state.attribute_name == "frost_lock_reset"
+    ]
+    assert len(buttons) == 1
+    entity = buttons[0]
 
     await entity.async_press()
     await zha_gateway.async_block_till_done()

@@ -23,7 +23,6 @@ from zha.application.platforms import (
     register_entity,
 )
 from zha.application.platforms.button.const import DEFAULT_DURATION, ButtonDeviceClass
-from zha.application.platforms.const import TUYA_MANUFACTURER_CLUSTER
 from zha.application.platforms.legacy_quirks import AQARA_OPPLE_CLUSTER
 
 if TYPE_CHECKING:
@@ -186,24 +185,6 @@ class WriteAttributeButton(BaseButton, ZclPlatformEntity):
         await write_attributes_safe(
             self._cluster, {self._attribute_name: self._attribute_value}
         )
-
-
-@register_entity(TUYA_MANUFACTURER_CLUSTER)
-class FrostLockResetButton(WriteAttributeButton):
-    """Defines a ZHA frost lock reset button."""
-
-    _unique_id_suffix = "reset_frost_lock"
-    _attribute_name = "frost_lock_reset"
-    _attribute_value = 0
-    _attr_device_class = ButtonDeviceClass.RESTART
-    _attr_entity_category = EntityCategory.CONFIG
-    _attr_translation_key = "reset_frost_lock"
-    _cluster_id = TUYA_MANUFACTURER_CLUSTER
-
-    _cluster_match = ClusterMatch(
-        server_clusters=frozenset({TUYA_MANUFACTURER_CLUSTER}),
-        manufacturers=frozenset({"_TZE200_htnnfasr"}),
-    )
 
 
 @register_entity(AQARA_OPPLE_CLUSTER)
