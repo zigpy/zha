@@ -1606,9 +1606,15 @@ class ZigbeeDevice(BaseDevice[ZigpyDevice]):
         args: list | None,
         params: dict[str, Any] | None,
         cluster_type: str = CLUSTER_TYPE_IN,
-        manufacturer: int | None = None,
+        manufacturer: int | UndefinedType | None = UNDEFINED,
     ) -> None:
-        """Issue a command against specified zigbee cluster on this device."""
+        """Issue a command against specified zigbee cluster on this device.
+
+        A manufacturer code is passed on to zigpy only when one is given. Otherwise
+        (`UNDEFINED`, or `None` as the previous default) zigpy picks the code from the
+        command definition and the cluster, and quirk `command()` overrides, which
+        default `manufacturer` to `None`, never receive `UNDEFINED`.
+        """
         try:
             cluster: Cluster = self.async_get_cluster(
                 endpoint_id, cluster_id, cluster_type
@@ -1623,6 +1629,9 @@ class ZigbeeDevice(BaseDevice[ZigpyDevice]):
             if command_type == CLUSTER_COMMAND_SERVER
             else cluster.client_commands
         )
+        kwargs: dict[str, Any] = {}
+        if manufacturer is not UNDEFINED and manufacturer is not None:
+            kwargs["manufacturer"] = manufacturer
         if args is not None:
             self.warning(
                 (
@@ -1632,11 +1641,11 @@ class ZigbeeDevice(BaseDevice[ZigpyDevice]):
                 args,
                 [field.name for field in commands[command].schema.fields],
             )
-            response = await getattr(cluster, commands[command].name)(*args)
+            response = await getattr(cluster, commands[command].name)(*args, **kwargs)
         else:
             assert params is not None
             response = await getattr(cluster, commands[command].name)(
-                **convert_to_zcl_values(params, commands[command].schema)
+                **convert_to_zcl_values(params, commands[command].schema), **kwargs
             )
         self.debug(
             "Issued cluster command: %s %s %s %s %s %s %s %s",

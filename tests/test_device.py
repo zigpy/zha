@@ -4,6 +4,7 @@ import asyncio
 from collections.abc import Iterator
 import logging
 import time
+from typing import Any
 from unittest import mock
 from unittest.mock import AsyncMock, call, patch
 
@@ -892,6 +893,121 @@ async def test_issue_cluster_command_lightlink_status(
             None,
             {},
         )
+
+
+@pytest.mark.parametrize(
+    ("manufacturer_kwargs", "expected_kwargs"),
+    [
+        ({"manufacturer": 0x1234}, {"manufacturer": 0x1234}),
+        ({}, {}),
+        ({"manufacturer": UNDEFINED}, {}),
+        ({"manufacturer": None}, {}),
+    ],
+)
+async def test_issue_cluster_command_manufacturer(
+    zha_gateway: Gateway,
+    manufacturer_kwargs: dict[str, Any],
+    expected_kwargs: dict[str, Any],
+) -> None:
+    """Test that issue_cluster_command passes a given manufacturer code on."""
+    zigpy_dev = create_mock_zigpy_device(
+        zha_gateway,
+        {
+            3: {
+                SIG_EP_INPUT: [general.Basic.cluster_id, general.Groups.cluster_id],
+                SIG_EP_OUTPUT: [],
+                SIG_EP_TYPE: zigpy.profiles.zha.DeviceType.ON_OFF_SWITCH,
+                SIG_EP_PROFILE: zigpy.profiles.zha.PROFILE_ID,
+            }
+        },
+    )
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
+    cluster = zigpy_dev.endpoints[3].groups
+
+    # Server command, sent with `params` and with the deprecated `args`. Quirks
+    # override `command()` with `manufacturer=None` as the default, so without a
+    # code the keyword must not be passed at all (no `UNDEFINED` reaching them).
+    with patch.object(cluster, "command", AsyncMock(return_value=None)) as command:
+        await zha_device.issue_cluster_command(
+            3,
+            general.Groups.cluster_id,
+            general.Groups.ServerCommandDefs.remove_all.id,
+            CLUSTER_COMMAND_SERVER,
+            None,
+            {},
+            **manufacturer_kwargs,
+        )
+        await zha_device.issue_cluster_command(
+            3,
+            general.Groups.cluster_id,
+            general.Groups.ServerCommandDefs.view.id,
+            CLUSTER_COMMAND_SERVER,
+            [0x0001],
+            None,
+            **manufacturer_kwargs,
+        )
+
+    assert command.await_args_list == [
+        call(general.Groups.ServerCommandDefs.remove_all.id, **expected_kwargs),
+        call(general.Groups.ServerCommandDefs.view.id, 0x0001, **expected_kwargs),
+    ]
+
+    # Client command
+    with patch.object(
+        cluster, "client_command", AsyncMock(return_value=None)
+    ) as client_command:
+        await zha_device.issue_cluster_command(
+            3,
+            general.Groups.cluster_id,
+            general.Groups.ClientCommandDefs.remove_response.id,
+            "client",
+            None,
+            {"status": Status.SUCCESS, "group_id": 0x0001},
+            **manufacturer_kwargs,
+        )
+
+    assert client_command.await_args_list == [
+        call(
+            general.Groups.ClientCommandDefs.remove_response.id,
+            status=Status.SUCCESS,
+            group_id=0x0001,
+            **expected_kwargs,
+        )
+    ]
+
+
+async def test_issue_cluster_command_manufacturer_frame(
+    zha_gateway: Gateway,
+) -> None:
+    """Test that a given manufacturer code ends up in the request zigpy sends."""
+    zigpy_dev = zigpy_device(zha_gateway, with_basic_cluster=True)
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
+    cluster = zigpy_dev.endpoints[3].on_off
+
+    default_response = GENERAL_COMMANDS[GeneralCommand.Default_Response].schema
+
+    for manufacturer, expected in ((0x1234, 0x1234), (UNDEFINED, None)):
+        with patch(
+            "zigpy.zcl.Cluster.request",
+            return_value=default_response(
+                command_id=general.OnOff.ServerCommandDefs.on.id,
+                status=Status.SUCCESS,
+            ),
+        ):
+            await zha_device.issue_cluster_command(
+                3,
+                general.OnOff.cluster_id,
+                general.OnOff.ServerCommandDefs.on.id,
+                CLUSTER_COMMAND_SERVER,
+                None,
+                {},
+                manufacturer=manufacturer,
+            )
+
+            # OnOff is a standard cluster whose `on` command carries no manufacturer
+            # information, so zigpy sends no code unless one is given
+            assert cluster.request.await_count == 1
+            assert cluster.request.await_args.kwargs["manufacturer"] == expected
 
 
 async def test_async_add_to_group_remove_from_group(
