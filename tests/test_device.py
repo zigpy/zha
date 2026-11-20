@@ -896,18 +896,23 @@ async def test_issue_cluster_command_lightlink_status(
 
 
 @pytest.mark.parametrize(
-    ("manufacturer_kwargs", "expected_kwargs"),
+    ("manufacturer_kwargs", "expected_kwargs", "expected_client_kwargs"),
     [
-        ({"manufacturer": 0x1234}, {"manufacturer": 0x1234}),
-        ({}, {}),
-        ({"manufacturer": UNDEFINED}, {}),
-        ({"manufacturer": None}, {}),
+        ({"manufacturer": 0x1234}, {"manufacturer": 0x1234}, {"manufacturer": 0x1234}),
+        ({}, {}, {}),
+        ({"manufacturer": UNDEFINED}, {}, {}),
+        ({"manufacturer": None}, {}, {}),
+        # Home Assistant's "force no code": zigpy's `client_command` takes `None` as
+        # no code, server commands can't force it and keep zigpy's choice
+        ({"manufacturer": -1}, {}, {"manufacturer": None}),
+        ({"manufacturer": -2}, {}, {}),
     ],
 )
 async def test_issue_cluster_command_manufacturer(
     zha_gateway: Gateway,
     manufacturer_kwargs: dict[str, Any],
     expected_kwargs: dict[str, Any],
+    expected_client_kwargs: dict[str, Any],
 ) -> None:
     """Test that issue_cluster_command passes a given manufacturer code on."""
     zigpy_dev = create_mock_zigpy_device(
@@ -971,9 +976,27 @@ async def test_issue_cluster_command_manufacturer(
             general.Groups.ClientCommandDefs.remove_response.id,
             status=Status.SUCCESS,
             group_id=0x0001,
-            **expected_kwargs,
+            **expected_client_kwargs,
         )
     ]
+
+    # The code zigpy puts in the client frame: the given one, else none for this
+    # standard-cluster command (`-1` included)
+    with patch("zigpy.zcl.Cluster.reply", AsyncMock(return_value=None)) as reply:
+        await zha_device.issue_cluster_command(
+            3,
+            general.Groups.cluster_id,
+            general.Groups.ClientCommandDefs.remove_response.id,
+            "client",
+            None,
+            {"status": Status.SUCCESS, "group_id": 0x0001},
+            **manufacturer_kwargs,
+        )
+
+    assert reply.await_count == 1
+    assert reply.await_args.kwargs["manufacturer"] == expected_client_kwargs.get(
+        "manufacturer"
+    )
 
 
 async def test_issue_cluster_command_manufacturer_frame(
@@ -986,7 +1009,7 @@ async def test_issue_cluster_command_manufacturer_frame(
 
     default_response = GENERAL_COMMANDS[GeneralCommand.Default_Response].schema
 
-    for manufacturer, expected in ((0x1234, 0x1234), (UNDEFINED, None)):
+    for manufacturer, expected in ((0x1234, 0x1234), (UNDEFINED, None), (-1, None)):
         with patch(
             "zigpy.zcl.Cluster.request",
             return_value=default_response(

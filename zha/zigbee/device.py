@@ -1614,6 +1614,11 @@ class ZigbeeDevice(BaseDevice[ZigpyDevice]):
         (`UNDEFINED`, or `None` as the previous default) zigpy picks the code from the
         command definition and the cluster, and quirk `command()` overrides, which
         default `manufacturer` to `None`, never receive `UNDEFINED`.
+
+        Home Assistant accepts `-1` to send no code. zigpy can't serialize a negative
+        code: for client commands `-1` becomes `manufacturer=None` (no code), while
+        server commands have no way to force no code, so negative codes are left out
+        there, as they always were.
         """
         try:
             cluster: Cluster = self.async_get_cluster(
@@ -1630,8 +1635,18 @@ class ZigbeeDevice(BaseDevice[ZigpyDevice]):
             else cluster.client_commands
         )
         kwargs: dict[str, Any] = {}
-        if manufacturer is not UNDEFINED and manufacturer is not None:
+        if manufacturer is UNDEFINED or manufacturer is None:
+            pass
+        elif manufacturer >= 0:
             kwargs["manufacturer"] = manufacturer
+        elif manufacturer == -1 and command_type != CLUSTER_COMMAND_SERVER:
+            kwargs["manufacturer"] = None
+        else:
+            self.debug(
+                "Not passing manufacturer code %s on to cluster command %s",
+                manufacturer,
+                command,
+            )
         if args is not None:
             self.warning(
                 (
