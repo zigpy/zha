@@ -518,11 +518,11 @@
         "available": true,
         "group_id": null,
         "current_option": "Celsius",
-        "enum": "TuyaTempUnitConvert",
         "options": [
           "Celsius",
           "Fahrenheit"
-        ]
+        ],
+        "enum": "TuyaTempUnitConvert"
       }
     ],
     "sensor": [

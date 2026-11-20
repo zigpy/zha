@@ -329,12 +329,12 @@
         "available": true,
         "group_id": null,
         "current_option": null,
-        "enum": "AqaraMotionSensitivity",
         "options": [
           "Low",
           "Medium",
           "High"
-        ]
+        ],
+        "enum": "AqaraMotionSensitivity"
       }
     ],
     "sensor": [

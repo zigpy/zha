@@ -263,12 +263,12 @@
         "available": true,
         "group_id": null,
         "current_option": null,
-        "enum": "TuyaSensitivityMode",
         "options": [
           "Low",
           "Medium",
           "High"
-        ]
+        ],
+        "enum": "TuyaSensitivityMode"
       }
     ],
     "sensor": [

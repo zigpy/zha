@@ -831,12 +831,12 @@
         "available": true,
         "group_id": null,
         "current_option": "Nothing",
-        "enum": "DanfossAdaptationRunControlEnum",
         "options": [
           "Nothing",
           "Initiate",
           "Cancel"
-        ]
+        ],
+        "enum": "DanfossAdaptationRunControlEnum"
       },
       {
         "fallback_name": null,
@@ -858,7 +858,6 @@
         "available": true,
         "group_id": null,
         "current_option": "quick 5min",
-        "enum": "DanfossControlAlgorithmScaleFactorEnum",
         "options": [
           "quick 5min",
           "quick 10min",
@@ -871,7 +870,8 @@
           "moderate 70min",
           "slow 80min",
           "quick open disabled"
-        ]
+        ],
+        "enum": "DanfossControlAlgorithmScaleFactorEnum"
       },
       {
         "fallback_name": null,
@@ -893,7 +893,6 @@
         "available": true,
         "group_id": null,
         "current_option": "Thursday",
-        "enum": "DanfossExerciseDayOfTheWeekEnum",
         "options": [
           "Sunday",
           "Monday",
@@ -903,7 +902,8 @@
           "Friday",
           "Saturday",
           "Undefined"
-        ]
+        ],
+        "enum": "DanfossExerciseDayOfTheWeekEnum"
       },
       {
         "fallback_name": null,
@@ -925,11 +925,11 @@
         "available": true,
         "group_id": null,
         "current_option": "Horizontal",
-        "enum": "DanfossOrientationEnum",
         "options": [
           "Horizontal",
           "Vertical"
-        ]
+        ],
+        "enum": "DanfossOrientationEnum"
       },
       {
         "fallback_name": null,
@@ -951,14 +951,14 @@
         "available": true,
         "group_id": null,
         "current_option": "Unlock",
-        "enum": "KeypadLockoutEnum",
         "options": [
           "Unlock",
           "Lock1",
           "Lock2",
           "Lock3",
           "Lock4"
-        ]
+        ],
+        "enum": "KeypadLockoutEnum"
       },
       {
         "fallback_name": null,
@@ -980,11 +980,11 @@
         "available": true,
         "group_id": null,
         "current_option": "Default",
-        "enum": "DanfossViewingDirectionEnum",
         "options": [
           "Default",
           "Inverted"
-        ]
+        ],
+        "enum": "DanfossViewingDirectionEnum"
       }
     ],
     "sensor": [

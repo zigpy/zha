@@ -284,11 +284,11 @@
         "available": true,
         "group_id": null,
         "current_option": null,
-        "enum": "AqaraSwitchClickMode",
         "options": [
           "Single",
           "Multiple"
-        ]
+        ],
+        "enum": "AqaraSwitchClickMode"
       },
       {
         "fallback_name": "Operation mode",
@@ -310,11 +310,11 @@
         "available": true,
         "group_id": null,
         "current_option": null,
-        "enum": "AqaraSwitchOperationMode",
         "options": [
           "Command",
           "Event"
-        ]
+        ],
+        "enum": "AqaraSwitchOperationMode"
       }
     ],
     "sensor": [

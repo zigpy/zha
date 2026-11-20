@@ -672,14 +672,14 @@
         "available": true,
         "group_id": null,
         "current_option": "Unlock",
-        "enum": "KeypadLockoutEnum",
         "options": [
           "Unlock",
           "Lock1",
           "Lock2",
           "Lock3",
           "Lock4"
-        ]
+        ],
+        "enum": "KeypadLockoutEnum"
       },
       {
         "fallback_name": "Actuator type",
@@ -701,11 +701,11 @@
         "available": true,
         "group_id": null,
         "current_option": null,
-        "enum": "BoschActuatorType",
         "options": [
           "NormallyClosed",
           "NormallyOpen"
-        ]
+        ],
+        "enum": "BoschActuatorType"
       },
       {
         "fallback_name": "Heater type",
@@ -727,13 +727,13 @@
         "available": true,
         "group_id": null,
         "current_option": null,
-        "enum": "BoschHeaterType",
         "options": [
           "UnderfloorHeating",
           "Boiler",
           "Radiator",
           "CentralHeating"
-        ]
+        ],
+        "enum": "BoschHeaterType"
       },
       {
         "fallback_name": "Operating mode",
@@ -755,12 +755,12 @@
         "available": true,
         "group_id": null,
         "current_option": null,
-        "enum": "BoschOperatingMode",
         "options": [
           "Schedule",
           "Manual",
           "Pause"
-        ]
+        ],
+        "enum": "BoschOperatingMode"
       },
       {
         "fallback_name": "Sensor connection",
@@ -782,12 +782,12 @@
         "available": true,
         "group_id": null,
         "current_option": null,
-        "enum": "BoschSensorConnection",
         "options": [
           "NotUsed",
           "WithoutRegulation",
           "WithRegulation"
-        ]
+        ],
+        "enum": "BoschSensorConnection"
       },
       {
         "fallback_name": "Temperature display mode",
@@ -809,11 +809,11 @@
         "available": true,
         "group_id": null,
         "current_option": null,
-        "enum": "TemperatureDisplayMode",
         "options": [
           "Metric",
           "Imperial"
-        ]
+        ],
+        "enum": "TemperatureDisplayMode"
       },
       {
         "fallback_name": "Valve status LED",
@@ -835,12 +835,12 @@
         "available": true,
         "group_id": null,
         "current_option": null,
-        "enum": "BoschValveStatusLed",
         "options": [
           "Off",
           "Normal",
           "On"
-        ]
+        ],
+        "enum": "BoschValveStatusLed"
       }
     ],
     "sensor": [

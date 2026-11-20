@@ -345,14 +345,14 @@
         "available": true,
         "group_id": null,
         "current_option": "Ringtone 01",
-        "enum": "TuyaSirenRingtone",
         "options": [
           "Ringtone 01",
           "Ringtone 02",
           "Ringtone 03",
           "Ringtone 04",
           "Ringtone 05"
-        ]
+        ],
+        "enum": "TuyaSirenRingtone"
       }
     ],
     "sensor": [

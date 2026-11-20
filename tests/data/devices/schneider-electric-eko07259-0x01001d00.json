@@ -1959,14 +1959,14 @@
         "available": true,
         "group_id": null,
         "current_option": "Unlock",
-        "enum": "KeypadLockoutEnum",
         "options": [
           "Unlock",
           "Lock1",
           "Lock2",
           "Lock3",
           "Lock4"
-        ]
+        ],
+        "enum": "KeypadLockoutEnum"
       },
       {
         "fallback_name": "Control type",
@@ -1988,12 +1988,12 @@
         "available": true,
         "group_id": null,
         "current_option": "NoControl",
-        "enum": "SEControlType",
         "options": [
           "OnOff",
           "PI",
           "NoControl"
-        ]
+        ],
+        "enum": "SEControlType"
       },
       {
         "fallback_name": "Heat transfer medium",
@@ -2015,12 +2015,12 @@
         "available": true,
         "group_id": null,
         "current_option": "Nothing",
-        "enum": "SEHeatTransferMedium",
         "options": [
           "Nothing",
           "Hydronic",
           "Air"
-        ]
+        ],
+        "enum": "SEHeatTransferMedium"
       },
       {
         "fallback_name": "Heating emitter type",
@@ -2042,7 +2042,6 @@
         "available": true,
         "group_id": null,
         "current_option": "Floor",
-        "enum": "SEHeatingEmitterType",
         "options": [
           "Direct",
           "Radiator",
@@ -2050,7 +2049,8 @@
           "RadiantPanel",
           "Floor",
           "NotSpecified"
-        ]
+        ],
+        "enum": "SEHeatingEmitterType"
       },
       {
         "fallback_name": "Heating fuel",
@@ -2072,7 +2072,6 @@
         "available": true,
         "group_id": null,
         "current_option": "Electricity",
-        "enum": "SEHeatingFuel",
         "options": [
           "Electricity",
           "Gas",
@@ -2082,7 +2081,8 @@
           "ComunityHeating",
           "HeatPump",
           "NotSpecified"
-        ]
+        ],
+        "enum": "SEHeatingFuel"
       },
       {
         "fallback_name": "Local temperature source",
@@ -2104,11 +2104,11 @@
         "available": true,
         "group_id": null,
         "current_option": "Ambient",
-        "enum": "SELocalTemperatureSourceSelect",
         "options": [
           "Ambient",
           "External"
-        ]
+        ],
+        "enum": "SELocalTemperatureSourceSelect"
       },
       {
         "fallback_name": "Thermostat application",
@@ -2130,12 +2130,12 @@
         "available": true,
         "group_id": null,
         "current_option": "Floor",
-        "enum": "SEThermostatApplication",
         "options": [
           "OccupiedSpace",
           "Floor",
           "NotKnown"
-        ]
+        ],
+        "enum": "SEThermostatApplication"
       },
       {
         "fallback_name": "External temperature sensor type",
@@ -2157,7 +2157,6 @@
         "available": true,
         "group_id": null,
         "current_option": "SensorAbsent",
-        "enum": "SETemperatureSensorType",
         "options": [
           "Sensor2kOhm",
           "Sensor10kOhm",
@@ -2166,7 +2165,8 @@
           "Sensor33kOhm",
           "Sensor47kOhm",
           "SensorAbsent"
-        ]
+        ],
+        "enum": "SETemperatureSensorType"
       }
     ],
     "sensor": [

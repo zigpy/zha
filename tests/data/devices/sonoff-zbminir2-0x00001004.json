@@ -356,13 +356,13 @@
         "available": true,
         "group_id": null,
         "current_option": "Off",
-        "enum": "StartUpOnOff",
         "options": [
           "Off",
           "On",
           "Toggle",
           "PreviousValue"
-        ]
+        ],
+        "enum": "StartUpOnOff"
       },
       {
         "fallback_name": "External trigger mode",
@@ -384,13 +384,13 @@
         "available": true,
         "group_id": null,
         "current_option": "Edge trigger",
-        "enum": "SonoffExternalSwitchTriggerType",
         "options": [
           "Edge trigger",
           "Pulse trigger",
           "Normally off follow trigger",
           "Normally on follow trigger"
-        ]
+        ],
+        "enum": "SonoffExternalSwitchTriggerType"
       }
     ],
     "sensor": [

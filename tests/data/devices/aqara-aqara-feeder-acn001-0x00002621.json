@@ -390,11 +390,11 @@
         "available": true,
         "group_id": null,
         "current_option": "Schedule",
-        "enum": "FeedingMode",
         "options": [
           "Manual",
           "Schedule"
-        ]
+        ],
+        "enum": "FeedingMode"
       }
     ],
     "sensor": [

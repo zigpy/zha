@@ -270,12 +270,12 @@
         "available": true,
         "group_id": null,
         "current_option": "Low",
-        "enum": "SonoffPresenceDetectionSensitivityEnum",
         "options": [
           "Low",
           "Medium",
           "High"
-        ]
+        ],
+        "enum": "SonoffPresenceDetectionSensitivityEnum"
       }
     ],
     "sensor": [

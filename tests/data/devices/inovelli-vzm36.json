@@ -1368,13 +1368,13 @@
         "available": true,
         "group_id": null,
         "current_option": "PreviousValue",
-        "enum": "StartUpOnOff",
         "options": [
           "Off",
           "On",
           "Toggle",
           "PreviousValue"
-        ]
+        ],
+        "enum": "StartUpOnOff"
       },
       {
         "fallback_name": "Increased non-neutral output",
@@ -1396,11 +1396,11 @@
         "available": true,
         "group_id": null,
         "current_option": null,
-        "enum": "InovelliNonNeutralOutput",
         "options": [
           "Low",
           "High"
-        ]
+        ],
+        "enum": "InovelliNonNeutralOutput"
       },
       {
         "fallback_name": "Dimming mode",
@@ -1422,11 +1422,11 @@
         "available": true,
         "group_id": null,
         "current_option": null,
-        "enum": "InovelliDimmingMode",
         "options": [
           "LeadingEdge",
           "TrailingEdge"
-        ]
+        ],
+        "enum": "InovelliDimmingMode"
       },
       {
         "fallback_name": "Output mode",
@@ -1448,11 +1448,11 @@
         "available": true,
         "group_id": null,
         "current_option": null,
-        "enum": "InovelliOutputMode",
         "options": [
           "Dimmer",
           "OnOff"
-        ]
+        ],
+        "enum": "InovelliOutputMode"
       },
       {
         "fallback_name": null,
@@ -1474,13 +1474,13 @@
         "available": true,
         "group_id": null,
         "current_option": "PreviousValue",
-        "enum": "StartUpOnOff",
         "options": [
           "Off",
           "On",
           "Toggle",
           "PreviousValue"
-        ]
+        ],
+        "enum": "StartUpOnOff"
       },
       {
         "fallback_name": "Output mode",
@@ -1502,11 +1502,11 @@
         "available": true,
         "group_id": null,
         "current_option": null,
-        "enum": "InovelliOutputMode",
         "options": [
           "Dimmer",
           "OnOff"
-        ]
+        ],
+        "enum": "InovelliOutputMode"
       }
     ],
     "sensor": [

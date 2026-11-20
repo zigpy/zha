@@ -378,11 +378,11 @@
         "available": true,
         "group_id": null,
         "current_option": null,
-        "enum": "MotorDirection",
         "options": [
           "Forward",
           "Back"
-        ]
+        ],
+        "enum": "MotorDirection"
       }
     ],
     "sensor": [

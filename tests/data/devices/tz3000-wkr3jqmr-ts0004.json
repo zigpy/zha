@@ -722,12 +722,12 @@
         "available": true,
         "group_id": null,
         "current_option": "LightWhenOn",
-        "enum": "TuyaBacklightMode",
         "options": [
           "Off",
           "LightWhenOn",
           "LightWhenOff"
-        ]
+        ],
+        "enum": "TuyaBacklightMode"
       },
       {
         "fallback_name": null,
@@ -749,12 +749,12 @@
         "available": true,
         "group_id": null,
         "current_option": "LastState",
-        "enum": "TuyaPowerOnState",
         "options": [
           "Off",
           "On",
           "LastState"
-        ]
+        ],
+        "enum": "TuyaPowerOnState"
       }
     ],
     "sensor": [

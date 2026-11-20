@@ -592,12 +592,12 @@
         "available": true,
         "group_id": null,
         "current_option": "Manual",
-        "enum": "AqaraThermostatPresetMode",
         "options": [
           "Manual",
           "Auto",
           "Away"
-        ]
+        ],
+        "enum": "AqaraThermostatPresetMode"
       }
     ],
     "sensor": [

@@ -682,14 +682,14 @@
         "available": true,
         "group_id": null,
         "current_option": "Unlock",
-        "enum": "KeypadLockoutEnum",
         "options": [
           "Unlock",
           "Lock1",
           "Lock2",
           "Lock3",
           "Lock4"
-        ]
+        ],
+        "enum": "KeypadLockoutEnum"
       },
       {
         "fallback_name": null,
@@ -711,11 +711,11 @@
         "available": true,
         "group_id": null,
         "current_option": "Default",
-        "enum": "DanfossViewingDirectionEnum",
         "options": [
           "Default",
           "Inverted"
-        ]
+        ],
+        "enum": "DanfossViewingDirectionEnum"
       }
     ],
     "sensor": [

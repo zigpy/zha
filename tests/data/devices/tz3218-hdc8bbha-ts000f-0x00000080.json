@@ -279,12 +279,12 @@
         "available": true,
         "group_id": null,
         "current_option": null,
-        "enum": "PowerOnState",
         "options": [
           "Off",
           "On",
           "LastState"
-        ]
+        ],
+        "enum": "PowerOnState"
       },
       {
         "fallback_name": "External switch type",
@@ -306,12 +306,12 @@
         "available": true,
         "group_id": null,
         "current_option": null,
-        "enum": "Ts000fExternalSwitchType",
         "options": [
           "Momentary",
           "Toggle",
           "State"
-        ]
+        ],
+        "enum": "Ts000fExternalSwitchType"
       }
     ],
     "sensor": [

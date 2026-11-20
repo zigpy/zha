@@ -499,13 +499,13 @@
         "available": true,
         "group_id": null,
         "current_option": "PreviousValue",
-        "enum": "StartUpOnOff",
         "options": [
           "Off",
           "On",
           "Toggle",
           "PreviousValue"
-        ]
+        ],
+        "enum": "StartUpOnOff"
       },
       {
         "fallback_name": "Pilot wire mode",
@@ -527,7 +527,6 @@
         "available": true,
         "group_id": null,
         "current_option": null,
-        "enum": "NodOnPilotWireMode",
         "options": [
           "Off",
           "Comfort",
@@ -535,7 +534,8 @@
           "FrostProtection",
           "ComfortMinus1",
           "ComfortMinus2"
-        ]
+        ],
+        "enum": "NodOnPilotWireMode"
       }
     ],
     "sensor": [

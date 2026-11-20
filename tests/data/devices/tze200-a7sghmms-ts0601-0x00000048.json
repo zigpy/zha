@@ -369,11 +369,11 @@
         "available": true,
         "group_id": null,
         "current_option": "Duration",
-        "enum": "GiexIrrigationMode",
         "options": [
           "Duration",
           "Capacity"
-        ]
+        ],
+        "enum": "GiexIrrigationMode"
       },
       {
         "fallback_name": "Weather delay",
@@ -395,13 +395,13 @@
         "available": true,
         "group_id": null,
         "current_option": "NoDelay",
-        "enum": "GiexIrrigationWeatherDelay",
         "options": [
           "NoDelay",
           "TwentyFourHourDelay",
           "FortyEightHourDelay",
           "SeventyTwoHourDelay"
-        ]
+        ],
+        "enum": "GiexIrrigationWeatherDelay"
       }
     ],
     "sensor": [

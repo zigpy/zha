@@ -756,14 +756,14 @@
         "available": true,
         "group_id": null,
         "current_option": "Unlock",
-        "enum": "KeypadLockoutEnum",
         "options": [
           "Unlock",
           "Lock1",
           "Lock2",
           "Lock3",
           "Lock4"
-        ]
+        ],
+        "enum": "KeypadLockoutEnum"
       }
     ],
     "sensor": [

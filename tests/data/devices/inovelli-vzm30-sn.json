@@ -1686,13 +1686,13 @@
         "available": true,
         "group_id": null,
         "current_option": "PreviousValue",
-        "enum": "StartUpOnOff",
         "options": [
           "Off",
           "On",
           "Toggle",
           "PreviousValue"
-        ]
+        ],
+        "enum": "StartUpOnOff"
       },
       {
         "fallback_name": "Increased non-neutral output",
@@ -1714,11 +1714,11 @@
         "available": true,
         "group_id": null,
         "current_option": null,
-        "enum": "InovelliNonNeutralOutput",
         "options": [
           "Low",
           "High"
-        ]
+        ],
+        "enum": "InovelliNonNeutralOutput"
       },
       {
         "fallback_name": "LED scaling mode",
@@ -1740,11 +1740,11 @@
         "available": true,
         "group_id": null,
         "current_option": null,
-        "enum": "InovelliLedScalingMode",
         "options": [
           "VZM31SN",
           "LZW31SN"
-        ]
+        ],
+        "enum": "InovelliLedScalingMode"
       },
       {
         "fallback_name": "Output mode",
@@ -1766,11 +1766,11 @@
         "available": true,
         "group_id": null,
         "current_option": null,
-        "enum": "InovelliOutputMode",
         "options": [
           "Dimmer",
           "OnOff"
-        ]
+        ],
+        "enum": "InovelliOutputMode"
       }
     ],
     "sensor": [

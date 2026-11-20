@@ -497,12 +497,12 @@
         "available": true,
         "group_id": null,
         "current_option": "High",
-        "enum": "AqaraRollerDriverSpeed",
         "options": [
           "Low",
           "Medium",
           "High"
-        ]
+        ],
+        "enum": "AqaraRollerDriverSpeed"
       }
     ],
     "sensor": [

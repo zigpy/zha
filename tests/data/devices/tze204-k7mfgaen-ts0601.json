@@ -265,13 +265,13 @@
         "available": true,
         "group_id": null,
         "current_option": null,
-        "enum": "TuyaSirenState",
         "options": [
           "Sound",
           "Light",
           "Sound and light",
           "Normal"
-        ]
+        ],
+        "enum": "TuyaSirenState"
       },
       {
         "fallback_name": "Alarm ringtone",
@@ -293,7 +293,6 @@
         "available": true,
         "group_id": null,
         "current_option": null,
-        "enum": "TuyaSirenRingtoneV02",
         "options": [
           "Ringtone 01",
           "Ringtone 02",
@@ -308,7 +307,8 @@
           "Temperature",
           "Entered",
           "Left"
-        ]
+        ],
+        "enum": "TuyaSirenRingtoneV02"
       },
       {
         "fallback_name": "Alarm volume",
@@ -330,13 +330,13 @@
         "available": true,
         "group_id": null,
         "current_option": null,
-        "enum": "TuyaAlarmVolume",
         "options": [
           "Low",
           "Medium",
           "High",
           "Mute"
-        ]
+        ],
+        "enum": "TuyaAlarmVolume"
       }
     ],
     "sensor": [

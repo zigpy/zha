@@ -685,13 +685,13 @@
         "available": true,
         "group_id": null,
         "current_option": "On",
-        "enum": "StartUpOnOff",
         "options": [
           "Off",
           "On",
           "Toggle",
           "PreviousValue"
-        ]
+        ],
+        "enum": "StartUpOnOff"
       },
       {
         "fallback_name": null,
@@ -713,11 +713,11 @@
         "available": true,
         "group_id": null,
         "current_option": "Warm white",
-        "enum": "BegaColorTemperatureChannel",
         "options": [
           "Warm white",
           "Cool white"
-        ]
+        ],
+        "enum": "BegaColorTemperatureChannel"
       }
     ],
     "sensor": [

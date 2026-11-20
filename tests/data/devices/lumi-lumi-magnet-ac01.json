@@ -234,12 +234,12 @@
         "available": true,
         "group_id": null,
         "current_option": "TwentyMillimeters",
-        "enum": "DetectionDistance",
         "options": [
           "TenMillimeters",
           "TwentyMillimeters",
           "ThirtyMillimeters"
-        ]
+        ],
+        "enum": "DetectionDistance"
       }
     ],
     "sensor": [

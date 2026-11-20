@@ -327,12 +327,12 @@
         "available": true,
         "group_id": null,
         "current_option": null,
-        "enum": "PresetModeV01",
         "options": [
           "Manual",
           "Home",
           "Away"
-        ]
+        ],
+        "enum": "PresetModeV01"
       },
       {
         "fallback_name": "Regulator period",
@@ -354,14 +354,14 @@
         "available": true,
         "group_id": null,
         "current_option": null,
-        "enum": "RegulatorPeriod",
         "options": [
           " 15 min",
           " 30 min",
           " 45 min",
           " 60 min",
           " 90 min"
-        ]
+        ],
+        "enum": "RegulatorPeriod"
       },
       {
         "fallback_name": "Sensor mode",
@@ -383,12 +383,12 @@
         "available": true,
         "group_id": null,
         "current_option": null,
-        "enum": "SensorMode",
         "options": [
           "Air",
           "Floor",
           "Both"
-        ]
+        ],
+        "enum": "SensorMode"
       },
       {
         "fallback_name": "Thermostat mode",
@@ -410,11 +410,11 @@
         "available": true,
         "group_id": null,
         "current_option": null,
-        "enum": "ThermostatMode",
         "options": [
           "Regulator",
           "Thermostat"
-        ]
+        ],
+        "enum": "ThermostatMode"
       }
     ],
     "sensor": [

@@ -1638,13 +1638,13 @@
         "available": true,
         "group_id": null,
         "current_option": "PreviousValue",
-        "enum": "StartUpOnOff",
         "options": [
           "Off",
           "On",
           "Toggle",
           "PreviousValue"
-        ]
+        ],
+        "enum": "StartUpOnOff"
       },
       {
         "fallback_name": "Increased non-neutral output",
@@ -1666,11 +1666,11 @@
         "available": true,
         "group_id": null,
         "current_option": null,
-        "enum": "InovelliNonNeutralOutput",
         "options": [
           "Low",
           "High"
-        ]
+        ],
+        "enum": "InovelliNonNeutralOutput"
       },
       {
         "fallback_name": "Dimming mode",
@@ -1692,11 +1692,11 @@
         "available": true,
         "group_id": null,
         "current_option": "LeadingEdge",
-        "enum": "InovelliDimmingMode",
         "options": [
           "LeadingEdge",
           "TrailingEdge"
-        ]
+        ],
+        "enum": "InovelliDimmingMode"
       },
       {
         "fallback_name": "LED scaling mode",
@@ -1718,11 +1718,11 @@
         "available": true,
         "group_id": null,
         "current_option": null,
-        "enum": "InovelliLedScalingMode",
         "options": [
           "VZM31SN",
           "LZW31SN"
-        ]
+        ],
+        "enum": "InovelliLedScalingMode"
       },
       {
         "fallback_name": "Output mode",
@@ -1744,11 +1744,11 @@
         "available": true,
         "group_id": null,
         "current_option": "OnOff",
-        "enum": "InovelliOutputMode",
         "options": [
           "Dimmer",
           "OnOff"
-        ]
+        ],
+        "enum": "InovelliOutputMode"
       },
       {
         "fallback_name": "Switch type",
@@ -1770,13 +1770,13 @@
         "available": true,
         "group_id": null,
         "current_option": "Single Pole",
-        "enum": "InovelliSwitchType",
         "options": [
           "Single Pole",
           "Three Way Dumb",
           "Three Way AUX",
           "Single Pole Full Sine"
-        ]
+        ],
+        "enum": "InovelliSwitchType"
       }
     ],
     "sensor": [

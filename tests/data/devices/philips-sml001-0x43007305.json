@@ -364,12 +364,12 @@
         "available": true,
         "group_id": null,
         "current_option": "Low",
-        "enum": "HueV1MotionSensitivities",
         "options": [
           "Low",
           "Medium",
           "High"
-        ]
+        ],
+        "enum": "HueV1MotionSensitivities"
       }
     ],
     "sensor": [

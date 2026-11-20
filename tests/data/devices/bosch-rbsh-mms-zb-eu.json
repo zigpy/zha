@@ -788,12 +788,12 @@
         "available": true,
         "group_id": null,
         "current_option": null,
-        "enum": "BoschDeviceMode",
         "options": [
           "Disabled",
           "Cover",
           "Light"
-        ]
+        ],
+        "enum": "BoschDeviceMode"
       },
       {
         "fallback_name": "Switch type",
@@ -815,13 +815,13 @@
         "available": true,
         "group_id": null,
         "current_option": null,
-        "enum": "BoschSwitchType",
         "options": [
           "Button",
           "Button key change",
           "Rocker switch",
           "Rocker switch key change"
-        ]
+        ],
+        "enum": "BoschSwitchType"
       },
       {
         "fallback_name": null,
@@ -843,13 +843,13 @@
         "available": true,
         "group_id": null,
         "current_option": "Off",
-        "enum": "StartUpOnOff",
         "options": [
           "Off",
           "On",
           "Toggle",
           "PreviousValue"
-        ]
+        ],
+        "enum": "StartUpOnOff"
       },
       {
         "fallback_name": null,
@@ -871,13 +871,13 @@
         "available": true,
         "group_id": null,
         "current_option": "Off",
-        "enum": "StartUpOnOff",
         "options": [
           "Off",
           "On",
           "Toggle",
           "PreviousValue"
-        ]
+        ],
+        "enum": "StartUpOnOff"
       }
     ],
     "sensor": [

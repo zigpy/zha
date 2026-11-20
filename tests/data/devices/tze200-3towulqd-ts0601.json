@@ -292,13 +292,13 @@
         "available": true,
         "group_id": null,
         "current_option": null,
-        "enum": "TuyaMotionFadeTime",
         "options": [
           " 10 seconds",
           " 30 seconds",
           " 60 seconds",
           " 120 seconds"
-        ]
+        ],
+        "enum": "TuyaMotionFadeTime"
       },
       {
         "fallback_name": "Presence sensitivity",
@@ -320,12 +320,12 @@
         "available": true,
         "group_id": null,
         "current_option": null,
-        "enum": "TuyaMotionPresenceSensitivity",
         "options": [
           "Low",
           "Medium",
           "High"
-        ]
+        ],
+        "enum": "TuyaMotionPresenceSensitivity"
       }
     ],
     "sensor": [

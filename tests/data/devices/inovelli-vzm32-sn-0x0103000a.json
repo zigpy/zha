@@ -1717,13 +1717,13 @@
         "available": true,
         "group_id": null,
         "current_option": "PreviousValue",
-        "enum": "StartUpOnOff",
         "options": [
           "Off",
           "On",
           "Toggle",
           "PreviousValue"
-        ]
+        ],
+        "enum": "StartUpOnOff"
       },
       {
         "fallback_name": "Increased non-neutral output",
@@ -1745,11 +1745,11 @@
         "available": true,
         "group_id": null,
         "current_option": null,
-        "enum": "InovelliNonNeutralOutput",
         "options": [
           "Low",
           "High"
-        ]
+        ],
+        "enum": "InovelliNonNeutralOutput"
       },
       {
         "fallback_name": "LED scaling mode",
@@ -1771,11 +1771,11 @@
         "available": true,
         "group_id": null,
         "current_option": null,
-        "enum": "InovelliLedScalingMode",
         "options": [
           "VZM31SN",
           "LZW31SN"
-        ]
+        ],
+        "enum": "InovelliLedScalingMode"
       },
       {
         "fallback_name": "Light on presence behavior",
@@ -1797,7 +1797,6 @@
         "available": true,
         "group_id": null,
         "current_option": null,
-        "enum": "InovelliLightOnPresenceBehavior",
         "options": [
           "Disabled",
           "On When Occupied Off When Unoccupied",
@@ -1806,7 +1805,8 @@
           "On When Vacant Off When Occupied",
           "On When Vacant",
           "Off When Occupied"
-        ]
+        ],
+        "enum": "InovelliLightOnPresenceBehavior"
       },
       {
         "fallback_name": "mmWave room size preset",
@@ -1828,7 +1828,6 @@
         "available": true,
         "group_id": null,
         "current_option": null,
-        "enum": "InovelliMmwaveRoomSizePreset",
         "options": [
           "Custom",
           "X Small",
@@ -1836,7 +1835,8 @@
           "Medium",
           "Large",
           "X Large"
-        ]
+        ],
+        "enum": "InovelliMmwaveRoomSizePreset"
       },
       {
         "fallback_name": "Output mode",
@@ -1858,11 +1858,11 @@
         "available": true,
         "group_id": null,
         "current_option": "Dimmer",
-        "enum": "InovelliOutputMode",
         "options": [
           "Dimmer",
           "OnOff"
-        ]
+        ],
+        "enum": "InovelliOutputMode"
       },
       {
         "fallback_name": "Switch type",
@@ -1884,11 +1884,11 @@
         "available": true,
         "group_id": null,
         "current_option": null,
-        "enum": "InovelliVZM32SwitchType",
         "options": [
           "Single Pole",
           "Three Way AUX"
-        ]
+        ],
+        "enum": "InovelliVZM32SwitchType"
       },
       {
         "fallback_name": "mmWave sensitivity",
@@ -1910,12 +1910,12 @@
         "available": true,
         "group_id": null,
         "current_option": null,
-        "enum": "InovelliMmwaveSensitivity",
         "options": [
           "Low",
           "Medium",
           "High"
-        ]
+        ],
+        "enum": "InovelliMmwaveSensitivity"
       },
       {
         "fallback_name": "mmWave target speed",
@@ -1937,12 +1937,12 @@
         "available": true,
         "group_id": null,
         "current_option": null,
-        "enum": "InovelliMmwaveTargetSpeed",
         "options": [
           "Low",
           "Medium",
           "Fast"
-        ]
+        ],
+        "enum": "InovelliMmwaveTargetSpeed"
       }
     ],
     "sensor": [

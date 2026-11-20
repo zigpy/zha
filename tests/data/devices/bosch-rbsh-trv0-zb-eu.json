@@ -528,11 +528,11 @@
         "available": true,
         "group_id": null,
         "current_option": "Heating",
-        "enum": "BoschControlSequenceOfOperation",
         "options": [
           "Cooling",
           "Heating"
-        ]
+        ],
+        "enum": "BoschControlSequenceOfOperation"
       },
       {
         "fallback_name": "Display orientation",
@@ -554,11 +554,11 @@
         "available": true,
         "group_id": null,
         "current_option": null,
-        "enum": "BoschDisplayOrientation",
         "options": [
           "Normal",
           "Flipped"
-        ]
+        ],
+        "enum": "BoschDisplayOrientation"
       },
       {
         "fallback_name": "Displayed temperature",
@@ -580,11 +580,11 @@
         "available": true,
         "group_id": null,
         "current_option": null,
-        "enum": "BoschDisplayedTemperature",
         "options": [
           "Target",
           "Measured"
-        ]
+        ],
+        "enum": "BoschDisplayedTemperature"
       }
     ],
     "sensor": [

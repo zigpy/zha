@@ -408,7 +408,6 @@
         "available": true,
         "group_id": null,
         "current_option": null,
-        "enum": "SESwitchAction",
         "options": [
           "Light",
           "LightOpposite",
@@ -424,7 +423,8 @@
           "AlternateLight",
           "AlternateDimmer",
           "NotUsed"
-        ]
+        ],
+        "enum": "SESwitchAction"
       },
       {
         "fallback_name": "Switch indication",
@@ -446,13 +446,13 @@
         "available": true,
         "group_id": null,
         "current_option": "FollowsLoad",
-        "enum": "SESwitchIndication",
         "options": [
           "FollowsLoad",
           "AlwaysOn",
           "InverseOfLoad",
           "AlwaysOff"
-        ]
+        ],
+        "enum": "SESwitchIndication"
       }
     ],
     "sensor": [

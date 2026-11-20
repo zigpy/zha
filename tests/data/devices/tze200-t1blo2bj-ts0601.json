@@ -222,7 +222,6 @@
         "available": true,
         "group_id": null,
         "current_option": null,
-        "enum": "NeoAlarmMelody18",
         "options": [
           "Melody 01",
           "Melody 02",
@@ -242,7 +241,8 @@
           "Melody 16",
           "Melody 17",
           "Melody 18"
-        ]
+        ],
+        "enum": "NeoAlarmMelody18"
       },
       {
         "fallback_name": "Alarm volume",
@@ -264,12 +264,12 @@
         "available": true,
         "group_id": null,
         "current_option": null,
-        "enum": "NeoAlarmVolume",
         "options": [
           "Low",
           "Medium",
           "High"
-        ]
+        ],
+        "enum": "NeoAlarmVolume"
       }
     ],
     "sensor": [

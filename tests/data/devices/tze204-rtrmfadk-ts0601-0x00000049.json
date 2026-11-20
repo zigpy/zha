@@ -455,11 +455,11 @@
         "available": true,
         "group_id": null,
         "current_option": null,
-        "enum": "TuyaThermostatEcoMode",
         "options": [
           "Comfort",
           "Eco"
-        ]
+        ],
+        "enum": "TuyaThermostatEcoMode"
       }
     ],
     "sensor": [

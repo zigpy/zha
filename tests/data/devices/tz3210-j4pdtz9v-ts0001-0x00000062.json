@@ -302,12 +302,12 @@
         "available": true,
         "group_id": null,
         "current_option": "SWITCH",
-        "enum": "FingerBotMode",
         "options": [
           "CLICK",
           "SWITCH",
           "PROGRAM"
-        ]
+        ],
+        "enum": "FingerBotMode"
       },
       {
         "fallback_name": "Reverse",
@@ -329,11 +329,11 @@
         "available": true,
         "group_id": null,
         "current_option": null,
-        "enum": "FingerBotReverse",
         "options": [
           "UP ON",
           "UP OFF"
-        ]
+        ],
+        "enum": "FingerBotReverse"
       }
     ],
     "sensor": [

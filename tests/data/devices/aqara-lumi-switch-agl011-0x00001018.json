@@ -1158,11 +1158,11 @@
         "available": true,
         "group_id": null,
         "current_option": "Anti Flicker",
-        "enum": "ModeSwitch",
         "options": [
           "Quick",
           "Anti Flicker"
-        ]
+        ],
+        "enum": "ModeSwitch"
       },
       {
         "fallback_name": "Operation mode",
@@ -1184,11 +1184,11 @@
         "available": true,
         "group_id": null,
         "current_option": "Relay",
-        "enum": "OperationMode",
         "options": [
           "Decoupled",
           "Relay"
-        ]
+        ],
+        "enum": "OperationMode"
       },
       {
         "fallback_name": "Phase",
@@ -1210,11 +1210,11 @@
         "available": true,
         "group_id": null,
         "current_option": "Trailing",
-        "enum": "Phase",
         "options": [
           "Leading",
           "Trailing"
-        ]
+        ],
+        "enum": "Phase"
       },
       {
         "fallback_name": "Power on state",
@@ -1236,13 +1236,13 @@
         "available": true,
         "group_id": null,
         "current_option": "Inverted",
-        "enum": "PowerOnState",
         "options": [
           "On",
           "Previous",
           "Off",
           "Inverted"
-        ]
+        ],
+        "enum": "PowerOnState"
       }
     ],
     "sensor": [

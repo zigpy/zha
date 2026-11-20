@@ -351,12 +351,12 @@
         "available": true,
         "group_id": null,
         "current_option": "High",
-        "enum": "AqaraMotionSensitivities",
         "options": [
           "Low",
           "Medium",
           "High"
-        ]
+        ],
+        "enum": "AqaraMotionSensitivities"
       }
     ],
     "sensor": [

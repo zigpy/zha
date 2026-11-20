@@ -626,12 +626,12 @@
         "available": true,
         "group_id": null,
         "current_option": "LastState",
-        "enum": "TuyaPowerOnState",
         "options": [
           "Off",
           "On",
           "LastState"
-        ]
+        ],
+        "enum": "TuyaPowerOnState"
       }
     ],
     "sensor": [

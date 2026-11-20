@@ -376,11 +376,11 @@
         "available": true,
         "group_id": null,
         "current_option": null,
-        "enum": "SonoffExternalSwitchTriggerType",
         "options": [
           "edge trigger",
           "pulse trigger"
-        ]
+        ],
+        "enum": "SonoffExternalSwitchTriggerType"
       }
     ],
     "sensor": [

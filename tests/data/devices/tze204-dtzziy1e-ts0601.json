@@ -431,11 +431,11 @@
         "available": true,
         "group_id": null,
         "current_option": null,
-        "enum": "TuyaBreakerMode",
         "options": [
           "Standard",
           "Local"
-        ]
+        ],
+        "enum": "TuyaBreakerMode"
       },
       {
         "fallback_name": "Breaker polarity",
@@ -457,11 +457,11 @@
         "available": true,
         "group_id": null,
         "current_option": null,
-        "enum": "TuyaBreakerPolarity",
         "options": [
           "NC",
           "NO"
-        ]
+        ],
+        "enum": "TuyaBreakerPolarity"
       },
       {
         "fallback_name": "Breaker status",
@@ -483,11 +483,11 @@
         "available": true,
         "group_id": null,
         "current_option": null,
-        "enum": "TuyaBreakerStatus",
         "options": [
           "Off",
           "On"
-        ]
+        ],
+        "enum": "TuyaBreakerStatus"
       },
       {
         "fallback_name": "Sensor mode",
@@ -509,13 +509,13 @@
         "available": true,
         "group_id": null,
         "current_option": null,
-        "enum": "TuyaMotionSensorMode",
         "options": [
           "On",
           "Off",
           "Occupied",
           "Unoccupied"
-        ]
+        ],
+        "enum": "TuyaMotionSensorMode"
       },
       {
         "fallback_name": "Status indication",
@@ -537,11 +537,11 @@
         "available": true,
         "group_id": null,
         "current_option": null,
-        "enum": "TuyaStatusIndication",
         "options": [
           "Off",
           "On"
-        ]
+        ],
+        "enum": "TuyaStatusIndication"
       }
     ],
     "sensor": [

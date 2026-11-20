@@ -321,14 +321,14 @@
         "available": true,
         "group_id": null,
         "current_option": "High",
-        "enum": "HueV2MotionSensitivities",
         "options": [
           "Lowest",
           "Low",
           "Medium",
           "High",
           "Highest"
-        ]
+        ],
+        "enum": "HueV2MotionSensitivities"
       }
     ],
     "sensor": [

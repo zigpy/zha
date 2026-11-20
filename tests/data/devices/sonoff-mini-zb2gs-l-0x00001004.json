@@ -421,13 +421,13 @@
         "available": true,
         "group_id": null,
         "current_option": "Off",
-        "enum": "StartUpOnOff",
         "options": [
           "Off",
           "On",
           "Toggle",
           "PreviousValue"
-        ]
+        ],
+        "enum": "StartUpOnOff"
       },
       {
         "fallback_name": "Detach relay",
@@ -449,13 +449,13 @@
         "available": true,
         "group_id": null,
         "current_option": "All channels disabled",
-        "enum": "SonoffDetachRelayType",
         "options": [
           "All channels disabled",
           "CH1 enabled",
           "CH2 enabled",
           "All channels enabled"
-        ]
+        ],
+        "enum": "SonoffDetachRelayType"
       },
       {
         "fallback_name": "External trigger mode",
@@ -477,13 +477,13 @@
         "available": true,
         "group_id": null,
         "current_option": "Pulse trigger",
-        "enum": "SonoffExternalSwitchTriggerType",
         "options": [
           "Edge trigger",
           "Pulse trigger",
           "Normally off follow trigger",
           "Normally on follow trigger"
-        ]
+        ],
+        "enum": "SonoffExternalSwitchTriggerType"
       },
       {
         "fallback_name": null,
@@ -505,13 +505,13 @@
         "available": true,
         "group_id": null,
         "current_option": "Off",
-        "enum": "StartUpOnOff",
         "options": [
           "Off",
           "On",
           "Toggle",
           "PreviousValue"
-        ]
+        ],
+        "enum": "StartUpOnOff"
       },
       {
         "fallback_name": "External trigger mode",
@@ -533,13 +533,13 @@
         "available": true,
         "group_id": null,
         "current_option": "Pulse trigger",
-        "enum": "SonoffExternalSwitchTriggerType",
         "options": [
           "Edge trigger",
           "Pulse trigger",
           "Normally off follow trigger",
           "Normally on follow trigger"
-        ]
+        ],
+        "enum": "SonoffExternalSwitchTriggerType"
       }
     ],
     "sensor": [

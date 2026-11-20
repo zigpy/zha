@@ -436,12 +436,12 @@
         "available": true,
         "group_id": null,
         "current_option": null,
-        "enum": "TuyaLiquidState",
         "options": [
           "Normal",
           "Low",
           "High"
-        ]
+        ],
+        "enum": "TuyaLiquidState"
       }
     ],
     "sensor": [

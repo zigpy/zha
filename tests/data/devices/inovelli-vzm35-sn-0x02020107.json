@@ -1331,13 +1331,13 @@
         "available": true,
         "group_id": null,
         "current_option": "PreviousValue",
-        "enum": "StartUpOnOff",
         "options": [
           "Off",
           "On",
           "Toggle",
           "PreviousValue"
-        ]
+        ],
+        "enum": "StartUpOnOff"
       },
       {
         "fallback_name": "Output mode",
@@ -1359,11 +1359,11 @@
         "available": true,
         "group_id": null,
         "current_option": "OnOff",
-        "enum": "InovelliOutputMode",
         "options": [
           "Dimmer",
           "OnOff"
-        ]
+        ],
+        "enum": "InovelliOutputMode"
       },
       {
         "fallback_name": "Smart fan LED display levels",
@@ -1385,7 +1385,6 @@
         "available": true,
         "group_id": null,
         "current_option": "Adaptive",
-        "enum": "InovelliFanLedScalingMode",
         "options": [
           "VZM31SN",
           "Grade 1",
@@ -1398,7 +1397,8 @@
           "Grade 8",
           "Grade 9",
           "Adaptive"
-        ]
+        ],
+        "enum": "InovelliFanLedScalingMode"
       },
       {
         "fallback_name": "Switch type",
@@ -1420,11 +1420,11 @@
         "available": true,
         "group_id": null,
         "current_option": "Load Only",
-        "enum": "InovelliFanSwitchType",
         "options": [
           "Load Only",
           "Three Way AUX"
-        ]
+        ],
+        "enum": "InovelliFanSwitchType"
       }
     ],
     "sensor": [

@@ -416,13 +416,13 @@
         "available": true,
         "group_id": null,
         "current_option": null,
-        "enum": "SEControlMode",
         "options": [
           "Auto",
           "RC",
           "RL",
           "RL LED"
-        ]
+        ],
+        "enum": "SEControlMode"
       }
     ],
     "sensor": [

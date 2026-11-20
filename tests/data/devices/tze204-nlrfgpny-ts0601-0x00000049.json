@@ -328,13 +328,13 @@
         "available": true,
         "group_id": null,
         "current_option": null,
-        "enum": "TuyaSirenState",
         "options": [
           "Sound",
           "Light",
           "Sound and light",
           "Normal"
-        ]
+        ],
+        "enum": "TuyaSirenState"
       },
       {
         "fallback_name": "Alarm ringtone",
@@ -356,12 +356,12 @@
         "available": true,
         "group_id": null,
         "current_option": null,
-        "enum": "TuyaSirenRingtone",
         "options": [
           "Ringtone 01",
           "Ringtone 02",
           "Ringtone 03"
-        ]
+        ],
+        "enum": "TuyaSirenRingtone"
       }
     ],
     "sensor": [

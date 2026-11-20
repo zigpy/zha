@@ -415,11 +415,11 @@
         "available": true,
         "group_id": null,
         "current_option": "Fahrenheit",
-        "enum": "TemperatureUnit",
         "options": [
           "Celsius",
           "Fahrenheit"
-        ]
+        ],
+        "enum": "TemperatureUnit"
       }
     ],
     "sensor": [

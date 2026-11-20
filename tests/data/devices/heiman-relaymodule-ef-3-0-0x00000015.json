@@ -355,13 +355,13 @@
         "available": true,
         "group_id": null,
         "current_option": "PreviousValue",
-        "enum": "StartUpOnOff",
         "options": [
           "Off",
           "On",
           "Toggle",
           "PreviousValue"
-        ]
+        ],
+        "enum": "StartUpOnOff"
       },
       {
         "fallback_name": "Switch action L1",
@@ -383,12 +383,12 @@
         "available": true,
         "group_id": null,
         "current_option": "OnOff",
-        "enum": "SwitchActions",
         "options": [
           "OnOff",
           "OffOn",
           "ToggleToggle"
-        ]
+        ],
+        "enum": "SwitchActions"
       },
       {
         "fallback_name": "Switch type L1",
@@ -410,11 +410,11 @@
         "available": true,
         "group_id": null,
         "current_option": null,
-        "enum": "HeimanSwitchType",
         "options": [
           "Toggle",
           "Momentary"
-        ]
+        ],
+        "enum": "HeimanSwitchType"
       },
       {
         "fallback_name": null,
@@ -436,13 +436,13 @@
         "available": true,
         "group_id": null,
         "current_option": "PreviousValue",
-        "enum": "StartUpOnOff",
         "options": [
           "Off",
           "On",
           "Toggle",
           "PreviousValue"
-        ]
+        ],
+        "enum": "StartUpOnOff"
       },
       {
         "fallback_name": "Switch action L2",
@@ -464,12 +464,12 @@
         "available": true,
         "group_id": null,
         "current_option": "ToggleToggle",
-        "enum": "SwitchActions",
         "options": [
           "OnOff",
           "OffOn",
           "ToggleToggle"
-        ]
+        ],
+        "enum": "SwitchActions"
       },
       {
         "fallback_name": "Switch type L2",
@@ -491,11 +491,11 @@
         "available": true,
         "group_id": null,
         "current_option": null,
-        "enum": "HeimanSwitchType",
         "options": [
           "Toggle",
           "Momentary"
-        ]
+        ],
+        "enum": "HeimanSwitchType"
       }
     ],
     "sensor": [

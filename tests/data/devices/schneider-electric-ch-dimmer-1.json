@@ -374,7 +374,6 @@
         "available": true,
         "group_id": null,
         "current_option": null,
-        "enum": "SESwitchAction",
         "options": [
           "Light",
           "LightOpposite",
@@ -390,7 +389,8 @@
           "AlternateLight",
           "AlternateDimmer",
           "NotUsed"
-        ]
+        ],
+        "enum": "SESwitchAction"
       },
       {
         "fallback_name": "Switch indication",
@@ -412,13 +412,13 @@
         "available": true,
         "group_id": null,
         "current_option": null,
-        "enum": "SESwitchIndication",
         "options": [
           "FollowsLoad",
           "AlwaysOn",
           "InverseOfLoad",
           "AlwaysOff"
-        ]
+        ],
+        "enum": "SESwitchIndication"
       },
       {
         "fallback_name": "Control mode",
@@ -440,13 +440,13 @@
         "available": true,
         "group_id": null,
         "current_option": null,
-        "enum": "SEControlMode",
         "options": [
           "Auto",
           "RC",
           "RL",
           "RL LED"
-        ]
+        ],
+        "enum": "SEControlMode"
       }
     ],
     "sensor": [

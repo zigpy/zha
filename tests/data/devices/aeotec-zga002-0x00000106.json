@@ -837,13 +837,13 @@
         "available": true,
         "group_id": null,
         "current_option": "PreviousValue",
-        "enum": "StartUpOnOff",
         "options": [
           "Off",
           "On",
           "Toggle",
           "PreviousValue"
-        ]
+        ],
+        "enum": "StartUpOnOff"
       },
       {
         "fallback_name": "S1 switch actions",
@@ -867,12 +867,12 @@
         "available": true,
         "group_id": null,
         "current_option": "Follow",
-        "enum": "AeotecSwitchActions",
         "options": [
           "Follow",
           "Invert",
           "Toggle"
-        ]
+        ],
+        "enum": "AeotecSwitchActions"
       },
       {
         "fallback_name": "S1 switch type",
@@ -896,12 +896,12 @@
         "available": true,
         "group_id": null,
         "current_option": "Momentary",
-        "enum": "AeotecSwitchType",
         "options": [
           "Toggle",
           "Momentary",
           "Auto Detect"
-        ]
+        ],
+        "enum": "AeotecSwitchType"
       },
       {
         "fallback_name": "S2 switch actions",
@@ -925,12 +925,12 @@
         "available": true,
         "group_id": null,
         "current_option": "Toggle",
-        "enum": "AeotecSwitchActions",
         "options": [
           "Follow",
           "Invert",
           "Toggle"
-        ]
+        ],
+        "enum": "AeotecSwitchActions"
       },
       {
         "fallback_name": "S2 switch type",
@@ -954,12 +954,12 @@
         "available": true,
         "group_id": null,
         "current_option": "Momentary",
-        "enum": "AeotecSwitchType",
         "options": [
           "Toggle",
           "Momentary",
           "Auto Detect"
-        ]
+        ],
+        "enum": "AeotecSwitchType"
       }
     ],
     "sensor": [

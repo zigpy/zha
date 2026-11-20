@@ -602,11 +602,11 @@
         "available": true,
         "group_id": null,
         "current_option": null,
-        "enum": "LedStripT1Audio",
         "options": [
           "Off",
           "On"
-        ]
+        ],
+        "enum": "LedStripT1Audio"
       },
       {
         "fallback_name": "Audio effect",
@@ -628,13 +628,13 @@
         "available": true,
         "group_id": null,
         "current_option": null,
-        "enum": "LedStripT1AudioEffect",
         "options": [
           "Random",
           "Blink",
           "Rainbow",
           "Wave"
-        ]
+        ],
+        "enum": "LedStripT1AudioEffect"
       },
       {
         "fallback_name": "Audio sensitivity",
@@ -656,12 +656,12 @@
         "available": true,
         "group_id": null,
         "current_option": null,
-        "enum": "LedStripT1AudioSensitivity",
         "options": [
           "Low",
           "Medium",
           "High"
-        ]
+        ],
+        "enum": "LedStripT1AudioSensitivity"
       },
       {
         "fallback_name": "Power on state",
@@ -683,13 +683,13 @@
         "available": true,
         "group_id": null,
         "current_option": null,
-        "enum": "LedStripT1PowerOnStateMode",
         "options": [
           "On",
           "Previous",
           "Off",
           "Toggle"
-        ]
+        ],
+        "enum": "LedStripT1PowerOnStateMode"
       },
       {
         "fallback_name": "Preset",
@@ -711,7 +711,6 @@
         "available": true,
         "group_id": null,
         "current_option": null,
-        "enum": "LedStripT1Preset",
         "options": [
           "Breathe",
           "Rainbow",
@@ -721,7 +720,8 @@
           "ReversedRainbow",
           "Colorful",
           "Scan"
-        ]
+        ],
+        "enum": "LedStripT1Preset"
       }
     ],
     "sensor": [

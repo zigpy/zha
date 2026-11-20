@@ -518,12 +518,12 @@
         "available": true,
         "group_id": null,
         "current_option": null,
-        "enum": "TuyaDisplayBrightness",
         "options": [
           "High",
           "Medium",
           "Low"
-        ]
+        ],
+        "enum": "TuyaDisplayBrightness"
       },
       {
         "fallback_name": "Display orientation",
@@ -545,11 +545,11 @@
         "available": true,
         "group_id": null,
         "current_option": null,
-        "enum": "TuyaDisplayOrientation",
         "options": [
           "Up",
           "Down"
-        ]
+        ],
+        "enum": "TuyaDisplayOrientation"
       },
       {
         "fallback_name": "Hysteresis mode",
@@ -571,11 +571,11 @@
         "available": true,
         "group_id": null,
         "current_option": null,
-        "enum": "TuyaHysteresis",
         "options": [
           "Comfort",
           "Eco"
-        ]
+        ],
+        "enum": "TuyaHysteresis"
       },
       {
         "fallback_name": "Motor thrust",
@@ -597,12 +597,12 @@
         "available": true,
         "group_id": null,
         "current_option": null,
-        "enum": "TuyaMotorThrust",
         "options": [
           "Strong",
           "Middle",
           "Weak"
-        ]
+        ],
+        "enum": "TuyaMotorThrust"
       },
       {
         "fallback_name": "Preset mode",
@@ -624,13 +624,13 @@
         "available": true,
         "group_id": null,
         "current_option": null,
-        "enum": "TuyaPresetMode",
         "options": [
           "Eco",
           "Auto",
           "Off",
           "Heat"
-        ]
+        ],
+        "enum": "TuyaPresetMode"
       }
     ],
     "sensor": [

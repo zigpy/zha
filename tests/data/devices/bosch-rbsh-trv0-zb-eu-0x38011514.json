@@ -652,14 +652,14 @@
         "available": true,
         "group_id": null,
         "current_option": "Unlock",
-        "enum": "KeypadLockoutEnum",
         "options": [
           "Unlock",
           "Lock1",
           "Lock2",
           "Lock3",
           "Lock4"
-        ]
+        ],
+        "enum": "KeypadLockoutEnum"
       },
       {
         "fallback_name": "Control sequence",
@@ -681,11 +681,11 @@
         "available": true,
         "group_id": null,
         "current_option": "Heating",
-        "enum": "BoschControlSequenceOfOperation",
         "options": [
           "Cooling",
           "Heating"
-        ]
+        ],
+        "enum": "BoschControlSequenceOfOperation"
       },
       {
         "fallback_name": "Display orientation",
@@ -707,11 +707,11 @@
         "available": true,
         "group_id": null,
         "current_option": "Normal",
-        "enum": "BoschDisplayOrientation",
         "options": [
           "Normal",
           "Flipped"
-        ]
+        ],
+        "enum": "BoschDisplayOrientation"
       },
       {
         "fallback_name": "Displayed temperature",
@@ -733,11 +733,11 @@
         "available": true,
         "group_id": null,
         "current_option": "Measured",
-        "enum": "BoschDisplayedTemperature",
         "options": [
           "Target",
           "Measured"
-        ]
+        ],
+        "enum": "BoschDisplayedTemperature"
       }
     ],
     "sensor": [

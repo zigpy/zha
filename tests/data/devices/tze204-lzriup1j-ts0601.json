@@ -338,13 +338,13 @@
         "available": true,
         "group_id": null,
         "current_option": null,
-        "enum": "BacklightMode",
         "options": [
           "Off",
           "Low",
           "Medium",
           "High"
-        ]
+        ],
+        "enum": "BacklightMode"
       },
       {
         "fallback_name": "Preset mode",
@@ -366,12 +366,12 @@
         "available": true,
         "group_id": null,
         "current_option": null,
-        "enum": "PresetModeV02",
         "options": [
           "Manual",
           "Auto",
           "Temporary Manual"
-        ]
+        ],
+        "enum": "PresetModeV02"
       },
       {
         "fallback_name": "Sensor mode",
@@ -393,12 +393,12 @@
         "available": true,
         "group_id": null,
         "current_option": null,
-        "enum": "SensorMode",
         "options": [
           "Air",
           "Floor",
           "Both"
-        ]
+        ],
+        "enum": "SensorMode"
       },
       {
         "fallback_name": "Working day",
@@ -420,13 +420,13 @@
         "available": true,
         "group_id": null,
         "current_option": null,
-        "enum": "WorkingDayV02",
         "options": [
           "Disabled",
           "Five Two",
           "Six One",
           "Seven"
-        ]
+        ],
+        "enum": "WorkingDayV02"
       }
     ],
     "sensor": [

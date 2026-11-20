@@ -749,13 +749,13 @@
         "available": true,
         "group_id": null,
         "current_option": "PreviousValue",
-        "enum": "StartUpOnOff",
         "options": [
           "Off",
           "On",
           "Toggle",
           "PreviousValue"
-        ]
+        ],
+        "enum": "StartUpOnOff"
       },
       {
         "fallback_name": "Input mode",
@@ -777,12 +777,12 @@
         "available": true,
         "group_id": null,
         "current_option": "Toggle",
-        "enum": "InputMode",
         "options": [
           "Toggle",
           "Toggle switch",
           "On off switch"
-        ]
+        ],
+        "enum": "InputMode"
       }
     ],
     "sensor": [

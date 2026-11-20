@@ -287,12 +287,12 @@
         "available": true,
         "group_id": null,
         "current_option": "Far",
-        "enum": "AqaraApproachDistances",
         "options": [
           "Far",
           "Medium",
           "Near"
-        ]
+        ],
+        "enum": "AqaraApproachDistances"
       },
       {
         "fallback_name": null,
@@ -314,11 +314,11 @@
         "available": true,
         "group_id": null,
         "current_option": "Left Right",
-        "enum": "AqaraMonitoringModess",
         "options": [
           "Undirected",
           "Left Right"
-        ]
+        ],
+        "enum": "AqaraMonitoringModess"
       },
       {
         "fallback_name": null,
@@ -340,12 +340,12 @@
         "available": true,
         "group_id": null,
         "current_option": "High",
-        "enum": "AqaraMotionSensitivities",
         "options": [
           "Low",
           "Medium",
           "High"
-        ]
+        ],
+        "enum": "AqaraMotionSensitivities"
       }
     ],
     "sensor": [

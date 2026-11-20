@@ -1030,7 +1030,6 @@
         "available": true,
         "group_id": null,
         "current_option": null,
-        "enum": "TuyaPresenceStateV02",
         "options": [
           "Unoccupied",
           "Large",
@@ -1038,7 +1037,8 @@
           "Small",
           "Huge",
           "Gigantic"
-        ]
+        ],
+        "enum": "TuyaPresenceStateV02"
       }
     ],
     "sensor": [

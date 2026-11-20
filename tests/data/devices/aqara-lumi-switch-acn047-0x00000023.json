@@ -821,11 +821,11 @@
         "available": true,
         "group_id": null,
         "current_option": "ControlRelay",
-        "enum": "DecoupledMode",
         "options": [
           "Decoupled",
           "ControlRelay"
-        ]
+        ],
+        "enum": "DecoupledMode"
       },
       {
         "fallback_name": null,
@@ -847,13 +847,13 @@
         "available": true,
         "group_id": null,
         "current_option": "Previous",
-        "enum": "StartupOnOff",
         "options": [
           "On",
           "Previous",
           "Off",
           "Toggle"
-        ]
+        ],
+        "enum": "StartupOnOff"
       },
       {
         "fallback_name": null,
@@ -875,12 +875,12 @@
         "available": true,
         "group_id": null,
         "current_option": "Power",
-        "enum": "SwitchMode",
         "options": [
           "Power",
           "Pulse",
           "Dry"
-        ]
+        ],
+        "enum": "SwitchMode"
       },
       {
         "fallback_name": null,
@@ -902,12 +902,12 @@
         "available": true,
         "group_id": null,
         "current_option": "Toggle",
-        "enum": "SwitchType",
         "options": [
           "Toggle",
           "Momentary",
           "NoSwitch"
-        ]
+        ],
+        "enum": "SwitchType"
       },
       {
         "fallback_name": null,
@@ -929,11 +929,11 @@
         "available": true,
         "group_id": null,
         "current_option": "ControlRelay",
-        "enum": "DecoupledMode",
         "options": [
           "Decoupled",
           "ControlRelay"
-        ]
+        ],
+        "enum": "DecoupledMode"
       }
     ],
     "sensor": [

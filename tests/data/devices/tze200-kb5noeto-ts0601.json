@@ -407,12 +407,12 @@
         "available": true,
         "group_id": null,
         "current_option": null,
-        "enum": "TuyaMotionDetectionMode",
         "options": [
           "Only PIR",
           "PIR and radar",
           "Only radar"
-        ]
+        ],
+        "enum": "TuyaMotionDetectionMode"
       }
     ],
     "sensor": [

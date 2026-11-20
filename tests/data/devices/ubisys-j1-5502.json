@@ -702,7 +702,6 @@
         "available": true,
         "group_id": null,
         "current_option": null,
-        "enum": "WindowCoveringType",
         "options": [
           "Rollershade",
           "Rollershade two motors",
@@ -714,7 +713,8 @@
           "Tilt blind tilt only",
           "Tilt blind tilt and lift",
           "Projector screen"
-        ]
+        ],
+        "enum": "WindowCoveringType"
       }
     ],
     "sensor": [

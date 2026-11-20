@@ -352,13 +352,13 @@
         "available": true,
         "group_id": null,
         "current_option": null,
-        "enum": "SirenLevel",
         "options": [
           "Low level sound",
           "Medium level sound",
           "High level sound",
           "Very high level sound"
-        ]
+        ],
+        "enum": "SirenLevel"
       },
       {
         "fallback_name": null,
@@ -380,11 +380,11 @@
         "available": true,
         "group_id": null,
         "current_option": null,
-        "enum": "Strobe",
         "options": [
           "No Strobe",
           "Strobe"
-        ]
+        ],
+        "enum": "Strobe"
       },
       {
         "fallback_name": null,
@@ -406,13 +406,13 @@
         "available": true,
         "group_id": null,
         "current_option": null,
-        "enum": "StrobeLevel",
         "options": [
           "Low level strobe",
           "Medium level strobe",
           "High level strobe",
           "Very high level strobe"
-        ]
+        ],
+        "enum": "StrobeLevel"
       },
       {
         "fallback_name": null,
@@ -434,7 +434,6 @@
         "available": true,
         "group_id": null,
         "current_option": null,
-        "enum": "WarningMode",
         "options": [
           "Stop",
           "Burglar",
@@ -443,7 +442,8 @@
           "Police Panic",
           "Fire Panic",
           "Emergency Panic"
-        ]
+        ],
+        "enum": "WarningMode"
       }
     ],
     "sensor": [
