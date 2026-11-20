@@ -21,7 +21,7 @@ from zigpy.zcl.clusters.general import Ota
 import zigpy.zcl.foundation as zcl_f
 import zigpy.zdo.types as zdo_t
 
-from zha.application import Platform
+from zha.application import Platform, discovery
 from zha.application.gateway import Gateway
 from zha.application.platforms import BaseEntity, GroupEntity, PlatformEntity
 from zha.quirks import DEVICE_REGISTRY, DeviceRegistry
@@ -636,6 +636,26 @@ async def rejoin_zha_device(zha_gateway: Gateway, zha_device: Device) -> Device:
     del zha_gateway._devices[zigpy_dev.ieee]  # pylint: disable=protected-access
 
     return await join_zigpy_device(zha_gateway, zigpy_dev)
+
+
+async def rebuild_zha_group(zha_gateway: Gateway, zha_group: Group) -> Group:
+    """Tear down a ZHA group and create it again from the same zigpy group.
+
+    The zigpy group and the network store are kept, as they are across a restart,
+    while the ZHA group and its entities are new, created the way the gateway loads
+    groups at start-up.
+    """
+    zigpy_group = zha_group.zigpy_group
+    await zha_group.on_remove()
+    del zha_gateway._groups[zigpy_group.group_id]  # pylint: disable=protected-access
+
+    new_group = zha_gateway.get_or_create_group(zigpy_group)
+
+    for entity in discovery.discover_group_entities(new_group):
+        entity.on_add()
+
+    await zha_gateway.async_block_till_done()
+    return new_group
 
 
 def create_mock_zigpy_device(

@@ -26,17 +26,28 @@ from tests.common import (
     get_group_entity,
     group_entity_availability_test,
     join_zigpy_device,
+    rebuild_zha_group,
     rejoin_zha_device,
     send_attributes_report,
     update_attribute_cache,
 )
 from zha.application import Platform
 from zha.application.gateway import Gateway
-from zha.application.platforms import GroupEntity, PlatformEntity
+from zha.application.platforms import (
+    ASSUMED_STATE_SAVE_DELAY,
+    GroupEntity,
+    PlatformEntity,
+)
 from zha.application.platforms.light.const import FLASH_EFFECTS, ColorMode, FlashMode
 from zha.zigbee.device import Device
 from zha.zigbee.group import Group, GroupMemberReference
-from zha.zigbee.store import ENTITY_STATE_NAMESPACE, entity_state_key
+from zha.zigbee.store import (
+    ENTITY_ASSUMED_STATE_NAMESPACE,
+    ENTITY_STATE_NAMESPACE,
+    GROUP_ENTITY_STATE_NAMESPACE,
+    entity_state_key,
+    group_entity_state_key,
+)
 
 ON = 1
 OFF = 0
@@ -2724,3 +2735,719 @@ async def test_group_state_ignores_unavailable_members(zha_gateway: Gateway) -> 
     await asyncio.sleep(0.1)
     await zha_gateway.async_block_till_done()
     assert bool(entity.state.on) is True
+
+
+def _assumed_light_record(zha_device: Device, entity: PlatformEntity) -> Any:
+    """Return the assumed state record of a light, or `None`."""
+    namespace = zha_device.device.store.namespace(ENTITY_ASSUMED_STATE_NAMESPACE)
+    return namespace.get(entity_state_key(Platform.LIGHT, entity.unique_id))
+
+
+async def _wait_for_assumed_save(zha_gateway: Gateway) -> None:
+    """Wait until delayed saves of assumed values have run."""
+    await asyncio.sleep(ASSUMED_STATE_SAVE_DELAY + 1)
+    await zha_gateway.async_block_till_done()
+
+
+@patch(
+    "zigpy.zcl.clusters.general.LevelControl.request",
+    new=AsyncMock(return_value=[sentinel.data, zcl_f.Status.SUCCESS]),
+)
+@patch(
+    "zigpy.zcl.clusters.general.OnOff.request",
+    new=AsyncMock(return_value=[sentinel.data, zcl_f.Status.SUCCESS]),
+)
+async def test_light_assumed_state_survives_restart(zha_gateway: Gateway) -> None:
+    """Commanded on/off and brightness are kept until the light reports them."""
+    zha_device = await device_light_3_mock(zha_gateway)
+    entity = get_entity(zha_device, platform=Platform.LIGHT)
+    on_off = zha_device.device.endpoints[1].on_off
+    level = zha_device.device.endpoints[1].level
+
+    await send_attributes_report(zha_gateway, on_off, {0: OFF})
+    await send_attributes_report(zha_gateway, level, {0: 10})
+    assert entity.state.on is False
+
+    # Nothing is stored for reported state
+    assert _assumed_light_record(zha_device, entity) is None
+    assert len(zha_device.device.store.namespace(ENTITY_ASSUMED_STATE_NAMESPACE)) == 0
+
+    await entity.async_turn_on(brightness=120)
+    entity.async_transition_complete()
+    await _wait_for_assumed_save(zha_gateway)
+
+    record = _assumed_light_record(zha_device, entity)
+    assert record["state"]["value"] is True
+    assert record["brightness"]["value"] == 120
+
+    # The cache still says off at level 10, the assumed values are newer
+    zha_device = await rejoin_zha_device(zha_gateway, zha_device)
+    entity = get_entity(zha_device, platform=Platform.LIGHT)
+    assert entity.state.on is True
+    assert entity.state.brightness == 120
+
+    # Home Assistant's copy is a fallback only, for the other fields
+    entity.restore_external_state_attributes(
+        state=False,
+        off_with_transition=None,
+        off_brightness=None,
+        brightness=5,
+        color_temp=300,
+        xy_color=None,
+        color_mode=None,
+        effect=None,
+    )
+    assert entity.state.on is True
+    assert entity.state.brightness == 120
+    assert entity.state.color_temp == 300
+
+
+@patch(
+    "zigpy.zcl.clusters.general.LevelControl.request",
+    new=AsyncMock(return_value=[sentinel.data, zcl_f.Status.SUCCESS]),
+)
+@patch(
+    "zigpy.zcl.clusters.general.OnOff.request",
+    new=AsyncMock(return_value=[sentinel.data, zcl_f.Status.SUCCESS]),
+)
+async def test_light_assumed_state_dropped_on_report(zha_gateway: Gateway) -> None:
+    """Each assumed field is replaced by a report of its own attribute."""
+    zha_device = await device_light_3_mock(zha_gateway)
+    entity = get_entity(zha_device, platform=Platform.LIGHT)
+    on_off = zha_device.device.endpoints[1].on_off
+    level = zha_device.device.endpoints[1].level
+
+    await send_attributes_report(zha_gateway, on_off, {0: OFF})
+    await send_attributes_report(zha_gateway, level, {0: 10})
+
+    await entity.async_turn_on(brightness=120)
+    entity.async_transition_complete()
+
+    # The light contradicts the commanded on/off state
+    await send_attributes_report(zha_gateway, on_off, {0: OFF})
+    assert entity.state.on is False
+    await _wait_for_assumed_save(zha_gateway)
+    assert set(_assumed_light_record(zha_device, entity)) == {"brightness"}
+
+    zha_device = await rejoin_zha_device(zha_gateway, zha_device)
+    entity = get_entity(zha_device, platform=Platform.LIGHT)
+    assert entity.state.on is False
+    assert entity.state.brightness == 120
+
+    # The light confirms the commanded level
+    await send_attributes_report(zha_gateway, level, {0: 120})
+    assert entity.state.brightness == 120
+    await _wait_for_assumed_save(zha_gateway)
+    assert _assumed_light_record(zha_device, entity) is None
+
+    zha_device = await rejoin_zha_device(zha_gateway, zha_device)
+    entity = get_entity(zha_device, platform=Platform.LIGHT)
+    assert entity.state.on is False
+    assert entity.state.brightness == 120
+
+
+@patch(
+    "zigpy.zcl.clusters.general.LevelControl.request",
+    new=AsyncMock(return_value=[sentinel.data, zcl_f.Status.SUCCESS]),
+)
+@patch(
+    "zigpy.zcl.clusters.general.OnOff.request",
+    new=AsyncMock(return_value=[sentinel.data, zcl_f.Status.SUCCESS]),
+)
+async def test_light_assumed_state_yields_to_newer_cache(zha_gateway: Gateway) -> None:
+    """At load, a cache value newer than an assumed one wins, field by field."""
+    zha_device = await device_light_3_mock(zha_gateway)
+    entity = get_entity(zha_device, platform=Platform.LIGHT)
+    zigpy_device = zha_device.device
+    level = zigpy_device.endpoints[1].level
+
+    await entity.async_turn_on(brightness=120)
+    entity.async_transition_complete()
+
+    # The light reports a level while no entity listens
+    await zha_device.on_remove()
+    level._attr_cache.set_value(general.LevelControl.AttributeDefs.current_level, 33)
+    del zha_gateway._devices[zigpy_device.ieee]
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
+    entity = get_entity(zha_device, platform=Platform.LIGHT)
+
+    assert entity.state.on is True
+    assert entity.state.brightness == 33
+
+    # HA's brightness is the fallback for the field that was not restored
+    entity.restore_external_state_attributes(
+        state=False,
+        off_with_transition=None,
+        off_brightness=None,
+        brightness=44,
+        color_temp=None,
+        xy_color=None,
+        color_mode=None,
+        effect=None,
+    )
+    assert entity.state.on is True
+    assert entity.state.brightness == 44
+
+    # The stale entry is removed by the save scheduled at load
+    await _wait_for_assumed_save(zha_gateway)
+    assert set(_assumed_light_record(zha_device, entity)) == {"state"}
+
+
+@patch(
+    "zigpy.zcl.clusters.general.LevelControl.request",
+    new=AsyncMock(return_value=[sentinel.data, zcl_f.Status.SUCCESS]),
+)
+@patch(
+    "zigpy.zcl.clusters.general.OnOff.request",
+    new=AsyncMock(return_value=[sentinel.data, zcl_f.Status.SUCCESS]),
+)
+async def test_light_assumed_state_after_turn_off_with_transition(
+    zha_gateway: Gateway,
+) -> None:
+    """Turning off with a transition keeps the off state and the level it leaves."""
+    zha_device = await device_light_3_mock(zha_gateway)
+    entity = get_entity(zha_device, platform=Platform.LIGHT)
+
+    await entity.async_turn_on(brightness=120)
+    entity.async_transition_complete()
+    await entity.async_turn_off(transition=1)
+    entity.async_transition_complete()
+    await _wait_for_assumed_save(zha_gateway)
+
+    record = _assumed_light_record(zha_device, entity)
+    assert record["state"]["value"] is False
+    assert record["brightness"]["value"] == 1
+
+    zha_device = await rejoin_zha_device(zha_gateway, zha_device)
+    entity = get_entity(zha_device, platform=Platform.LIGHT)
+    assert entity.state.on is False
+    assert entity.state.off_brightness == 120
+    assert entity.state.off_with_transition is True
+
+    # Turning on again uses the remembered brightness
+    await entity.async_turn_on()
+    entity.async_transition_complete()
+    assert entity.state.on is True
+    assert entity.state.brightness == 120
+    await _wait_for_assumed_save(zha_gateway)
+    assert _assumed_light_record(zha_device, entity)["brightness"]["value"] == 120
+
+
+async def test_light_assumed_state_not_kept_on_failure(zha_gateway: Gateway) -> None:
+    """A failed command leaves no assumed value behind."""
+    zha_device = await device_light_3_mock(zha_gateway)
+    entity = get_entity(zha_device, platform=Platform.LIGHT)
+
+    with (
+        patch(
+            "zigpy.zcl.clusters.general.OnOff.request",
+            new=AsyncMock(return_value=[sentinel.data, zcl_f.Status.FAILURE]),
+        ),
+        patch(
+            "zigpy.zcl.clusters.general.LevelControl.request",
+            new=AsyncMock(return_value=[sentinel.data, zcl_f.Status.FAILURE]),
+        ),
+    ):
+        await entity.async_turn_on()
+        await entity.async_turn_on(brightness=10)
+        await entity.async_turn_off()
+
+    await _wait_for_assumed_save(zha_gateway)
+    assert len(zha_device.device.store.namespace(ENTITY_ASSUMED_STATE_NAMESPACE)) == 0
+
+
+@pytest.mark.parametrize(
+    "record",
+    [
+        {"state": {"value": 1, "since": "2100-01-01T00:00:00+00:00"}},
+        {"brightness": {"value": -1, "since": "2100-01-01T00:00:00+00:00"}},
+        {"brightness": {"value": True, "since": "2100-01-01T00:00:00+00:00"}},
+        {"brightness": {"value": 256, "since": "2100-01-01T00:00:00+00:00"}},
+    ],
+)
+async def test_light_invalid_assumed_state_ignored(
+    zha_gateway: Gateway, record: Any
+) -> None:
+    """An invalid assumed value is not restored and Home Assistant's is used."""
+    zha_device = await device_light_3_mock(zha_gateway)
+    entity = get_entity(zha_device, platform=Platform.LIGHT)
+    namespace = zha_device.device.store.namespace(ENTITY_ASSUMED_STATE_NAMESPACE)
+    namespace[entity_state_key(Platform.LIGHT, entity.unique_id)] = record
+
+    zha_device = await rejoin_zha_device(zha_gateway, zha_device)
+    entity = get_entity(zha_device, platform=Platform.LIGHT)
+
+    entity.restore_external_state_attributes(
+        state=True,
+        off_with_transition=None,
+        off_brightness=None,
+        brightness=77,
+        color_temp=None,
+        xy_color=None,
+        color_mode=None,
+        effect=None,
+    )
+    assert entity.state.on is True
+    assert entity.state.brightness == 77
+
+
+async def _create_light_group(zha_gateway: Gateway) -> tuple[Group, Device, Device]:
+    """Create a group of two lights, both on at level 100."""
+    await coordinator_mock(zha_gateway)
+    device_light_1 = await device_light_1_mock(zha_gateway)
+    device_light_2 = await device_light_2_mock(zha_gateway)
+
+    zha_group = await zha_gateway.async_create_zigpy_group(
+        "Test Group",
+        [
+            GroupMemberReference(ieee=device_light_1.ieee, endpoint_id=1),
+            GroupMemberReference(ieee=device_light_2.ieee, endpoint_id=1),
+        ],
+    )
+    await zha_gateway.async_block_till_done()
+
+    for device in (device_light_1, device_light_2):
+        await send_attributes_report(
+            zha_gateway, device.device.endpoints[1].on_off, {0: ON}
+        )
+        await send_attributes_report(
+            zha_gateway, device.device.endpoints[1].level, {0: 100}
+        )
+
+    await _async_shift_time(zha_gateway)
+    return zha_group, device_light_1, device_light_2
+
+
+def _group_records(zha_gateway: Gateway) -> Any:
+    """Return the group entity restore records of the network store."""
+    return zha_gateway.application_controller.network_store.namespace(
+        GROUP_ENTITY_STATE_NAMESPACE
+    )
+
+
+async def test_light_group_off_brightness_persisted(zha_gateway: Gateway) -> None:
+    """A light group's brightness before turning off survives the group being rebuilt."""
+    zha_group, _, _ = await _create_light_group(zha_gateway)
+    entity = get_group_entity(zha_group, platform=Platform.LIGHT)
+    namespace = _group_records(zha_gateway)
+    key = group_entity_state_key(zha_group.group_id, Platform.LIGHT, entity.unique_id)
+
+    assert entity.state.on is True
+    assert entity.state.brightness == 100
+
+    # Nothing is stored for a group that was never turned off with a transition
+    assert len(namespace) == 0
+
+    await entity.async_turn_off(transition=1)
+    await zha_gateway.async_block_till_done()
+
+    assert entity.state.off_brightness == 100
+    assert entity.state.off_with_transition is True
+    assert namespace[key] == {"off_brightness": 100, "off_with_transition": True}
+
+    new_group = await rebuild_zha_group(zha_gateway, zha_group)
+    new_entity = get_group_entity(new_group, platform=Platform.LIGHT)
+
+    assert new_entity is not entity
+    assert new_entity.state.off_brightness == 100
+    assert new_entity.state.off_with_transition is True
+
+    # Home Assistant's restored copy is older than the store and is ignored
+    new_entity.restore_external_state_attributes(
+        state=False,
+        off_with_transition=False,
+        off_brightness=5,
+        brightness=None,
+        color_temp=None,
+        xy_color=None,
+        color_mode=None,
+        effect=None,
+    )
+    assert new_entity.state.off_brightness == 100
+    assert new_entity.state.off_with_transition is True
+    assert namespace[key] == {"off_brightness": 100, "off_with_transition": True}
+
+    # The removed group's entity no longer writes
+    entity._off_brightness = 3
+    entity.maybe_emit_state_changed_event()
+    assert namespace[key] == {"off_brightness": 100, "off_with_transition": True}
+
+
+async def test_light_group_off_brightness_taken_over_from_restore(
+    zha_gateway: Gateway,
+) -> None:
+    """Without a stored record, Home Assistant's restored values are used and stored."""
+    zha_group, _, _ = await _create_light_group(zha_gateway)
+    entity = get_group_entity(zha_group, platform=Platform.LIGHT)
+    namespace = _group_records(zha_gateway)
+    key = group_entity_state_key(zha_group.group_id, Platform.LIGHT, entity.unique_id)
+
+    entity.restore_external_state_attributes(
+        state=None,
+        off_with_transition=True,
+        off_brightness=33,
+        brightness=None,
+        color_temp=None,
+        xy_color=None,
+        color_mode=None,
+        effect=None,
+    )
+
+    assert entity.state.off_brightness == 33
+    assert namespace[key] == {"off_brightness": 33, "off_with_transition": True}
+
+    new_group = await rebuild_zha_group(zha_gateway, zha_group)
+    new_entity = get_group_entity(new_group, platform=Platform.LIGHT)
+    assert new_entity.state.off_brightness == 33
+
+
+async def test_light_group_records_removed_with_group(zha_gateway: Gateway) -> None:
+    """Removing a group deletes its records, and only its records."""
+    zha_group, _, _ = await _create_light_group(zha_gateway)
+    entity = get_group_entity(zha_group, platform=Platform.LIGHT)
+    namespace = _group_records(zha_gateway)
+    key = group_entity_state_key(zha_group.group_id, Platform.LIGHT, entity.unique_id)
+
+    other_key = group_entity_state_key(
+        zha_group.group_id + 1, Platform.LIGHT, "light_zha_group_other"
+    )
+    namespace[other_key] = {"off_brightness": 1}
+
+    await entity.async_turn_off(transition=1)
+    await zha_gateway.async_block_till_done()
+    assert key in namespace
+
+    await zha_gateway.async_remove_zigpy_group(zha_group.group_id)
+    await zha_gateway.async_block_till_done()
+
+    assert key not in namespace
+    assert namespace[other_key] == {"off_brightness": 1}
+
+    # The removed group's entity no longer writes: zigpy removes the members first,
+    # which unregisters the group's entities
+    assert entity.unique_id not in zha_group.group_entities
+    entity._off_brightness = 3
+    entity.maybe_emit_state_changed_event()
+    assert key not in namespace
+
+
+async def test_light_group_without_network_store(zha_gateway: Gateway) -> None:
+    """An application without a network store keeps HA's restore only."""
+    zha_group, _, _ = await _create_light_group(zha_gateway)
+
+    with patch.object(zha_gateway.application_controller, "network_store", None):
+        new_group = await rebuild_zha_group(zha_gateway, zha_group)
+        entity = get_group_entity(new_group, platform=Platform.LIGHT)
+
+        entity.restore_external_state_attributes(
+            state=None,
+            off_with_transition=True,
+            off_brightness=33,
+            brightness=None,
+            color_temp=None,
+            xy_color=None,
+            color_mode=None,
+            effect=None,
+        )
+        await entity.async_turn_off(transition=1)
+        await zha_gateway.async_block_till_done()
+
+    assert entity.state.off_brightness == 33
+    assert len(_group_records(zha_gateway)) == 0
+
+
+@patch(
+    "zigpy.zcl.clusters.general.LevelControl.request",
+    new=AsyncMock(return_value=[sentinel.data, zcl_f.Status.SUCCESS]),
+)
+@patch(
+    "zigpy.zcl.clusters.general.OnOff.request",
+    new=AsyncMock(return_value=[sentinel.data, zcl_f.Status.SUCCESS]),
+)
+async def test_light_group_members_keep_assumed_state(zha_gateway: Gateway) -> None:
+    """Members assuming a group command's state keep it as assumed values."""
+    zha_gateway.config.config.light_options.group_members_assume_state = True
+    zha_group, device_light_1, _ = await _create_light_group(zha_gateway)
+    entity = get_group_entity(zha_group, platform=Platform.LIGHT)
+
+    await entity.async_turn_on(brightness=200)
+    await zha_gateway.async_block_till_done()
+
+    member = get_entity(device_light_1, platform=Platform.LIGHT)
+    assert member.state.brightness == 200
+    await _wait_for_assumed_save(zha_gateway)
+    record = _assumed_light_record(device_light_1, member)
+    assert record["state"]["value"] is True
+    assert record["brightness"]["value"] == 200
+
+    device_light_1 = await rejoin_zha_device(zha_gateway, device_light_1)
+    member = get_entity(device_light_1, platform=Platform.LIGHT)
+    assert member.state.on is True
+    assert member.state.brightness == 200
+
+
+async def test_light_assumed_brightness_timed_by_its_own_command(
+    zha_gateway: Gateway,
+) -> None:
+    """A report during an earlier command of the same call does not supersede a later one."""
+    zha_gateway.config.config.light_options.enable_light_transitioning_flag = False
+    zha_device = await device_light_3_mock(zha_gateway)
+    entity = get_entity(zha_device, platform=Platform.LIGHT)
+    level = zha_device.device.endpoints[1].level
+    color = zha_device.device.endpoints[1].light_color
+
+    # Color commands are sent before the level command
+    color.update_attribute(
+        lighting.Color.AttributeDefs.options.id, lighting.Color.Options.Execute_if_off
+    )
+    entity.recompute_capabilities()
+
+    async def color_and_report(*args: Any, **kwargs: Any) -> list[Any]:
+        level.update_attribute(general.LevelControl.AttributeDefs.current_level.id, 5)
+        return [sentinel.data, zcl_f.Status.SUCCESS]
+
+    with (
+        patch(
+            "zigpy.zcl.clusters.general.LevelControl.request",
+            new=AsyncMock(return_value=[sentinel.data, zcl_f.Status.SUCCESS]),
+        ),
+        patch("zigpy.zcl.clusters.lighting.Color.request", new=color_and_report),
+    ):
+        await entity.async_turn_on(brightness=150, color_temp=300)
+
+    await _wait_for_assumed_save(zha_gateway)
+    assert entity.state.brightness == 150
+    assert _assumed_light_record(zha_device, entity)["brightness"]["value"] == 150
+
+
+async def test_light_assumed_state_timed_by_the_command_that_set_it(
+    zha_gateway: Gateway,
+) -> None:
+    """A level-only command does not re-time the on/off state an earlier one set."""
+    zha_gateway.config.config.light_options.enable_light_transitioning_flag = False
+    zha_device = await device_light_3_mock(zha_gateway)
+    entity = get_entity(zha_device, platform=Platform.LIGHT)
+    on_off = zha_device.device.endpoints[1].on_off
+    level = zha_device.device.endpoints[1].level
+
+    await send_attributes_report(zha_gateway, on_off, {0: OFF})
+    await send_attributes_report(zha_gateway, level, {0: 10})
+    assert entity.state.on is False
+
+    # Turning on with a new color while off sends `move_to_level_with_on_off`, the
+    # color, then a level-only `move_to_level`. The light reports off in between.
+    async def color_and_report(*args: Any, **kwargs: Any) -> list[Any]:
+        on_off.update_attribute(general.OnOff.AttributeDefs.on_off.id, OFF)
+        return [sentinel.data, zcl_f.Status.SUCCESS]
+
+    with (
+        patch(
+            "zigpy.zcl.clusters.general.LevelControl.request",
+            new=AsyncMock(return_value=[sentinel.data, zcl_f.Status.SUCCESS]),
+        ) as level_request,
+        patch("zigpy.zcl.clusters.lighting.Color.request", new=color_and_report),
+    ):
+        await entity.async_turn_on(brightness=150, color_temp=300)
+
+    assert [c.args[1] for c in level_request.call_args_list] == [
+        general.LevelControl.commands_by_name["move_to_level_with_on_off"].id,
+        general.LevelControl.commands_by_name["move_to_level"].id,
+    ]
+
+    # The report is newer than the command that turned the light on
+    await _wait_for_assumed_save(zha_gateway)
+    assert set(_assumed_light_record(zha_device, entity)) == {"brightness"}
+
+
+async def test_light_failed_command_schedules_no_save(zha_gateway: Gateway) -> None:
+    """A command that set nothing does not start the delayed save."""
+    zha_device = await device_light_3_mock(zha_gateway)
+    entity = get_entity(zha_device, platform=Platform.LIGHT)
+
+    with patch(
+        "zigpy.zcl.clusters.general.OnOff.request",
+        new=AsyncMock(return_value=[sentinel.data, zcl_f.Status.FAILURE]),
+    ):
+        await entity.async_turn_on()
+
+    assert entity._assumed_state_save_handle is None
+
+
+@patch(
+    "zigpy.zcl.clusters.general.LevelControl.request",
+    new=AsyncMock(return_value=[sentinel.data, zcl_f.Status.SUCCESS]),
+)
+@patch(
+    "zigpy.zcl.clusters.general.OnOff.request",
+    new=AsyncMock(return_value=[sentinel.data, zcl_f.Status.SUCCESS]),
+)
+async def test_light_confirmed_command_writes_nothing(zha_gateway: Gateway) -> None:
+    """Commands the light confirms before the save delay leave no store write."""
+    zha_device = await device_light_3_mock(zha_gateway)
+    entity = get_entity(zha_device, platform=Platform.LIGHT)
+    on_off = zha_device.device.endpoints[1].on_off
+    level = zha_device.device.endpoints[1].level
+    store = zha_device.device.store
+
+    with patch.object(store, "_emit", wraps=store._emit) as emit:
+        for brightness in (50, 60, 70):
+            await entity.async_turn_on(brightness=brightness)
+            entity.async_transition_complete()
+            await send_attributes_report(zha_gateway, on_off, {0: ON})
+            await send_attributes_report(zha_gateway, level, {0: brightness})
+
+        await _wait_for_assumed_save(zha_gateway)
+
+    assert entity.state.brightness == 70
+    assert emit.call_count == 0
+
+
+@patch(
+    "zigpy.zcl.clusters.general.LevelControl.request",
+    new=AsyncMock(return_value=[sentinel.data, zcl_f.Status.SUCCESS]),
+)
+@patch(
+    "zigpy.zcl.clusters.general.OnOff.request",
+    new=AsyncMock(return_value=[sentinel.data, zcl_f.Status.SUCCESS]),
+)
+async def test_light_restored_state_older_than_report_since_load(
+    zha_gateway: Gateway,
+) -> None:
+    """A report after loading is newer than Home Assistant's restored state."""
+    zha_device = await device_light_3_mock(zha_gateway)
+    entity = get_entity(zha_device, platform=Platform.LIGHT)
+    on_off = zha_device.device.endpoints[1].on_off
+
+    await entity.async_turn_on(brightness=120)
+    entity.async_transition_complete()
+
+    zha_device = await rejoin_zha_device(zha_gateway, zha_device)
+    entity = get_entity(zha_device, platform=Platform.LIGHT)
+    assert entity.state.on is True
+
+    await send_attributes_report(zha_gateway, on_off, {0: OFF})
+    entity.restore_external_state_attributes(
+        state=True,
+        off_with_transition=None,
+        off_brightness=None,
+        brightness=None,
+        color_temp=None,
+        xy_color=None,
+        color_mode=None,
+        effect=None,
+    )
+    assert entity.state.on is False
+
+
+@pytest.mark.parametrize("command", ["turn_on", "turn_off"])
+async def test_light_group_failed_command_not_assumed(
+    zha_gateway: Gateway, command: str
+) -> None:
+    """Members do not assume, or keep, the state of a group command that failed."""
+    zha_gateway.config.config.light_options.group_members_assume_state = True
+    zha_group, device_light_1, _ = await _create_light_group(zha_gateway)
+    entity = get_group_entity(zha_group, platform=Platform.LIGHT)
+    member = get_entity(device_light_1, platform=Platform.LIGHT)
+    assert member.state.on is True
+
+    failure = AsyncMock(return_value=[sentinel.data, zcl_f.Status.FAILURE])
+
+    with (
+        patch.object(zha_group.endpoint[general.OnOff.cluster_id], "request", failure),
+        patch.object(
+            zha_group.endpoint[general.LevelControl.cluster_id], "request", failure
+        ),
+    ):
+        if command == "turn_on":
+            await send_attributes_report(
+                zha_gateway, device_light_1.device.endpoints[1].on_off, {0: OFF}
+            )
+            await entity.async_turn_on(brightness=200)
+            expected_on = False
+        else:
+            await entity.async_turn_off()
+            expected_on = True
+
+    await _wait_for_assumed_save(zha_gateway)
+    assert member.state.on is expected_on
+    assert _assumed_light_record(device_light_1, member) is None
+
+
+@patch(
+    "zigpy.zcl.clusters.general.LevelControl.request",
+    new=AsyncMock(return_value=[sentinel.data, zcl_f.Status.SUCCESS]),
+)
+@patch(
+    "zigpy.zcl.clusters.general.OnOff.request",
+    new=AsyncMock(return_value=[sentinel.data, zcl_f.Status.SUCCESS]),
+)
+async def test_light_group_members_keep_only_commanded_brightness(
+    zha_gateway: Gateway,
+) -> None:
+    """Members do not keep a brightness that no group command set."""
+    zha_gateway.config.config.light_options.group_members_assume_state = True
+    zha_group, device_light_1, _ = await _create_light_group(zha_gateway)
+    entity = get_group_entity(zha_group, platform=Platform.LIGHT)
+    member = get_entity(device_light_1, platform=Platform.LIGHT)
+
+    # A level of 0 sets no brightness, members are given the group's old one
+    await entity.async_turn_on(brightness=0)
+    await zha_gateway.async_block_till_done()
+    assert member.state.brightness == 100
+
+    await _wait_for_assumed_save(zha_gateway)
+    assert "brightness" not in (_assumed_light_record(device_light_1, member) or {})
+
+
+@pytest.mark.parametrize("through_zigpy", [True, False])
+async def test_light_group_record_not_written_after_removal(
+    zha_gateway: Gateway, through_zigpy: bool
+) -> None:
+    """A transition finishing after the group was removed does not write a record."""
+    zha_group, _, _ = await _create_light_group(zha_gateway)
+    entity = get_group_entity(zha_group, platform=Platform.LIGHT)
+    namespace = _group_records(zha_gateway)
+    key = group_entity_state_key(zha_group.group_id, Platform.LIGHT, entity.unique_id)
+
+    await entity.async_turn_off(transition=5)
+    assert entity.is_transitioning
+    assert key in namespace
+
+    if through_zigpy:
+        await zha_gateway.async_remove_zigpy_group(zha_group.group_id)
+    else:
+        # The gateway's handler alone: the group entity is still registered
+        zha_gateway.group_removed(zha_group.zigpy_group)
+        assert zha_group.group_entities[entity.unique_id] is entity
+
+    assert key not in namespace
+
+    await _async_shift_time(zha_gateway)
+    assert not entity.is_transitioning
+    assert key not in namespace
+
+
+async def test_light_group_record_follows_unique_id_migration(
+    zha_gateway: Gateway,
+) -> None:
+    """A group record stored under a previous unique ID moves to the current one."""
+    zha_group, _, _ = await _create_light_group(zha_gateway)
+    entity = get_group_entity(zha_group, platform=Platform.LIGHT)
+    namespace = _group_records(zha_gateway)
+    old_key = group_entity_state_key(zha_group.group_id, Platform.LIGHT, "old-id")
+    namespace[old_key] = {"off_brightness": 99, "off_with_transition": True}
+
+    with patch.object(
+        type(entity),
+        "migrate_unique_ids",
+        new_callable=PropertyMock,
+        return_value=frozenset({"old-id"}),
+    ):
+        new_group = await rebuild_zha_group(zha_gateway, zha_group)
+
+    new_entity = get_group_entity(new_group, platform=Platform.LIGHT)
+    assert new_entity.state.off_brightness == 99
+    assert old_key not in namespace
+    assert namespace[
+        group_entity_state_key(zha_group.group_id, Platform.LIGHT, new_entity.unique_id)
+    ] == {"off_brightness": 99, "off_with_transition": True}
