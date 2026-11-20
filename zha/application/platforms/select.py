@@ -72,6 +72,7 @@ class SelectState(BaseEntityState):
     """State for select entities."""
 
     current_option: str | None
+    options: list[str]
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -79,7 +80,6 @@ class EnumSelectState(SelectState):
     """State for enum select entities."""
 
     enum: str
-    options: list[str]
 
 
 class BaseSelectEntity(BaseEntity, ABC):
@@ -100,6 +100,7 @@ class BaseSelectEntity(BaseEntity, ABC):
         return SelectState(
             **super().state.__dict__,
             current_option=self.current_option,
+            options=self.options,
         )
 
     @property
@@ -110,6 +111,14 @@ class BaseSelectEntity(BaseEntity, ABC):
     @abstractmethod
     async def async_select_option(self, option: str) -> None:
         """Change the selected option."""
+
+    @abstractmethod
+    def restore_external_state_attributes(
+        self,
+        *,
+        state: str,
+    ) -> None:
+        """Restore extra state attributes that are stored outside of the ZCL cache."""
 
 
 class SirenDefaultSelectEntity(BaseSelectEntity, ZclPlatformEntity):
@@ -144,7 +153,6 @@ class SirenDefaultSelectEntity(BaseSelectEntity, ZclPlatformEntity):
         return EnumSelectState(
             **super().state.__dict__,
             enum=self._enum.__name__,
-            options=self.options,
         )
 
     @property
@@ -307,7 +315,6 @@ class ZCLEnumSelectEntity(BaseSelectEntity, ZclPlatformEntity):
         return EnumSelectState(
             **super().state.__dict__,
             enum=self._enum.__name__,
-            options=self.options,
         )
 
     @property

@@ -74,6 +74,30 @@ class BaseLock(PlatformEntity, ABC):
     async def async_unlock(self) -> None:
         """Unlock the lock."""
 
+    @abstractmethod
+    async def async_set_lock_user_code(self, code_slot: int, user_code: str) -> None:
+        """Set the user_code to index X on the lock."""
+
+    @abstractmethod
+    async def async_enable_lock_user_code(self, code_slot: int) -> None:
+        """Enable user_code at index X on the lock."""
+
+    @abstractmethod
+    async def async_disable_lock_user_code(self, code_slot: int) -> None:
+        """Disable user_code at index X on the lock."""
+
+    @abstractmethod
+    async def async_clear_lock_user_code(self, code_slot: int) -> None:
+        """Clear the user_code at index X on the lock."""
+
+    @abstractmethod
+    def restore_external_state_attributes(
+        self,
+        *,
+        state: Literal["locked", "unlocked"] | None,
+    ) -> None:
+        """Restore extra state attributes that are stored outside of the ZCL cache."""
+
 
 @register_entity(DoorLockCluster.cluster_id)
 class DoorLock(BaseLock, ZclPlatformEntity):

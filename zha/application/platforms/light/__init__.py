@@ -101,8 +101,8 @@ class LightState(BaseEntityState):
     supported_color_modes: set[ColorMode]
     off_with_transition: bool
     off_brightness: int | None
-    min_mireds: int | None
-    max_mireds: int | None
+    min_mireds: int
+    max_mireds: int
 
 
 class BaseLight(BaseEntity, ABC):
@@ -114,8 +114,8 @@ class BaseLight(BaseEntity, ABC):
     def __init__(self, *args, **kwargs):
         """Initialize the light."""
         super().__init__(*args, **kwargs)
-        self._min_mireds: int | None = 153
-        self._max_mireds: int | None = 500
+        self._min_mireds: int = 153
+        self._max_mireds: int = 500
         self._xy_color: tuple[float, float] | None = None
         self._color_mode = ColorMode.UNKNOWN  # Set by subclasses
         self._color_temp: int | None = None
@@ -196,12 +196,12 @@ class BaseLight(BaseEntity, ABC):
         return self._brightness
 
     @property
-    def min_mireds(self) -> int | None:
+    def min_mireds(self) -> int:
         """Return the coldest color_temp that this light supports."""
         return self._min_mireds
 
     @property
-    def max_mireds(self) -> int | None:
+    def max_mireds(self) -> int:
         """Return the warmest color_temp that this light supports."""
         return self._max_mireds
 

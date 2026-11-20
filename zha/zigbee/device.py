@@ -820,6 +820,10 @@ class BaseDevice[ZigpyDeviceT: ZigpyBaseDevice](LogMixin, EventBase):
         """Get extended device information."""
         raise NotImplementedError
 
+    def get_diagnostics_json(self) -> dict[str, Any]:
+        """Get ZHA device information."""
+        raise NotImplementedError
+
     async def async_configure(self) -> None:
         """Configure the device."""
         raise NotImplementedError

@@ -92,6 +92,19 @@ class BaseCover(PlatformEntity, ABC):
         return self._attr_supported_features
 
     @property
+    def state(self) -> CoverEntityState:
+        """Get the state of the cover."""
+        return CoverEntityState(
+            **super().state.__dict__,
+            current_position=self.current_cover_position,
+            current_tilt_position=self.current_cover_tilt_position,
+            is_opening=self.is_opening,
+            is_closing=self.is_closing,
+            is_closed=self.is_closed,
+            supported_features=self.supported_features,
+        )
+
+    @property
     @abstractmethod
     def is_closed(self) -> bool | None:
         """Return True if the cover is closed."""
@@ -137,6 +150,30 @@ class BaseCover(PlatformEntity, ABC):
     @abstractmethod
     async def async_stop_cover(self) -> None:
         """Stop the cover."""
+
+    async def async_open_cover_tilt(self) -> None:
+        """Open the cover tilt (covers that support tilt override)."""
+        raise NotImplementedError
+
+    async def async_close_cover_tilt(self) -> None:
+        """Close the cover tilt (covers that support tilt override)."""
+        raise NotImplementedError
+
+    async def async_set_cover_tilt_position(self, tilt_position: int) -> None:
+        """Move the cover tilt to a specific position (covers that support tilt override)."""
+        raise NotImplementedError
+
+    async def async_stop_cover_tilt(self) -> None:
+        """Stop the cover tilt (covers that support tilt override)."""
+        raise NotImplementedError
+
+    def restore_external_state_attributes(
+        self,
+        *,
+        state: CoverState | None,
+        **kwargs: Any,  # pylint: disable=unused-argument
+    ) -> None:
+        """Restore external state attributes (no-op unless a subclass overrides it)."""
 
 
 @register_entity(WindowCovering.cluster_id)
@@ -277,7 +314,7 @@ class Cover(BaseCover, ZclPlatformEntity):
         *,
         state: CoverState | None,
         **kwargs: Any,  # pylint: disable=unused-argument
-    ):
+    ) -> None:
         """Restore external state attributes.
 
         If the state is OPENING or CLOSING, a callback is scheduled
@@ -300,19 +337,6 @@ class Cover(BaseCover, ZclPlatformEntity):
                 DEFAULT_MOVEMENT_TIMEOUT,
                 functools.partial(self._determine_cover_state, refresh=True),
             )
-        )
-
-    @property
-    def state(self) -> CoverEntityState:
-        """Get the state of the cover."""
-        return CoverEntityState(
-            **super().state.__dict__,
-            current_position=self.current_cover_position,
-            current_tilt_position=self.current_cover_tilt_position,
-            is_opening=self.is_opening,
-            is_closing=self.is_closing,
-            is_closed=self.is_closed,
-            supported_features=self.supported_features,
         )
 
     @property
@@ -890,19 +914,6 @@ class Shade(BaseCover, ZclPlatformEntity):
                         event_type.event_type, self.handle_level_attribute_updated
                     )
                 )
-
-    @property
-    def state(self) -> CoverEntityState:
-        """Get the state of the cover."""
-        return CoverEntityState(
-            **super().state.__dict__,
-            current_position=self.current_cover_position,
-            current_tilt_position=self.current_cover_tilt_position,
-            is_opening=self.is_opening,
-            is_closing=self.is_closing,
-            is_closed=self.is_closed,
-            supported_features=self.supported_features,
-        )
 
     @property
     def current_cover_position(self) -> int | None:

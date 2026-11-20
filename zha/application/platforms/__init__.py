@@ -190,7 +190,7 @@ class EntityCategory(StrEnum):
 class BaseEntityState:
     """State for the base entity."""
 
-    fallback_name: str
+    fallback_name: str | None
     unique_id: str
     migrate_unique_ids: frozenset[str]
     platform: str
@@ -209,7 +209,7 @@ class BaseEntityState:
     # For platform entities
     device_ieee: EUI64 | None
     endpoint_id: int | None
-    available: bool | None
+    available: bool
 
     # For group entities
     group_id: int | None
@@ -395,6 +395,11 @@ class BaseEntity(LogMixin, EventBase):
         """Return the state class."""
         return self._attr_state_class
 
+    @property
+    def available(self) -> bool:
+        """Return if the entity is available (platform and group entities override)."""
+        raise NotImplementedError
+
     @final
     @property
     def unique_id(self) -> str:
@@ -438,7 +443,7 @@ class BaseEntity(LogMixin, EventBase):
             # Set by platform entities
             device_ieee=None,
             endpoint_id=None,
-            available=None,
+            available=self.available,
             # Set by group entities
             group_id=None,
         )
@@ -506,6 +511,9 @@ class BaseEntity(LogMixin, EventBase):
             raise
 
         return unsub
+
+    async def async_update(self) -> None:
+        """Retrieve the latest state (platform and group entities override)."""
 
     def log(self, level: int, msg: str, *args: Any, **kwargs: Any) -> None:
         """Log a message."""
@@ -663,7 +671,6 @@ class PlatformEntity(BaseEntity):
         return dataclasses.replace(
             super().state,
             device_ieee=self._device.ieee,
-            available=self.available,
         )
 
 
@@ -835,7 +842,6 @@ class GroupEntity(BaseEntity):
         """Return the state of this entity."""
         return dataclasses.replace(
             super().state,
-            available=self.available,
             group_id=self.group_id,
         )
 

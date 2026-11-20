@@ -67,6 +67,17 @@ class BaseBinarySensor(PlatformEntity, ABC):
 
     PLATFORM: Platform = Platform.BINARY_SENSOR
 
+    _attribute_name: str
+
+    @property
+    def state(self) -> BinarySensorState:
+        """Return the state of the binary sensor."""
+        return BinarySensorState(
+            **super().state.__dict__,
+            is_on=self.is_on,
+            attribute_name=self._attribute_name,
+        )
+
     @property
     @abstractmethod
     def is_on(self) -> bool:
@@ -77,17 +88,7 @@ class BinarySensor(BaseBinarySensor, ZclPlatformEntity):
     """ZHA BinarySensor."""
 
     _attr_device_class: BinarySensorDeviceClass | None
-    _attribute_name: str
     _attribute_converter: Callable[[Any], Any] | None = None
-
-    @property
-    def state(self) -> BinarySensorState:
-        """Return the state of the binary sensor."""
-        return BinarySensorState(
-            **super().state.__dict__,
-            is_on=self.is_on,
-            attribute_name=self._attribute_name,
-        )
 
     def __init__(
         self,
