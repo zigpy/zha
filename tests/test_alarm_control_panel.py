@@ -15,8 +15,14 @@ from tests.common import join_zigpy_device, zigpy_device_from_json
 from zha.application import Platform
 from zha.application.gateway import Gateway
 from zha.application.helpers import ZHAData
-from zha.application.platforms.alarm_control_panel import AlarmControlPanel
-from zha.application.platforms.alarm_control_panel.const import AlarmState
+from zha.application.platforms.alarm_control_panel import (
+    ALARM_STATE_TO_PANEL_STATUS,
+    AlarmControlPanel,
+)
+from zha.application.platforms.alarm_control_panel.const import (
+    IAS_ACE_STATE_MAP,
+    AlarmState,
+)
 from zha.zigbee.device import Device
 
 _LOGGER = logging.getLogger(__name__)
@@ -339,9 +345,19 @@ async def test_alarm_control_panel_restore_ignores_unknown_states(
     assert entity.state.alarm_state == AlarmState.TRIGGERED
     assert entity.alarm_status == security.IasAce.AlarmStatus.Emergency
 
-    for state in ("unavailable", "unknown", AlarmState.PENDING, None):
+    for state in (
+        "unavailable",
+        "unknown",
+        AlarmState.ARMING,
+        AlarmState.PENDING,
+        None,
+    ):
         entity.restore_external_state_attributes(state=state)
         assert entity.state.alarm_state == AlarmState.TRIGGERED
+
+    # Every restorable state round-trips through the panel status it restores
+    for alarm_state, panel_status in ALARM_STATE_TO_PANEL_STATUS.items():
+        assert IAS_ACE_STATE_MAP[panel_status] == alarm_state
 
     # A known alarm cause is kept when the triggered state is restored again
     entity.alarm_status = security.IasAce.AlarmStatus.Fire

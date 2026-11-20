@@ -45,8 +45,15 @@ _LOGGER = logging.getLogger(__name__)
 SIGNAL_ARMED_STATE_CHANGED = "zha_armed_state_changed"
 SIGNAL_ALARM_TRIGGERED = "zha_armed_triggered"
 
+# The states a restart can hand back. Only settled ones: an arming or pending state ends
+# with a delay timer, which doesn't survive a restart, so restoring one would leave the
+# panel stuck in it.
 ALARM_STATE_TO_PANEL_STATUS: dict[AlarmState, PanelStatus] = {
-    alarm_state: panel_status for panel_status, alarm_state in IAS_ACE_STATE_MAP.items()
+    AlarmState.DISARMED: PanelStatus.Panel_Disarmed,
+    AlarmState.ARMED_HOME: PanelStatus.Armed_Stay,
+    AlarmState.ARMED_NIGHT: PanelStatus.Armed_Night,
+    AlarmState.ARMED_AWAY: PanelStatus.Armed_Away,
+    AlarmState.TRIGGERED: PanelStatus.In_Alarm,
 }
 
 
