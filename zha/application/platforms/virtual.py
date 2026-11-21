@@ -45,6 +45,7 @@ from zha.application.platforms.const import (
     IKEA_SHORTCUT_V1_CLUSTER,
     INOVELLI_CLUSTER,
     OSRAM_CLUSTER,
+    PHILIPS_CONTACT_CLUSTER,
     PHILIPS_REMOTE_CLUSTER,
     SINOPE_MANUFACTURER_CLUSTER,
     SMARTTHINGS_ACCELERATION_CLUSTER,
@@ -460,6 +461,48 @@ class OsramClusterBind(VirtualEntity):
     _server_cluster_config = {
         OSRAM_CLUSTER: ClusterConfig(bind=True),
     }
+
+
+@register_entity(PHILIPS_CONTACT_CLUSTER)
+class PhilipsContactClusterBind(VirtualEntity):
+    """Bind the Hue contact sensor's contact cluster and configure its reporting."""
+
+    _unique_id_suffix = "philips_contact_cluster_bind"
+
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({PHILIPS_CONTACT_CLUSTER}),
+        manufacturers=frozenset({"Philips", "Signify Netherlands B.V."}),
+    )
+    _server_cluster_config = {
+        PHILIPS_CONTACT_CLUSTER: ClusterConfig(
+            bind=True,
+            attributes={
+                "contact": AttrConfig(
+                    read_on_startup=False,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
+                ),
+                "tamper": AttrConfig(
+                    read_on_startup=False,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
+                ),
+            },
+        ),
+    }
+
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        """Initialize the entity."""
+        super().__init__(*args, **kwargs)
+
+        # Without the SOC001 quirk the cluster defines no attributes to report
+        reported = self._server_cluster_config[PHILIPS_CONTACT_CLUSTER].attributes
+        if not reported.keys() <= self._cluster.attributes_by_name.keys():
+            self._server_cluster_config = {
+                PHILIPS_CONTACT_CLUSTER: ClusterConfig(bind=True),
+            }
 
 
 @register_entity(Ota.cluster_id)
