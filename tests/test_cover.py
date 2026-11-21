@@ -716,6 +716,61 @@ async def test_cover_recompute_capabilities_on_type_update(
     assert len(subscriber.mock_calls) == 1
 
 
+async def test_cover_unknown_position(zha_gateway: Gateway) -> None:
+    """Test that a position percentage of 0xFF (unknown) is not shown as a position."""
+
+    # 0xFF is the attribute's default (ZCL R8 Table 7-40): the cover does not know
+    # its position (Zigbee2MQTT notes that a ubisys J1 reports 255 then)
+    zha_device, zigpy_cover_device = await device_cover_mock(
+        zha_gateway,
+        current_position_lift_percentage=0xFF,
+        current_position_tilt_percentage=0xFF,
+        window_covering_type=WCT.Tilt_blind_tilt_and_lift,
+    )
+    cluster = zigpy_cover_device.endpoints[1].window_covering
+    entity = get_entity(zha_device, platform=Platform.COVER)
+
+    assert entity.state.current_position is None
+    assert entity.state.current_tilt_position is None
+    assert _cover_state(entity) is None
+
+    # a known position is shown
+    await send_attributes_report(
+        zha_gateway,
+        cluster,
+        {
+            WCAttrs.current_position_lift_percentage.id: 40,
+            WCAttrs.current_position_tilt_percentage.id: 30,
+        },
+    )
+    assert entity.state.current_position == 60
+    assert entity.state.current_tilt_position == 70
+
+    # and becomes unknown again when the cover reports 0xFF
+    await send_attributes_report(
+        zha_gateway,
+        cluster,
+        {
+            WCAttrs.current_position_lift_percentage.id: 0xFF,
+            WCAttrs.current_position_tilt_percentage.id: 0xFF,
+        },
+    )
+    assert entity.state.current_position is None
+    assert entity.state.current_tilt_position is None
+
+    # moving a cover with an unknown position still sends the command
+    with patch("zigpy.zcl.Cluster.request", return_value=[0x05, zcl_f.Status.SUCCESS]):
+        await entity.async_set_cover_position(position=50)
+        await zha_gateway.async_block_till_done()
+        assert cluster.request.call_count == 1
+        assert cluster.request.call_args[0][3] == 50
+
+        await entity.async_set_cover_tilt_position(tilt_position=20)
+        await zha_gateway.async_block_till_done()
+        assert cluster.request.call_count == 2
+        assert cluster.request.call_args[0][3] == 80
+
+
 async def test_cover_failures(zha_gateway: Gateway) -> None:
     """Test ZHA cover platform failure cases."""
 
