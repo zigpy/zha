@@ -452,16 +452,20 @@ class Cover(BaseCover, ZclPlatformEntity):
             self._tilt_position_history,
         )
 
-        # Clear transition if the cover axis is not moving, else update the timer
-        if self._lift_state not in (CoverState.OPENING, CoverState.CLOSING):
+        # Clear transition if the cover axis is not moving, else update the timer.
+        # An axis with an unknown position (state None) keeps a running transition
+        # until its timer runs out: the direction shows once a position is reported.
+        if self._lift_state in (CoverState.OPENING, CoverState.CLOSING):
+            if is_lift_update:
+                self._start_lift_transition(is_position_update=True)
+        elif self._lift_state is not None or self._lift_transition_timer is None:
             self._clear_lift_transition()
-        elif is_lift_update:
-            self._start_lift_transition(is_position_update=True)
 
-        if self._tilt_state not in (CoverState.OPENING, CoverState.CLOSING):
+        if self._tilt_state in (CoverState.OPENING, CoverState.CLOSING):
+            if is_tilt_update:
+                self._start_tilt_transition(is_position_update=True)
+        elif self._tilt_state is not None or self._tilt_transition_timer is None:
             self._clear_tilt_transition()
-        elif is_tilt_update:
-            self._start_tilt_transition(is_position_update=True)
 
         # Keep the last direction if either axis is still moving
         if (
