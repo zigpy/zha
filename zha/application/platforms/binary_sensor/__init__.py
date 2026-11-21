@@ -499,6 +499,13 @@ class FrostLock(BinarySensor):
         manufacturers=frozenset({"_TZE200_htnnfasr"}),
     )
 
+    @staticmethod
+    def parse(value: bool | int) -> bool:
+        """Parse the raw attribute into a bool state."""
+        # The attribute is True while the frost guard is active and irrigation is
+        # locked, but the LOCK device class is on when unlocked
+        return not value
+
 
 @register_entity(IKEA_AIR_PURIFIER_CLUSTER)
 class ReplaceFilter(BinarySensor):
