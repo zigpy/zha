@@ -222,6 +222,55 @@ async def test_alarm_control_panel(
     assert "Invalid code supplied to IAS ACE" in caplog.text
 
 
+@patch(
+    "zigpy.zcl.clusters.security.IasAce.client_command",
+    new=AsyncMock(return_value=[sentinel.data, zcl_f.Status.SUCCESS]),
+)
+async def test_alarm_control_panel_responses_carry_request_tsn(
+    zha_gateway: Gateway,
+) -> None:
+    """Arm Response and Get Panel Status Response reuse the request's TSN (ZCL 2.4.1.3)."""
+    zigpy_device: ZigbeeDevice = await zigpy_device_from_json(
+        zha_gateway.application_controller,
+        "tests/data/devices/frient-a-s-kepzb-110-0x00020005.json",
+    )
+    zha_device: Device = await join_zigpy_device(zha_gateway, zigpy_device)
+    cluster: security.IasAce = zigpy_device.endpoints[44].out_clusters[
+        security.IasAce.cluster_id
+    ]
+    alarm_entity: AlarmControlPanel = zha_device.platform_entities.get(
+        (
+            Platform.ALARM_CONTROL_PANEL,
+            f"{zigpy_device.ieee}-44-{security.IasAce.cluster_id}",
+        )
+    )
+    arm_response_id = security.IasAce.ClientCommandDefs.arm_response.id
+    panel_status_response_id = (
+        security.IasAce.ClientCommandDefs.panel_status_response.id
+    )
+
+    # Arm from the keypad with TSN 0x42
+    cluster.client_command.reset_mock()
+    cluster.listener_event(
+        "cluster_command", 0x42, 0x00, [security.IasAce.ArmMode.Arm_All_Zones, "", 0]
+    )
+    await zha_gateway.async_block_till_done()
+    assert alarm_entity.state.alarm_state == AlarmState.ARMED_AWAY
+    (arm_rsp,) = [
+        c for c in cluster.client_command.call_args_list if c.args[0] == arm_response_id
+    ]
+    assert arm_rsp.args[1] == security.IasAce.ArmNotification.All_Zones_Armed
+    assert arm_rsp.kwargs.get("tsn") == 0x42
+
+    # Get Panel Status from the keypad with TSN 0x43
+    cluster.client_command.reset_mock()
+    cluster.listener_event("cluster_command", 0x43, 0x07, [])
+    await zha_gateway.async_block_till_done()
+    (status_rsp,) = cluster.client_command.call_args_list
+    assert status_rsp.args[0] == panel_status_response_id
+    assert status_rsp.kwargs.get("tsn") == 0x43
+
+
 async def reset_alarm_panel(
     zha_gateway: Gateway,
     cluster: security.IasAce,
