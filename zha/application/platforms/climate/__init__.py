@@ -236,6 +236,9 @@ class Thermostat(BaseThermostat, ZclPlatformEntity):
     _attr_translation_key: str = "thermostat"
     _enable_turn_on_off_backwards_compatibility = False
 
+    # Preset for each value of a manufacturer specific `operation_preset` attribute
+    _operation_presets: dict[int, Preset | str] = {}
+
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({ThermostatCluster.cluster_id}),
         optional_server_clusters=frozenset({FanCluster.cluster_id}),
@@ -385,7 +388,6 @@ class Thermostat(BaseThermostat, ZclPlatformEntity):
             **kwargs,
             legacy_discovery_unique_id=legacy_discovery_unique_id,
         )
-        self._preset: Preset | str = Preset.NONE
         self._presets: list[Preset | str] = []
 
         self._cluster = endpoint.zigpy_endpoint.in_clusters[
@@ -394,6 +396,17 @@ class Thermostat(BaseThermostat, ZclPlatformEntity):
         self._fan_cluster = endpoint.zigpy_endpoint.in_clusters.get(
             FanCluster.cluster_id
         )
+
+        # The preset of a thermostat that has one is in the attribute cache, which
+        # zigpy restores on startup: take it from there instead of starting at none
+        self._preset: Preset | str = Preset.NONE
+        if (
+            self._operation_presets
+            and "operation_preset" in self._cluster.attributes_by_name
+        ):
+            self._preset = self._operation_presets.get(
+                self._cluster.get("operation_preset"), Preset.NONE
+            )
 
         self._supported_features = ClimateEntityFeature(0)
         self.recompute_capabilities()
@@ -809,6 +822,11 @@ class Thermostat(BaseThermostat, ZclPlatformEntity):
         | AttributeWrittenEvent,
     ) -> None:
         """Handle attribute update from device."""
+        if (
+            event.attribute_name == "operation_preset"
+            and event.value in self._operation_presets
+        ):
+            self._preset = self._operation_presets[event.value]
         self.device.gateway.async_create_task(self._handle_attribute_updated(event))
 
     async def _handle_attribute_updated(
@@ -1200,6 +1218,16 @@ class MoesThermostat(Thermostat):
         feature_priority=(PlatformFeatureGroup.THERMOSTAT_FAN, 2),
     )
 
+    _operation_presets = {
+        0: Preset.AWAY,
+        1: Preset.SCHEDULE,
+        2: Preset.NONE,
+        3: Preset.COMFORT,
+        4: Preset.ECO,
+        5: Preset.BOOST,
+        6: Preset.COMPLEX,
+    }
+
     def recompute_capabilities(self) -> None:
         """Recompute capabilities and feature flags."""
         super().recompute_capabilities()
@@ -1218,31 +1246,6 @@ class MoesThermostat(Thermostat):
     def hvac_modes(self) -> list[HVACMode]:
         """Return only the heat mode, because the device can't be turned off."""
         return [HVACMode.HEAT]
-
-    def handle_attribute_updated(
-        self,
-        event: AttributeReadEvent
-        | AttributeReportedEvent
-        | AttributeUpdatedEvent
-        | AttributeWrittenEvent,
-    ) -> None:
-        """Handle attribute update from device."""
-        if event.attribute_name == "operation_preset":
-            if event.value == 0:
-                self._preset = Preset.AWAY
-            if event.value == 1:
-                self._preset = Preset.SCHEDULE
-            if event.value == 2:
-                self._preset = Preset.NONE
-            if event.value == 3:
-                self._preset = Preset.COMFORT
-            if event.value == 4:
-                self._preset = Preset.ECO
-            if event.value == 5:
-                self._preset = Preset.BOOST
-            if event.value == 6:
-                self._preset = Preset.COMPLEX
-        super().handle_attribute_updated(event)
 
     async def async_preset_handler(self, preset: str, enable: bool = False) -> None:
         """Set the preset mode."""
@@ -1287,6 +1290,15 @@ class BecaThermostat(Thermostat):
         feature_priority=(PlatformFeatureGroup.THERMOSTAT_FAN, 2),
     )
 
+    _operation_presets = {
+        0: Preset.AWAY,
+        1: Preset.SCHEDULE,
+        2: Preset.NONE,
+        4: Preset.ECO,
+        5: Preset.BOOST,
+        7: Preset.TEMP_MANUAL,
+    }
+
     def recompute_capabilities(self) -> None:
         """Recompute capabilities and feature flags."""
         super().recompute_capabilities()
@@ -1304,29 +1316,6 @@ class BecaThermostat(Thermostat):
     def hvac_modes(self) -> list[HVACMode]:
         """Return only the heat mode, because the device can't be turned off."""
         return [HVACMode.HEAT]
-
-    def handle_attribute_updated(
-        self,
-        event: AttributeReadEvent
-        | AttributeReportedEvent
-        | AttributeUpdatedEvent
-        | AttributeWrittenEvent,
-    ) -> None:
-        """Handle attribute update from device."""
-        if event.attribute_name == "operation_preset":
-            if event.value == 0:
-                self._preset = Preset.AWAY
-            if event.value == 1:
-                self._preset = Preset.SCHEDULE
-            if event.value == 2:
-                self._preset = Preset.NONE
-            if event.value == 4:
-                self._preset = Preset.ECO
-            if event.value == 5:
-                self._preset = Preset.BOOST
-            if event.value == 7:
-                self._preset = Preset.TEMP_MANUAL
-        super().handle_attribute_updated(event)
 
     async def async_preset_handler(self, preset: str, enable: bool = False) -> None:
         """Set the preset mode."""
@@ -1405,6 +1394,14 @@ class ZONNSMARTThermostat(Thermostat):
         feature_priority=(PlatformFeatureGroup.THERMOSTAT_FAN, 2),
     )
 
+    _operation_presets = {
+        0: Preset.SCHEDULE,
+        1: Preset.NONE,
+        2: PRESET_HOLIDAY,
+        3: PRESET_HOLIDAY,
+        4: PRESET_FROST,
+    }
+
     def recompute_capabilities(self) -> None:
         """Recompute capabilities."""
         super().recompute_capabilities()
@@ -1415,25 +1412,6 @@ class ZONNSMARTThermostat(Thermostat):
             self.PRESET_FROST,
         ]
         self._supported_features |= ClimateEntityFeature.PRESET_MODE
-
-    def handle_attribute_updated(
-        self,
-        event: AttributeReadEvent
-        | AttributeReportedEvent
-        | AttributeUpdatedEvent
-        | AttributeWrittenEvent,
-    ) -> None:
-        """Handle attribute update from device."""
-        if event.attribute_name == "operation_preset":
-            if event.value == 0:
-                self._preset = Preset.SCHEDULE
-            if event.value == 1:
-                self._preset = Preset.NONE
-            if event.value in (2, 3):
-                self._preset = self.PRESET_HOLIDAY
-            if event.value == 4:
-                self._preset = self.PRESET_FROST
-        super().handle_attribute_updated(event)
 
     async def async_preset_handler(self, preset: str, enable: bool = False) -> None:
         """Set the preset mode."""
