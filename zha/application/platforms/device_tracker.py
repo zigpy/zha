@@ -108,10 +108,13 @@ class DeviceScannerEntity(BaseDeviceTracker, ZclPlatformEntity):
         PowerConfiguration.cluster_id: ClusterConfig(
             bind=True,
             attributes={
+                # The battery voltage report is the device's heartbeat: the tracker is
+                # connected only while the device was seen within the keepalive
+                # interval, so it has to be sent more often than that.
                 PowerConfiguration.AttributeDefs.battery_voltage: AttrConfig(
                     read_on_startup=False,
                     reporting=ReportingConfig(
-                        min_interval=3600, max_interval=10800, reportable_change=1
+                        min_interval=45, max_interval=45, reportable_change=1
                     ),
                 ),
                 PowerConfiguration.AttributeDefs.battery_percentage_remaining: AttrConfig(
