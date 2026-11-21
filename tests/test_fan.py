@@ -13,6 +13,7 @@ import zhaquirks
 from zigpy.device import ZigbeeDevice
 from zigpy.exceptions import ZigbeeException
 from zigpy.profiles import zha
+import zigpy.types as zigpy_t
 from zigpy.typing import UNDEFINED
 from zigpy.zcl.clusters import general, hvac
 import zigpy.zcl.foundation as zcl_f
@@ -430,6 +431,45 @@ async def test_zha_group_fan_entity_failure_state(
         assert len(group_fan_cluster.write_attributes.mock_calls) == 1
         assert group_fan_cluster.write_attributes.call_args[0][0] == {"fan_mode": 2}
         assert "Could not set fan mode" in caplog.text
+
+
+async def test_zha_group_fan_entity_unmocked_write(
+    zha_gateway: Gateway,
+) -> None:
+    """Test that a fan group write goes out as a multicast without raising."""
+    device_fan_1 = await device_fan_1_mock(zha_gateway)
+    device_fan_2 = await device_fan_2_mock(zha_gateway)
+    members = [
+        GroupMemberReference(ieee=device_fan_1.ieee, endpoint_id=1),
+        GroupMemberReference(ieee=device_fan_2.ieee, endpoint_id=1),
+    ]
+    zha_group: Group = await zha_gateway.async_create_zigpy_group("Test Group", members)
+    await zha_gateway.async_block_till_done()
+
+    entity: GroupEntity = get_group_entity(zha_group, platform=Platform.FAN)
+    app = zha_gateway.application_controller
+
+    # The group cluster's `write_attributes` is not mocked: the real zigpy write path
+    # runs, with the group's multicast reply
+    with patch.object(app, "send_packet", new=AsyncMock()) as send_packet:
+        await async_set_percentage(zha_gateway, entity, percentage=100)
+        await async_set_preset_mode(zha_gateway, entity, preset_mode=PRESET_MODE_AUTO)
+        await async_turn_off(zha_gateway, entity)
+
+    assert send_packet.await_count == 3
+    for packet_call, fan_mode in zip(
+        send_packet.await_args_list,
+        (hvac.Fan.FanMode.High, hvac.Fan.FanMode.Auto, hvac.Fan.FanMode.Off),
+        strict=True,
+    ):
+        packet = packet_call.args[0]
+        assert packet.dst.addr_mode == zigpy_t.AddrMode.Group
+        assert packet.dst.address == zha_group.group_id
+        assert packet.cluster_id == hvac.Fan.cluster_id
+        # Write Attributes, attribute 0x0000 (fan_mode), enum8, the new mode
+        assert packet.data.serialize()[2:] == bytes(
+            [zcl_f.GeneralCommand.Write_Attributes, 0x00, 0x00, 0x30, fan_mode]
+        )
 
 
 @pytest.mark.parametrize(
