@@ -1070,6 +1070,81 @@ async def test_set_temperature_heat_cool(
     }
 
 
+@pytest.mark.parametrize("is_away", [False, True])
+async def test_set_temperature_heat_cool_keeps_deadband(
+    zha_gateway: Gateway,
+    is_away: bool,
+) -> None:
+    """Moving the range up must not violate the deadband between the setpoints.
+
+    A thermostat answers INVALID_VALUE to a setpoint write that would bring the
+    heating and cooling setpoints closer than MinSetpointDeadBand (ZCL R8 6.3.2.2.2.2).
+    """
+    device_climate = await device_climate_mock(
+        zha_gateway,
+        CLIMATE_SINOPE,
+        {
+            "occupied_cooling_setpoint": 2500,
+            "occupied_heating_setpoint": 2000,
+            "system_mode": Thermostat.SystemMode.Auto,
+            "unoccupied_heating_setpoint": 2000,
+            "unoccupied_cooling_setpoint": 2500,
+        },
+        manuf=MANUF_SINOPE,
+        quirk=zhaquirks.sinope.thermostat.SinopeTechnologiesThermostat,
+    )
+    thrm_cluster = device_climate.device.endpoints[1].thermostat
+    entity: ThermostatEntity = get_entity(
+        device_climate, platform=Platform.CLIMATE, entity_type=ThermostatEntity
+    )
+    if is_away:
+        await entity.async_set_preset_mode("away")
+        await zha_gateway.async_block_till_done()
+    prefix = "unoccupied" if is_away else "occupied"
+    heat_attr = f"{prefix}_heating_setpoint"
+    cool_attr = f"{prefix}_cooling_setpoint"
+    deadband = 250  # MinSetpointDeadBand default, 2.5 °C
+
+    async def write_attributes(attributes, manufacturer=None):
+        records = []
+        for name, value in attributes.items():
+            new = {
+                heat_attr: thrm_cluster.get(heat_attr),
+                cool_attr: thrm_cluster.get(cool_attr),
+                name: value,
+            }
+            attr_id = thrm_cluster.find_attribute(name).id
+            if new[cool_attr] - new[heat_attr] < deadband:
+                status = zcl_f.Status.INVALID_VALUE
+            else:
+                status = zcl_f.Status.SUCCESS
+                thrm_cluster.update_attribute(attr_id, value)
+            records.append(zcl_f.WriteAttributesStatusRecord(status, attr_id))
+        return [records]
+
+    thrm_cluster.write_attributes.reset_mock()
+    thrm_cluster.write_attributes.side_effect = write_attributes
+
+    # 20-25 °C -> 26-29 °C: the new heating setpoint is above the current cooling one
+    await entity.async_set_temperature(target_temp_low=26, target_temp_high=29)
+    await zha_gateway.async_block_till_done()
+    assert entity.state.target_temperature_low == 26.0
+    assert entity.state.target_temperature_high == 29.0
+
+    # and back down: 26-29 °C -> 18-22 °C
+    await entity.async_set_temperature(target_temp_low=18, target_temp_high=22)
+    await zha_gateway.async_block_till_done()
+    assert entity.state.target_temperature_low == 18.0
+    assert entity.state.target_temperature_high == 22.0
+
+    assert [c.args[0] for c in thrm_cluster.write_attributes.call_args_list] == [
+        {cool_attr: 2900},
+        {heat_attr: 2600},
+        {heat_attr: 1800},
+        {cool_attr: 2200},
+    ]
+
+
 async def test_set_temperature_heat(
     zha_gateway: Gateway,
 ):
