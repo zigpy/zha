@@ -198,7 +198,14 @@ class AlarmControlPanel(BaseAlarmControlPanel, ZclPlatformEntity):
         self.debug(
             "received command %s", self._cluster.server_commands[command_id].name
         )
-        self._command_map[command_id](*args)
+        if command_id in (
+            AceCluster.ServerCommandDefs.arm.id,
+            AceCluster.ServerCommandDefs.get_panel_status.id,
+        ):
+            # Responses carry the TSN of the request (ZCL R8 2.4.1.3)
+            self._command_map[command_id](*args, tsn=tsn)
+        else:
+            self._command_map[command_id](*args)
 
     def _emit_zha_event(self, command: str, args: list | dict) -> None:
         """Relay a cluster-level zha_event via the endpoint."""
@@ -212,7 +219,9 @@ class AlarmControlPanel(BaseAlarmControlPanel, ZclPlatformEntity):
             }
         )
 
-    def _cmd_arm(self, arm_mode: int, code: str | None, zone_id: int) -> None:
+    def _cmd_arm(
+        self, arm_mode: int, code: str | None, zone_id: int, *, tsn: int | None = None
+    ) -> None:
         """Handle the IAS ACE arm command."""
         mode = AceCluster.ArmMode(arm_mode)
 
@@ -226,8 +235,10 @@ class AlarmControlPanel(BaseAlarmControlPanel, ZclPlatformEntity):
             },
         )
 
-        zigbee_reply = self._arm_map[mode](code)
-        self._device.gateway.async_create_task(zigbee_reply)
+        arm_notification = self._arm_map[mode](code)
+        self._device.gateway.async_create_task(
+            self._cluster.arm_response(arm_notification, tsn=tsn)
+        )
 
         if self.invalid_tries >= self.max_invalid_tries:
             self.alarm_status = AceCluster.AlarmStatus.Emergency
@@ -241,7 +252,7 @@ class AlarmControlPanel(BaseAlarmControlPanel, ZclPlatformEntity):
             )
         self._emit_panel_status_changed()
 
-    def _disarm(self, code: str):
+    def _disarm(self, code: str) -> ArmNotification:
         """Test the code and disarm the panel if the code is correct."""
         if (
             code != self.panel_code
@@ -249,9 +260,7 @@ class AlarmControlPanel(BaseAlarmControlPanel, ZclPlatformEntity):
         ):
             self.debug("Invalid code supplied to IAS ACE")
             self.invalid_tries += 1
-            zigbee_reply = self._cluster.arm_response(
-                AceCluster.ArmNotification.Invalid_Arm_Disarm_Code
-            )
+            arm_notification = AceCluster.ArmNotification.Invalid_Arm_Disarm_Code
         else:
             self.invalid_tries = 0
             if (
@@ -259,20 +268,16 @@ class AlarmControlPanel(BaseAlarmControlPanel, ZclPlatformEntity):
                 and self.alarm_status == AceCluster.AlarmStatus.No_Alarm
             ):
                 self.debug("IAS ACE already disarmed")
-                zigbee_reply = self._cluster.arm_response(
-                    AceCluster.ArmNotification.Already_Disarmed
-                )
+                arm_notification = AceCluster.ArmNotification.Already_Disarmed
             else:
                 self.debug("Disarming all IAS ACE zones")
-                zigbee_reply = self._cluster.arm_response(
-                    AceCluster.ArmNotification.All_Zones_Disarmed
-                )
+                arm_notification = AceCluster.ArmNotification.All_Zones_Disarmed
 
             self.armed_state = AceCluster.PanelStatus.Panel_Disarmed
             self.alarm_status = AceCluster.AlarmStatus.No_Alarm
-        return zigbee_reply
+        return arm_notification
 
-    def _arm_day(self, code: str):
+    def _arm_day(self, code: str) -> ArmNotification:
         """Arm the panel for day / home zones."""
         return self._handle_arm(
             code,
@@ -280,7 +285,7 @@ class AlarmControlPanel(BaseAlarmControlPanel, ZclPlatformEntity):
             AceCluster.ArmNotification.Only_Day_Home_Zones_Armed,
         )
 
-    def _arm_night(self, code: str):
+    def _arm_night(self, code: str) -> ArmNotification:
         """Arm the panel for night / sleep zones."""
         return self._handle_arm(
             code,
@@ -288,7 +293,7 @@ class AlarmControlPanel(BaseAlarmControlPanel, ZclPlatformEntity):
             AceCluster.ArmNotification.Only_Night_Sleep_Zones_Armed,
         )
 
-    def _arm_away(self, code: str):
+    def _arm_away(self, code: str) -> ArmNotification:
         """Arm the panel for away mode."""
         return self._handle_arm(
             code,
@@ -301,18 +306,15 @@ class AlarmControlPanel(BaseAlarmControlPanel, ZclPlatformEntity):
         code: str,
         panel_status: PanelStatus,
         armed_type: ArmNotification,
-    ):
+    ) -> ArmNotification:
         """Arm the panel with the specified statuses."""
         if self.code_required_arm_actions and code != self.panel_code:
             self.debug("Invalid code supplied to IAS ACE")
-            zigbee_reply = self._cluster.arm_response(
-                AceCluster.ArmNotification.Invalid_Arm_Disarm_Code
-            )
-        else:
-            self.debug("Arming all IAS ACE zones")
-            self.armed_state = panel_status
-            zigbee_reply = self._cluster.arm_response(armed_type)
-        return zigbee_reply
+            return AceCluster.ArmNotification.Invalid_Arm_Disarm_Code
+
+        self.debug("Arming all IAS ACE zones")
+        self.armed_state = panel_status
+        return armed_type
 
     def _bypass(self, zone_list, code) -> None:
         """Handle the IAS ACE bypass command."""
@@ -345,13 +347,14 @@ class AlarmControlPanel(BaseAlarmControlPanel, ZclPlatformEntity):
     def _get_zone_info(self, zone_id):
         """Handle the IAS ACE zone info command."""
 
-    def _send_panel_status_response(self) -> None:
+    def _send_panel_status_response(self, *, tsn: int | None = None) -> None:
         """Handle the IAS ACE panel status response command."""
         response = self._cluster.panel_status_response(
             self.armed_state,
             0x00,
             AceCluster.AudibleNotification.Default_Sound,
             self.alarm_status,
+            tsn=tsn,
         )
         self._device.gateway.async_create_task(response)
 
