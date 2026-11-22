@@ -2,6 +2,7 @@
 
 from unittest.mock import patch
 
+import pytest
 import zigpy.profiles.zha
 from zigpy.zcl.clusters import closures, general
 import zigpy.zcl.foundation as zcl_f
@@ -21,6 +22,7 @@ from zha.application import Platform
 from zha.application.gateway import Gateway
 from zha.application.platforms import PlatformEntity
 from zha.application.platforms.lock.const import STATE_LOCKED, STATE_UNLOCKED
+from zha.exceptions import ZHAException
 
 LOCK_DOOR = 0
 UNLOCK_DOOR = 1
@@ -103,7 +105,8 @@ async def async_lock(
 
     # test unlock failure
     with patch("zigpy.zcl.Cluster.request", return_value=[zcl_f.Status.FAILURE]):
-        await entity.async_unlock()
+        with pytest.raises(ZHAException):
+            await entity.async_unlock()
         await zha_gateway.async_block_till_done()
         assert entity.state.is_locked is True
         assert cluster.request.call_count == 1
@@ -129,7 +132,8 @@ async def async_unlock(
 
     # test lock failure
     with patch("zigpy.zcl.Cluster.request", return_value=[zcl_f.Status.FAILURE]):
-        await entity.async_lock()
+        with pytest.raises(ZHAException):
+            await entity.async_lock()
         await zha_gateway.async_block_till_done()
         assert entity.state.is_locked is False
         assert cluster.request.call_count == 1
@@ -219,3 +223,71 @@ async def test_lock_state_restoration(zha_gateway: Gateway) -> None:
 
     entity.restore_external_state_attributes(state=STATE_UNLOCKED)
     assert entity.state.is_locked is False
+
+
+_LOCK_RESPONSES = closures.DoorLock.ClientCommandDefs
+
+
+@pytest.mark.parametrize(
+    ("method", "args", "response"),
+    [
+        ("async_lock", (), _LOCK_RESPONSES.lock_door_response),
+        ("async_unlock", (), _LOCK_RESPONSES.unlock_door_response),
+        (
+            "async_set_lock_user_code",
+            (3, "13246579"),
+            _LOCK_RESPONSES.set_pin_code_response,
+        ),
+        ("async_clear_lock_user_code", (3,), _LOCK_RESPONSES.clear_pin_code_response),
+        (
+            "async_enable_lock_user_code",
+            (3,),
+            _LOCK_RESPONSES.set_user_status_response,
+        ),
+        (
+            "async_disable_lock_user_code",
+            (3,),
+            _LOCK_RESPONSES.set_user_status_response,
+        ),
+    ],
+)
+async def test_lock_command_failure_raises(
+    zha_gateway: Gateway,
+    method: str,
+    args: tuple,
+    response: zcl_f.ZCLCommandDef,
+) -> None:
+    """A command the lock rejects raises instead of passing as a success."""
+    zigpy_device = create_mock_zigpy_device(zha_gateway, ZIGPY_LOCK)
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
+    entity = get_entity(zha_device, platform=Platform.LOCK)
+
+    # The lock's own response with a failure status
+    with (
+        patch(
+            "zigpy.zcl.Cluster.request",
+            return_value=response.schema(status=zcl_f.Status.FAILURE),
+        ),
+        pytest.raises(ZHAException),
+    ):
+        await getattr(entity, method)(*args)
+
+    # A Default Response with an error status, e.g. when a PIN is required
+    with (
+        patch(
+            "zigpy.zcl.Cluster.request",
+            return_value=zcl_f.DefaultResponse(
+                command_id=response.id, status=zcl_f.Status.NOT_AUTHORIZED
+            ),
+        ),
+        pytest.raises(ZHAException),
+    ):
+        await getattr(entity, method)(*args)
+
+    # Both forms of success pass
+    for success in (
+        response.schema(status=zcl_f.Status.SUCCESS),
+        zcl_f.DefaultResponse(command_id=response.id, status=zcl_f.Status.SUCCESS),
+    ):
+        with patch("zigpy.zcl.Cluster.request", return_value=success):
+            await getattr(entity, method)(*args)
