@@ -31,6 +31,7 @@ from zha.application.platforms import (
     register_entity,
 )
 from zha.application.platforms.lock.const import (
+    RESPONSE_STATUS_REASONS,
     STATE_LOCKED,
     STATE_UNLOCKED,
     VALUE_TO_STATE,
@@ -141,9 +142,15 @@ class DoorLock(BaseLock, ZclPlatformEntity):
         The lock answers with the command's own response, whose first field is the
         status, or with a Default Response when it rejects the command outright.
         """
-        status = result.status if isinstance(result, DefaultResponse) else result[0]
-        if status is not Status.SUCCESS:
-            raise ZHAException(f"Failed to {command}: {status}")
+        if isinstance(result, DefaultResponse):
+            if result.status is not Status.SUCCESS:
+                raise ZHAException(f"Failed to {command}: {result.status.name}")
+            return
+
+        status = int(result[0])
+        if status != Status.SUCCESS:
+            reason = RESPONSE_STATUS_REASONS.get(status, f"status 0x{status:02X}")
+            raise ZHAException(f"Failed to {command}: {reason}")
 
     async def async_lock(self) -> None:
         """Lock the lock."""

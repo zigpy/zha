@@ -284,10 +284,37 @@ async def test_lock_command_failure_raises(
     ):
         await getattr(entity, method)(*args)
 
+    # A rejected lock or unlock leaves the state alone
+    assert entity.state.is_locked is False
+
     # Both forms of success pass
     for success in (
         response.schema(status=zcl_f.Status.SUCCESS),
         zcl_f.DefaultResponse(command_id=response.id, status=zcl_f.Status.SUCCESS),
     ):
+        entity.restore_external_state_attributes(state=None)
         with patch("zigpy.zcl.Cluster.request", return_value=success):
             await getattr(entity, method)(*args)
+        if method == "async_lock":
+            assert entity.state.is_locked is True
+
+
+async def test_set_user_code_failure_reason(zha_gateway: Gateway) -> None:
+    """The lock's set PIN code status values are named in the error."""
+    zigpy_device = create_mock_zigpy_device(zha_gateway, ZIGPY_LOCK)
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
+    entity = get_entity(zha_device, platform=Platform.LOCK)
+
+    # The set PIN code response status is a DoorLock value, not a ZCL status
+    schema = _LOCK_RESPONSES.set_pin_code_response.schema
+    for frame, reason in (
+        (b"\x02", "memory full"),
+        (b"\x03", "duplicate code"),
+        (b"\x7f", "status 0x7F"),
+    ):
+        response, _ = schema.deserialize(frame)
+        with (
+            patch("zigpy.zcl.Cluster.request", return_value=response),
+            pytest.raises(ZHAException, match=f"slot 3: {reason}$"),
+        ):
+            await entity.async_set_lock_user_code(3, "13246579")
