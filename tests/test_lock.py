@@ -262,6 +262,11 @@ async def test_lock_command_failure_raises(
     zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
     entity = get_entity(zha_device, platform=Platform.LOCK)
 
+    # Start from the state a lock or unlock would change
+    start = STATE_UNLOCKED if method == "async_lock" else STATE_LOCKED
+    entity.restore_external_state_attributes(state=start)
+    was_locked = entity.state.is_locked
+
     # The lock's own response with a failure status
     with (
         patch(
@@ -284,19 +289,23 @@ async def test_lock_command_failure_raises(
     ):
         await getattr(entity, method)(*args)
 
-    # A rejected lock or unlock leaves the state alone
-    assert entity.state.is_locked is False
+    # A rejected command leaves the state alone
+    assert entity.state.is_locked is was_locked
 
     # Both forms of success pass
     for success in (
         response.schema(status=zcl_f.Status.SUCCESS),
         zcl_f.DefaultResponse(command_id=response.id, status=zcl_f.Status.SUCCESS),
     ):
-        entity.restore_external_state_attributes(state=None)
+        entity.restore_external_state_attributes(state=start)
         with patch("zigpy.zcl.Cluster.request", return_value=success):
             await getattr(entity, method)(*args)
         if method == "async_lock":
             assert entity.state.is_locked is True
+        elif method == "async_unlock":
+            assert entity.state.is_locked is False
+        else:
+            assert entity.state.is_locked is was_locked
 
 
 async def test_set_user_code_failure_reason(zha_gateway: Gateway) -> None:
