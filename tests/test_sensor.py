@@ -1132,13 +1132,19 @@ async def test_unsupported_attributes_sensor(
         (
             3,
             2340,
-            0.23,
+            23.4,
             UnitOfVolume.CUBIC_FEET,
         ),
         (
             3,
             2360,
-            0.24,
+            23.6,
+            UnitOfVolume.CUBIC_FEET,
+        ),
+        (
+            10,
+            2340,
+            234.0,
             UnitOfVolume.CUBIC_FEET,
         ),
         (
@@ -1245,6 +1251,60 @@ async def test_se_summation_uom(
 
     entity = get_entity(
         zha_device, platform=Platform.SENSOR, qualifier="summation_delivered"
+    )
+
+    assert_state(entity, expected_state, expected_uom)
+
+
+@pytest.mark.parametrize(
+    "raw_uom, raw_value, expected_state, expected_uom",
+    (
+        (0x02, 12345, 12.3, "ft³/h"),
+        (0x03, 12345, 1234.5, "ft³/h"),
+        (0x0A, 12345, 12345.0, "ft³/h"),
+    ),
+)
+async def test_se_demand_uom(
+    zha_gateway: Gateway,
+    raw_uom: int,
+    raw_value: int,
+    expected_state: float,
+    expected_uom: str,
+) -> None:
+    """Test the unit and scale of the smart energy demand sensor."""
+
+    zigpy_device = create_mock_zigpy_device(
+        zha_gateway,
+        {
+            1: {
+                SIG_EP_INPUT: [
+                    smartenergy.Metering.cluster_id,
+                    general.Basic.cluster_id,
+                ],
+                SIG_EP_OUTPUT: [],
+                SIG_EP_TYPE: zigpy.profiles.zha.DeviceType.SIMPLE_SENSOR,
+                SIG_EP_PROFILE: zigpy.profiles.zha.PROFILE_ID,
+            }
+        },
+    )
+    zigpy_device.node_desc.mac_capability_flags |= 0b_0000_0100
+
+    cluster = zigpy_device.endpoints[1].in_clusters[smartenergy.Metering.cluster_id]
+    cluster.PLUGGED_ATTR_READS = {
+        "instantaneous_demand": raw_value,
+        "demand_formatting": 0xF9,
+        "divisor": 1000,
+        "metering_device_type": 0x01,
+        "multiplier": 1,
+        "status": 0x00,
+        "unit_of_measure": raw_uom,
+    }
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
+
+    entity = get_entity(
+        zha_device,
+        platform=Platform.SENSOR,
+        exact_entity_type=sensor.SmartEnergyMetering,
     )
 
     assert_state(entity, expected_state, expected_uom)

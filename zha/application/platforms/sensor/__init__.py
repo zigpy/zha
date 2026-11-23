@@ -2287,11 +2287,11 @@ class SmartEnergyMetering(Sensor):
             device_class=None,  # volume flow rate is not supported yet
         ),
         0x02: SmartEnergyMeteringEntityDescription(
-            native_unit_of_measurement=UnitOfVolumeFlowRate.CUBIC_FEET_PER_MINUTE,
+            native_unit_of_measurement=f"{UnitOfVolume.CUBIC_FEET}/{UnitOfTime.HOURS}",  # cubic feet per hour
             device_class=None,  # volume flow rate is not supported yet
         ),
         0x03: SmartEnergyMeteringEntityDescription(
-            native_unit_of_measurement=UnitOfVolumeFlowRate.CUBIC_METERS_PER_HOUR,
+            native_unit_of_measurement=f"{UnitOfVolume.CUBIC_FEET}/{UnitOfTime.HOURS}",  # ccf/h, shown as cubic feet per hour
             device_class=None,  # volume flow rate is not supported yet
             scale=100,
         ),
@@ -2413,10 +2413,19 @@ class SmartEnergyMetering(Sensor):
     def _divisor(self, value: int | float | None) -> None:
         raise AttributeError("Cannot set divisor directly")
 
+    @property
+    def _scale(self) -> int:
+        """Return the factor from the meter's unit to the entity's unit.
+
+        For example 100 for ccf (hundred cubic feet), shown in cubic feet.
+        """
+        entity_description = getattr(self, "entity_description", None)
+        return entity_description.scale if entity_description is not None else 1
+
     def formatter(self, value: int) -> int | float:
         """Metering formatter."""
         # TODO: improve typing for base class
-        scaled_value = cast(float, super().formatter(value))
+        scaled_value = cast(float, super().formatter(value)) * self._scale
 
         if self._unit_of_measurement == MeteringUnitofMeasure.Kwh_and_Kwh_binary:
             # Zigbee spec power unit is kW, but we show the value in W
@@ -2516,7 +2525,7 @@ class SmartEnergySummation(SmartEnergyMetering):
     def formatter(self, value: int) -> int | float:
         """Metering summation formatter."""
         # TODO: improve typing for base class
-        scaled_value = cast(float, Sensor.formatter(self, value))
+        scaled_value = cast(float, Sensor.formatter(self, value)) * self._scale
 
         if self._unit_of_measurement == MeteringUnitofMeasure.Kwh_and_Kwh_binary:
             return scaled_value
