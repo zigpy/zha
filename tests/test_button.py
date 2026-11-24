@@ -349,11 +349,15 @@ async def test_quirks_write_attr_buttons_uid(zha_gateway: Gateway) -> None:
     assert isinstance(entity_btn_1, WriteAttributeButton)
     assert entity_btn_1.translation_key == "btn_1"
     assert entity_btn_1._unique_id_suffix == "btn_1"
+    assert entity_btn_1.unique_id == f"{zha_device.ieee}-1-btn_1"
+    assert entity_btn_1.unique_id_base == f"{zha_device.ieee}-1"
     assert entity_btn_1._attribute_value == 1
 
     assert isinstance(entity_btn_2, WriteAttributeButton)
     assert entity_btn_2.translation_key == "btn_2"
     assert entity_btn_2._unique_id_suffix == "btn_2"
+    assert entity_btn_2.unique_id == f"{zha_device.ieee}-1-btn_2"
+    assert entity_btn_2.unique_id_base == f"{zha_device.ieee}-1"
     assert entity_btn_2._attribute_value == 2
 
 

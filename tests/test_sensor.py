@@ -14,7 +14,7 @@ from zhaquirks.clusters import CustomCluster
 from zhaquirks.danfoss import thermostat as danfoss_thermostat
 from zhaquirks.device import CustomZigpyDevice
 from zhaquirks.legacy import get_device
-from zigpy.device import Device as ZigpyDevice
+from zigpy.device import ZigbeeDevice
 from zigpy.profiles import zha
 import zigpy.profiles.zha
 import zigpy.types as t
@@ -57,6 +57,7 @@ from zha.units import (
     UnitOfMass,
     UnitOfPressure,
     UnitOfVolume,
+    UnitOfVolumeFlowRate,
 )
 from zha.zigbee.device import Device
 
@@ -65,7 +66,7 @@ EMAttrs = homeautomation.ElectricalMeasurement.AttributeDefs
 
 def elec_measurement_zigpy_device_mock(
     zha_gateway: Gateway,
-) -> ZigpyDevice:
+) -> ZigbeeDevice:
     """Electric Measurement zigpy device."""
 
     zigpy_device = create_mock_zigpy_device(
@@ -105,7 +106,7 @@ def elec_measurement_zigpy_device_mock(
 
 def metering_zigpy_device_mock(
     zha_gateway: Gateway,
-) -> ZigpyDevice:
+) -> ZigbeeDevice:
     """Metering zigpy device."""
 
     zigpy_device = create_mock_zigpy_device(
@@ -281,6 +282,63 @@ async def async_test_smart_energy_summation(
     assert_state(entity, 12.32, "m³")
     assert entity.state.status == "NO_ALARMS"
     assert entity.state.device_type == "Electric Metering"
+
+
+@pytest.mark.parametrize(
+    ("unit_of_measure", "native_unit_of_measurement"),
+    [
+        (0x00, "W"),
+        (0x01, UnitOfVolumeFlowRate.CUBIC_METERS_PER_HOUR),
+        (0x02, UnitOfVolumeFlowRate.CUBIC_FEET_PER_MINUTE),
+        (0x03, UnitOfVolumeFlowRate.CUBIC_METERS_PER_HOUR),
+        (0x04, UnitOfVolumeFlowRate.GALLONS_PER_HOUR),
+        (0x07, UnitOfVolumeFlowRate.LITERS_PER_HOUR),
+    ],
+)
+async def test_smart_energy_metering_instantaneous_demand_device_class(
+    zha_gateway: Gateway,
+    unit_of_measure: int,
+    native_unit_of_measurement: str,
+) -> None:
+    """Test instantaneous demand gets a volume flow rate device class, when supported."""
+    zigpy_device = create_mock_zigpy_device(
+        zha_gateway,
+        {
+            1: {
+                SIG_EP_INPUT: [
+                    smartenergy.Metering.cluster_id,
+                    general.Basic.cluster_id,
+                ],
+                SIG_EP_OUTPUT: [],
+                SIG_EP_TYPE: zigpy.profiles.zha.DeviceType.ON_OFF_SWITCH,
+                SIG_EP_PROFILE: zigpy.profiles.zha.PROFILE_ID,
+            }
+        },
+    )
+    cluster = zigpy_device.endpoints[1].in_clusters[smartenergy.Metering.cluster_id]
+    # this one is mains powered
+    zigpy_device.node_desc.mac_capability_flags |= 0b_0000_0100
+    cluster.PLUGGED_ATTR_READS = {
+        "unit_of_measure": unit_of_measure,
+        "multiplier": 1,
+        "divisor": 1,
+        "metering_device_type": 2,  # water
+    }
+
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
+    entity = get_entity(
+        zha_device,
+        platform=Platform.SENSOR,
+        exact_entity_type=sensor.SmartEnergyMetering,
+    )
+
+    expected_device_class = (
+        SensorDeviceClass.POWER
+        if unit_of_measure == 0x00
+        else SensorDeviceClass.VOLUME_FLOW_RATE
+    )
+    assert entity.state.device_class == expected_device_class
+    assert entity.state.unit == native_unit_of_measurement
 
 
 async def async_test_electrical_measurement(
@@ -1864,7 +1922,7 @@ async def test_device_unavailable_or_disabled_skips_entity_polling(
 
 async def zigpy_device_danfoss_thermostat_mock(
     zha_gateway: Gateway,
-) -> tuple[Device, zigpy.device.Device]:
+) -> tuple[Device, zigpy.device.ZigbeeDevice]:
     """Danfoss thermostat device."""
 
     zigpy_device = create_mock_zigpy_device(
@@ -2238,3 +2296,72 @@ async def test_sonoff_s60_electrical_measurement_reporting(
     assert configured[EMAttrs.active_power] == ReportingConfig(
         min_interval=5, max_interval=900, reportable_change=1
     )
+
+
+async def test_em_poller_skips_multiplier_and_divisor_attributes(
+    zha_gateway: Gateway,
+) -> None:
+    """The EM poller reads the measured values, not their multipliers/divisors."""
+    zigpy_device = await zigpy_device_from_json(
+        zha_gateway.application_controller,
+        "tests/data/devices/sonoff-s60zbtpg-0x00001002.json",
+    )
+    cluster = zigpy_device.endpoints[1].electrical_measurement
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
+
+    scaling_attrs = {
+        "ac_current_divisor",
+        "ac_current_multiplier",
+        "ac_power_divisor",
+        "ac_power_multiplier",
+        "ac_voltage_divisor",
+        "ac_voltage_multiplier",
+    }
+
+    # Multipliers and divisors are still read on startup and configured for reporting
+    startup_reads = {
+        attr for call in cluster.read_attributes.call_args_list for attr in call[0][0]
+    }
+    assert scaling_attrs <= startup_reads
+    configured = cluster.configure_reporting_multiple.call_args.args[0]
+    assert scaling_attrs <= {attr.name for attr in configured}
+
+    poller = get_entity(
+        zha_device,
+        platform=Platform.VIRTUAL,
+        exact_entity_type=sensor.ElectricalMeasurementPoller,
+    )
+
+    cluster.read_attributes.reset_mock()
+    await poller.async_update()
+    await zha_gateway.async_block_till_done()
+
+    # But they are not polled
+    assert len(cluster.read_attributes.call_args_list) == 1
+    polled = set(cluster.read_attributes.call_args_list[0][0][0])
+    assert polled == {"active_power", "rms_current", "rms_voltage"}
+
+
+async def test_em_poller_skips_fallback_multiplier_and_divisor_attributes(
+    zha_gateway: Gateway,
+) -> None:
+    """The fallback `power_multiplier`/`power_divisor` are not polled either."""
+    zigpy_dev = elec_measurement_zigpy_device_mock(zha_gateway)
+    zha_dev = await join_zigpy_device(zha_gateway, zigpy_dev)
+    cluster = zigpy_dev.endpoints[1].electrical_measurement
+
+    poller = get_entity(
+        zha_dev,
+        platform=Platform.VIRTUAL,
+        exact_entity_type=sensor.ElectricalMeasurementPoller,
+    )
+
+    cluster.read_attributes.reset_mock()
+    await poller.async_update()
+    await zha_gateway.async_block_till_done()
+
+    polled = {
+        attr for call in cluster.read_attributes.call_args_list for attr in call[0][0]
+    }
+    assert polled
+    assert not {attr for attr in polled if "multiplier" in attr or "divisor" in attr}

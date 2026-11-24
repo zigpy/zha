@@ -3,7 +3,7 @@
 from typing import Any
 
 import pytest
-from zigpy.device import Device as ZigpyDevice
+from zigpy.device import ZigbeeDevice
 from zigpy.profiles import zha
 import zigpy.types as t
 from zigpy.zcl.clusters.general import Basic, Identify, OnOff
@@ -62,14 +62,14 @@ async def test_async_is_bindable_target(
     zha_gateway: Gateway,  # pylint: disable=unused-argument
 ) -> None:
     """Test zha if a device is a binding target for another device."""
-    zigpy_device: ZigpyDevice = create_mock_zigpy_device(zha_gateway, ZIGPY_DEVICE)
+    zigpy_device: ZigbeeDevice = create_mock_zigpy_device(zha_gateway, ZIGPY_DEVICE)
     zigpy_device.node_desc.mac_capability_flags |= (
         0b_0000_0100  # this one is mains powered
     )
-    zigpy_device_not_bindable: ZigpyDevice = create_mock_zigpy_device(
+    zigpy_device_not_bindable: ZigbeeDevice = create_mock_zigpy_device(
         zha_gateway, ZIGPY_DEVICE_NOT_BINDABLE, ieee=IEEE_GROUPABLE_DEVICE2, nwk=0x2345
     )
-    remote_zigpy_device: ZigpyDevice = create_mock_zigpy_device(
+    remote_zigpy_device: ZigbeeDevice = create_mock_zigpy_device(
         zha_gateway, REMOTE_ZIGPY_DEVICE, ieee=IEEE_GROUPABLE_DEVICE, nwk=0x1234
     )
 
@@ -88,14 +88,14 @@ async def test_get_matched_clusters(
     zha_gateway: Gateway,  # pylint: disable=unused-argument
 ) -> None:
     """Test getting matched clusters for 2 zha devices."""
-    zigpy_device: ZigpyDevice = create_mock_zigpy_device(zha_gateway, ZIGPY_DEVICE)
+    zigpy_device: ZigbeeDevice = create_mock_zigpy_device(zha_gateway, ZIGPY_DEVICE)
     zigpy_device.node_desc.mac_capability_flags |= (
         0b_0000_0100  # this one is mains powered
     )
-    zigpy_device_not_bindable: ZigpyDevice = create_mock_zigpy_device(
+    zigpy_device_not_bindable: ZigbeeDevice = create_mock_zigpy_device(
         zha_gateway, ZIGPY_DEVICE_NOT_BINDABLE, ieee=IEEE_GROUPABLE_DEVICE2, nwk=0x2345
     )
-    remote_zigpy_device: ZigpyDevice = create_mock_zigpy_device(
+    remote_zigpy_device: ZigbeeDevice = create_mock_zigpy_device(
         zha_gateway, REMOTE_ZIGPY_DEVICE, ieee=IEEE_GROUPABLE_DEVICE, nwk=0x1234
     )
     zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
