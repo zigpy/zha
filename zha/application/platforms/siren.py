@@ -39,6 +39,8 @@ if TYPE_CHECKING:
 
 
 DEFAULT_DURATION = 5  # seconds
+# Start warning's Warning Duration: uint16, in seconds (ZCL R8 8.4.2.2.1.1, .5)
+MAX_DURATION = 0xFFFF
 
 ATTR_AVAILABLE_TONES: Final[str] = "available_tones"
 ATTR_DURATION: Final[str] = "duration"
@@ -292,7 +294,7 @@ class AdvancedSiren(BaseZclSiren):
         )
         siren_duration = DEFAULT_DURATION
         if duration is not None:
-            siren_duration = duration
+            siren_duration = min(duration, MAX_DURATION)
         if tone is not None:
             siren_tone = tone
         if volume_level is not None:
@@ -366,7 +368,9 @@ class BasicSiren(BaseZclSiren):
     ) -> None:
         """Turn on siren with fixed tone, level, and strobe."""
         self._cancel_off_listener()
-        siren_duration = duration if duration is not None else DEFAULT_DURATION
+        siren_duration = (
+            min(duration, MAX_DURATION) if duration is not None else DEFAULT_DURATION
+        )
 
         warning = WarningType(
             # some Frient sensors send INVALID_VALUE for EMERGENCY
