@@ -62,6 +62,7 @@ from zha.quirks import (
     GreenPowerQuirkRegistryEntry,
     QuirkRegistryEntry,
 )
+from zha.zigbee.applied_config import AppliedConfigRecorder
 from zha.zigbee.device import (
     BaseDevice,
     Device,
@@ -808,6 +809,13 @@ class Gateway(AsyncUtilMixin, EventBase):
             device.ieee,
             zha_device.status is not DeviceStatus.INITIALIZED,
         )
+
+        # The device joined (again), possibly after a reset: what it acknowledged
+        # before may be gone. Recording must not stop the join.
+        try:
+            AppliedConfigRecorder(device).mark_joined()
+        except Exception:  # pylint: disable=broad-except
+            _LOGGER.exception("Failed to mark configuration records of %s", device.ieee)
 
         if zha_device.status is DeviceStatus.INITIALIZED:
             # ZHA already has an initialized device so either the device was assigned a

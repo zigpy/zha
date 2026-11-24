@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Awaitable, Callable
+import re
 from typing import TYPE_CHECKING, Any, Final
 
 from zigpy.store import DEFAULT_VERSION, DeviceStore, JSONValue, StoredValue
@@ -27,6 +28,14 @@ DEVICE_VALUES_NAMESPACE: Final = "device_values"
 # Its errors propagate to the caller of the entity's write.
 type DeviceValueWriter[T] = Callable[[ZigpyBaseDevice, T], Awaitable[None]]
 
+# Joins the parts of keys built by `store_key`, which no part may contain
+STORE_KEY_SEPARATOR: Final = "/"
+
+# What `store_key` renders an integer part as, which string parts may not look like
+_INT_PART_RE: Final = re.compile(r"0x[0-9a-f]{4,}")
+
+_EUI64_RE: Final = re.compile(r"(?:[0-9a-f]{2}:){7}[0-9a-f]{2}")
+
 
 def get_device_store(zigpy_device: ZigpyBaseDevice) -> DeviceStore | None:
     """Return the device's store, or `None` if there is no store."""
@@ -43,19 +52,32 @@ def store_diagnostics(zigpy_device: ZigpyBaseDevice) -> dict[str, Any]:
     """Return the contents of the device's store for diagnostics, by namespace.
 
     Keys can contain the device's IEEE address (entity restore records are keyed by
-    unique ID). Home Assistant redacts diagnostics by key name only, so the address
-    is replaced here.
+    unique ID) and those of other devices (the destination of a binding). Home
+    Assistant redacts diagnostics by key name only, so addresses are replaced here:
+    the device's own by `<ieee>`, others by `<ieee N>`, numbered in order of
+    appearance so that keys stay distinct.
     """
     store = get_device_store(zigpy_device)
 
     if store is None:
         return {}
 
-    ieee = str(zigpy_device.ieee)
+    replacements = {str(zigpy_device.ieee): "<ieee>"}
+
+    def redact(key: str) -> str:
+        def replace(match: re.Match[str]) -> str:
+            ieee = match.group(0)
+
+            if ieee not in replacements:
+                replacements[ieee] = f"<ieee {len(replacements)}>"
+
+            return replacements[ieee]
+
+        return _EUI64_RE.sub(replace, key)
 
     return {
         namespace.name: {
-            key.replace(ieee, "<ieee>"): {
+            redact(key): {
                 "value": item.value,
                 "version": item.version,
                 "last_updated": item.last_updated.isoformat(),
@@ -109,6 +131,45 @@ def device_value[T](
         version=version,
         migrate=migrate,
     )
+
+
+def store_key(*parts: str | int | None) -> str:
+    """Build a store key from structured parts.
+
+    Every key with more than one part must be built here, never by formatting a
+    string, and every part is rendered so that it decodes back to one value: integers
+    as `0x` and at least four hex digits, `None` as `-`, strings as they are. A string
+    part must be non-empty, must not contain the separator, and must not look like an
+    integer or `None` part, so a string and an integer never render the same. A prefix
+    of whole parts then matches only keys that have those parts (`0x0001/` does not
+    match `0x0010/`).
+    """
+    if not parts:
+        raise ValueError("A store key needs at least one part")
+
+    rendered = []
+
+    for part in parts:
+        if part is None:
+            rendered.append("-")
+        elif isinstance(part, bool):
+            raise TypeError(f"Boolean store key part: {part!r}")
+        elif isinstance(part, int):
+            if part < 0:
+                raise ValueError(f"Negative store key part: {part}")
+
+            rendered.append(f"0x{part:04x}")
+        elif (
+            not part
+            or STORE_KEY_SEPARATOR in part
+            or part == "-"
+            or _INT_PART_RE.fullmatch(part)
+        ):
+            raise ValueError(f"Invalid store key part: {part!r}")
+        else:
+            rendered.append(part)
+
+    return STORE_KEY_SEPARATOR.join(rendered)
 
 
 def entity_state_key(platform: Platform, unique_id: str) -> str:
