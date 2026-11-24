@@ -640,6 +640,24 @@ async def test_green_power_device_left(zha_gateway: Gateway) -> None:
     assert left == [DeviceLeftEvent(ieee=zigpy_gpd.ieee, nwk=zigpy_gpd.nwk)]
 
 
+async def test_green_power_device_configure_after_teardown(
+    zha_gateway: Gateway,
+) -> None:
+    """Test that a removed GPD neither discovers entities nor reports configured."""
+    zigpy_gpd = make_zigpy_gpd(zha_gateway)
+    zha_device = zha_gateway.get_or_create_device(zigpy_gpd)
+
+    configured: list[object] = []
+    zha_device.on_event(ZHA_DEVICE_CONFIGURED_EVENT, configured.append)
+
+    await zha_device.on_remove()
+    await zha_device.async_configure()
+
+    assert not configured
+    assert not zha_device._discovered_entities
+    assert not zha_device._pending_entities
+
+
 async def test_green_power_device_removed(zha_gateway: Gateway) -> None:
     """Test removal of a GPD, from zigpy and via the gateway API."""
     zigpy_gpd = make_zigpy_gpd(zha_gateway)
