@@ -6,7 +6,7 @@ from __future__ import annotations
 
 import asyncio
 from collections import defaultdict
-from collections.abc import Callable, Collection, Iterable, Iterator
+from collections.abc import AsyncIterator, Callable, Collection, Iterable, Iterator
 import contextlib
 import copy
 import dataclasses
@@ -364,6 +364,15 @@ class BaseDevice[ZigpyDeviceT: ZigpyBaseDevice](LogMixin, EventBase):
         # device becoming available again) and both calls would otherwise drain
         # the same pending list and register the same entity objects twice.
         self._entity_lifecycle_lock = asyncio.Lock()
+        # The task currently holding the lock, so a teardown can cancel an
+        # in-flight initialization instead of waiting for its device reads.
+        self._entity_lifecycle_task: asyncio.Task | None = None
+        # Teardowns requested but still waiting for the lock, and whether one has
+        # run (`_init_from_zigpy_device` clears that on a rebuild). Either makes
+        # initialization rounds holding or queued on the lock skip instead of
+        # resurrecting entities on a removed device; see `_teardown_requested`.
+        self._pending_teardowns: int = 0
+        self._torn_down: bool = False
         self._primary_entity: PlatformEntity | None = None
         # All entities discovered for this device, including ones removed by a quirk.
         # Used for aggregating cluster configs so binding/reporting matches the
@@ -394,6 +403,7 @@ class BaseDevice[ZigpyDeviceT: ZigpyBaseDevice](LogMixin, EventBase):
         self._on_remove_callbacks.clear()
         self._pending_entities.clear()
         self._discovered_entities.clear()
+        self._torn_down = False
 
         self._zigpy_device: ZigpyDeviceT = zigpy_device
 
@@ -836,8 +846,12 @@ class BaseDevice[ZigpyDeviceT: ZigpyBaseDevice](LogMixin, EventBase):
         underlying zigpy device.  Emits entity removal events so listeners
         (e.g. HA) can clean up stale entities.
         """
-        await self.async_teardown(emit_entity_events=True)
-        self._init_from_zigpy_device(zigpy_device)
+        await self._acquire_lock_for_teardown()
+        try:
+            await self._async_teardown_locked(emit_entity_events=True)
+            self._init_from_zigpy_device(zigpy_device)
+        finally:
+            self._entity_lifecycle_lock.release()
 
     def emit_reconfigure_done(self) -> None:
         """Emit `DeviceConfiguredEvent`.
@@ -860,6 +874,12 @@ class BaseDevice[ZigpyDeviceT: ZigpyBaseDevice](LogMixin, EventBase):
 
     def _discover_new_entities(self) -> None:
         self._discovered_entities.clear()
+
+        # A configuration that was already past its first await when the
+        # teardown landed must not activate and queue entities nothing drains
+        if self._teardown_requested:
+            self.debug("Device was torn down, skipping entity discovery")
+            return
 
         # Iterate defensively so a failure in any single entity construction
         # does not abort discovery for the rest of the device.
@@ -969,6 +989,20 @@ class BaseDevice[ZigpyDeviceT: ZigpyBaseDevice](LogMixin, EventBase):
 
         self._pending_entities.clear()
 
+        # A teardown was requested meanwhile and is waiting for the lock we hold:
+        # registering these would announce entities on a device that is gone, so
+        # deactivate and drop them here (the teardown then finds them neither
+        # registered nor pending). Reached when the teardown's cancellation landed
+        # in the loop above: `on_remove()` absorbs a cancellation while it waits
+        # for the entity's own tasks, so the round carries on to here.
+        if self._teardown_requested:
+            self.debug(
+                "Device was torn down, dropping %d new entities", len(new_entities)
+            )
+            for entity in new_entities.values():
+                await entity.on_remove()
+            return
+
         # Compute a new primary entity
         self._compute_primary_entity(all_entities.values())
 
@@ -993,7 +1027,11 @@ class BaseDevice[ZigpyDeviceT: ZigpyBaseDevice](LogMixin, EventBase):
         """Recompute all entities for this device."""
         self.debug("Recomputing entities")
 
-        async with self._entity_lifecycle_lock:
+        async with self._entity_lifecycle() as torn_down:
+            if torn_down:
+                self.debug("Device was torn down, skipping entity recomputation")
+                return
+
             entities = list(self._platform_entities.values())
 
             # Remove all entities that are no longer supported
@@ -1016,7 +1054,11 @@ class BaseDevice[ZigpyDeviceT: ZigpyBaseDevice](LogMixin, EventBase):
         """Initialize cluster handlers."""
         self.debug("started initialization")
 
-        async with self._entity_lifecycle_lock:
+        async with self._entity_lifecycle() as torn_down:
+            if torn_down:
+                self.debug("Device was torn down, skipping initialization")
+                return
+
             # We discover prospective entities before initialization
             self._discover_new_entities()
 
@@ -1027,6 +1069,8 @@ class BaseDevice[ZigpyDeviceT: ZigpyBaseDevice](LogMixin, EventBase):
 
             # And add them after. Emit events only on re-initialization, not the first.
             await self._add_pending_entities(emit_event=self._initialized)
+            if self._teardown_requested:
+                return
             self._initialized = True
 
         # Sync the device's firmware version with the first platform entity
@@ -1055,6 +1099,47 @@ class BaseDevice[ZigpyDeviceT: ZigpyBaseDevice](LogMixin, EventBase):
         self.status = DeviceStatus.INITIALIZED
         self.debug("completed initialization")
 
+    @property
+    def _teardown_requested(self) -> bool:
+        """Return whether the device is torn down or a teardown waits for the lock.
+
+        A rebuild clears `_torn_down` while it still holds the lock, so a removal
+        queued behind it must keep counting on its own until it gets the lock.
+        """
+        return self._torn_down or self._pending_teardowns > 0
+
+    @contextlib.asynccontextmanager
+    async def _entity_lifecycle(self) -> AsyncIterator[bool]:
+        """Hold the entity lifecycle lock for an initialization round.
+
+        Records the holding task so `async_teardown` can cancel it, and yields
+        whether the device was torn down in the meantime (the round must then
+        be skipped instead of resurrecting entities on a removed device).
+        """
+        async with self._entity_lifecycle_lock:
+            self._entity_lifecycle_task = asyncio.current_task()
+            try:
+                yield self._teardown_requested
+            finally:
+                self._entity_lifecycle_task = None
+
+    def _request_teardown(self) -> None:
+        """Count a pending teardown and cancel the in-flight initialization round.
+
+        A teardown must not wait for the device reads of a startup poll or an
+        availability refresh (that would stall device removal and shutdown
+        behind request timeouts), and must not let them register entities
+        afterwards either. Cancelling the lock holder ends a round that is still
+        reading; a round already registering absorbs the cancellation in
+        `on_remove()` and drops what it collected instead. The count makes rounds
+        already queued on the lock skip themselves.
+        """
+        self._pending_teardowns += 1
+        task = self._entity_lifecycle_task
+        if task is not None and not task.done() and task is not asyncio.current_task():
+            self.debug("Cancelling in-flight entity initialization %s", task)
+            task.cancel()
+
     async def async_teardown(self, *, emit_entity_events: bool) -> None:
         """Tear down handlers, entities, and endpoints.
 
@@ -1064,6 +1149,26 @@ class BaseDevice[ZigpyDeviceT: ZigpyBaseDevice](LogMixin, EventBase):
                 up.  Shutdown paths pass False to avoid unnecessary traffic.
 
         """
+        await self._acquire_lock_for_teardown()
+        try:
+            await self._async_teardown_locked(emit_entity_events=emit_entity_events)
+        finally:
+            self._entity_lifecycle_lock.release()
+
+    async def _acquire_lock_for_teardown(self) -> None:
+        """Request a teardown and take the entity lifecycle lock for it."""
+        self._request_teardown()
+        try:
+            await self._entity_lifecycle_lock.acquire()
+            self._torn_down = True
+        finally:
+            # A wait cancelled here (e.g. a rejoin cancelling a queued
+            # re-interview task) tore nothing down, so it only drops its count:
+            # rounds run again unless another teardown is still pending
+            self._pending_teardowns -= 1
+
+    async def _async_teardown_locked(self, *, emit_entity_events: bool) -> None:
+        """Tear down with the entity lifecycle lock held."""
         for callback in self._on_remove_callbacks:
             try:
                 callback()
@@ -1443,6 +1548,10 @@ class ZigbeeDevice(BaseDevice[ZigpyDevice]):
 
     async def async_configure(self) -> None:
         """Configure the device."""
+        if self._teardown_requested:
+            self.debug("Device was torn down, skipping configuration")
+            return
+
         self.debug("started configuration")
 
         if hasattr(self._zigpy_device, "apply_custom_configuration"):
@@ -2069,6 +2178,10 @@ class GreenPowerDevice(BaseDevice[ZigpyGreenPowerDevice]):
 
     async def async_configure(self) -> None:
         """Configure the device: a GPD has nothing to bind or report."""
+        if self._teardown_requested:
+            self.debug("Device was torn down, skipping configuration")
+            return
+
         self._discover_new_entities()
         self.emit_reconfigure_done()
 

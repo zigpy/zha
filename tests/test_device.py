@@ -2,10 +2,12 @@
 
 import asyncio
 from collections.abc import Iterator
+import contextlib
 import json
 import logging
 import pathlib
 import time
+from typing import Any
 from unittest import mock
 from unittest.mock import AsyncMock, call, patch
 
@@ -55,7 +57,7 @@ from zha.application.const import (
     UNKNOWN,
 )
 from zha.application.gateway import Gateway
-from zha.application.platforms import EntityCategory, PlatformEntity
+from zha.application.platforms import EntityCategory, PlatformEntity, ZclPlatformEntity
 from zha.application.platforms.binary_sensor import IASZone
 from zha.application.platforms.light import HueLight, Light
 from zha.application.platforms.number import (
@@ -71,6 +73,7 @@ from zha.application.platforms.switch import Switch
 from zha.const import STATE_CHANGED
 from zha.exceptions import ZHAException
 from zha.quirks import DeviceMatch, DeviceRegistry, ModelInfo
+import zha.zigbee.device
 from zha.zigbee.device import (
     ClusterBinding,
     Device,
@@ -2188,10 +2191,10 @@ async def test_reinitialize_emits_events_for_new_entities(
     )
 
 
-async def test_reinitialize_after_on_remove_emits_events(
+async def test_reinitialize_after_rebuild_emits_events(
     zha_gateway: Gateway,
 ) -> None:
-    """Test that re-init after on_remove (all entities cleared) still emits events."""
+    """Test that re-init after a rebuild (all entities cleared) still emits events."""
     zigpy_dev = await zigpy_device_from_json(
         zha_gateway.application_controller,
         "tests/data/devices/ikea-of-sweden-tradfri-bulb-gu10-ws-400lm-0x23095631.json",
@@ -2199,8 +2202,9 @@ async def test_reinitialize_after_on_remove_emits_events(
     zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
     entity_count = len(zha_device.platform_entities)
 
-    # Simulate a full removal, clearing all entities
-    await zha_device.on_remove()
+    # A rebuild after a re-interview clears all entities while the device
+    # stays initialized (after `on_remove()` the device is gone for good)
+    await zha_device.async_rebuild_from_zigpy_device(zigpy_dev)
     assert len(zha_device.platform_entities) == 0
 
     event_listener = mock.Mock()
@@ -2288,6 +2292,387 @@ async def test_entity_recomputation(zha_gateway: Gateway) -> None:
             )
         )
     ]
+
+
+async def _start_initialize_in_registration_step(
+    zha_device: Device,
+) -> tuple[asyncio.Task, Any]:
+    """Start an initialization and return once it registers entities.
+
+    `_add_pending_entities` awaits `entity.on_remove()` for every entity it
+    drops (unsupported, or a duplicate), which suspends while that entity's
+    owned tasks are being cancelled. Give every entity such a task, so the
+    round is held at that point with the entities it is about to register still
+    unregistered: where a concurrent teardown lands in the worst case, on a
+    startup poll or availability refresh of a device that has just joined.
+    """
+    registering = asyncio.Event()
+    original_on_add = PlatformEntity.on_add
+    original_on_remove = PlatformEntity.on_remove
+
+    def on_add_with_task(self: PlatformEntity) -> None:
+        original_on_add(self)
+        self._tracked_tasks.append(asyncio.create_task(asyncio.sleep(3600)))
+
+    async def on_remove_with_signal(self: PlatformEntity) -> None:
+        registering.set()
+        await original_on_remove(self)
+
+    patcher = patch.multiple(
+        PlatformEntity, on_add=on_add_with_task, on_remove=on_remove_with_signal
+    )
+    patcher.start()
+    init_task = asyncio.create_task(zha_device.async_initialize(from_cache=False))
+    await registering.wait()
+    return init_task, patcher
+
+
+async def _start_initialize_in_reads(zha_device: Device) -> tuple[asyncio.Task, Any]:
+    """Start an initialization and return while it waits for its device reads."""
+    reading = asyncio.Event()
+
+    async def blocked_initialize_cluster_configs(*args: Any, **kwargs: Any) -> None:
+        reading.set()
+        await asyncio.Future()
+
+    patcher = patch(
+        "zha.zigbee.device.initialize_cluster_configs",
+        blocked_initialize_cluster_configs,
+    )
+    patcher.start()
+    init_task = asyncio.create_task(zha_device.async_initialize(from_cache=False))
+    await reading.wait()
+    return init_task, patcher
+
+
+async def _unjoined_device(zha_gateway: Gateway) -> Device:
+    zigpy_dev = await zigpy_device_from_json(
+        zha_gateway.application_controller,
+        "tests/data/devices/ikea-of-sweden-tradfri-bulb-gu10-ws-400lm-0x23095631.json",
+    )
+    zha_gateway.application_controller.devices[zigpy_dev.ieee] = zigpy_dev
+    return zha_gateway.get_or_create_device(zigpy_dev)
+
+
+async def test_teardown_cancels_in_flight_initialize(zha_gateway: Gateway) -> None:
+    """Test that a teardown does not let an in-flight initialization add entities.
+
+    Startup mains polling or an availability refresh can be reading from the
+    device while it is removed. The teardown cancels that round instead of
+    waiting for its reads, and a round started afterwards skips itself.
+    """
+    zha_device = await _unjoined_device(zha_gateway)
+
+    init_task, patcher = await _start_initialize_in_reads(zha_device)
+    try:
+        # The removal neither waits for the reads nor lets the round add entities
+        await zha_device.on_remove()
+        with contextlib.suppress(asyncio.CancelledError):
+            await init_task
+    finally:
+        patcher.stop()
+
+    assert not zha_device.platform_entities
+    assert not zha_device._pending_entities
+    assert init_task.cancelled()
+
+    # Rounds started after the teardown skip themselves, and so does a
+    # configuration (which would otherwise activate and queue entities)
+    await zha_device.async_configure()
+    await zha_device.async_initialize(from_cache=False)
+    await zha_device.recompute_entities()
+    assert not zha_device.platform_entities
+    assert not zha_device._pending_entities
+
+
+async def test_teardown_skips_queued_initialize(zha_gateway: Gateway) -> None:
+    """Test that a round already queued on the lock skips once a teardown is requested.
+
+    The lock is FIFO, so without the torn-down mark the queued round would run
+    a full round of device reads ahead of the teardown.
+    """
+    zha_device = await _unjoined_device(zha_gateway)
+    reads = 0
+    original_initialize_cluster_configs = zha.zigbee.device.initialize_cluster_configs
+
+    async def counting_initialize_cluster_configs(*args, **kwargs) -> None:
+        nonlocal reads
+        reads += 1
+        await original_initialize_cluster_configs(*args, **kwargs)
+
+    with patch(
+        "zha.zigbee.device.initialize_cluster_configs",
+        counting_initialize_cluster_configs,
+    ):
+        init_task, patcher = await _start_initialize_in_registration_step(zha_device)
+        try:
+            queued_task = asyncio.create_task(
+                zha_device.async_initialize(from_cache=False)
+            )
+            await asyncio.sleep(0)
+            assert not queued_task.done()
+
+            await zha_device.on_remove()
+            with contextlib.suppress(asyncio.CancelledError):
+                await init_task
+            await queued_task
+        finally:
+            patcher.stop()
+
+    assert reads == 1
+    assert not zha_device.platform_entities
+    assert not zha_device._pending_entities
+
+
+async def test_teardown_during_registration_step(zha_gateway: Gateway) -> None:
+    """Test that a round cancelled while registering entities registers nothing.
+
+    `on_remove()` absorbs a cancellation while it waits for an entity's own
+    tasks, so a round cancelled in its registration step carries on; it must
+    then drop the entities it collected instead of announcing them.
+    """
+    zha_device = await _unjoined_device(zha_gateway)
+
+    init_task, patcher = await _start_initialize_in_registration_step(zha_device)
+    try:
+        await zha_device.on_remove()
+        await init_task
+    finally:
+        patcher.stop()
+
+    assert not init_task.cancelled()
+    assert not zha_device.platform_entities
+    assert not zha_device._pending_entities
+
+
+async def test_teardown_during_started_configure(zha_gateway: Gateway) -> None:
+    """Test that a configuration already past its first await does not queue entities.
+
+    A join's `async_configure()` can be suspended in the quirk's custom
+    configuration when the device is removed; when it resumes it must not
+    activate and queue entities that nothing would drain anymore.
+    """
+    zha_device = await _unjoined_device(zha_gateway)
+    configuring = asyncio.Event()
+    torn_down = asyncio.Event()
+
+    async def apply_custom_configuration() -> None:
+        configuring.set()
+        await torn_down.wait()
+
+    with patch.object(
+        zha_device.device,
+        "apply_custom_configuration",
+        apply_custom_configuration,
+        create=True,
+    ):
+        configure_task = asyncio.create_task(zha_device.async_configure())
+        await configuring.wait()
+
+        await zha_device.on_remove()
+        torn_down.set()
+        await configure_task
+
+    assert not zha_device._discovered_entities
+    assert not zha_device._pending_entities
+    assert not zha_device.platform_entities
+
+
+async def test_cancelled_teardown_wait_lets_rounds_run_again(
+    zha_gateway: Gateway,
+) -> None:
+    """Test that a rebuild cancelled while queued on the lock does not strand the device.
+
+    A rejoin cancels a queued re-interview task; the device must not stay
+    marked torn down with its entities intact and every later round skipped.
+    """
+    zha_device = await _unjoined_device(zha_gateway)
+    registering = asyncio.Event()
+    original_on_remove = PlatformEntity.on_remove
+
+    async def on_remove_swallowing_cancellation(self: PlatformEntity) -> None:
+        registering.set()
+        with contextlib.suppress(asyncio.CancelledError):
+            await asyncio.sleep(0.1)
+        await original_on_remove(self)
+
+    with patch.object(PlatformEntity, "on_remove", on_remove_swallowing_cancellation):
+        init_task = asyncio.create_task(zha_device.async_initialize(from_cache=False))
+        await registering.wait()
+
+        # Queued behind the round, which keeps the lock despite the cancel
+        rebuild_task = asyncio.create_task(
+            zha_device.async_rebuild_from_zigpy_device(zha_device.device)
+        )
+        await asyncio.sleep(0)
+        assert zha_device._teardown_requested
+        rebuild_task.cancel()
+        with pytest.raises(asyncio.CancelledError):
+            await rebuild_task
+
+        assert not zha_device._teardown_requested
+        await init_task
+
+    # The round registered as usual, and later rounds work
+    entities = set(zha_device.platform_entities)
+    assert entities
+    await zha_device.async_initialize(from_cache=False)
+    assert set(zha_device.platform_entities) == entities
+
+
+async def test_rebuild_during_in_flight_initialize(zha_gateway: Gateway) -> None:
+    """Test that a rebuild after a re-interview only ends up with fresh entities.
+
+    An initialization still registering entities of the old zigpy device must
+    not add them after the rebuild, or the re-interview's own initialization
+    drops the fresh ones as duplicates and the stale ones stay registered.
+    """
+    zha_device = await _unjoined_device(zha_gateway)
+
+    # The re-interviewed zigpy device object, same IEEE
+    new_zigpy_dev = await zigpy_device_from_json(
+        zha_gateway.application_controller,
+        "tests/data/devices/ikea-of-sweden-tradfri-bulb-gu10-ws-400lm-0x23095631.json",
+    )
+
+    init_task, patcher = await _start_initialize_in_registration_step(zha_device)
+    try:
+        zha_gateway.application_controller.devices[new_zigpy_dev.ieee] = new_zigpy_dev
+        await zha_device.async_rebuild_from_zigpy_device(new_zigpy_dev)
+        await init_task
+    finally:
+        patcher.stop()
+
+    assert zha_device.device is new_zigpy_dev
+    assert not zha_device.platform_entities
+
+    # The gateway configures and initializes the rebuilt device next
+    await zha_device.async_configure()
+    await zha_device.async_initialize()
+
+    # Device-bound entities (RSSI, LQI) have no cluster; every ZCL entity must be
+    # backed by a cluster of the new zigpy device
+    zcl_entities = [
+        entity
+        for entity in zha_device.platform_entities.values()
+        if isinstance(entity, ZclPlatformEntity)
+    ]
+    assert zcl_entities
+    assert all(
+        entity.cluster.endpoint.device is new_zigpy_dev for entity in zcl_entities
+    )
+
+
+async def test_removal_queued_behind_rebuild_skips_queued_round(
+    zha_gateway: Gateway,
+) -> None:
+    """Test that a finished rebuild does not let a round run ahead of a queued removal.
+
+    A rebuild clears the torn-down mark while it still holds the lock. A round
+    queued on the lock ahead of a removal requested meanwhile must still skip,
+    rather than read from and register entities on the removed device.
+    """
+    zha_device = await _unjoined_device(zha_gateway)
+    await zha_device.async_initialize(from_cache=True)
+    assert zha_device.platform_entities
+
+    new_zigpy_dev = await zigpy_device_from_json(
+        zha_gateway.application_controller,
+        "tests/data/devices/ikea-of-sweden-tradfri-bulb-gu10-ws-400lm-0x23095631.json",
+    )
+    zha_gateway.application_controller.devices[new_zigpy_dev.ieee] = new_zigpy_dev
+
+    removing = asyncio.Event()
+    resume = asyncio.Event()
+    original_on_remove = PlatformEntity.on_remove
+    reads = 0
+
+    async def on_remove_held(self: PlatformEntity) -> None:
+        removing.set()
+        await resume.wait()
+        await original_on_remove(self)
+
+    async def counting_initialize_cluster_configs(*args: Any, **kwargs: Any) -> None:
+        nonlocal reads
+        reads += 1
+
+    with (
+        patch.object(PlatformEntity, "on_remove", on_remove_held),
+        patch(
+            "zha.zigbee.device.initialize_cluster_configs",
+            counting_initialize_cluster_configs,
+        ),
+    ):
+        rebuild_task = asyncio.create_task(
+            zha_device.async_rebuild_from_zigpy_device(new_zigpy_dev)
+        )
+        await removing.wait()
+
+        # Queued on the lock held by the rebuild: a round, then the removal
+        queued_task = asyncio.create_task(zha_device.async_initialize(from_cache=False))
+        await asyncio.sleep(0)
+        removal_task = asyncio.create_task(zha_device.on_remove())
+        await asyncio.sleep(0)
+
+        resume.set()
+        await rebuild_task
+        await queued_task
+        await removal_task
+
+    assert reads == 0
+    assert not zha_device.platform_entities
+    assert not zha_device._pending_entities
+    assert zha_device._torn_down
+
+
+async def test_rejoin_during_rebuild_teardown(zha_gateway: Gateway) -> None:
+    """Test that a rejoin cancelling a rebuild mid-teardown does not strand the device.
+
+    A rejoin cancels the re-interview task, which may be waiting in an entity's
+    `on_remove()` for that entity's own tasks. The teardown must still finish and
+    the device be rebuilt, rather than be left marked torn down with part of its
+    entities removed and every later round skipped.
+    """
+    zigpy_dev = await zigpy_device_from_json(
+        zha_gateway.application_controller,
+        "tests/data/devices/ikea-of-sweden-tradfri-bulb-gu10-ws-400lm-0x23095631.json",
+    )
+    original_on_add = PlatformEntity.on_add
+
+    def on_add_with_task(self: PlatformEntity) -> None:
+        original_on_add(self)
+        self._tracked_tasks.append(asyncio.create_task(asyncio.sleep(3600)))
+
+    # Every entity owns a task, so the teardown waits in each `on_remove()`
+    with patch.object(PlatformEntity, "on_add", on_add_with_task):
+        zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
+    entity_count = len(zha_device.platform_entities)
+    assert entity_count
+
+    new_zigpy_dev = await zigpy_device_from_json(
+        zha_gateway.application_controller,
+        "tests/data/devices/ikea-of-sweden-tradfri-bulb-gu10-ws-400lm-0x23095631.json",
+    )
+    zha_gateway.application_controller.devices[new_zigpy_dev.ieee] = new_zigpy_dev
+
+    removing = asyncio.Event()
+    original_on_remove = PlatformEntity.on_remove
+
+    async def on_remove_with_signal(self: PlatformEntity) -> None:
+        removing.set()
+        await original_on_remove(self)
+
+    with patch.object(PlatformEntity, "on_remove", on_remove_with_signal):
+        zha_gateway.device_reinterviewed(new_zigpy_dev)
+        await removing.wait()
+
+        # The rejoin cancels the re-interview task while it waits in `on_remove()`
+        zha_gateway.device_initialized(new_zigpy_dev)
+        await zha_gateway.async_block_till_done()
+
+    assert zha_device.device is new_zigpy_dev
+    assert not zha_device._teardown_requested
+    assert len(zha_device.platform_entities) == entity_count
 
 
 async def test_add_entity_duplicate(zha_gateway: Gateway) -> None:
