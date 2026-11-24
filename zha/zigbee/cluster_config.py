@@ -16,7 +16,7 @@ from zha.application.const import (
     ZHA_CLUSTER_BIND_EVENT,
     ZHA_CLUSTER_CONFIGURE_REPORTING_EVENT,
 )
-from zha.application.platforms import AttrConfig, PlatformEntity
+from zha.application.platforms import AttrConfig, ZclPlatformEntity
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
@@ -91,7 +91,7 @@ def aggregate_cluster_configs(
     result: dict[tuple[int, int, bool], AggregatedClusterConfig] = {}
 
     for entity in entities:
-        if not isinstance(entity, PlatformEntity):
+        if not isinstance(entity, ZclPlatformEntity):
             continue
 
         if not entity._server_cluster_config and not entity._client_cluster_config:
@@ -153,10 +153,7 @@ async def configure_cluster_configs(
     per-cluster outcomes.
     """
     # Imported lazily to avoid a circular import.
-    from zha.zigbee.device import (  # noqa: PLC0415
-        ClusterBindEvent,
-        ClusterConfigureReportingEvent,
-    )
+    from zha.zigbee.device import ClusterBindEvent, ClusterConfigureReportingEvent  # noqa: PLC0415
 
     for (endpoint_id, _cluster_id, _is_server), agg in configs.items():
         if agg.bind:

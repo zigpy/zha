@@ -2,7 +2,7 @@
 
 from enum import StrEnum
 
-ATTR_MULTI_PRESS_COUNT = "multi_press_count"
+ATTR_PRESS_COUNT = "press_count"
 
 
 class EventDeviceClass(StrEnum):
@@ -20,11 +20,18 @@ class DoorbellEventType(StrEnum):
 
 
 class ButtonEventType(StrEnum):
-    """Standard event types for the button device class."""
+    """Standard event types for the button device class.
 
+    None of these are mandatory: an entity declares only the types whose meaning
+    holds for every event the device sends under that name.
+    """
+
+    # Physical: the edges of the button
     PRESS_START = "press_start"
     PRESS_END = "press_end"
+
+    # Gesture: what the device concluded
     LONG_PRESS_START = "long_press_start"
     LONG_PRESS_END = "long_press_end"
-    MULTI_PRESS_ONGOING = "multi_press_ongoing"
-    MULTI_PRESS_END = "multi_press_end"
+    SINGLE_PRESS = "single_press"
+    MULTI_PRESS = "multi_press"

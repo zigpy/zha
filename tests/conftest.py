@@ -1,7 +1,7 @@
 """Test configuration for the ZHA component."""
 
 import asyncio
-from collections.abc import Generator
+from collections.abc import AsyncGenerator, Generator
 from contextlib import contextmanager
 import logging
 import os
@@ -12,6 +12,7 @@ from unittest.mock import patch
 
 import looptime
 import pytest
+import pytest_asyncio
 import zhaquirks
 import zhaquirks.legacy
 import zigpy
@@ -56,7 +57,7 @@ class _FakeApp(ControllerApplication):
     async def disconnect(self):
         pass
 
-    async def force_remove(self, dev: zigpy.device.Device):
+    async def force_remove(self, dev: zigpy.device.ZigbeeDevice):
         pass
 
     async def load_network_info(self, *, load_devices: bool = False):
@@ -86,7 +87,7 @@ class _FakeApp(ControllerApplication):
 
     async def request(
         self,
-        device: zigpy.device.Device,
+        device: zigpy.device.ZigbeeDevice,
         profile: zigpy.types.uint16_t,
         cluster: zigpy.types.uint16_t,
         src_ep: zigpy.types.uint8_t,
@@ -162,18 +163,18 @@ def expected_lingering_timers() -> bool:
     return False
 
 
-@pytest.fixture(autouse=True)
-def verify_cleanup(
-    event_loop: asyncio.AbstractEventLoop,
+@pytest_asyncio.fixture(autouse=True)
+async def verify_cleanup(
     expected_lingering_tasks: bool,  # pylint: disable=redefined-outer-name
     expected_lingering_timers: bool,  # pylint: disable=redefined-outer-name
-) -> Generator[None, None, None]:
+) -> AsyncGenerator[None, None]:
     """Verify that the test has cleaned up resources correctly."""
+    event_loop = asyncio.get_running_loop()
     threads_before = frozenset(threading.enumerate())
     tasks_before = asyncio.all_tasks(event_loop)
     yield
 
-    event_loop.run_until_complete(event_loop.shutdown_default_executor())
+    await event_loop.shutdown_default_executor()
 
     if len(INSTANCES) >= 2:
         count = len(INSTANCES)
@@ -183,7 +184,12 @@ def verify_cleanup(
 
     # Warn and clean-up lingering tasks and timers
     # before moving on to the next test.
-    tasks = asyncio.all_tasks(event_loop) - tasks_before
+    current_task = asyncio.current_task()
+    tasks = {
+        task
+        for task in asyncio.all_tasks(event_loop) - tasks_before
+        if task is not current_task
+    }
     for task in tasks:
         if expected_lingering_tasks:
             _LOGGER.warning("Lingering task after test %r", task)
@@ -191,7 +197,7 @@ def verify_cleanup(
             pytest.fail(f"Lingering task after test {task!r}")
         task.cancel()
     if tasks:
-        event_loop.run_until_complete(asyncio.wait(tasks))
+        await asyncio.wait(tasks)
 
     for handle in event_loop._scheduled:
         if not handle.cancelled():
@@ -254,7 +260,7 @@ def make_zigpy_app_controller():
     ep.add_input_cluster(Groups.cluster_id)
     ep.profile_id = ZHA_PROFILE_ID
 
-    with patch("zigpy.device.Device.request", return_value=[Status.SUCCESS]):
+    with patch("zigpy.device.ZigbeeDevice.request", return_value=[Status.SUCCESS]):
         yield app
 
 

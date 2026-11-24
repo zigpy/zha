@@ -7,8 +7,8 @@
   "friendly_manufacturer": "CentraLite",
   "friendly_model": "3300",
   "name": "CentraLite 3300",
-  "quirk_applied": false,
-  "quirk_class": "zigpy.device.Device",
+  "quirk_applied": true,
+  "quirk_class": "zhaquirks.centralite.cl_3300S:CentraLite3300SNoEP2",
   "exposes_features": [],
   "manufacturer_code": 4174,
   "power_source": "Battery or Unknown",
@@ -72,12 +72,6 @@
             {
               "id": "0x0060",
               "name": "battery_3_voltage",
-              "zcl_type": "uint8",
-              "unsupported": true
-            },
-            {
-              "id": "0x0021",
-              "name": "battery_percentage_remaining",
               "zcl_type": "uint8",
               "unsupported": true
             },
@@ -297,7 +291,7 @@
         "primary": false,
         "extra_state_attribute_names": [],
         "device_ieee": "ab:cd:ef:12:51:73:e6:7b",
-        "endpoint_id": 1,
+        "endpoint_id": null,
         "available": true,
         "group_id": null,
         "native_value": null,
@@ -320,7 +314,7 @@
         "primary": false,
         "extra_state_attribute_names": [],
         "device_ieee": "ab:cd:ef:12:51:73:e6:7b",
-        "endpoint_id": 1,
+        "endpoint_id": null,
         "available": true,
         "group_id": null,
         "native_value": null,

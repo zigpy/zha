@@ -8,7 +8,7 @@
   "friendly_model": "HK-DIM",
   "name": "Sunricher HK-DIM",
   "quirk_applied": false,
-  "quirk_class": "zigpy.device.Device",
+  "quirk_class": "zigpy.device.ZigbeeDevice",
   "exposes_features": [],
   "manufacturer_code": 4644,
   "power_source": "Mains",
@@ -446,12 +446,6 @@
               "name": "occupancy",
               "zcl_type": "map8",
               "value": 1
-            },
-            {
-              "id": "0x0001",
-              "name": "occupancy_sensor_type_bitmap",
-              "zcl_type": "map8",
-              "value": 0
             },
             {
               "id": "0x0030",
@@ -952,7 +946,7 @@
         "primary": false,
         "extra_state_attribute_names": [],
         "device_ieee": "ab:cd:ef:12:55:c3:5a:e0",
-        "endpoint_id": 1,
+        "endpoint_id": null,
         "available": true,
         "group_id": null,
         "native_value": 232,
@@ -975,7 +969,7 @@
         "primary": false,
         "extra_state_attribute_names": [],
         "device_ieee": "ab:cd:ef:12:55:c3:5a:e0",
-        "endpoint_id": 1,
+        "endpoint_id": null,
         "available": true,
         "group_id": null,
         "native_value": -53,

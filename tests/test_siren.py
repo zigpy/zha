@@ -3,6 +3,7 @@
 import asyncio
 from unittest.mock import patch
 
+import pytest
 from zigpy.const import SIG_EP_PROFILE
 from zigpy.profiles import zha
 from zigpy.zcl.clusters import general, security
@@ -80,7 +81,7 @@ async def test_siren(zha_gateway: Gateway) -> None:
         assert kw["warning"] == 50  # bitmask for default args
         assert kw["warning_duration"] == 5  # duration in seconds
         assert kw["strobe_duty_cycle"] == 0
-        assert kw["stobe_level"] == 2
+        assert kw["strobe_level"] == 2
         cluster.request.reset_mock()
 
     # test that the state has changed to on
@@ -100,7 +101,7 @@ async def test_siren(zha_gateway: Gateway) -> None:
         assert kw["warning"] == 2  # bitmask for default args
         assert kw["warning_duration"] == 5  # duration in seconds
         assert kw["strobe_duty_cycle"] == 0
-        assert kw["stobe_level"] == 2
+        assert kw["strobe_level"] == 2
         cluster.request.reset_mock()
 
     # test that the state has changed to off
@@ -120,7 +121,7 @@ async def test_siren(zha_gateway: Gateway) -> None:
         assert kw["warning"] == 51  # bitmask for specified args
         assert kw["warning_duration"] == 100  # duration in seconds
         assert kw["strobe_duty_cycle"] == 0
-        assert kw["stobe_level"] == 2
+        assert kw["strobe_level"] == 2
         cluster.request.reset_mock()
 
     # test that the state has changed to on
@@ -156,7 +157,7 @@ async def test_basic_siren(zha_gateway: Gateway) -> None:
         assert kw["warning"] == 18  # bitmask for default args
         assert kw["warning_duration"] == 5  # duration in seconds
         assert kw["strobe_duty_cycle"] == 0
-        assert kw["stobe_level"] == 2
+        assert kw["strobe_level"] == 2
         cluster.request.reset_mock()
 
     # test that the state has changed to on
@@ -176,7 +177,7 @@ async def test_basic_siren(zha_gateway: Gateway) -> None:
         assert kw["warning"] == 2  # bitmask for default args
         assert kw["warning_duration"] == 5  # duration in seconds
         assert kw["strobe_duty_cycle"] == 0
-        assert kw["stobe_level"] == 2
+        assert kw["strobe_level"] == 2
         cluster.request.reset_mock()
 
     # test that the state has changed to off
@@ -196,7 +197,7 @@ async def test_basic_siren(zha_gateway: Gateway) -> None:
         assert kw["warning"] == 18  # bitmask for specified args
         assert kw["warning_duration"] == 100  # duration in seconds
         assert kw["strobe_duty_cycle"] == 0
-        assert kw["stobe_level"] == 2
+        assert kw["strobe_level"] == 2
         cluster.request.reset_mock()
 
     # test that the state has changed to on
@@ -226,7 +227,7 @@ async def test_siren_timed_off(zha_gateway: Gateway) -> None:
         assert kw["warning"] == 50  # bitmask for default args
         assert kw["warning_duration"] == 5  # duration in seconds
         assert kw["strobe_duty_cycle"] == 0
-        assert kw["stobe_level"] == 2
+        assert kw["strobe_level"] == 2
         cluster.request.reset_mock()
 
     # test that the state has changed to on
@@ -235,4 +236,82 @@ async def test_siren_timed_off(zha_gateway: Gateway) -> None:
     await asyncio.sleep(6)
 
     # test that the state has changed to off from the timer
+    assert entity.state.is_on is False
+
+
+async def test_siren_squawk(zha_gateway: Gateway) -> None:
+    """Test zha siren squawk."""
+    zha_device, cluster = await siren_mock(zha_gateway)
+    assert cluster is not None
+
+    entity = get_entity(zha_device, platform=Platform.SIREN)
+
+    with patch(
+        "zigpy.zcl.Cluster.request",
+        return_value=mock_coro([0x01, zcl_f.Status.SUCCESS]),
+    ):
+        await entity.async_squawk(mode=1, strobe=1, squawk_level=3)
+        await zha_gateway.async_block_till_done()
+        assert len(cluster.request.mock_calls) == 1
+        assert cluster.request.call_args[0][0] is False
+        assert (
+            cluster.request.call_args[0][1]
+            == security.IasWd.ServerCommandDefs.squawk.id
+        )
+        assert cluster.request.call_args.kwargs["squawk"] == security.Squawk(
+            mode=security.SquawkMode.Disarmed,
+            strobe=security.SquawkStrobe.Strobe,
+            level=security.SquawkLevel.Very_high_level_sound,
+        )
+
+
+@pytest.mark.parametrize("basic", [False, True])
+async def test_siren_failed_turn_on_keeps_off_timer(
+    zha_gateway: Gateway, basic: bool
+) -> None:
+    """Test a failed turn on doesn't leave the siren on forever."""
+    zha_device, _ = await siren_mock(zha_gateway, basic=basic)
+    entity = get_entity(zha_device, platform=Platform.SIREN)
+
+    with patch(
+        "zigpy.zcl.Cluster.request",
+        return_value=mock_coro([0x00, zcl_f.Status.SUCCESS]),
+    ):
+        await entity.async_turn_on(duration=60)
+    assert entity.state.is_on is True
+
+    # a second turn on that fails must not drop the first one's off timer
+    with (
+        patch("zigpy.zcl.Cluster.request", side_effect=asyncio.TimeoutError),
+        pytest.raises(asyncio.TimeoutError),
+    ):
+        await entity.async_turn_on(duration=60)
+    assert entity.state.is_on is True
+
+    await asyncio.sleep(61)
+    assert entity.state.is_on is False
+
+
+@pytest.mark.parametrize("basic", [False, True])
+async def test_siren_overlapping_turn_on(zha_gateway: Gateway, basic: bool) -> None:
+    """Test overlapping turn on calls keep the last call's off timer."""
+    zha_device, _ = await siren_mock(zha_gateway, basic=basic)
+    entity = get_entity(zha_device, platform=Platform.SIREN)
+
+    async def slow_request(*args, **kwargs):
+        await asyncio.sleep(0.1)
+        return [0x00, zcl_f.Status.SUCCESS]
+
+    with patch("zigpy.zcl.Cluster.request", side_effect=slow_request):
+        await asyncio.gather(
+            entity.async_turn_on(duration=5),
+            entity.async_turn_on(duration=60),
+        )
+    assert entity.state.is_on is True
+
+    # the device was last told to sound for 60 seconds
+    await asyncio.sleep(10)
+    assert entity.state.is_on is True
+
+    await asyncio.sleep(51)
     assert entity.state.is_on is False
