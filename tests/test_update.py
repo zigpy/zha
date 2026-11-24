@@ -3,7 +3,7 @@
 from unittest.mock import ANY, AsyncMock, call, patch
 
 import pytest
-from zigpy.device import Device as ZigpyDevice
+from zigpy.device import ZigbeeDevice
 from zigpy.exceptions import DeliveryError
 from zigpy.ota import OtaImagesResult, OtaImageWithMetadata
 import zigpy.ota.image as firmware
@@ -98,7 +98,7 @@ def create_fw_image(
 
 
 def make_packet(
-    zigpy_device: ZigpyDevice,  # pylint: disable=redefined-outer-name
+    zigpy_device: ZigbeeDevice,  # pylint: disable=redefined-outer-name
     cluster: Cluster,
     cmd_name: str,
     **kwargs,
@@ -132,7 +132,7 @@ def make_packet(
 
 async def setup_test_data(
     zha_gateway: Gateway,
-    zigpy_device: ZigpyDevice,
+    zigpy_device: ZigbeeDevice,
 ):
     """Set up test data for the tests."""
     installed_fw_version = 0x12345678
@@ -483,7 +483,7 @@ async def test_firmware_update_raises(zha_gateway: Gateway) -> None:
 
     with (
         patch(
-            "zigpy.device.Device.update_firmware",
+            "zigpy.device.ZigbeeDevice.update_firmware",
             AsyncMock(side_effect=DeliveryError("failed to deliver")),
         ),
         pytest.raises(ZHAException),
@@ -522,7 +522,7 @@ async def test_firmware_update_empty_exception_message(zha_gateway: Gateway) -> 
 
     with (
         patch(
-            "zigpy.device.Device.update_firmware",
+            "zigpy.device.ZigbeeDevice.update_firmware",
             AsyncMock(side_effect=raised),
         ),
         pytest.raises(ZHAException) as exc_info,

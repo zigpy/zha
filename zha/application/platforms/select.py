@@ -36,7 +36,7 @@ from zha.application.platforms import (
     ClusterConfig,
     ClusterMatch,
     EntityCategory,
-    PlatformEntity,
+    ZclPlatformEntity,
     register_entity,
 )
 from zha.application.platforms.const import (
@@ -112,7 +112,7 @@ class BaseSelectEntity(BaseEntity, ABC):
         """Change the selected option."""
 
 
-class SirenDefaultSelectEntity(BaseSelectEntity, PlatformEntity):
+class SirenDefaultSelectEntity(BaseSelectEntity, ZclPlatformEntity):
     """Select entity whose state lives on the AdvancedSiren on the same cluster."""
 
     _attr_entity_category = EntityCategory.CONFIG
@@ -246,7 +246,7 @@ class DefaultStrobeSelectEntity(SirenDefaultSelectEntity):
     )
 
 
-class ZCLEnumSelectEntity(BaseSelectEntity, PlatformEntity):
+class ZCLEnumSelectEntity(BaseSelectEntity, ZclPlatformEntity):
     """Representation of a ZHA ZCL enum select entity."""
 
     _attribute_name: str
@@ -713,29 +713,6 @@ class AqaraT2RelayDecoupledMode(ZCLEnumSelectEntity):
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({T2RelayOppleCluster.cluster_id}),
         models=frozenset({"lumi.switch.acn047"}),
-    )
-
-
-class AqaraFeedingMode(types.enum8):
-    """Feeding mode."""
-
-    Manual = 0x00
-    Schedule = 0x01
-
-
-@register_entity(AQARA_OPPLE_CLUSTER)
-class AqaraPetFeederMode(ZCLEnumSelectEntity):
-    """Representation of an Aqara pet feeder mode configuration entity."""
-
-    _unique_id_suffix = "feeding_mode"
-    _attribute_name = "feeding_mode"
-    _enum = AqaraFeedingMode
-    _attr_translation_key: str = "feeding_mode"
-    _cluster_id = AQARA_OPPLE_CLUSTER
-
-    _cluster_match = ClusterMatch(
-        server_clusters=frozenset({AQARA_OPPLE_CLUSTER}),
-        models=frozenset({"aqara.feeder.acn001"}),
     )
 
 

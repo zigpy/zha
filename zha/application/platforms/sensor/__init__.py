@@ -4,23 +4,27 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 import contextlib
-from dataclasses import dataclass, replace
+from dataclasses import dataclass
 from datetime import date, datetime, timedelta
 import enum
-import functools
 import logging
 import math
 import numbers
 import typing
 from typing import TYPE_CHECKING, Any, cast
+import warnings
 
 from zigpy import types
+from zigpy.profiles.zha import PROFILE_ID as ZHA_PROFILE_ID
+from zigpy.profiles.zll import PROFILE_ID as ZLL_PROFILE_ID
 from zigpy.state import Counter, State
 from zigpy.zcl import (
     AttributeReadEvent,
     AttributeReportedEvent,
     AttributeUpdatedEvent,
     AttributeWrittenEvent,
+    Cluster,
+    ClusterType,
     ReportingConfig,
     foundation,
 )
@@ -59,14 +63,13 @@ from zha.application import Platform
 from zha.application.helpers import safe_read
 from zha.application.platforms import (
     AttrConfig,
-    BaseEntity,
     BaseEntityState,
-    BaseIdentifiers,
     ClusterConfig,
     ClusterMatch,
     EntityCategory,
     PlatformEntity,
     PlatformFeatureGroup,
+    ZclPlatformEntity,
     register_entity,
 )
 from zha.application.platforms.climate.const import HVACAction
@@ -122,7 +125,6 @@ from zha.units import (
     UnitOfElectricPotential,
     UnitOfEnergy,
     UnitOfFrequency,
-    UnitOfMass,
     UnitOfPower,
     UnitOfPressure,
     UnitOfSpeed,
@@ -182,13 +184,6 @@ class DeviceCounterSensorState(BaseEntityState):
     counter_group: str
 
 
-@dataclass(frozen=True, kw_only=True)
-class DeviceCounterSensorIdentifiers(BaseIdentifiers):
-    """Device counter sensor identifiers."""
-
-    device_ieee: str
-
-
 class BaseSensor(PlatformEntity, ABC):
     """Abstract base class for ZHA sensor entities."""
 
@@ -225,7 +220,7 @@ class BaseSensor(PlatformEntity, ABC):
         """Return the current sensor value."""
 
 
-class Sensor(BaseSensor):
+class Sensor(BaseSensor, ZclPlatformEntity):
     """Base ZHA sensor."""
 
     _attribute_name: int | str | None = None
@@ -280,6 +275,15 @@ class Sensor(BaseSensor):
                 self._attr_def = self._cluster.find_attribute(self._attribute_name)
 
         self.recompute_capabilities()
+
+    @property
+    def _scaling_attribute_names(self) -> frozenset[str]:
+        """Return the names of the attributes scaling this sensor's value.
+
+        Cluster pollers skip these: they are read on startup and are expected
+        to be reported when they change.
+        """
+        return frozenset()
 
     def on_add(self) -> None:
         """Run when entity is added."""
@@ -405,7 +409,7 @@ class TimestampSensor(Sensor):
     """Timestamp ZHA sensor."""
 
 
-class DeviceCounterSensor(BaseEntity):
+class DeviceCounterSensor(PlatformEntity):
     """Device counter sensor."""
 
     PLATFORM = Platform.SENSOR
@@ -416,7 +420,7 @@ class DeviceCounterSensor(BaseEntity):
 
     def __init__(
         self,
-        zha_device: Device,
+        device: Device,
         counter_groups: str,
         counter_group: str,
         counter: str,
@@ -424,12 +428,12 @@ class DeviceCounterSensor(BaseEntity):
         """Init this sensor."""
 
         # XXX: ZHA uses the IEEE address of the device passed through `slugify`!
-        slugified_device_id = zha_device.unique_id.replace(":", "-")
+        slugified_device_id = device.unique_id.replace(":", "-")
         super().__init__(
-            unique_id=f"{slugified_device_id}_{counter_groups}_{counter_group}_{counter}"
+            device,
+            unique_id=f"{slugified_device_id}_{counter_groups}_{counter_group}_{counter}",
         )
 
-        self._device: Device = zha_device
         state: State = self._device.gateway.application_controller.state
         self._zigpy_counter: Counter = (
             getattr(state, counter_groups).get(counter_group, {}).get(counter, None)
@@ -438,7 +442,6 @@ class DeviceCounterSensor(BaseEntity):
         self._zigpy_counter_group: str = counter_group
 
         self._attr_fallback_name: str = self._zigpy_counter.name
-        self._always_supported: bool = True
 
         # TODO: why do entities get created with " None" as a name suffix instead of
         # falling back to `fallback_name`? We should be able to provide translation keys
@@ -455,24 +458,11 @@ class DeviceCounterSensor(BaseEntity):
             )
         )
 
-    @functools.cached_property
-    def identifiers(self) -> DeviceCounterSensorIdentifiers:
-        """Return a dict with the information necessary to identify this entity."""
-        return DeviceCounterSensorIdentifiers(
-            **super().identifiers.__dict__, device_ieee=str(self._device.ieee)
-        )
-
     @property
     def state(self) -> DeviceCounterSensorState:
         """Return the state for this sensor."""
-        # `BaseEntity.state` leaves the platform entity fields unset
-        base_state = replace(
-            super().state,
-            available=self.available,
-            device_ieee=self._device.ieee,
-        )
         return DeviceCounterSensorState(
-            **base_state.__dict__,
+            **super().state.__dict__,
             native_value=self._zigpy_counter.value,
             suggested_display_precision=self._attr_suggested_display_precision,
             counter=self._zigpy_counter.name,
@@ -485,16 +475,6 @@ class DeviceCounterSensor(BaseEntity):
     def native_value(self) -> int | None:
         """Return the state of the entity."""
         return self._zigpy_counter.value
-
-    @property
-    def available(self) -> bool:
-        """Return entity availability."""
-        return self._device.available
-
-    @functools.cached_property
-    def device(self) -> Device:
-        """Return the device."""
-        return self._device
 
     def enable(self) -> None:
         """Enable the entity."""
@@ -794,7 +774,9 @@ class Battery(Sensor):
 
     def _is_supported(self) -> bool:
         # XXX: We intentionally ignore the presence of this attribute
-        return PlatformEntity._is_supported(self) and not self.device.is_mains_powered
+        return (
+            ZclPlatformEntity._is_supported(self) and not self.device.is_mains_powered
+        )
 
     @staticmethod
     def formatter(value: int) -> float | None:  # pylint: disable=arguments-differ
@@ -927,6 +909,20 @@ class BaseElectricalMeasurement(Sensor):
     def _divisor(self, value: int | float | None) -> None:
         raise AttributeError("Cannot set divisor directly")
 
+    @property
+    def _scaling_attribute_names(self) -> frozenset[str]:
+        """Return the multiplier and divisor attribute names, incl. fallbacks."""
+        return frozenset(
+            name
+            for name in (
+                self._multiplier_attribute_name,
+                self._multiplier_fallback_attribute_name,
+                self._divisor_attribute_name,
+                self._divisor_fallback_attribute_name,
+            )
+            if name is not None
+        )
+
 
 class AggregatedClusterPoller(VirtualEntity):
     """Polls a cluster on behalf of sibling entities that need updates.
@@ -973,13 +969,17 @@ class AggregatedClusterPoller(VirtualEntity):
             cfg = entity._server_cluster_config.get(self._cluster_id)
             if cfg is None:
                 continue
+            scaling_attrs = entity._scaling_attribute_names
             for attr_def, attr_cfg in cfg.attributes.items():
                 if attr_cfg.reporting is None:
+                    continue
+                attr_name = attr_def if isinstance(attr_def, str) else attr_def.name
+                if attr_name in scaling_attrs:
                     continue
                 if self._cluster.is_attribute_unsupported(attr_def):
                     continue
 
-                attrs.add(attr_def if isinstance(attr_def, str) else attr_def.name)
+                attrs.add(attr_name)
 
         if not attrs:
             return
@@ -2283,20 +2283,20 @@ class SmartEnergyMetering(Sensor):
         ),
         0x01: SmartEnergyMeteringEntityDescription(
             native_unit_of_measurement=UnitOfVolumeFlowRate.CUBIC_METERS_PER_HOUR,
-            device_class=None,  # volume flow rate is not supported yet
+            device_class=SensorDeviceClass.VOLUME_FLOW_RATE,
         ),
         0x02: SmartEnergyMeteringEntityDescription(
             native_unit_of_measurement=UnitOfVolumeFlowRate.CUBIC_FEET_PER_MINUTE,
-            device_class=None,  # volume flow rate is not supported yet
+            device_class=SensorDeviceClass.VOLUME_FLOW_RATE,
         ),
         0x03: SmartEnergyMeteringEntityDescription(
             native_unit_of_measurement=UnitOfVolumeFlowRate.CUBIC_METERS_PER_HOUR,
-            device_class=None,  # volume flow rate is not supported yet
+            device_class=SensorDeviceClass.VOLUME_FLOW_RATE,
             scale=100,
         ),
         0x04: SmartEnergyMeteringEntityDescription(
-            native_unit_of_measurement=f"{UnitOfVolume.GALLONS}/{UnitOfTime.HOURS}",  # US gallons per hour
-            device_class=None,  # volume flow rate is not supported yet
+            native_unit_of_measurement=UnitOfVolumeFlowRate.GALLONS_PER_HOUR,  # US gallons per hour
+            device_class=SensorDeviceClass.VOLUME_FLOW_RATE,
         ),
         0x05: SmartEnergyMeteringEntityDescription(
             native_unit_of_measurement=f"IMP {UnitOfVolume.GALLONS}/{UnitOfTime.HOURS}",  # IMP gallons per hour
@@ -2308,8 +2308,8 @@ class SmartEnergyMetering(Sensor):
             state_class=None,
         ),
         0x07: SmartEnergyMeteringEntityDescription(
-            native_unit_of_measurement=f"l/{UnitOfTime.HOURS}",
-            device_class=None,  # volume flow rate is not supported yet
+            native_unit_of_measurement=UnitOfVolumeFlowRate.LITERS_PER_HOUR,
+            device_class=SensorDeviceClass.VOLUME_FLOW_RATE,
         ),
         0x08: SmartEnergyMeteringEntityDescription(
             native_unit_of_measurement=UnitOfPressure.KPA,
@@ -3087,7 +3087,7 @@ class ThermostatHVACAction(Sensor):
     }
 
     def _is_supported(self) -> bool:
-        return PlatformEntity._is_supported(self)
+        return ZclPlatformEntity._is_supported(self)
 
     @property
     def _pi_heating_demand(self) -> int | None:
@@ -3202,11 +3202,9 @@ class SinopeHVACAction(ThermostatHVACAction):
         return HVACAction.OFF
 
 
-@register_entity(Basic.cluster_id)
-class RSSISensor(Sensor):
+class RSSISensor(BaseSensor):
     """RSSI sensor for a device."""
 
-    # TODO: migrate this away from `PlatformEntity`
     _unique_id_suffix: str = "rssi"
     _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
     _attr_device_class: SensorDeviceClass | None = SensorDeviceClass.SIGNAL_STRENGTH
@@ -3214,20 +3212,55 @@ class RSSISensor(Sensor):
     _attr_entity_category = EntityCategory.DIAGNOSTIC
     _attr_entity_registry_enabled_default = False
     _attr_translation_key: str = "rssi"
-    _cluster_id = Basic.cluster_id
 
-    _cluster_match = ClusterMatch(
-        server_clusters=frozenset({Basic.cluster_id}),
-    )
+    _device: Device
 
-    def __init__(
-        self,
-        endpoint: Endpoint,
-        device: Device,
-        **kwargs: Any,
-    ) -> None:
-        """Init."""
-        super().__init__(endpoint=endpoint, device=device, **kwargs)
+    @property
+    def device(self) -> Device:
+        """Return the device."""
+        return self._device
+
+    @staticmethod
+    def legacy_basic_cluster(device: Device) -> Cluster | None:
+        """Return the Basic cluster the legacy RSSI/LQI unique IDs were derived from."""
+        fallback = None
+        for ep_id, ep in device.device.endpoints.items():
+            if ep_id == 0 or (cluster := ep.in_clusters.get(Basic.cluster_id)) is None:
+                continue
+            if ep.profile_id in (ZHA_PROFILE_ID, ZLL_PROFILE_ID):
+                return cluster
+            fallback = fallback or cluster
+        return fallback
+
+    # TODO: remove once zha-quirks only filters `ZclPlatformEntity` by endpoint/cluster
+    # and HA Core's `websocket_get_groupable_devices` no longer reads `entity.endpoint`
+    @property
+    def endpoint(self) -> Endpoint:
+        """Return the endpoint of the legacy Basic cluster entity, for old quirks."""
+        warnings.warn(
+            f"`{type(self).__name__}.endpoint` is deprecated, device-bound entities"
+            " have no endpoint",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        basic_cluster = self.legacy_basic_cluster(self._device)
+        assert basic_cluster is not None
+        return self._device.endpoints[basic_cluster.endpoint.endpoint_id]
+
+    def targets_cluster(
+        self, cluster_id: int, cluster_type: ClusterType | None = None
+    ) -> bool:
+        """Match the legacy Basic cluster entity, for old quirks."""
+        warnings.warn(
+            f"`{type(self).__name__}.targets_cluster` is deprecated, device-bound"
+            " entities have no cluster",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return cluster_id == Basic.cluster_id and cluster_type in (
+            None,
+            ClusterType.Server,
+        )
 
     def on_add(self) -> None:
         """Run when entity is added."""
@@ -3238,16 +3271,6 @@ class RSSISensor(Sensor):
                 self.update
             )
         )
-
-    def _is_supported(self) -> bool:
-        # This entity is not actually tied to an endpoint or cluster and will always be
-        # supported
-        return True
-
-    def is_supported_in_list(self, entities: list[BaseEntity]) -> bool:
-        """Check if the sensor is supported given the list of entities."""
-        cls = type(self)
-        return not any(type(entity) is cls for entity in entities if entity is not self)
 
     @property
     def native_value(self) -> str | int | float | None:
@@ -3277,20 +3300,13 @@ class RSSISensor(Sensor):
             )
 
 
-@register_entity(Basic.cluster_id)
 class LQISensor(RSSISensor):
     """LQI sensor for a device."""
 
-    # TODO: migrate this away from `PlatformEntity`
     _unique_id_suffix: str = "lqi"
     _attr_device_class = None
     _attr_native_unit_of_measurement = None
     _attr_translation_key = "lqi"
-    _cluster_id = Basic.cluster_id
-
-    _cluster_match = ClusterMatch(
-        server_clusters=frozenset({Basic.cluster_id}),
-    )
 
     @property
     def native_value(self) -> str | int | float | None:
@@ -3312,77 +3328,6 @@ class TimeLeft(Sensor):
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({TUYA_MANUFACTURER_CLUSTER}),
         manufacturers=frozenset({"_TZE200_htnnfasr"}),
-    )
-
-
-class AqaraFeedingSource(types.enum8):
-    """Aqara pet feeder feeding source."""
-
-    Feeder = 0x01
-    HomeAssistant = 0x02
-
-
-@register_entity(AQARA_OPPLE_CLUSTER)
-class AqaraPetFeederLastFeedingSource(EnumSensor):
-    """Sensor that displays the last feeding source of pet feeder."""
-
-    _attribute_name = "last_feeding_source"
-    _unique_id_suffix = "last_feeding_source"
-    _attr_translation_key: str = "last_feeding_source"
-    _enum = AqaraFeedingSource
-    _cluster_id = AQARA_OPPLE_CLUSTER
-
-    _cluster_match = ClusterMatch(
-        server_clusters=frozenset({AQARA_OPPLE_CLUSTER}),
-        models=frozenset({"aqara.feeder.acn001"}),
-    )
-
-
-@register_entity(AQARA_OPPLE_CLUSTER)
-class AqaraPetFeederLastFeedingSize(Sensor):
-    """Sensor that displays the last feeding size of the pet feeder."""
-
-    _attribute_name = "last_feeding_size"
-    _unique_id_suffix = "last_feeding_size"
-    _attr_translation_key: str = "last_feeding_size"
-    _cluster_id = AQARA_OPPLE_CLUSTER
-
-    _cluster_match = ClusterMatch(
-        server_clusters=frozenset({AQARA_OPPLE_CLUSTER}),
-        models=frozenset({"aqara.feeder.acn001"}),
-    )
-
-
-@register_entity(AQARA_OPPLE_CLUSTER)
-class AqaraPetFeederPortionsDispensed(Sensor):
-    """Sensor that displays the number of portions dispensed by the pet feeder."""
-
-    _attribute_name = "portions_dispensed"
-    _unique_id_suffix = "portions_dispensed"
-    _attr_translation_key: str = "portions_dispensed_today"
-    _attr_state_class: SensorStateClass = SensorStateClass.TOTAL_INCREASING
-    _cluster_id = AQARA_OPPLE_CLUSTER
-
-    _cluster_match = ClusterMatch(
-        server_clusters=frozenset({AQARA_OPPLE_CLUSTER}),
-        models=frozenset({"aqara.feeder.acn001"}),
-    )
-
-
-@register_entity(AQARA_OPPLE_CLUSTER)
-class AqaraPetFeederWeightDispensed(Sensor):
-    """Sensor that displays the weight dispensed by the pet feeder."""
-
-    _attribute_name = "weight_dispensed"
-    _unique_id_suffix = "weight_dispensed"
-    _attr_translation_key: str = "weight_dispensed_today"
-    _attr_native_unit_of_measurement = UnitOfMass.GRAMS
-    _attr_state_class: SensorStateClass = SensorStateClass.TOTAL_INCREASING
-    _cluster_id = AQARA_OPPLE_CLUSTER
-
-    _cluster_match = ClusterMatch(
-        server_clusters=frozenset({AQARA_OPPLE_CLUSTER}),
-        models=frozenset({"aqara.feeder.acn001"}),
     )
 
 

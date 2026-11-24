@@ -31,6 +31,7 @@ from zha.application.platforms import (
     EntityCategory,
     PlatformEntity,
     PlatformFeatureGroup,
+    ZclPlatformEntity,
     register_entity,
 )
 from zha.application.platforms.binary_sensor.const import (
@@ -71,7 +72,7 @@ class BaseBinarySensor(PlatformEntity, ABC):
         """Return True if the binary sensor is on."""
 
 
-class BinarySensor(BaseBinarySensor):
+class BinarySensor(BaseBinarySensor, ZclPlatformEntity):
     """ZHA BinarySensor."""
 
     _attr_device_class: BinarySensorDeviceClass | None
@@ -495,21 +496,6 @@ class FrostLock(BinarySensor):
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({TUYA_MANUFACTURER_CLUSTER}),
         manufacturers=frozenset({"_TZE200_htnnfasr"}),
-    )
-
-
-@register_entity(AQARA_OPPLE_CLUSTER)
-class AqaraPetFeederErrorDetected(BinarySensor):
-    """ZHA aqara pet feeder error detected binary sensor."""
-
-    _attribute_name = "error_detected"
-    _unique_id_suffix = "error_detected"
-    _attr_device_class: BinarySensorDeviceClass = BinarySensorDeviceClass.PROBLEM
-    _cluster_id = AQARA_OPPLE_CLUSTER
-
-    _cluster_match = ClusterMatch(
-        server_clusters=frozenset({AQARA_OPPLE_CLUSTER}),
-        models=frozenset({"aqara.feeder.acn001"}),
     )
 
 

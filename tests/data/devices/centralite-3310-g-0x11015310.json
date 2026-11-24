@@ -172,7 +172,7 @@
             {
               "id": "0x0000",
               "name": "measured_value",
-              "zcl_type": "uint16",
+              "zcl_type": "int16",
               "value": 5987
             }
           ]
@@ -282,7 +282,7 @@
         "primary": false,
         "extra_state_attribute_names": [],
         "device_ieee": "ab:cd:ef:12:ef:57:4b:ce",
-        "endpoint_id": 1,
+        "endpoint_id": null,
         "available": true,
         "group_id": null,
         "native_value": 144,
@@ -305,7 +305,7 @@
         "primary": false,
         "extra_state_attribute_names": [],
         "device_ieee": "ab:cd:ef:12:ef:57:4b:ce",
-        "endpoint_id": 1,
+        "endpoint_id": null,
         "available": true,
         "group_id": null,
         "native_value": -64,
