@@ -3,7 +3,9 @@
 # pylint: disable=redefined-outer-name
 
 import asyncio
+import json
 import logging
+import pathlib
 from unittest.mock import AsyncMock, call, patch
 
 import pytest
@@ -27,6 +29,7 @@ from tests.common import (
     group_entity_availability_test,
     join_zigpy_device,
     send_attributes_report,
+    zigpy_device_from_device_data,
 )
 from zha.application import Platform
 from zha.application.gateway import Gateway
@@ -888,3 +891,36 @@ async def test_group_state_ignores_unavailable_members(zha_gateway: Gateway) -> 
     await zha_gateway.async_block_till_done()
     assert entity.state.percentage == 100
     assert entity.state.is_on is True
+
+
+async def test_group_ignores_ikea_fans(zha_gateway: Gateway) -> None:
+    """Test that IKEA air purifier fans don't get a fan group entity."""
+    device_data_text = await asyncio.get_running_loop().run_in_executor(
+        None,
+        pathlib.Path(
+            "tests/data/devices/ikea-of-sweden-starkvind-air-purifier-0x00011001.json"
+        ).read_text,
+    )
+
+    devices: list[Device] = []
+    for ieee in (IEEE_GROUPABLE_DEVICE, IEEE_GROUPABLE_DEVICE2):
+        device_data = json.loads(device_data_text)
+        device_data["ieee"] = ieee
+        zigpy_device = zigpy_device_from_device_data(
+            app=zha_gateway.application_controller, device_data=device_data
+        )
+        devices.append(await join_zigpy_device(zha_gateway, zigpy_device))
+
+    zha_group: Group = await zha_gateway.async_create_zigpy_group(
+        "Test Group",
+        [GroupMemberReference(ieee=device.ieee, endpoint_id=1) for device in devices],
+    )
+    await zha_gateway.async_block_till_done()
+
+    # the fan is controlled through the IKEA cluster, not the `Fan` cluster that the
+    # group entity sends commands to, and the other switches are config entities
+    for device in devices:
+        assert get_entity(device, platform=Platform.FAN).group_member is False
+    for member in zha_group.members:
+        assert member.associated_entities == []
+    assert zha_group.group_entities == {}

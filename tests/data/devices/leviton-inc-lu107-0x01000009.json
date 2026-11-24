@@ -1,0 +1,671 @@
+{
+  "version": 3,
+  "ieee": "ab:cd:ef:12:3d:e2:4b:3c",
+  "nwk": "0xEA78",
+  "manufacturer": "Leviton Inc",
+  "model": "LU107",
+  "friendly_manufacturer": "Leviton Inc",
+  "friendly_model": "LU107",
+  "name": "Leviton Inc LU107",
+  "quirk_applied": true,
+  "quirk_class": "zhaquirks.leviton.dimmer:(LEVITON / ZK700-D0W)",
+  "exposes_features": [],
+  "manufacturer_code": 4098,
+  "power_source": "Mains",
+  "lqi": 168,
+  "rssi": -58,
+  "last_seen": "2026-04-19T20:19:35.449493+00:00",
+  "available": true,
+  "device_type": "Router",
+  "active_coordinator": false,
+  "node_descriptor": {
+    "logical_type": "Router",
+    "complex_descriptor_available": false,
+    "user_descriptor_available": false,
+    "reserved": 0,
+    "aps_flags": 0,
+    "frequency_band": 8,
+    "mac_capability_flags": 142,
+    "manufacturer_code": 4098,
+    "maximum_buffer_size": 82,
+    "maximum_incoming_transfer_size": 82,
+    "server_mask": 10752,
+    "maximum_outgoing_transfer_size": 82,
+    "descriptor_capability_field": 0
+  },
+  "endpoints": {
+    "1": {
+      "profile_id": 260,
+      "device_type": {
+        "name": "DIMMABLE_LIGHT",
+        "id": 257
+      },
+      "in_clusters": [
+        {
+          "cluster_id": "0x0000",
+          "endpoint_attribute": "basic",
+          "attributes": [
+            {
+              "id": "0x0001",
+              "name": "app_version",
+              "zcl_type": "uint8",
+              "value": 0
+            },
+            {
+              "id": "0x0012",
+              "name": "device_enabled",
+              "zcl_type": "bool",
+              "value": 1
+            },
+            {
+              "id": "0x0008",
+              "name": "generic_device_class",
+              "zcl_type": "enum8",
+              "unsupported": true
+            },
+            {
+              "id": "0x0009",
+              "name": "generic_device_type",
+              "zcl_type": "enum8",
+              "unsupported": true
+            },
+            {
+              "id": "0x0004",
+              "name": "manufacturer",
+              "zcl_type": "string",
+              "value": "Leviton Inc"
+            },
+            {
+              "id": "0x0005",
+              "name": "model",
+              "zcl_type": "string",
+              "value": "LU107"
+            },
+            {
+              "id": "0x0007",
+              "name": "power_source",
+              "zcl_type": "enum8",
+              "value": 0
+            },
+            {
+              "id": "0x000d",
+              "name": "serial_number",
+              "zcl_type": "string",
+              "unsupported": true
+            },
+            {
+              "id": "0x0002",
+              "name": "stack_version",
+              "zcl_type": "uint8",
+              "value": 0
+            },
+            {
+              "id": "0x4000",
+              "name": "sw_build_id",
+              "zcl_type": "string",
+              "value": "01.00.0009"
+            },
+            {
+              "id": "0x0000",
+              "name": "zcl_version",
+              "zcl_type": "uint8",
+              "value": 2
+            }
+          ]
+        },
+        {
+          "cluster_id": "0x0003",
+          "endpoint_attribute": "identify",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0004",
+          "endpoint_attribute": "groups",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0005",
+          "endpoint_attribute": "scenes",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0006",
+          "endpoint_attribute": "on_off",
+          "attributes": [
+            {
+              "id": "0x0000",
+              "name": "on_off",
+              "zcl_type": "bool",
+              "value": 1
+            },
+            {
+              "id": "0x4003",
+              "name": "start_up_on_off",
+              "zcl_type": "enum8",
+              "unsupported": true
+            }
+          ]
+        },
+        {
+          "cluster_id": "0x0008",
+          "endpoint_attribute": "level",
+          "attributes": [
+            {
+              "id": "0x0000",
+              "name": "current_level",
+              "zcl_type": "uint8",
+              "value": 122
+            },
+            {
+              "id": "0x0014",
+              "name": "default_move_rate",
+              "zcl_type": "uint8",
+              "unsupported": true
+            },
+            {
+              "id": "0x0005",
+              "name": "min_frequency",
+              "zcl_type": "uint16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0002",
+              "name": "min_level",
+              "zcl_type": "uint8",
+              "unsupported": true
+            },
+            {
+              "id": "0x0013",
+              "name": "off_transition_time",
+              "zcl_type": "uint16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0011",
+              "name": "on_level",
+              "zcl_type": "uint8",
+              "unsupported": true
+            },
+            {
+              "id": "0x0010",
+              "name": "on_off_transition_time",
+              "zcl_type": "uint16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0012",
+              "name": "on_transition_time",
+              "zcl_type": "uint16",
+              "unsupported": true
+            },
+            {
+              "id": "0x4000",
+              "name": "start_up_current_level",
+              "zcl_type": "uint8",
+              "unsupported": true
+            }
+          ]
+        },
+        {
+          "cluster_id": "0x0015",
+          "endpoint_attribute": "commissioning",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0301",
+          "endpoint_attribute": "light_ballast",
+          "attributes": [
+            {
+              "id": "0x0015",
+              "name": "ballast_factor_adjustment",
+              "zcl_type": "uint8",
+              "unsupported": true
+            },
+            {
+              "id": "0x0002",
+              "name": "ballast_status",
+              "zcl_type": "map8",
+              "value": 0
+            },
+            {
+              "id": "0x0014",
+              "name": "intrinsic_ballast_factor",
+              "zcl_type": "uint8",
+              "value": 0
+            },
+            {
+              "id": "0x0030",
+              "name": "lamp_type",
+              "zcl_type": "string",
+              "unsupported": true
+            },
+            {
+              "id": "0x0011",
+              "name": "max_level",
+              "zcl_type": "uint8",
+              "value": 255
+            },
+            {
+              "id": "0x0010",
+              "name": "min_level",
+              "zcl_type": "uint8",
+              "value": 0
+            },
+            {
+              "id": "0x0001",
+              "name": "physical_max_level",
+              "zcl_type": "uint8",
+              "value": 255
+            },
+            {
+              "id": "0x0000",
+              "name": "physical_min_level",
+              "zcl_type": "uint8",
+              "value": 0
+            },
+            {
+              "id": "0x0012",
+              "name": "power_on_level",
+              "zcl_type": "uint8",
+              "value": 120
+            },
+            {
+              "id": "0xfffe",
+              "name": "reporting_status",
+              "zcl_type": "enum8",
+              "unsupported": true
+            }
+          ]
+        },
+        {
+          "cluster_id": "0x8008",
+          "endpoint_attribute": null,
+          "attributes": []
+        },
+        {
+          "cluster_id": "0xfc02",
+          "endpoint_attribute": "manufacturer_specific",
+          "attributes": []
+        }
+      ],
+      "out_clusters": [
+        {
+          "cluster_id": "0x0003",
+          "endpoint_attribute": "identify",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0004",
+          "endpoint_attribute": "groups",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0005",
+          "endpoint_attribute": "scenes",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0006",
+          "endpoint_attribute": "on_off",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0008",
+          "endpoint_attribute": "level",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0019",
+          "endpoint_attribute": "ota",
+          "attributes": [
+            {
+              "id": "0x0002",
+              "name": "current_file_version",
+              "zcl_type": "uint32",
+              "value": 16777225
+            }
+          ]
+        },
+        {
+          "cluster_id": "0x0020",
+          "endpoint_attribute": "poll_control",
+          "attributes": [
+            {
+              "id": "0x0000",
+              "name": "checkin_interval",
+              "zcl_type": "uint32",
+              "unsupported": true
+            },
+            {
+              "id": "0x0004",
+              "name": "checkin_interval_min",
+              "zcl_type": "uint32",
+              "unsupported": true
+            },
+            {
+              "id": "0xfffd",
+              "name": "cluster_revision",
+              "zcl_type": "uint16",
+              "value": 1
+            },
+            {
+              "id": "0x0003",
+              "name": "fast_poll_timeout",
+              "zcl_type": "uint16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0006",
+              "name": "fast_poll_timeout_max",
+              "zcl_type": "uint16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0001",
+              "name": "long_poll_interval",
+              "zcl_type": "uint32",
+              "unsupported": true
+            },
+            {
+              "id": "0x0005",
+              "name": "long_poll_interval_min",
+              "zcl_type": "uint32",
+              "unsupported": true
+            },
+            {
+              "id": "0xfffe",
+              "name": "reporting_status",
+              "zcl_type": "enum8",
+              "unsupported": true
+            },
+            {
+              "id": "0x0002",
+              "name": "short_poll_interval",
+              "zcl_type": "uint16",
+              "unsupported": true
+            }
+          ]
+        },
+        {
+          "cluster_id": "0x0300",
+          "endpoint_attribute": "light_color",
+          "attributes": []
+        }
+      ]
+    }
+  },
+  "original_signature": {
+    "manufacturer": "Leviton Inc",
+    "model": "LU107",
+    "node_desc": {
+      "logical_type": 1,
+      "complex_descriptor_available": 0,
+      "user_descriptor_available": 0,
+      "reserved": 0,
+      "aps_flags": 0,
+      "frequency_band": 8,
+      "mac_capability_flags": 142,
+      "manufacturer_code": 4098,
+      "maximum_buffer_size": 82,
+      "maximum_incoming_transfer_size": 82,
+      "server_mask": 10752,
+      "maximum_outgoing_transfer_size": 82,
+      "descriptor_capability_field": 0
+    },
+    "endpoints": {
+      "1": {
+        "profile_id": "0x0104",
+        "device_type": "0x0101",
+        "input_clusters": [
+          "0x0000",
+          "0x0003",
+          "0x0004",
+          "0x0005",
+          "0x0006",
+          "0x0008",
+          "0x0015",
+          "0x0301",
+          "0x8008",
+          "0xfc02"
+        ],
+        "output_clusters": [
+          "0x0003",
+          "0x0004",
+          "0x0005",
+          "0x0006",
+          "0x0008",
+          "0x0019",
+          "0x0020",
+          "0x0300"
+        ]
+      }
+    }
+  },
+  "zha_lib_entities": {
+    "binary_sensor": [
+      {
+        "fallback_name": null,
+        "unique_id": "ab:cd:ef:12:3d:e2:4b:3c-1-6",
+        "migrate_unique_ids": [],
+        "platform": "binary_sensor",
+        "class_name": "Opening",
+        "translation_key": null,
+        "translation_placeholders": null,
+        "device_class": "opening",
+        "state_class": null,
+        "entity_category": null,
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:3d:e2:4b:3c",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "is_on": false,
+        "attribute_name": "on_off"
+      }
+    ],
+    "button": [
+      {
+        "fallback_name": null,
+        "unique_id": "ab:cd:ef:12:3d:e2:4b:3c-1-3",
+        "migrate_unique_ids": [],
+        "platform": "button",
+        "class_name": "IdentifyButton",
+        "translation_key": null,
+        "translation_placeholders": null,
+        "device_class": "identify",
+        "state_class": null,
+        "entity_category": "diagnostic",
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:3d:e2:4b:3c",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "command": "identify",
+        "args": [
+          5
+        ],
+        "kwargs": {}
+      }
+    ],
+    "light": [
+      {
+        "fallback_name": null,
+        "unique_id": "ab:cd:ef:12:3d:e2:4b:3c-1",
+        "migrate_unique_ids": [],
+        "platform": "light",
+        "class_name": "Light",
+        "translation_key": "light",
+        "translation_placeholders": null,
+        "device_class": null,
+        "state_class": null,
+        "entity_category": null,
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": true,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:3d:e2:4b:3c",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "on": true,
+        "brightness": 122,
+        "xy_color": null,
+        "color_temp": null,
+        "effect_list": [
+          "off"
+        ],
+        "effect": "off",
+        "supported_features": 40,
+        "color_mode": "brightness",
+        "supported_color_modes": [
+          "brightness",
+          "onoff"
+        ],
+        "off_with_transition": false,
+        "off_brightness": null,
+        "min_mireds": 153,
+        "max_mireds": 500
+      }
+    ],
+    "number": [
+      {
+        "fallback_name": null,
+        "unique_id": "ab:cd:ef:12:3d:e2:4b:3c-1-769-ballast_max_level",
+        "migrate_unique_ids": [],
+        "platform": "number",
+        "class_name": "BallastMaxLevel",
+        "translation_key": "maximum_dimming_level",
+        "translation_placeholders": null,
+        "device_class": null,
+        "state_class": null,
+        "entity_category": "config",
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:3d:e2:4b:3c",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "native_value": 255,
+        "mode": "auto",
+        "native_max_value": 254,
+        "native_min_value": 1,
+        "native_step": 1.0,
+        "native_unit_of_measurement": null
+      },
+      {
+        "fallback_name": null,
+        "unique_id": "ab:cd:ef:12:3d:e2:4b:3c-1-769-ballast_min_level",
+        "migrate_unique_ids": [],
+        "platform": "number",
+        "class_name": "BallastMinLevel",
+        "translation_key": "minimum_dimming_level",
+        "translation_placeholders": null,
+        "device_class": null,
+        "state_class": null,
+        "entity_category": "config",
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:3d:e2:4b:3c",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "native_value": 0,
+        "mode": "auto",
+        "native_max_value": 254,
+        "native_min_value": 1,
+        "native_step": 1.0,
+        "native_unit_of_measurement": null
+      }
+    ],
+    "sensor": [
+      {
+        "fallback_name": null,
+        "unique_id": "ab:cd:ef:12:3d:e2:4b:3c-1-0-lqi",
+        "migrate_unique_ids": [],
+        "platform": "sensor",
+        "class_name": "LQISensor",
+        "translation_key": "lqi",
+        "translation_placeholders": null,
+        "device_class": null,
+        "state_class": "measurement",
+        "entity_category": "diagnostic",
+        "entity_registry_enabled_default": false,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:3d:e2:4b:3c",
+        "endpoint_id": null,
+        "available": true,
+        "group_id": null,
+        "native_value": 168,
+        "suggested_display_precision": null,
+        "unit": null
+      },
+      {
+        "fallback_name": null,
+        "unique_id": "ab:cd:ef:12:3d:e2:4b:3c-1-0-rssi",
+        "migrate_unique_ids": [],
+        "platform": "sensor",
+        "class_name": "RSSISensor",
+        "translation_key": "rssi",
+        "translation_placeholders": null,
+        "device_class": "signal_strength",
+        "state_class": "measurement",
+        "entity_category": "diagnostic",
+        "entity_registry_enabled_default": false,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:3d:e2:4b:3c",
+        "endpoint_id": null,
+        "available": true,
+        "group_id": null,
+        "native_value": -58,
+        "suggested_display_precision": null,
+        "unit": "dBm"
+      }
+    ],
+    "update": [
+      {
+        "fallback_name": null,
+        "unique_id": "ab:cd:ef:12:3d:e2:4b:3c-1-25-firmware_update",
+        "migrate_unique_ids": [],
+        "platform": "update",
+        "class_name": "FirmwareUpdateEntity",
+        "translation_key": null,
+        "translation_placeholders": null,
+        "device_class": "firmware",
+        "state_class": null,
+        "entity_category": "config",
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:3d:e2:4b:3c",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "installed_version": "0x01000009",
+        "in_progress": false,
+        "update_percentage": null,
+        "latest_version": null,
+        "release_summary": null,
+        "release_notes": null,
+        "release_url": null,
+        "supported_features": 23
+      }
+    ]
+  },
+  "neighbors": [],
+  "routes": []
+}
