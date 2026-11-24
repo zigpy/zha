@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 import asyncio
+from collections.abc import Mapping
 import contextlib
 from dataclasses import dataclass
 from enum import Enum, IntFlag
@@ -228,6 +229,10 @@ class AdvancedSiren(BaseZclSiren):
 
     defaults: dict[type[Enum], Enum | None]
 
+    # The defaults are set through the select entities of the same cluster and exist
+    # only on the host. They are stored by the name of their enum, as member values.
+    _persisted_state_fields = ("WarningMode", "SirenLevel", "Strobe", "StrobeLevel")
+
     def __init__(
         self,
         endpoint: Endpoint,
@@ -257,6 +262,37 @@ class AdvancedSiren(BaseZclSiren):
             Strobe: None,
             StrobeLevel: None,
         }
+
+    def _dump_persisted_state(self) -> dict[str, Any]:
+        """Return the siren defaults as a JSON-compatible record."""
+        return {
+            enum.__name__: None if value is None else int(value.value)
+            for enum, value in self.defaults.items()
+        }
+
+    def _apply_persisted_state(self, record: Mapping[str, Any]) -> frozenset[str]:
+        """Apply stored siren defaults and return the names of those restored."""
+        restored = set()
+
+        for enum in self.defaults:
+            name = enum.__name__
+
+            if name not in record:
+                continue
+
+            value = record[name]
+
+            if value is None:
+                self.defaults[enum] = None
+            elif type(value) is int and any(member.value == value for member in enum):
+                # Checked first: zigpy enums make up members for undefined values
+                self.defaults[enum] = enum(value)
+            else:
+                continue
+
+            restored.add(name)
+
+        return frozenset(restored)
 
     async def async_turn_on(
         self,

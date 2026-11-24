@@ -7,6 +7,7 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 import asyncio
 from collections import Counter
+from collections.abc import Mapping
 import contextlib
 import dataclasses
 import itertools
@@ -884,6 +885,10 @@ class Light(BaseSharedLight, ZclPlatformEntity):
     _REFRESH_INTERVAL = (2700, 4500)
     __polling_interval: int
 
+    # Turning a light off with a transition dims it to zero, so the brightness to
+    # restore is remembered here. No attribute on the device holds it.
+    _persisted_state_fields = ("off_brightness", "off_with_transition")
+
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({OnOff.cluster_id}),
         optional_server_clusters=frozenset({Color.cluster_id, LevelControl.cluster_id}),
@@ -1295,6 +1300,62 @@ class Light(BaseSharedLight, ZclPlatformEntity):
                 else:
                     self._effect = EFFECT_OFF
         self.maybe_emit_state_changed_event()
+
+    def _apply_persisted_state(self, record: Mapping[str, Any]) -> frozenset[str]:
+        """Apply a stored record and return the names of the fields it restored."""
+        restored = set()
+
+        if "off_brightness" in record:
+            off_brightness = record["off_brightness"]
+
+            if off_brightness is None or (
+                type(off_brightness) is int and 0 <= off_brightness <= 255
+            ):
+                self._off_brightness = off_brightness
+                restored.add("off_brightness")
+
+        if type(record.get("off_with_transition")) is bool:
+            self._off_with_transition = record["off_with_transition"]
+            restored.add("off_with_transition")
+
+        return frozenset(restored)
+
+    def restore_external_state_attributes(
+        self,
+        *,
+        state: bool | None,
+        off_with_transition: bool | None,
+        off_brightness: int | None,
+        brightness: int | None,
+        color_temp: int | None,
+        xy_color: tuple[float, float] | None,
+        color_mode: ColorMode | None,
+        effect: str | None,
+    ) -> None:
+        """Restore extra state attributes that are stored outside of the ZCL cache.
+
+        Fields the device's store holds are newer than what Home Assistant kept, so
+        they win. The rest are taken over and stored from now on.
+        """
+        if "off_with_transition" in self._stored_state_fields:
+            off_with_transition = None
+
+        if "off_brightness" in self._stored_state_fields:
+            off_brightness = None
+
+        super().restore_external_state_attributes(
+            state=state,
+            off_with_transition=off_with_transition,
+            off_brightness=off_brightness,
+            brightness=brightness,
+            color_temp=color_temp,
+            xy_color=xy_color,
+            color_mode=color_mode,
+            effect=effect,
+        )
+
+        # Written even at the defaults, so that the store is authoritative from now on
+        self._save_persisted_state(take_over=self._persisted_state_fields)
 
 
 @register_entity(OnOff.cluster_id)

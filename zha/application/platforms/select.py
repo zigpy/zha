@@ -172,7 +172,9 @@ class SirenDefaultSelectEntity(BaseSelectEntity, ZclPlatformEntity):
 
     async def async_select_option(self, option: str) -> None:
         """Change the selected option."""
-        self._siren().defaults[self._enum] = self._option_to_member[option]
+        siren = self._siren()
+        siren.defaults[self._enum] = self._option_to_member[option]
+        siren._save_persisted_state()
         self.maybe_emit_state_changed_event()
 
     def restore_external_state_attributes(
@@ -180,8 +182,18 @@ class SirenDefaultSelectEntity(BaseSelectEntity, ZclPlatformEntity):
         *,
         state: str,
     ) -> None:
-        """Restore extra state attributes that are stored outside of the ZCL cache."""
-        self._siren().defaults[self._enum] = self._option_to_member[state]
+        """Restore extra state attributes that are stored outside of the ZCL cache.
+
+        The siren keeps its defaults in the device's store. Home Assistant's copy is
+        only used for a default the store does not have yet.
+        """
+        siren = self._siren()
+
+        if self._enum.__name__ in siren._stored_state_fields:
+            return
+
+        siren.defaults[self._enum] = self._option_to_member[state]
+        siren._save_persisted_state(take_over=(self._enum.__name__,))
 
 
 @register_entity(IasWd.cluster_id)
