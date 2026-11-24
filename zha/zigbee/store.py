@@ -1,4 +1,4 @@
-"""Access to zigpy's per-device key/value store."""
+"""Access to zigpy's key/value stores: the per-device stores and the network store."""
 
 from __future__ import annotations
 
@@ -6,9 +6,16 @@ from collections.abc import Awaitable, Callable
 import re
 from typing import TYPE_CHECKING, Any, Final
 
-from zigpy.store import DEFAULT_VERSION, DeviceStore, JSONValue, StoredValue
+from zigpy.store import (
+    DEFAULT_VERSION,
+    DeviceStore,
+    JSONValue,
+    NetworkStore,
+    StoredValue,
+)
 
 if TYPE_CHECKING:
+    from zigpy.application import ControllerApplication
     from zigpy.device import BaseDevice as ZigpyBaseDevice
     from zigpy.store import StoreNamespace
 
@@ -16,6 +23,16 @@ if TYPE_CHECKING:
 
 # Restore records of entities, keyed by `entity_state_key`
 ENTITY_STATE_NAMESPACE: Final = "zha.entity_state"
+
+# Values a successful command set without the attribute cache changing, such as a
+# lock's state after a lock command, keyed by `entity_state_key`. They are kept apart
+# from the restore records: they are beliefs about the device, which a report replaces,
+# not state the host owns.
+ENTITY_ASSUMED_STATE_NAMESPACE: Final = "zha.entity_assumed_state"
+
+# Restore records of group entities, in the network store, keyed by
+# `group_entity_state_key`
+GROUP_ENTITY_STATE_NAMESPACE: Final = "zha.group_entity_state"
 
 # Device values: state of a device that is not a ZCL attribute, such as a Tuya
 # datapoint, written by quirks and shown by value-backed entities
@@ -46,6 +63,29 @@ def get_device_store(zigpy_device: ZigpyBaseDevice) -> DeviceStore | None:
         return None
 
     return store
+
+
+def get_network_store(app: ControllerApplication) -> NetworkStore | None:
+    """Return the application's network store, or `None` if it has none."""
+    store = getattr(app, "network_store", None)
+
+    # Tests construct gateways on mocked applications, whose stores are mocks too
+    if not isinstance(store, NetworkStore):
+        return None
+
+    return store
+
+
+def get_network_store_namespace(
+    app: ControllerApplication, namespace: str
+) -> StoreNamespace | None:
+    """Return a namespace of the network store, or `None` if there is no store."""
+    store = get_network_store(app)
+
+    if store is None:
+        return None
+
+    return store.namespace(namespace)
 
 
 def store_diagnostics(zigpy_device: ZigpyBaseDevice) -> dict[str, Any]:
@@ -179,3 +219,29 @@ def entity_state_key(platform: Platform, unique_id: str) -> str:
     names never contain the separator.
     """
     return f"{platform}/{unique_id}"
+
+
+def group_entity_state_key(group_id: int, platform: Platform, unique_id: str) -> str:
+    """Return the network store key of a group entity's restore record.
+
+    The key starts with the group ID, so that removing a group can find the records
+    of all its entities.
+    """
+    return f"{_group_key_prefix(group_id)}{platform}/{unique_id}"
+
+
+def _group_key_prefix(group_id: int) -> str:
+    return f"0x{group_id:04x}/"
+
+
+def remove_group_entity_states(app: ControllerApplication, group_id: int) -> None:
+    """Delete the restore records of all entities of a removed group."""
+    namespace = get_network_store_namespace(app, GROUP_ENTITY_STATE_NAMESPACE)
+
+    if namespace is None:
+        return
+
+    prefix = _group_key_prefix(group_id)
+
+    for key in [key for key in namespace if key.startswith(prefix)]:
+        del namespace[key]

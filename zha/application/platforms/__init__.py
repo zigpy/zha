@@ -9,8 +9,9 @@ from collections.abc import Callable, Collection, Mapping
 from contextlib import suppress
 import dataclasses
 from dataclasses import dataclass, field
+from datetime import UTC, datetime
 from enum import StrEnum
-from functools import cached_property
+from functools import cached_property, partial
 import logging
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, Final, cast, final
@@ -21,8 +22,16 @@ from zigpy.profiles.zll import PROFILE_ID as ZLL_PROFILE_ID
 from zigpy.types import ClusterId
 from zigpy.types.named import EUI64
 import zigpy.zcl
-from zigpy.zcl import ReportingConfig
+from zigpy.zcl import (
+    AttributeReadEvent,
+    AttributeReportedEvent,
+    AttributeUpdatedEvent,
+    AttributeWrittenEvent,
+    ReportingConfig,
+    foundation,
+)
 from zigpy.zcl.foundation import ZCLAttributeDef
+from zigpy.zcl.helpers import UnsupportedAttribute
 
 from zha.application import EntityType, Platform
 from zha.application.const import UniqueIdMigration
@@ -32,11 +41,15 @@ from zha.event import EventBase
 from zha.exceptions import ZHAException
 from zha.mixins import LogMixin
 from zha.zigbee.store import (
+    ENTITY_ASSUMED_STATE_NAMESPACE,
     ENTITY_STATE_NAMESPACE,
+    GROUP_ENTITY_STATE_NAMESPACE,
     DeviceValueWriter,
     entity_state_key,
     get_device_store,
+    get_network_store_namespace,
     get_store_namespace,
+    group_entity_state_key,
 )
 
 if TYPE_CHECKING:
@@ -55,6 +68,10 @@ if TYPE_CHECKING:
 _LOGGER = logging.getLogger(__name__)
 
 DEFAULT_UPDATE_GROUP_FROM_CHILD_DELAY: float = 0.5
+
+# Seconds an assumed value is held before it is saved, so that a command the device
+# confirms within this time causes no store write
+ASSUMED_STATE_SAVE_DELAY: Final = 5
 
 ENTITY_REGISTRY: dict[ClusterId | int, list[type[ZclPlatformEntity]]] = defaultdict(
     list
@@ -288,6 +305,37 @@ def compute_state_diff(
     }
 
 
+@dataclass(frozen=True, kw_only=True)
+class AssumedValue:
+    """A value a successful command set, and when the command was sent."""
+
+    value: Any
+    since: datetime
+
+    def to_json(self) -> dict[str, Any]:
+        """Return the value as stored."""
+        return {"value": self.value, "since": self.since.isoformat()}
+
+    @classmethod
+    def from_json(cls, entry: Any) -> AssumedValue | None:
+        """Return a stored value, or `None` if it is malformed."""
+        if not isinstance(entry, dict) or "value" not in entry:
+            return None
+
+        if not isinstance(since := entry.get("since"), str):
+            return None
+
+        try:
+            parsed = datetime.fromisoformat(since)
+        except ValueError:
+            return None
+
+        if parsed.tzinfo is None:
+            return None
+
+        return cls(value=entry["value"], since=parsed.astimezone(UTC))
+
+
 class BaseEntity(LogMixin, EventBase):
     """Base class for entities."""
 
@@ -319,6 +367,12 @@ class BaseEntity(LogMixin, EventBase):
     # chosen. If there is a tie, both lose.
     _attr_primary_weight: int = 0
 
+    # Fields of host-side state that no ZCL attribute holds, such as a light's
+    # brightness before it was turned off. They are kept in a store (the device's for
+    # device entities, the network store for group entities) and restored when the
+    # entity is added. By default, field `x` is attribute `_x`.
+    _persisted_state_fields: tuple[str, ...] = ()
+
     def __init__(self, unique_id: str) -> None:
         """Initialize the platform entity."""
         super().__init__()
@@ -330,6 +384,15 @@ class BaseEntity(LogMixin, EventBase):
         self._tracked_tasks: list[asyncio.Task] = []
         self._tracked_handles: list[asyncio.Handle] = []
         self._on_remove_callbacks: list[Callable[[], None]] = []
+
+        # Persisted state is only saved once it has been loaded, so that the defaults
+        # set in `__init__` never overwrite a stored record
+        self._persisted_state_loaded: bool = False
+        # Fields the store holds for this entity: restored from it, or saved to it.
+        # Home Assistant's restored copies of these are older and are ignored.
+        self._stored_state_fields: frozenset[str] = frozenset()
+        # The fields as they were right after loading
+        self._loaded_state: dict[str, Any] | None = None
 
     def is_supported(self) -> bool:
         """Return if the entity is supported for the device."""
@@ -469,7 +532,7 @@ class BaseEntity(LogMixin, EventBase):
 
     def on_add(self) -> None:
         """Run when entity is added."""
-        pass
+        self._load_persisted_state()
 
     async def on_remove(self) -> None:
         """Cancel tasks and timers this entity owns."""
@@ -503,6 +566,8 @@ class BaseEntity(LogMixin, EventBase):
             )
             self.__previous_state = state
 
+        self._save_persisted_state()
+
     def subscribe_state(
         self, callback: Callable[[EntityStateChangedEvent], None]
     ) -> Callable[[], None]:
@@ -523,6 +588,142 @@ class BaseEntity(LogMixin, EventBase):
 
         return unsub
 
+    def _persisted_state_namespace(self) -> StoreNamespace | None:
+        """Return the store namespace holding restore records, if there is a store."""
+        return None
+
+    def _persisted_state_key(self, unique_id: str) -> str:
+        """Return the key of the restore record of this entity under `unique_id`."""
+        raise NotImplementedError
+
+    def _owns_persisted_state(self) -> bool:
+        """Return whether this entity object may write its records.
+
+        Only the entity its device or group has added does: discovery creates
+        candidate copies of live entities, and a removed entity can still finish a
+        command, and neither may overwrite the live entity's records.
+        """
+        return False
+
+    def _dump_persisted_state(self) -> dict[str, Any]:
+        """Return the persisted fields as a JSON-compatible record."""
+        return {
+            name: getattr(self, f"_{name}") for name in self._persisted_state_fields
+        }
+
+    def _apply_persisted_state(self, record: Mapping[str, Any]) -> frozenset[str]:
+        """Apply a stored record and return the names of the fields it restored."""
+        restored = set()
+
+        for name in self._persisted_state_fields:
+            if name in record:
+                setattr(self, f"_{name}", record[name])
+                restored.add(name)
+
+        return frozenset(restored)
+
+    def _load_persisted_state(self) -> None:
+        """Restore persisted fields from the store."""
+        if self._persisted_state_loaded:
+            return
+
+        self._persisted_state_loaded = True
+
+        if not self._persisted_state_fields:
+            return
+
+        namespace = self._persisted_state_namespace()
+
+        if namespace is None:
+            return
+
+        key = self._persisted_state_key(self.unique_id)
+
+        if self._find_persisted_record(namespace, key):
+            self._restore_persisted_record(namespace[key])
+
+        self._loaded_state = self._dump_persisted_state()
+
+    def _find_persisted_record(self, namespace: StoreNamespace, key: str) -> bool:
+        """Return whether `namespace` has a record of this entity under `key`.
+
+        A record stored under a previous unique ID is moved to `key` first, so that it
+        follows the entity when its unique ID changes.
+        """
+        if key in namespace:
+            return True
+
+        for old_unique_id in sorted(self.migrate_unique_ids):
+            old_key = self._persisted_state_key(old_unique_id)
+
+            if old_key in namespace:
+                namespace[key] = namespace[old_key]
+                del namespace[old_key]
+                return True
+
+        return False
+
+    def _restore_persisted_record(self, record: Any) -> None:
+        """Apply the stored record of this entity."""
+        if not isinstance(record, dict):
+            self.warning("Ignoring invalid stored state %r", record)
+            return
+
+        try:
+            self._stored_state_fields = self._apply_persisted_state(record)
+        except Exception:  # noqa: BLE001
+            self.error("Failed to restore stored state %r", record, exc_info=True)
+            return
+
+        if (
+            ignored := (set(record) & set(self._persisted_state_fields))
+            - self._stored_state_fields
+        ):
+            self.debug("Ignoring invalid stored %s in %r", sorted(ignored), record)
+
+    def _save_persisted_state(self, *, take_over: Collection[str] = ()) -> None:
+        """Store the persisted fields if they changed.
+
+        Only the entity its device or group has added saves (`_owns_persisted_state`).
+        A field is only written once it is owned: restored from the record, changed
+        since loading, or named in `take_over` because its value came from Home
+        Assistant. Fields still at their loaded values are left out, and no record is
+        created for them alone.
+        """
+        if not self._persisted_state_fields or not self._persisted_state_loaded:
+            return
+
+        if not self._owns_persisted_state():
+            return
+
+        namespace = self._persisted_state_namespace()
+
+        if namespace is None:
+            return
+
+        key = self._persisted_state_key(self.unique_id)
+        state = self._dump_persisted_state()
+        loaded = self._loaded_state or {}
+
+        # Fields changed since loading are newer than any copy Home Assistant kept.
+        # A field still at its loaded value is not, and is left out of the record, so
+        # that HA can still fill it after a restart.
+        changed = {name for name in state if state[name] != loaded.get(name)}
+        owned = self._stored_state_fields | changed | set(take_over)
+
+        if not owned:
+            return
+
+        # Keys this version does not know, e.g. from a newer one, are kept
+        stored = namespace.get(key)
+        record = dict(stored) if isinstance(stored, dict) else {}
+        record.update({name: state[name] for name in owned})
+
+        if record != stored:
+            namespace[key] = record
+
+        self._stored_state_fields = frozenset(owned)
+
     def log(self, level: int, msg: str, *args: Any, **kwargs: Any) -> None:
         """Log a message."""
         msg = f"%s: {msg}"
@@ -539,10 +740,13 @@ class PlatformEntity(BaseEntity):
 
     _migrate_platform_unique_ids: tuple[tuple[UniqueIdMigration, str]] | None = None
 
-    # Fields of host-side state that no ZCL attribute holds, such as a light's
-    # brightness before it was turned off. They are kept in the device's store and
-    # restored when the entity is added. By default, field `x` is attribute `_x`.
-    _persisted_state_fields: tuple[str, ...] = ()
+    # Fields of device state that a successful command sets without the attribute
+    # cache changing, such as a lock's state after a lock command. Each has an
+    # attribute behind it (`_assumed_state_attribute`). The commanded value is kept in
+    # the device's store, with the time the command was sent, until that attribute is
+    # reported or read, and is restored when the entity is added unless the attribute
+    # cache holds a newer value. By default, field `x` is attribute `_x`.
+    _assumed_state_fields: tuple[str, ...] = ()
 
     def __init__(
         self,
@@ -587,14 +791,14 @@ class PlatformEntity(BaseEntity):
 
         self._device: BaseDevice = device
 
-        # Persisted state is only saved once it has been loaded, so that the defaults
-        # set in `__init__` never overwrite a stored record
-        self._persisted_state_loaded: bool = False
-        # Fields the store holds for this entity: restored from it, or saved to it.
-        # Home Assistant's restored copies of these are older and are ignored.
-        self._stored_state_fields: frozenset[str] = frozenset()
-        # The fields as they were right after loading
-        self._loaded_state: dict[str, Any] | None = None
+        # Assumed values of `_assumed_state_fields`, by field
+        self._assumed_state: dict[str, AssumedValue] = {}
+        self._assumed_state_save_handle: asyncio.TimerHandle | None = None
+        # Whether a save ran before the device added the entity, and is still to do
+        self._assumed_state_save_deferred: bool = False
+        # When the assumed values were loaded: a read or report after that is newer
+        # than Home Assistant's restored state
+        self._state_loaded_at: datetime | None = None
 
     def _apply_entity_config(
         self,
@@ -699,127 +903,311 @@ class PlatformEntity(BaseEntity):
     def on_add(self) -> None:
         """Run when entity is added."""
         super().on_add()
-        self._load_persisted_state()
+        self._subscribe_assumed_state()
+
+    async def on_remove(self) -> None:
+        """Save pending assumed values, then cancel tasks and timers."""
+        # The device removes an entity before dropping it, so it still owns its record
+        self._save_assumed_state()
+        await super().on_remove()
 
     def maybe_emit_state_changed_event(self) -> None:
         """Send the state of this platform entity."""
         super().maybe_emit_state_changed_event()
-        self._save_persisted_state()
+
+        # The device calls this right after adding the entity: a save that ran before
+        # then, such as the one scheduled at load, is done now
+        if self._assumed_state_save_deferred and self._owns_persisted_state():
+            self._save_assumed_state()
 
     def _persisted_state_namespace(self) -> StoreNamespace | None:
         """Return the store namespace holding restore records, if there is a store."""
         return get_store_namespace(self._device.device, ENTITY_STATE_NAMESPACE)
 
-    def _dump_persisted_state(self) -> dict[str, Any]:
-        """Return the persisted fields as a JSON-compatible record."""
-        return {
-            name: getattr(self, f"_{name}") for name in self._persisted_state_fields
-        }
+    def _persisted_state_key(self, unique_id: str) -> str:
+        """Return the key of the restore record of this entity under `unique_id`."""
+        return entity_state_key(self.PLATFORM, unique_id)
 
-    def _apply_persisted_state(self, record: Mapping[str, Any]) -> frozenset[str]:
-        """Apply a stored record and return the names of the fields it restored."""
-        restored = set()
-
-        for name in self._persisted_state_fields:
-            if name in record:
-                setattr(self, f"_{name}", record[name])
-                restored.add(name)
-
-        return frozenset(restored)
+    def _owns_persisted_state(self) -> bool:
+        """Return whether this is the entity the device has added."""
+        return (
+            self._device.platform_entities.get((self.PLATFORM, self.unique_id)) is self
+        )
 
     def _load_persisted_state(self) -> None:
-        """Restore persisted fields from the device's store."""
-        if not self._persisted_state_fields or self._persisted_state_loaded:
+        """Restore persisted fields and assumed values from the device's store."""
+        if self._persisted_state_loaded:
             return
 
-        self._persisted_state_loaded = True
-        namespace = self._persisted_state_namespace()
+        super()._load_persisted_state()
+        self._load_assumed_state()
+
+    def _assumed_state_namespace(self) -> StoreNamespace | None:
+        """Return the store namespace holding assumed values, if there is a store."""
+        return get_store_namespace(self._device.device, ENTITY_ASSUMED_STATE_NAMESPACE)
+
+    def _assumed_state_attribute(
+        self, name: str
+    ) -> tuple[zigpy.zcl.Cluster, ZCLAttributeDef] | None:
+        """Return the cluster attribute that reports field `name`, if there is one."""
+        return None
+
+    def _apply_assumed_value(self, name: str, value: Any) -> bool:
+        """Set field `name` to an assumed value and return whether it was valid."""
+        setattr(self, f"_{name}", value)
+        return True
+
+    def _apply_assumed_state(self) -> None:
+        """Set the fields that have assumed values again, after reading the cache."""
+        for name, assumed in self._assumed_state.items():
+            self._apply_assumed_value(name, assumed.value)
+
+    def _assumed_value_is_current(self, name: str, since: datetime) -> bool:
+        """Return whether a value commanded at `since` is newer than the cache.
+
+        A field without an attribute behind it is never kept.
+        """
+        if (source := self._assumed_state_attribute(name)) is None:
+            return False
+
+        cluster, attr_def = source
+
+        try:
+            last_updated: datetime = cluster._attr_cache.get_last_updated(  # noqa: SLF001
+                attr_def
+            )
+        except (KeyError, UnsupportedAttribute):
+            return True
+
+        return last_updated < since
+
+    def _restored_value_is_stale(self, name: str) -> bool:
+        """Return whether Home Assistant's restored copy of field `name` is older.
+
+        It is when the field has an assumed value, or when its attribute was read or
+        reported after the entity loaded its state.
+        """
+        if name in self._assumed_state:
+            return True
+
+        if self._state_loaded_at is None or self._assumed_state_attribute(name) is None:
+            return False
+
+        return not self._assumed_value_is_current(name, self._state_loaded_at)
+
+    def _assume_state(self, sent: Mapping[str, datetime]) -> None:
+        """Keep fields that a successful command set until the device reports them.
+
+        `sent` maps each field to when the command that set it was sent. A field whose
+        attribute was reported or read after that already holds the device's answer,
+        and is not kept. Saving is delayed (`ASSUMED_STATE_SAVE_DELAY`), so a command
+        the device confirms right away writes nothing.
+        """
+        previous = dict(self._assumed_state)
+
+        for name, since in sent.items():
+            if name not in self._assumed_state_fields:
+                continue
+
+            if self._assumed_value_is_current(name, since):
+                self._assumed_state[name] = AssumedValue(
+                    value=getattr(self, f"_{name}"), since=since
+                )
+            else:
+                self._assumed_state.pop(name, None)
+
+        if self._assumed_state != previous:
+            self._schedule_assumed_state_save()
+
+    def _schedule_assumed_state_save(self) -> None:
+        """Save the assumed values after `ASSUMED_STATE_SAVE_DELAY`.
+
+        The delay starts at the first change and is not extended by later ones.
+        """
+        if self._assumed_state_save_handle is not None:
+            return
+
+        try:
+            loop = asyncio.get_running_loop()
+        except RuntimeError:
+            self._save_assumed_state()
+            return
+
+        self._assumed_state_save_handle = loop.call_later(
+            ASSUMED_STATE_SAVE_DELAY, self._save_assumed_state
+        )
+        self._tracked_handles.append(self._assumed_state_save_handle)
+
+    def _subscribe_assumed_state(self) -> None:
+        """Drop an assumed value when its attribute is reported or read."""
+        by_cluster: dict[int, tuple[zigpy.zcl.Cluster, dict[int, str]]] = {}
+
+        for name in self._assumed_state_fields:
+            if (source := self._assumed_state_attribute(name)) is None:
+                continue
+
+            cluster, attr_def = source
+            by_cluster.setdefault(id(cluster), (cluster, {}))[1][attr_def.id] = name
+
+        for cluster, names_by_attribute in by_cluster.values():
+            handler = partial(
+                self._handle_assumed_attribute_event, cluster, names_by_attribute
+            )
+
+            for event_type in (
+                AttributeReadEvent,
+                AttributeReportedEvent,
+                AttributeUpdatedEvent,
+                AttributeWrittenEvent,
+            ):
+                self._on_remove_callbacks.append(
+                    cluster.on_event(event_type.event_type, handler)
+                )
+
+    def _handle_assumed_attribute_event(
+        self,
+        cluster: zigpy.zcl.Cluster,
+        names_by_attribute: Mapping[int, str],
+        event: AttributeReadEvent
+        | AttributeReportedEvent
+        | AttributeUpdatedEvent
+        | AttributeWrittenEvent,
+    ) -> None:
+        """Drop the assumed value of a field whose attribute the device answered for.
+
+        The value read, reported or successfully written confirms or contradicts the
+        assumed one, and is newer either way.
+        """
+        if (name := names_by_attribute.get(event.attribute_id)) is None:
+            return
+
+        if (
+            isinstance(event, AttributeWrittenEvent)
+            and event.status != foundation.Status.SUCCESS
+        ):
+            return
+
+        # A manufacturer-specific attribute can share the ID of a standard one
+        source = self._assumed_state_attribute(name)
+
+        if (
+            source is None
+            or event.manufacturer_code
+            != cluster._get_effective_manufacturer_code(source[1])  # noqa: SLF001
+        ):
+            return
+
+        if self._assumed_state.pop(name, None) is not None:
+            self._schedule_assumed_state_save()
+
+    def _load_assumed_state(self) -> None:
+        """Restore assumed values that are newer than the attribute cache.
+
+        Entries that are not restored are removed by a save scheduled here, which
+        runs once the device has added the entity.
+        """
+        if not self._assumed_state_fields:
+            return
+
+        self._state_loaded_at = datetime.now(UTC)
+
+        namespace = self._assumed_state_namespace()
 
         if namespace is None:
             return
 
-        key = entity_state_key(self.PLATFORM, self.unique_id)
-        self._restore_persisted_record(namespace, key)
-        self._loaded_state = self._dump_persisted_state()
+        key = self._persisted_state_key(self.unique_id)
 
-    def _restore_persisted_record(self, namespace: StoreNamespace, key: str) -> None:
-        """Apply the stored record of this entity, if there is one."""
-        if key not in namespace:
-            # The record follows the entity when its unique ID changes
-            for old_unique_id in sorted(self.migrate_unique_ids):
-                old_key = entity_state_key(self.PLATFORM, old_unique_id)
-
-                if old_key in namespace:
-                    namespace[key] = namespace[old_key]
-                    del namespace[old_key]
-                    break
-            else:
-                return
+        if not self._find_persisted_record(namespace, key):
+            return
 
         record = namespace[key]
 
         if not isinstance(record, dict):
-            self.warning("Ignoring invalid stored state %r", record)
+            self.warning("Ignoring invalid assumed state %r", record)
+            self._schedule_assumed_state_save()
             return
 
-        try:
-            self._stored_state_fields = self._apply_persisted_state(record)
-        except Exception:  # noqa: BLE001
-            self.error("Failed to restore stored state %r", record, exc_info=True)
-            return
+        for name in self._assumed_state_fields:
+            if name not in record:
+                continue
 
-        if (
-            ignored := (set(record) & set(self._persisted_state_fields))
-            - self._stored_state_fields
-        ):
-            self.debug("Ignoring invalid stored %s in %r", sorted(ignored), record)
+            if (assumed := AssumedValue.from_json(record[name])) is None:
+                self.debug("Ignoring invalid assumed %s: %r", name, record[name])
+                self._schedule_assumed_state_save()
+                continue
 
-    def _save_persisted_state(self, *, take_over: Collection[str] = ()) -> None:
-        """Store the persisted fields if they changed.
+            if not self._assumed_value_is_current(name, assumed.since):
+                self.debug("Ignoring assumed %s older than the cache", name)
+                self._schedule_assumed_state_save()
+                continue
 
-        Only the entity the device has added saves: discovery creates candidate
-        copies of live entities, and a removed entity can still finish a command,
-        and neither may overwrite the live entity's record. A field is only written
-        once it is owned: restored from the record, changed since loading, or named
-        in `take_over` because its value came from Home Assistant. Fields still at
-        their loaded values are left out, and no record is created for them alone.
+            try:
+                valid = self._apply_assumed_value(name, assumed.value)
+            except Exception:  # noqa: BLE001
+                self.error("Failed to restore assumed %s %r", name, assumed.value)
+                self._schedule_assumed_state_save()
+                continue
+
+            if not valid:
+                self.debug("Ignoring invalid assumed %s: %r", name, assumed.value)
+                self._schedule_assumed_state_save()
+                continue
+
+            self._assumed_state[name] = assumed
+
+    def _save_assumed_state(self) -> None:
+        """Store the assumed values if they changed.
+
+        Entries that were not restored (older than the cache, or invalid) and entries
+        that were dropped are removed, and the record with them once it is empty.
         """
-        if not self._persisted_state_fields or not self._persisted_state_loaded:
+        if (handle := self._assumed_state_save_handle) is not None:
+            self._assumed_state_save_handle = None
+            handle.cancel()
+
+            with suppress(ValueError):
+                self._tracked_handles.remove(handle)
+
+        if not self._assumed_state_fields or not self._persisted_state_loaded:
             return
 
-        if (
-            self._device.platform_entities.get((self.PLATFORM, self.unique_id))
-            is not self
-        ):
+        if not self._owns_persisted_state():
+            # Not added by the device yet, e.g. while it reads attributes at
+            # initialization: saved once it is (`maybe_emit_state_changed_event`)
+            self._assumed_state_save_deferred = True
             return
 
-        namespace = self._persisted_state_namespace()
+        self._assumed_state_save_deferred = False
+        namespace = self._assumed_state_namespace()
 
         if namespace is None:
             return
 
-        key = entity_state_key(self.PLATFORM, self.unique_id)
-        state = self._dump_persisted_state()
-        loaded = self._loaded_state or {}
+        key = self._persisted_state_key(self.unique_id)
+        stored = namespace.get(key)
 
-        # Fields changed since loading are newer than any copy Home Assistant kept.
-        # A field still at its loaded value is not, and is left out of the record, so
-        # that HA can still fill it after a restart.
-        changed = {name for name in state if state[name] != loaded.get(name)}
-        owned = self._stored_state_fields | changed | set(take_over)
+        # Fields this version does not know, e.g. from a newer one, are kept
+        record = (
+            {
+                name: entry
+                for name, entry in stored.items()
+                if name not in self._assumed_state_fields
+            }
+            if isinstance(stored, dict)
+            else {}
+        )
+        record.update(
+            {name: assumed.to_json() for name, assumed in self._assumed_state.items()}
+        )
 
-        if not owned:
+        if record == stored:
             return
 
-        # Keys this version does not know, e.g. from a newer one, are kept
-        stored = namespace.get(key)
-        record = dict(stored) if isinstance(stored, dict) else {}
-        record.update({name: state[name] for name in owned})
-
-        if record != stored:
+        if record:
             namespace[key] = record
-
-        self._stored_state_fields = frozenset(owned)
+        elif key in namespace:
+            del namespace[key]
 
 
 class DeviceValueEntity(PlatformEntity):
@@ -1099,6 +1487,28 @@ class GroupEntity(BaseEntity):
     def group(self) -> Group:
         """Return the group."""
         return self._group
+
+    def _persisted_state_namespace(self) -> StoreNamespace | None:
+        """Return the network store namespace holding restore records, if any."""
+        return get_network_store_namespace(
+            self._group.gateway.application_controller, GROUP_ENTITY_STATE_NAMESPACE
+        )
+
+    def _persisted_state_key(self, unique_id: str) -> str:
+        """Return the key of the restore record of this entity under `unique_id`."""
+        return group_entity_state_key(self.group_id, self.PLATFORM, unique_id)
+
+    def _owns_persisted_state(self) -> bool:
+        """Return whether this is the entity its group has registered.
+
+        A group's entities are unregistered when it is torn down or drops below two
+        members, and stop writing once the gateway no longer has the group, so that
+        nothing writes the records again after the group is removed.
+        """
+        return (
+            self._group.gateway.groups.get(self.group_id) is self._group
+            and self._group.group_entities.get(self.unique_id) is self
+        )
 
     def debounced_update(self, _: Any | None = None) -> None:
         """Debounce updating group entity from member entity updates."""

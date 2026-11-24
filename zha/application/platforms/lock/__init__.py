@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 import dataclasses
+from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Any, Literal, cast
 
 from zigpy.zcl import (
@@ -37,6 +38,9 @@ from zha.application.platforms.lock.const import (
 )
 
 if TYPE_CHECKING:
+    import zigpy.zcl
+    from zigpy.zcl.foundation import ZCLAttributeDef
+
     from zha.zigbee.device import Device
     from zha.zigbee.endpoint import Endpoint
 
@@ -81,6 +85,10 @@ class DoorLock(BaseLock, ZclPlatformEntity):
 
     _attr_translation_key: str = "door_lock"
     _attr_primary_weight = 5
+
+    # A lock or unlock command sets the state before the lock reports it, and it is
+    # kept as an assumed value until it does
+    _assumed_state_fields = ("state",)
 
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({DoorLockCluster.cluster_id}),
@@ -136,22 +144,26 @@ class DoorLock(BaseLock, ZclPlatformEntity):
 
     async def async_lock(self) -> None:
         """Lock the lock."""
+        started = datetime.now(UTC)
         result = await self._cluster.lock_door()
         if result[0] is not Status.SUCCESS:
             self.error("Error with lock_door: %s", result)
             return
 
         self._state = STATE_LOCKED
+        self._assume_state({"state": started})
         self.maybe_emit_state_changed_event()
 
     async def async_unlock(self) -> None:
         """Unlock the lock."""
+        started = datetime.now(UTC)
         result = await self._cluster.unlock_door()
         if result[0] is not Status.SUCCESS:
             self.error("Error with unlock_door: %s", result)
             return
 
         self._state = STATE_UNLOCKED
+        self._assume_state({"state": started})
         self.maybe_emit_state_changed_event()
 
     async def async_set_lock_user_code(self, code_slot: int, user_code: str) -> None:
@@ -200,21 +212,52 @@ class DoorLock(BaseLock, ZclPlatformEntity):
 
     async def async_update(self) -> None:
         """Poll lock_state from the cluster."""
-        await safe_read(
+        results = await safe_read(
             self._cluster,
             [DoorLockCluster.AttributeDefs.lock_state.name],
             allow_cache=False,
             only_cache=False,
         )
+        # Only when the lock answered: after a failed read, the cache holds an older
+        # value than the state shown, which may be assumed. The value is taken from
+        # the cache, where a quirk may have transformed the one read.
+        if DoorLockCluster.AttributeDefs.lock_state.name not in results:
+            return
+
         value = self._cluster.get(DoorLockCluster.AttributeDefs.lock_state.name)
         if value is not None:
             self._state = VALUE_TO_STATE.get(value, self._state)
             self.maybe_emit_state_changed_event()
+
+    def _assumed_state_attribute(
+        self, name: str
+    ) -> tuple[zigpy.zcl.Cluster, ZCLAttributeDef] | None:
+        """Return the cluster attribute that reports field `name`, if there is one."""
+        if name == "state":
+            return self._cluster, DoorLockCluster.AttributeDefs.lock_state
+
+        return None
+
+    def _apply_assumed_value(self, name: str, value: Any) -> bool:
+        """Set field `name` to an assumed value and return whether it was valid."""
+        if name == "state" and value in (STATE_LOCKED, STATE_UNLOCKED):
+            self._state = value
+            return True
+
+        return False
 
     def restore_external_state_attributes(
         self,
         *,
         state: Literal["locked", "unlocked"] | None,
     ) -> None:
-        """Restore extra state attributes that are stored outside of the ZCL cache."""
+        """Restore extra state attributes that are stored outside of the ZCL cache.
+
+        An assumed state restored from the device's store, or a state the lock
+        reported or was read for since, is newer than what Home Assistant kept, so it
+        wins. HA's state is not taken over as an assumed one: it is a fallback.
+        """
+        if self._restored_value_is_stale("state"):
+            return
+
         self._state = state
