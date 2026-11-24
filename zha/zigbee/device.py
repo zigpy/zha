@@ -530,6 +530,10 @@ class BaseDevice[ZigpyDeviceT: ZigpyBaseDevice](LogMixin, EventBase):
         """
         return None
 
+    def _is_child_device_allowlisted(self) -> bool:
+        """Whether the device's output endpoints are split into child devices."""
+        return False
+
     def _is_entity_removed_by_quirk(self, entity: PlatformEntity) -> bool:
         """Whether a quirk hides this default entity (declarative quirks override)."""
         return False
@@ -1171,7 +1175,7 @@ class BaseDevice[ZigpyDeviceT: ZigpyBaseDevice](LogMixin, EventBase):
         if (quirk_child_devices := self._quirk_child_devices()) is not None:
             child_devices = quirk_child_devices
             assignments = assign_endpoint_child_devices(child_devices, entities)
-        elif is_child_device_allowlisted(self.manufacturer, self.model):
+        elif self._is_child_device_allowlisted():
             child_devices, assignments = compute_output_child_devices(entities)
         else:
             child_devices, assignments = (), {}
@@ -1308,6 +1312,16 @@ class ZigbeeDevice(BaseDevice[ZigpyDevice]):
             ep = Endpoint.new(endpoint, self)
             self._endpoints[endpoint.endpoint_id] = ep
             self._on_remove_callbacks.append(ep.on_remove)
+
+    def _is_child_device_allowlisted(self) -> bool:
+        """Whether the device's output endpoints are split into child devices.
+
+        Matches the manufacturer and model the device reports, as a quirk can give the
+        device a friendly name.
+        """
+        return is_child_device_allowlisted(
+            self._zigpy_device.manufacturer or "", self._zigpy_device.model or ""
+        )
 
     def _resolve_manufacturer(self) -> str:
         """Resolve the manufacturer name (declarative quirks override this)."""
