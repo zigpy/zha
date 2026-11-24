@@ -18,7 +18,7 @@ from zigpy import types
 from zigpy.profiles.zha import PROFILE_ID as ZHA_PROFILE_ID
 from zigpy.profiles.zll import PROFILE_ID as ZLL_PROFILE_ID
 from zigpy.state import Counter, State
-from zigpy.store import StoredValue, StoreValueDeletedEvent, StoreValueUpdatedEvent
+from zigpy.store import StoredValue
 from zigpy.zcl import (
     AttributeReadEvent,
     AttributeReportedEvent,
@@ -67,6 +67,7 @@ from zha.application.platforms import (
     BaseEntityState,
     ClusterConfig,
     ClusterMatch,
+    DeviceValueEntity,
     EntityCategory,
     PlatformEntity,
     PlatformFeatureGroup,
@@ -135,7 +136,6 @@ from zha.units import (
     UnitOfVolume,
     UnitOfVolumeFlowRate,
 )
-from zha.zigbee.store import get_device_store
 
 if TYPE_CHECKING:
     from zha.zigbee.device import BaseDevice, Device
@@ -413,12 +413,8 @@ def _validate_state_class(
         return None
 
 
-class DeviceValueSensor(BaseSensor):
-    """Sensor showing a device value, kept in the device's store.
-
-    A device value is state that is not a ZCL attribute, such as a Tuya datapoint.
-    The entity is bound to the device only, so it needs no endpoint or cluster.
-    """
+class DeviceValueSensor(BaseSensor, DeviceValueEntity):
+    """Sensor showing a device value, kept in the device's store."""
 
     _divisor: int | float | None = None
     _multiplier: int | float | None = None
@@ -439,8 +435,6 @@ class DeviceValueSensor(BaseSensor):
         **kwargs: Any,
     ) -> None:
         """Init this sensor."""
-        self._value = value
-
         if value_converter is not None:
             self._value_converter = value_converter
         if divisor is not None and divisor != 1:
@@ -461,51 +455,12 @@ class DeviceValueSensor(BaseSensor):
         if unit is not None:
             self._attr_native_unit_of_measurement = unit
 
-        super().__init__(device, **kwargs)
-
-    def on_add(self) -> None:
-        """Run when entity is added."""
-        super().on_add()
-        store = get_device_store(self._device.device)
-
-        if store is not None:
-            self._on_remove_callbacks.append(
-                store.on_change(self._value, self._handle_value_changed)
-            )
-
-    # TODO: remove once HA Core's `websocket_get_groupable_devices` no longer reads
-    # `entity.endpoint` for every entity of a groupable device
-    @property
-    def endpoint(self) -> Endpoint:
-        """Return the device's first endpoint, for code that expects every entity on one.
-
-        A device value has no endpoint. Home Assistant's list of groupable devices
-        reads the endpoint of each entity of a device, and fails without one.
-        """
-        warnings.warn(
-            f"`{type(self).__name__}.endpoint` is deprecated, device-bound entities"
-            " have no endpoint",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        endpoints = cast("Device", self._device).endpoints
-        return endpoints[min(ep_id for ep_id in endpoints if ep_id != 0)]
-
-    def _handle_value_changed(
-        self, event: StoreValueUpdatedEvent | StoreValueDeletedEvent
-    ) -> None:
-        """Handle the value being set or deleted."""
-        self.maybe_emit_state_changed_event()
+        super().__init__(device, value=value, **kwargs)
 
     @property
     def native_value(self) -> date | datetime | str | int | float | None:
         """Return the state of the entity."""
-        store = get_device_store(self._device.device)
-
-        if store is None:
-            return None
-
-        value = store.get(self._value)
+        value = self._get_value()
 
         if value is None:
             return None
