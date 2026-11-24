@@ -1714,8 +1714,27 @@ class ZigbeeDevice(BaseDevice[ZigpyDevice]):
         self, endpoint_id: int, group_id: int
     ) -> None:
         """Remove the device endpoint from the provided zigbee group."""
+        if (endpoint := self._zigpy_device.endpoints.get(endpoint_id)) is None:
+            # The endpoint no longer exists (e.g. persisted membership of an endpoint
+            # the current radio does not expose, such as a replaced coordinator):
+            # there is nothing to send the command to, so only drop the stale
+            # membership.
+            self.debug(
+                "Endpoint %s of device '%s' does not exist, dropping it from group:"
+                " 0x%04x",
+                endpoint_id,
+                self._zigpy_device.ieee,
+                group_id,
+            )
+            zigpy_group = self.gateway.application_controller.groups.get(group_id)
+            if zigpy_group is not None and (
+                member := zigpy_group.get((self._zigpy_device.ieee, endpoint_id))
+            ):
+                zigpy_group.remove_member(member)
+            return
+
         try:
-            await self._zigpy_device.endpoints[endpoint_id].remove_from_group(group_id)
+            await endpoint.remove_from_group(group_id)
         except (zigpy.exceptions.ZigbeeException, TimeoutError) as ex:
             self.debug(
                 (
