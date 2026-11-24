@@ -99,6 +99,7 @@ from zha.zigbee.cluster_config import (
     initialize_cluster_configs,
 )
 from zha.zigbee.endpoint import Endpoint
+from zha.zigbee.store import store_diagnostics
 
 if TYPE_CHECKING:
     from zha.application.gateway import Gateway
@@ -1917,6 +1918,10 @@ class ZigbeeDevice(BaseDevice[ZigpyDevice]):
 
             info["original_signature"] = original_signature
 
+        # Only present for devices with stored state, as most have none
+        if store := store_diagnostics(self.device):
+            info["store"] = store
+
         info["zha_lib_entities"] = defaultdict(list)
 
         for (platform, _unique_id), platform_entity in sorted(
@@ -2093,6 +2098,10 @@ class GreenPowerDevice(BaseDevice[ZigpyGreenPowerDevice]):
         info["device_type"] = self.device_type
         info["active_coordinator"] = self.is_active_coordinator
         info["signature"] = self.signature
+
+        # Only present for devices with stored state, as most have none
+        if store := store_diagnostics(self.device):
+            info["store"] = store
 
         info["zha_lib_entities"] = defaultdict(list)
 
