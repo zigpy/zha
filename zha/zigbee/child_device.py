@@ -21,9 +21,10 @@ from zigpy.zcl.clusters.general import (
 from zigpy.zcl.clusters.homeautomation import Diagnostic
 
 from zha.application import Platform
+from zha.application.platforms import ZclPlatformEntity
 
 if TYPE_CHECKING:
-    from zha.application.platforms import PlatformEntity, ZclPlatformEntity
+    from zha.application.platforms import PlatformEntity
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -151,9 +152,6 @@ def is_child_device_allowlisted(manufacturer: str, model: str) -> bool:
 
 def _zcl_entities(entities: Iterable[PlatformEntity]) -> list[ZclPlatformEntity]:
     """Return the entities backed by an endpoint, only those can be split by endpoint."""
-    # Imported here, `zha.application.platforms` imports this module for typing only
-    from zha.application.platforms import ZclPlatformEntity  # noqa: PLC0415
-
     return [entity for entity in entities if isinstance(entity, ZclPlatformEntity)]
 
 
