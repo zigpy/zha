@@ -3,6 +3,7 @@
 import asyncio
 from unittest.mock import patch
 
+import pytest
 from zigpy.const import SIG_EP_PROFILE
 from zigpy.profiles import zha
 from zigpy.zcl.clusters import general, security
@@ -262,3 +263,25 @@ async def test_siren_squawk(zha_gateway: Gateway) -> None:
             strobe=security.SquawkStrobe.Strobe,
             level=security.SquawkLevel.Very_high_level_sound,
         )
+
+
+@pytest.mark.parametrize("basic", [False, True])
+async def test_siren_duration_above_uint16(zha_gateway: Gateway, basic: bool) -> None:
+    """Test a duration beyond the command's uint16 field is clamped."""
+    zha_device, cluster = await siren_mock(zha_gateway, basic=basic)
+    entity = get_entity(zha_device, platform=Platform.SIREN)
+    cluster.endpoint.request.reset_mock()
+
+    # 24 hours is a valid duration for Home Assistant's `siren.turn_on`, the
+    # command is serialized for real here
+    await entity.async_turn_on(duration=86400)
+    assert entity.state.is_on is True
+
+    data = cluster.endpoint.request.call_args.kwargs["data"]
+    hdr, payload = zcl_f.ZCLHeader.deserialize(data)
+    assert hdr.command_id == security.IasWd.ServerCommandDefs.start_warning.id
+    args, _ = security.IasWd.ServerCommandDefs.start_warning.schema.deserialize(payload)
+    assert args.warning_duration == 0xFFFF
+
+    await asyncio.sleep(0xFFFF + 1)
+    assert entity.state.is_on is False
