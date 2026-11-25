@@ -183,8 +183,11 @@ async def test_gateway_startup_failure(
             "bellows.zigbee.application.ControllerApplication.new",
             return_value=zigpy_app_controller,
         ),
-        patch("zha.application.gateway.Gateway.load_devices", side_effect=Exception),
-        pytest.raises(Exception),
+        patch(
+            "zha.application.gateway.Gateway.load_devices",
+            side_effect=RuntimeError("load_devices failed"),
+        ),
+        pytest.raises(RuntimeError, match="load_devices failed"),
     ):
         zha_gateway.shutdown = AsyncMock(wraps=zha_gateway.shutdown)
         await zha_gateway.async_initialize()
