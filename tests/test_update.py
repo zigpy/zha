@@ -4,7 +4,7 @@ from unittest.mock import ANY, AsyncMock, PropertyMock, call, patch
 
 import pytest
 from zigpy.device import ZigbeeDevice
-from zigpy.exceptions import DeliveryError
+from zigpy.exceptions import DeliveryError, OtaImageDownloadError
 from zigpy.ota import OtaImagesResult, OtaImageWithMetadata
 import zigpy.ota.image as firmware
 from zigpy.ota.providers import BaseOtaImageMetadata
@@ -688,10 +688,22 @@ async def test_firmware_update_result_message(
             " version again later.",
         ),
         (
-            RuntimeError("Failed to download the firmware image: 404"),
+            OtaImageDownloadError("Timed out downloading the firmware image"),
+            None,
+            False,
+            "Timed out downloading the firmware image",
+        ),
+        (
+            OtaImageDownloadError("Failed to download the firmware image: 404"),
             None,
             False,
             "Failed to download the firmware image: 404",
+        ),
+        (
+            RuntimeError("Something went wrong"),
+            None,
+            False,
+            "Something went wrong",
         ),
         (
             ValueError(),
