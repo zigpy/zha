@@ -8,7 +8,7 @@
   "friendly_model": "TS0601",
   "name": "_TZE200_nkjintbl TS0601",
   "quirk_applied": true,
-  "quirk_class": "zhaquirks.tuya.ts0601_switch:TuyaDoubleSwitchTO",
+  "quirk_class": "zhaquirks.tuya.ts0601_switch:(_TZE200_g1ib5ldv / TS0601)",
   "exposes_features": [
     "tuya.plug_manufacturer_attributes"
   ],
