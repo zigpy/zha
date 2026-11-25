@@ -148,6 +148,27 @@ async def test_allowlisted_device_per_output_meters(zha_gateway: Gateway) -> Non
     assert device.primary_entity is None
 
 
+async def test_allowlisted_device_with_friendly_name(zha_gateway: Gateway) -> None:
+    """Test the allowlist matches the model the device reports, not a friendly name."""
+    registry = DeviceRegistry()
+    (
+        QuirkBuilder("Aurora", "DoubleSocket50AU")
+        .friendly_name(manufacturer="Aurora Lighting", model="Double Socket")
+        .add_to_registry(registry)
+    )
+
+    zigpy_device = registry.resolve(
+        await zigpy_device_from_json(
+            zha_gateway.application_controller,
+            "tests/data/devices/aurora-doublesocket50au.json",
+        )
+    )
+    device = await join_zigpy_device(zha_gateway, zigpy_device)
+
+    assert device.model == "Double Socket"
+    assert list(device.child_devices) == ["1", "2"]
+
+
 async def test_not_allowlisted_device(zha_gateway: Gateway) -> None:
     """Test a device that is not allowlisted is not split."""
     with patch("zha.zigbee.device.is_child_device_allowlisted", return_value=False):

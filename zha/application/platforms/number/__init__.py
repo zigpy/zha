@@ -288,6 +288,8 @@ class NumberConfigurationEntity(BaseNumber, ZclPlatformEntity):
     _attr_native_step: float = 1.0
     _multiplier: float = 1
     _attribute_name: str
+    # Attributes the range is computed from, see `recompute_capabilities`
+    _capability_attribute_names: frozenset[str] = frozenset()
 
     def __init__(
         self,
@@ -395,8 +397,11 @@ class NumberConfigurationEntity(BaseNumber, ZclPlatformEntity):
         | AttributeWrittenEvent,
     ) -> None:
         """Handle value update from cluster."""
-        if event.attribute_name == self._attribute_name:
-            self.maybe_emit_state_changed_event()
+        if event.attribute_name in self._capability_attribute_names:
+            self.recompute_capabilities()
+        elif event.attribute_name != self._attribute_name:
+            return
+        self.maybe_emit_state_changed_event()
 
 
 @register_entity(AQARA_OPPLE_CLUSTER)
@@ -1026,6 +1031,14 @@ class ZCLHeatSetpointLimitEntity(ZCLTemperatureEntity):
     """Min or max heat setpoint setting on thermostats."""
 
     _attr_native_step: float = 0.5
+    _capability_attribute_names = frozenset(
+        {
+            Thermostat.AttributeDefs.abs_min_heat_setpoint_limit.name,
+            Thermostat.AttributeDefs.abs_max_heat_setpoint_limit.name,
+            Thermostat.AttributeDefs.min_heat_setpoint_limit.name,
+            Thermostat.AttributeDefs.max_heat_setpoint_limit.name,
+        }
+    )
 
     def recompute_capabilities(self) -> None:
         """Recompute capabilities."""

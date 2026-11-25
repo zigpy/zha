@@ -2472,3 +2472,197 @@ async def test_group_state_ignores_unavailable_members(zha_gateway: Gateway) -> 
     await asyncio.sleep(0.1)
     await zha_gateway.async_block_till_done()
     assert bool(entity.state.on) is True
+
+
+@patch(
+    "zigpy.zcl.clusters.general.LevelControl.request",
+    new=AsyncMock(return_value=[sentinel.data, zcl_f.Status.SUCCESS]),
+)
+@patch(
+    "zigpy.zcl.clusters.general.OnOff.request",
+    new=AsyncMock(return_value=[sentinel.data, zcl_f.Status.SUCCESS]),
+)
+async def test_group_member_change_during_off_transition(
+    zha_gateway: Gateway,
+) -> None:
+    """Test that a member change during the group's off transition keeps its state.
+
+    Without `group_members_assume_state`, member reports are buffered until the
+    transition ends, so the members still have their pre-transition state.
+    Recomputing the group state from them would turn the group back on and drop
+    the brightness saved for the next turn on.
+    """
+
+    coordinator = await coordinator_mock(zha_gateway)
+    device_light_1 = await device_light_1_mock(zha_gateway)
+    device_light_2 = await device_light_2_mock(zha_gateway)
+    device_light_3 = await device_light_3_mock(zha_gateway)
+
+    zha_gateway.config.config.light_options.group_members_assume_state = False
+
+    zha_gateway.coordinator_zha_device = coordinator
+    coordinator._zha_gateway = zha_gateway
+    device_light_1._zha_gateway = zha_gateway
+    device_light_2._zha_gateway = zha_gateway
+    device_light_3._zha_gateway = zha_gateway
+
+    members = [
+        GroupMemberReference(ieee=device_light_1.ieee, endpoint_id=1),
+        GroupMemberReference(ieee=device_light_2.ieee, endpoint_id=1),
+        GroupMemberReference(ieee=device_light_3.ieee, endpoint_id=1),
+    ]
+    zha_group: Group = await zha_gateway.async_create_zigpy_group("Test Group", members)
+    await zha_gateway.async_block_till_done()
+
+    entity: GroupEntity = get_group_entity(zha_group, platform=Platform.LIGHT)
+
+    for device in (device_light_1, device_light_2, device_light_3):
+        await send_attributes_report(
+            zha_gateway,
+            device.device.endpoints[1].on_off,
+            {general.OnOff.AttributeDefs.on_off.id: 1},
+        )
+        await send_attributes_report(
+            zha_gateway,
+            device.device.endpoints[1].level,
+            {general.LevelControl.AttributeDefs.current_level.id: 200},
+        )
+    await zha_gateway.async_block_till_done()
+    # group member updates are debounced
+    await asyncio.sleep(0.6)
+    await zha_gateway.async_block_till_done()
+    assert bool(entity.state.on) is True
+    assert entity.state.brightness == 200
+
+    await entity.async_turn_off(transition=1)
+    await zha_gateway.async_block_till_done()
+    assert entity.is_transitioning
+    assert bool(entity.state.on) is False
+    assert entity.state.off_with_transition is True
+    assert entity.state.off_brightness == 200
+    # the members don't assume the group state
+    assert bool(get_entity(device_light_1, platform=Platform.LIGHT).state.on) is True
+
+    # remove a member and add it back while the group is still fading out
+    await zha_group.async_remove_members(
+        [GroupMemberReference(ieee=device_light_3.ieee, endpoint_id=1)]
+    )
+    await zha_gateway.async_block_till_done()
+    assert len(zha_group.members) == 2
+    assert get_group_entity(zha_group, platform=Platform.LIGHT) is entity
+    assert entity.is_transitioning
+    assert bool(entity.state.on) is False
+    assert entity.state.off_with_transition is True
+    assert entity.state.off_brightness == 200
+
+    await zha_group.async_add_members(
+        [GroupMemberReference(ieee=device_light_3.ieee, endpoint_id=1)]
+    )
+    await zha_gateway.async_block_till_done()
+    assert len(zha_group.members) == 3
+    assert get_group_entity(zha_group, platform=Platform.LIGHT) is entity
+    assert entity.is_transitioning
+    assert bool(entity.state.on) is False
+    assert entity.state.off_with_transition is True
+    assert entity.state.off_brightness == 200
+
+    # the transition ends, and the members' state isn't refreshed (polling is off
+    # here, as if their reads failed): the group doesn't recompute its state from
+    # their pre-transition state either
+    await asyncio.sleep(2)
+    await zha_gateway.async_block_till_done()
+    assert not entity.is_transitioning
+    assert bool(get_entity(device_light_1, platform=Platform.LIGHT).state.on) is True
+    assert bool(entity.state.on) is False
+    assert entity.state.off_with_transition is True
+    assert entity.state.off_brightness == 200
+
+
+@patch(
+    "zigpy.zcl.clusters.general.LevelControl.request",
+    new=AsyncMock(return_value=[sentinel.data, zcl_f.Status.SUCCESS]),
+)
+@patch(
+    "zigpy.zcl.clusters.general.OnOff.request",
+    new=AsyncMock(return_value=[sentinel.data, zcl_f.Status.SUCCESS]),
+)
+async def test_group_member_added_during_transition_counts_after_it(
+    zha_gateway: Gateway,
+) -> None:
+    """Test that a member added during the group's transition counts once it ends.
+
+    With `group_members_assume_state`, the members already have the state the
+    group set when the transition ends, so refreshing them changes nothing. The
+    group has to recompute its state from the new members itself.
+    """
+
+    coordinator = await coordinator_mock(zha_gateway)
+    device_light_1 = await device_light_1_mock(zha_gateway)
+    device_light_2 = await device_light_2_mock(zha_gateway)
+    device_light_3 = await device_light_3_mock(zha_gateway)
+
+    zha_gateway.coordinator_zha_device = coordinator
+    coordinator._zha_gateway = zha_gateway
+    device_light_1._zha_gateway = zha_gateway
+    device_light_2._zha_gateway = zha_gateway
+    device_light_3._zha_gateway = zha_gateway
+
+    members = [
+        GroupMemberReference(ieee=device_light_1.ieee, endpoint_id=1),
+        GroupMemberReference(ieee=device_light_2.ieee, endpoint_id=1),
+    ]
+    zha_group: Group = await zha_gateway.async_create_zigpy_group("Test Group", members)
+    await zha_gateway.async_block_till_done()
+
+    entity: GroupEntity = get_group_entity(zha_group, platform=Platform.LIGHT)
+    device_3_light_entity = get_entity(device_light_3, platform=Platform.LIGHT)
+
+    for device in (device_light_1, device_light_2, device_light_3):
+        await send_attributes_report(
+            zha_gateway,
+            device.device.endpoints[1].on_off,
+            {general.OnOff.AttributeDefs.on_off.id: 1},
+        )
+    await zha_gateway.async_block_till_done()
+    # group member updates are debounced
+    await asyncio.sleep(0.1)
+    await zha_gateway.async_block_till_done()
+    assert bool(entity.state.on) is True
+
+    await entity.async_turn_off(transition=1)
+    await zha_gateway.async_block_till_done()
+    assert entity.is_transitioning
+    assert bool(entity.state.on) is False
+
+    # the members report that they are off (buffered during the transition)
+    for device in (device_light_1, device_light_2):
+        await send_attributes_report(
+            zha_gateway,
+            device.device.endpoints[1].on_off,
+            {general.OnOff.AttributeDefs.on_off.id: 0},
+        )
+    await zha_gateway.async_block_till_done()
+    # let the debounced group update from the members assuming the state run
+    await asyncio.sleep(0.1)
+    await zha_gateway.async_block_till_done()
+    assert entity.is_transitioning
+    assert bool(entity.state.on) is False
+
+    # a light that is on, and didn't get the group's off command, joins the group
+    await zha_group.async_add_members(
+        [GroupMemberReference(ieee=device_light_3.ieee, endpoint_id=1)]
+    )
+    await zha_gateway.async_block_till_done()
+    assert get_group_entity(zha_group, platform=Platform.LIGHT) is entity
+    assert bool(device_3_light_entity.state.on) is True
+    assert entity.is_transitioning
+    assert bool(entity.state.on) is False
+
+    # once the transition (1 s + 0.5 s) has ended, the new member counts
+    await asyncio.sleep(2)
+    await zha_gateway.async_block_till_done()
+    assert not entity.is_transitioning
+    assert bool(get_entity(device_light_1, platform=Platform.LIGHT).state.on) is False
+    assert bool(get_entity(device_light_2, platform=Platform.LIGHT).state.on) is False
+    assert bool(device_3_light_entity.state.on) is True
+    assert bool(entity.state.on) is True

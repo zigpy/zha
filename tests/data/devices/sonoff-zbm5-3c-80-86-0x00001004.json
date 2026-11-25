@@ -440,7 +440,7 @@
         "device_ieee": "ab:cd:ef:12:89:f3:cd:e6",
         "endpoint_id": 1,
         "available": true,
-        "child_device_id": null,
+        "child_device_id": "1",
         "group_id": null,
         "current_option": "Off",
         "enum": "StartUpOnOff",
@@ -469,7 +469,7 @@
         "device_ieee": "ab:cd:ef:12:89:f3:cd:e6",
         "endpoint_id": 2,
         "available": true,
-        "child_device_id": null,
+        "child_device_id": "2",
         "group_id": null,
         "current_option": "On",
         "enum": "StartUpOnOff",
@@ -498,7 +498,7 @@
         "device_ieee": "ab:cd:ef:12:89:f3:cd:e6",
         "endpoint_id": 3,
         "available": true,
-        "child_device_id": null,
+        "child_device_id": "3",
         "group_id": null,
         "current_option": "Off",
         "enum": "StartUpOnOff",
@@ -602,12 +602,12 @@
         "entity_category": null,
         "entity_registry_enabled_default": true,
         "enabled": true,
-        "primary": false,
+        "primary": true,
         "extra_state_attribute_names": [],
         "device_ieee": "ab:cd:ef:12:89:f3:cd:e6",
         "endpoint_id": 1,
         "available": true,
-        "child_device_id": null,
+        "child_device_id": "1",
         "group_id": null,
         "is_on": 0
       },
@@ -714,12 +714,12 @@
         "entity_category": null,
         "entity_registry_enabled_default": true,
         "enabled": true,
-        "primary": false,
+        "primary": true,
         "extra_state_attribute_names": [],
         "device_ieee": "ab:cd:ef:12:89:f3:cd:e6",
         "endpoint_id": 2,
         "available": true,
-        "child_device_id": null,
+        "child_device_id": "2",
         "group_id": null,
         "is_on": 1
       },
@@ -736,12 +736,12 @@
         "entity_category": null,
         "entity_registry_enabled_default": true,
         "enabled": true,
-        "primary": false,
+        "primary": true,
         "extra_state_attribute_names": [],
         "device_ieee": "ab:cd:ef:12:89:f3:cd:e6",
         "endpoint_id": 3,
         "available": true,
-        "child_device_id": null,
+        "child_device_id": "3",
         "group_id": null,
         "is_on": 0
       }
@@ -778,7 +778,41 @@
       }
     ]
   },
-  "child_devices": [],
+  "child_devices": [
+    {
+      "id": "1",
+      "endpoint_ids": [
+        1
+      ],
+      "translation_key": "channel",
+      "translation_placeholders": {
+        "index": "1"
+      },
+      "fallback_name": "Channel 1"
+    },
+    {
+      "id": "2",
+      "endpoint_ids": [
+        2
+      ],
+      "translation_key": "channel",
+      "translation_placeholders": {
+        "index": "2"
+      },
+      "fallback_name": "Channel 2"
+    },
+    {
+      "id": "3",
+      "endpoint_ids": [
+        3
+      ],
+      "translation_key": "channel",
+      "translation_placeholders": {
+        "index": "3"
+      },
+      "fallback_name": "Channel 3"
+    }
+  ],
   "neighbors": [],
   "routes": []
 }
