@@ -1103,7 +1103,7 @@ async def test_group_state_follows_membership_changes(zha_gateway: Gateway) -> N
 
     # removing it leaves two members that are both off, so the group turns off
     await zha_group.async_remove_members([member_3])
-    await asyncio.sleep(1)
+    # recomputed synchronously, before the group event, not by a debounced update
     await zha_gateway.async_block_till_done()
     assert len(zha_group.members) == 2
     assert get_group_entity(zha_group, platform=Platform.SWITCH) is entity
@@ -1111,7 +1111,7 @@ async def test_group_state_follows_membership_changes(zha_gateway: Gateway) -> N
 
     # adding it back while it is still on turns the group on again
     await zha_group.async_add_members([member_3])
-    await asyncio.sleep(1)
+    # recomputed synchronously, before the group event, not by a debounced update
     await zha_gateway.async_block_till_done()
     assert len(zha_group.members) == 3
     assert get_group_entity(zha_group, platform=Platform.SWITCH) is entity
