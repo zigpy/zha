@@ -1366,6 +1366,7 @@ class LightGroup(BaseSharedLight, GroupEntity):
         self._level_cluster = group.zigpy_group.endpoint[LevelControl.cluster_id]
         self._color_cluster = group.zigpy_group.endpoint[Color.cluster_id]
         self._identify_cluster = group.zigpy_group.endpoint[Identify.cluster_id]
+        self._members_changed_during_transition: bool = False
 
         self._debounced_member_refresh: Debouncer | None = Debouncer(
             self.group.gateway,
@@ -1467,12 +1468,13 @@ class LightGroup(BaseSharedLight, GroupEntity):
         """Recompute the state after members were added to or removed from the group.
 
         Not during the group's own transition: its members' reports are buffered
-        until the transition ends, when the group refreshes its members and
-        recomputes its state. Recomputing it now from their pre-transition state
-        would turn a group that is fading out back on and drop the brightness it
-        saved for the next turn on.
+        until the transition ends, and recomputing the state now from their
+        pre-transition state would turn a group that is fading out back on and
+        drop the brightness it saved for the next turn on. The state is recomputed
+        once the group has refreshed its members at the end of the transition.
         """
         if self.is_transitioning:
+            self._members_changed_during_transition = True
             return
         super().on_members_changed()
 
@@ -1568,6 +1570,12 @@ class LightGroup(BaseSharedLight, GroupEntity):
         """Force the update of members to ensure the states are correct for bulbs that don't report their state."""
         for platform_entity in self.group.get_platform_entities(Light.PLATFORM):
             await platform_entity.async_update()
+
+        # A member change during the transition was not reflected yet, and the
+        # refresh above only updates the group if a member's state changed
+        if self._members_changed_during_transition and not self.is_transitioning:
+            self._members_changed_during_transition = False
+            self.update()
 
     def _make_members_assume_group_state(
         self,
