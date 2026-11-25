@@ -8,7 +8,7 @@
   "friendly_model": "TS0601",
   "name": "_TZE204_vmcgja59 TS0601",
   "quirk_applied": true,
-  "quirk_class": "zhaquirks.tuya.ts0601_switch:TuyaSwitchX16GP",
+  "quirk_class": "zhaquirks.tuya.ts0601_switch:(_TZE204_vmcgja59 / TS0601)",
   "exposes_features": [],
   "manufacturer_code": 4417,
   "power_source": "Mains",
@@ -611,6 +611,7 @@
         "device_ieee": "ab:cd:ef:12:31:d2:60:17",
         "endpoint_id": null,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "native_value": null,
         "suggested_display_precision": null,
@@ -634,6 +635,7 @@
         "device_ieee": "ab:cd:ef:12:31:d2:60:17",
         "endpoint_id": null,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "native_value": null,
         "suggested_display_precision": null,
@@ -659,6 +661,7 @@
         "device_ieee": "ab:cd:ef:12:31:d2:60:17",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "installed_version": null,
         "in_progress": false,
@@ -671,6 +674,7 @@
       }
     ]
   },
+  "child_devices": [],
   "neighbors": [],
   "routes": []
 }

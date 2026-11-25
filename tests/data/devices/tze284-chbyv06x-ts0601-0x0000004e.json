@@ -247,6 +247,7 @@
         "device_ieee": "ab:cd:ef:12:a7:d0:58:f5",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "is_on": false,
         "attribute_name": "zone_status"
@@ -269,6 +270,7 @@
         "device_ieee": "ab:cd:ef:12:a7:d0:58:f5",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "is_on": false,
         "attribute_name": "preheat_active"
@@ -291,6 +293,7 @@
         "device_ieee": "ab:cd:ef:12:a7:d0:58:f5",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "is_on": false,
         "attribute_name": "silence_alarm"
@@ -315,6 +318,7 @@
         "device_ieee": "ab:cd:ef:12:a7:d0:58:f5",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "native_value": 180,
         "mode": "auto",
@@ -343,6 +347,7 @@
         "device_ieee": "ab:cd:ef:12:a7:d0:58:f5",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "current_option": "Ringtone 01",
         "enum": "TuyaSirenRingtone",
@@ -374,6 +379,7 @@
         "device_ieee": "ab:cd:ef:12:a7:d0:58:f5",
         "endpoint_id": null,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "native_value": 168,
         "suggested_display_precision": null,
@@ -397,6 +403,7 @@
         "device_ieee": "ab:cd:ef:12:a7:d0:58:f5",
         "endpoint_id": null,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "native_value": -58,
         "suggested_display_precision": null,
@@ -420,6 +427,7 @@
         "device_ieee": "ab:cd:ef:12:a7:d0:58:f5",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "native_value": 0.0,
         "suggested_display_precision": null,
@@ -443,6 +451,7 @@
         "device_ieee": "ab:cd:ef:12:a7:d0:58:f5",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "native_value": "Success",
         "suggested_display_precision": null,
@@ -474,6 +483,7 @@
         "device_ieee": "ab:cd:ef:12:a7:d0:58:f5",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "is_on": false,
         "inverted": false,
@@ -503,6 +513,7 @@
         "device_ieee": "ab:cd:ef:12:a7:d0:58:f5",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "installed_version": "0x0000004e",
         "in_progress": false,
@@ -515,6 +526,7 @@
       }
     ]
   },
+  "child_devices": [],
   "neighbors": [],
   "routes": []
 }

@@ -23,6 +23,7 @@ from zigpy.zcl.clusters import general, homeautomation, hvac, measurement, smart
 from zigpy.zcl.clusters.general import AnalogInput, PowerConfiguration
 from zigpy.zcl.clusters.general_const import AnalogInputType, ApplicationType
 from zigpy.zcl.clusters.manufacturer_specific import ManufacturerSpecificCluster
+from zigpy.zcl.foundation import ZCLAttributeDef
 
 from tests.common import (
     SIG_EP_INPUT,
@@ -139,7 +140,11 @@ async def async_test_humidity(
     zha_gateway: Gateway, cluster: Cluster, entity: PlatformEntity
 ) -> None:
     """Test humidity sensor."""
-    await send_attributes_report(zha_gateway, cluster, {1: 1, 0: 1000, 2: 100})
+    await send_attributes_report(
+        zha_gateway,
+        cluster,
+        {measurement.RelativeHumidity.AttributeDefs.measured_value: 1000},
+    )
     assert_state(entity, 10.0, "%")
 
 
@@ -147,10 +152,18 @@ async def async_test_flow(
     zha_gateway: Gateway, cluster: Cluster, entity: PlatformEntity
 ) -> None:
     """Test flow sensor."""
-    await send_attributes_report(zha_gateway, cluster, {1: 1, 0: 40})
+    await send_attributes_report(
+        zha_gateway,
+        cluster,
+        {measurement.FlowMeasurement.AttributeDefs.measured_value: 40},
+    )
     assert_state(entity, 4.0, "m³/h")
 
-    await send_attributes_report(zha_gateway, cluster, {1: 1, 0: 0xFFFF})
+    await send_attributes_report(
+        zha_gateway,
+        cluster,
+        {measurement.FlowMeasurement.AttributeDefs.measured_value: 0xFFFF},
+    )
     assert_state(entity, None, "m³/h")
 
 
@@ -159,7 +172,11 @@ async def async_test_temperature(
 ) -> None:
     """Test temperature sensor."""
     assert entity.state.extra_state_attribute_names == frozenset()
-    await send_attributes_report(zha_gateway, cluster, {1: 1, 0: 2900, 2: 100})
+    await send_attributes_report(
+        zha_gateway,
+        cluster,
+        {measurement.TemperatureMeasurement.AttributeDefs.measured_value: 2900},
+    )
     assert_state(entity, 29.0, "°C")
 
 
@@ -167,10 +184,22 @@ async def async_test_pressure(
     zha_gateway: Gateway, cluster: Cluster, entity: PlatformEntity
 ) -> None:
     """Test pressure sensor."""
-    await send_attributes_report(zha_gateway, cluster, {1: 1, 0: 1000, 2: 10000})
+    await send_attributes_report(
+        zha_gateway,
+        cluster,
+        {measurement.PressureMeasurement.AttributeDefs.measured_value: 1000},
+    )
     assert_state(entity, 1000, "hPa")
 
-    await send_attributes_report(zha_gateway, cluster, {0: 1000, 20: -1, 16: 10000})
+    await send_attributes_report(
+        zha_gateway,
+        cluster,
+        {
+            measurement.PressureMeasurement.AttributeDefs.measured_value: 1000,
+            measurement.PressureMeasurement.AttributeDefs.scale: -1,
+            measurement.PressureMeasurement.AttributeDefs.scaled_value: 10000,
+        },
+    )
     assert_state(entity, 1000, "hPa")
 
 
@@ -178,10 +207,18 @@ async def async_test_illuminance(
     zha_gateway: Gateway, cluster: Cluster, entity: PlatformEntity
 ) -> None:
     """Test illuminance sensor."""
-    await send_attributes_report(zha_gateway, cluster, {1: 1, 0: 10, 2: 20})
+    await send_attributes_report(
+        zha_gateway,
+        cluster,
+        {measurement.IlluminanceMeasurement.AttributeDefs.measured_value: 10},
+    )
     assert_state(entity, 1.0, "lx")
 
-    await send_attributes_report(zha_gateway, cluster, {0: 0xFFFF})
+    await send_attributes_report(
+        zha_gateway,
+        cluster,
+        {measurement.IlluminanceMeasurement.AttributeDefs.measured_value: 0xFFFF},
+    )
     assert_state(entity, None, "lx")
 
 
@@ -195,13 +232,22 @@ async def async_test_metering(
         "zcl_unit_of_measurement",
     }
     await send_attributes_report(
-        zha_gateway, cluster, {1025: 1, 1024: 12345, 1026: 100}
+        zha_gateway,
+        cluster,
+        {smartenergy.Metering.AttributeDefs.instantaneous_demand: 12345},
     )
     assert_state(entity, 12345.0, None)
     assert entity.state.status == "NO_ALARMS"
     assert entity.state.device_type == "Electric Metering"
 
-    await send_attributes_report(zha_gateway, cluster, {1024: 12346, "status": 64 + 8})
+    await send_attributes_report(
+        zha_gateway,
+        cluster,
+        {
+            smartenergy.Metering.AttributeDefs.instantaneous_demand: 12346,
+            smartenergy.Metering.AttributeDefs.status: 64 + 8,
+        },
+    )
     assert_state(entity, 12346.0, None)
     assert entity.state.status in (
         "SERVICE_DISCONNECT|POWER_FAILURE",
@@ -249,7 +295,9 @@ async def async_test_smart_energy_summation_delivered(
         "zcl_unit_of_measurement",
     }
     await send_attributes_report(
-        zha_gateway, cluster, {1025: 1, "current_summ_delivered": 12321, 1026: 100}
+        zha_gateway,
+        cluster,
+        {smartenergy.Metering.AttributeDefs.current_summ_delivered: 12321},
     )
     assert_state(entity, 12.321, UnitOfEnergy.KILO_WATT_HOUR)
     assert entity.state.status == "NO_ALARMS"
@@ -263,7 +311,9 @@ async def async_test_smart_energy_summation_received(
     """Test SmartEnergy Summation received sensor."""
 
     await send_attributes_report(
-        zha_gateway, cluster, {1025: 1, "current_summ_received": 12321, 1026: 100}
+        zha_gateway,
+        cluster,
+        {smartenergy.Metering.AttributeDefs.current_summ_received: 12321},
     )
     assert_state(entity, 12.321, UnitOfEnergy.KILO_WATT_HOUR)
     assert entity.state.status == "NO_ALARMS"
@@ -277,7 +327,9 @@ async def async_test_smart_energy_summation(
     """Test SmartEnergy Summation delivered sensro."""
 
     await send_attributes_report(
-        zha_gateway, cluster, {1025: 1, "current_summ_delivered": 12321, 1026: 100}
+        zha_gateway,
+        cluster,
+        {smartenergy.Metering.AttributeDefs.current_summ_delivered: 12321},
     )
     assert_state(entity, 12.32, "m³")
     assert entity.state.status == "NO_ALARMS"
@@ -347,28 +399,20 @@ async def async_test_electrical_measurement(
     """Test electrical measurement sensor."""
     # update divisor cached value
     await send_attributes_report(zha_gateway, cluster, {"ac_power_divisor": 1})
-    await send_attributes_report(
-        zha_gateway, cluster, {0: 1, EMAttrs.active_power.id: 100}
-    )
+    await send_attributes_report(zha_gateway, cluster, {EMAttrs.active_power: 100})
     assert_state(entity, 100, "W")
 
-    await send_attributes_report(
-        zha_gateway, cluster, {0: 1, EMAttrs.active_power.id: 99}
-    )
+    await send_attributes_report(zha_gateway, cluster, {EMAttrs.active_power: 99})
     assert_state(entity, 99, "W")
 
     await send_attributes_report(zha_gateway, cluster, {"ac_power_divisor": 10})
-    await send_attributes_report(
-        zha_gateway, cluster, {0: 1, EMAttrs.active_power.id: 1000}
-    )
+    await send_attributes_report(zha_gateway, cluster, {EMAttrs.active_power: 1000})
     assert_state(entity, 100, "W")
 
-    await send_attributes_report(
-        zha_gateway, cluster, {0: 1, EMAttrs.active_power.id: 99}
-    )
+    await send_attributes_report(zha_gateway, cluster, {EMAttrs.active_power: 99})
     assert_state(entity, 9.9, "W")
 
-    await send_attributes_report(zha_gateway, cluster, {0: 1, 0x050D: 88})
+    await send_attributes_report(zha_gateway, cluster, {EMAttrs.active_power_max: 88})
     assert entity.state.max_value == 8.8
     assert entity.state.max_attribute_name == "active_power_max"
 
@@ -385,17 +429,17 @@ async def async_test_em_apparent_power(
     """Test electrical measurement Apparent Power sensor."""
     # update divisor cached value
     await send_attributes_report(zha_gateway, cluster, {"ac_power_divisor": 1})
-    await send_attributes_report(zha_gateway, cluster, {0: 1, 0x050F: 100})
+    await send_attributes_report(zha_gateway, cluster, {EMAttrs.apparent_power: 100})
     assert_state(entity, 100, "VA")
 
-    await send_attributes_report(zha_gateway, cluster, {0: 1, 0x050F: 99})
+    await send_attributes_report(zha_gateway, cluster, {EMAttrs.apparent_power: 99})
     assert_state(entity, 99, "VA")
 
     await send_attributes_report(zha_gateway, cluster, {"ac_power_divisor": 10})
-    await send_attributes_report(zha_gateway, cluster, {0: 1, 0x050F: 1000})
+    await send_attributes_report(zha_gateway, cluster, {EMAttrs.apparent_power: 1000})
     assert_state(entity, 100, "VA")
 
-    await send_attributes_report(zha_gateway, cluster, {0: 1, 0x050F: 99})
+    await send_attributes_report(zha_gateway, cluster, {EMAttrs.apparent_power: 99})
     assert_state(entity, 9.9, "VA")
 
 
@@ -407,41 +451,40 @@ async def async_test_em_power_factor(
 
     # update divisor cached value
     await send_attributes_report(zha_gateway, cluster, {"ac_power_divisor": 1})
-    await send_attributes_report(zha_gateway, cluster, {0: 1, 0x0510: 100, 10: 1000})
+    await send_attributes_report(zha_gateway, cluster, {EMAttrs.power_factor: 100})
     assert_state(entity, 100, PERCENTAGE)
 
-    await send_attributes_report(zha_gateway, cluster, {0: 1, 0x0510: 99, 10: 1000})
+    await send_attributes_report(zha_gateway, cluster, {EMAttrs.power_factor: 99})
     assert_state(entity, 99, PERCENTAGE)
 
     await send_attributes_report(zha_gateway, cluster, {"ac_power_divisor": 10})
-    await send_attributes_report(zha_gateway, cluster, {0: 1, 0x0510: 100, 10: 5000})
+    await send_attributes_report(zha_gateway, cluster, {EMAttrs.power_factor: 100})
     assert_state(entity, 100, PERCENTAGE)
 
-    await send_attributes_report(zha_gateway, cluster, {0: 1, 0x0510: 99, 10: 5000})
+    await send_attributes_report(zha_gateway, cluster, {EMAttrs.power_factor: 99})
     assert_state(entity, 99, PERCENTAGE)
 
 
 async def async_test_em_rms_current(
-    current_attrid: int,
-    current_max_attrid: int,
-    current_max_attr_name: str,
+    current_attr: ZCLAttributeDef,
+    current_max_attr: ZCLAttributeDef,
     zha_gateway: Gateway,
     cluster: Cluster,
     entity: PlatformEntity,
 ) -> None:
     """Test electrical measurement RMS Current sensor."""
 
-    await send_attributes_report(zha_gateway, cluster, {0: 1, current_attrid: 1234})
+    await send_attributes_report(zha_gateway, cluster, {current_attr: 1234})
     assert_state(entity, 1.234, "A")
 
     await send_attributes_report(zha_gateway, cluster, {"ac_current_divisor": 10})
-    await send_attributes_report(zha_gateway, cluster, {0: 1, current_attrid: 236})
+    await send_attributes_report(zha_gateway, cluster, {current_attr: 236})
     assert_state(entity, 23.6, "A")
 
-    await send_attributes_report(zha_gateway, cluster, {0: 1, current_attrid: 1236})
+    await send_attributes_report(zha_gateway, cluster, {current_attr: 1236})
     assert_state(entity, 123.6, "A")
 
-    await send_attributes_report(zha_gateway, cluster, {0: 1, current_max_attrid: 88})
+    await send_attributes_report(zha_gateway, cluster, {current_max_attr: 88})
     assert entity.state.max_value == 8.8
 
 
@@ -454,17 +497,17 @@ async def async_test_em_rms_voltage(
         "rms_voltage_max",
     }
 
-    await send_attributes_report(zha_gateway, cluster, {0: 1, 0x0505: 1234})
+    await send_attributes_report(zha_gateway, cluster, {EMAttrs.rms_voltage: 1234})
     assert_state(entity, 123.4, "V")
 
-    await send_attributes_report(zha_gateway, cluster, {0: 1, 0x0505: 234})
+    await send_attributes_report(zha_gateway, cluster, {EMAttrs.rms_voltage: 234})
     assert_state(entity, 23.4, "V")
 
     await send_attributes_report(zha_gateway, cluster, {"ac_voltage_divisor": 100})
-    await send_attributes_report(zha_gateway, cluster, {0: 1, 0x0505: 2236})
+    await send_attributes_report(zha_gateway, cluster, {EMAttrs.rms_voltage: 2236})
     assert_state(entity, 22.36, "V")
 
-    await send_attributes_report(zha_gateway, cluster, {0: 1, 0x0507: 888})
+    await send_attributes_report(zha_gateway, cluster, {EMAttrs.rms_voltage_max: 888})
     assert entity.state.max_value == 8.88
 
 
@@ -477,7 +520,11 @@ async def async_test_powerconfiguration(
         "battery_quantity",
         "battery_size",
     }
-    await send_attributes_report(zha_gateway, cluster, {33: 98})
+    await send_attributes_report(
+        zha_gateway,
+        cluster,
+        {PowerConfiguration.AttributeDefs.battery_percentage_remaining: 98},
+    )
     assert_state(entity, 49, "%")
     assert entity.state.battery_voltage == 2.9
     assert entity.state.battery_quantity == 3
@@ -487,7 +534,9 @@ async def async_test_powerconfiguration(
         "battery_quantity": 3,
         "battery_size": "AAA",
     }
-    await send_attributes_report(zha_gateway, cluster, {32: 20})
+    await send_attributes_report(
+        zha_gateway, cluster, {PowerConfiguration.AttributeDefs.battery_voltage: 20}
+    )
     assert entity.state.battery_voltage == 2.0
 
 
@@ -495,10 +544,18 @@ async def async_test_powerconfiguration2(
     zha_gateway: Gateway, cluster: Cluster, entity: PlatformEntity
 ):
     """Test powerconfiguration/battery sensor."""
-    await send_attributes_report(zha_gateway, cluster, {33: 255})
+    await send_attributes_report(
+        zha_gateway,
+        cluster,
+        {PowerConfiguration.AttributeDefs.battery_percentage_remaining: 255},
+    )
     assert_state(entity, None, "%")
 
-    await send_attributes_report(zha_gateway, cluster, {33: 98})
+    await send_attributes_report(
+        zha_gateway,
+        cluster,
+        {PowerConfiguration.AttributeDefs.battery_percentage_remaining: 98},
+    )
     assert_state(entity, 49, "%")
 
 
@@ -506,7 +563,11 @@ async def async_test_device_temperature(
     zha_gateway: Gateway, cluster: Cluster, entity: PlatformEntity
 ) -> None:
     """Test temperature sensor."""
-    await send_attributes_report(zha_gateway, cluster, {0: 2900})
+    await send_attributes_report(
+        zha_gateway,
+        cluster,
+        {general.DeviceTemperature.AttributeDefs.current_temperature: 2900},
+    )
     assert_state(entity, 29.0, "°C")
 
 
@@ -517,7 +578,7 @@ async def async_test_setpoint_change_source(
     await send_attributes_report(
         zha_gateway,
         cluster,
-        {hvac.Thermostat.AttributeDefs.setpoint_change_source.id: 0x01},
+        {hvac.Thermostat.AttributeDefs.setpoint_change_source: 0x01},
     )
     assert entity.state.native_value == "Schedule"
     assert entity.state.options == ["Manual", "Schedule", "External"]
@@ -528,7 +589,7 @@ async def async_test_pi_heating_demand(
 ):
     """Test pi heating demand is correctly returned."""
     await send_attributes_report(
-        zha_gateway, cluster, {hvac.Thermostat.AttributeDefs.pi_heating_demand.id: 1}
+        zha_gateway, cluster, {hvac.Thermostat.AttributeDefs.pi_heating_demand: 1}
     )
     assert_state(entity, 1, "%")
 
@@ -540,7 +601,7 @@ async def async_test_change_source_timestamp(
     await send_attributes_report(
         zha_gateway,
         cluster,
-        {hvac.Thermostat.AttributeDefs.setpoint_change_source_timestamp.id: 781355715},
+        {hvac.Thermostat.AttributeDefs.setpoint_change_source_timestamp: 781355715},
     )
     assert entity.state.native_value == datetime(2024, 10, 4, 11, 15, 15, tzinfo=UTC)
 
@@ -551,14 +612,14 @@ async def async_test_em_dc_voltage(
     """Test electrical measurement DC Voltage sensor."""
     assert entity.state.extra_state_attribute_names == {"measurement_type"}
 
-    await send_attributes_report(zha_gateway, cluster, {0: 1, 0x0100: 1234})
+    await send_attributes_report(zha_gateway, cluster, {EMAttrs.dc_voltage: 1234})
     assert_state(entity, 123.4, "V")
 
-    await send_attributes_report(zha_gateway, cluster, {0: 1, 0x0100: 234})
+    await send_attributes_report(zha_gateway, cluster, {EMAttrs.dc_voltage: 234})
     assert_state(entity, 23.4, "V")
 
     await send_attributes_report(zha_gateway, cluster, {"dc_voltage_divisor": 100})
-    await send_attributes_report(zha_gateway, cluster, {0: 1, 0x0100: 2236})
+    await send_attributes_report(zha_gateway, cluster, {EMAttrs.dc_voltage: 2236})
     assert_state(entity, 22.36, "V")
 
 
@@ -567,14 +628,14 @@ async def async_test_em_dc_current(
 ) -> None:
     """Test electrical measurement DC Current sensor."""
 
-    await send_attributes_report(zha_gateway, cluster, {0: 1, 0x0103: 1234})
+    await send_attributes_report(zha_gateway, cluster, {EMAttrs.dc_current: 1234})
     assert_state(entity, 1.234, "A")
 
     await send_attributes_report(zha_gateway, cluster, {"dc_current_divisor": 10})
-    await send_attributes_report(zha_gateway, cluster, {0: 1, 0x0103: 236})
+    await send_attributes_report(zha_gateway, cluster, {EMAttrs.dc_current: 236})
     assert_state(entity, 23.6, "A")
 
-    await send_attributes_report(zha_gateway, cluster, {0: 1, 0x0103: 1236})
+    await send_attributes_report(zha_gateway, cluster, {EMAttrs.dc_current: 1236})
     assert_state(entity, 123.6, "A")
 
 
@@ -584,17 +645,17 @@ async def async_test_em_dc_power(
     """Test electrical measurement DC Power sensor."""
     # update divisor cached value
     await send_attributes_report(zha_gateway, cluster, {"dc_power_divisor": 1})
-    await send_attributes_report(zha_gateway, cluster, {0: 1, 0x0106: 100})
+    await send_attributes_report(zha_gateway, cluster, {EMAttrs.dc_power: 100})
     assert_state(entity, 100, "W")
 
-    await send_attributes_report(zha_gateway, cluster, {0: 1, 0x0106: 99})
+    await send_attributes_report(zha_gateway, cluster, {EMAttrs.dc_power: 99})
     assert_state(entity, 99, "W")
 
     await send_attributes_report(zha_gateway, cluster, {"dc_power_divisor": 10})
-    await send_attributes_report(zha_gateway, cluster, {0: 1, 0x0106: 1000})
+    await send_attributes_report(zha_gateway, cluster, {EMAttrs.dc_power: 1000})
     assert_state(entity, 100, "W")
 
-    await send_attributes_report(zha_gateway, cluster, {0: 1, 0x0106: 99})
+    await send_attributes_report(zha_gateway, cluster, {EMAttrs.dc_power: 99})
     assert_state(entity, 9.9, "W")
 
 
@@ -704,14 +765,20 @@ async def async_test_em_dc_power(
         (
             homeautomation.ElectricalMeasurement.cluster_id,
             sensor.ElectricalMeasurementRMSCurrent,
-            partial(async_test_em_rms_current, 0x0508, 0x050A, "rms_current_max"),
+            partial(
+                async_test_em_rms_current, EMAttrs.rms_current, EMAttrs.rms_current_max
+            ),
             {"ac_current_divisor": 1000, "ac_current_multiplier": 1},
             {"active_power", "apparent_power", "rms_voltage"},
         ),
         (
             homeautomation.ElectricalMeasurement.cluster_id,
             sensor.ElectricalMeasurementRMSCurrentPhB,
-            partial(async_test_em_rms_current, 0x0908, 0x090A, "rms_current_max_ph_b"),
+            partial(
+                async_test_em_rms_current,
+                EMAttrs.rms_current_ph_b,
+                EMAttrs.rms_current_max_ph_b,
+            ),
             {
                 "ac_current_divisor": 1000,
                 "ac_current_multiplier": 1,
@@ -722,7 +789,11 @@ async def async_test_em_dc_power(
         (
             homeautomation.ElectricalMeasurement.cluster_id,
             sensor.ElectricalMeasurementRMSCurrentPhC,
-            partial(async_test_em_rms_current, 0x0A08, 0x0A0A, "rms_current_max_ph_c"),
+            partial(
+                async_test_em_rms_current,
+                EMAttrs.rms_current_ph_c,
+                EMAttrs.rms_current_max_ph_c,
+            ),
             {
                 "ac_current_divisor": 1000,
                 "ac_current_multiplier": 1,
@@ -1020,21 +1091,21 @@ async def test_electrical_measurement_init(zha_gateway: Gateway) -> None:
     await send_attributes_report(
         zha_gateway,
         cluster,
-        {EMAttrs.active_power.id: 100},
+        {EMAttrs.active_power: 100},
     )
     assert entity.state.native_value == 100
 
     await send_attributes_report(
         zha_gateway,
         cluster,
-        {EMAttrs.active_power.id: 30, EMAttrs.ac_power_divisor.id: 10},
+        {EMAttrs.active_power: 30, EMAttrs.ac_power_divisor: 10},
     )
     assert entity.state.native_value == 3.0
 
     await send_attributes_report(
         zha_gateway,
         cluster,
-        {EMAttrs.active_power.id: 30, EMAttrs.ac_power_multiplier.id: 20},
+        {EMAttrs.active_power: 30, EMAttrs.ac_power_multiplier: 20},
     )
     assert entity.state.native_value == 60.0
 
@@ -2053,7 +2124,7 @@ async def test_ignore_non_value(zha_gateway: Gateway) -> None:
     await send_attributes_report(
         zha_gateway,
         cluster,
-        {measurement.TemperatureMeasurement.AttributeDefs.measured_value.id: 3000},
+        {measurement.TemperatureMeasurement.AttributeDefs.measured_value: 3000},
     )
     assert entity.state.native_value == 30.0
 
@@ -2061,7 +2132,7 @@ async def test_ignore_non_value(zha_gateway: Gateway) -> None:
     await send_attributes_report(
         zha_gateway,
         cluster,
-        {measurement.TemperatureMeasurement.AttributeDefs.measured_value.id: -0x8000},
+        {measurement.TemperatureMeasurement.AttributeDefs.measured_value: -0x8000},
     )
     assert entity.state.native_value is None
 
@@ -2111,9 +2182,7 @@ async def test_ignore_nan_value(zha_gateway: Gateway) -> None:
     await send_attributes_report(
         zha_gateway,
         cluster,
-        {
-            measurement.CarbonMonoxideConcentration.AttributeDefs.measured_value.id: 0.001
-        },
+        {measurement.CarbonMonoxideConcentration.AttributeDefs.measured_value: 0.001},
     )
     assert entity.state.native_value == 1000.0
 
@@ -2122,7 +2191,7 @@ async def test_ignore_nan_value(zha_gateway: Gateway) -> None:
         zha_gateway,
         cluster,
         {
-            measurement.CarbonMonoxideConcentration.AttributeDefs.measured_value.id: float(
+            measurement.CarbonMonoxideConcentration.AttributeDefs.measured_value: float(
                 "nan"
             ),
         },

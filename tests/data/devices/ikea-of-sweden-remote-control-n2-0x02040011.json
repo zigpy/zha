@@ -237,12 +237,119 @@
         "device_ieee": "ab:cd:ef:12:6b:e7:d0:70",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "command": "identify",
         "args": [
           5
         ],
         "kwargs": {}
+      }
+    ],
+    "event": [
+      {
+        "fallback_name": "Left button",
+        "unique_id": "ab:cd:ef:12:6b:e7:d0:70-1-button_left",
+        "migrate_unique_ids": [],
+        "platform": "event",
+        "class_name": "ZhaEventButton",
+        "translation_key": "left_button",
+        "translation_placeholders": null,
+        "device_class": "button",
+        "state_class": null,
+        "entity_category": null,
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:6b:e7:d0:70",
+        "endpoint_id": 1,
+        "available": true,
+        "child_device_id": null,
+        "group_id": null,
+        "event_types": [
+          "press_end",
+          "long_press_start",
+          "long_press_end"
+        ]
+      },
+      {
+        "fallback_name": "Off button",
+        "unique_id": "ab:cd:ef:12:6b:e7:d0:70-1-button_off",
+        "migrate_unique_ids": [],
+        "platform": "event",
+        "class_name": "ZhaEventButton",
+        "translation_key": "off_button",
+        "translation_placeholders": null,
+        "device_class": "button",
+        "state_class": null,
+        "entity_category": null,
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:6b:e7:d0:70",
+        "endpoint_id": 1,
+        "available": true,
+        "child_device_id": null,
+        "group_id": null,
+        "event_types": [
+          "press_end",
+          "long_press_start",
+          "long_press_end"
+        ]
+      },
+      {
+        "fallback_name": "On button",
+        "unique_id": "ab:cd:ef:12:6b:e7:d0:70-1-button_on",
+        "migrate_unique_ids": [],
+        "platform": "event",
+        "class_name": "ZhaEventButton",
+        "translation_key": "on_button",
+        "translation_placeholders": null,
+        "device_class": "button",
+        "state_class": null,
+        "entity_category": null,
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:6b:e7:d0:70",
+        "endpoint_id": 1,
+        "available": true,
+        "child_device_id": null,
+        "group_id": null,
+        "event_types": [
+          "press_end",
+          "long_press_start",
+          "long_press_end"
+        ]
+      },
+      {
+        "fallback_name": "Right button",
+        "unique_id": "ab:cd:ef:12:6b:e7:d0:70-1-button_right",
+        "migrate_unique_ids": [],
+        "platform": "event",
+        "class_name": "ZhaEventButton",
+        "translation_key": "right_button",
+        "translation_placeholders": null,
+        "device_class": "button",
+        "state_class": null,
+        "entity_category": null,
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:6b:e7:d0:70",
+        "endpoint_id": 1,
+        "available": true,
+        "child_device_id": null,
+        "group_id": null,
+        "event_types": [
+          "press_end",
+          "long_press_start",
+          "long_press_end"
+        ]
       }
     ],
     "sensor": [
@@ -264,6 +371,7 @@
         "device_ieee": "ab:cd:ef:12:6b:e7:d0:70",
         "endpoint_id": null,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "native_value": null,
         "suggested_display_precision": null,
@@ -287,6 +395,7 @@
         "device_ieee": "ab:cd:ef:12:6b:e7:d0:70",
         "endpoint_id": null,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "native_value": null,
         "suggested_display_precision": null,
@@ -314,6 +423,7 @@
         "device_ieee": "ab:cd:ef:12:6b:e7:d0:70",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "native_value": 84.0,
         "suggested_display_precision": 0,
@@ -342,6 +452,7 @@
         "device_ieee": "ab:cd:ef:12:6b:e7:d0:70",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "installed_version": "0x02040011",
         "in_progress": false,
@@ -354,6 +465,7 @@
       }
     ]
   },
+  "child_devices": [],
   "neighbors": [],
   "routes": []
 }

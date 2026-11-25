@@ -223,12 +223,144 @@
         "device_ieee": "90:fd:9f:ff:fe:fe:d8:a1",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "command": "identify",
         "args": [
           5
         ],
         "kwargs": {}
+      }
+    ],
+    "event": [
+      {
+        "fallback_name": "Dim down button",
+        "unique_id": "90:fd:9f:ff:fe:fe:d8:a1-1-button_dim_down",
+        "migrate_unique_ids": [],
+        "platform": "event",
+        "class_name": "ZhaEventButton",
+        "translation_key": "dim_down_button",
+        "translation_placeholders": null,
+        "device_class": "button",
+        "state_class": null,
+        "entity_category": null,
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "90:fd:9f:ff:fe:fe:d8:a1",
+        "endpoint_id": 1,
+        "available": true,
+        "child_device_id": null,
+        "group_id": null,
+        "event_types": [
+          "press_end",
+          "long_press_start",
+          "long_press_end"
+        ]
+      },
+      {
+        "fallback_name": "Dim up button",
+        "unique_id": "90:fd:9f:ff:fe:fe:d8:a1-1-button_dim_up",
+        "migrate_unique_ids": [],
+        "platform": "event",
+        "class_name": "ZhaEventButton",
+        "translation_key": "dim_up_button",
+        "translation_placeholders": null,
+        "device_class": "button",
+        "state_class": null,
+        "entity_category": null,
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "90:fd:9f:ff:fe:fe:d8:a1",
+        "endpoint_id": 1,
+        "available": true,
+        "child_device_id": null,
+        "group_id": null,
+        "event_types": [
+          "press_end",
+          "long_press_start",
+          "long_press_end"
+        ]
+      },
+      {
+        "fallback_name": "Left button",
+        "unique_id": "90:fd:9f:ff:fe:fe:d8:a1-1-button_left",
+        "migrate_unique_ids": [],
+        "platform": "event",
+        "class_name": "ZhaEventButton",
+        "translation_key": "left_button",
+        "translation_placeholders": null,
+        "device_class": "button",
+        "state_class": null,
+        "entity_category": null,
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "90:fd:9f:ff:fe:fe:d8:a1",
+        "endpoint_id": 1,
+        "available": true,
+        "child_device_id": null,
+        "group_id": null,
+        "event_types": [
+          "press_end",
+          "long_press_start",
+          "long_press_end"
+        ]
+      },
+      {
+        "fallback_name": "Right button",
+        "unique_id": "90:fd:9f:ff:fe:fe:d8:a1-1-button_right",
+        "migrate_unique_ids": [],
+        "platform": "event",
+        "class_name": "ZhaEventButton",
+        "translation_key": "right_button",
+        "translation_placeholders": null,
+        "device_class": "button",
+        "state_class": null,
+        "entity_category": null,
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "90:fd:9f:ff:fe:fe:d8:a1",
+        "endpoint_id": 1,
+        "available": true,
+        "child_device_id": null,
+        "group_id": null,
+        "event_types": [
+          "press_end",
+          "long_press_start",
+          "long_press_end"
+        ]
+      },
+      {
+        "fallback_name": "Toggle button",
+        "unique_id": "90:fd:9f:ff:fe:fe:d8:a1-1-button_toggle",
+        "migrate_unique_ids": [],
+        "platform": "event",
+        "class_name": "ZhaEventButton",
+        "translation_key": "toggle_button",
+        "translation_placeholders": null,
+        "device_class": "button",
+        "state_class": null,
+        "entity_category": null,
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "90:fd:9f:ff:fe:fe:d8:a1",
+        "endpoint_id": 1,
+        "available": true,
+        "child_device_id": null,
+        "group_id": null,
+        "event_types": [
+          "press_start",
+          "long_press_start"
+        ]
       }
     ],
     "sensor": [
@@ -250,6 +382,7 @@
         "device_ieee": "90:fd:9f:ff:fe:fe:d8:a1",
         "endpoint_id": null,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "native_value": null,
         "suggested_display_precision": null,
@@ -273,6 +406,7 @@
         "device_ieee": "90:fd:9f:ff:fe:fe:d8:a1",
         "endpoint_id": null,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "native_value": null,
         "suggested_display_precision": null,
@@ -300,6 +434,7 @@
         "device_ieee": "90:fd:9f:ff:fe:fe:d8:a1",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "native_value": 16.0,
         "suggested_display_precision": 0,
@@ -328,6 +463,7 @@
         "device_ieee": "90:fd:9f:ff:fe:fe:d8:a1",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "installed_version": null,
         "in_progress": false,
@@ -340,6 +476,7 @@
       }
     ]
   },
+  "child_devices": [],
   "neighbors": [],
   "routes": []
 }
