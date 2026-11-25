@@ -19,6 +19,7 @@ from zigpy.profiles.zha import PROFILE_ID as ZHA_PROFILE_ID
 from zigpy.profiles.zll import PROFILE_ID as ZLL_PROFILE_ID
 from zigpy.types import ClusterId
 from zigpy.types.named import EUI64
+from zigpy.typing import UNDEFINED, UndefinedType
 import zigpy.zcl
 from zigpy.zcl import ReportingConfig
 from zigpy.zcl.foundation import ZCLAttributeDef
@@ -38,6 +39,7 @@ from zha.zigbee.store import (
 if TYPE_CHECKING:
     from zigpy.store import StoreNamespace
 
+    from zha.zigbee.child_device import ChildDevice
     from zha.zigbee.device import BaseDevice, Device
     from zha.zigbee.endpoint import Endpoint
     from zha.zigbee.group import Group
@@ -217,6 +219,8 @@ class BaseEntityState:
     device_ieee: EUI64 | None
     endpoint_id: int | None
     available: bool | None
+    # The id of the child device of `device_ieee` the entity belongs to, if any
+    child_device_id: str | None = None
 
     # For group entities
     group_id: int | None
@@ -357,6 +361,11 @@ class BaseEntity(LogMixin, EventBase):
     def primary_weight(self) -> int:
         """Return the primary weight of the entity."""
         return self._attr_primary_weight
+
+    @property
+    def child_device(self) -> ChildDevice | None:
+        """Return the child device the entity belongs to, if any."""
+        return None
 
     @property
     def fallback_name(self) -> str | None:
@@ -530,6 +539,11 @@ class PlatformEntity(BaseEntity):
 
     _migrate_platform_unique_ids: tuple[tuple[UniqueIdMigration, str]] | None = None
 
+    # Explicitly assigns the entity to a child device of its device by child device id,
+    # or keeps it on the main device with `None`. `UNDEFINED` derives it from the
+    # endpoint (see `zha.zigbee.child_device`).
+    _attr_child_device_id: str | None | UndefinedType = UNDEFINED
+
     # Fields of host-side state that no ZCL attribute holds, such as a light's
     # brightness before it was turned off. They are kept in the device's store and
     # restored when the entity is added. By default, field `x` is attribute `_x`.
@@ -548,6 +562,7 @@ class PlatformEntity(BaseEntity):
         entity_type: EntityType | None = None,
         primary: bool | None = None,
         initially_disabled: bool = False,
+        child_device_id: str | None | UndefinedType = UNDEFINED,
         **kwargs: Any,
     ):
         """Initialize the platform entity.
@@ -567,6 +582,7 @@ class PlatformEntity(BaseEntity):
             entity_type=entity_type,
             primary=primary,
             initially_disabled=initially_disabled,
+            child_device_id=child_device_id,
         )
 
         self._unique_id_base = unique_id
@@ -577,6 +593,7 @@ class PlatformEntity(BaseEntity):
         super().__init__(unique_id=unique_id, **kwargs)
 
         self._device: BaseDevice = device
+        self._child_device: ChildDevice | None = None
 
         # Persisted state is only saved once it has been loaded, so that the defaults
         # set in `__init__` never overwrite a stored record
@@ -597,6 +614,7 @@ class PlatformEntity(BaseEntity):
         entity_type: EntityType | None,
         primary: bool | None,
         initially_disabled: bool,
+        child_device_id: str | None | UndefinedType = UNDEFINED,
     ) -> None:
         """Apply the generic entity configuration keywords that are given."""
         if initially_disabled:
@@ -624,6 +642,9 @@ class PlatformEntity(BaseEntity):
         if primary is not None:
             self._attr_primary = primary
 
+        if child_device_id is not UNDEFINED:
+            self._attr_child_device_id = child_device_id
+
     @property
     def device(self) -> BaseDevice:
         """Return the device."""
@@ -647,10 +668,28 @@ class PlatformEntity(BaseEntity):
     @property
     def primary(self) -> bool:
         """Return if the entity is the primary device control."""
-        if self._attr_primary is not None:
-            return self._attr_primary
+        if self._attr_primary is False:
+            return False
 
-        return self._device.primary_entity is self
+        # An explicitly primary entity wins the election, unless it conflicts with
+        # another one on the same (child) device. Until its device has run the
+        # election (when the entity is added), no entity is primary.
+        return self._device.is_primary_entity(self)
+
+    @property
+    def explicit_child_device_id(self) -> str | None | UndefinedType:
+        """Return the explicitly assigned child device id (`None`: main device)."""
+        return self._attr_child_device_id
+
+    @property
+    def child_device(self) -> ChildDevice | None:
+        """Return the child device the entity belongs to, if any."""
+        return self._child_device
+
+    @child_device.setter
+    def child_device(self, child_device: ChildDevice | None) -> None:
+        """Set the child device the entity belongs to (set by its device)."""
+        self._child_device = child_device
 
     @cached_property
     def identifiers(self) -> PlatformEntityIdentifiers:
@@ -685,6 +724,9 @@ class PlatformEntity(BaseEntity):
             super().state,
             device_ieee=self._device.ieee,
             available=self.available,
+            child_device_id=(
+                self._child_device.id if self._child_device is not None else None
+            ),
         )
 
     def on_add(self) -> None:
@@ -1028,4 +1070,13 @@ class GroupEntity(BaseEntity):
 
     async def async_update(self, _: Any | None = None) -> None:
         """Update the state of this group entity."""
+        self.update()
+
+    def on_members_changed(self) -> None:
+        """Recompute the state after members were added to or removed from the group.
+
+        Existing group entities are kept rather than replaced by the ones that
+        rediscovery creates, so their state has to be recomputed from the new set
+        of members.
+        """
         self.update()
