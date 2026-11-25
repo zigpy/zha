@@ -1062,3 +1062,57 @@ async def test_group_ignores_binary_output_switches(zha_gateway: Gateway) -> Non
         assert type(entity) is BinaryOutputSwitch
         assert entity.group_member is False
     assert zha_group.group_entities == {}
+
+
+async def test_group_state_follows_membership_changes(zha_gateway: Gateway) -> None:
+    """Test that the group state is recomputed when members are removed or added."""
+    devices: list[Device] = [
+        await device_switch_1_mock(zha_gateway),
+        await device_switch_2_mock(zha_gateway),
+    ]
+    zigpy_dev_3 = create_mock_zigpy_device(
+        zha_gateway,
+        {
+            1: {
+                SIG_EP_INPUT: [general.OnOff.cluster_id, general.Groups.cluster_id],
+                SIG_EP_OUTPUT: [],
+                SIG_EP_TYPE: zha.DeviceType.ON_OFF_SWITCH,
+                SIG_EP_PROFILE: zha.PROFILE_ID,
+            }
+        },
+        ieee="03:2d:6f:00:0a:90:69:e8",
+    )
+    devices.append(await join_zigpy_device(zha_gateway, zigpy_dev_3))
+    member_3 = GroupMemberReference(ieee=devices[2].ieee, endpoint_id=1)
+
+    zha_group: Group = await zha_gateway.async_create_zigpy_group(
+        "Test Group",
+        [GroupMemberReference(ieee=device.ieee, endpoint_id=1) for device in devices],
+    )
+    await zha_gateway.async_block_till_done()
+    entity: GroupEntity = get_group_entity(zha_group, platform=Platform.SWITCH)
+
+    # only the third member is on, so the group is on
+    await send_attributes_report(
+        zha_gateway, devices[2].device.endpoints[1].on_off, {0: 1}
+    )
+    # group member updates are debounced
+    await asyncio.sleep(1)
+    await zha_gateway.async_block_till_done()
+    assert bool(entity.state.is_on) is True
+
+    # removing it leaves two members that are both off, so the group turns off
+    await zha_group.async_remove_members([member_3])
+    await asyncio.sleep(1)
+    await zha_gateway.async_block_till_done()
+    assert len(zha_group.members) == 2
+    assert get_group_entity(zha_group, platform=Platform.SWITCH) is entity
+    assert bool(entity.state.is_on) is False
+
+    # adding it back while it is still on turns the group on again
+    await zha_group.async_add_members([member_3])
+    await asyncio.sleep(1)
+    await zha_gateway.async_block_till_done()
+    assert len(zha_group.members) == 3
+    assert get_group_entity(zha_group, platform=Platform.SWITCH) is entity
+    assert bool(entity.state.is_on) is True

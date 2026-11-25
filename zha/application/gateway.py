@@ -672,6 +672,11 @@ class Gateway(AsyncUtilMixin, EventBase):
         for entity in discovery.discover_group_entities(zha_group):
             entity.on_add()
 
+        # Existing group entities are kept rather than replaced by the ones created
+        # above, so their state has to be recomputed from the new set of members
+        for group_entity in zha_group.group_entities.values():
+            group_entity.update()
+
         zha_group.info("group_member_removed - endpoint: %s", endpoint)
         self._emit_group_gateway_message(zigpy_group, ZHA_GW_MSG_GROUP_MEMBER_REMOVED)
 
@@ -685,6 +690,11 @@ class Gateway(AsyncUtilMixin, EventBase):
 
         for entity in discovery.discover_group_entities(zha_group):
             entity.on_add()
+
+        # Existing group entities are kept rather than replaced by the ones created
+        # above, so their state has to be recomputed from the new set of members
+        for group_entity in zha_group.group_entities.values():
+            group_entity.update()
 
         zha_group.info("group_member_added - endpoint: %s", endpoint)
         self._emit_group_gateway_message(zigpy_group, ZHA_GW_MSG_GROUP_MEMBER_ADDED)
