@@ -172,12 +172,17 @@ async def test_device_left(zha_gateway: Gateway) -> None:
 
 async def test_gateway_startup_failure(
     zha_data: ZHAData,
+    zigpy_app_controller: ControllerApplication,
 ) -> None:
     """Test shutdown called when gateway init fails."""
 
     zha_gateway = await Gateway.async_from_config(zha_data)
 
     with (
+        patch(
+            "bellows.zigbee.application.ControllerApplication.new",
+            return_value=zigpy_app_controller,
+        ),
         patch("zha.application.gateway.Gateway.load_devices", side_effect=Exception),
         pytest.raises(Exception),
     ):
