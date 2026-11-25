@@ -800,7 +800,8 @@ async def test_zha_event_rotary(zha_device: Device) -> None:
                 event_type=RotaryEventType.ROTATION,
                 event_data=STEP_DOWN,
                 direction=RotaryDirection.COUNTER_CLOCKWISE,
-                event_attributes={ATTR_STEPS: 1},
+                # A constant integral float is passed on as an integer too
+                event_attributes={ATTR_STEPS: 1.0},
             ),
         ],
     )
@@ -820,6 +821,7 @@ async def test_zha_event_rotary(zha_device: Device) -> None:
         ("rotation", {ATTR_DIRECTION: "clockwise", ATTR_STEPS: 1}),
         ("rotation", {ATTR_DIRECTION: "counter_clockwise", ATTR_STEPS: 1}),
     ]
+    assert type(events[1][1][ATTR_STEPS]) is int
 
 
 async def test_zha_event_rotary_start_and_end(zha_device: Device) -> None:
@@ -1170,6 +1172,10 @@ async def test_zha_event_rotary_invalid(
         ({"event_attributes": {ATTR_PRESSED: 1}}, "Invalid pressed 1"),
         ({"event_attributes": {ATTR_DEGREES: float("inf")}}, "Invalid degrees inf"),
         ({"event_attributes": {ATTR_STEPS: 1.5}}, "Invalid steps 1.5"),
+        (
+            {"event_type": "knob_turned", "event_attributes": {ATTR_STEPS: 1}},
+            "Only 'rotation' reports an amount, not 'knob_turned'",
+        ),
         (
             {"event_attributes_from_data": {ATTR_STEPS: ()}},
             "Event data steps needs a non-empty sequence",

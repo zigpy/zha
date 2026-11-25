@@ -451,17 +451,25 @@ class ZhaEventRotaryMatch:
             )
 
         # A report with movement is a `rotation`, even if it starts or ends a turn
-        if self.event_type in (
-            RotaryEventType.ROTATION_START,
-            RotaryEventType.ROTATION_END,
-        ) and any(name in _ROTARY_AMOUNTS for name in names):
+        if self.event_type != RotaryEventType.ROTATION and any(
+            name in _ROTARY_AMOUNTS for name in names
+        ):
             raise ValueError(
                 f"Only '{RotaryEventType.ROTATION}' reports an amount, not"
                 f" '{self.event_type}'"
             )
 
-        for name, value in self.event_attributes.items():
-            _normalize_rotary_attribute(name, value)
+        # The match is frozen: store the constant event data as plain values
+        object.__setattr__(
+            self,
+            "event_attributes",
+            MappingProxyType(
+                {
+                    name: _normalize_rotary_attribute(name, value)
+                    for name, value in self.event_attributes.items()
+                }
+            ),
+        )
 
         for name, path in self.event_attributes_from_data.items():
             _validate_event_data_path(name, path)
