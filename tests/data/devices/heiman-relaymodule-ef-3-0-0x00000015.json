@@ -326,6 +326,7 @@
         "device_ieee": "ab:cd:ef:12:d4:57:23:d2",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "command": "identify",
         "args": [
@@ -353,6 +354,7 @@
         "device_ieee": "ab:cd:ef:12:d4:57:23:d2",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": "1",
         "group_id": null,
         "current_option": "PreviousValue",
         "enum": "StartUpOnOff",
@@ -381,6 +383,7 @@
         "device_ieee": "ab:cd:ef:12:d4:57:23:d2",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": "1",
         "group_id": null,
         "current_option": "OnOff",
         "enum": "SwitchActions",
@@ -408,6 +411,7 @@
         "device_ieee": "ab:cd:ef:12:d4:57:23:d2",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": "1",
         "group_id": null,
         "current_option": null,
         "enum": "HeimanSwitchType",
@@ -434,6 +438,7 @@
         "device_ieee": "ab:cd:ef:12:d4:57:23:d2",
         "endpoint_id": 2,
         "available": true,
+        "child_device_id": "2",
         "group_id": null,
         "current_option": "PreviousValue",
         "enum": "StartUpOnOff",
@@ -462,6 +467,7 @@
         "device_ieee": "ab:cd:ef:12:d4:57:23:d2",
         "endpoint_id": 2,
         "available": true,
+        "child_device_id": "2",
         "group_id": null,
         "current_option": "ToggleToggle",
         "enum": "SwitchActions",
@@ -489,6 +495,7 @@
         "device_ieee": "ab:cd:ef:12:d4:57:23:d2",
         "endpoint_id": 2,
         "available": true,
+        "child_device_id": "2",
         "group_id": null,
         "current_option": null,
         "enum": "HeimanSwitchType",
@@ -517,6 +524,7 @@
         "device_ieee": "ab:cd:ef:12:d4:57:23:d2",
         "endpoint_id": null,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "native_value": 255,
         "suggested_display_precision": null,
@@ -540,6 +548,7 @@
         "device_ieee": "ab:cd:ef:12:d4:57:23:d2",
         "endpoint_id": null,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "native_value": -24,
         "suggested_display_precision": null,
@@ -563,6 +572,7 @@
         "device_ieee": "ab:cd:ef:12:d4:57:23:d2",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "native_value": 34.0,
         "suggested_display_precision": null,
@@ -583,11 +593,12 @@
         "entity_category": null,
         "entity_registry_enabled_default": true,
         "enabled": true,
-        "primary": false,
+        "primary": true,
         "extra_state_attribute_names": [],
         "device_ieee": "ab:cd:ef:12:d4:57:23:d2",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": "1",
         "group_id": null,
         "is_on": 0
       },
@@ -604,11 +615,12 @@
         "entity_category": null,
         "entity_registry_enabled_default": true,
         "enabled": true,
-        "primary": false,
+        "primary": true,
         "extra_state_attribute_names": [],
         "device_ieee": "ab:cd:ef:12:d4:57:23:d2",
         "endpoint_id": 2,
         "available": true,
+        "child_device_id": "2",
         "group_id": null,
         "is_on": 0
       }
@@ -632,6 +644,7 @@
         "device_ieee": "ab:cd:ef:12:d4:57:23:d2",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "installed_version": "0x00000015",
         "in_progress": false,
@@ -644,6 +657,30 @@
       }
     ]
   },
+  "child_devices": [
+    {
+      "id": "1",
+      "endpoint_ids": [
+        1
+      ],
+      "translation_key": "channel",
+      "translation_placeholders": {
+        "index": "1"
+      },
+      "fallback_name": "Channel 1"
+    },
+    {
+      "id": "2",
+      "endpoint_ids": [
+        2
+      ],
+      "translation_key": "channel",
+      "translation_placeholders": {
+        "index": "2"
+      },
+      "fallback_name": "Channel 2"
+    }
+  ],
   "neighbors": [],
   "routes": []
 }

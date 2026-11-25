@@ -165,7 +165,7 @@ async def test_cover_non_tilt_initial_state(  # pylint: disable=unused-argument
 
     # test update
     await send_attributes_report(
-        zha_gateway, cluster, {WCAttrs.current_position_lift_percentage.id: 100}
+        zha_gateway, cluster, {WCAttrs.current_position_lift_percentage: 100}
     )
     assert _cover_state(entity) == CoverState.CLOSED
     assert entity.state.current_position == 0
@@ -208,7 +208,7 @@ async def test_cover_non_lift_initial_state(  # pylint: disable=unused-argument
 
     # test update
     await send_attributes_report(
-        zha_gateway, cluster, {WCAttrs.current_position_tilt_percentage.id: 100}
+        zha_gateway, cluster, {WCAttrs.current_position_tilt_percentage: 100}
     )
     assert _cover_state(entity) == CoverState.CLOSED
     assert entity.state.current_tilt_position == 0
@@ -252,31 +252,31 @@ async def test_cover(
 
     # set lift to 100% (closed) and test that the state has changed from unavailable to closed
     await send_attributes_report(
-        zha_gateway, cluster, {WCAttrs.current_position_lift_percentage.id: 100}
+        zha_gateway, cluster, {WCAttrs.current_position_lift_percentage: 100}
     )
     assert _cover_state(entity) == CoverState.CLOSED
 
     # test that the state remains after tilting to 100% (closed)
     await send_attributes_report(
-        zha_gateway, cluster, {WCAttrs.current_position_tilt_percentage.id: 100}
+        zha_gateway, cluster, {WCAttrs.current_position_tilt_percentage: 100}
     )
     assert _cover_state(entity) == CoverState.CLOSED
 
     # set lift to 0% (open) and test to see if state changes to open
     await send_attributes_report(
-        zha_gateway, cluster, {WCAttrs.current_position_lift_percentage.id: 0}
+        zha_gateway, cluster, {WCAttrs.current_position_lift_percentage: 0}
     )
     assert _cover_state(entity) == CoverState.OPEN
 
     # test that the state remains after tilting to 0% (open)
     await send_attributes_report(
-        zha_gateway, cluster, {WCAttrs.current_position_tilt_percentage.id: 0}
+        zha_gateway, cluster, {WCAttrs.current_position_tilt_percentage: 0}
     )
     assert _cover_state(entity) == CoverState.OPEN
 
     # test to see the state remains after tilting to 100% (closed)
     await send_attributes_report(
-        zha_gateway, cluster, {WCAttrs.current_position_tilt_percentage.id: 100}
+        zha_gateway, cluster, {WCAttrs.current_position_tilt_percentage: 100}
     )
     assert _cover_state(entity) == CoverState.OPEN
 
@@ -301,7 +301,7 @@ async def test_cover(
         assert _cover_state(entity) == CoverState.CLOSING
 
         await send_attributes_report(
-            zha_gateway, cluster, {WCAttrs.current_position_lift_percentage.id: 100}
+            zha_gateway, cluster, {WCAttrs.current_position_lift_percentage: 100}
         )
 
         assert _cover_state(entity) == CoverState.CLOSED
@@ -314,7 +314,7 @@ async def test_cover(
     with patch("zigpy.zcl.Cluster.request", return_value=[0x1, zcl_f.Status.SUCCESS]):
         # reset the tilt to 0% (open)
         await send_attributes_report(
-            zha_gateway, cluster, {WCAttrs.current_position_tilt_percentage.id: 0}
+            zha_gateway, cluster, {WCAttrs.current_position_tilt_percentage: 0}
         )
         assert _cover_state(entity) == CoverState.CLOSED
 
@@ -333,7 +333,7 @@ async def test_cover(
         assert _cover_state(entity) == CoverState.CLOSING
 
         await send_attributes_report(
-            zha_gateway, cluster, {WCAttrs.current_position_tilt_percentage.id: 100}
+            zha_gateway, cluster, {WCAttrs.current_position_tilt_percentage: 100}
         )
 
         assert _cover_state(entity) == CoverState.CLOSED
@@ -355,7 +355,7 @@ async def test_cover(
         assert _cover_state(entity) == CoverState.OPENING
 
         await send_attributes_report(
-            zha_gateway, cluster, {WCAttrs.current_position_lift_percentage.id: 0}
+            zha_gateway, cluster, {WCAttrs.current_position_lift_percentage: 0}
         )
 
         assert _cover_state(entity) == CoverState.OPEN
@@ -381,7 +381,7 @@ async def test_cover(
         assert _cover_state(entity) == CoverState.OPENING
 
         await send_attributes_report(
-            zha_gateway, cluster, {WCAttrs.current_position_tilt_percentage.id: 0}
+            zha_gateway, cluster, {WCAttrs.current_position_tilt_percentage: 0}
         )
 
         assert _cover_state(entity) == CoverState.OPEN
@@ -405,14 +405,14 @@ async def test_cover(
         assert _cover_state(entity) == CoverState.CLOSING
 
         await send_attributes_report(
-            zha_gateway, cluster, {WCAttrs.current_position_lift_percentage.id: 35}
+            zha_gateway, cluster, {WCAttrs.current_position_lift_percentage: 35}
         )
 
         assert entity.state.current_position == 65
         assert _cover_state(entity) == CoverState.CLOSING
 
         await send_attributes_report(
-            zha_gateway, cluster, {WCAttrs.current_position_lift_percentage.id: 53}
+            zha_gateway, cluster, {WCAttrs.current_position_lift_percentage: 53}
         )
 
         assert entity.state.current_position == 47
@@ -446,14 +446,14 @@ async def test_cover(
         assert _cover_state(entity) == CoverState.CLOSING
 
         await send_attributes_report(
-            zha_gateway, cluster, {WCAttrs.current_position_tilt_percentage.id: 35}
+            zha_gateway, cluster, {WCAttrs.current_position_tilt_percentage: 35}
         )
 
         assert entity.state.current_tilt_position == 65
         assert _cover_state(entity) == CoverState.CLOSING
 
         await send_attributes_report(
-            zha_gateway, cluster, {WCAttrs.current_position_tilt_percentage.id: 53}
+            zha_gateway, cluster, {WCAttrs.current_position_tilt_percentage: 53}
         )
 
         assert entity.state.current_tilt_position == 47
@@ -483,7 +483,7 @@ async def test_cover(
 
         # simulate a device position update to set timer to the default duration rather than dynamic
         await send_attributes_report(
-            zha_gateway, cluster, {WCAttrs.current_position_lift_percentage.id: 70}
+            zha_gateway, cluster, {WCAttrs.current_position_lift_percentage: 70}
         )
 
         assert entity.state.current_position == 30
@@ -511,7 +511,7 @@ async def test_cover(
 
         # simulate a device position update to set timer to the default duration rather than dynamic
         await send_attributes_report(
-            zha_gateway, cluster, {WCAttrs.current_position_tilt_percentage.id: 70}
+            zha_gateway, cluster, {WCAttrs.current_position_tilt_percentage: 70}
         )
 
         assert entity.state.current_tilt_position == 30
@@ -527,7 +527,7 @@ async def test_cover(
         assert _cover_state(entity) == CoverState.OPEN
 
         await send_attributes_report(
-            zha_gateway, cluster, {WCAttrs.current_position_lift_percentage.id: 60}
+            zha_gateway, cluster, {WCAttrs.current_position_lift_percentage: 60}
         )
 
         assert entity.state.current_position == 40
@@ -543,7 +543,7 @@ async def test_cover(
         assert _cover_state(entity) == CoverState.OPEN
 
         await send_attributes_report(
-            zha_gateway, cluster, {WCAttrs.current_position_tilt_percentage.id: 60}
+            zha_gateway, cluster, {WCAttrs.current_position_tilt_percentage: 60}
         )
 
         assert entity.state.current_tilt_position == 40
@@ -642,7 +642,7 @@ async def test_cover(
 
         # report that tilt has reached its target
         await send_attributes_report(
-            zha_gateway, cluster, {WCAttrs.current_position_tilt_percentage.id: 99}
+            zha_gateway, cluster, {WCAttrs.current_position_tilt_percentage: 99}
         )
         assert entity.state.current_tilt_position == 1
 
@@ -651,7 +651,7 @@ async def test_cover(
 
         # report that lift has reached its target
         await send_attributes_report(
-            zha_gateway, cluster, {WCAttrs.current_position_lift_percentage.id: 10}
+            zha_gateway, cluster, {WCAttrs.current_position_lift_percentage: 10}
         )
         assert entity.state.current_position == 90
 
@@ -732,7 +732,7 @@ async def test_cover_failures(zha_gateway: Gateway) -> None:
 
     # test to see if it opens
     await send_attributes_report(
-        zha_gateway, cluster, {WCAttrs.current_position_lift_percentage.id: 0}
+        zha_gateway, cluster, {WCAttrs.current_position_lift_percentage: 0}
     )
 
     assert _cover_state(entity) == CoverState.OPEN
@@ -898,13 +898,13 @@ async def test_shade(
 
     # test that the state has changed from unavailable to off
     await send_attributes_report(
-        zha_gateway, cluster_on_off, {cluster_on_off.AttributeDefs.on_off.id: 0}
+        zha_gateway, cluster_on_off, {cluster_on_off.AttributeDefs.on_off: 0}
     )
     assert _cover_state(entity) == CoverState.CLOSED
 
     # test to see if it opens
     await send_attributes_report(
-        zha_gateway, cluster_on_off, {cluster_on_off.AttributeDefs.on_off.id: 1}
+        zha_gateway, cluster_on_off, {cluster_on_off.AttributeDefs.on_off: 1}
     )
     assert _cover_state(entity) == CoverState.OPEN
 
@@ -942,7 +942,11 @@ async def test_shade(
         assert _cover_state(entity) == CoverState.CLOSED
 
     # open from client command fails
-    await send_attributes_report(zha_gateway, cluster_level, {0: 0})
+    await send_attributes_report(
+        zha_gateway,
+        cluster_level,
+        {general.LevelControl.AttributeDefs.current_level: 0},
+    )
     assert _cover_state(entity) == CoverState.CLOSED
 
     with (
@@ -1005,7 +1009,11 @@ async def test_shade(
         assert entity.state.current_position == 47
 
     # report position change
-    await send_attributes_report(zha_gateway, cluster_level, {8: 0, 0: 100, 1: 1})
+    await send_attributes_report(
+        zha_gateway,
+        cluster_level,
+        {general.LevelControl.AttributeDefs.current_level: 100},
+    )
     assert entity.state.current_position == int(100 * 100 / 255)
 
     # stop command fails
@@ -1064,7 +1072,9 @@ async def test_keen_vent(
     assert entity.is_closing is None
 
     # test that the state has changed from unavailable to off
-    await send_attributes_report(zha_gateway, cluster_on_off, {8: 0, 0: False, 1: 1})
+    await send_attributes_report(
+        zha_gateway, cluster_on_off, {general.OnOff.AttributeDefs.on_off: False}
+    )
     assert _cover_state(entity) == CoverState.CLOSED
 
     # test entity async_update

@@ -358,7 +358,14 @@ class FanGroup(BaseFan, GroupEntity):
 
     async def _async_set_fan_mode(self, fan_mode: int) -> None:
         """Set the fan mode for the group."""
-        await write_attributes_safe(self._cluster, {"fan_mode": fan_mode})
+        # A multicast write gets no response from the members: zigpy only returns a
+        # synthesized default response, so there is no per-attribute status to check.
+        # Nothing reads the group cluster's attribute cache (the group state follows
+        # the members' own fan mode), and zigpy's cache update after a write expects a
+        # device (it reads `endpoint.device.ieee`), so skip it.
+        await self._cluster.write_attributes(
+            {hvac.Fan.AttributeDefs.fan_mode.name: fan_mode}, update_cache=False
+        )
         self.maybe_emit_state_changed_event()
 
     def update(self, _: Any = None) -> None:

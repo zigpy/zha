@@ -118,7 +118,7 @@ def make_attribute(attrid: int, value: Any, status: int = 0) -> zcl_f.Attribute:
 async def send_attributes_report(
     zha_gateway: Gateway,
     cluster: zigpy.zcl.Cluster,
-    attributes: dict[str | int | zcl_f.ZCLAttributeDef, Any],
+    attributes: dict[str | zcl_f.ZCLAttributeDef, Any],
     *,
     tsn: int | None = None,
 ) -> None:
@@ -127,28 +127,15 @@ async def send_attributes_report(
     manufacturer_codes: set[int | None] = set()
 
     for attr, value in attributes.items():
-        if isinstance(attr, int):
-            # Raw attribute ID for unknown attributes
-            manufacturer_codes.add(None)
-            reports.append(
-                zcl_f.Attribute(
-                    attrid=attr,
-                    value=zcl_f.TypeValue(
-                        type=zcl_f.DataType.from_python_type(type(value)).type_id,
-                        value=value,
-                    ),
-                )
-            )
-        else:
-            attr_def = cluster.find_attribute(attr)
-            manufacturer_codes.add(cluster._get_effective_manufacturer_code(attr_def))
+        attr_def = cluster.find_attribute(attr)
+        manufacturer_codes.add(cluster._get_effective_manufacturer_code(attr_def))
 
-            reports.append(
-                zcl_f.Attribute(
-                    attrid=attr_def.id,
-                    value=zcl_f.TypeValue(type=attr_def.zcl_type, value=value),
-                )
+        reports.append(
+            zcl_f.Attribute(
+                attrid=attr_def.id,
+                value=zcl_f.TypeValue(type=attr_def.zcl_type, value=value),
             )
+        )
 
     if len(manufacturer_codes) != 1:
         raise ValueError(
