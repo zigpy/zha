@@ -273,11 +273,11 @@
   "zha_lib_entities": {
     "binary_sensor": [
       {
-        "fallback_name": null,
+        "fallback_name": "Replace filter",
         "unique_id": "ab:cd:ef:12:e0:99:45:a5-1-64637-replace_filter",
         "migrate_unique_ids": [],
         "platform": "binary_sensor",
-        "class_name": "ReplaceFilter",
+        "class_name": "BinarySensor",
         "translation_key": "replace_filter",
         "translation_placeholders": null,
         "device_class": "problem",
@@ -370,11 +370,11 @@
     ],
     "number": [
       {
-        "fallback_name": null,
+        "fallback_name": "Filter life time",
         "unique_id": "ab:cd:ef:12:e0:99:45:a5-1-64637-filter_life_time",
         "migrate_unique_ids": [],
         "platform": "number",
-        "class_name": "FilterLifeTime",
+        "class_name": "NumberConfigurationEntity",
         "translation_key": "filter_life_time",
         "translation_placeholders": null,
         "device_class": null,
@@ -471,11 +471,11 @@
         "unit": "\u03bcg/m\u00b3"
       },
       {
-        "fallback_name": null,
+        "fallback_name": "Device run time",
         "unique_id": "ab:cd:ef:12:e0:99:45:a5-1-64637-device_run_time",
         "migrate_unique_ids": [],
         "platform": "sensor",
-        "class_name": "IkeaDeviceRunTime",
+        "class_name": "Sensor",
         "translation_key": "device_run_time",
         "translation_placeholders": null,
         "device_class": "duration",
@@ -495,11 +495,11 @@
         "unit": "min"
       },
       {
-        "fallback_name": null,
+        "fallback_name": "Filter run time",
         "unique_id": "ab:cd:ef:12:e0:99:45:a5-1-64637-filter_run_time",
         "migrate_unique_ids": [],
         "platform": "sensor",
-        "class_name": "IkeaFilterRunTime",
+        "class_name": "Sensor",
         "translation_key": "filter_run_time",
         "translation_placeholders": null,
         "device_class": "duration",
@@ -521,11 +521,11 @@
     ],
     "switch": [
       {
-        "fallback_name": null,
+        "fallback_name": "Child lock",
         "unique_id": "ab:cd:ef:12:e0:99:45:a5-1-64637-child_lock",
         "migrate_unique_ids": [],
         "platform": "switch",
-        "class_name": "ChildLock",
+        "class_name": "ConfigurableAttributeSwitch",
         "translation_key": "child_lock",
         "translation_placeholders": null,
         "device_class": null,
@@ -549,11 +549,11 @@
         "on_value": 1
       },
       {
-        "fallback_name": null,
+        "fallback_name": "Disable LED",
         "unique_id": "ab:cd:ef:12:e0:99:45:a5-1-64637-disable_led",
         "migrate_unique_ids": [],
         "platform": "switch",
-        "class_name": "DisableLed",
+        "class_name": "ConfigurableAttributeSwitch",
         "translation_key": "disable_led",
         "translation_placeholders": null,
         "device_class": null,

@@ -561,6 +561,7 @@ def zigpy_device_ikea_mock(zha_gateway: Gateway) -> ZigbeeDevice:
                 general.Identify.cluster_id,
                 general.Groups.cluster_id,
                 general.Scenes.cluster_id,
+                hvac.Fan.cluster_id,
                 64637,
             ],
             SIG_EP_OUTPUT: [],
@@ -568,6 +569,7 @@ def zigpy_device_ikea_mock(zha_gateway: Gateway) -> ZigbeeDevice:
             SIG_EP_PROFILE: zha.PROFILE_ID,
         },
     }
+    # the quirk is a v2 quirk, so it is resolved from the manufacturer and model
     return create_mock_zigpy_device(
         zha_gateway,
         endpoints,
