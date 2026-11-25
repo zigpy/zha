@@ -233,6 +233,116 @@
         "kwargs": {}
       }
     ],
+    "event": [
+      {
+        "fallback_name": "Dim down button",
+        "unique_id": "00:17:88:01:0c:26:42:ec-1-button_dim_down",
+        "migrate_unique_ids": [],
+        "platform": "event",
+        "class_name": "ZhaEventButton",
+        "translation_key": "dim_down_button",
+        "translation_placeholders": null,
+        "device_class": "button",
+        "state_class": null,
+        "entity_category": null,
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "00:17:88:01:0c:26:42:ec",
+        "endpoint_id": 1,
+        "available": true,
+        "child_device_id": null,
+        "group_id": null,
+        "event_types": [
+          "press_start",
+          "press_end",
+          "long_press_start",
+          "long_press_end"
+        ]
+      },
+      {
+        "fallback_name": "Dim up button",
+        "unique_id": "00:17:88:01:0c:26:42:ec-1-button_dim_up",
+        "migrate_unique_ids": [],
+        "platform": "event",
+        "class_name": "ZhaEventButton",
+        "translation_key": "dim_up_button",
+        "translation_placeholders": null,
+        "device_class": "button",
+        "state_class": null,
+        "entity_category": null,
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "00:17:88:01:0c:26:42:ec",
+        "endpoint_id": 1,
+        "available": true,
+        "child_device_id": null,
+        "group_id": null,
+        "event_types": [
+          "press_start",
+          "press_end",
+          "long_press_start",
+          "long_press_end"
+        ]
+      },
+      {
+        "fallback_name": "Hue button",
+        "unique_id": "00:17:88:01:0c:26:42:ec-1-button_hue",
+        "migrate_unique_ids": [],
+        "platform": "event",
+        "class_name": "ZhaEventButton",
+        "translation_key": "hue_button",
+        "translation_placeholders": null,
+        "device_class": "button",
+        "state_class": null,
+        "entity_category": null,
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "00:17:88:01:0c:26:42:ec",
+        "endpoint_id": 1,
+        "available": true,
+        "child_device_id": null,
+        "group_id": null,
+        "event_types": [
+          "press_start",
+          "press_end",
+          "long_press_start",
+          "long_press_end"
+        ]
+      },
+      {
+        "fallback_name": "Toggle button",
+        "unique_id": "00:17:88:01:0c:26:42:ec-1-button_toggle",
+        "migrate_unique_ids": [],
+        "platform": "event",
+        "class_name": "ZhaEventButton",
+        "translation_key": "toggle_button",
+        "translation_placeholders": null,
+        "device_class": "button",
+        "state_class": null,
+        "entity_category": null,
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "00:17:88:01:0c:26:42:ec",
+        "endpoint_id": 1,
+        "available": true,
+        "child_device_id": null,
+        "group_id": null,
+        "event_types": [
+          "press_start",
+          "press_end",
+          "long_press_start",
+          "long_press_end"
+        ]
+      }
+    ],
     "sensor": [
       {
         "fallback_name": null,

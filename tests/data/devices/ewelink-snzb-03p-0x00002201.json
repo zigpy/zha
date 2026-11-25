@@ -7,8 +7,8 @@
   "friendly_manufacturer": "eWeLink",
   "friendly_model": "SNZB-03P",
   "name": "eWeLink SNZB-03P",
-  "quirk_applied": false,
-  "quirk_class": "zigpy.device.ZigbeeDevice",
+  "quirk_applied": true,
+  "quirk_class": "zhaquirks.sonoff.snzb03p:(eWeLink / SNZB-03P)",
   "exposes_features": [],
   "manufacturer_code": 4742,
   "power_source": "Battery or Unknown",
@@ -170,6 +170,11 @@
           ]
         },
         {
+          "cluster_id": "0xfc11",
+          "endpoint_attribute": "sonoff_illumination",
+          "attributes": []
+        },
+        {
           "cluster_id": "0xfc57",
           "endpoint_attribute": "works_with_all_hubs",
           "attributes": []
@@ -249,7 +254,7 @@
         "entity_category": null,
         "entity_registry_enabled_default": true,
         "enabled": true,
-        "primary": false,
+        "primary": true,
         "extra_state_attribute_names": [],
         "device_ieee": "ab:cd:ef:12:cb:2e:18:c7",
         "endpoint_id": 1,
@@ -270,9 +275,9 @@
         "device_class": "motion",
         "state_class": null,
         "entity_category": null,
-        "entity_registry_enabled_default": true,
+        "entity_registry_enabled_default": false,
         "enabled": true,
-        "primary": true,
+        "primary": false,
         "extra_state_attribute_names": [],
         "device_ieee": "ab:cd:ef:12:cb:2e:18:c7",
         "endpoint_id": 1,
@@ -317,10 +322,10 @@
         "unique_id": "ab:cd:ef:12:cb:2e:18:c7-1-1030-presence_detection_timeout",
         "migrate_unique_ids": [],
         "platform": "number",
-        "class_name": "SonoffPresenceSenorTimeout",
+        "class_name": "SNZB03PMotionTimeout",
         "translation_key": "presence_detection_timeout",
         "translation_placeholders": null,
-        "device_class": null,
+        "device_class": "duration",
         "state_class": null,
         "entity_category": "config",
         "entity_registry_enabled_default": true,
@@ -335,9 +340,9 @@
         "native_value": 60,
         "mode": "box",
         "native_max_value": 60,
-        "native_min_value": 15,
+        "native_min_value": 5,
         "native_step": 1.0,
-        "native_unit_of_measurement": null
+        "native_unit_of_measurement": "s"
       }
     ],
     "sensor": [
@@ -419,6 +424,34 @@
         "battery_size": null,
         "battery_quantity": null,
         "battery_voltage": 3.1
+      },
+      {
+        "fallback_name": "Illumination",
+        "unique_id": "ab:cd:ef:12:cb:2e:18:c7-1-last_illumination_state",
+        "migrate_unique_ids": [],
+        "platform": "sensor",
+        "class_name": "EnumSensor",
+        "translation_key": "illumination",
+        "translation_placeholders": null,
+        "device_class": "enum",
+        "state_class": null,
+        "entity_category": null,
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:cb:2e:18:c7",
+        "endpoint_id": 1,
+        "available": true,
+        "child_device_id": null,
+        "group_id": null,
+        "native_value": null,
+        "suggested_display_precision": null,
+        "unit": null,
+        "options": [
+          "Dark",
+          "Light"
+        ]
       }
     ],
     "update": [

@@ -1291,15 +1291,13 @@
         ]
       },
       {
-        "fallback_name": "S1 switch actions",
+        "fallback_name": "Switch actions",
         "unique_id": "ab:cd:ef:12:45:ea:a1:6c-3-switch_actions",
         "migrate_unique_ids": [],
         "platform": "select",
         "class_name": "ZCLEnumSelectEntity",
-        "translation_key": "switch_actions_id",
-        "translation_placeholders": {
-          "id": "S1"
-        },
+        "translation_key": "switch_actions",
+        "translation_placeholders": null,
         "device_class": null,
         "state_class": null,
         "entity_category": "config",
@@ -1310,7 +1308,7 @@
         "device_ieee": "ab:cd:ef:12:45:ea:a1:6c",
         "endpoint_id": 3,
         "available": true,
-        "child_device_id": null,
+        "child_device_id": "1",
         "group_id": null,
         "current_option": null,
         "enum": "AeotecSwitchActions",
@@ -1321,15 +1319,13 @@
         ]
       },
       {
-        "fallback_name": "S1 switch type",
+        "fallback_name": "Switch type",
         "unique_id": "ab:cd:ef:12:45:ea:a1:6c-3-switch_type",
         "migrate_unique_ids": [],
         "platform": "select",
         "class_name": "ZCLEnumSelectEntity",
-        "translation_key": "switch_type_id",
-        "translation_placeholders": {
-          "id": "S1"
-        },
+        "translation_key": "switch_type",
+        "translation_placeholders": null,
         "device_class": null,
         "state_class": null,
         "entity_category": "config",
@@ -1340,7 +1336,7 @@
         "device_ieee": "ab:cd:ef:12:45:ea:a1:6c",
         "endpoint_id": 3,
         "available": true,
-        "child_device_id": null,
+        "child_device_id": "1",
         "group_id": null,
         "current_option": null,
         "enum": "AeotecSwitchType",
@@ -1351,15 +1347,13 @@
         ]
       },
       {
-        "fallback_name": "S2 switch actions",
+        "fallback_name": "Switch actions",
         "unique_id": "ab:cd:ef:12:45:ea:a1:6c-4-switch_actions",
         "migrate_unique_ids": [],
         "platform": "select",
         "class_name": "ZCLEnumSelectEntity",
-        "translation_key": "switch_actions_id",
-        "translation_placeholders": {
-          "id": "S2"
-        },
+        "translation_key": "switch_actions",
+        "translation_placeholders": null,
         "device_class": null,
         "state_class": null,
         "entity_category": "config",
@@ -1370,7 +1364,7 @@
         "device_ieee": "ab:cd:ef:12:45:ea:a1:6c",
         "endpoint_id": 4,
         "available": true,
-        "child_device_id": null,
+        "child_device_id": "2",
         "group_id": null,
         "current_option": null,
         "enum": "AeotecSwitchActions",
@@ -1381,15 +1375,13 @@
         ]
       },
       {
-        "fallback_name": "S2 switch type",
+        "fallback_name": "Switch type",
         "unique_id": "ab:cd:ef:12:45:ea:a1:6c-4-switch_type",
         "migrate_unique_ids": [],
         "platform": "select",
         "class_name": "ZCLEnumSelectEntity",
-        "translation_key": "switch_type_id",
-        "translation_placeholders": {
-          "id": "S2"
-        },
+        "translation_key": "switch_type",
+        "translation_placeholders": null,
         "device_class": null,
         "state_class": null,
         "entity_category": "config",
@@ -1400,7 +1392,7 @@
         "device_ieee": "ab:cd:ef:12:45:ea:a1:6c",
         "endpoint_id": 4,
         "available": true,
-        "child_device_id": null,
+        "child_device_id": "2",
         "group_id": null,
         "current_option": null,
         "enum": "AeotecSwitchType",
@@ -1833,15 +1825,13 @@
         "is_on": 0
       },
       {
-        "fallback_name": "S1 local control",
+        "fallback_name": "Local control",
         "unique_id": "ab:cd:ef:12:45:ea:a1:6c-3-controls",
         "migrate_unique_ids": [],
         "platform": "switch",
         "class_name": "ConfigurableAttributeSwitch",
-        "translation_key": "local_control_id",
-        "translation_placeholders": {
-          "id": "S1"
-        },
+        "translation_key": "local_control",
+        "translation_placeholders": null,
         "device_class": null,
         "state_class": null,
         "entity_category": "config",
@@ -1852,7 +1842,7 @@
         "device_ieee": "ab:cd:ef:12:45:ea:a1:6c",
         "endpoint_id": 3,
         "available": true,
-        "child_device_id": null,
+        "child_device_id": "1",
         "group_id": null,
         "is_on": false,
         "inverted": false,
@@ -1863,15 +1853,13 @@
         "on_value": 1
       },
       {
-        "fallback_name": "S2 local control",
+        "fallback_name": "Local control",
         "unique_id": "ab:cd:ef:12:45:ea:a1:6c-4-controls",
         "migrate_unique_ids": [],
         "platform": "switch",
         "class_name": "ConfigurableAttributeSwitch",
-        "translation_key": "local_control_id",
-        "translation_placeholders": {
-          "id": "S2"
-        },
+        "translation_key": "local_control",
+        "translation_placeholders": null,
         "device_class": null,
         "state_class": null,
         "entity_category": "config",
@@ -1882,7 +1870,7 @@
         "device_ieee": "ab:cd:ef:12:45:ea:a1:6c",
         "endpoint_id": 4,
         "available": true,
-        "child_device_id": null,
+        "child_device_id": "2",
         "group_id": null,
         "is_on": false,
         "inverted": false,
@@ -1929,7 +1917,8 @@
     {
       "id": "1",
       "endpoint_ids": [
-        1
+        1,
+        3
       ],
       "translation_key": "channel",
       "translation_placeholders": {
@@ -1940,7 +1929,8 @@
     {
       "id": "2",
       "endpoint_ids": [
-        2
+        2,
+        4
       ],
       "translation_key": "channel",
       "translation_placeholders": {

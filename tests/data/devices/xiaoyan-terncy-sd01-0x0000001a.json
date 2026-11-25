@@ -185,6 +185,33 @@
         "kwargs": {}
       }
     ],
+    "event": [
+      {
+        "fallback_name": "Button",
+        "unique_id": "00:0d:6f:00:16:73:c1:c9-1-button",
+        "migrate_unique_ids": [],
+        "platform": "event",
+        "class_name": "ZhaEventButton",
+        "translation_key": "button",
+        "translation_placeholders": null,
+        "device_class": "button",
+        "state_class": null,
+        "entity_category": null,
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "00:0d:6f:00:16:73:c1:c9",
+        "endpoint_id": 1,
+        "available": true,
+        "child_device_id": null,
+        "group_id": null,
+        "event_types": [
+          "single_press",
+          "multi_press"
+        ]
+      }
+    ],
     "sensor": [
       {
         "fallback_name": null,

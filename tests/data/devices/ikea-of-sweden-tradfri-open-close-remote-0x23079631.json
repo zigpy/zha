@@ -247,6 +247,58 @@
         "kwargs": {}
       }
     ],
+    "event": [
+      {
+        "fallback_name": "Close button",
+        "unique_id": "38:5b:44:ff:fe:e6:8a:85-1-button_close",
+        "migrate_unique_ids": [],
+        "platform": "event",
+        "class_name": "ZhaEventButton",
+        "translation_key": "close_button",
+        "translation_placeholders": null,
+        "device_class": "button",
+        "state_class": null,
+        "entity_category": null,
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "38:5b:44:ff:fe:e6:8a:85",
+        "endpoint_id": 1,
+        "available": true,
+        "child_device_id": null,
+        "group_id": null,
+        "event_types": [
+          "press_start",
+          "long_press_end"
+        ]
+      },
+      {
+        "fallback_name": "Open button",
+        "unique_id": "38:5b:44:ff:fe:e6:8a:85-1-button_open",
+        "migrate_unique_ids": [],
+        "platform": "event",
+        "class_name": "ZhaEventButton",
+        "translation_key": "open_button",
+        "translation_placeholders": null,
+        "device_class": "button",
+        "state_class": null,
+        "entity_category": null,
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "38:5b:44:ff:fe:e6:8a:85",
+        "endpoint_id": 1,
+        "available": true,
+        "child_device_id": null,
+        "group_id": null,
+        "event_types": [
+          "press_start",
+          "long_press_end"
+        ]
+      }
+    ],
     "sensor": [
       {
         "fallback_name": null,

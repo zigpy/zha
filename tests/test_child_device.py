@@ -385,10 +385,6 @@ async def test_child_device_primary_reelection(zha_gateway: Gateway) -> None:
     assert remaining_switch.primary
 
 
-@pytest.mark.skipif(
-    not hasattr(QuirkBuilder, "child_device"),
-    reason="requires zha-quirks with child device support",
-)
 async def test_quirks_v2_child_devices(zha_gateway: Gateway) -> None:
     """Test child devices defined by a quirks v2 quirk."""
     registry = DeviceRegistry()

@@ -421,6 +421,86 @@
         "kwargs": {}
       }
     ],
+    "event": [
+      {
+        "fallback_name": "Button 1",
+        "unique_id": "ab:cd:ef:12:89:f3:cd:e6-1-button_1",
+        "migrate_unique_ids": [],
+        "platform": "event",
+        "class_name": "ZhaEventButton",
+        "translation_key": "button_numbered",
+        "translation_placeholders": {
+          "number": "1"
+        },
+        "device_class": "button",
+        "state_class": null,
+        "entity_category": null,
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:89:f3:cd:e6",
+        "endpoint_id": 1,
+        "available": true,
+        "child_device_id": null,
+        "group_id": null,
+        "event_types": [
+          "single_press"
+        ]
+      },
+      {
+        "fallback_name": "Button 2",
+        "unique_id": "ab:cd:ef:12:89:f3:cd:e6-2-button_2",
+        "migrate_unique_ids": [],
+        "platform": "event",
+        "class_name": "ZhaEventButton",
+        "translation_key": "button_numbered",
+        "translation_placeholders": {
+          "number": "2"
+        },
+        "device_class": "button",
+        "state_class": null,
+        "entity_category": null,
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:89:f3:cd:e6",
+        "endpoint_id": 2,
+        "available": true,
+        "child_device_id": null,
+        "group_id": null,
+        "event_types": [
+          "single_press"
+        ]
+      },
+      {
+        "fallback_name": "Button 3",
+        "unique_id": "ab:cd:ef:12:89:f3:cd:e6-3-button_3",
+        "migrate_unique_ids": [],
+        "platform": "event",
+        "class_name": "ZhaEventButton",
+        "translation_key": "button_numbered",
+        "translation_placeholders": {
+          "number": "3"
+        },
+        "device_class": "button",
+        "state_class": null,
+        "entity_category": null,
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:89:f3:cd:e6",
+        "endpoint_id": 3,
+        "available": true,
+        "child_device_id": null,
+        "group_id": null,
+        "event_types": [
+          "single_press"
+        ]
+      }
+    ],
     "select": [
       {
         "fallback_name": null,
