@@ -1622,6 +1622,58 @@ async def test_gateway_shutdown_device_on_remove_failure(
     assert "Device removal failed" in caplog.text
 
 
+@pytest.mark.parametrize("shutdown_fails", [False, True])
+async def test_gateway_shutdown_detaches_controller_listeners(
+    zha_gateway: Gateway,
+    shutdown_fails: bool,
+) -> None:
+    """Retained controllers and groups must not notify a retired gateway."""
+    controller = zha_gateway.application_controller
+    original_shutdown = controller.shutdown
+    zigpy_dev = await zigpy_device_from_json(
+        controller, "tests/data/devices/centralite-3320-l.json"
+    )
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
+    original_remove = zha_device.on_remove
+
+    async def remove() -> None:
+        controller.listener_event("connection_lost", None)
+        controller.groups.listener_event("group_added", MagicMock())
+        connection_lost.assert_not_called()
+        group_added.assert_not_called()
+        await original_remove()
+
+    async def shutdown() -> None:
+        await original_shutdown()
+        if shutdown_fails:
+            raise RuntimeError("transport shutdown failed")
+
+    with (
+        patch.object(zha_gateway, "connection_lost") as connection_lost,
+        patch.object(zha_gateway, "group_added") as group_added,
+        patch.object(controller, "shutdown", side_effect=shutdown),
+        patch.object(zha_device, "on_remove", side_effect=remove) as device_remove,
+    ):
+        controller.listener_event("connection_lost", None)
+        controller.groups.listener_event("group_added", MagicMock())
+        connection_lost.assert_called_once()
+        group_added.assert_called_once()
+        connection_lost.reset_mock()
+        group_added.reset_mock()
+
+        if shutdown_fails:
+            with pytest.raises(RuntimeError, match="transport shutdown failed"):
+                await zha_gateway.shutdown()
+        else:
+            await zha_gateway.shutdown()
+
+        device_remove.assert_awaited_once()
+        controller.listener_event("connection_lost", None)
+        controller.groups.listener_event("group_added", MagicMock())
+        connection_lost.assert_not_called()
+        group_added.assert_not_called()
+
+
 async def test_gateway_shutdown_group_on_remove_failure(
     zha_gateway: Gateway,
     caplog: pytest.LogCaptureFixture,

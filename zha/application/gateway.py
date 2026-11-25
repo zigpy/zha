@@ -1024,6 +1024,10 @@ class Gateway(AsyncUtilMixin, EventBase):
         self.global_updater.stop()
         self._device_availability_checker.stop()
 
+        if self.application_controller is not None:
+            self.application_controller.remove_listener(self)
+            self.application_controller.groups.remove_listener(self)
+
         for device in self._devices.values():
             try:
                 await device.on_remove()
