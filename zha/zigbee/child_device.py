@@ -106,7 +106,7 @@ class ChildDeviceMatch:
 CHILD_DEVICE_ALLOWLIST: Final[tuple[ChildDeviceMatch, ...]] = (
     # Tuya multi-gang wall switches and relays
     ChildDeviceMatch(models=frozenset({"TS0002", "TS0003", "TS0004", "TS000F"})),
-    ChildDeviceMatch(models=frozenset({"TS0012", "TS0013"})),
+    ChildDeviceMatch(models=frozenset({"TS0012", "TS0013", "TS0014"})),
     # Tuya power strips and multi-socket plugs
     ChildDeviceMatch(models=frozenset({"TS011F", "TS0115"})),
     # Tuya dual cover and dual dimmer modules
@@ -119,6 +119,7 @@ CHILD_DEVICE_ALLOWLIST: Final[tuple[ChildDeviceMatch, ...]] = (
                 "lumi.relay.c2acn01",
                 "lumi.switch.acn047",
                 "lumi.switch.agl006",
+                "lumi.switch.aeu001",
                 "lumi.switch.agl010",
                 "lumi.switch.b2naus01",
                 "lumi.switch.l2aeu1",
@@ -140,7 +141,30 @@ CHILD_DEVICE_ALLOWLIST: Final[tuple[ChildDeviceMatch, ...]] = (
         manufacturers=frozenset({"frient A/S"}), models=frozenset({"IOMZB-110"})
     ),
     ChildDeviceMatch(
+        manufacturers=frozenset({"HEIMAN"}), models=frozenset({"RelayModule-EF-3.0"})
+    ),
+    ChildDeviceMatch(
+        manufacturers=frozenset({"SDevices"}), models=frozenset({"SBDV-00199"})
+    ),
+    # SONOFF multi-gang relays and wall switches
+    ChildDeviceMatch(
+        manufacturers=frozenset({"SONOFF"}),
+        models=frozenset(
+            {
+                "MINI-ZB2GS",
+                "MINI-ZB2GS-L",
+                "ZBM5-2C-80/86",
+                "ZBM5-2C-120",
+                "ZBM5-3C-80/86",
+                "ZBM5-3C-120",
+            }
+        ),
+    ),
+    ChildDeviceMatch(
         manufacturers=frozenset({"Sunricher"}), models=frozenset({"ON/OFF(2CH)"})
+    ),
+    ChildDeviceMatch(
+        manufacturers=frozenset({"Yandex"}), models=frozenset({"YNDX-00532"})
     ),
 )
 
