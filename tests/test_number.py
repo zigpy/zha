@@ -9,7 +9,7 @@ from zigpy.exceptions import ZigbeeException
 from zigpy.profiles import zha
 import zigpy.types
 from zigpy.typing import UNDEFINED
-from zigpy.zcl.clusters import general, lighting
+from zigpy.zcl.clusters import general, hvac, lighting
 import zigpy.zdo.types as zdo_t
 
 from tests.common import (
@@ -150,12 +150,16 @@ async def test_number(
 
     # change value from device
     assert cluster.read_attributes.call_count == 2
-    await send_attributes_report(zha_gateway, cluster, {0x0055: 15})
+    await send_attributes_report(
+        zha_gateway, cluster, {general.AnalogOutput.AttributeDefs.present_value: 15}
+    )
     await zha_gateway.async_block_till_done()
     assert entity.state.native_value == 15.0
 
     # update value from device
-    await send_attributes_report(zha_gateway, cluster, {0x0055: 20})
+    await send_attributes_report(
+        zha_gateway, cluster, {general.AnalogOutput.AttributeDefs.present_value: 20}
+    )
     await zha_gateway.async_block_till_done()
     assert entity.state.native_value == 20.0
 
@@ -550,7 +554,7 @@ async def test_level_control_number(
     await send_attributes_report(
         zha_gateway,
         level_control_cluster,
-        {level_control_cluster.attributes_by_name[attr].id: initial_value},
+        {level_control_cluster.attributes_by_name[attr]: initial_value},
     )
     await zha_gateway.async_block_till_done()
     assert entity.state.native_value == initial_value
@@ -653,7 +657,102 @@ async def test_color_number(
     await send_attributes_report(
         zha_gateway,
         color_cluster,
-        {color_cluster.attributes_by_name[attr].id: initial_value},
+        {color_cluster.attributes_by_name[attr]: initial_value},
     )
     await zha_gateway.async_block_till_done()
     assert entity.state.native_value == initial_value
+
+
+async def test_heat_setpoint_limit_ranges_follow_each_other(
+    zha_gateway: Gateway,
+) -> None:
+    """Test the min/max heat setpoint limit ranges follow the other limit."""
+    zigpy_device = create_mock_zigpy_device(
+        zha_gateway,
+        {
+            1: {
+                SIG_EP_PROFILE: zha.PROFILE_ID,
+                SIG_EP_TYPE: zha.DeviceType.THERMOSTAT,
+                SIG_EP_INPUT: [general.Basic.cluster_id, hvac.Thermostat.cluster_id],
+                SIG_EP_OUTPUT: [],
+            }
+        },
+    )
+    thermostat = zigpy_device.endpoints[1].thermostat
+    thermostat.PLUGGED_ATTR_READS = {
+        "abs_min_heat_setpoint_limit": 500,
+        "abs_max_heat_setpoint_limit": 3500,
+        "min_heat_setpoint_limit": 700,
+        "max_heat_setpoint_limit": 3000,
+    }
+    update_attribute_cache(thermostat)
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
+
+    min_limit = get_entity(
+        zha_device, platform=Platform.NUMBER, qualifier="min_heat_setpoint_limit"
+    )
+    max_limit = get_entity(
+        zha_device, platform=Platform.NUMBER, qualifier="max_heat_setpoint_limit"
+    )
+    assert min_limit.state.native_min_value == 5.0
+    assert min_limit.state.native_max_value == 30.0
+    assert max_limit.state.native_min_value == 7.0
+    assert max_limit.state.native_max_value == 35.0
+
+    # Writing one limit moves the bound of the other one
+    await min_limit.async_set_native_value(16.0)
+    await zha_gateway.async_block_till_done()
+    assert min_limit.state.native_value == 16.0
+    assert max_limit.state.native_min_value == 16.0
+
+    # So does a value reported by the device
+    await send_attributes_report(
+        zha_gateway,
+        thermostat,
+        {hvac.Thermostat.AttributeDefs.max_heat_setpoint_limit.id: 2200},
+    )
+    await zha_gateway.async_block_till_done()
+    assert max_limit.state.native_value == 22.0
+    assert min_limit.state.native_max_value == 22.0
+
+
+@pytest.mark.parametrize(
+    ("engineering_units", "unit"),
+    [
+        (20, "BTU"),  # BTUs
+        (41, "ton"),  # tons
+        (90, "°"),  # degrees-angular
+        (117, "BTU/lb"),  # BTUs-per-pound
+        (136, "L/h"),  # liters-per-hour
+        (137, "kWh/m²"),  # kilowatt-hours-per-square-meter
+        (138, "kWh/ft²"),  # kilowatt-hours-per-square-foot
+        (161, "mm/s"),  # millimeters-per-second
+        (200, "dBmV"),  # decibels-millivolt
+        (201, "dBV"),  # decibels-volt
+        (246, "A²·h"),  # ampere-square-hours
+    ],
+)
+async def test_number_engineering_units(
+    zha_gateway: Gateway,
+    engineering_units: int,
+    unit: str,
+) -> None:
+    """Test the BACnet engineering units are shown as the unit they name."""
+    zigpy_analog_output_device = create_mock_zigpy_device(
+        zha_gateway, ZIGPY_ANALOG_OUTPUT_DEVICE
+    )
+    cluster: general.AnalogOutput = zigpy_analog_output_device.endpoints.get(
+        1
+    ).analog_output
+    cluster.PLUGGED_ATTR_READS = {
+        "max_present_value": 100.0,
+        "min_present_value": 0.0,
+        "engineering_units": engineering_units,
+        "present_value": 50.0,
+    }
+    update_attribute_cache(cluster)
+
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_analog_output_device)
+    entity: PlatformEntity = get_entity(zha_device, platform=Platform.NUMBER)
+
+    assert entity.state.native_unit_of_measurement == unit

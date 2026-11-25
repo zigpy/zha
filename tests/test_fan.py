@@ -148,11 +148,15 @@ async def test_fan(
     assert entity.state.is_on is False
 
     # turn on at fan
-    await send_attributes_report(zha_gateway, cluster, {1: 2, 0: 1, 2: 3})
+    await send_attributes_report(
+        zha_gateway, cluster, {hvac.Fan.AttributeDefs.fan_mode: 1}
+    )
     assert entity.state.is_on is True
 
     # turn off at fan
-    await send_attributes_report(zha_gateway, cluster, {1: 1, 0: 0, 2: 2})
+    await send_attributes_report(
+        zha_gateway, cluster, {hvac.Fan.AttributeDefs.fan_mode: 0}
+    )
     assert entity.state.is_on is False
 
     # turn on from client
@@ -349,13 +353,19 @@ async def test_zha_group_fan_entity(
     assert group_fan_cluster.write_attributes.call_args[0][0] == {"fan_mode": 6}
 
     # test some of the group logic to make sure we key off states correctly
-    await send_attributes_report(zha_gateway, dev1_fan_cluster, {0: 0})
-    await send_attributes_report(zha_gateway, dev2_fan_cluster, {0: 0})
+    await send_attributes_report(
+        zha_gateway, dev1_fan_cluster, {hvac.Fan.AttributeDefs.fan_mode: 0}
+    )
+    await send_attributes_report(
+        zha_gateway, dev2_fan_cluster, {hvac.Fan.AttributeDefs.fan_mode: 0}
+    )
 
     # test that group fan is off
     assert entity.state.is_on is False
 
-    await send_attributes_report(zha_gateway, dev2_fan_cluster, {0: 2})
+    await send_attributes_report(
+        zha_gateway, dev2_fan_cluster, {hvac.Fan.AttributeDefs.fan_mode: 2}
+    )
     await zha_gateway.async_block_till_done()
 
     # no update yet because of debouncing
@@ -367,7 +377,9 @@ async def test_zha_group_fan_entity(
 
     assert entity.state.is_on is True
 
-    await send_attributes_report(zha_gateway, dev2_fan_cluster, {0: 0})
+    await send_attributes_report(
+        zha_gateway, dev2_fan_cluster, {hvac.Fan.AttributeDefs.fan_mode: 0}
+    )
     await zha_gateway.async_block_till_done()
 
     # no update yet because of debouncing
@@ -740,11 +752,15 @@ async def test_fan_kof(
     assert entity.state.is_on is False
 
     # turn on at fan
-    await send_attributes_report(zha_gateway, cluster, {1: 2, 0: 1, 2: 3})
+    await send_attributes_report(
+        zha_gateway, cluster, {hvac.Fan.AttributeDefs.fan_mode: 1}
+    )
     assert entity.state.is_on is True
 
     # turn off at fan
-    await send_attributes_report(zha_gateway, cluster, {1: 1, 0: 0, 2: 2})
+    await send_attributes_report(
+        zha_gateway, cluster, {hvac.Fan.AttributeDefs.fan_mode: 0}
+    )
     assert entity.state.is_on is False
 
     # turn on from HA
@@ -861,8 +877,12 @@ async def test_group_state_ignores_unavailable_members(zha_gateway: Gateway) -> 
     dev2_fan_cluster = device_fan_2.device.endpoints[1].fan
 
     # first member on high, second on low: the first member's speed wins
-    await send_attributes_report(zha_gateway, dev1_fan_cluster, {0: 3})
-    await send_attributes_report(zha_gateway, dev2_fan_cluster, {0: 1})
+    await send_attributes_report(
+        zha_gateway, dev1_fan_cluster, {hvac.Fan.AttributeDefs.fan_mode: 3}
+    )
+    await send_attributes_report(
+        zha_gateway, dev2_fan_cluster, {hvac.Fan.AttributeDefs.fan_mode: 1}
+    )
     # group member updates are debounced
     await asyncio.sleep(1)
     await zha_gateway.async_block_till_done()
@@ -880,7 +900,9 @@ async def test_group_state_ignores_unavailable_members(zha_gateway: Gateway) -> 
     assert entity.state.is_on is True
 
     # turning the reachable member off turns the group off
-    await send_attributes_report(zha_gateway, dev2_fan_cluster, {0: 0})
+    await send_attributes_report(
+        zha_gateway, dev2_fan_cluster, {hvac.Fan.AttributeDefs.fan_mode: 0}
+    )
     await asyncio.sleep(1)
     await zha_gateway.async_block_till_done()
     assert entity.state.is_on is False
