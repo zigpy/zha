@@ -12,7 +12,6 @@ import math
 import numbers
 import typing
 from typing import TYPE_CHECKING, Any, cast
-import warnings
 
 from zigpy import types
 from zigpy.profiles.zha import PROFILE_ID as ZHA_PROFILE_ID
@@ -24,7 +23,6 @@ from zigpy.zcl import (
     AttributeUpdatedEvent,
     AttributeWrittenEvent,
     Cluster,
-    ClusterType,
     ReportingConfig,
     foundation,
 )
@@ -3232,39 +3230,6 @@ class RSSISensor(BaseSensor):
                 return cluster
             fallback = fallback or cluster
         return fallback
-
-    # TODO: remove once zha-quirks only filters `ZclPlatformEntity` by endpoint/cluster
-    # and HA Core's `websocket_get_groupable_devices` no longer reads `entity.endpoint`
-    @property
-    def endpoint(self) -> Endpoint:
-        """Return the endpoint of the legacy Basic cluster entity, for old quirks."""
-        warnings.warn(
-            f"`{type(self).__name__}.endpoint` is deprecated, device-bound entities"
-            " have no endpoint",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        basic_cluster = self.legacy_basic_cluster(self._device)
-        assert basic_cluster is not None
-
-        endpoint_id = basic_cluster.endpoint.endpoint_id
-        assert endpoint_id is not None
-        return self._device.endpoints[endpoint_id]
-
-    def targets_cluster(
-        self, cluster_id: int, cluster_type: ClusterType | None = None
-    ) -> bool:
-        """Match the legacy Basic cluster entity, for old quirks."""
-        warnings.warn(
-            f"`{type(self).__name__}.targets_cluster` is deprecated, device-bound"
-            " entities have no cluster",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        return cluster_id == Basic.cluster_id and cluster_type in (
-            None,
-            ClusterType.Server,
-        )
 
     def on_add(self) -> None:
         """Run when entity is added."""
