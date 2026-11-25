@@ -2284,20 +2284,20 @@ class SmartEnergyMetering(Sensor):
         ),
         0x01: SmartEnergyMeteringEntityDescription(
             native_unit_of_measurement=UnitOfVolumeFlowRate.CUBIC_METERS_PER_HOUR,
-            device_class=None,  # volume flow rate is not supported yet
+            device_class=SensorDeviceClass.VOLUME_FLOW_RATE,
         ),
         0x02: SmartEnergyMeteringEntityDescription(
             native_unit_of_measurement=UnitOfVolumeFlowRate.CUBIC_FEET_PER_MINUTE,
-            device_class=None,  # volume flow rate is not supported yet
+            device_class=SensorDeviceClass.VOLUME_FLOW_RATE,
         ),
         0x03: SmartEnergyMeteringEntityDescription(
             native_unit_of_measurement=UnitOfVolumeFlowRate.CUBIC_METERS_PER_HOUR,
-            device_class=None,  # volume flow rate is not supported yet
+            device_class=SensorDeviceClass.VOLUME_FLOW_RATE,
             scale=100,
         ),
         0x04: SmartEnergyMeteringEntityDescription(
-            native_unit_of_measurement=f"{UnitOfVolume.GALLONS}/{UnitOfTime.HOURS}",  # US gallons per hour
-            device_class=None,  # volume flow rate is not supported yet
+            native_unit_of_measurement=UnitOfVolumeFlowRate.GALLONS_PER_HOUR,  # US gallons per hour
+            device_class=SensorDeviceClass.VOLUME_FLOW_RATE,
         ),
         0x05: SmartEnergyMeteringEntityDescription(
             native_unit_of_measurement=f"IMP {UnitOfVolume.GALLONS}/{UnitOfTime.HOURS}",  # IMP gallons per hour
@@ -2309,8 +2309,8 @@ class SmartEnergyMetering(Sensor):
             state_class=None,
         ),
         0x07: SmartEnergyMeteringEntityDescription(
-            native_unit_of_measurement=f"l/{UnitOfTime.HOURS}",
-            device_class=None,  # volume flow rate is not supported yet
+            native_unit_of_measurement=UnitOfVolumeFlowRate.LITERS_PER_HOUR,
+            device_class=SensorDeviceClass.VOLUME_FLOW_RATE,
         ),
         0x08: SmartEnergyMeteringEntityDescription(
             native_unit_of_measurement=UnitOfPressure.KPA,
