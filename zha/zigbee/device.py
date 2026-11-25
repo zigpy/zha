@@ -685,7 +685,8 @@ class BaseDevice[ZigpyDeviceT: ZigpyBaseDevice](LogMixin, EventBase):
     def get_entity(
         self,
         platform: Platform,
-        endpoint_id: int | None = None,
+        # `None` is the endpoint of Green Power devices using SrcID addressing
+        endpoint_id: int | None | UndefinedType = UNDEFINED,
         cluster_id: int | None = None,
         *,
         pick_first: bool = False,
@@ -699,10 +700,10 @@ class BaseDevice[ZigpyDeviceT: ZigpyBaseDevice](LogMixin, EventBase):
         for entity in self._platform_entities.values():
             if platform != entity.PLATFORM:
                 continue
-            if endpoint_id is not None or cluster_id is not None:
+            if endpoint_id is not UNDEFINED or cluster_id is not None:
                 if not isinstance(entity, ZclPlatformEntity):
                     continue
-                if endpoint_id is not None and entity.endpoint.id != endpoint_id:
+                if endpoint_id is not UNDEFINED and entity.endpoint.id != endpoint_id:
                     continue
                 if cluster_id is not None and entity.cluster.cluster_id != cluster_id:
                     continue
