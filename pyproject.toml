@@ -65,12 +65,12 @@ ci = [
 default-groups = ["testing"]
 # zha-quirks 2.5.0 isn't released yet: build against its dev commit until it is
 override-dependencies = [
-    "zha-quirks @ git+https://github.com/zigpy/zha-device-handlers@abcffe0ca937b676643d2245994130a5b92a9f27",
+    "zha-quirks @ git+https://github.com/zigpy/zha-device-handlers@59d7b4527ab577ce1d3868f66c33141e651b313d",
 ]
 # That commit requires zha>=2.5.0, but a checkout with tags is 2.4.3.postN until
 # 2.5.0 is tagged: give it the same requirements without the zha version
 dependency-metadata = [
-    { name = "zha-quirks", version = "2.4.1.post42+git.abcffe0c", requires-dist = ["zigpy>=2.4.0", "zha"] },
+    { name = "zha-quirks", version = "2.4.1.post45+git.59d7b452", requires-dist = ["zigpy>=2.4.0", "zha"] },
 ]
 
 [tool.setuptools-git-versioning]
