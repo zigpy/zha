@@ -333,6 +333,7 @@
         "device_ieee": "ab:cd:ef:12:e7:40:47:bc",
         "endpoint_id": 11,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "command": "identify",
         "args": [
@@ -360,6 +361,7 @@
         "device_ieee": "ab:cd:ef:12:e7:40:47:bc",
         "endpoint_id": 11,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "on": false,
         "brightness": 180,
@@ -406,6 +408,7 @@
         "device_ieee": "ab:cd:ef:12:e7:40:47:bc",
         "endpoint_id": 11,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "native_value": 366,
         "mode": "auto",
@@ -432,6 +435,7 @@
         "device_ieee": "ab:cd:ef:12:e7:40:47:bc",
         "endpoint_id": 11,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "native_value": 254,
         "mode": "auto",
@@ -460,6 +464,7 @@
         "device_ieee": "ab:cd:ef:12:e7:40:47:bc",
         "endpoint_id": 11,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "current_option": "On",
         "enum": "StartUpOnOff",
@@ -490,6 +495,7 @@
         "device_ieee": "ab:cd:ef:12:e7:40:47:bc",
         "endpoint_id": null,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "native_value": 104,
         "suggested_display_precision": null,
@@ -513,6 +519,7 @@
         "device_ieee": "ab:cd:ef:12:e7:40:47:bc",
         "endpoint_id": null,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "native_value": -85,
         "suggested_display_precision": null,
@@ -538,6 +545,7 @@
         "device_ieee": "ab:cd:ef:12:e7:40:47:bc",
         "endpoint_id": 11,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "installed_version": "0x01000804",
         "in_progress": false,
@@ -550,6 +558,7 @@
       }
     ]
   },
+  "child_devices": [],
   "neighbors": [],
   "routes": []
 }

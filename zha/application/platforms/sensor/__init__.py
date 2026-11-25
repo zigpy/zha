@@ -12,7 +12,6 @@ import math
 import numbers
 import typing
 from typing import TYPE_CHECKING, Any, cast
-import warnings
 
 from zigpy import types
 from zigpy.profiles.zha import PROFILE_ID as ZHA_PROFILE_ID
@@ -24,7 +23,6 @@ from zigpy.zcl import (
     AttributeUpdatedEvent,
     AttributeWrittenEvent,
     Cluster,
-    ClusterType,
     ReportingConfig,
     foundation,
 )
@@ -2284,20 +2282,20 @@ class SmartEnergyMetering(Sensor):
         ),
         0x01: SmartEnergyMeteringEntityDescription(
             native_unit_of_measurement=UnitOfVolumeFlowRate.CUBIC_METERS_PER_HOUR,
-            device_class=None,  # volume flow rate is not supported yet
+            device_class=SensorDeviceClass.VOLUME_FLOW_RATE,
         ),
         0x02: SmartEnergyMeteringEntityDescription(
             native_unit_of_measurement=UnitOfVolumeFlowRate.CUBIC_FEET_PER_MINUTE,
-            device_class=None,  # volume flow rate is not supported yet
+            device_class=SensorDeviceClass.VOLUME_FLOW_RATE,
         ),
         0x03: SmartEnergyMeteringEntityDescription(
             native_unit_of_measurement=UnitOfVolumeFlowRate.CUBIC_METERS_PER_HOUR,
-            device_class=None,  # volume flow rate is not supported yet
+            device_class=SensorDeviceClass.VOLUME_FLOW_RATE,
             scale=100,
         ),
         0x04: SmartEnergyMeteringEntityDescription(
-            native_unit_of_measurement=f"{UnitOfVolume.GALLONS}/{UnitOfTime.HOURS}",  # US gallons per hour
-            device_class=None,  # volume flow rate is not supported yet
+            native_unit_of_measurement=UnitOfVolumeFlowRate.GALLONS_PER_HOUR,  # US gallons per hour
+            device_class=SensorDeviceClass.VOLUME_FLOW_RATE,
         ),
         0x05: SmartEnergyMeteringEntityDescription(
             native_unit_of_measurement=f"IMP {UnitOfVolume.GALLONS}/{UnitOfTime.HOURS}",  # IMP gallons per hour
@@ -2309,8 +2307,8 @@ class SmartEnergyMetering(Sensor):
             state_class=None,
         ),
         0x07: SmartEnergyMeteringEntityDescription(
-            native_unit_of_measurement=f"l/{UnitOfTime.HOURS}",
-            device_class=None,  # volume flow rate is not supported yet
+            native_unit_of_measurement=UnitOfVolumeFlowRate.LITERS_PER_HOUR,
+            device_class=SensorDeviceClass.VOLUME_FLOW_RATE,
         ),
         0x08: SmartEnergyMeteringEntityDescription(
             native_unit_of_measurement=UnitOfPressure.KPA,
@@ -3232,36 +3230,6 @@ class RSSISensor(BaseSensor):
                 return cluster
             fallback = fallback or cluster
         return fallback
-
-    # TODO: remove once zha-quirks only filters `ZclPlatformEntity` by endpoint/cluster
-    # and HA Core's `websocket_get_groupable_devices` no longer reads `entity.endpoint`
-    @property
-    def endpoint(self) -> Endpoint:
-        """Return the endpoint of the legacy Basic cluster entity, for old quirks."""
-        warnings.warn(
-            f"`{type(self).__name__}.endpoint` is deprecated, device-bound entities"
-            " have no endpoint",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        basic_cluster = self.legacy_basic_cluster(self._device)
-        assert basic_cluster is not None
-        return self._device.endpoints[basic_cluster.endpoint.endpoint_id]
-
-    def targets_cluster(
-        self, cluster_id: int, cluster_type: ClusterType | None = None
-    ) -> bool:
-        """Match the legacy Basic cluster entity, for old quirks."""
-        warnings.warn(
-            f"`{type(self).__name__}.targets_cluster` is deprecated, device-bound"
-            " entities have no cluster",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        return cluster_id == Basic.cluster_id and cluster_type in (
-            None,
-            ClusterType.Server,
-        )
 
     def on_add(self) -> None:
         """Run when entity is added."""

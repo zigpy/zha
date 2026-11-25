@@ -269,7 +269,6 @@ class AdvancedSiren(BaseZclSiren):
         strobe_intensity: int | None = None,
     ) -> None:
         """Turn on siren."""
-        self._cancel_off_listener()
         tone_default = self.defaults[WarningMode]
         siren_tone = (
             tone_default.value if tone_default is not None else WarningMode.Emergency
@@ -318,6 +317,9 @@ class AdvancedSiren(BaseZclSiren):
             strobe_duty_cycle=duty_cycle,
             strobe_level=strobe_level,
         )
+        # Replace the previous off timer only once the command went out: a failed
+        # command keeps it, and of overlapping calls the last one to finish wins
+        self._cancel_off_listener()
         self._attr_is_on = True
         self._off_listener = asyncio.get_running_loop().call_later(
             siren_duration, self._async_set_off
@@ -365,7 +367,6 @@ class BasicSiren(BaseZclSiren):
         strobe_intensity: int | None = None,
     ) -> None:
         """Turn on siren with fixed tone, level, and strobe."""
-        self._cancel_off_listener()
         siren_duration = duration if duration is not None else DEFAULT_DURATION
 
         warning = WarningType(
@@ -380,6 +381,9 @@ class BasicSiren(BaseZclSiren):
             strobe_duty_cycle=0,
             strobe_level=StrobeLevel.High_level_strobe,
         )
+        # Replace the previous off timer only once the command went out: a failed
+        # command keeps it, and of overlapping calls the last one to finish wins
+        self._cancel_off_listener()
         self._attr_is_on = True
         self._off_listener = asyncio.get_running_loop().call_later(
             siren_duration, self._async_set_off

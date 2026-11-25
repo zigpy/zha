@@ -965,6 +965,47 @@ async def test_async_add_to_group_remove_from_group(
         )
 
 
+async def test_remove_group_with_stale_endpoint_member(
+    zha_gateway: Gateway,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    """Test removing a group whose member endpoint no longer exists on the device."""
+    zigpy_dev = zigpy_device(zha_gateway, with_basic_cluster=True)
+    zigpy_dev.endpoints[3].add_input_cluster(general.Groups.cluster_id)
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
+
+    group: Group = zha_device.gateway.groups[0x1001]
+    await zha_device.async_add_endpoint_to_group(3, group.group_id)
+    assert (zha_device.ieee, 3) in group.zigpy_group.members
+    assert len(group.members) == 1
+
+    # The endpoint disappears (e.g. a different radio or a quirk change)
+    del zigpy_dev.endpoints[3]
+
+    await zha_gateway.async_remove_zigpy_group(group.group_id)
+
+    assert group.group_id not in zha_gateway.application_controller.groups
+    assert "Failed to remove endpoint: 3" not in caplog.text
+
+
+async def test_remove_stale_endpoint_from_group(zha_gateway: Gateway) -> None:
+    """Test removing a stale endpoint member drops the membership without a request."""
+    zigpy_dev = zigpy_device(zha_gateway, with_basic_cluster=True)
+    zigpy_dev.endpoints[3].add_input_cluster(general.Groups.cluster_id)
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
+
+    group: Group = zha_device.gateway.groups[0x1001]
+    await zha_device.async_add_endpoint_to_group(3, group.group_id)
+    assert (zha_device.ieee, 3) in group.zigpy_group.members
+
+    del zigpy_dev.endpoints[3]
+
+    with patch("zigpy.zcl.Cluster.request", side_effect=AssertionError):
+        await zha_device.async_remove_endpoint_from_group(3, group.group_id)
+
+    assert (zha_device.ieee, 3) not in group.zigpy_group.members
+
+
 async def test_async_bind_to_group(
     zha_gateway: Gateway,
     caplog: pytest.LogCaptureFixture,
