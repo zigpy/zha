@@ -2673,3 +2673,82 @@ async def test_group_member_added_during_transition_counts_after_it(
     assert bool(get_entity(device_light_2, platform=Platform.LIGHT).state.on) is False
     assert bool(device_3_light_entity.state.on) is True
     assert bool(entity.state.on) is True
+
+
+async def test_group_member_change_recomputes_member_capabilities(
+    zha_gateway: Gateway,
+) -> None:
+    """Test that a light group re-derives its command options from new members.
+
+    Whether the group sends color commands before turning on (all members support
+    `Execute_if_off`) and its minimum transition time (a Sengled member) depend on
+    the members. The group entity is kept when members are added or removed, so it
+    has to recompute them.
+    """
+
+    coordinator = await coordinator_mock(zha_gateway)
+    device_light_1 = await device_light_1_mock(zha_gateway)
+    device_light_2 = await device_light_2_mock(zha_gateway)
+    device_light_3 = await device_light_3_mock(zha_gateway)
+
+    zha_gateway.coordinator_zha_device = coordinator
+    coordinator._zha_gateway = zha_gateway
+    device_light_1._zha_gateway = zha_gateway
+    device_light_2._zha_gateway = zha_gateway
+    device_light_3._zha_gateway = zha_gateway
+
+    # lights 1 and 3 execute color commands while off, the Sengled light 2 doesn't
+    for device in (device_light_1, device_light_3):
+        color_cluster = device.device.endpoints[1].light_color
+        color_cluster.PLUGGED_ATTR_READS = {
+            "options": lighting.Color.Options.Execute_if_off
+        }
+        update_attribute_cache(color_cluster)
+
+    members = [
+        GroupMemberReference(ieee=device_light_1.ieee, endpoint_id=1),
+        GroupMemberReference(ieee=device_light_3.ieee, endpoint_id=1),
+    ]
+    zha_group: Group = await zha_gateway.async_create_zigpy_group("Test Group", members)
+    await zha_gateway.async_block_till_done()
+
+    entity: GroupEntity = get_group_entity(zha_group, platform=Platform.LIGHT)
+    assert entity._GROUP_SUPPORTS_EXECUTE_IF_OFF is True
+    assert entity._DEFAULT_MIN_TRANSITION_TIME == 0
+
+    await zha_group.async_add_members(
+        [GroupMemberReference(ieee=device_light_2.ieee, endpoint_id=1)]
+    )
+    await zha_gateway.async_block_till_done()
+    assert len(zha_group.members) == 3
+    assert get_group_entity(zha_group, platform=Platform.LIGHT) is entity
+
+    # the group now has a member that ignores color commands while it is off
+    assert entity._GROUP_SUPPORTS_EXECUTE_IF_OFF is False
+    assert entity._DEFAULT_MIN_TRANSITION_TIME == 0.1
+
+    # so turning the group on with a color turns it on before setting the color
+    commands = AsyncMock()
+    commands.on_off.return_value = [sentinel.data, zcl_f.Status.SUCCESS]
+    commands.level.return_value = [sentinel.data, zcl_f.Status.SUCCESS]
+    commands.color.return_value = [sentinel.data, zcl_f.Status.SUCCESS]
+    with (
+        patch("zigpy.zcl.clusters.general.OnOff.request", new=commands.on_off),
+        patch("zigpy.zcl.clusters.general.LevelControl.request", new=commands.level),
+        patch("zigpy.zcl.clusters.lighting.Color.request", new=commands.color),
+    ):
+        await entity.async_turn_on(color_temp=300)
+        await zha_gateway.async_block_till_done()
+
+    assert [name for name, _, _ in commands.mock_calls] == ["on_off", "color"]
+    # with the minimum transition time of the Sengled member
+    assert commands.color.mock_calls[0].kwargs["transition_time"] == 1
+
+    # removing the Sengled member restores both
+    await zha_group.async_remove_members(
+        [GroupMemberReference(ieee=device_light_2.ieee, endpoint_id=1)]
+    )
+    await zha_gateway.async_block_till_done()
+    assert get_group_entity(zha_group, platform=Platform.LIGHT) is entity
+    assert entity._GROUP_SUPPORTS_EXECUTE_IF_OFF is True
+    assert entity._DEFAULT_MIN_TRANSITION_TIME == 0
