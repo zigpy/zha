@@ -221,6 +221,62 @@
         "kwargs": {}
       }
     ],
+    "event": [
+      {
+        "fallback_name": "Left button",
+        "unique_id": "ab:cd:ef:12:74:63:9c:dc-1-button_left",
+        "migrate_unique_ids": [],
+        "platform": "event",
+        "class_name": "ZhaEventButton",
+        "translation_key": "left_button",
+        "translation_placeholders": null,
+        "device_class": "button",
+        "state_class": null,
+        "entity_category": null,
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:74:63:9c:dc",
+        "endpoint_id": 1,
+        "available": true,
+        "child_device_id": null,
+        "group_id": null,
+        "event_types": [
+          "press_start",
+          "press_end",
+          "long_press_start",
+          "long_press_end"
+        ]
+      },
+      {
+        "fallback_name": "Right button",
+        "unique_id": "ab:cd:ef:12:74:63:9c:dc-1-button_right",
+        "migrate_unique_ids": [],
+        "platform": "event",
+        "class_name": "ZhaEventButton",
+        "translation_key": "right_button",
+        "translation_placeholders": null,
+        "device_class": "button",
+        "state_class": null,
+        "entity_category": null,
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:74:63:9c:dc",
+        "endpoint_id": 1,
+        "available": true,
+        "child_device_id": null,
+        "group_id": null,
+        "event_types": [
+          "press_start",
+          "press_end",
+          "long_press_start",
+          "long_press_end"
+        ]
+      }
+    ],
     "sensor": [
       {
         "fallback_name": null,

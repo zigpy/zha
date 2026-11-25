@@ -227,6 +227,182 @@
         "kwargs": {}
       }
     ],
+    "event": [
+      {
+        "fallback_name": "Button 1",
+        "unique_id": "ab:cd:ef:12:52:61:2b:43-1-button_1",
+        "migrate_unique_ids": [],
+        "platform": "event",
+        "class_name": "ZhaEventButton",
+        "translation_key": "button_numbered",
+        "translation_placeholders": {
+          "number": "1"
+        },
+        "device_class": "button",
+        "state_class": null,
+        "entity_category": null,
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:52:61:2b:43",
+        "endpoint_id": 1,
+        "available": true,
+        "child_device_id": null,
+        "group_id": null,
+        "event_types": [
+          "single_press",
+          "multi_press"
+        ]
+      },
+      {
+        "fallback_name": "Button 2",
+        "unique_id": "ab:cd:ef:12:52:61:2b:43-1-button_2",
+        "migrate_unique_ids": [],
+        "platform": "event",
+        "class_name": "ZhaEventButton",
+        "translation_key": "button_numbered",
+        "translation_placeholders": {
+          "number": "2"
+        },
+        "device_class": "button",
+        "state_class": null,
+        "entity_category": null,
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:52:61:2b:43",
+        "endpoint_id": 1,
+        "available": true,
+        "child_device_id": null,
+        "group_id": null,
+        "event_types": [
+          "single_press",
+          "multi_press"
+        ]
+      },
+      {
+        "fallback_name": "Next button",
+        "unique_id": "ab:cd:ef:12:52:61:2b:43-1-button_next",
+        "migrate_unique_ids": [],
+        "platform": "event",
+        "class_name": "ZhaEventButton",
+        "translation_key": "next_button",
+        "translation_placeholders": null,
+        "device_class": "button",
+        "state_class": null,
+        "entity_category": null,
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:52:61:2b:43",
+        "endpoint_id": 1,
+        "available": true,
+        "child_device_id": null,
+        "group_id": null,
+        "event_types": [
+          "single_press"
+        ]
+      },
+      {
+        "fallback_name": "Play/pause button",
+        "unique_id": "ab:cd:ef:12:52:61:2b:43-1-button_play_pause",
+        "migrate_unique_ids": [],
+        "platform": "event",
+        "class_name": "ZhaEventButton",
+        "translation_key": "play_pause_button",
+        "translation_placeholders": null,
+        "device_class": "button",
+        "state_class": null,
+        "entity_category": null,
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:52:61:2b:43",
+        "endpoint_id": 1,
+        "available": true,
+        "child_device_id": null,
+        "group_id": null,
+        "event_types": [
+          "single_press"
+        ]
+      },
+      {
+        "fallback_name": "Previous button",
+        "unique_id": "ab:cd:ef:12:52:61:2b:43-1-button_previous",
+        "migrate_unique_ids": [],
+        "platform": "event",
+        "class_name": "ZhaEventButton",
+        "translation_key": "previous_button",
+        "translation_placeholders": null,
+        "device_class": "button",
+        "state_class": null,
+        "entity_category": null,
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:52:61:2b:43",
+        "endpoint_id": 1,
+        "available": true,
+        "child_device_id": null,
+        "group_id": null,
+        "event_types": [
+          "single_press"
+        ]
+      },
+      {
+        "fallback_name": "Volume down button",
+        "unique_id": "ab:cd:ef:12:52:61:2b:43-1-button_volume_down",
+        "migrate_unique_ids": [],
+        "platform": "event",
+        "class_name": "ZhaEventButton",
+        "translation_key": "volume_down_button",
+        "translation_placeholders": null,
+        "device_class": "button",
+        "state_class": null,
+        "entity_category": null,
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:52:61:2b:43",
+        "endpoint_id": 1,
+        "available": true,
+        "child_device_id": null,
+        "group_id": null,
+        "event_types": [
+          "press_end"
+        ]
+      },
+      {
+        "fallback_name": "Volume up button",
+        "unique_id": "ab:cd:ef:12:52:61:2b:43-1-button_volume_up",
+        "migrate_unique_ids": [],
+        "platform": "event",
+        "class_name": "ZhaEventButton",
+        "translation_key": "volume_up_button",
+        "translation_placeholders": null,
+        "device_class": "button",
+        "state_class": null,
+        "entity_category": null,
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:52:61:2b:43",
+        "endpoint_id": 1,
+        "available": true,
+        "child_device_id": null,
+        "group_id": null,
+        "event_types": [
+          "press_end"
+        ]
+      }
+    ],
     "sensor": [
       {
         "fallback_name": null,

@@ -8,7 +8,7 @@
   "friendly_model": "STARKVIND Air purifier",
   "name": "IKEA of Sweden STARKVIND Air purifier",
   "quirk_applied": true,
-  "quirk_class": "zhaquirks.ikea.starkvind:IkeaSTARKVIND",
+  "quirk_class": "zhaquirks.ikea.starkvind:(IKEA of Sweden / STARKVIND Air purifier)",
   "exposes_features": [],
   "manufacturer_code": 4476,
   "power_source": "Mains",
@@ -73,18 +73,6 @@
           "cluster_id": "0x0005",
           "endpoint_attribute": "scenes",
           "attributes": []
-        },
-        {
-          "cluster_id": "0x042a",
-          "endpoint_attribute": "pm25",
-          "attributes": [
-            {
-              "id": "0x0000",
-              "name": "measured_value",
-              "zcl_type": "single",
-              "value": 16
-            }
-          ]
         },
         {
           "cluster_id": "0xfc57",
@@ -168,6 +156,11 @@
         {
           "cluster_id": "0x0400",
           "endpoint_attribute": "illuminance",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x042a",
+          "endpoint_attribute": "pm25",
           "attributes": []
         }
       ]
@@ -412,11 +405,11 @@
         "unit": "dBm"
       },
       {
-        "fallback_name": null,
+        "fallback_name": "PM2.5",
         "unique_id": "0c:43:14:ff:fe:73:07:e2-1-1066",
         "migrate_unique_ids": [],
         "platform": "sensor",
-        "class_name": "PM25",
+        "class_name": "Sensor",
         "translation_key": null,
         "translation_placeholders": null,
         "device_class": "pm25",
