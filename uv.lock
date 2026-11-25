@@ -7,11 +7,11 @@ resolution-markers = [
 ]
 
 [manifest]
-overrides = [{ name = "zha-quirks", git = "https://github.com/zigpy/zha-device-handlers?rev=cadced60134e43c6514b1b8ecb7d649e75844d39" }]
+overrides = [{ name = "zha-quirks", git = "https://github.com/zigpy/zha-device-handlers?rev=abcffe0ca937b676643d2245994130a5b92a9f27" }]
 
 [[manifest.dependency-metadata]]
 name = "zha-quirks"
-version = "2.4.1.post35+git.cadced60"
+version = "2.4.1.post42+git.abcffe0c"
 requires-dist = ["zigpy>=2.4.0", "zha"]
 
 [[package]]
@@ -2071,8 +2071,8 @@ testing = [
 
 [[package]]
 name = "zha-quirks"
-version = "2.4.1.post35+git.cadced60"
-source = { git = "https://github.com/zigpy/zha-device-handlers?rev=cadced60134e43c6514b1b8ecb7d649e75844d39#cadced60134e43c6514b1b8ecb7d649e75844d39" }
+version = "2.4.1.post42+git.abcffe0c"
+source = { git = "https://github.com/zigpy/zha-device-handlers?rev=abcffe0ca937b676643d2245994130a5b92a9f27#abcffe0ca937b676643d2245994130a5b92a9f27" }
 dependencies = [
     { name = "zha" },
     { name = "zigpy" },
