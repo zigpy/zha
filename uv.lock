@@ -2010,7 +2010,7 @@ requires-dist = [
     { name = "frozendict" },
     { name = "pytest", marker = "extra == 'testing'" },
     { name = "python-slugify", marker = "extra == 'testing'" },
-    { name = "zigpy", specifier = "==2.4.1" },
+    { name = "zigpy", specifier = "==2.5.0" },
     { name = "zigpy-deconz", specifier = "==1.1.1" },
     { name = "zigpy-xbee", specifier = "==0.22.0" },
     { name = "zigpy-zigate", specifier = "==0.14.0" },
@@ -2076,7 +2076,7 @@ wheels = [
 
 [[package]]
 name = "zigpy"
-version = "2.4.1"
+version = "2.5.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "aiohttp" },
@@ -2090,9 +2090,9 @@ dependencies = [
     { name = "typing-extensions" },
     { name = "voluptuous" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/8c/42/9a1f933fe9b7144833d0e2705f39086c92fd44b92535375b9eaf3600ea8c/zigpy-2.4.1.tar.gz", hash = "sha256:d05e0a249d2d0b8026b4fd58955d7152b33f052b4d3c096aba84aa27bfb513a9", size = 393651, upload-time = "2026-10-28T03:31:07.516Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/a0/13/8c91e8f391a887c1412e4582aa96e8759014690347ea6c2ce55f53d2a332/zigpy-2.5.0.tar.gz", hash = "sha256:4a61f1f8d4e0f4bcbbb8ce515d07054b36b2ae062880927557580c28f10e0573", size = 434046, upload-time = "2026-11-25T02:02:20.643Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/ab/41/2dd6ffbeeaf1cc2b7b7a9e528e0f93d2be827a2822e168316692b81977d9/zigpy-2.4.1-py3-none-any.whl", hash = "sha256:22f6b7ddb30539153529a17eae1c8cc06d921169158ac8e85ae747d856fcb2fc", size = 293816, upload-time = "2026-10-28T03:31:06.366Z" },
+    { url = "https://files.pythonhosted.org/packages/9f/fc/173fb32332bb262929e47c1e54f0bc20ca8674da87b673eaf43d66683944/zigpy-2.5.0-py3-none-any.whl", hash = "sha256:58ff54fbb1dd93bc8c2d7b77b5eff59e370abdbdc5867b9fae09293e2c1f8ebc", size = 313262, upload-time = "2026-11-25T02:02:19.258Z" },
 ]
 
 [[package]]
