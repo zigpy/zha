@@ -6,14 +6,6 @@ resolution-markers = [
     "python_full_version < '3.15'",
 ]
 
-[manifest]
-overrides = [{ name = "zha-quirks", git = "https://github.com/zigpy/zha-device-handlers?rev=59d7b4527ab577ce1d3868f66c33141e651b313d" }]
-
-[[manifest.dependency-metadata]]
-name = "zha-quirks"
-version = "2.4.1.post45+git.59d7b452"
-requires-dist = ["zigpy>=2.4.0", "zha"]
-
 [[package]]
 name = "aiohappyeyeballs"
 version = "2.7.1"
@@ -2092,11 +2084,15 @@ testing = [
 
 [[package]]
 name = "zha-quirks"
-version = "2.4.1.post45+git.59d7b452"
-source = { git = "https://github.com/zigpy/zha-device-handlers?rev=59d7b4527ab577ce1d3868f66c33141e651b313d#59d7b4527ab577ce1d3868f66c33141e651b313d" }
+version = "2.5.0"
+source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "zha" },
     { name = "zigpy" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/e4/03/37d7bf28819fdbfc342f8757d52f8a05311994997b5b7dd055953cb9d58c/zha_quirks-2.5.0.tar.gz", hash = "sha256:fbe4b1a1ef4daeb18e7ce364ad350db8cac32c21239c6c53298270c972ec6bea", size = 612658, upload-time = "2026-11-25T12:59:35.51Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/f4/dd/b9815b8b5c2de6984b1fb0e2428ac9505dcbce42119d6ec0d1683c24a552/zha_quirks-2.5.0-py3-none-any.whl", hash = "sha256:6543810de96759194e9bf75f6486c67da1a6a85e0487deee204ff83ba57eca80", size = 677882, upload-time = "2026-11-25T12:59:33.697Z" },
 ]
 
 [[package]]
