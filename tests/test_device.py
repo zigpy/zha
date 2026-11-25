@@ -378,8 +378,8 @@ async def test_check_available_lumi_uses_reported_manufacturer(
     zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
     basic_cluster = zigpy_dev.endpoints[3].basic
 
-    assert zha_device.manufacturer == friendly_manufacturer
-    assert zha_device.reported_manufacturer == manufacturer
+    assert zha_device.friendly_manufacturer == friendly_manufacturer
+    assert zha_device.manufacturer == manufacturer
     assert zha_device.available is True
 
     zigpy_dev.last_seen = time.time() - zha_device.consider_unavailable_time - 2
@@ -1244,10 +1244,28 @@ async def test_quirks_v2_device_renaming(zha_gateway: Gateway) -> None:
     )
 
     zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
-    assert zha_device.model == "IRIS Keypad V2"
-    assert zha_device.manufacturer == "Lowe's"
-    assert zha_device.reported_model == "3405-L"
-    assert zha_device.reported_manufacturer == "CentraLite"
+    assert zha_device.friendly_model == "IRIS Keypad V2"
+    assert zha_device.friendly_manufacturer == "Lowe's"
+    assert zha_device.model == "3405-L"
+    assert zha_device.manufacturer == "CentraLite"
+    assert zha_device.name == "Lowe's IRIS Keypad V2"
+
+    device_info = zha_device.device_info
+    assert device_info.friendly_model == "IRIS Keypad V2"
+    assert device_info.friendly_manufacturer == "Lowe's"
+    assert device_info.model == "3405-L"
+    assert device_info.manufacturer == "CentraLite"
+    assert device_info.name == "Lowe's IRIS Keypad V2"
+
+    # The signature lists the names a quirk has to match
+    assert zha_device.zigbee_signature["model"] == "3405-L"
+    assert zha_device.zigbee_signature["manufacturer"] == "CentraLite"
+
+    diagnostics = zha_device.get_diagnostics_json()
+    assert diagnostics["friendly_model"] == "IRIS Keypad V2"
+    assert diagnostics["friendly_manufacturer"] == "Lowe's"
+    assert diagnostics["model"] == "3405-L"
+    assert diagnostics["manufacturer"] == "CentraLite"
 
 
 async def test_quirks_v2_device_alerts(zha_gateway: Gateway) -> None:
@@ -2436,6 +2454,9 @@ async def test_gateway_reconfigure_with_swap(
     assert zha_device.device is new_zigpy_dev
     assert zha_device.manufacturer == "NewManufacturer"
     assert zha_device.model == "NewModel"
+    assert zha_device.friendly_manufacturer == "NewManufacturer"
+    assert zha_device.friendly_model == "NewModel"
+    assert zha_device.name == "NewManufacturer NewModel"
     assert zha_device.status.name == "INITIALIZED"
     assert len(zha_device.endpoints) > 0
     assert len(zha_device.platform_entities) > 0
@@ -2657,6 +2678,9 @@ async def test_gateway_device_reinterviewed_ota_path(
     assert zha_device.device is new_zigpy_dev
     assert zha_device.manufacturer == "OTAManufacturer"
     assert zha_device.model == "OTAModel"
+    assert zha_device.friendly_manufacturer == "OTAManufacturer"
+    assert zha_device.friendly_model == "OTAModel"
+    assert zha_device.name == "OTAManufacturer OTAModel"
     assert zha_device.status.name == "INITIALIZED"
     assert len(zha_device.platform_entities) > 0
 

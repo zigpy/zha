@@ -131,11 +131,15 @@ async def test_switch(zha_gateway: Gateway) -> None:
     assert bool(bool(entity.state.is_on)) is False
 
     # turn on at switch
-    await send_attributes_report(zha_gateway, cluster, {1: 0, 0: 1, 2: 2})
+    await send_attributes_report(
+        zha_gateway, cluster, {general.OnOff.AttributeDefs.on_off: 1}
+    )
     assert bool(entity.state.is_on) is True
 
     # turn off at switch
-    await send_attributes_report(zha_gateway, cluster, {1: 1, 0: 0, 2: 2})
+    await send_attributes_report(
+        zha_gateway, cluster, {general.OnOff.AttributeDefs.on_off: 0}
+    )
     assert bool(entity.state.is_on) is False
 
     # turn on from client
@@ -294,8 +298,12 @@ async def test_zha_group_switch_entity(zha_gateway: Gateway) -> None:
     assert bool(entity.state.is_on) is False
 
     # test some of the group logic to make sure we key off states correctly
-    await send_attributes_report(zha_gateway, dev1_cluster_on_off, {0: 1})
-    await send_attributes_report(zha_gateway, dev2_cluster_on_off, {0: 1})
+    await send_attributes_report(
+        zha_gateway, dev1_cluster_on_off, {general.OnOff.AttributeDefs.on_off: 1}
+    )
+    await send_attributes_report(
+        zha_gateway, dev2_cluster_on_off, {general.OnOff.AttributeDefs.on_off: 1}
+    )
     await zha_gateway.async_block_till_done()
 
     # group member updates are debounced
@@ -306,13 +314,17 @@ async def test_zha_group_switch_entity(zha_gateway: Gateway) -> None:
     # test that group light is on
     assert bool(entity.state.is_on) is True
 
-    await send_attributes_report(zha_gateway, dev1_cluster_on_off, {0: 0})
+    await send_attributes_report(
+        zha_gateway, dev1_cluster_on_off, {general.OnOff.AttributeDefs.on_off: 0}
+    )
     await zha_gateway.async_block_till_done()
 
     # test that group light is still on
     assert bool(entity.state.is_on) is True
 
-    await send_attributes_report(zha_gateway, dev2_cluster_on_off, {0: 0})
+    await send_attributes_report(
+        zha_gateway, dev2_cluster_on_off, {general.OnOff.AttributeDefs.on_off: 0}
+    )
     await zha_gateway.async_block_till_done()
 
     # group member updates are debounced
@@ -323,7 +335,9 @@ async def test_zha_group_switch_entity(zha_gateway: Gateway) -> None:
     # test that group light is now off
     assert bool(entity.state.is_on) is False
 
-    await send_attributes_report(zha_gateway, dev1_cluster_on_off, {0: 1})
+    await send_attributes_report(
+        zha_gateway, dev1_cluster_on_off, {general.OnOff.AttributeDefs.on_off: 1}
+    )
     await zha_gateway.async_block_till_done()
 
     # group member updates are debounced
@@ -772,7 +786,7 @@ async def test_cover_inversion_switch(zha_gateway: Gateway) -> None:
 
     # test to see the state remains after tilting to 0%
     await send_attributes_report(
-        zha_gateway, cluster, {WCAttrs.current_position_tilt_percentage.id: 0}
+        zha_gateway, cluster, {WCAttrs.current_position_tilt_percentage: 0}
     )
     assert bool(entity.state.is_on) is False
 
@@ -889,7 +903,7 @@ async def test_binary_output_cluster(zha_gateway: Gateway) -> None:
     await send_attributes_report(
         zha_gateway,
         cluster,
-        {BinaryOutput.AttributeDefs.present_value.id: t.Bool(False)},
+        {BinaryOutput.AttributeDefs.present_value: t.Bool(False)},
     )
     assert switch_entity.state.is_on is False
 
@@ -931,8 +945,12 @@ async def test_group_state_ignores_unavailable_members(
     dev2_cluster_on_off = device_switch_2.device.endpoints[1].on_off
 
     # both members on, so the group is on
-    await send_attributes_report(zha_gateway, dev1_cluster_on_off, {0: 1})
-    await send_attributes_report(zha_gateway, dev2_cluster_on_off, {0: 1})
+    await send_attributes_report(
+        zha_gateway, dev1_cluster_on_off, {general.OnOff.AttributeDefs.on_off: 1}
+    )
+    await send_attributes_report(
+        zha_gateway, dev2_cluster_on_off, {general.OnOff.AttributeDefs.on_off: 1}
+    )
     # group member updates are debounced
     await asyncio.sleep(1)
     await zha_gateway.async_block_till_done()
@@ -949,7 +967,9 @@ async def test_group_state_ignores_unavailable_members(
     assert bool(device_2_entity.state.is_on) is True
 
     # turning the reachable member off turns the group off
-    await send_attributes_report(zha_gateway, dev1_cluster_on_off, {0: 0})
+    await send_attributes_report(
+        zha_gateway, dev1_cluster_on_off, {general.OnOff.AttributeDefs.on_off: 0}
+    )
     await asyncio.sleep(1)
     await zha_gateway.async_block_till_done()
     assert bool(entity.state.is_on) is False
@@ -1008,7 +1028,9 @@ async def test_group_ignores_config_switches(zha_gateway: Gateway) -> None:
     # relays off, but the network LEDs on: the group is off
     for device in devices:
         await send_attributes_report(
-            zha_gateway, device.device.endpoints[1].on_off, {0: 0}
+            zha_gateway,
+            device.device.endpoints[1].on_off,
+            {general.OnOff.AttributeDefs.on_off: 0},
         )
         await send_attributes_report(
             zha_gateway, device.device.endpoints[1].ewelink, {"network_led": 1}
@@ -1022,7 +1044,9 @@ async def test_group_ignores_config_switches(zha_gateway: Gateway) -> None:
 
     # turning a relay on turns the group on
     await send_attributes_report(
-        zha_gateway, devices[0].device.endpoints[1].on_off, {0: 1}
+        zha_gateway,
+        devices[0].device.endpoints[1].on_off,
+        {general.OnOff.AttributeDefs.on_off: 1},
     )
     await asyncio.sleep(1)
     await zha_gateway.async_block_till_done()
@@ -1062,3 +1086,57 @@ async def test_group_ignores_binary_output_switches(zha_gateway: Gateway) -> Non
         assert type(entity) is BinaryOutputSwitch
         assert entity.group_member is False
     assert zha_group.group_entities == {}
+
+
+async def test_group_state_follows_membership_changes(zha_gateway: Gateway) -> None:
+    """Test that the group state is recomputed when members are removed or added."""
+    devices: list[Device] = [
+        await device_switch_1_mock(zha_gateway),
+        await device_switch_2_mock(zha_gateway),
+    ]
+    zigpy_dev_3 = create_mock_zigpy_device(
+        zha_gateway,
+        {
+            1: {
+                SIG_EP_INPUT: [general.OnOff.cluster_id, general.Groups.cluster_id],
+                SIG_EP_OUTPUT: [],
+                SIG_EP_TYPE: zha.DeviceType.ON_OFF_SWITCH,
+                SIG_EP_PROFILE: zha.PROFILE_ID,
+            }
+        },
+        ieee="03:2d:6f:00:0a:90:69:e8",
+    )
+    devices.append(await join_zigpy_device(zha_gateway, zigpy_dev_3))
+    member_3 = GroupMemberReference(ieee=devices[2].ieee, endpoint_id=1)
+
+    zha_group: Group = await zha_gateway.async_create_zigpy_group(
+        "Test Group",
+        [GroupMemberReference(ieee=device.ieee, endpoint_id=1) for device in devices],
+    )
+    await zha_gateway.async_block_till_done()
+    entity: GroupEntity = get_group_entity(zha_group, platform=Platform.SWITCH)
+
+    # only the third member is on, so the group is on
+    await send_attributes_report(
+        zha_gateway, devices[2].device.endpoints[1].on_off, {0: 1}
+    )
+    # group member updates are debounced
+    await asyncio.sleep(1)
+    await zha_gateway.async_block_till_done()
+    assert bool(entity.state.is_on) is True
+
+    # removing it leaves two members that are both off, so the group turns off
+    await zha_group.async_remove_members([member_3])
+    # recomputed synchronously, before the group event, not by a debounced update
+    await zha_gateway.async_block_till_done()
+    assert len(zha_group.members) == 2
+    assert get_group_entity(zha_group, platform=Platform.SWITCH) is entity
+    assert bool(entity.state.is_on) is False
+
+    # adding it back while it is still on turns the group on again
+    await zha_group.async_add_members([member_3])
+    # recomputed synchronously, before the group event, not by a debounced update
+    await zha_gateway.async_block_till_done()
+    assert len(zha_group.members) == 3
+    assert get_group_entity(zha_group, platform=Platform.SWITCH) is entity
+    assert bool(entity.state.is_on) is True

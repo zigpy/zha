@@ -6,7 +6,7 @@ from __future__ import annotations
 
 import asyncio
 from collections import defaultdict
-from collections.abc import Callable, Collection, Iterable, Iterator
+from collections.abc import Callable, Collection, Iterable, Iterator, Mapping, Sequence
 import contextlib
 import copy
 import dataclasses
@@ -15,6 +15,7 @@ from enum import Enum
 from functools import cached_property
 import logging
 import time
+from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, Final
 
 from zigpy.device import (
@@ -92,6 +93,14 @@ from zha.quirks import (
     GreenPowerQuirkRegistryEntry,
     QuirkRegistryEntry,
     ReplacingZigpyDeviceFactory,
+)
+from zha.zigbee.child_device import (
+    OUTPUT_PLATFORMS,
+    ChildDevice,
+    apply_explicit_child_devices,
+    assign_endpoint_child_devices,
+    compute_output_child_devices,
+    is_child_device_allowlisted,
 )
 from zha.zigbee.cluster_config import (
     aggregate_cluster_configs,
@@ -271,6 +280,8 @@ class DeviceInfo:
     nwk: NWK
     manufacturer: str
     model: str
+    friendly_manufacturer: str
+    friendly_model: str
     name: str
     quirk_applied: bool
     quirk_class: str
@@ -328,6 +339,7 @@ class ExtendedDeviceInfo(DeviceInfo):
     neighbors: list[NeighborInfo]
     routes: list[RouteInfo]
     endpoint_names: list[EndpointNameInfo]
+    child_devices: list[ChildDevice] = dataclasses.field(default_factory=list)
 
 
 class BaseDevice[ZigpyDeviceT: ZigpyBaseDevice](LogMixin, EventBase):
@@ -339,8 +351,8 @@ class BaseDevice[ZigpyDeviceT: ZigpyBaseDevice](LogMixin, EventBase):
         "name",
         "manufacturer",
         "model",
-        "reported_manufacturer",
-        "reported_model",
+        "friendly_manufacturer",
+        "friendly_model",
         "device_alerts",
         "skip_configuration",
         "device_automation_commands",
@@ -362,6 +374,8 @@ class BaseDevice[ZigpyDeviceT: ZigpyBaseDevice](LogMixin, EventBase):
         self._platform_entities: dict[tuple[Platform, str], PlatformEntity] = {}
         self._pending_entities: list[PlatformEntity] = []
         self._primary_entity: PlatformEntity | None = None
+        self._child_devices: dict[str, ChildDevice] = {}
+        self._child_device_primary_entities: dict[str, PlatformEntity] = {}
         # All entities discovered for this device, including ones removed by a quirk.
         # Used for aggregating cluster configs so binding/reporting matches the
         # legacy claim-during-discovery flow (which configured handlers even when
@@ -391,6 +405,8 @@ class BaseDevice[ZigpyDeviceT: ZigpyBaseDevice](LogMixin, EventBase):
         self._on_remove_callbacks.clear()
         self._pending_entities.clear()
         self._discovered_entities.clear()
+        self._child_devices.clear()
+        self._child_device_primary_entities.clear()
 
         self._zigpy_device: ZigpyDeviceT = zigpy_device
 
@@ -477,9 +493,9 @@ class BaseDevice[ZigpyDeviceT: ZigpyBaseDevice](LogMixin, EventBase):
     def name(self) -> str:
         """Return device name."""
         # Nabu Casa devices include a brand name in the model
-        if self.manufacturer == "Nabu Casa":
-            return self.model
-        return f"{self.manufacturer} {self.model}"
+        if self.friendly_manufacturer == "Nabu Casa":
+            return self.friendly_model
+        return f"{self.friendly_manufacturer} {self.friendly_model}"
 
     @property
     def ieee(self) -> EUI64:
@@ -510,6 +526,14 @@ class BaseDevice[ZigpyDeviceT: ZigpyBaseDevice](LogMixin, EventBase):
         """Device automation triggers contributed by a quirk."""
         return {}
 
+    def _quirk_child_devices(self) -> Sequence[ChildDevice] | None:
+        """Child devices defined by a quirk, `None` if the quirk defines none.
+
+        Quirk defined child devices replace the automatic split of allowlisted devices.
+        An empty sequence disables child devices for the device.
+        """
+        return None
+
     def _is_entity_removed_by_quirk(self, entity: PlatformEntity) -> bool:
         """Whether a quirk hides this default entity (declarative quirks override)."""
         return False
@@ -519,32 +543,6 @@ class BaseDevice[ZigpyDeviceT: ZigpyBaseDevice](LogMixin, EventBase):
 
     @cached_property
     def manufacturer(self) -> str:
-        """Return the manufacturer shown for the device.
-
-        This is a quirk's friendly name when it has one. Match devices on
-        `reported_manufacturer` instead.
-        """
-        return self._resolve_manufacturer()
-
-    def _resolve_manufacturer(self) -> str:
-        """Resolve the manufacturer name (declarative quirks override this)."""
-        return self.reported_manufacturer
-
-    @cached_property
-    def model(self) -> str:
-        """Return the model shown for the device.
-
-        This is a quirk's friendly name when it has one. Match devices on
-        `reported_model` instead.
-        """
-        return self._resolve_model()
-
-    def _resolve_model(self) -> str:
-        """Resolve the model name (declarative quirks override this)."""
-        return self.reported_model
-
-    @cached_property
-    def reported_manufacturer(self) -> str:
         """Return the manufacturer the device reports, never a friendly name."""
         return self._resolve_reported_manufacturer()
 
@@ -553,13 +551,37 @@ class BaseDevice[ZigpyDeviceT: ZigpyBaseDevice](LogMixin, EventBase):
         raise NotImplementedError
 
     @cached_property
-    def reported_model(self) -> str:
+    def model(self) -> str:
         """Return the model the device reports, never a friendly name."""
         return self._resolve_reported_model()
 
     def _resolve_reported_model(self) -> str:
         """Resolve the reported model name (subclasses override this)."""
         raise NotImplementedError
+
+    @cached_property
+    def friendly_manufacturer(self) -> str:
+        """Return the manufacturer shown for the device.
+
+        This is a quirk's friendly name when it has one, else `manufacturer`.
+        """
+        return self._resolve_manufacturer()
+
+    def _resolve_manufacturer(self) -> str:
+        """Resolve the friendly manufacturer name (declarative quirks override this)."""
+        return self.manufacturer
+
+    @cached_property
+    def friendly_model(self) -> str:
+        """Return the model shown for the device.
+
+        This is a quirk's friendly name when it has one, else `model`.
+        """
+        return self._resolve_model()
+
+    def _resolve_model(self) -> str:
+        """Resolve the friendly model name (declarative quirks override this)."""
+        return self.model
 
     @cached_property
     def device_alerts(self) -> Iterable[Any]:
@@ -700,8 +722,20 @@ class BaseDevice[ZigpyDeviceT: ZigpyBaseDevice](LogMixin, EventBase):
 
     @property
     def primary_entity(self) -> PlatformEntity | None:
-        """Return the primary entity of the device, if any."""
+        """Return the primary entity of the main device, if any."""
         return self._primary_entity
+
+    @property
+    def child_devices(self) -> Mapping[str, ChildDevice]:
+        """Return the child devices holding at least one entity, by id."""
+        return MappingProxyType(self._child_devices)
+
+    def is_primary_entity(self, entity: PlatformEntity) -> bool:
+        """Return whether the entity is elected primary on its (child) device."""
+        if entity.child_device is None:
+            return entity is self._primary_entity
+
+        return self._child_device_primary_entities.get(entity.child_device.id) is entity
 
     def get_platform_entity(self, platform: Platform, unique_id: str) -> PlatformEntity:
         """Get a platform entity by unique id."""
@@ -713,7 +747,8 @@ class BaseDevice[ZigpyDeviceT: ZigpyBaseDevice](LogMixin, EventBase):
     def get_entity(
         self,
         platform: Platform,
-        endpoint_id: int | None = None,
+        # `None` is the endpoint of Green Power devices using SrcID addressing
+        endpoint_id: int | None | UndefinedType = UNDEFINED,
         cluster_id: int | None = None,
         *,
         pick_first: bool = False,
@@ -727,10 +762,10 @@ class BaseDevice[ZigpyDeviceT: ZigpyBaseDevice](LogMixin, EventBase):
         for entity in self._platform_entities.values():
             if platform != entity.PLATFORM:
                 continue
-            if endpoint_id is not None or cluster_id is not None:
+            if endpoint_id is not UNDEFINED or cluster_id is not None:
                 if not isinstance(entity, ZclPlatformEntity):
                     continue
-                if endpoint_id is not None and entity.endpoint.id != endpoint_id:
+                if endpoint_id is not UNDEFINED and entity.endpoint.id != endpoint_id:
                     continue
                 if cluster_id is not None and entity.cluster.cluster_id != cluster_id:
                     continue
@@ -829,6 +864,8 @@ class BaseDevice[ZigpyDeviceT: ZigpyBaseDevice](LogMixin, EventBase):
             nwk=self.nwk,
             manufacturer=self.manufacturer,
             model=self.model,
+            friendly_manufacturer=self.friendly_manufacturer,
+            friendly_model=self.friendly_model,
             name=self.name,
             quirk_applied=self.quirk_applied,
             quirk_class=self.quirk_class,
@@ -950,10 +987,17 @@ class BaseDevice[ZigpyDeviceT: ZigpyBaseDevice](LogMixin, EventBase):
             # rediscovers the same unique_id would skip the replacement and
             # leave the stale entity shadowing it indefinitely.
             del self._platform_entities[key]
+            # No re-election here: every live-removal caller runs the election (and
+            # the child device assignment) right after via `_add_pending_entities`
             if entity is self._primary_entity:
-                # No re-election here: every live-removal caller runs the
-                # election right after via `_add_pending_entities`
                 self._primary_entity = None
+            self._child_device_primary_entities = {
+                child_device_id: primary_entity
+                for child_device_id, primary_entity in (
+                    self._child_device_primary_entities.items()
+                )
+                if primary_entity is not entity
+            }
             if emit_event:
                 self.emit(
                     DeviceEntityRemovedEvent.event_type,
@@ -992,8 +1036,9 @@ class BaseDevice[ZigpyDeviceT: ZigpyBaseDevice](LogMixin, EventBase):
 
         self._pending_entities.clear()
 
-        # Compute a new primary entity
-        self._compute_primary_entity(all_entities.values())
+        # Assign the entities to child devices, then compute the new primary entities
+        self._compute_child_devices(list(all_entities.values()))
+        self._compute_primary_entities(list(all_entities.values()))
 
         # Finally, add the new entities
         for entity in new_entities.values():
@@ -1005,7 +1050,8 @@ class BaseDevice[ZigpyDeviceT: ZigpyBaseDevice](LogMixin, EventBase):
             for entity in new_entities.values():
                 entity.maybe_emit_state_changed_event()
 
-        # `_compute_primary_entity` above can flip `primary` on an existing entity, and
+        # `_compute_primary_entities` and `_compute_child_devices` above can change the
+        # primary state and child device of an existing entity, and
         # the caller may have recomputed their capabilities beforehand; emit so those
         # changes reach consumers.
         for key, entity in all_entities.items():
@@ -1133,10 +1179,84 @@ class BaseDevice[ZigpyDeviceT: ZigpyBaseDevice](LogMixin, EventBase):
         args = (self.nwk, self.model) + args
         _LOGGER.log(level, msg, *args, **kwargs)
 
-    def _compute_primary_entity(self, entities: Collection[PlatformEntity]) -> None:
-        """Compute the primary entity from a given set of entities."""
-        self._primary_entity = None
+    def _compute_child_devices(self, entities: Sequence[PlatformEntity]) -> None:
+        """Assign the entities to the child devices of the device."""
+        child_devices: Sequence[ChildDevice]
+        assignments: dict[PlatformEntity, ChildDevice]
 
+        if self.is_coordinator:
+            # The coordinator's entities describe the network, not parts of a device
+            self._child_devices = {}
+            return
+
+        # Virtual entities are internal helpers that consumers don't expose, so they
+        # stay on the main device and don't keep a child device alive
+        for entity in entities:
+            if entity.PLATFORM is Platform.VIRTUAL:
+                entity.child_device = None
+
+        entities = [
+            entity for entity in entities if entity.PLATFORM is not Platform.VIRTUAL
+        ]
+
+        if (quirk_child_devices := self._quirk_child_devices()) is not None:
+            child_devices = quirk_child_devices
+            assignments = assign_endpoint_child_devices(child_devices, entities)
+        elif is_child_device_allowlisted(self.manufacturer, self.model):
+            child_devices, assignments = compute_output_child_devices(entities)
+        else:
+            child_devices, assignments = (), {}
+
+        assignments = apply_explicit_child_devices(child_devices, assignments, entities)
+
+        for entity in entities:
+            entity.child_device = assignments.get(entity)
+
+        used_child_device_ids = {
+            child_device.id for child_device in assignments.values()
+        }
+        self._child_devices = {
+            child_device.id: child_device
+            for child_device in child_devices
+            if child_device.id in used_child_device_ids
+        }
+
+    def _compute_primary_entities(self, entities: Sequence[PlatformEntity]) -> None:
+        """Elect the primary entity of the main device and of each child device."""
+        entities_by_child_device: defaultdict[str | None, list[PlatformEntity]] = (
+            defaultdict(list)
+        )
+        for entity in entities:
+            child_device_id = (
+                entity.child_device.id if entity.child_device is not None else None
+            )
+            entities_by_child_device[child_device_id].append(entity)
+
+        main_entities = entities_by_child_device.pop(None, [])
+
+        if entities_by_child_device:
+            # With child devices, the main feature of the device is split over them.
+            # Electing a leftover entity (e.g. a meter) of the main device would take
+            # its name, so only an output entity can still be its primary entity.
+            main_entities = [
+                entity
+                for entity in main_entities
+                if entity._attr_primary or entity.PLATFORM in OUTPUT_PLATFORMS
+            ]
+
+        self._primary_entity = self._elect_primary_entity(main_entities)
+        self._child_device_primary_entities = {}
+        for child_device_id, child_device_entities in entities_by_child_device.items():
+            assert child_device_id is not None
+            primary_entity = self._elect_primary_entity(child_device_entities)
+
+            if primary_entity is not None:
+                self._child_device_primary_entities[child_device_id] = primary_entity
+
+    def _elect_primary_entity(
+        self, entities: Collection[PlatformEntity]
+    ) -> PlatformEntity | None:
+        """Elect the primary entity from a given set of entities."""
         # First, check if any entity is explicitly primary
         explicitly_primary = [entity for entity in entities if entity._attr_primary]
 
@@ -1145,11 +1265,16 @@ class BaseDevice[ZigpyDeviceT: ZigpyBaseDevice](LogMixin, EventBase):
                 "Device has a single explicitly primary entity,"
                 " not performing weight matching"
             )
-            self._primary_entity = explicitly_primary[0]
-            return
+            return explicitly_primary[0]
 
-        # It should not be possible for there to be more than one
-        assert not explicitly_primary
+        if explicitly_primary:
+            # Quirks prevent this, but e.g. entity metadata changes can still move
+            # several explicitly primary entities onto the same (child) device
+            self.warning(
+                "Multiple explicitly primary entities %s, no primary entity",
+                explicitly_primary,
+            )
+            return None
 
         # For weight matching, only consider entities with a non-zero primary weight
         # which are not explicitly marked as not primary. Entities disabled at runtime
@@ -1162,19 +1287,19 @@ class BaseDevice[ZigpyDeviceT: ZigpyBaseDevice](LogMixin, EventBase):
         candidates.sort(reverse=True, key=lambda e: e.primary_weight)
 
         if not candidates:
-            return
+            return None
 
         winner = candidates[0]
         others = candidates[1:]
 
         # We have a clear winner
         if not others or winner.primary_weight > others[0].primary_weight:
-            self._primary_entity = winner
-            return
+            return winner
 
         self.debug(
             "Primary entity tie between %s and %s, no primary entity", winner, others[0]
         )
+        return None
 
 
 class ZigbeeDevice(BaseDevice[ZigpyDevice]):
@@ -1375,7 +1500,7 @@ class ZigbeeDevice(BaseDevice[ZigpyDevice]):
         if self._gateway.config.allow_polling:
             if (
                 self._checkins_missed_count >= _CHECKIN_GRACE_PERIODS
-                or self.reported_manufacturer == "LUMI"
+                or self.manufacturer == "LUMI"
                 or not self._endpoints
             ):
                 self.debug(
@@ -1459,6 +1584,7 @@ class ZigbeeDevice(BaseDevice[ZigpyDevice]):
                 for route in topology.routes[self.ieee]
             ],
             endpoint_names=names,
+            child_devices=list(self._child_devices.values()),
         )
 
     async def async_configure(self) -> None:
@@ -1855,8 +1981,8 @@ class ZigbeeDevice(BaseDevice[ZigpyDevice]):
         info["nwk"] = str(self.nwk)
         info["manufacturer"] = self.device.manufacturer
         info["model"] = self.device.model
-        info["friendly_manufacturer"] = self.manufacturer
-        info["friendly_model"] = self.model
+        info["friendly_manufacturer"] = self.friendly_manufacturer
+        info["friendly_model"] = self.friendly_model
         info["name"] = self.name
         info["quirk_applied"] = self.quirk_applied
         info["quirk_class"] = self.quirk_class
@@ -1980,6 +2106,21 @@ class ZigbeeDevice(BaseDevice[ZigpyDevice]):
             )
 
             info["zha_lib_entities"][platform].append(state_dict)
+
+        info["child_devices"] = [
+            {
+                "id": child_device.id,
+                "endpoint_ids": sorted(child_device.endpoint_ids),
+                "translation_key": child_device.translation_key,
+                "translation_placeholders": (
+                    dict(child_device.translation_placeholders)
+                    if child_device.translation_placeholders is not None
+                    else None
+                ),
+                "fallback_name": child_device.fallback_name,
+            }
+            for child_device in self._child_devices.values()
+        ]
 
         topology = self.gateway.application_controller.topology
         info["neighbors"] = [
@@ -2113,6 +2254,7 @@ class GreenPowerDevice(BaseDevice[ZigpyGreenPowerDevice]):
             neighbors=[],
             routes=[],
             endpoint_names=[],
+            child_devices=list(self._child_devices.values()),
         )
 
     def get_diagnostics_json(self) -> dict[str, Any]:
@@ -2121,8 +2263,8 @@ class GreenPowerDevice(BaseDevice[ZigpyGreenPowerDevice]):
         info["version"] = DIAGNOSTICS_JSON_VERSION
         info["ieee"] = str(self.ieee)
         info["nwk"] = str(self.nwk)
-        info["friendly_manufacturer"] = self.manufacturer
-        info["friendly_model"] = self.model
+        info["friendly_manufacturer"] = self.friendly_manufacturer
+        info["friendly_model"] = self.friendly_model
         info["name"] = self.name
         info["quirk_applied"] = self.quirk_applied
         info["quirk_class"] = self.quirk_class

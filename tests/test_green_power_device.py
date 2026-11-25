@@ -144,6 +144,8 @@ async def test_green_power_device_identifiers(zha_gateway: Gateway) -> None:
 
     assert zha_device.manufacturer == "0x1234"
     assert zha_device.model == "0x0007"
+    assert zha_device.friendly_manufacturer == "0x1234"
+    assert zha_device.friendly_model == "0x0007"
     assert zha_device.manufacturer_code == 0x1234
     assert zha_device.name == "0x1234 0x0007"
 

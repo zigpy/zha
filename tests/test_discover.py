@@ -1048,10 +1048,10 @@ async def test_discovery_matches_reported_model(
     )
     zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
 
-    assert zha_device.manufacturer == friendly_manufacturer
-    assert zha_device.model == friendly_model
-    assert zha_device.reported_manufacturer == "IKEA of Sweden"
-    assert zha_device.reported_model == model
+    assert zha_device.friendly_manufacturer == friendly_manufacturer
+    assert zha_device.friendly_model == friendly_model
+    assert zha_device.manufacturer == "IKEA of Sweden"
+    assert zha_device.model == model
 
     assert (
         any(

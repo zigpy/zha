@@ -172,14 +172,22 @@ async def test_device_left(zha_gateway: Gateway) -> None:
 
 async def test_gateway_startup_failure(
     zha_data: ZHAData,
+    zigpy_app_controller: ControllerApplication,
 ) -> None:
     """Test shutdown called when gateway init fails."""
 
     zha_gateway = await Gateway.async_from_config(zha_data)
 
     with (
-        patch("zha.application.gateway.Gateway.load_devices", side_effect=Exception),
-        pytest.raises(Exception),
+        patch(
+            "bellows.zigbee.application.ControllerApplication.new",
+            return_value=zigpy_app_controller,
+        ),
+        patch(
+            "zha.application.gateway.Gateway.load_devices",
+            side_effect=RuntimeError("load_devices failed"),
+        ),
+        pytest.raises(RuntimeError, match="load_devices failed"),
     ):
         zha_gateway.shutdown = AsyncMock(wraps=zha_gateway.shutdown)
         await zha_gateway.async_initialize()
@@ -1062,7 +1070,7 @@ async def test_reinterview_replaces_device_when_quirk_changes(
     )
     zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
     assert zha_device.quirk_applied
-    assert zha_device.model == "Quirk A"
+    assert zha_device.friendly_model == "Quirk A"
 
     reinterviewed = create_mock_zigpy_device(
         zha_gateway,
@@ -1077,7 +1085,7 @@ async def test_reinterview_replaces_device_when_quirk_changes(
     new_zha_device = zha_gateway.get_device(zigpy_device.ieee)
     assert new_zha_device is not zha_device
     assert new_zha_device.quirk_applied
-    assert new_zha_device.model == "Quirk B"
+    assert new_zha_device.friendly_model == "Quirk B"
 
 
 async def test_reinterview_swap_emits_full_init_configured(
