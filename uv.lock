@@ -6,6 +6,14 @@ resolution-markers = [
     "python_full_version < '3.15'",
 ]
 
+[manifest]
+overrides = [{ name = "zha-quirks", git = "https://github.com/zigpy/zha-device-handlers?rev=cadced60134e43c6514b1b8ecb7d649e75844d39" }]
+
+[[manifest.dependency-metadata]]
+name = "zha-quirks"
+version = "2.4.1.post35+git.cadced60"
+requires-dist = ["zigpy>=2.4.0", "zha"]
+
 [[package]]
 name = "aiohappyeyeballs"
 version = "2.7.1"
@@ -2039,7 +2047,7 @@ ci = [
     { name = "python-slugify" },
     { name = "ruff", specifier = "==0.17.3" },
     { name = "uv", specifier = ">=0.11.16" },
-    { name = "zha-quirks", git = "https://github.com/zigpy/zha-device-handlers?rev=4e90e593a9ae2a2b1702f1c600a0dbc7e1c128bc" },
+    { name = "zha-quirks", specifier = ">=2.5.0" },
 ]
 testing = [
     { name = "codespell", specifier = "==2.4.3" },
@@ -2058,13 +2066,13 @@ testing = [
     { name = "python-slugify" },
     { name = "ruff", specifier = "==0.17.3" },
     { name = "uv", specifier = ">=0.11.16" },
-    { name = "zha-quirks", git = "https://github.com/zigpy/zha-device-handlers?rev=4e90e593a9ae2a2b1702f1c600a0dbc7e1c128bc" },
+    { name = "zha-quirks", specifier = ">=2.5.0" },
 ]
 
 [[package]]
 name = "zha-quirks"
-version = "2.4.1.post9+git.4e90e593"
-source = { git = "https://github.com/zigpy/zha-device-handlers?rev=4e90e593a9ae2a2b1702f1c600a0dbc7e1c128bc#4e90e593a9ae2a2b1702f1c600a0dbc7e1c128bc" }
+version = "2.4.1.post35+git.cadced60"
+source = { git = "https://github.com/zigpy/zha-device-handlers?rev=cadced60134e43c6514b1b8ecb7d649e75844d39#cadced60134e43c6514b1b8ecb7d649e75844d39" }
 dependencies = [
     { name = "zha" },
     { name = "zigpy" },

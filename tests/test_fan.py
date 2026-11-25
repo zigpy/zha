@@ -573,7 +573,6 @@ def zigpy_device_ikea_mock(zha_gateway: Gateway) -> ZigbeeDevice:
         endpoints,
         manufacturer="IKEA of Sweden",
         model="STARKVIND Air purifier",
-        quirk=zhaquirks.ikea.starkvind.IkeaSTARKVIND,
         node_descriptor=zdo_t.NodeDescriptor(
             logical_type=zdo_t.LogicalType.EndDevice,
             complex_descriptor_available=0,

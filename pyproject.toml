@@ -53,7 +53,7 @@ testing = [
     "python-slugify",
     "ruff==0.17.3",
     "uv>=0.11.16",
-    "zha-quirks>=2.4.0",
+    "zha-quirks>=2.5.0",
 ]
 ci = [
     {include-group = "testing"},
@@ -63,9 +63,15 @@ ci = [
 
 [tool.uv]
 default-groups = ["testing"]
-
-[tool.uv.sources]
-zha-quirks = { git = "https://github.com/zigpy/zha-device-handlers", rev = "4e90e593a9ae2a2b1702f1c600a0dbc7e1c128bc" }
+# zha-quirks 2.5.0 isn't released yet: build against its dev commit until it is
+override-dependencies = [
+    "zha-quirks @ git+https://github.com/zigpy/zha-device-handlers@cadced60134e43c6514b1b8ecb7d649e75844d39",
+]
+# That commit requires zha>=2.5.0, which this checkout only is once 2.5.0 is
+# tagged: give it the same requirements without the zha version
+dependency-metadata = [
+    { name = "zha-quirks", version = "2.4.1.post35+git.cadced60", requires-dist = ["zigpy>=2.4.0", "zha"] },
+]
 
 [tool.setuptools-git-versioning]
 enabled = true
