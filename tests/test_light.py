@@ -488,7 +488,9 @@ async def async_test_on_off_from_light(
 ) -> None:
     """Test on off functionality from the light."""
     # turn on at light
-    await send_attributes_report(zha_gateway, cluster, {1: 0, 0: 1, 2: 3})
+    await send_attributes_report(
+        zha_gateway, cluster, {general.OnOff.AttributeDefs.on_off: 1}
+    )
     await zha_gateway.async_block_till_done()
 
     # group member updates are debounced
@@ -500,7 +502,9 @@ async def async_test_on_off_from_light(
     assert bool(entity.state.on) is True
 
     # turn off at light
-    await send_attributes_report(zha_gateway, cluster, {1: 1, 0: 0, 2: 3})
+    await send_attributes_report(
+        zha_gateway, cluster, {general.OnOff.AttributeDefs.on_off: 0}
+    )
     await zha_gateway.async_block_till_done()
 
     # group member updates are debounced
@@ -520,7 +524,7 @@ async def async_test_on_from_light(
     """Test on off functionality from the light."""
     # turn on at light
     await send_attributes_report(
-        zha_gateway, cluster, {general.OnOff.AttributeDefs.on_off.id: 1}
+        zha_gateway, cluster, {general.OnOff.AttributeDefs.on_off: 1}
     )
     await zha_gateway.async_block_till_done()
 
@@ -677,7 +681,7 @@ async def async_test_dimmer_from_light(
     """Test dimmer functionality from the light."""
 
     await send_attributes_report(
-        zha_gateway, cluster, {1: level + 10, 0: level, 2: level - 10 or 22}
+        zha_gateway, cluster, {general.LevelControl.AttributeDefs.current_level: level}
     )
     await zha_gateway.async_block_till_done()
     assert entity.state.on == expected_state
@@ -845,8 +849,12 @@ async def test_zha_group_light_entity(
 
     assert len(zha_group.members) == 2
     # test some of the group logic to make sure we key off states correctly
-    await send_attributes_report(zha_gateway, dev1_cluster_on_off, {0: 1})
-    await send_attributes_report(zha_gateway, dev2_cluster_on_off, {0: 1})
+    await send_attributes_report(
+        zha_gateway, dev1_cluster_on_off, {general.OnOff.AttributeDefs.on_off: 1}
+    )
+    await send_attributes_report(
+        zha_gateway, dev2_cluster_on_off, {general.OnOff.AttributeDefs.on_off: 1}
+    )
     await zha_gateway.async_block_till_done()
 
     # test that group light is on
@@ -854,7 +862,9 @@ async def test_zha_group_light_entity(
     assert device_2_light_entity.state.on is True
     assert bool(entity.state.on) is True
 
-    await send_attributes_report(zha_gateway, dev1_cluster_on_off, {0: 0})
+    await send_attributes_report(
+        zha_gateway, dev1_cluster_on_off, {general.OnOff.AttributeDefs.on_off: 0}
+    )
     await zha_gateway.async_block_till_done()
 
     # test that group light is still on
@@ -862,7 +872,9 @@ async def test_zha_group_light_entity(
     assert device_2_light_entity.state.on is True
     assert bool(entity.state.on) is True
 
-    await send_attributes_report(zha_gateway, dev2_cluster_on_off, {0: 0})
+    await send_attributes_report(
+        zha_gateway, dev2_cluster_on_off, {general.OnOff.AttributeDefs.on_off: 0}
+    )
     await zha_gateway.async_block_till_done()
 
     # test that group light is now off
@@ -875,7 +887,9 @@ async def test_zha_group_light_entity(
     await zha_gateway.async_block_till_done()
     assert bool(entity.state.on) is False
 
-    await send_attributes_report(zha_gateway, dev1_cluster_on_off, {0: 1})
+    await send_attributes_report(
+        zha_gateway, dev1_cluster_on_off, {general.OnOff.AttributeDefs.on_off: 1}
+    )
     await zha_gateway.async_block_till_done()
 
     # test that group light is now back on
@@ -892,7 +906,9 @@ async def test_zha_group_light_entity(
     )
 
     # turn it off to test a new member add being tracked
-    await send_attributes_report(zha_gateway, dev1_cluster_on_off, {0: 0})
+    await send_attributes_report(
+        zha_gateway, dev1_cluster_on_off, {general.OnOff.AttributeDefs.on_off: 0}
+    )
     await zha_gateway.async_block_till_done()
     assert device_1_light_entity.state.on is False
     assert device_2_light_entity.state.on is False
@@ -911,7 +927,9 @@ async def test_zha_group_light_entity(
     assert len(zha_group.members) == 3
     entity = get_group_entity(zha_group, platform=Platform.LIGHT)
     assert entity is not None
-    await send_attributes_report(zha_gateway, dev3_cluster_on_off, {0: 1})
+    await send_attributes_report(
+        zha_gateway, dev3_cluster_on_off, {general.OnOff.AttributeDefs.on_off: 1}
+    )
     await zha_gateway.async_block_till_done()
 
     assert device_1_light_entity.state.on is False
@@ -948,14 +966,20 @@ async def test_zha_group_light_entity(
 
     entity = get_group_entity(zha_group, platform=Platform.LIGHT)
     assert entity is not None
-    await send_attributes_report(zha_gateway, dev3_cluster_on_off, {0: 1})
+    await send_attributes_report(
+        zha_gateway, dev3_cluster_on_off, {general.OnOff.AttributeDefs.on_off: 1}
+    )
     await zha_gateway.async_block_till_done()
     assert bool(entity.state.on) is True
 
     # add a 3rd member and ensure we still have an entity and we track the new member
     # First we turn the lights currently in the group off
-    await send_attributes_report(zha_gateway, dev1_cluster_on_off, {0: 0})
-    await send_attributes_report(zha_gateway, dev3_cluster_on_off, {0: 0})
+    await send_attributes_report(
+        zha_gateway, dev1_cluster_on_off, {general.OnOff.AttributeDefs.on_off: 0}
+    )
+    await send_attributes_report(
+        zha_gateway, dev3_cluster_on_off, {general.OnOff.AttributeDefs.on_off: 0}
+    )
     await zha_gateway.async_block_till_done()
     # group member updates are debounced
     assert bool(entity.state.on) is True
@@ -974,7 +998,9 @@ async def test_zha_group_light_entity(
     assert len(zha_group.members) == 4
     entity = get_group_entity(zha_group, platform=Platform.LIGHT)
     assert entity is not None
-    await send_attributes_report(zha_gateway, dev2_cluster_on_off, {0: 1})
+    await send_attributes_report(
+        zha_gateway, dev2_cluster_on_off, {general.OnOff.AttributeDefs.on_off: 1}
+    )
     await zha_gateway.async_block_till_done()
     # group member updates are debounced
     assert bool(entity.state.on) is False
@@ -1972,7 +1998,7 @@ async def test_transition_brightness_buffering(zha_gateway: Gateway) -> None:
     await send_attributes_report(
         zha_gateway,
         dev1_cluster_level,
-        {general.LevelControl.AttributeDefs.current_level.id: 50},
+        {general.LevelControl.AttributeDefs.current_level: 50},
     )
     await zha_gateway.async_block_till_done()
     assert entity.state.brightness == 200  # still the optimistic value
@@ -1981,7 +2007,7 @@ async def test_transition_brightness_buffering(zha_gateway: Gateway) -> None:
     await send_attributes_report(
         zha_gateway,
         dev1_cluster_level,
-        {general.LevelControl.AttributeDefs.current_level.id: 120},
+        {general.LevelControl.AttributeDefs.current_level: 120},
     )
     await zha_gateway.async_block_till_done()
     assert entity.state.brightness == 200  # still buffered, not yet applied
@@ -2055,7 +2081,7 @@ async def test_turn_on_during_off_transition(zha_gateway: Gateway) -> None:
     await send_attributes_report(
         zha_gateway,
         dev1_cluster_on_off,
-        {general.OnOff.AttributeDefs.on_off.id: 0},
+        {general.OnOff.AttributeDefs.on_off: 0},
     )
     await zha_gateway.async_block_till_done()
 
@@ -2102,7 +2128,7 @@ async def test_on_off_only_rapid_toggle_does_not_revert(
     await send_attributes_report(
         zha_gateway,
         on_off_cluster,
-        {general.OnOff.AttributeDefs.on_off.id: 0},
+        {general.OnOff.AttributeDefs.on_off: 0},
     )
     await zha_gateway.async_block_till_done()
 
@@ -2114,7 +2140,7 @@ async def test_on_off_only_rapid_toggle_does_not_revert(
     await send_attributes_report(
         zha_gateway,
         on_off_cluster,
-        {general.OnOff.AttributeDefs.on_off.id: 1},
+        {general.OnOff.AttributeDefs.on_off: 1},
     )
     await zha_gateway.async_block_till_done()
 
@@ -2408,8 +2434,12 @@ async def test_group_state_ignores_unavailable_members(zha_gateway: Gateway) -> 
     dev2_cluster_on_off = device_light_2.device.endpoints[1].on_off
 
     # both members on, so the group is on
-    await send_attributes_report(zha_gateway, dev1_cluster_on_off, {0: 1})
-    await send_attributes_report(zha_gateway, dev2_cluster_on_off, {0: 1})
+    await send_attributes_report(
+        zha_gateway, dev1_cluster_on_off, {general.OnOff.AttributeDefs.on_off: 1}
+    )
+    await send_attributes_report(
+        zha_gateway, dev2_cluster_on_off, {general.OnOff.AttributeDefs.on_off: 1}
+    )
     await zha_gateway.async_block_till_done()
     assert device_1_entity.state.on is True
     assert device_2_entity.state.on is True
@@ -2427,7 +2457,9 @@ async def test_group_state_ignores_unavailable_members(zha_gateway: Gateway) -> 
 
     # turning the reachable member off turns the group off: the unavailable
     # member's last known state must not keep the group on
-    await send_attributes_report(zha_gateway, dev1_cluster_on_off, {0: 0})
+    await send_attributes_report(
+        zha_gateway, dev1_cluster_on_off, {general.OnOff.AttributeDefs.on_off: 0}
+    )
     await zha_gateway.async_block_till_done()
     assert device_1_entity.state.on is False
     # group member updates are debounced
