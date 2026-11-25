@@ -286,6 +286,7 @@
         "device_ieee": "ab:cd:ef:12:a5:60:3b:a6",
         "endpoint_id": 37,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "is_on": false,
         "attribute_name": "zone_status"
@@ -310,6 +311,7 @@
         "device_ieee": "ab:cd:ef:12:a5:60:3b:a6",
         "endpoint_id": 37,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "command": "identify",
         "args": [
@@ -337,6 +339,7 @@
         "device_ieee": "ab:cd:ef:12:a5:60:3b:a6",
         "endpoint_id": null,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "native_value": 255,
         "suggested_display_precision": null,
@@ -360,6 +363,7 @@
         "device_ieee": "ab:cd:ef:12:a5:60:3b:a6",
         "endpoint_id": null,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "native_value": -31,
         "suggested_display_precision": null,
@@ -385,6 +389,7 @@
         "device_ieee": "ab:cd:ef:12:a5:60:3b:a6",
         "endpoint_id": 37,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "installed_version": "0x00020002",
         "in_progress": false,
@@ -397,6 +402,7 @@
       }
     ]
   },
+  "child_devices": [],
   "neighbors": [],
   "routes": []
 }

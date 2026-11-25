@@ -18,11 +18,11 @@ dependencies = [
     "frozendict",
     "bellows==1.2.1",
     "zigpy-znp==1.1.1",
-    "zigpy-deconz==1.1.1",
+    "zigpy-deconz==1.1.2",
     "zigpy-xbee==0.22.0",
     "zigpy-zigate==0.14.0",
     "zigpy-ziggurat==1.2.1",
-    "zigpy==2.4.1",
+    "zigpy==2.5.0",
 ]
 
 [tool.setuptools.packages.find]
@@ -63,6 +63,9 @@ ci = [
 
 [tool.uv]
 default-groups = ["testing"]
+
+[tool.uv.sources]
+zha-quirks = { git = "https://github.com/zigpy/zha-device-handlers", rev = "4e90e593a9ae2a2b1702f1c600a0dbc7e1c128bc" }
 
 [tool.setuptools-git-versioning]
 enabled = true

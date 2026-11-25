@@ -11,7 +11,7 @@ from enum import Enum
 import logging
 import random
 import time
-from typing import Any, Final, Self, TypeVar, cast
+from typing import Any, Final, Self, cast
 
 from zigpy.application import ControllerApplication
 from zigpy.config import (
@@ -88,7 +88,6 @@ GROUP_ID_ALLOCATION_ATTEMPTS: Final[int] = 10
 # Never allocated: the coordinator joins the Green Power sink group itself, so it
 # never shows up as a zigpy group
 RESERVED_GROUP_IDS: Final[frozenset[int]] = frozenset({GP_GROUP_ID})
-_R = TypeVar("_R")
 _LOGGER = logging.getLogger(__name__)
 
 
@@ -673,6 +672,9 @@ class Gateway(AsyncUtilMixin, EventBase):
         for entity in discovery.discover_group_entities(zha_group):
             entity.on_add()
 
+        for group_entity in zha_group.group_entities.values():
+            group_entity.on_members_changed()
+
         zha_group.info("group_member_removed - endpoint: %s", endpoint)
         self._emit_group_gateway_message(zigpy_group, ZHA_GW_MSG_GROUP_MEMBER_REMOVED)
 
@@ -686,6 +688,9 @@ class Gateway(AsyncUtilMixin, EventBase):
 
         for entity in discovery.discover_group_entities(zha_group):
             entity.on_add()
+
+        for group_entity in zha_group.group_entities.values():
+            group_entity.on_members_changed()
 
         zha_group.info("group_member_added - endpoint: %s", endpoint)
         self._emit_group_gateway_message(zigpy_group, ZHA_GW_MSG_GROUP_MEMBER_ADDED)
