@@ -227,6 +227,65 @@
         "kwargs": {}
       }
     ],
+    "event": [
+      {
+        "fallback_name": null,
+        "unique_id": "ab:cd:ef:12:84:06:58:23-1-6",
+        "migrate_unique_ids": [],
+        "platform": "event",
+        "class_name": "OnOffEvent",
+        "translation_key": "on_off",
+        "translation_placeholders": null,
+        "device_class": null,
+        "state_class": null,
+        "entity_category": null,
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:84:06:58:23",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "event_types": [
+          "off",
+          "on",
+          "toggle",
+          "off_with_effect",
+          "on_with_recall_global_scene",
+          "on_with_timed_off"
+        ]
+      },
+      {
+        "fallback_name": null,
+        "unique_id": "ab:cd:ef:12:84:06:58:23-1-8",
+        "migrate_unique_ids": [],
+        "platform": "event",
+        "class_name": "LevelControlEvent",
+        "translation_key": "level_control",
+        "translation_placeholders": null,
+        "device_class": null,
+        "state_class": null,
+        "entity_category": null,
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:84:06:58:23",
+        "endpoint_id": 1,
+        "available": true,
+        "group_id": null,
+        "event_types": [
+          "step",
+          "step_with_on_off",
+          "stop",
+          "move",
+          "move_with_on_off",
+          "move_to_level",
+          "move_to_level_with_on_off"
+        ]
+      }
+    ],
     "sensor": [
       {
         "fallback_name": null,
