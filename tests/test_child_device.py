@@ -165,7 +165,8 @@ async def test_allowlisted_device_with_friendly_name(zha_gateway: Gateway) -> No
     )
     device = await join_zigpy_device(zha_gateway, zigpy_device)
 
-    assert device.model == "Double Socket"
+    assert device.friendly_model == "Double Socket"
+    assert device.model == "DoubleSocket50AU"
     assert list(device.child_devices) == ["1", "2"]
 
 
