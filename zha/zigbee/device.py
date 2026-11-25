@@ -339,6 +339,8 @@ class BaseDevice[ZigpyDeviceT: ZigpyBaseDevice](LogMixin, EventBase):
         "name",
         "manufacturer",
         "model",
+        "reported_manufacturer",
+        "reported_model",
         "device_alerts",
         "skip_configuration",
         "device_automation_commands",
@@ -517,20 +519,46 @@ class BaseDevice[ZigpyDeviceT: ZigpyBaseDevice](LogMixin, EventBase):
 
     @cached_property
     def manufacturer(self) -> str:
-        """Return manufacturer for device."""
+        """Return the manufacturer shown for the device.
+
+        This is a quirk's friendly name when it has one. Match devices on
+        `reported_manufacturer` instead.
+        """
         return self._resolve_manufacturer()
 
     def _resolve_manufacturer(self) -> str:
-        """Resolve the manufacturer name (subclasses and declarative quirks override)."""
-        raise NotImplementedError
+        """Resolve the manufacturer name (declarative quirks override this)."""
+        return self.reported_manufacturer
 
     @cached_property
     def model(self) -> str:
-        """Return model for device."""
+        """Return the model shown for the device.
+
+        This is a quirk's friendly name when it has one. Match devices on
+        `reported_model` instead.
+        """
         return self._resolve_model()
 
     def _resolve_model(self) -> str:
-        """Resolve the model name (subclasses and declarative quirks override)."""
+        """Resolve the model name (declarative quirks override this)."""
+        return self.reported_model
+
+    @cached_property
+    def reported_manufacturer(self) -> str:
+        """Return the manufacturer the device reports, never a friendly name."""
+        return self._resolve_reported_manufacturer()
+
+    def _resolve_reported_manufacturer(self) -> str:
+        """Resolve the reported manufacturer name (subclasses override this)."""
+        raise NotImplementedError
+
+    @cached_property
+    def reported_model(self) -> str:
+        """Return the model the device reports, never a friendly name."""
+        return self._resolve_reported_model()
+
+    def _resolve_reported_model(self) -> str:
+        """Resolve the reported model name (subclasses override this)."""
         raise NotImplementedError
 
     @cached_property
@@ -1187,8 +1215,8 @@ class ZigbeeDevice(BaseDevice[ZigpyDevice]):
             self._endpoints[endpoint.endpoint_id] = ep
             self._on_remove_callbacks.append(ep.on_remove)
 
-    def _resolve_manufacturer(self) -> str:
-        """Resolve the manufacturer name (declarative quirks override this)."""
+    def _resolve_reported_manufacturer(self) -> str:
+        """Resolve the reported manufacturer name."""
         if self.is_active_coordinator:
             manufacturer = (
                 self.gateway.application_controller.state.node_info.manufacturer
@@ -1200,8 +1228,8 @@ class ZigbeeDevice(BaseDevice[ZigpyDevice]):
 
         return self._zigpy_device.manufacturer
 
-    def _resolve_model(self) -> str:
-        """Resolve the model name (declarative quirks override this)."""
+    def _resolve_reported_model(self) -> str:
+        """Resolve the reported model name."""
         if self.is_active_coordinator:
             model = self.gateway.application_controller.state.node_info.model
             if model is None:
@@ -1347,7 +1375,7 @@ class ZigbeeDevice(BaseDevice[ZigpyDevice]):
         if self._gateway.config.allow_polling:
             if (
                 self._checkins_missed_count >= _CHECKIN_GRACE_PERIODS
-                or self.manufacturer == "LUMI"
+                or self.reported_manufacturer == "LUMI"
                 or not self._endpoints
             ):
                 self.debug(
@@ -2022,15 +2050,15 @@ class GreenPowerDevice(BaseDevice[ZigpyGreenPowerDevice]):
         # A GPD has no heartbeat to age against: it is available until removed
         self._available = True
 
-    def _resolve_manufacturer(self) -> str:
-        """Resolve the manufacturer name (declarative quirks override this)."""
+    def _resolve_reported_manufacturer(self) -> str:
+        """Resolve the reported manufacturer name."""
         if self._zigpy_device.gpd_manufacturer_id is not None:
             return f"0x{self._zigpy_device.gpd_manufacturer_id:04X}"
 
         return UNKNOWN_MANUFACTURER
 
-    def _resolve_model(self) -> str:
-        """Resolve the model name (declarative quirks override this)."""
+    def _resolve_reported_model(self) -> str:
+        """Resolve the reported model name."""
         if self._zigpy_device.gpd_model_id is not None:
             return f"0x{self._zigpy_device.gpd_model_id:04X}"
 

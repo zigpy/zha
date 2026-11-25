@@ -244,11 +244,11 @@ def discover_entities_for_endpoint(endpoint: Endpoint) -> Iterator[ZclPlatformEn
 
             if (
                 match.manufacturers is not None
-                and device.manufacturer not in match.manufacturers
+                and device.reported_manufacturer not in match.manufacturers
             ):
                 continue
 
-            if match.models is not None and device.model not in match.models:
+            if match.models is not None and device.reported_model not in match.models:
                 continue
 
             profile_device_type = (

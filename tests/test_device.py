@@ -97,7 +97,13 @@ def zigpy_device(zha_gateway: Gateway, with_basic_cluster: bool = True, **kwargs
     return create_mock_zigpy_device(zha_gateway, endpoints, **kwargs)
 
 
-def zigpy_device_mains(zha_gateway: Gateway, with_basic_cluster: bool = True):
+def zigpy_device_mains(
+    zha_gateway: Gateway,
+    with_basic_cluster: bool = True,
+    manufacturer: str = "FakeManufacturer",
+    model: str = "FakeModel",
+    registry: DeviceRegistry | None = None,
+):
     """Return a ZigbeeDevice with a switch cluster."""
     in_clusters = [general.OnOff.cluster_id]
     if with_basic_cluster:
@@ -114,6 +120,9 @@ def zigpy_device_mains(zha_gateway: Gateway, with_basic_cluster: bool = True):
     return create_mock_zigpy_device(
         zha_gateway,
         endpoints,
+        manufacturer=manufacturer,
+        model=model,
+        **({"registry": registry} if registry is not None else {}),
         node_descriptor=zdo_t.NodeDescriptor(
             logical_type=zdo_t.LogicalType.EndDevice,
             complex_descriptor_available=0,
@@ -338,6 +347,51 @@ async def test_check_available_unsuccessful(
         entity.emit.assert_called()
         assert not entity.available
         entity.emit.reset_mock()
+
+
+@pytest.mark.parametrize(
+    ("manufacturer", "friendly_manufacturer", "pinged"),
+    [
+        # A LUMI device is marked unavailable without a ping, also when renamed
+        ("LUMI", "Aqara", False),
+        # A friendly name of "LUMI" doesn't make another device skip the ping
+        ("FakeManufacturer", "LUMI", True),
+    ],
+)
+async def test_check_available_lumi_uses_reported_manufacturer(
+    zha_gateway: Gateway,
+    manufacturer: str,
+    friendly_manufacturer: str,
+    pinged: bool,
+) -> None:
+    """Test the LUMI availability rule matches the reported manufacturer."""
+    registry = DeviceRegistry()
+    (
+        QuirkBuilder(manufacturer, "FakeModel")
+        .friendly_name(manufacturer=friendly_manufacturer, model="Friendly model")
+        .add_to_registry(registry)
+    )
+
+    zigpy_dev = zigpy_device_mains(
+        zha_gateway, manufacturer=manufacturer, registry=registry
+    )
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
+    basic_cluster = zigpy_dev.endpoints[3].basic
+
+    assert zha_device.manufacturer == friendly_manufacturer
+    assert zha_device.reported_manufacturer == manufacturer
+    assert zha_device.available is True
+
+    zigpy_dev.last_seen = time.time() - zha_device.consider_unavailable_time - 2
+    zha_gateway.global_updater.stop()
+    basic_cluster.read_attributes.reset_mock()
+
+    await _send_time_changed(
+        zha_gateway, zha_gateway._device_availability_checker.__polling_interval + 1
+    )
+
+    assert (basic_cluster.read_attributes.await_count == 1) is pinged
+    assert zha_device.available is pinged
 
 
 async def test_check_available_no_basic_cluster(
@@ -1192,6 +1246,8 @@ async def test_quirks_v2_device_renaming(zha_gateway: Gateway) -> None:
     zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
     assert zha_device.model == "IRIS Keypad V2"
     assert zha_device.manufacturer == "Lowe's"
+    assert zha_device.reported_model == "3405-L"
+    assert zha_device.reported_manufacturer == "CentraLite"
 
 
 async def test_quirks_v2_device_alerts(zha_gateway: Gateway) -> None:

@@ -560,8 +560,8 @@ async def test_base_device_abstract_resolvers(zha_gateway: Gateway) -> None:
     zha_device = zha_gateway.get_or_create_device(make_zigpy_gpd(zha_gateway))
 
     for method in (
-        BaseDevice._resolve_manufacturer,
-        BaseDevice._resolve_model,
+        BaseDevice._resolve_reported_manufacturer,
+        BaseDevice._resolve_reported_model,
     ):
         with pytest.raises(NotImplementedError):
             method(zha_device)

@@ -1405,7 +1405,10 @@ class LightGroup(BaseSharedLight, GroupEntity):
         for member in self.group.members:
             # Ensure we do not send group commands that violate the minimum transition
             # time of any members.
-            if member.device.manufacturer in DEFAULT_MIN_TRANSITION_MANUFACTURERS:
+            if (
+                member.device.reported_manufacturer
+                in DEFAULT_MIN_TRANSITION_MANUFACTURERS
+            ):
                 self._DEFAULT_MIN_TRANSITION_TIME = (
                     MinTransitionLight._DEFAULT_MIN_TRANSITION_TIME
                 )

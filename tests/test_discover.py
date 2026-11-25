@@ -1006,3 +1006,57 @@ async def test_entityless_cluster_binds_via_virtual_entity(
     await zha_gateway.async_block_till_done(wait_background_tasks=True)
 
     assert len(philips_cluster.bind.mock_calls) == 1
+
+
+@pytest.mark.parametrize(
+    ("model", "friendly_manufacturer", "friendly_model", "matches"),
+    [
+        # A rule for the reported names still matches a renamed device
+        ("TRADFRI motion sensor", "IKEA", "Friendly motion sensor", True),
+        # A friendly name equal to a rule's names doesn't make another device match
+        ("Fake motion sensor", "IKEA of Sweden", "TRADFRI motion sensor", False),
+    ],
+)
+async def test_discovery_matches_reported_model(
+    zha_gateway: Gateway,
+    model: str,
+    friendly_manufacturer: str,
+    friendly_model: str,
+    matches: bool,
+) -> None:
+    """Test discovery matches the reported manufacturer and model, not a friendly name."""
+    registry = DeviceRegistry()
+    (
+        QuirkBuilder("IKEA of Sweden", model)
+        .friendly_name(manufacturer=friendly_manufacturer, model=friendly_model)
+        .add_to_registry(registry)
+    )
+
+    zigpy_device = create_mock_zigpy_device(
+        zha_gateway,
+        {
+            1: {
+                SIG_EP_INPUT: [zigpy.zcl.clusters.general.Basic.cluster_id],
+                SIG_EP_OUTPUT: [zigpy.zcl.clusters.general.OnOff.cluster_id],
+                SIG_EP_TYPE: zigpy.profiles.zha.DeviceType.OCCUPANCY_SENSOR,
+                SIG_EP_PROFILE: zigpy.profiles.zha.PROFILE_ID,
+            }
+        },
+        manufacturer="IKEA of Sweden",
+        model=model,
+        registry=registry,
+    )
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
+
+    assert zha_device.manufacturer == friendly_manufacturer
+    assert zha_device.model == friendly_model
+    assert zha_device.reported_manufacturer == "IKEA of Sweden"
+    assert zha_device.reported_model == model
+
+    assert (
+        any(
+            isinstance(entity, binary_sensor.IkeaMotion)
+            for entity in zha_device.platform_entities.values()
+        )
+        is matches
+    )
