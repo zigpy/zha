@@ -1467,11 +1467,13 @@ class LightGroup(BaseSharedLight, GroupEntity):
     def on_members_changed(self) -> None:
         """Recompute the state after members were added to or removed from the group.
 
-        Not during the group's own transition: its members' reports are buffered
-        until the transition ends, and recomputing the state now from their
-        pre-transition state would turn a group that is fading out back on and
-        drop the brightness it saved for the next turn on. The state is recomputed
-        once the group has refreshed its members at the end of the transition.
+        Not during the group's own transition: its members' reports are not
+        applied until the transition ends, and recomputing the state now from
+        their pre-transition state would turn a group that is fading out back on
+        and drop the brightness it saved for the next turn on. The group refreshes
+        its members when the transition ends, and the members whose state changes
+        then update the group; see `_force_member_updates` for the case where none
+        does.
         """
         if self.is_transitioning:
             self._members_changed_during_transition = True
@@ -1568,14 +1570,20 @@ class LightGroup(BaseSharedLight, GroupEntity):
 
     async def _force_member_updates(self) -> None:
         """Force the update of members to ensure the states are correct for bulbs that don't report their state."""
-        for platform_entity in self.group.get_platform_entities(Light.PLATFORM):
-            await platform_entity.async_update()
-
-        # A member change during the transition was not reflected yet, and the
-        # refresh above only updates the group if a member's state changed
-        if self._members_changed_during_transition and not self.is_transitioning:
-            self._members_changed_during_transition = False
-            self.update()
+        try:
+            for platform_entity in self.group.get_platform_entities(Light.PLATFORM):
+                await platform_entity.async_update()
+        finally:
+            if self._members_changed_during_transition and not self.is_transitioning:
+                self._members_changed_during_transition = False
+                # The refresh above only updates the group if a member's state
+                # changed. Members that assume the group state already had the one
+                # it set, so a member change during the transition is reflected
+                # here. Members that don't assume it change state when the
+                # transition took effect, which updates the group anyway, and a
+                # member whose poll failed still has its pre-transition state.
+                if self._zha_config_group_members_assume_state:
+                    self.update()
 
     def _make_members_assume_group_state(
         self,

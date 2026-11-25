@@ -2534,6 +2534,17 @@ async def test_group_member_change_during_off_transition(
     assert entity.state.off_with_transition is True
     assert entity.state.off_brightness == 200
 
+    # the transition ends, and the members' state isn't refreshed (polling is off
+    # here, as if their reads failed): the group doesn't recompute its state from
+    # their pre-transition state either
+    await asyncio.sleep(2)
+    await zha_gateway.async_block_till_done()
+    assert not entity.is_transitioning
+    assert bool(get_entity(device_light_1, platform=Platform.LIGHT).state.on) is True
+    assert bool(entity.state.on) is False
+    assert entity.state.off_with_transition is True
+    assert entity.state.off_brightness == 200
+
 
 @patch(
     "zigpy.zcl.clusters.general.LevelControl.request",
