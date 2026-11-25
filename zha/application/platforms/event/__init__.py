@@ -273,11 +273,6 @@ class ZhaEventButton(BaseEvent, ZclPlatformEntity):
                         " it must be an integer of at least 2"
                     )
 
-    @property
-    def event_matches(self) -> tuple[ZhaEventMatch, ...]:
-        """Return the `zha_event` matches of this entity."""
-        return self._event_matches
-
     def on_add(self) -> None:
         """Listen to the `zha_event`s of the device."""
         super().on_add()
