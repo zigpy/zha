@@ -18,7 +18,7 @@ from zigpy.device import ZigbeeDevice
 from zigpy.profiles import zha
 import zigpy.profiles.zha
 import zigpy.types as t
-from zigpy.zcl import Cluster, ReportingConfig
+from zigpy.zcl import Cluster, ClusterType, ReportingConfig
 from zigpy.zcl.clusters import general, homeautomation, hvac, measurement, smartenergy
 from zigpy.zcl.clusters.general import AnalogInput, PowerConfiguration
 from zigpy.zcl.clusters.general_const import AnalogInputType, ApplicationType
@@ -1919,6 +1919,34 @@ async def test_device_counter_sensors(zha_gateway: Gateway) -> None:
     entity.enable()
 
     assert len(zha_gateway.global_updater._update_listeners) == 3
+
+
+@pytest.mark.parametrize(
+    "entity_type", [sensor.RSSISensor, sensor.LQISensor], ids=["rssi", "lqi"]
+)
+async def test_device_bound_sensor_deprecated_endpoint_and_cluster(
+    zha_gateway: Gateway, entity_type: type[sensor.RSSISensor]
+) -> None:
+    """Test the deprecated endpoint/cluster shims of the RSSI and LQI sensors."""
+
+    zigpy_dev = elec_measurement_zigpy_device_mock(zha_gateway)
+    zha_dev = await join_zigpy_device(zha_gateway, zigpy_dev)
+    entity = get_entity(
+        zha_dev, platform=Platform.SENSOR, exact_entity_type=entity_type
+    )
+
+    with pytest.warns(DeprecationWarning, match="endpoint` is deprecated"):
+        endpoint = entity.endpoint
+    assert endpoint is zha_dev.endpoints[1]
+
+    with pytest.warns(DeprecationWarning, match="targets_cluster` is deprecated"):
+        assert entity.targets_cluster(general.Basic.cluster_id)
+    with pytest.warns(DeprecationWarning):
+        assert entity.targets_cluster(general.Basic.cluster_id, ClusterType.Server)
+    with pytest.warns(DeprecationWarning):
+        assert not entity.targets_cluster(general.Basic.cluster_id, ClusterType.Client)
+    with pytest.warns(DeprecationWarning):
+        assert not entity.targets_cluster(general.OnOff.cluster_id)
 
 
 async def test_device_unavailable_or_disabled_skips_entity_polling(
