@@ -397,6 +397,13 @@ async def test_light(
     # test turning the lights on and off from the light
     await async_test_on_off_from_light(zha_gateway, cluster_on_off, entity)
 
+    # reports of other on/off attributes leave the state alone
+    await send_attributes_report(
+        zha_gateway, cluster_on_off, {general.OnOff.AttributeDefs.on_time: 1}
+    )
+    await zha_gateway.async_block_till_done()
+    assert bool(entity.state.on) is False
+
     # test turning the lights on and off from the client
     await async_test_on_off_from_client(zha_gateway, cluster_on_off, entity)
     await _async_shift_time(zha_gateway)

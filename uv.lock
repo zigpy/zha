@@ -266,7 +266,7 @@ wheels = [
 
 [[package]]
 name = "bellows"
-version = "1.2.1"
+version = "1.3.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "click" },
@@ -275,9 +275,9 @@ dependencies = [
     { name = "voluptuous" },
     { name = "zigpy" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/4c/9f/3f8e1343ae7828aa67a424fc5fd366cb7e81f2c10a9dcaf6e96c837639ba/bellows-1.2.1.tar.gz", hash = "sha256:44d9dbb0576b964b3fe238835bfbb26198b4f2d71010f0f6908a73170f224b6d", size = 206020, upload-time = "2026-10-23T18:16:25.593Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/af/d8/819b7d508bbe63269880e6dfcc43796f7c8389d71868c133771d48bfc952/bellows-1.3.0.tar.gz", hash = "sha256:055884e67eed0b908b3739bd2f4f0abade7669a7e905a0155b1bcd4222340c0f", size = 213391, upload-time = "2026-11-25T04:46:14.608Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/5f/88/3acf251cfdd78d46346cf8fc6a1043c9bd7f1223eb555c22ef65943d8a22/bellows-1.2.1-py3-none-any.whl", hash = "sha256:834c6c4ab09cfb68c18619b0ee580ff0845e45bcc7092d9ce6e0528207e1c41a", size = 168270, upload-time = "2026-10-23T18:16:24.298Z" },
+    { url = "https://files.pythonhosted.org/packages/08/e2/64659132d02166fd61883a5f22bc5f521f9a710c79866f6457c773a4a12c/bellows-1.3.0-py3-none-any.whl", hash = "sha256:750c7ba12ced017a791eb706804dbf6d393f2f56ea45358a5b13f6de48b60c41", size = 171844, upload-time = "2026-11-25T04:46:13.288Z" },
 ]
 
 [[package]]
@@ -2005,7 +2005,7 @@ testing = [
 [package.metadata]
 requires-dist = [
     { name = "attrs" },
-    { name = "bellows", specifier = "==1.2.1" },
+    { name = "bellows", specifier = "==1.3.0" },
     { name = "coloredlogs", marker = "extra == 'testing'" },
     { name = "frozendict" },
     { name = "pytest", marker = "extra == 'testing'" },
@@ -2014,7 +2014,7 @@ requires-dist = [
     { name = "zigpy-deconz", specifier = "==1.1.2" },
     { name = "zigpy-xbee", specifier = "==0.22.0" },
     { name = "zigpy-zigate", specifier = "==0.14.0" },
-    { name = "zigpy-ziggurat", specifier = "==1.2.1" },
+    { name = "zigpy-ziggurat", specifier = "==1.3.0" },
     { name = "zigpy-znp", specifier = "==1.1.1" },
 ]
 provides-extras = ["testing"]
@@ -2133,16 +2133,16 @@ wheels = [
 
 [[package]]
 name = "zigpy-ziggurat"
-version = "1.2.1"
+version = "1.3.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "aiohttp" },
     { name = "aiospinel" },
     { name = "zigpy" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/d2/2d/faadbe4f46385dcfd5ccf341f1d7b5682f2a118cae4d71ac97f84c0b4af7/zigpy_ziggurat-1.2.1.tar.gz", hash = "sha256:3dfda429b46406638d5e75e55e2722c00319692220c20ffa954b6aaee6c87992", size = 40011, upload-time = "2026-11-04T15:35:59.836Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/02/62/63bee3ab5db54336c627e2265f056ed6b2c2c0a797203898588fd29fd840/zigpy_ziggurat-1.3.0.tar.gz", hash = "sha256:c1d399529ee4fd93c19247f9056ba28a2294cc273e2af43b8929df633e71e3b5", size = 44997, upload-time = "2026-11-25T04:31:06.499Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/0f/e8/10eba202ffe9342583c8868f9f29ef71ce83bef29bc64ad91124919f7329/zigpy_ziggurat-1.2.1-py3-none-any.whl", hash = "sha256:f9d98aea56bc30d6396f5c124e738be018ebf1531a99ad03074c1f58017e2d32", size = 24681, upload-time = "2026-11-04T15:35:58.864Z" },
+    { url = "https://files.pythonhosted.org/packages/01/5a/0f3b8624009a0e4c3880a39f99d56445242b0c9503b19ebfa44045ec3415/zigpy_ziggurat-1.3.0-py3-none-any.whl", hash = "sha256:8e4cf49db527d837af7f9f8e607c93a8d0760c79ecb194fdbd92263447b3b9db", size = 26510, upload-time = "2026-11-25T04:31:05.582Z" },
 ]
 
 [[package]]
