@@ -883,3 +883,12 @@ class GroupEntity(BaseEntity):
     async def async_update(self, _: Any | None = None) -> None:
         """Update the state of this group entity."""
         self.update()
+
+    def on_members_changed(self) -> None:
+        """Recompute the state after members were added to or removed from the group.
+
+        Existing group entities are kept rather than replaced by the ones that
+        rediscovery creates, so their state has to be recomputed from the new set
+        of members.
+        """
+        self.update()

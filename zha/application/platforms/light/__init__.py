@@ -1463,6 +1463,19 @@ class LightGroup(BaseSharedLight, GroupEntity):
         if self._debounced_member_refresh:
             await self._debounced_member_refresh.async_call()
 
+    def on_members_changed(self) -> None:
+        """Recompute the state after members were added to or removed from the group.
+
+        Not during the group's own transition: its members' reports are buffered
+        until the transition ends, when the group refreshes its members and
+        recomputes its state. Recomputing it now from their pre-transition state
+        would turn a group that is fading out back on and drop the brightness it
+        saved for the next turn on.
+        """
+        if self.is_transitioning:
+            return
+        super().on_members_changed()
+
     def update(self, _: Any = None) -> None:
         """Query all members and determine the light group state."""
         self.debug("Updating light group entity state")
