@@ -9,6 +9,7 @@ import itertools
 import logging
 from typing import TYPE_CHECKING, Any, Final
 
+from zigpy.exceptions import DeliveryError
 from zigpy.ota import OtaImagesResult, OtaImageWithMetadata
 from zigpy.zcl import (
     AttributeReadEvent,
@@ -269,19 +270,99 @@ class BaseFirmwareUpdateEntity(PlatformEntity, ABC):
         except Exception as ex:
             self._attr_in_progress = False
             self.maybe_emit_state_changed_event()
-            raise ZHAException(
-                f"Update was not successful: {str(ex) or repr(ex)}"
-            ) from ex
+            raise ZHAException(self._describe_update_exception(ex)) from ex
 
         # If the update finished but was not successful, we should also throw an error
         if result != Status.SUCCESS:
             self._attr_in_progress = False
             self.maybe_emit_state_changed_event()
-            raise ZHAException(f"Update was not successful: {result}")
+            raise ZHAException(self._describe_update_result(result))
 
         # Clear the state
         self._attr_in_progress = False
         self.maybe_emit_state_changed_event()
+
+    def _with_wake_up_hint(self, message: str) -> str:
+        """Add a hint to wake the device up, unless it is mains powered."""
+        if self.device.is_mains_powered:
+            return message
+
+        return (
+            f"{message} If the device is battery powered, wake it up (for example by"
+            " pressing a button on it) right before starting the update."
+        )
+
+    def _describe_update_exception(self, ex: Exception) -> str:
+        """Describe an exception raised by a firmware update."""
+        progress = self._attr_update_percentage
+
+        if progress is not None and progress >= 100:
+            # Errors during the transfer end the update with a status, so an exception
+            # after the whole image was sent comes from the steps zigpy runs after the
+            # device reported a successful update, like reading back its new version.
+            # Requiring 100% is deliberately conservative: below that, the generic
+            # messages are used
+            return (
+                "The device reported a successful update, but its new firmware version"
+                " could not be read back. It may still be restarting; check the"
+                " firmware version again later."
+            )
+
+        if isinstance(ex, TimeoutError):
+            return self._with_wake_up_hint("The device did not respond.")
+
+        if isinstance(ex, DeliveryError):
+            # zigpy's text is often a radio-specific status repr, it stays in the cause
+            return self._with_wake_up_hint("The device could not be reached.")
+
+        return str(ex) or repr(ex)
+
+    def _describe_update_result(self, result: Status | None) -> str:
+        """Describe an unsuccessful firmware update result."""
+        progress = self._attr_update_percentage
+
+        if result is None:
+            return "A firmware update is already in progress for this device."
+
+        if result == Status.TIMEOUT:
+            if progress is None:
+                return self._with_wake_up_hint(
+                    "The device did not start downloading the firmware."
+                )
+
+            if progress < 100:
+                return (
+                    f"The device stopped downloading the firmware at {int(progress)}%."
+                )
+
+            return (
+                "The whole firmware image was sent, but the device did not confirm the"
+                " update."
+            )
+
+        if result == Status.FAILURE:
+            # Either zigpy could not send a message to the device, or the device
+            # reported a failure itself
+            message = (
+                "The update failed: a message to the device could not be delivered, or"
+                " the device reported a failure."
+            )
+            return self._with_wake_up_hint(message) if progress is None else message
+
+        if result == Status.NO_IMAGE_AVAILABLE:
+            return (
+                "The device's firmware request does not match this image. The device"
+                " may already have this version or a newer one, or need a different"
+                " image."
+            )
+
+        if result == Status.ABORT:
+            return "The device aborted the update."
+
+        if result == Status.INVALID_IMAGE:
+            return "The device rejected the firmware image as invalid."
+
+        return f"The update ended with status {result.name} (0x{int(result):02X})."
 
     async def on_remove(self) -> None:
         """Call when entity will be removed."""
