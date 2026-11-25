@@ -94,11 +94,15 @@ async def async_test_binary_sensor_occupancy(
 ) -> None:
     """Test getting on and off messages for binary sensors."""
     # binary sensor on
-    await send_attributes_report(zha_gateway, cluster, {1: 0, 0: 1, 2: 2})
+    await send_attributes_report(
+        zha_gateway, cluster, {measurement.OccupancySensing.AttributeDefs.occupancy: 1}
+    )
     assert entity.is_on
 
     # binary sensor off
-    await send_attributes_report(zha_gateway, cluster, {1: 1, 0: 0, 2: 2})
+    await send_attributes_report(
+        zha_gateway, cluster, {measurement.OccupancySensing.AttributeDefs.occupancy: 0}
+    )
     assert entity.is_on is False
 
     # test refresh

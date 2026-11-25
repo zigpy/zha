@@ -13,24 +13,12 @@ from functools import cached_property
 import inspect
 import logging
 import time
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Final,
-    Generic,
-    ParamSpec,
-    TypeVar,
-    TypeVarTuple,
-    cast,
-)
+from typing import TYPE_CHECKING, Any, Final, Generic, ParamSpec, TypeVar, cast
 
 from zigpy.types.named import EUI64
 
-_T = TypeVar("_T")
-_R = TypeVar("_R")
 _R_co = TypeVar("_R_co", covariant=True)
 _P = ParamSpec("_P")
-_Ts = TypeVarTuple("_Ts")
 BLOCK_LOG_TIMEOUT: Final[int] = 60
 
 _LOGGER = logging.getLogger(__name__)
@@ -232,13 +220,13 @@ class AsyncUtilMixin:
             ):
                 handle.cancel()
 
-    def async_add_zha_job(
+    def async_add_zha_job[R](
         self,
-        zhajob: ZHAJob[..., Coroutine[Any, Any, _R] | _R],
+        zhajob: ZHAJob[..., Coroutine[Any, Any, R] | R],
         *args: Any,
         eager_start: bool = False,
         background: bool = False,
-    ) -> asyncio.Future[_R] | asyncio.Task[_R] | None:
+    ) -> asyncio.Future[R] | asyncio.Task[R] | None:
         """Add a ZHAJob from within the event loop.
 
         If eager_start is True, coroutine functions will be scheduled eagerly.
@@ -248,19 +236,19 @@ class AsyncUtilMixin:
         zhajob: ZHAJob to call.
         args: parameters for method to call.
         """
-        task: asyncio.Future[_R]
+        task: asyncio.Future[R]
         # This code path is performance sensitive and uses
         # if TYPE_CHECKING to avoid the overhead of constructing
         # the type used for the cast. For history see:
         # https://github.com/home-assistant/core/pull/71960
         if zhajob.job_type is ZHAJobType.Callback:
             if TYPE_CHECKING:
-                zhajob.target = cast(Callable[..., _R], zhajob.target)
+                zhajob.target = cast(Callable[..., R], zhajob.target)
             self.loop.call_soon(zhajob.target, *args)
             return None
 
         if TYPE_CHECKING:
-            zhajob.target = cast(Callable[..., Coroutine[Any, Any, _R]], zhajob.target)
+            zhajob.target = cast(Callable[..., Coroutine[Any, Any, R]], zhajob.target)
 
         # Use loop.create_task
         # to avoid the extra function call in asyncio.create_task.
@@ -294,12 +282,12 @@ class AsyncUtilMixin:
             functools.partial(self.async_create_task, target, name, eager_start=True)
         )
 
-    def async_create_task(
+    def async_create_task[R](
         self,
-        target: Coroutine[Any, Any, _R],
+        target: Coroutine[Any, Any, R],
         name: str | None = None,
         eager_start: bool = False,
-    ) -> asyncio.Task[_R]:
+    ) -> asyncio.Task[R]:
         """Create a task from within the event loop.
 
         This method must be run in the event loop. If you are using this in your
@@ -319,13 +307,13 @@ class AsyncUtilMixin:
         task.add_done_callback(self._tracked_completable_tasks.remove)
         return task
 
-    def async_create_background_task(
+    def async_create_background_task[R](
         self,
-        target: Coroutine[Any, Any, _R],
+        target: Coroutine[Any, Any, R],
         name: str,
         eager_start: bool = False,
         untracked: bool = False,
-    ) -> asyncio.Task[_R]:
+    ) -> asyncio.Task[R]:
         """Create a task from within the event loop.
 
         This type of task is for background tasks that usually run for
@@ -358,9 +346,9 @@ class AsyncUtilMixin:
         task.add_done_callback(task_bucket.remove)
         return task
 
-    def async_add_executor_job(
-        self, target: Callable[..., _T], *args: Any
-    ) -> asyncio.Future[_T]:
+    def async_add_executor_job[T](
+        self, target: Callable[..., T], *args: Any
+    ) -> asyncio.Future[T]:
         """Add an executor job from within the event loop."""
         task = self.loop.run_in_executor(None, target, *args)
         tracked = asyncio.current_task() in self._tracked_completable_tasks
@@ -371,13 +359,13 @@ class AsyncUtilMixin:
         task.add_done_callback(task_bucket.remove)
         return task
 
-    def async_run_zha_job(
+    def async_run_zha_job[R](
         self,
-        zhajob: ZHAJob[..., Coroutine[Any, Any, _R] | _R],
+        zhajob: ZHAJob[..., Coroutine[Any, Any, R] | R],
         *args: Any,
         background: bool = False,
         eager_start: bool = True,
-    ) -> asyncio.Future[_R] | asyncio.Task[_R] | None:
+    ) -> asyncio.Future[R] | asyncio.Task[R] | None:
         """Run a ZHAJob from within the event loop.
 
         This method must be run in the event loop.
@@ -393,7 +381,7 @@ class AsyncUtilMixin:
         # https://github.com/home-assistant/core/pull/71960
         if zhajob.job_type is ZHAJobType.Callback:
             if TYPE_CHECKING:
-                zhajob.target = cast(Callable[..., _R], zhajob.target)
+                zhajob.target = cast(Callable[..., R], zhajob.target)
             zhajob.target(*args)
             return None
 
