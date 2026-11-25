@@ -302,6 +302,32 @@
         "kwargs": {}
       }
     ],
+    "event": [
+      {
+        "fallback_name": "Button",
+        "unique_id": "00:15:bc:00:39:00:52:cd-32-button",
+        "migrate_unique_ids": [],
+        "platform": "event",
+        "class_name": "ZhaEventButton",
+        "translation_key": "button",
+        "translation_placeholders": null,
+        "device_class": "button",
+        "state_class": null,
+        "entity_category": null,
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "00:15:bc:00:39:00:52:cd",
+        "endpoint_id": 32,
+        "available": true,
+        "child_device_id": null,
+        "group_id": null,
+        "event_types": [
+          "single_press"
+        ]
+      }
+    ],
     "sensor": [
       {
         "fallback_name": null,

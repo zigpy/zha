@@ -40,6 +40,7 @@ class EntityPlatform(StrEnum):
 
     BINARY_SENSOR = "binary_sensor"
     BUTTON = "button"
+    EVENT = "event"
     NUMBER = "number"
     SENSOR = "sensor"
     SELECT = "select"

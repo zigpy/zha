@@ -234,6 +234,60 @@
         "kwargs": {}
       }
     ],
+    "event": [
+      {
+        "fallback_name": "Off button",
+        "unique_id": "5c:c7:c1:ff:fe:cc:19:d9-1-button_off",
+        "migrate_unique_ids": [],
+        "platform": "event",
+        "class_name": "ZhaEventButton",
+        "translation_key": "off_button",
+        "translation_placeholders": null,
+        "device_class": "button",
+        "state_class": null,
+        "entity_category": null,
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "5c:c7:c1:ff:fe:cc:19:d9",
+        "endpoint_id": 1,
+        "available": true,
+        "child_device_id": null,
+        "group_id": null,
+        "event_types": [
+          "press_end",
+          "long_press_start",
+          "long_press_end"
+        ]
+      },
+      {
+        "fallback_name": "On button",
+        "unique_id": "5c:c7:c1:ff:fe:cc:19:d9-1-button_on",
+        "migrate_unique_ids": [],
+        "platform": "event",
+        "class_name": "ZhaEventButton",
+        "translation_key": "on_button",
+        "translation_placeholders": null,
+        "device_class": "button",
+        "state_class": null,
+        "entity_category": null,
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "5c:c7:c1:ff:fe:cc:19:d9",
+        "endpoint_id": 1,
+        "available": true,
+        "child_device_id": null,
+        "group_id": null,
+        "event_types": [
+          "press_end",
+          "long_press_start",
+          "long_press_end"
+        ]
+      }
+    ],
     "sensor": [
       {
         "fallback_name": null,

@@ -543,8 +543,8 @@
         "group_id": null,
         "native_value": 30.0,
         "mode": "auto",
-        "native_max_value": 3000,
-        "native_min_value": -500,
+        "native_max_value": 30,
+        "native_min_value": -5,
         "native_step": 0.5,
         "native_unit_of_measurement": "\u00b0C"
       },
@@ -570,8 +570,8 @@
         "group_id": null,
         "native_value": 5.0,
         "mode": "auto",
-        "native_max_value": 3000,
-        "native_min_value": -500,
+        "native_max_value": 30,
+        "native_min_value": -5,
         "native_step": 0.5,
         "native_unit_of_measurement": "\u00b0C"
       },
@@ -597,8 +597,8 @@
         "group_id": null,
         "native_value": null,
         "mode": "auto",
-        "native_max_value": 32767,
-        "native_min_value": -32768,
+        "native_max_value": 327.6,
+        "native_min_value": -327.6,
         "native_step": 0.1,
         "native_unit_of_measurement": "\u00b0C"
       }

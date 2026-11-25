@@ -12,7 +12,6 @@ import math
 import numbers
 import typing
 from typing import TYPE_CHECKING, Any, cast
-import warnings
 
 from zigpy import types
 from zigpy.profiles.zha import PROFILE_ID as ZHA_PROFILE_ID
@@ -24,7 +23,6 @@ from zigpy.zcl import (
     AttributeUpdatedEvent,
     AttributeWrittenEvent,
     Cluster,
-    ClusterType,
     ReportingConfig,
     foundation,
 )
@@ -74,7 +72,6 @@ from zha.application.platforms import (
 )
 from zha.application.platforms.climate.const import HVACAction
 from zha.application.platforms.const import (
-    IKEA_AIR_PURIFIER_CLUSTER,
     SMARTTHINGS_HUMIDITY_CLUSTER,
     SONOFF_CLUSTER,
     TUYA_MANUFACTURER_CLUSTER,
@@ -3233,36 +3230,6 @@ class RSSISensor(BaseSensor):
             fallback = fallback or cluster
         return fallback
 
-    # TODO: remove once zha-quirks only filters `ZclPlatformEntity` by endpoint/cluster
-    # and HA Core's `websocket_get_groupable_devices` no longer reads `entity.endpoint`
-    @property
-    def endpoint(self) -> Endpoint:
-        """Return the endpoint of the legacy Basic cluster entity, for old quirks."""
-        warnings.warn(
-            f"`{type(self).__name__}.endpoint` is deprecated, device-bound entities"
-            " have no endpoint",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        basic_cluster = self.legacy_basic_cluster(self._device)
-        assert basic_cluster is not None
-        return self._device.endpoints[basic_cluster.endpoint.endpoint_id]
-
-    def targets_cluster(
-        self, cluster_id: int, cluster_type: ClusterType | None = None
-    ) -> bool:
-        """Match the legacy Basic cluster entity, for old quirks."""
-        warnings.warn(
-            f"`{type(self).__name__}.targets_cluster` is deprecated, device-bound"
-            " entities have no cluster",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        return cluster_id == Basic.cluster_id and cluster_type in (
-            None,
-            ClusterType.Server,
-        )
-
     def on_add(self) -> None:
         """Run when entity is added."""
         super().on_add()
@@ -3329,40 +3296,6 @@ class TimeLeft(Sensor):
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({TUYA_MANUFACTURER_CLUSTER}),
         manufacturers=frozenset({"_TZE200_htnnfasr"}),
-    )
-
-
-@register_entity(IKEA_AIR_PURIFIER_CLUSTER)
-class IkeaDeviceRunTime(Sensor):
-    """Sensor that displays device run time (in minutes)."""
-
-    _attribute_name = "device_run_time"
-    _unique_id_suffix = "device_run_time"
-    _attr_device_class: SensorDeviceClass = SensorDeviceClass.DURATION
-    _attr_translation_key: str = "device_run_time"
-    _attr_native_unit_of_measurement = UnitOfTime.MINUTES
-    _attr_entity_category: EntityCategory = EntityCategory.DIAGNOSTIC
-    _cluster_id = IKEA_AIR_PURIFIER_CLUSTER
-
-    _cluster_match = ClusterMatch(
-        server_clusters=frozenset({IKEA_AIR_PURIFIER_CLUSTER}),
-    )
-
-
-@register_entity(IKEA_AIR_PURIFIER_CLUSTER)
-class IkeaFilterRunTime(Sensor):
-    """Sensor that displays run time of the current filter (in minutes)."""
-
-    _attribute_name = "filter_run_time"
-    _unique_id_suffix = "filter_run_time"
-    _attr_device_class: SensorDeviceClass = SensorDeviceClass.DURATION
-    _attr_translation_key: str = "filter_run_time"
-    _attr_native_unit_of_measurement = UnitOfTime.MINUTES
-    _attr_entity_category: EntityCategory = EntityCategory.DIAGNOSTIC
-    _cluster_id = IKEA_AIR_PURIFIER_CLUSTER
-
-    _cluster_match = ClusterMatch(
-        server_clusters=frozenset({IKEA_AIR_PURIFIER_CLUSTER}),
     )
 
 

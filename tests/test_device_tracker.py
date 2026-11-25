@@ -54,7 +54,9 @@ async def test_device_tracker(
 
     # turn state flip
     await send_attributes_report(
-        zha_gateway, cluster, {0x0000: 0, 0x0020: 23, 0x0021: 200, 0x0001: 2}
+        zha_gateway,
+        cluster,
+        {general.PowerConfiguration.AttributeDefs.battery_percentage_remaining: 200},
     )
 
     entity.async_update = AsyncMock(wraps=entity.async_update)

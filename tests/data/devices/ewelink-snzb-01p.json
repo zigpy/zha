@@ -8,7 +8,7 @@
   "friendly_model": "SNZB-01P",
   "name": "eWeLink SNZB-01P",
   "quirk_applied": true,
-  "quirk_class": "zhaquirks.sonoff.button:(eWeLink / WB01)",
+  "quirk_class": "zhaquirks.sonoff.button:(eWeLink / SNZB-01P)",
   "exposes_features": [],
   "manufacturer_code": 4742,
   "power_source": "Battery or Unknown",
@@ -195,6 +195,34 @@
           5
         ],
         "kwargs": {}
+      }
+    ],
+    "event": [
+      {
+        "fallback_name": "Button",
+        "unique_id": "ab:cd:ef:12:6a:05:59:94-1-button",
+        "migrate_unique_ids": [],
+        "platform": "event",
+        "class_name": "ZhaEventButton",
+        "translation_key": "button",
+        "translation_placeholders": null,
+        "device_class": "button",
+        "state_class": null,
+        "entity_category": null,
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:6a:05:59:94",
+        "endpoint_id": 1,
+        "available": true,
+        "child_device_id": null,
+        "group_id": null,
+        "event_types": [
+          "single_press",
+          "multi_press",
+          "long_press_start"
+        ]
       }
     ],
     "sensor": [

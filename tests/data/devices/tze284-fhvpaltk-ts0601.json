@@ -165,12 +165,12 @@
   "zha_lib_entities": {
     "number": [
       {
-        "fallback_name": "Irrigation time 1",
+        "fallback_name": "Irrigation time",
         "unique_id": "ab:cd:ef:12:56:b9:75:cd-1-valve_countdown_1",
         "migrate_unique_ids": [],
         "platform": "number",
         "class_name": "NumberConfigurationEntity",
-        "translation_key": "valve_countdown_1",
+        "translation_key": "valve_countdown",
         "translation_placeholders": null,
         "device_class": "duration",
         "state_class": null,
@@ -182,7 +182,7 @@
         "device_ieee": "ab:cd:ef:12:56:b9:75:cd",
         "endpoint_id": 1,
         "available": true,
-        "child_device_id": null,
+        "child_device_id": "1",
         "group_id": null,
         "native_value": null,
         "mode": "auto",
@@ -192,12 +192,12 @@
         "native_unit_of_measurement": "min"
       },
       {
-        "fallback_name": "Irrigation time 2",
+        "fallback_name": "Irrigation time",
         "unique_id": "ab:cd:ef:12:56:b9:75:cd-1-valve_countdown_2",
         "migrate_unique_ids": [],
         "platform": "number",
         "class_name": "NumberConfigurationEntity",
-        "translation_key": "valve_countdown_2",
+        "translation_key": "valve_countdown",
         "translation_placeholders": null,
         "device_class": "duration",
         "state_class": null,
@@ -209,7 +209,7 @@
         "device_ieee": "ab:cd:ef:12:56:b9:75:cd",
         "endpoint_id": 1,
         "available": true,
-        "child_device_id": null,
+        "child_device_id": "2",
         "group_id": null,
         "native_value": null,
         "mode": "auto",
@@ -300,12 +300,12 @@
         "battery_voltage": null
       },
       {
-        "fallback_name": "Irrigation duration 1",
+        "fallback_name": "Irrigation duration",
         "unique_id": "ab:cd:ef:12:56:b9:75:cd-1-valve_duration_1",
         "migrate_unique_ids": [],
         "platform": "sensor",
         "class_name": "Sensor",
-        "translation_key": "irrigation_duration_1",
+        "translation_key": "irrigation_duration",
         "translation_placeholders": null,
         "device_class": "duration",
         "state_class": "measurement",
@@ -317,19 +317,19 @@
         "device_ieee": "ab:cd:ef:12:56:b9:75:cd",
         "endpoint_id": 1,
         "available": true,
-        "child_device_id": null,
+        "child_device_id": "1",
         "group_id": null,
         "native_value": null,
         "suggested_display_precision": null,
         "unit": "s"
       },
       {
-        "fallback_name": "Irrigation duration 2",
+        "fallback_name": "Irrigation duration",
         "unique_id": "ab:cd:ef:12:56:b9:75:cd-1-valve_duration_2",
         "migrate_unique_ids": [],
         "platform": "sensor",
         "class_name": "Sensor",
-        "translation_key": "irriation_duration_2",
+        "translation_key": "irrigation_duration",
         "translation_placeholders": null,
         "device_class": "duration",
         "state_class": "measurement",
@@ -341,19 +341,19 @@
         "device_ieee": "ab:cd:ef:12:56:b9:75:cd",
         "endpoint_id": 1,
         "available": true,
-        "child_device_id": null,
+        "child_device_id": "2",
         "group_id": null,
         "native_value": null,
         "suggested_display_precision": null,
         "unit": "s"
       },
       {
-        "fallback_name": "Status 1",
+        "fallback_name": "Valve status",
         "unique_id": "ab:cd:ef:12:56:b9:75:cd-1-valve_status_1",
         "migrate_unique_ids": [],
         "platform": "sensor",
         "class_name": "EnumSensor",
-        "translation_key": "valve_status_1",
+        "translation_key": "valve_status",
         "translation_placeholders": null,
         "device_class": "enum",
         "state_class": null,
@@ -365,7 +365,7 @@
         "device_ieee": "ab:cd:ef:12:56:b9:75:cd",
         "endpoint_id": 1,
         "available": true,
-        "child_device_id": null,
+        "child_device_id": "1",
         "group_id": null,
         "native_value": null,
         "suggested_display_precision": null,
@@ -377,12 +377,12 @@
         ]
       },
       {
-        "fallback_name": "Status 2",
+        "fallback_name": "Valve status",
         "unique_id": "ab:cd:ef:12:56:b9:75:cd-1-valve_status_2",
         "migrate_unique_ids": [],
         "platform": "sensor",
         "class_name": "EnumSensor",
-        "translation_key": "valve_status_2",
+        "translation_key": "valve_status",
         "translation_placeholders": null,
         "device_class": "enum",
         "state_class": null,
@@ -394,7 +394,7 @@
         "device_ieee": "ab:cd:ef:12:56:b9:75:cd",
         "endpoint_id": 1,
         "available": true,
-        "child_device_id": null,
+        "child_device_id": "2",
         "group_id": null,
         "native_value": null,
         "suggested_display_precision": null,
@@ -420,12 +420,12 @@
         "entity_category": null,
         "entity_registry_enabled_default": true,
         "enabled": true,
-        "primary": false,
+        "primary": true,
         "extra_state_attribute_names": [],
         "device_ieee": "ab:cd:ef:12:56:b9:75:cd",
         "endpoint_id": 1,
         "available": true,
-        "child_device_id": null,
+        "child_device_id": "1",
         "group_id": null,
         "is_on": false,
         "inverted": false,
@@ -448,12 +448,12 @@
         "entity_category": null,
         "entity_registry_enabled_default": true,
         "enabled": true,
-        "primary": false,
+        "primary": true,
         "extra_state_attribute_names": [],
         "device_ieee": "ab:cd:ef:12:56:b9:75:cd",
         "endpoint_id": 1,
         "available": true,
-        "child_device_id": null,
+        "child_device_id": "2",
         "group_id": null,
         "is_on": false,
         "inverted": false,
@@ -496,7 +496,26 @@
       }
     ]
   },
-  "child_devices": [],
+  "child_devices": [
+    {
+      "id": "1",
+      "endpoint_ids": [],
+      "translation_key": "valve",
+      "translation_placeholders": {
+        "index": "1"
+      },
+      "fallback_name": "Valve 1"
+    },
+    {
+      "id": "2",
+      "endpoint_ids": [],
+      "translation_key": "valve",
+      "translation_placeholders": {
+        "index": "2"
+      },
+      "fallback_name": "Valve 2"
+    }
+  ],
   "neighbors": [],
   "routes": []
 }

@@ -358,7 +358,14 @@ class FanGroup(BaseFan, GroupEntity):
 
     async def _async_set_fan_mode(self, fan_mode: int) -> None:
         """Set the fan mode for the group."""
-        await write_attributes_safe(self._cluster, {"fan_mode": fan_mode})
+        # A multicast write gets no response from the members: zigpy only returns a
+        # synthesized default response, so there is no per-attribute status to check.
+        # Nothing reads the group cluster's attribute cache (the group state follows
+        # the members' own fan mode), and zigpy's cache update after a write expects a
+        # device (it reads `endpoint.device.ieee`), so skip it.
+        await self._cluster.write_attributes(
+            {hvac.Fan.AttributeDefs.fan_mode.name: fan_mode}, update_cache=False
+        )
         self.maybe_emit_state_changed_event()
 
     def update(self, _: Any = None) -> None:
@@ -404,48 +411,13 @@ class IkeaFan(BaseFan, ZclPlatformEntity):
         models=frozenset({"STARKVIND Air purifier", "STARKVIND Air purifier table"}),
     )
 
-    # Aggregated reporting/bind config for the whole STARKVIND manufacturer
-    # cluster; sibling ChildLock/DisableLed switches don't need their own.
+    # Bind and reporting config for the attributes this entity uses. The quirk
+    # declares its own config for the other attributes of the manufacturer
+    # specific cluster; both are merged before the device is configured.
     _server_cluster_config = {
         IKEA_AIR_PURIFIER_CLUSTER: ClusterConfig(
             bind=True,
             attributes={
-                "filter_run_time": AttrConfig(
-                    read_on_startup=False,
-                    reporting=ReportingConfig(
-                        min_interval=30, max_interval=900, reportable_change=1
-                    ),
-                ),
-                "replace_filter": AttrConfig(
-                    read_on_startup=False,
-                    reporting=ReportingConfig(
-                        min_interval=0, max_interval=900, reportable_change=1
-                    ),
-                ),
-                "filter_life_time": AttrConfig(
-                    read_on_startup=False,
-                    reporting=ReportingConfig(
-                        min_interval=30, max_interval=900, reportable_change=1
-                    ),
-                ),
-                "disable_led": AttrConfig(
-                    read_on_startup=False,
-                    reporting=ReportingConfig(
-                        min_interval=0, max_interval=900, reportable_change=1
-                    ),
-                ),
-                "air_quality_25pm": AttrConfig(
-                    read_on_startup=False,
-                    reporting=ReportingConfig(
-                        min_interval=0, max_interval=900, reportable_change=1
-                    ),
-                ),
-                "child_lock": AttrConfig(
-                    read_on_startup=False,
-                    reporting=ReportingConfig(
-                        min_interval=0, max_interval=900, reportable_change=1
-                    ),
-                ),
                 "fan_mode": AttrConfig(
                     read_on_startup=False,
                     reporting=ReportingConfig(
@@ -456,12 +428,6 @@ class IkeaFan(BaseFan, ZclPlatformEntity):
                     read_on_startup=False,
                     reporting=ReportingConfig(
                         min_interval=0, max_interval=900, reportable_change=1
-                    ),
-                ),
-                "device_run_time": AttrConfig(
-                    read_on_startup=False,
-                    reporting=ReportingConfig(
-                        min_interval=30, max_interval=900, reportable_change=1
                     ),
                 ),
             },
