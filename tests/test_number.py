@@ -150,12 +150,16 @@ async def test_number(
 
     # change value from device
     assert cluster.read_attributes.call_count == 2
-    await send_attributes_report(zha_gateway, cluster, {0x0055: 15})
+    await send_attributes_report(
+        zha_gateway, cluster, {general.AnalogOutput.AttributeDefs.present_value: 15}
+    )
     await zha_gateway.async_block_till_done()
     assert entity.state.native_value == 15.0
 
     # update value from device
-    await send_attributes_report(zha_gateway, cluster, {0x0055: 20})
+    await send_attributes_report(
+        zha_gateway, cluster, {general.AnalogOutput.AttributeDefs.present_value: 20}
+    )
     await zha_gateway.async_block_till_done()
     assert entity.state.native_value == 20.0
 
@@ -550,7 +554,7 @@ async def test_level_control_number(
     await send_attributes_report(
         zha_gateway,
         level_control_cluster,
-        {level_control_cluster.attributes_by_name[attr].id: initial_value},
+        {level_control_cluster.attributes_by_name[attr]: initial_value},
     )
     await zha_gateway.async_block_till_done()
     assert entity.state.native_value == initial_value
@@ -653,7 +657,7 @@ async def test_color_number(
     await send_attributes_report(
         zha_gateway,
         color_cluster,
-        {color_cluster.attributes_by_name[attr].id: initial_value},
+        {color_cluster.attributes_by_name[attr]: initial_value},
     )
     await zha_gateway.async_block_till_done()
     assert entity.state.native_value == initial_value

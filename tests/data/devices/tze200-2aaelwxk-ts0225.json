@@ -455,7 +455,7 @@
             {
               "id": "0x000e",
               "name": "state_text",
-              "zcl_type": "unk",
+              "zcl_type": "array",
               "value": [
                 "None",
                 "Large",

@@ -3246,7 +3246,10 @@ class RSSISensor(BaseSensor):
         )
         basic_cluster = self.legacy_basic_cluster(self._device)
         assert basic_cluster is not None
-        return self._device.endpoints[basic_cluster.endpoint.endpoint_id]
+
+        endpoint_id = basic_cluster.endpoint.endpoint_id
+        assert endpoint_id is not None
+        return self._device.endpoints[endpoint_id]
 
     def targets_cluster(
         self, cluster_id: int, cluster_type: ClusterType | None = None
