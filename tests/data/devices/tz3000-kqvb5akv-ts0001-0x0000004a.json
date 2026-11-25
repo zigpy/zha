@@ -8,8 +8,10 @@
   "friendly_model": "TS0001",
   "name": "_TZ3000_kqvb5akv TS0001",
   "quirk_applied": true,
-  "quirk_class": "zhaquirks.tuya.ts0001_switch:(_TZ3000_xkap8wtb / TS0001)",
-  "exposes_features": [],
+  "quirk_class": "zhaquirks.tuya.builder:(_TZ3000_xkap8wtb / TS0001)",
+  "exposes_features": [
+    "tuya.plug_on_off_attributes"
+  ],
   "manufacturer_code": 4417,
   "power_source": "Mains",
   "lqi": 200,
@@ -556,6 +558,7 @@
         "device_ieee": "ab:cd:ef:12:c3:82:cb:22",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "command": "identify",
         "args": [
@@ -583,6 +586,7 @@
         "device_ieee": "ab:cd:ef:12:c3:82:cb:22",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "on": true,
         "brightness": null,
@@ -601,6 +605,36 @@
         "off_brightness": null,
         "min_mireds": 153,
         "max_mireds": 500
+      }
+    ],
+    "select": [
+      {
+        "fallback_name": null,
+        "unique_id": "ab:cd:ef:12:c3:82:cb:22-1-6-power_on_state",
+        "migrate_unique_ids": [],
+        "platform": "select",
+        "class_name": "TuyaPowerOnStateSelectEntity",
+        "translation_key": "power_on_state",
+        "translation_placeholders": null,
+        "device_class": null,
+        "state_class": null,
+        "entity_category": "config",
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:c3:82:cb:22",
+        "endpoint_id": 1,
+        "available": true,
+        "child_device_id": null,
+        "group_id": null,
+        "current_option": "LastState",
+        "enum": "TuyaPowerOnState",
+        "options": [
+          "Off",
+          "On",
+          "LastState"
+        ]
       }
     ],
     "sensor": [
@@ -622,6 +656,7 @@
         "device_ieee": "ab:cd:ef:12:c3:82:cb:22",
         "endpoint_id": null,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "native_value": 200,
         "suggested_display_precision": null,
@@ -645,6 +680,7 @@
         "device_ieee": "ab:cd:ef:12:c3:82:cb:22",
         "endpoint_id": null,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "native_value": null,
         "suggested_display_precision": null,
@@ -672,6 +708,7 @@
         "device_ieee": "ab:cd:ef:12:c3:82:cb:22",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "native_value": 1.54,
         "suggested_display_precision": 3,
@@ -701,6 +738,7 @@
         "device_ieee": "ab:cd:ef:12:c3:82:cb:22",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "native_value": 30.0,
         "suggested_display_precision": 1,
@@ -730,6 +768,7 @@
         "device_ieee": "ab:cd:ef:12:c3:82:cb:22",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "native_value": 0.245,
         "suggested_display_precision": 2,
@@ -759,6 +798,7 @@
         "device_ieee": "ab:cd:ef:12:c3:82:cb:22",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "native_value": 231.0,
         "suggested_display_precision": 1,
@@ -787,6 +827,7 @@
         "device_ieee": "ab:cd:ef:12:c3:82:cb:22",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "installed_version": "0x0000004a",
         "in_progress": false,
@@ -799,6 +840,7 @@
       }
     ]
   },
+  "child_devices": [],
   "neighbors": [],
   "routes": []
 }

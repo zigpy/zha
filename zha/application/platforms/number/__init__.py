@@ -43,7 +43,7 @@ from zha.application.platforms.legacy_quirks import AQARA_OPPLE_CLUSTER
 from zha.application.platforms.number.bacnet import BACNET_UNITS_TO_HA_UNITS
 from zha.application.platforms.number.const import ICONS, NumberDeviceClass, NumberMode
 from zha.quirks import DANFOSS_ALLY_THERMOSTAT
-from zha.units import UnitOfMass, UnitOfTemperature, UnitOfTime
+from zha.units import UnitOfTemperature, UnitOfTime
 
 if TYPE_CHECKING:
     from zha.zigbee.device import Device
@@ -288,6 +288,8 @@ class NumberConfigurationEntity(BaseNumber, ZclPlatformEntity):
     _attr_native_step: float = 1.0
     _multiplier: float = 1
     _attribute_name: str
+    # Attributes the range is computed from, see `recompute_capabilities`
+    _capability_attribute_names: frozenset[str] = frozenset()
 
     def __init__(
         self,
@@ -371,7 +373,7 @@ class NumberConfigurationEntity(BaseNumber, ZclPlatformEntity):
     async def async_set_native_value(self, value: float) -> None:
         """Update the current value from HA."""
         await write_attributes_safe(
-            self._cluster, {self._attribute_name: int(value / self._multiplier)}
+            self._cluster, {self._attribute_name: round(value / self._multiplier)}
         )
         self.maybe_emit_state_changed_event()
 
@@ -395,8 +397,11 @@ class NumberConfigurationEntity(BaseNumber, ZclPlatformEntity):
         | AttributeWrittenEvent,
     ) -> None:
         """Handle value update from cluster."""
-        if event.attribute_name == self._attribute_name:
-            self.maybe_emit_state_changed_event()
+        if event.attribute_name in self._capability_attribute_names:
+            self.recompute_capabilities()
+        elif event.attribute_name != self._attribute_name:
+            return
+        self.maybe_emit_state_changed_event()
 
 
 @register_entity(AQARA_OPPLE_CLUSTER)
@@ -823,47 +828,6 @@ class TiRouterTransmitPower(NumberConfigurationEntity):
 
 
 @register_entity(AQARA_OPPLE_CLUSTER)
-class AqaraPetFeederServingSize(NumberConfigurationEntity):
-    """Aqara pet feeder serving size configuration entity."""
-
-    _unique_id_suffix = "serving_size"
-    _attr_entity_category = EntityCategory.CONFIG
-    _attr_native_min_value: float = 1
-    _attr_native_max_value: float = 10
-    _attribute_name = "serving_size"
-    _attr_translation_key: str = "serving_size"
-    _cluster_id = AQARA_OPPLE_CLUSTER
-
-    _attr_mode: NumberMode = NumberMode.BOX
-
-    _cluster_match = ClusterMatch(
-        server_clusters=frozenset({AQARA_OPPLE_CLUSTER}),
-        models=frozenset({"aqara.feeder.acn001"}),
-    )
-
-
-@register_entity(AQARA_OPPLE_CLUSTER)
-class AqaraPetFeederPortionWeight(NumberConfigurationEntity):
-    """Aqara pet feeder portion weight configuration entity."""
-
-    _unique_id_suffix = "portion_weight"
-    _attr_entity_category = EntityCategory.CONFIG
-    _attr_native_min_value: float = 1
-    _attr_native_max_value: float = 100
-    _attribute_name = "portion_weight"
-    _attr_translation_key: str = "portion_weight"
-    _cluster_id = AQARA_OPPLE_CLUSTER
-
-    _attr_mode: NumberMode = NumberMode.BOX
-    _attr_native_unit_of_measurement: str = UnitOfMass.GRAMS
-
-    _cluster_match = ClusterMatch(
-        server_clusters=frozenset({AQARA_OPPLE_CLUSTER}),
-        models=frozenset({"aqara.feeder.acn001"}),
-    )
-
-
-@register_entity(AQARA_OPPLE_CLUSTER)
 class AqaraThermostatAwayTemp(NumberConfigurationEntity):
     """Aqara away preset temperature configuration entity."""
 
@@ -1067,6 +1031,14 @@ class ZCLHeatSetpointLimitEntity(ZCLTemperatureEntity):
     """Min or max heat setpoint setting on thermostats."""
 
     _attr_native_step: float = 0.5
+    _capability_attribute_names = frozenset(
+        {
+            Thermostat.AttributeDefs.abs_min_heat_setpoint_limit.name,
+            Thermostat.AttributeDefs.abs_max_heat_setpoint_limit.name,
+            Thermostat.AttributeDefs.min_heat_setpoint_limit.name,
+            Thermostat.AttributeDefs.max_heat_setpoint_limit.name,
+        }
+    )
 
     def recompute_capabilities(self) -> None:
         """Recompute capabilities."""

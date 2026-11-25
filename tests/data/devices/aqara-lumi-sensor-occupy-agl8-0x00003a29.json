@@ -5,10 +5,10 @@
   "manufacturer": "Aqara",
   "model": "lumi.sensor_occupy.agl8",
   "friendly_manufacturer": "Aqara",
-  "friendly_model": "lumi.sensor_occupy.agl8",
-  "name": "Aqara lumi.sensor_occupy.agl8",
-  "quirk_applied": false,
-  "quirk_class": "zigpy.device.ZigbeeDevice",
+  "friendly_model": "Presence Sensor FP300",
+  "name": "Aqara Presence Sensor FP300",
+  "quirk_applied": true,
+  "quirk_class": "zhaquirks.xiaomi.aqara.motion_agl8:(Aqara / lumi.sensor_occupy.agl8)",
   "exposes_features": [],
   "manufacturer_code": 4447,
   "power_source": "Battery or Unknown",
@@ -73,13 +73,13 @@
               "id": "0x0033",
               "name": "battery_quantity",
               "zcl_type": "uint8",
-              "value": 1
+              "value": 2
             },
             {
               "id": "0x0031",
               "name": "battery_size",
               "zcl_type": "enum8",
-              "value": 255
+              "value": 9
             },
             {
               "id": "0x0020",
@@ -137,7 +137,7 @@
         },
         {
           "cluster_id": "0xfcc0",
-          "endpoint_attribute": "manufacturer_specific",
+          "endpoint_attribute": "aqara_fp300_manu",
           "attributes": []
         }
       ],
@@ -202,6 +202,54 @@
     }
   },
   "zha_lib_entities": {
+    "binary_sensor": [
+      {
+        "fallback_name": "Motion",
+        "unique_id": "ab:cd:ef:12:ae:99:5e:c4-1-pir_detection",
+        "migrate_unique_ids": [],
+        "platform": "binary_sensor",
+        "class_name": "BinarySensor",
+        "translation_key": null,
+        "translation_placeholders": null,
+        "device_class": "motion",
+        "state_class": null,
+        "entity_category": "diagnostic",
+        "entity_registry_enabled_default": false,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:ae:99:5e:c4",
+        "endpoint_id": 1,
+        "available": true,
+        "child_device_id": null,
+        "group_id": null,
+        "is_on": false,
+        "attribute_name": "pir_detection"
+      },
+      {
+        "fallback_name": "Occupancy",
+        "unique_id": "ab:cd:ef:12:ae:99:5e:c4-1-presence",
+        "migrate_unique_ids": [],
+        "platform": "binary_sensor",
+        "class_name": "BinarySensor",
+        "translation_key": null,
+        "translation_placeholders": null,
+        "device_class": "occupancy",
+        "state_class": null,
+        "entity_category": null,
+        "entity_registry_enabled_default": true,
+        "enabled": true,
+        "primary": false,
+        "extra_state_attribute_names": [],
+        "device_ieee": "ab:cd:ef:12:ae:99:5e:c4",
+        "endpoint_id": 1,
+        "available": true,
+        "child_device_id": null,
+        "group_id": null,
+        "is_on": false,
+        "attribute_name": "presence"
+      }
+    ],
     "button": [
       {
         "fallback_name": null,
@@ -221,6 +269,7 @@
         "device_ieee": "ab:cd:ef:12:ae:99:5e:c4",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "command": "identify",
         "args": [
@@ -248,6 +297,7 @@
         "device_ieee": "ab:cd:ef:12:ae:99:5e:c4",
         "endpoint_id": null,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "native_value": 58,
         "suggested_display_precision": null,
@@ -271,6 +321,7 @@
         "device_ieee": "ab:cd:ef:12:ae:99:5e:c4",
         "endpoint_id": null,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "native_value": null,
         "suggested_display_precision": null,
@@ -298,12 +349,13 @@
         "device_ieee": "ab:cd:ef:12:ae:99:5e:c4",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "native_value": 100.0,
         "suggested_display_precision": 0,
         "unit": "%",
-        "battery_size": "Unknown",
-        "battery_quantity": 1,
+        "battery_size": "CR2450",
+        "battery_quantity": 2,
         "battery_voltage": 3.03
       },
       {
@@ -324,6 +376,7 @@
         "device_ieee": "ab:cd:ef:12:ae:99:5e:c4",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "native_value": 2,
         "suggested_display_precision": null,
@@ -347,6 +400,7 @@
         "device_ieee": "ab:cd:ef:12:ae:99:5e:c4",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "native_value": 21.75,
         "suggested_display_precision": null,
@@ -370,6 +424,7 @@
         "device_ieee": "ab:cd:ef:12:ae:99:5e:c4",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "native_value": 39.98,
         "suggested_display_precision": null,
@@ -395,6 +450,7 @@
         "device_ieee": "ab:cd:ef:12:ae:99:5e:c4",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "installed_version": "0x00003a29",
         "in_progress": false,
@@ -407,6 +463,7 @@
       }
     ]
   },
+  "child_devices": [],
   "neighbors": [],
   "routes": []
 }

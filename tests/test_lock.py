@@ -50,11 +50,15 @@ async def test_lock(zha_gateway: Gateway) -> None:
     assert entity.state.is_locked is False
 
     # set state to locked
-    await send_attributes_report(zha_gateway, cluster, {1: 0, 0: 1, 2: 2})
+    await send_attributes_report(
+        zha_gateway, cluster, {closures.DoorLock.AttributeDefs.lock_state: 1}
+    )
     assert entity.state.is_locked is True
 
     # set state to unlocked
-    await send_attributes_report(zha_gateway, cluster, {1: 0, 0: 2, 2: 3})
+    await send_attributes_report(
+        zha_gateway, cluster, {closures.DoorLock.AttributeDefs.lock_state: 2}
+    )
     assert entity.state.is_locked is False
 
     # lock from HA

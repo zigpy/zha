@@ -691,8 +691,13 @@ class BaseSharedLight(BaseLight):
             else DEFAULT_ON_OFF_TRANSITION
         ) + DEFAULT_EXTRA_TRANSITION_DELAY_SHORT
 
-        # Start pausing attribute report parsing
-        if self._zha_config_enable_light_transitioning_flag:
+        # Start pausing attribute report parsing, but not for on/off-only
+        # lights (they have no transition to wait for, and a follow-up
+        # turn_on would not clear the buffered off-report).
+        set_transition_flag = (
+            brightness_supported and self._zha_config_enable_light_transitioning_flag
+        )
+        if set_transition_flag:
             self.async_transition_set_flag()
 
         try:
@@ -712,7 +717,7 @@ class BaseSharedLight(BaseLight):
                 result = await self._on_off_cluster.off()
 
             # Pause parsing attribute reports until transition is complete
-            if self._zha_config_enable_light_transitioning_flag:
+            if set_transition_flag:
                 self.async_transition_start_timer(transition_time)
             self.debug("turned off: %s", result)
             if result[1] is not Status.SUCCESS:
@@ -734,9 +739,7 @@ class BaseSharedLight(BaseLight):
         finally:
             # If the task was cancelled before the transition timer was started,
             # clean up the transitioning flag so the light does not get stuck.
-            self._async_cleanup_transition_if_stuck(
-                self._zha_config_enable_light_transitioning_flag
-            )
+            self._async_cleanup_transition_if_stuck(set_transition_flag)
 
     async def async_handle_color_commands(
         self,
@@ -877,6 +880,7 @@ class Light(BaseSharedLight, ZclPlatformEntity):
     """Representation of a ZHA or ZLL light."""
 
     _attr_translation_key: str = "light"
+    _attr_group_member = True
     _REFRESH_INTERVAL = (2700, 4500)
     __polling_interval: int
 
@@ -1354,8 +1358,6 @@ class MinTransitionLight(Light):
 class LightGroup(BaseSharedLight, GroupEntity):
     """Representation of a light group."""
 
-    _attr_always_supported = True
-
     def __init__(self, group: Group):
         """Initialize a light group."""
         super().__init__(group)
@@ -1364,6 +1366,7 @@ class LightGroup(BaseSharedLight, GroupEntity):
         self._level_cluster = group.zigpy_group.endpoint[LevelControl.cluster_id]
         self._color_cluster = group.zigpy_group.endpoint[Color.cluster_id]
         self._identify_cluster = group.zigpy_group.endpoint[Identify.cluster_id]
+        self._members_changed_during_transition: bool = False
 
         self._debounced_member_refresh: Debouncer | None = Debouncer(
             self.group.gateway,
@@ -1461,6 +1464,22 @@ class LightGroup(BaseSharedLight, GroupEntity):
         if self._debounced_member_refresh:
             await self._debounced_member_refresh.async_call()
 
+    def on_members_changed(self) -> None:
+        """Recompute the state after members were added to or removed from the group.
+
+        Not during the group's own transition: its members' reports are not
+        applied until the transition ends, and recomputing the state now from
+        their pre-transition state would turn a group that is fading out back on
+        and drop the brightness it saved for the next turn on. The group refreshes
+        its members when the transition ends, and the members whose state changes
+        then update the group; see `_force_member_updates` for the case where none
+        does.
+        """
+        if self.is_transitioning:
+            self._members_changed_during_transition = True
+            return
+        super().on_members_changed()
+
     def update(self, _: Any = None) -> None:
         """Query all members and determine the light group state."""
         self.debug("Updating light group entity state")
@@ -1551,8 +1570,20 @@ class LightGroup(BaseSharedLight, GroupEntity):
 
     async def _force_member_updates(self) -> None:
         """Force the update of members to ensure the states are correct for bulbs that don't report their state."""
-        for platform_entity in self.group.get_platform_entities(Light.PLATFORM):
-            await platform_entity.async_update()
+        try:
+            for platform_entity in self.group.get_platform_entities(Light.PLATFORM):
+                await platform_entity.async_update()
+        finally:
+            if self._members_changed_during_transition and not self.is_transitioning:
+                self._members_changed_during_transition = False
+                # The refresh above only updates the group if a member's state
+                # changed. Members that assume the group state already had the one
+                # it set, so a member change during the transition is reflected
+                # here. Members that don't assume it change state when the
+                # transition took effect, which updates the group anyway, and a
+                # member whose poll failed still has its pre-transition state.
+                if self._zha_config_group_members_assume_state:
+                    self.update()
 
     def _make_members_assume_group_state(
         self,

@@ -7,8 +7,8 @@
   "friendly_manufacturer": "CentraLite",
   "friendly_model": "3300",
   "name": "CentraLite 3300",
-  "quirk_applied": false,
-  "quirk_class": "zigpy.device.ZigbeeDevice",
+  "quirk_applied": true,
+  "quirk_class": "zhaquirks.centralite.cl_3300S:CentraLite3300SNoEP2",
   "exposes_features": [],
   "manufacturer_code": 4174,
   "power_source": "Battery or Unknown",
@@ -72,12 +72,6 @@
             {
               "id": "0x0060",
               "name": "battery_3_voltage",
-              "zcl_type": "uint8",
-              "unsupported": true
-            },
-            {
-              "id": "0x0021",
-              "name": "battery_percentage_remaining",
               "zcl_type": "uint8",
               "unsupported": true
             },
@@ -248,6 +242,7 @@
         "device_ieee": "ab:cd:ef:12:51:73:e6:7b",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "is_on": true,
         "attribute_name": "zone_status"
@@ -272,6 +267,7 @@
         "device_ieee": "ab:cd:ef:12:51:73:e6:7b",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "command": "identify",
         "args": [
@@ -299,6 +295,7 @@
         "device_ieee": "ab:cd:ef:12:51:73:e6:7b",
         "endpoint_id": null,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "native_value": null,
         "suggested_display_precision": null,
@@ -322,6 +319,7 @@
         "device_ieee": "ab:cd:ef:12:51:73:e6:7b",
         "endpoint_id": null,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "native_value": null,
         "suggested_display_precision": null,
@@ -349,6 +347,7 @@
         "device_ieee": "ab:cd:ef:12:51:73:e6:7b",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "native_value": null,
         "suggested_display_precision": 0,
@@ -375,6 +374,7 @@
         "device_ieee": "ab:cd:ef:12:51:73:e6:7b",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "native_value": 23.35,
         "suggested_display_precision": null,
@@ -400,6 +400,7 @@
         "device_ieee": "ab:cd:ef:12:51:73:e6:7b",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "installed_version": "0x1f075310",
         "in_progress": false,
@@ -412,6 +413,7 @@
       }
     ]
   },
+  "child_devices": [],
   "neighbors": [],
   "routes": []
 }

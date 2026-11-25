@@ -7,8 +7,8 @@
   "friendly_manufacturer": "innr",
   "friendly_model": "SP 242",
   "name": "innr SP 242",
-  "quirk_applied": false,
-  "quirk_class": "zigpy.device.ZigbeeDevice",
+  "quirk_applied": true,
+  "quirk_class": "zhaquirks.innr.innr_sp240_plug:(innr / SP 240)",
   "exposes_features": [],
   "manufacturer_code": 4454,
   "power_source": "Mains",
@@ -93,54 +93,6 @@
           ]
         },
         {
-          "cluster_id": "0x0008",
-          "endpoint_attribute": "level",
-          "attributes": [
-            {
-              "id": "0x0000",
-              "name": "current_level",
-              "zcl_type": "uint8",
-              "value": 254
-            },
-            {
-              "id": "0x0014",
-              "name": "default_move_rate",
-              "zcl_type": "uint8",
-              "unsupported": true
-            },
-            {
-              "id": "0x0013",
-              "name": "off_transition_time",
-              "zcl_type": "uint16",
-              "value": 65535
-            },
-            {
-              "id": "0x0011",
-              "name": "on_level",
-              "zcl_type": "uint8",
-              "value": 255
-            },
-            {
-              "id": "0x0010",
-              "name": "on_off_transition_time",
-              "zcl_type": "uint16",
-              "value": 0
-            },
-            {
-              "id": "0x0012",
-              "name": "on_transition_time",
-              "zcl_type": "uint16",
-              "value": 65535
-            },
-            {
-              "id": "0x4000",
-              "name": "start_up_current_level",
-              "zcl_type": "uint8",
-              "value": 255
-            }
-          ]
-        },
-        {
           "cluster_id": "0x0702",
           "endpoint_attribute": "smartenergy_metering",
           "attributes": [
@@ -202,7 +154,7 @@
               "id": "0x0302",
               "name": "divisor",
               "zcl_type": "uint24",
-              "unsupported": true
+              "value": 1000
             },
             {
               "id": "0x0400",
@@ -220,7 +172,7 @@
               "id": "0x0301",
               "name": "multiplier",
               "zcl_type": "uint24",
-              "unsupported": true
+              "value": 1
             },
             {
               "id": "0x0200",
@@ -580,144 +532,13 @@
         "device_ieee": "ab:cd:ef:12:86:df:1b:97",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "command": "identify",
         "args": [
           5
         ],
         "kwargs": {}
-      }
-    ],
-    "number": [
-      {
-        "fallback_name": null,
-        "unique_id": "ab:cd:ef:12:86:df:1b:97-1-8-off_transition_time",
-        "migrate_unique_ids": [],
-        "platform": "number",
-        "class_name": "OffTransitionTimeConfigurationEntity",
-        "translation_key": "off_transition_time",
-        "translation_placeholders": null,
-        "device_class": null,
-        "state_class": null,
-        "entity_category": "config",
-        "entity_registry_enabled_default": true,
-        "enabled": true,
-        "primary": false,
-        "extra_state_attribute_names": [],
-        "device_ieee": "ab:cd:ef:12:86:df:1b:97",
-        "endpoint_id": 1,
-        "available": true,
-        "group_id": null,
-        "native_value": 65535,
-        "mode": "auto",
-        "native_max_value": 65534,
-        "native_min_value": 0,
-        "native_step": 1.0,
-        "native_unit_of_measurement": null
-      },
-      {
-        "fallback_name": null,
-        "unique_id": "ab:cd:ef:12:86:df:1b:97-1-8-on_level",
-        "migrate_unique_ids": [],
-        "platform": "number",
-        "class_name": "OnLevelConfigurationEntity",
-        "translation_key": "on_level",
-        "translation_placeholders": null,
-        "device_class": null,
-        "state_class": null,
-        "entity_category": "config",
-        "entity_registry_enabled_default": true,
-        "enabled": true,
-        "primary": false,
-        "extra_state_attribute_names": [],
-        "device_ieee": "ab:cd:ef:12:86:df:1b:97",
-        "endpoint_id": 1,
-        "available": true,
-        "group_id": null,
-        "native_value": 255,
-        "mode": "auto",
-        "native_max_value": 255,
-        "native_min_value": 0,
-        "native_step": 1.0,
-        "native_unit_of_measurement": null
-      },
-      {
-        "fallback_name": null,
-        "unique_id": "ab:cd:ef:12:86:df:1b:97-1-8-on_off_transition_time",
-        "migrate_unique_ids": [],
-        "platform": "number",
-        "class_name": "OnOffTransitionTimeConfigurationEntity",
-        "translation_key": "on_off_transition_time",
-        "translation_placeholders": null,
-        "device_class": null,
-        "state_class": null,
-        "entity_category": "config",
-        "entity_registry_enabled_default": true,
-        "enabled": true,
-        "primary": false,
-        "extra_state_attribute_names": [],
-        "device_ieee": "ab:cd:ef:12:86:df:1b:97",
-        "endpoint_id": 1,
-        "available": true,
-        "group_id": null,
-        "native_value": 0,
-        "mode": "auto",
-        "native_max_value": 65535,
-        "native_min_value": 0,
-        "native_step": 1.0,
-        "native_unit_of_measurement": null
-      },
-      {
-        "fallback_name": null,
-        "unique_id": "ab:cd:ef:12:86:df:1b:97-1-8-on_transition_time",
-        "migrate_unique_ids": [],
-        "platform": "number",
-        "class_name": "OnTransitionTimeConfigurationEntity",
-        "translation_key": "on_transition_time",
-        "translation_placeholders": null,
-        "device_class": null,
-        "state_class": null,
-        "entity_category": "config",
-        "entity_registry_enabled_default": true,
-        "enabled": true,
-        "primary": false,
-        "extra_state_attribute_names": [],
-        "device_ieee": "ab:cd:ef:12:86:df:1b:97",
-        "endpoint_id": 1,
-        "available": true,
-        "group_id": null,
-        "native_value": 65535,
-        "mode": "auto",
-        "native_max_value": 65534,
-        "native_min_value": 0,
-        "native_step": 1.0,
-        "native_unit_of_measurement": null
-      },
-      {
-        "fallback_name": null,
-        "unique_id": "ab:cd:ef:12:86:df:1b:97-1-8-start_up_current_level",
-        "migrate_unique_ids": [],
-        "platform": "number",
-        "class_name": "StartUpCurrentLevelConfigurationEntity",
-        "translation_key": "start_up_current_level",
-        "translation_placeholders": null,
-        "device_class": null,
-        "state_class": null,
-        "entity_category": "config",
-        "entity_registry_enabled_default": true,
-        "enabled": true,
-        "primary": false,
-        "extra_state_attribute_names": [],
-        "device_ieee": "ab:cd:ef:12:86:df:1b:97",
-        "endpoint_id": 1,
-        "available": true,
-        "group_id": null,
-        "native_value": 255,
-        "mode": "auto",
-        "native_max_value": 255,
-        "native_min_value": 0,
-        "native_step": 1.0,
-        "native_unit_of_measurement": null
       }
     ],
     "select": [
@@ -739,6 +560,7 @@
         "device_ieee": "ab:cd:ef:12:86:df:1b:97",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "current_option": "Off",
         "enum": "StartUpOnOff",
@@ -769,6 +591,7 @@
         "device_ieee": "ab:cd:ef:12:86:df:1b:97",
         "endpoint_id": null,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "native_value": 172,
         "suggested_display_precision": null,
@@ -792,6 +615,7 @@
         "device_ieee": "ab:cd:ef:12:86:df:1b:97",
         "endpoint_id": null,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "native_value": -68,
         "suggested_display_precision": null,
@@ -819,8 +643,9 @@
         "device_ieee": "ab:cd:ef:12:86:df:1b:97",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
-        "native_value": 466.0,
+        "native_value": 0.466,
         "suggested_display_precision": 3,
         "unit": "kWh",
         "device_type": "Electric Metering",
@@ -848,6 +673,7 @@
         "device_ieee": "ab:cd:ef:12:86:df:1b:97",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "native_value": 0.0,
         "suggested_display_precision": 1,
@@ -877,6 +703,7 @@
         "device_ieee": "ab:cd:ef:12:86:df:1b:97",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "native_value": 0.0,
         "suggested_display_precision": 2,
@@ -906,6 +733,7 @@
         "device_ieee": "ab:cd:ef:12:86:df:1b:97",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "native_value": 240.0,
         "suggested_display_precision": 1,
@@ -934,6 +762,7 @@
         "device_ieee": "ab:cd:ef:12:86:df:1b:97",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "is_on": 0
       }
@@ -957,6 +786,7 @@
         "device_ieee": "ab:cd:ef:12:86:df:1b:97",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "installed_version": "0x17173685",
         "in_progress": false,
@@ -969,6 +799,7 @@
       }
     ]
   },
+  "child_devices": [],
   "neighbors": [],
   "routes": []
 }

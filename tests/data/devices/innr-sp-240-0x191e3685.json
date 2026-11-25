@@ -93,54 +93,6 @@
           ]
         },
         {
-          "cluster_id": "0x0008",
-          "endpoint_attribute": "level",
-          "attributes": [
-            {
-              "id": "0x0000",
-              "name": "current_level",
-              "zcl_type": "uint8",
-              "value": 254
-            },
-            {
-              "id": "0x0014",
-              "name": "default_move_rate",
-              "zcl_type": "uint8",
-              "unsupported": true
-            },
-            {
-              "id": "0x0013",
-              "name": "off_transition_time",
-              "zcl_type": "uint16",
-              "value": 65535
-            },
-            {
-              "id": "0x0011",
-              "name": "on_level",
-              "zcl_type": "uint8",
-              "value": 255
-            },
-            {
-              "id": "0x0010",
-              "name": "on_off_transition_time",
-              "zcl_type": "uint16",
-              "value": 0
-            },
-            {
-              "id": "0x0012",
-              "name": "on_transition_time",
-              "zcl_type": "uint16",
-              "value": 65535
-            },
-            {
-              "id": "0x4000",
-              "name": "start_up_current_level",
-              "zcl_type": "uint8",
-              "value": 255
-            }
-          ]
-        },
-        {
           "cluster_id": "0x0702",
           "endpoint_attribute": "smartenergy_metering",
           "attributes": [
@@ -592,6 +544,7 @@
         "device_ieee": "ab:cd:ef:12:39:51:53:67",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "command": "identify",
         "args": [
@@ -619,6 +572,7 @@
         "device_ieee": "ab:cd:ef:12:39:51:53:67",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "current_option": "PreviousValue",
         "enum": "StartUpOnOff",
@@ -649,6 +603,7 @@
         "device_ieee": "ab:cd:ef:12:39:51:53:67",
         "endpoint_id": null,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "native_value": null,
         "suggested_display_precision": null,
@@ -672,6 +627,7 @@
         "device_ieee": "ab:cd:ef:12:39:51:53:67",
         "endpoint_id": null,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "native_value": null,
         "suggested_display_precision": null,
@@ -699,6 +655,7 @@
         "device_ieee": "ab:cd:ef:12:39:51:53:67",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "native_value": 0.143,
         "suggested_display_precision": 3,
@@ -728,6 +685,7 @@
         "device_ieee": "ab:cd:ef:12:39:51:53:67",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "native_value": 2.0,
         "suggested_display_precision": 1,
@@ -757,6 +715,7 @@
         "device_ieee": "ab:cd:ef:12:39:51:53:67",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "native_value": 0.014,
         "suggested_display_precision": 2,
@@ -786,6 +745,7 @@
         "device_ieee": "ab:cd:ef:12:39:51:53:67",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "native_value": 231.0,
         "suggested_display_precision": 1,
@@ -814,6 +774,7 @@
         "device_ieee": "ab:cd:ef:12:39:51:53:67",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "is_on": 1
       }
@@ -837,6 +798,7 @@
         "device_ieee": "ab:cd:ef:12:39:51:53:67",
         "endpoint_id": 1,
         "available": true,
+        "child_device_id": null,
         "group_id": null,
         "installed_version": "0x191e3685",
         "in_progress": false,
@@ -849,6 +811,7 @@
       }
     ]
   },
+  "child_devices": [],
   "neighbors": [],
   "routes": []
 }

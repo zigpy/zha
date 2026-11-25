@@ -5,7 +5,7 @@ from __future__ import annotations
 from abc import abstractmethod
 import asyncio
 from collections import defaultdict
-from collections.abc import Callable, Mapping
+from collections.abc import Callable, Collection, Mapping
 from contextlib import suppress
 import dataclasses
 from dataclasses import dataclass, field
@@ -19,6 +19,7 @@ from zigpy.profiles.zha import PROFILE_ID as ZHA_PROFILE_ID
 from zigpy.profiles.zll import PROFILE_ID as ZLL_PROFILE_ID
 from zigpy.types import ClusterId
 from zigpy.types.named import EUI64
+from zigpy.typing import UNDEFINED, UndefinedType
 import zigpy.zcl
 from zigpy.zcl import ReportingConfig
 from zigpy.zcl.foundation import ZCLAttributeDef
@@ -31,7 +32,8 @@ from zha.event import EventBase
 from zha.mixins import LogMixin
 
 if TYPE_CHECKING:
-    from zha.zigbee.device import Device
+    from zha.zigbee.child_device import ChildDevice
+    from zha.zigbee.device import BaseDevice, Device
     from zha.zigbee.endpoint import Endpoint
     from zha.zigbee.group import Group
 
@@ -210,6 +212,8 @@ class BaseEntityState:
     device_ieee: EUI64 | None
     endpoint_id: int | None
     available: bool | None
+    # The id of the child device of `device_ieee` the entity belongs to, if any
+    child_device_id: str | None = None
 
     # For group entities
     group_id: int | None
@@ -293,7 +297,6 @@ class BaseEntity(LogMixin, EventBase):
     _attr_state_class: str | None = None
     _attr_enabled: bool = True
     _attr_extra_state_attribute_names: set[str] | None = None
-    _attr_always_supported: bool = False
 
     # Explicitly marks the entity as (not) primary, set by entity classes and quirks.
     # It takes precedence over (and is never overwritten by) the weight-based primary
@@ -318,16 +321,13 @@ class BaseEntity(LogMixin, EventBase):
 
     def is_supported(self) -> bool:
         """Return if the entity is supported for the device."""
-        if self._attr_always_supported:
-            return True
-
         return self._is_supported()
 
     def _is_supported(self) -> bool:
         """Return if the entity is supported for the device, internal."""
         return True
 
-    def is_supported_in_list(self, entities: list[BaseEntity]) -> bool:
+    def is_supported_in_list(self, entities: Collection[BaseEntity]) -> bool:
         """Return if the entity is supported given all other entities."""
         return True
 
@@ -354,6 +354,11 @@ class BaseEntity(LogMixin, EventBase):
     def primary_weight(self) -> int:
         """Return the primary weight of the entity."""
         return self._attr_primary_weight
+
+    @property
+    def child_device(self) -> ChildDevice | None:
+        """Return the child device the entity belongs to, if any."""
+        return None
 
     @property
     def fallback_name(self) -> str | None:
@@ -527,12 +532,17 @@ class PlatformEntity(BaseEntity):
 
     _migrate_platform_unique_ids: tuple[tuple[UniqueIdMigration, str]] | None = None
 
+    # Explicitly assigns the entity to a child device of its device by child device id,
+    # or keeps it on the main device with `None`. `UNDEFINED` derives it from the
+    # endpoint (see `zha.zigbee.child_device`).
+    _attr_child_device_id: str | None | UndefinedType = UNDEFINED
+
     def __init__(
         self,
-        device: Device,
+        device: BaseDevice,
         *,
         unique_id: str,
-        from_quirk: bool = False,
+        force_create: bool = False,
         fallback_name: str | None = None,
         translation_key: str | None = None,
         translation_placeholders: Mapping[str, str] | None = None,
@@ -540,33 +550,40 @@ class PlatformEntity(BaseEntity):
         entity_type: EntityType | None = None,
         primary: bool | None = None,
         initially_disabled: bool = False,
+        child_device_id: str | None | UndefinedType = UNDEFINED,
         **kwargs: Any,
     ):
         """Initialize the platform entity.
 
-        Quirk entities are constructed with `from_quirk=True` and the generic
-        config keywords (`fallback_name`, `translation_key`, `entity_type`, etc.);
-        the platform subclasses add their own keywords.
+        The generic config keywords (`fallback_name`, `translation_key`, `entity_type`,
+        etc.) override the class's values when given; the platform subclasses add their
+        own keywords. `force_create=True` creates the entity without checking if it is
+        supported.
         """
-        if from_quirk:
-            self._apply_quirk_entity_config(
-                fallback_name=fallback_name,
-                translation_key=translation_key,
-                translation_placeholders=translation_placeholders,
-                unique_id_suffix=unique_id_suffix,
-                entity_type=entity_type,
-                primary=primary,
-                initially_disabled=initially_disabled,
-            )
+        self._force_create = force_create
+
+        self._apply_entity_config(
+            fallback_name=fallback_name,
+            translation_key=translation_key,
+            translation_placeholders=translation_placeholders,
+            unique_id_suffix=unique_id_suffix,
+            entity_type=entity_type,
+            primary=primary,
+            initially_disabled=initially_disabled,
+            child_device_id=child_device_id,
+        )
+
+        self._unique_id_base = unique_id
 
         if self._unique_id_suffix is not None:
             unique_id = f"{unique_id}-{self._unique_id_suffix}"
 
         super().__init__(unique_id=unique_id, **kwargs)
 
-        self._device: Device = device
+        self._device: BaseDevice = device
+        self._child_device: ChildDevice | None = None
 
-    def _apply_quirk_entity_config(
+    def _apply_entity_config(
         self,
         *,
         fallback_name: str | None,
@@ -576,13 +593,11 @@ class PlatformEntity(BaseEntity):
         entity_type: EntityType | None,
         primary: bool | None,
         initially_disabled: bool,
+        child_device_id: str | None | UndefinedType = UNDEFINED,
     ) -> None:
-        """Apply the generic quirk entity configuration keywords."""
+        """Apply the generic entity configuration keywords that are given."""
         if initially_disabled:
             self._attr_entity_registry_enabled_default = False
-
-        # quirk entities are assumed to always be supported
-        self._attr_always_supported = True
 
         if fallback_name:
             self._attr_fallback_name = fallback_name
@@ -600,24 +615,60 @@ class PlatformEntity(BaseEntity):
             self._attr_entity_category = EntityCategory.CONFIG
         elif entity_type == EntityType.DIAGNOSTIC:
             self._attr_entity_category = EntityCategory.DIAGNOSTIC
-        else:
+        elif entity_type == EntityType.STANDARD:
             self._attr_entity_category = None
 
         if primary is not None:
             self._attr_primary = primary
 
+        if child_device_id is not UNDEFINED:
+            self._attr_child_device_id = child_device_id
+
     @property
-    def device(self) -> Device:
+    def device(self) -> BaseDevice:
         """Return the device."""
         return self._device
 
     @property
+    def force_create(self) -> bool:
+        """Return if the entity is created without checking if it is supported."""
+        return self._force_create
+
+    @property
+    def unique_id_base(self) -> str:
+        """Return the unique ID the entity was created with, without its suffix."""
+        return self._unique_id_base
+
+    @property
+    def unique_id_suffix(self) -> str | None:
+        """Return the suffix appended to the unique ID base, if any."""
+        return self._unique_id_suffix
+
+    @property
     def primary(self) -> bool:
         """Return if the entity is the primary device control."""
-        if self._attr_primary is not None:
-            return self._attr_primary
+        if self._attr_primary is False:
+            return False
 
-        return self._device.primary_entity is self
+        # An explicitly primary entity wins the election, unless it conflicts with
+        # another one on the same (child) device. Until its device has run the
+        # election (when the entity is added), no entity is primary.
+        return self._device.is_primary_entity(self)
+
+    @property
+    def explicit_child_device_id(self) -> str | None | UndefinedType:
+        """Return the explicitly assigned child device id (`None`: main device)."""
+        return self._attr_child_device_id
+
+    @property
+    def child_device(self) -> ChildDevice | None:
+        """Return the child device the entity belongs to, if any."""
+        return self._child_device
+
+    @child_device.setter
+    def child_device(self, child_device: ChildDevice | None) -> None:
+        """Set the child device the entity belongs to (set by its device)."""
+        self._child_device = child_device
 
     @cached_property
     def identifiers(self) -> PlatformEntityIdentifiers:
@@ -652,6 +703,9 @@ class PlatformEntity(BaseEntity):
             super().state,
             device_ieee=self._device.ieee,
             available=self.available,
+            child_device_id=(
+                self._child_device.id if self._child_device is not None else None
+            ),
         )
 
 
@@ -666,37 +720,59 @@ class ZclPlatformEntity(PlatformEntity):
 
     _client_cluster_config: Mapping[int, ClusterConfig] = MappingProxyType({})
 
+    # Set by entity classes driven by the clusters their platform's group entity
+    # sends commands to. Only these entities can be part of a group.
+    _attr_group_member: bool = False
+
+    _device: Device
+
     def __init__(
         self,
         endpoint: Endpoint,
         device: Device,
         *,
         cluster: zigpy.zcl.Cluster,
-        from_quirk: bool = False,
+        unique_id: str | None = None,
         legacy_discovery_unique_id: str | None = None,
+        # TODO: remove this backwards compatibility shim after zha-device-handlers#5410
+        # is merged
+        from_quirk: bool = False,
         **kwargs: Any,
     ):
         """Initialize the ZCL platform entity.
 
-        Default-discovery entities pass no config keywords.
+        Default-discovery entities pass no config keywords. `unique_id` overrides the
+        legacy unique ID base.
         """
+
+        if from_quirk:
+            assert unique_id is None
+            assert "force_create" not in kwargs
+
+            unique_id = f"{device.ieee}-{endpoint.id}"
+            kwargs["force_create"] = True
+
         if legacy_discovery_unique_id is None:
-            if from_quirk:
-                legacy_discovery_unique_id = f"{device.ieee}-{endpoint.id}"
-            else:
-                legacy_discovery_unique_id = (
-                    f"{device.ieee}-{endpoint.id}-{cluster.cluster_id}"
-                )
+            legacy_discovery_unique_id = (
+                f"{device.ieee}-{endpoint.id}-{cluster.cluster_id}"
+            )
+
+        if unique_id is None:
+            unique_id = legacy_discovery_unique_id
 
         self._endpoint = endpoint
         self._cluster: zigpy.zcl.Cluster = cluster
 
         super().__init__(
             device,
-            unique_id=legacy_discovery_unique_id,
-            from_quirk=from_quirk,
+            unique_id=unique_id,
             **kwargs,
         )
+
+    @property
+    def device(self) -> Device:
+        """Return the device."""
+        return self._device
 
     @property
     def endpoint(self) -> Endpoint:
@@ -707,6 +783,11 @@ class ZclPlatformEntity(PlatformEntity):
     def cluster(self) -> zigpy.zcl.Cluster:
         """Return the ZCL cluster backing this entity."""
         return self._cluster
+
+    @property
+    def group_member(self) -> bool:
+        """Return if the entity can be part of a group."""
+        return self._attr_group_member
 
     def targets_cluster(
         self,
@@ -843,4 +924,13 @@ class GroupEntity(BaseEntity):
 
     async def async_update(self, _: Any | None = None) -> None:
         """Update the state of this group entity."""
+        self.update()
+
+    def on_members_changed(self) -> None:
+        """Recompute the state after members were added to or removed from the group.
+
+        Existing group entities are kept rather than replaced by the ones that
+        rediscovery creates, so their state has to be recomputed from the new set
+        of members.
+        """
         self.update()

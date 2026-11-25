@@ -8,6 +8,7 @@ import itertools
 import json
 import logging
 import pathlib
+import re
 import time
 from typing import Any
 from unittest.mock import AsyncMock
@@ -117,7 +118,7 @@ def make_attribute(attrid: int, value: Any, status: int = 0) -> zcl_f.Attribute:
 async def send_attributes_report(
     zha_gateway: Gateway,
     cluster: zigpy.zcl.Cluster,
-    attributes: dict[str | int | zcl_f.ZCLAttributeDef, Any],
+    attributes: dict[str | zcl_f.ZCLAttributeDef, Any],
     *,
     tsn: int | None = None,
 ) -> None:
@@ -126,28 +127,15 @@ async def send_attributes_report(
     manufacturer_codes: set[int | None] = set()
 
     for attr, value in attributes.items():
-        if isinstance(attr, int):
-            # Raw attribute ID for unknown attributes
-            manufacturer_codes.add(None)
-            reports.append(
-                zcl_f.Attribute(
-                    attrid=attr,
-                    value=zcl_f.TypeValue(
-                        type=zcl_f.DataType.from_python_type(type(value)).type_id,
-                        value=value,
-                    ),
-                )
-            )
-        else:
-            attr_def = cluster.find_attribute(attr)
-            manufacturer_codes.add(cluster._get_effective_manufacturer_code(attr_def))
+        attr_def = cluster.find_attribute(attr)
+        manufacturer_codes.add(cluster._get_effective_manufacturer_code(attr_def))
 
-            reports.append(
-                zcl_f.Attribute(
-                    attrid=attr_def.id,
-                    value=zcl_f.TypeValue(type=attr_def.zcl_type, value=value),
-                )
+        reports.append(
+            zcl_f.Attribute(
+                attrid=attr_def.id,
+                value=zcl_f.TypeValue(type=attr_def.zcl_type, value=value),
             )
+        )
 
     if len(manufacturer_codes) != 1:
         raise ValueError(
@@ -683,12 +671,34 @@ def create_mock_zigpy_device(
     return device
 
 
+# Types whose `repr` is a bytes literal
+JSON_BYTES_TYPES = frozenset(
+    {
+        "<class 'bytes'>",
+        "<class 'zigpy.types.basic.LVBytes'>",
+        "<class 'zigpy.types.basic.LimitedLVBytes.<locals>.LimitedLVBytes'>",
+        "<class 'sonoff_tp_wgzba.RawBytes'>",
+        "<class 'sonoff_tp_wgzba.Uint8ArrayPayload'>",
+    }
+)
+JSON_ARRAY_TYPE = "<class 'zigpy.zcl.foundation.Array'>"
+ARRAY_REPR_REGEX = re.compile(r"Array\(type=\w+, value=(?P<value>\[.*\])\)")
+
+
 def decode_json_value(value: Any) -> Any:
     """Decode a value encoded by Home Assistant diagnostics or `ZhaJsonEncoder`."""
-    if isinstance(value, dict) and value.keys() == {"__type", "repr"}:
+    if not (isinstance(value, dict) and value.keys() == {"__type", "repr"}):
+        return value
+
+    if value["__type"] in JSON_BYTES_TYPES:
         return ast.literal_eval(value["repr"])
 
-    return value
+    if value["__type"] == JSON_ARRAY_TYPE:
+        # The element type is lost, only the elements can be recovered
+        match = ARRAY_REPR_REGEX.fullmatch(value["repr"])
+        return ast.literal_eval(match.group("value"))
+
+    raise ValueError(f"Cannot decode JSON value: {value!r}")
 
 
 class ZhaJsonEncoder(json.JSONEncoder):

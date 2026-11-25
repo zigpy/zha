@@ -111,33 +111,26 @@ class GroupMember(LogMixin):
 
     @cached_property
     def associated_entities(self) -> list[ZclPlatformEntity]:
-        """Return the list of entities that were derived from this endpoint."""
+        """Return the entities of this endpoint that are controlled by the group.
+
+        Other entities on the endpoint (e.g. an LED indicator switch) don't follow
+        group commands, so they are not part of the group.
+        """
         return [
             platform_entity
             for platform_entity in self._device.platform_entities.values()
             if isinstance(platform_entity, ZclPlatformEntity)
             and platform_entity.endpoint.id == self.endpoint_id
+            and platform_entity.group_member
         ]
 
     async def async_remove_from_group(self) -> None:
         """Remove the device endpoint from the provided zigbee group."""
-        try:
-            await self._device.device.endpoints[self._endpoint_id].remove_from_group(
-                self._group.group_id
-            )
-        except (zigpy.exceptions.ZigbeeException, TimeoutError) as ex:
-            self.debug(
-                (
-                    "Failed to remove endpoint: %s for device '%s' from group: 0x%04x"
-                    " ex: %s"
-                ),
-                self._endpoint_id,
-                self._device.ieee,
-                self._group.group_id,
-                str(ex),
-            )
+        await self._device.async_remove_endpoint_from_group(
+            self._endpoint_id, self._group.group_id
+        )
 
-    def log(self, level: int, msg: str, *args: Any, **kwargs) -> None:
+    def log(self, level: int, msg: str, *args: Any, **kwargs: Any) -> None:
         """Log a message."""
         msg = f"[%s](%s): {msg}"
         args = (f"0x{self._group.group_id:04x}", self.endpoint_id) + args
@@ -169,7 +162,7 @@ class Group(LogMixin):
         return self._zigpy_group.group_id
 
     @property
-    def endpoint(self) -> zigpy.endpoint.Endpoint:
+    def endpoint(self) -> GroupEndpoint:
         """Return the endpoint for this group."""
         return self._zigpy_group.endpoint
 
@@ -192,7 +185,7 @@ class Group(LogMixin):
     def members(self) -> list[GroupMember]:
         """Return the ZHA devices that are members of this group."""
         return [
-            GroupMember(self, self._gateway.devices[member_ieee], endpoint_id)
+            GroupMember(self, self._gateway.get_zigbee_device(member_ieee), endpoint_id)
             for (member_ieee, endpoint_id) in self._zigpy_group.members
             if member_ieee in self._gateway.devices
         ]
@@ -236,7 +229,9 @@ class Group(LogMixin):
             self._group_entities.pop(group_entity.unique_id)
             self._entity_unsubs.pop(group_entity.unique_id)()
 
-    def _handle_maybe_update_group_members(self, event: EntityStateChangedEvent):
+    def _handle_maybe_update_group_members(
+        self, event: EntityStateChangedEvent
+    ) -> None:
         """Handle the maybe update group members event."""
         self.gateway.async_create_task(self._maybe_update_group_members(event))
 
@@ -289,40 +284,40 @@ class Group(LogMixin):
 
     async def async_add_members(self, members: list[GroupMemberReference]) -> None:
         """Add members to this group."""
-        devices: dict[EUI64, Device] = self._gateway.devices
         if len(members) > 1:
             tasks = []
             for member in members:
                 tasks.append(
-                    devices[member.ieee].async_add_endpoint_to_group(
-                        member.endpoint_id, self.group_id
-                    )
+                    self._gateway.get_zigbee_device(
+                        member.ieee
+                    ).async_add_endpoint_to_group(member.endpoint_id, self.group_id)
                 )
             await asyncio.gather(*tasks)
         else:
             member = members[0]
-            await devices[member.ieee].async_add_endpoint_to_group(
-                member.endpoint_id, self.group_id
-            )
+            await self._gateway.get_zigbee_device(
+                member.ieee
+            ).async_add_endpoint_to_group(member.endpoint_id, self.group_id)
         self.update_entity_subscriptions()
 
     async def async_remove_members(self, members: list[GroupMemberReference]) -> None:
         """Remove members from this group."""
-        devices: dict[EUI64, Device] = self._gateway.devices
         if len(members) > 1:
             tasks = []
             for member in members:
                 tasks.append(
-                    devices[member.ieee].async_remove_endpoint_from_group(
+                    self._gateway.get_zigbee_device(
+                        member.ieee
+                    ).async_remove_endpoint_from_group(
                         member.endpoint_id, self.group_id
                     )
                 )
             await asyncio.gather(*tasks)
         else:
             member = members[0]
-            await devices[member.ieee].async_remove_endpoint_from_group(
-                member.endpoint_id, self.group_id
-            )
+            await self._gateway.get_zigbee_device(
+                member.ieee
+            ).async_remove_endpoint_from_group(member.endpoint_id, self.group_id)
         self.update_entity_subscriptions()
 
     def get_platform_entities(self, platform: str) -> list[PlatformEntity]:
@@ -337,7 +332,7 @@ class Group(LogMixin):
 
         return platform_entities
 
-    def log(self, level: int, msg: str, *args: Any, **kwargs) -> None:
+    def log(self, level: int, msg: str, *args: Any, **kwargs: Any) -> None:
         """Log a message."""
         msg = f"[%s](%s): {msg}"
         args = (self.name, self.group_id) + args

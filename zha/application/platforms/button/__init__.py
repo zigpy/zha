@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from collections.abc import Collection
 from dataclasses import dataclass
 import functools
 import logging
@@ -141,7 +142,7 @@ class IdentifyButton(Button):
         server_clusters=frozenset({Identify.cluster_id}),
     )
 
-    def is_supported_in_list(self, entities: list[BaseEntity]) -> bool:
+    def is_supported_in_list(self, entities: Collection[BaseEntity]) -> bool:
         """Check if this button is supported given the list of entities."""
         cls = type(self)
         return not any(type(entity) is cls for entity in entities if entity is not self)
@@ -220,22 +221,6 @@ class NoPresenceStatusResetButton(WriteAttributeButton):
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({AQARA_OPPLE_CLUSTER}),
         models=frozenset({"lumi.motion.ac01"}),
-    )
-
-
-@register_entity(AQARA_OPPLE_CLUSTER)
-class AqaraPetFeederFeedButton(WriteAttributeButton):
-    """Defines a feed button for the aqara c1 pet feeder."""
-
-    _unique_id_suffix = "feeding"
-    _attribute_name = "feeding"
-    _attribute_value = 1
-    _attr_translation_key = "feed"
-    _cluster_id = AQARA_OPPLE_CLUSTER
-
-    _cluster_match = ClusterMatch(
-        server_clusters=frozenset({AQARA_OPPLE_CLUSTER}),
-        models=frozenset({"aqara.feeder.acn001"}),
     )
 
 

@@ -80,7 +80,10 @@ class VirtualEntity(ZclPlatformEntity):
     """
 
     PLATFORM = Platform.VIRTUAL
-    _attr_always_supported = True
+
+    def _is_supported(self) -> bool:
+        """Return True, virtual entities drive background work and are always supported."""
+        return True
 
     def on_add(self) -> None:
         """Subscribe to incoming cluster commands and attribute events."""
@@ -678,30 +681,6 @@ class AqaraPlugInit(_AqaraOppleInitBase):
             attributes={
                 "power_outage_memory": AttrConfig(read_on_startup=False),
                 "consumer_connected": AttrConfig(read_on_startup=False),
-            },
-        ),
-    }
-
-
-@register_entity(AQARA_OPPLE_CLUSTER)
-class AqaraFeederInit(_AqaraOppleInitBase):
-    """Aqara pet feeder attribute init."""
-
-    _cluster_match = ClusterMatch(
-        server_clusters=frozenset({AQARA_OPPLE_CLUSTER}),
-        models=frozenset({"aqara.feeder.acn001"}),
-    )
-    _server_cluster_config = {
-        AQARA_OPPLE_CLUSTER: ClusterConfig(
-            attributes={
-                "portions_dispensed": AttrConfig(read_on_startup=False),
-                "weight_dispensed": AttrConfig(read_on_startup=False),
-                "error_detected": AttrConfig(read_on_startup=False),
-                "disable_led_indicator": AttrConfig(read_on_startup=False),
-                "child_lock": AttrConfig(read_on_startup=False),
-                "feeding_mode": AttrConfig(read_on_startup=False),
-                "serving_size": AttrConfig(read_on_startup=False),
-                "portion_weight": AttrConfig(read_on_startup=False),
             },
         ),
     }
