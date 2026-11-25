@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
 import dataclasses
+import math
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, Final
 
@@ -317,36 +318,76 @@ class ZhaEventButton(BaseEvent, ZclPlatformEntity):
 _ROTARY_AMOUNTS: Final = (ATTR_STEPS, ATTR_DEGREES)
 
 
-def _validate_rotary_attribute(name: str, value: Any) -> None:
-    """Validate a rotary event data value, raising `ValueError` if it is invalid."""
+def _normalize_rotary_attribute(name: str, value: Any) -> Any:
+    """Return a rotary event data value as a plain value, if it is valid.
+
+    Raises `ValueError` for an invalid `steps`, `degrees` or `pressed`. Integral
+    floats are accepted as `steps`, and enums are turned into plain numbers.
+    """
     if name == ATTR_STEPS:
-        valid = isinstance(value, int) and not isinstance(value, bool) and value > 0
+        if (
+            isinstance(value, float)
+            and math.isfinite(value)
+            and value.is_integer()
+            and value > 0
+        ):
+            return int(value)
+
+        if isinstance(value, int) and not isinstance(value, bool) and value > 0:
+            return int(value)
+
         expected = "a positive integer"
     elif name == ATTR_DEGREES:
-        valid = (
-            isinstance(value, int | float) and not isinstance(value, bool) and value > 0
-        )
+        if (
+            isinstance(value, int | float)
+            and not isinstance(value, bool)
+            and math.isfinite(value)
+            and value > 0
+        ):
+            return value if type(value) in (int, float) else float(value)
+
         expected = "a positive number"
     elif name == ATTR_PRESSED:
-        valid = isinstance(value, bool)
+        if isinstance(value, bool):
+            return value
+
         expected = "a boolean"
     else:
-        return
+        return value
 
-    if not valid:
-        raise ValueError(f"Invalid {name} {value!r}: it must be {expected}")
+    raise ValueError(f"Invalid {name} {value!r}: it must be {expected}")
+
+
+def _validate_event_data_path(name: str, path: Any) -> None:
+    """Validate the path to an event data value, raising `ValueError` if invalid."""
+    if isinstance(path, str | bytes) or not isinstance(path, Sequence) or not path:
+        raise ValueError(
+            f"Event data {name} needs a non-empty sequence of keys and indexes,"
+            f" not {path!r}"
+        )
+
+    for key in path:
+        # A `ValueError`, as for every other invalid match
+        if not isinstance(key, str | int) or isinstance(key, bool):
+            raise ValueError(  # noqa: TRY004
+                f"Invalid key {key!r} in the path of event data {name}"
+            )
 
 
 def _get_event_data_value(data: Mapping[str, Any], path: Sequence[str | int]) -> Any:
     """Return the value at a path of keys and sequence indexes in `zha_event` data."""
     value: Any = data
     for key in path:
-        try:
+        # Keys index mappings and indexes index lists, never strings or bytes
+        if isinstance(key, str):
+            if isinstance(value, Mapping) and key in value:
+                value = value[key]
+                continue
+        elif isinstance(value, list | tuple) and -len(value) <= key < len(value):
             value = value[key]
-        except (KeyError, IndexError, TypeError) as err:
-            raise ValueError(
-                f"zha_event data {data} has no value at {list(path)}"
-            ) from err
+            continue
+
+        raise ValueError(f"zha_event data {data} has no value at {list(path)}")
 
     return value
 
@@ -362,7 +403,8 @@ class ZhaEventRotaryMatch:
     (`event_attributes_from_data`, the path of keys and indexes to the value).
     """
 
-    event_type: RotaryEventType
+    # A standard `RotaryEventType`, or an integration-specific event type
+    event_type: str
     event_data: Mapping[str, Any]
 
     # Required for `rotation` and `rotation_start`. A `rotation_end` without one
@@ -378,13 +420,21 @@ class ZhaEventRotaryMatch:
 
     def __post_init__(self) -> None:
         """Validate the match."""
-        if self.event_type not in tuple(RotaryEventType):
-            raise ValueError(f"Invalid rotary event type {self.event_type!r}")
+        if not isinstance(self.event_type, str) or not self.event_type:
+            raise ValueError(f"Invalid event type {self.event_type!r}")
 
         if not self.event_data:
             raise ValueError(f"Event type {self.event_type} matches every zha_event")
 
-        if self.direction is None and self.event_type != RotaryEventType.ROTATION_END:
+        if self.direction is not None and self.direction not in tuple(RotaryDirection):
+            raise ValueError(
+                f"Invalid direction {self.direction!r} for {self.event_type}"
+            )
+
+        if self.direction is None and self.event_type in (
+            RotaryEventType.ROTATION,
+            RotaryEventType.ROTATION_START,
+        ):
             raise ValueError(f"Event type {self.event_type} needs a direction")
 
         names = [*self.event_attributes, *self.event_attributes_from_data]
@@ -401,20 +451,20 @@ class ZhaEventRotaryMatch:
             )
 
         # A report with movement is a `rotation`, even if it starts or ends a turn
-        if self.event_type != RotaryEventType.ROTATION and any(
-            name in _ROTARY_AMOUNTS for name in names
-        ):
+        if self.event_type in (
+            RotaryEventType.ROTATION_START,
+            RotaryEventType.ROTATION_END,
+        ) and any(name in _ROTARY_AMOUNTS for name in names):
             raise ValueError(
                 f"Only '{RotaryEventType.ROTATION}' reports an amount, not"
                 f" '{self.event_type}'"
             )
 
         for name, value in self.event_attributes.items():
-            _validate_rotary_attribute(name, value)
+            _normalize_rotary_attribute(name, value)
 
         for name, path in self.event_attributes_from_data.items():
-            if not path:
-                raise ValueError(f"Event data {name} has an empty path")
+            _validate_event_data_path(name, path)
 
 
 class ZhaEventRotary(BaseEvent, ZclPlatformEntity):
@@ -489,17 +539,21 @@ class ZhaEventRotary(BaseEvent, ZclPlatformEntity):
             if name in _ROTARY_AMOUNTS and value == 0 and not isinstance(value, bool):
                 return
 
-            _validate_rotary_attribute(name, value)
-            event_attributes[name] = value
+            event_attributes[name] = _normalize_rotary_attribute(name, value)
 
+        # Only the standard types follow the turn: an integration-specific type
+        # neither starts nor ends one
         direction = match.direction
         if match.event_type == RotaryEventType.ROTATION_END:
             direction = direction or self._direction
             self._direction = None
-        else:
+        elif match.event_type in (
+            RotaryEventType.ROTATION,
+            RotaryEventType.ROTATION_START,
+        ):
             self._direction = direction
 
         if direction is not None:
-            event_attributes = {ATTR_DIRECTION: direction, **event_attributes}
+            event_attributes = {ATTR_DIRECTION: str(direction), **event_attributes}
 
         self._trigger_event(match.event_type, event_attributes)

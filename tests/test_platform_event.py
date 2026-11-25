@@ -957,6 +957,8 @@ async def test_zha_event_rotary_data_from_event(zha_device: Device) -> None:
         ),
         ({"command": "turned", "params": [3]}, "has no value at"),
         ({"command": "turned"}, "has no value at"),
+        # Indexes only index lists, keys only mappings
+        ({"command": "turned", "params": "clicks"}, "has no value at"),
         # The value is invalid
         ({"command": "turned", "params": {"clicks": -2}}, "Invalid steps -2"),
         ({"command": "turned", "params": {"clicks": 1.5}}, "Invalid steps 1.5"),
@@ -1118,10 +1120,9 @@ async def test_zha_event_rotary_invalid(
 @pytest.mark.parametrize(
     ("kwargs", "error"),
     [
-        (
-            {"event_type": "rotate_clockwise", "direction": RotaryDirection.CLOCKWISE},
-            "Invalid rotary event type 'rotate_clockwise'",
-        ),
+        ({"event_type": ""}, "Invalid event type ''"),
+        ({"direction": "left"}, "Invalid direction 'left' for rotation"),
+        ({"direction": ""}, "Invalid direction '' for rotation"),
         (
             {"event_type": RotaryEventType.ROTATION, "event_data": {}},
             "matches every zha_event",
@@ -1167,7 +1168,24 @@ async def test_zha_event_rotary_invalid(
         ({"event_attributes": {ATTR_STEPS: True}}, "Invalid steps True"),
         ({"event_attributes": {ATTR_DEGREES: -5}}, "Invalid degrees -5"),
         ({"event_attributes": {ATTR_PRESSED: 1}}, "Invalid pressed 1"),
-        ({"event_attributes_from_data": {ATTR_STEPS: ()}}, "steps has an empty path"),
+        ({"event_attributes": {ATTR_DEGREES: float("inf")}}, "Invalid degrees inf"),
+        ({"event_attributes": {ATTR_STEPS: 1.5}}, "Invalid steps 1.5"),
+        (
+            {"event_attributes_from_data": {ATTR_STEPS: ()}},
+            "Event data steps needs a non-empty sequence",
+        ),
+        (
+            {"event_attributes_from_data": {ATTR_STEPS: "clicks"}},
+            "Event data steps needs a non-empty sequence",
+        ),
+        (
+            {"event_attributes_from_data": {ATTR_STEPS: ("params", None)}},
+            "Invalid key None in the path of event data steps",
+        ),
+        (
+            {"event_attributes_from_data": {ATTR_STEPS: ("args", True)}},
+            "Invalid key True in the path of event data steps",
+        ),
     ],
 )
 def test_zha_event_rotary_match_invalid(kwargs: dict[str, Any], error: str) -> None:
@@ -1181,3 +1199,91 @@ def test_zha_event_rotary_match_invalid(kwargs: dict[str, Any], error: str) -> N
                 **kwargs,
             }
         )
+
+
+async def test_zha_event_rotary_steps_then_stop(zha_device: Device) -> None:
+    """Test a stop after steps, an interrupted turn and reports that change nothing."""
+    entity = create_event_rotary(
+        zha_device,
+        [
+            ZhaEventRotaryMatch(
+                event_type=RotaryEventType.ROTATION,
+                event_data={"command": "step", "params": {"step_mode": 0}},
+                direction=RotaryDirection.CLOCKWISE,
+                event_attributes_from_data={ATTR_STEPS: ("params", "clicks")},
+            ),
+            ZhaEventRotaryMatch(
+                event_type=RotaryEventType.ROTATION,
+                event_data={"command": "step", "params": {"step_mode": 1}},
+                direction=RotaryDirection.COUNTER_CLOCKWISE,
+                event_attributes_from_data={ATTR_STEPS: ("params", "clicks")},
+            ),
+            ZhaEventRotaryMatch(
+                event_type=RotaryEventType.ROTATION_END, event_data=TURN_STOP
+            ),
+        ],
+    )
+    events = fired_events(entity)
+
+    def step(mode: int, clicks: Any) -> None:
+        emit_zha_event(
+            zha_device,
+            {"command": "step", "params": {"step_mode": mode, "clicks": clicks}},
+        )
+
+    step(0, 2)
+    # Neither a report without movement nor an invalid report changes the turn
+    step(1, 0)
+    step(1, -1)
+    emit_zha_event(zha_device, TURN_STOP)
+    # A turn that changes direction ends in the direction it last turned
+    step(0, 1)
+    step(1, 3.0)
+    emit_zha_event(zha_device, TURN_STOP)
+
+    assert events == [
+        ("rotation", {ATTR_DIRECTION: "clockwise", ATTR_STEPS: 2}),
+        ("rotation_end", {ATTR_DIRECTION: "clockwise"}),
+        ("rotation", {ATTR_DIRECTION: "clockwise", ATTR_STEPS: 1}),
+        # An integral float is passed on as an integer
+        ("rotation", {ATTR_DIRECTION: "counter_clockwise", ATTR_STEPS: 3}),
+        ("rotation_end", {ATTR_DIRECTION: "counter_clockwise"}),
+    ]
+    assert type(events[3][1][ATTR_STEPS]) is int
+
+
+async def test_zha_event_rotary_extra_event_type(zha_device: Device) -> None:
+    """Test an integration-specific event type next to the standard ones."""
+    entity = create_event_rotary(
+        zha_device,
+        [
+            ZhaEventRotaryMatch(
+                event_type="rotation",
+                event_data=STEP_UP,
+                direction="clockwise",
+            ),
+            ZhaEventRotaryMatch(
+                event_type="knob_stop",
+                event_data=TURN_STOP,
+                event_attributes_from_data={"speed": ("args", 0)},
+            ),
+            ZhaEventRotaryMatch(
+                event_type=RotaryEventType.ROTATION_END,
+                event_data={"command": "released"},
+            ),
+        ],
+    )
+    assert entity.event_types == ["rotation", "knob_stop", "rotation_end"]
+    events = fired_events(entity)
+
+    emit_zha_event(zha_device, STEP_UP)
+    # The extra type neither ends the turn nor gets its direction
+    emit_zha_event(zha_device, {**TURN_STOP, "args": [7]})
+    emit_zha_event(zha_device, {"command": "released"})
+
+    assert events == [
+        ("rotation", {ATTR_DIRECTION: "clockwise"}),
+        ("knob_stop", {"speed": 7}),
+        ("rotation_end", {ATTR_DIRECTION: "clockwise"}),
+    ]
+    assert all(type(data.get(ATTR_DIRECTION, "")) is str for _, data in events)
