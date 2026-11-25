@@ -64,6 +64,9 @@ ci = [
 [tool.uv]
 default-groups = ["testing"]
 
+[tool.uv.sources]
+zha-quirks = { git = "https://github.com/zigpy/zha-device-handlers", rev = "4e90e593a9ae2a2b1702f1c600a0dbc7e1c128bc" }
+
 [tool.setuptools-git-versioning]
 enabled = true
 # Fallback version for tagless checkouts (e.g. Dependabot). zha-quirks depends
