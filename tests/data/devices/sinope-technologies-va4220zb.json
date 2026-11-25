@@ -650,7 +650,7 @@
         "class_name": "SmartEnergyMetering",
         "translation_key": "instantaneous_demand",
         "translation_placeholders": null,
-        "device_class": null,
+        "device_class": "volume_flow_rate",
         "state_class": "measurement",
         "entity_category": null,
         "entity_registry_enabled_default": true,
@@ -667,7 +667,7 @@
         "group_id": null,
         "native_value": 0.0,
         "suggested_display_precision": 1,
-        "unit": "l/h",
+        "unit": "L/h",
         "device_type": "Water Metering",
         "status": "NO_ALARMS",
         "zcl_unit_of_measurement": 7

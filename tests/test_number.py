@@ -710,3 +710,45 @@ async def test_heat_setpoint_limit_ranges_follow_each_other(
     await zha_gateway.async_block_till_done()
     assert max_limit.state.native_value == 22.0
     assert min_limit.state.native_max_value == 22.0
+
+
+@pytest.mark.parametrize(
+    ("engineering_units", "unit"),
+    [
+        (20, "BTU"),  # BTUs
+        (41, "ton"),  # tons
+        (90, "°"),  # degrees-angular
+        (117, "BTU/lb"),  # BTUs-per-pound
+        (136, "L/h"),  # liters-per-hour
+        (137, "kWh/m²"),  # kilowatt-hours-per-square-meter
+        (138, "kWh/ft²"),  # kilowatt-hours-per-square-foot
+        (161, "mm/s"),  # millimeters-per-second
+        (200, "dBmV"),  # decibels-millivolt
+        (201, "dBV"),  # decibels-volt
+        (246, "A²·h"),  # ampere-square-hours
+    ],
+)
+async def test_number_engineering_units(
+    zha_gateway: Gateway,
+    engineering_units: int,
+    unit: str,
+) -> None:
+    """Test the BACnet engineering units are shown as the unit they name."""
+    zigpy_analog_output_device = create_mock_zigpy_device(
+        zha_gateway, ZIGPY_ANALOG_OUTPUT_DEVICE
+    )
+    cluster: general.AnalogOutput = zigpy_analog_output_device.endpoints.get(
+        1
+    ).analog_output
+    cluster.PLUGGED_ATTR_READS = {
+        "max_present_value": 100.0,
+        "min_present_value": 0.0,
+        "engineering_units": engineering_units,
+        "present_value": 50.0,
+    }
+    update_attribute_cache(cluster)
+
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_analog_output_device)
+    entity: PlatformEntity = get_entity(zha_device, platform=Platform.NUMBER)
+
+    assert entity.state.native_unit_of_measurement == unit
