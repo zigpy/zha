@@ -9,7 +9,7 @@ from zigpy.exceptions import ZigbeeException
 from zigpy.profiles import zha
 import zigpy.types
 from zigpy.typing import UNDEFINED
-from zigpy.zcl.clusters import general, lighting
+from zigpy.zcl.clusters import general, hvac, lighting
 import zigpy.zdo.types as zdo_t
 
 from tests.common import (
@@ -657,6 +657,59 @@ async def test_color_number(
     )
     await zha_gateway.async_block_till_done()
     assert entity.state.native_value == initial_value
+
+
+async def test_heat_setpoint_limit_ranges_follow_each_other(
+    zha_gateway: Gateway,
+) -> None:
+    """Test the min/max heat setpoint limit ranges follow the other limit."""
+    zigpy_device = create_mock_zigpy_device(
+        zha_gateway,
+        {
+            1: {
+                SIG_EP_PROFILE: zha.PROFILE_ID,
+                SIG_EP_TYPE: zha.DeviceType.THERMOSTAT,
+                SIG_EP_INPUT: [general.Basic.cluster_id, hvac.Thermostat.cluster_id],
+                SIG_EP_OUTPUT: [],
+            }
+        },
+    )
+    thermostat = zigpy_device.endpoints[1].thermostat
+    thermostat.PLUGGED_ATTR_READS = {
+        "abs_min_heat_setpoint_limit": 500,
+        "abs_max_heat_setpoint_limit": 3500,
+        "min_heat_setpoint_limit": 700,
+        "max_heat_setpoint_limit": 3000,
+    }
+    update_attribute_cache(thermostat)
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
+
+    min_limit = get_entity(
+        zha_device, platform=Platform.NUMBER, qualifier="min_heat_setpoint_limit"
+    )
+    max_limit = get_entity(
+        zha_device, platform=Platform.NUMBER, qualifier="max_heat_setpoint_limit"
+    )
+    assert min_limit.state.native_min_value == 5.0
+    assert min_limit.state.native_max_value == 30.0
+    assert max_limit.state.native_min_value == 7.0
+    assert max_limit.state.native_max_value == 35.0
+
+    # Writing one limit moves the bound of the other one
+    await min_limit.async_set_native_value(16.0)
+    await zha_gateway.async_block_till_done()
+    assert min_limit.state.native_value == 16.0
+    assert max_limit.state.native_min_value == 16.0
+
+    # So does a value reported by the device
+    await send_attributes_report(
+        zha_gateway,
+        thermostat,
+        {hvac.Thermostat.AttributeDefs.max_heat_setpoint_limit.id: 2200},
+    )
+    await zha_gateway.async_block_till_done()
+    assert max_limit.state.native_value == 22.0
+    assert min_limit.state.native_max_value == 22.0
 
 
 @pytest.mark.parametrize(
