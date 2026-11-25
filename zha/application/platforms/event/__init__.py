@@ -323,7 +323,7 @@ def _normalize_rotary_attribute(name: str, value: Any) -> Any:
 
     Raises `ValueError` for an invalid `steps`, `degrees` or `pressed`. Integral
     floats are accepted as `steps`. Integer types such as enums and zigpy's
-    integers are turned into plain integers, and zigpy's `Bool` into a boolean.
+    integers are turned into plain integers, and zigpy's valid `Bool`s into booleans.
     """
     if name == ATTR_STEPS:
         if (
@@ -349,9 +349,12 @@ def _normalize_rotary_attribute(name: str, value: Any) -> Any:
 
         expected = "a positive number"
     elif name == ATTR_PRESSED:
-        # Parsed ZCL booleans are zigpy's `Bool` enum, not Python booleans
-        if isinstance(value, bool | Bool):
-            return bool(value)
+        if isinstance(value, bool):
+            return value
+
+        # Parsed ZCL booleans are zigpy's `Bool` enum, whose 0xFF is the invalid value
+        if isinstance(value, Bool) and value in (Bool.false, Bool.true):
+            return value == Bool.true
 
         expected = "a boolean"
     else:

@@ -950,7 +950,9 @@ async def test_zha_event_rotary_data_from_event(zha_device: Device) -> None:
     ]
 
 
-async def test_zha_event_rotary_zigpy_types(zha_device: Device) -> None:
+async def test_zha_event_rotary_zigpy_types(
+    zha_device: Device, caplog: pytest.LogCaptureFixture
+) -> None:
     """Test that zigpy types and enums are passed on as plain numbers and booleans."""
 
     class Angle(enum.IntEnum):
@@ -994,6 +996,19 @@ async def test_zha_event_rotary_zigpy_types(zha_device: Device) -> None:
             zha_device,
             {"command": "turned", "params": {"clicks": clicks, "pressed": pressed}},
         )
+
+    # The invalid ZCL boolean is no boolean
+    emit_zha_event(
+        zha_device,
+        {
+            "command": "turned",
+            "params": {
+                "clicks": zigpy.types.uint8_t(1),
+                "pressed": zigpy.types.Bool(0xFF),
+            },
+        },
+    )
+    assert "Invalid pressed <Bool.undefined_0xff: 255>" in caplog.text
 
     emit_zha_event(
         zha_device,
