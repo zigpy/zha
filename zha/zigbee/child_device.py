@@ -123,10 +123,13 @@ CHILD_DEVICE_ALLOWLIST: Final[tuple[ChildDeviceMatch, ...]] = (
                 "lumi.switch.agl010",
                 "lumi.switch.b2naus01",
                 "lumi.switch.l2aeu1",
+                "lumi.switch.n3acn3",
             }
         ),
     ),
-    ChildDeviceMatch(manufacturers=frozenset({"AEOTEC"}), models=frozenset({"ZGA004"})),
+    ChildDeviceMatch(
+        manufacturers=frozenset({"AEOTEC"}), models=frozenset({"ZGA003", "ZGA004"})
+    ),
     ChildDeviceMatch(
         manufacturers=frozenset({"Aurora"}), models=frozenset({"DoubleSocket50AU"})
     ),
@@ -144,7 +147,11 @@ CHILD_DEVICE_ALLOWLIST: Final[tuple[ChildDeviceMatch, ...]] = (
         manufacturers=frozenset({"HEIMAN"}), models=frozenset({"RelayModule-EF-3.0"})
     ),
     ChildDeviceMatch(
-        manufacturers=frozenset({"SDevices"}), models=frozenset({"SBDV-00199"})
+        manufacturers=frozenset({"HOBEIAN"}), models=frozenset({"ZG-301Z-2CH"})
+    ),
+    ChildDeviceMatch(
+        manufacturers=frozenset({"SDevices"}),
+        models=frozenset({"SBDV-00199", "SBDV-00200"}),
     ),
     # SONOFF multi-gang relays and wall switches
     ChildDeviceMatch(
