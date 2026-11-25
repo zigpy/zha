@@ -1062,7 +1062,7 @@ async def test_reinterview_replaces_device_when_quirk_changes(
     )
     zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
     assert zha_device.quirk_applied
-    assert zha_device.model == "Quirk A"
+    assert zha_device.friendly_model == "Quirk A"
 
     reinterviewed = create_mock_zigpy_device(
         zha_gateway,
@@ -1077,7 +1077,7 @@ async def test_reinterview_replaces_device_when_quirk_changes(
     new_zha_device = zha_gateway.get_device(zigpy_device.ieee)
     assert new_zha_device is not zha_device
     assert new_zha_device.quirk_applied
-    assert new_zha_device.model == "Quirk B"
+    assert new_zha_device.friendly_model == "Quirk B"
 
 
 async def test_reinterview_swap_emits_full_init_configured(

@@ -144,6 +144,8 @@ async def test_green_power_device_identifiers(zha_gateway: Gateway) -> None:
 
     assert zha_device.manufacturer == "0x1234"
     assert zha_device.model == "0x0007"
+    assert zha_device.friendly_manufacturer == "0x1234"
+    assert zha_device.friendly_model == "0x0007"
     assert zha_device.manufacturer_code == 0x1234
     assert zha_device.name == "0x1234 0x0007"
 
@@ -560,8 +562,8 @@ async def test_base_device_abstract_resolvers(zha_gateway: Gateway) -> None:
     zha_device = zha_gateway.get_or_create_device(make_zigpy_gpd(zha_gateway))
 
     for method in (
-        BaseDevice._resolve_manufacturer,
-        BaseDevice._resolve_model,
+        BaseDevice._resolve_reported_manufacturer,
+        BaseDevice._resolve_reported_model,
     ):
         with pytest.raises(NotImplementedError):
             method(zha_device)
