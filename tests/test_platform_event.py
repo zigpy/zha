@@ -1,5 +1,6 @@
 """Test the ZHA event platform."""
 
+import enum
 import re
 from typing import Any
 
@@ -946,6 +947,76 @@ async def test_zha_event_rotary_data_from_event(zha_device: Device) -> None:
             },
         ),
         ("rotation", {ATTR_DIRECTION: "counter_clockwise", ATTR_DEGREES: 12.5}),
+    ]
+
+
+async def test_zha_event_rotary_zigpy_types(zha_device: Device) -> None:
+    """Test that zigpy types and enums are passed on as plain numbers and booleans."""
+
+    class Angle(enum.IntEnum):
+        """An angle reported as an enum."""
+
+        QUARTER = 90
+
+    entity = create_event_rotary(
+        zha_device,
+        [
+            ZhaEventRotaryMatch(
+                event_type=RotaryEventType.ROTATION,
+                event_data={"command": "turned"},
+                direction=RotaryDirection.CLOCKWISE,
+                event_attributes_from_data={
+                    ATTR_STEPS: ("params", "clicks"),
+                    ATTR_PRESSED: ("params", "pressed"),
+                },
+            ),
+            ZhaEventRotaryMatch(
+                event_type=RotaryEventType.ROTATION,
+                event_data={"command": "angle"},
+                direction=RotaryDirection.COUNTER_CLOCKWISE,
+                event_attributes_from_data={ATTR_DEGREES: ("params", "degrees")},
+            ),
+            ZhaEventRotaryMatch(
+                event_type=RotaryEventType.ROTATION,
+                event_data={"command": "quarter"},
+                direction=RotaryDirection.CLOCKWISE,
+                event_attributes={ATTR_DEGREES: Angle.QUARTER},
+            ),
+        ],
+    )
+    events = fired_events(entity)
+
+    for clicks, pressed in (
+        (zigpy.types.uint8_t(2), zigpy.types.Bool.true),
+        (zigpy.types.uint8_t(1), zigpy.types.Bool.false),
+    ):
+        emit_zha_event(
+            zha_device,
+            {"command": "turned", "params": {"clicks": clicks, "pressed": pressed}},
+        )
+
+    emit_zha_event(
+        zha_device,
+        {"command": "angle", "params": {"degrees": zigpy.types.uint16_t(15)}},
+    )
+    emit_zha_event(zha_device, {"command": "quarter"})
+
+    assert events == [
+        ("rotation", {ATTR_DIRECTION: "clockwise", ATTR_STEPS: 2, ATTR_PRESSED: True}),
+        ("rotation", {ATTR_DIRECTION: "clockwise", ATTR_STEPS: 1, ATTR_PRESSED: False}),
+        ("rotation", {ATTR_DIRECTION: "counter_clockwise", ATTR_DEGREES: 15}),
+        ("rotation", {ATTR_DIRECTION: "clockwise", ATTR_DEGREES: 90}),
+    ]
+
+    # Plain values, not zigpy types or enums that only compare equal
+    assert [
+        {name: type(value) for name, value in attributes.items()}
+        for _, attributes in events
+    ] == [
+        {ATTR_DIRECTION: str, ATTR_STEPS: int, ATTR_PRESSED: bool},
+        {ATTR_DIRECTION: str, ATTR_STEPS: int, ATTR_PRESSED: bool},
+        {ATTR_DIRECTION: str, ATTR_DEGREES: int},
+        {ATTR_DIRECTION: str, ATTR_DEGREES: int},
     ]
 
 

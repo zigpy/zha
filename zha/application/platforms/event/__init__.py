@@ -8,7 +8,7 @@ import math
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, Final
 
-from zigpy.types.named import EUI64
+from zigpy.types.named import EUI64, Bool
 
 from zha.application import Platform
 from zha.application.const import ZHA_EVENT
@@ -322,7 +322,8 @@ def _normalize_rotary_attribute(name: str, value: Any) -> Any:
     """Return a rotary event data value as a plain value, if it is valid.
 
     Raises `ValueError` for an invalid `steps`, `degrees` or `pressed`. Integral
-    floats are accepted as `steps`, and enums are turned into plain numbers.
+    floats are accepted as `steps`. Integer types such as enums and zigpy's
+    integers are turned into plain integers, and zigpy's `Bool` into a boolean.
     """
     if name == ATTR_STEPS:
         if (
@@ -344,12 +345,13 @@ def _normalize_rotary_attribute(name: str, value: Any) -> Any:
             and math.isfinite(value)
             and value > 0
         ):
-            return value if type(value) in (int, float) else float(value)
+            return int(value) if isinstance(value, int) else float(value)
 
         expected = "a positive number"
     elif name == ATTR_PRESSED:
-        if isinstance(value, bool):
-            return value
+        # Parsed ZCL booleans are zigpy's `Bool` enum, not Python booleans
+        if isinstance(value, bool | Bool):
+            return bool(value)
 
         expected = "a boolean"
     else:
