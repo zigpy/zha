@@ -195,7 +195,7 @@ class DeviceStatusHeatingCooling(enum.IntFlag):
     BURST_DETECT = 16
     LEAK_DETECT = 32
     SERVICE_DISCONNECT = 64
-    REVERSE_FLOW = 128
+    FLOW_SENSOR = 128
 
 
 class DeviceStatusDefault(enum.IntFlag):

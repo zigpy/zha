@@ -278,6 +278,12 @@ async def async_test_metering(
         "TEMPERATURE_SENSOR|SERVICE_DISCONNECT",
     )
 
+    # Bit 7 is a flow sensor error for heat and cooling meters, not reverse flow
+    await send_attributes_report(
+        zha_gateway, cluster, {"status": 128, "metering_device_type": 5}
+    )
+    assert entity.state.status == "FLOW_SENSOR"
+
     # Status for other meter types
     await send_attributes_report(
         zha_gateway, cluster, {"status": 32, "metering_device_type": 4}
