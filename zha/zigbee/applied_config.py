@@ -355,9 +355,15 @@ class AppliedConfigRecorder:
         if self._namespace is None:
             return
 
+        endpoint_id = cluster.endpoint.endpoint_id
+
+        if endpoint_id is None:
+            self.note_incomplete()
+            raise ValueError(f"Cluster without an endpoint ID: {cluster!r}")
+
         try:
             key = reporting_key(
-                cluster.endpoint.endpoint_id,
+                endpoint_id,
                 cluster.is_server,
                 cluster.cluster_id,
                 attr_def.id,
@@ -381,7 +387,7 @@ class AppliedConfigRecorder:
             "change": desired.reportable_change,
         }
         record["kind"] = "reporting"
-        record["endpoint"] = cluster.endpoint.endpoint_id
+        record["endpoint"] = endpoint_id
         record["side"] = "server" if cluster.is_server else "client"
         record["cluster_id"] = cluster.cluster_id
         record["attribute_id"] = attr_def.id

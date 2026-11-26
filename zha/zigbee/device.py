@@ -1843,17 +1843,17 @@ class ZigbeeDevice(BaseDevice[ZigpyDevice]):
         self, target: BaseDevice, operation: BindOperation
     ) -> list[BindingResult]:
         """Create or remove direct zigbee bindings between this device and another."""
-        return await self._async_binding_requests(
-            operation,
-            [
-                (
-                    pair.source_cluster.endpoint.endpoint_id,
-                    pair.source_cluster.cluster_id,
-                    pair.destination_address,
-                )
-                for pair in await get_matched_clusters(self, target)
-            ],
-        )
+        requests: list[tuple[int, int, zdo_types.MultiAddress]] = []
+
+        for pair in await get_matched_clusters(self, target):
+            endpoint_id = pair.source_cluster.endpoint.endpoint_id
+            # Only Green Power devices have an endpoint without an ID
+            assert endpoint_id is not None
+            requests.append(
+                (endpoint_id, pair.source_cluster.cluster_id, pair.destination_address)
+            )
+
+        return await self._async_binding_requests(operation, requests)
 
     async def _async_binding_requests(
         self,
