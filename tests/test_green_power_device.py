@@ -700,7 +700,8 @@ async def test_green_power_recommissioned_factory_change(zha_gateway: Gateway) -
         assert new_zha_device.on_network is True
         assert len(new_zha_device.platform_entities) == 1
         assert [e.device_info.pairing_status for e in full] == [
-            DevicePairingStatus.CONFIGURED
+            DevicePairingStatus.CONFIGURED,
+            DevicePairingStatus.INITIALIZED,
         ]
 
         # The same entry on both sides is rebuilt in place
@@ -711,6 +712,10 @@ async def test_green_power_recommissioned_factory_change(zha_gateway: Gateway) -
         await zha_gateway.async_block_till_done()
         assert zha_gateway.devices[newer_zigpy_gpd.ieee] is new_zha_device
         assert new_zha_device.device is newer_zigpy_gpd
+        assert [e.device_info.pairing_status for e in full[2:]] == [
+            DevicePairingStatus.CONFIGURED,
+            DevicePairingStatus.INITIALIZED,
+        ]
 
 
 async def test_bindable_target_source_without_clusters(zha_gateway: Gateway) -> None:
