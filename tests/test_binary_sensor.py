@@ -8,6 +8,8 @@ from unittest.mock import call
 import pytest
 from zhaquirks.builder import QuirkBuilder
 from zhaquirks.device import CustomZigpyDevice
+from zhaquirks.tuya import TuyaCommand
+from zhaquirks.tuya.tuya_valve import ParksideTuyaValveManufCluster
 from zigpy.profiles import zha
 import zigpy.profiles.zha
 from zigpy.typing import UNDEFINED
@@ -34,9 +36,11 @@ from zha.application.platforms import PlatformEntity
 from zha.application.platforms.binary_sensor import (
     Accelerometer,
     BinarySensor,
+    FrostLock,
     IASZone,
     Occupancy,
 )
+from zha.application.platforms.binary_sensor.const import BinarySensorDeviceClass
 from zha.application.platforms.const import SMARTTHINGS_ACCELERATION_CLUSTER
 from zha.quirks import DeviceRegistry
 
@@ -378,3 +382,53 @@ async def test_onoff_client_binary_sensor_on_with_timed_off(
     cluster.handle_message(hdr, [])
     await zha_gateway.async_block_till_done()
     assert entity.is_on is False
+
+
+async def test_parkside_frost_lock_binary_sensor(zha_gateway: Gateway) -> None:
+    """Test the Parkside water valve frost lock binary sensor follows the device.
+
+    Datapoint 108 is True while the frost guard is active, i.e. irrigation is
+    locked. The sensor uses the LOCK device class, where on means unlocked.
+    """
+    zigpy_device = create_mock_zigpy_device(
+        zha_gateway,
+        {
+            1: {
+                SIG_EP_PROFILE: zigpy.profiles.zha.PROFILE_ID,
+                SIG_EP_TYPE: zigpy.profiles.zha.DeviceType.ON_OFF_SWITCH,
+                SIG_EP_INPUT: [
+                    general.Basic.cluster_id,
+                    general.OnOff.cluster_id,
+                    ParksideTuyaValveManufCluster.cluster_id,
+                ],
+                SIG_EP_OUTPUT: [general.Time.cluster_id, general.Ota.cluster_id],
+            }
+        },
+        manufacturer="_TZE200_htnnfasr",
+        model="TS0601",
+    )
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
+    cluster = zigpy_device.endpoints[1].tuya_manufacturer
+    assert isinstance(cluster, ParksideTuyaValveManufCluster)
+
+    entity = get_entity(
+        zha_device, platform=Platform.BINARY_SENSOR, exact_entity_type=FrostLock
+    )
+    assert entity.device_class == BinarySensorDeviceClass.LOCK
+
+    def send_dp108(active: bool) -> None:
+        # status, tsn, then datapoint 108: type bool (0x01), length 1, value
+        payload = b"\x00\x01" + bytes([108, 0x01, 0x00, 0x01, int(active)])
+        command, _ = TuyaCommand.deserialize(payload)
+        cluster.handle_get_data(command)
+
+    # Frost guard active: irrigation is locked, so the LOCK sensor must be off
+    send_dp108(True)
+    await zha_gateway.async_block_till_done()
+    assert cluster.get("frost_lock") == 1  # the report reached the attribute
+    assert entity.is_on is False
+
+    # Frost guard cleared: unlocked, so on
+    send_dp108(False)
+    await zha_gateway.async_block_till_done()
+    assert entity.is_on is True
