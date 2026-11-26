@@ -593,6 +593,19 @@ async def join_zigpy_device(
     return device
 
 
+async def rejoin_zha_device(zha_gateway: Gateway, zha_device: Device) -> Device:
+    """Tear down a ZHA device and create it again from the same zigpy device.
+
+    The zigpy device and its store are kept, as they are across a restart, while every
+    ZHA object is new.
+    """
+    zigpy_dev = zha_device.device
+    await zha_device.on_remove()
+    del zha_gateway._devices[zigpy_dev.ieee]  # pylint: disable=protected-access
+
+    return await join_zigpy_device(zha_gateway, zigpy_dev)
+
+
 def create_mock_zigpy_device(
     zha_gateway: Gateway,
     endpoints: dict[int, dict[str, Any]],
