@@ -1392,7 +1392,6 @@ class LightGroup(BaseSharedLight, GroupEntity):
         )
 
         self._zha_config_enhanced_light_transition = False
-        self._GROUP_SUPPORTS_EXECUTE_IF_OFF: bool = True
 
         if light_options.group_members_assume_state:
             self._change_listener_debouncer.cooldown = (
@@ -1402,6 +1401,18 @@ class LightGroup(BaseSharedLight, GroupEntity):
             self._change_listener_debouncer.cooldown = (
                 DEFAULT_UPDATE_GROUP_FROM_CHILD_DELAY
             )
+
+        self._update_member_command_options()
+
+        self._color_mode = ColorMode.UNKNOWN
+        self._internal_supported_color_modes = {ColorMode.ONOFF}
+
+        self.update()
+
+    def _update_member_command_options(self) -> None:
+        """Derive the group command options that depend on the current members."""
+        self._DEFAULT_MIN_TRANSITION_TIME = type(self)._DEFAULT_MIN_TRANSITION_TIME
+        self._GROUP_SUPPORTS_EXECUTE_IF_OFF: bool = True
 
         for member in self.group.members:
             # Ensure we do not send group commands that violate the minimum transition
@@ -1426,11 +1437,6 @@ class LightGroup(BaseSharedLight, GroupEntity):
                 if Color.Options.Execute_if_off not in options:
                     self._GROUP_SUPPORTS_EXECUTE_IF_OFF = False
                     break
-
-        self._color_mode = ColorMode.UNKNOWN
-        self._internal_supported_color_modes = {ColorMode.ONOFF}
-
-        self.update()
 
     async def on_remove(self) -> None:
         """Cancel tasks this entity owns."""
@@ -1474,7 +1480,12 @@ class LightGroup(BaseSharedLight, GroupEntity):
         its members when the transition ends, and the members whose state changes
         then update the group; see `_force_member_updates` for the case where none
         does.
+
+        The command options that depend on the members are updated right away, so
+        the next command takes the new members into account.
         """
+        self._update_member_command_options()
+
         if self.is_transitioning:
             self._members_changed_during_transition = True
             return
