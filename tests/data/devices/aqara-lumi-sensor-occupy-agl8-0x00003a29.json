@@ -427,7 +427,7 @@
         "child_device_id": null,
         "group_id": null,
         "native_value": 39.98,
-        "suggested_display_precision": null,
+        "suggested_display_precision": 1,
         "unit": "%"
       }
     ],

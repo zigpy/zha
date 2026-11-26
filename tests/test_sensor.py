@@ -147,6 +147,11 @@ async def async_test_humidity(
     )
     assert_state(entity, 10.0, "%")
 
+    # The state is not rounded, only the suggested display precision is set
+    await send_attributes_report(zha_gateway, cluster, {0: 4853})
+    assert_state(entity, 48.53, "%")
+    assert entity.state.suggested_display_precision == 1
+
 
 async def async_test_flow(
     zha_gateway: Gateway, cluster: Cluster, entity: PlatformEntity
@@ -665,6 +670,20 @@ async def async_test_em_dc_power(
         (
             measurement.RelativeHumidity.cluster_id,
             sensor.Humidity,
+            async_test_humidity,
+            None,
+            None,
+        ),
+        (
+            measurement.SoilMoisture.cluster_id,
+            sensor.SoilMoisture,
+            async_test_humidity,
+            None,
+            None,
+        ),
+        (
+            measurement.LeafWetness.cluster_id,
+            sensor.LeafWetness,
             async_test_humidity,
             None,
             None,
