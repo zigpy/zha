@@ -339,13 +339,9 @@ class Cover(BaseCover, ZclPlatformEntity):
         """
         if not self.supported_features & CoverEntityFeature.OPEN:
             return None
-        lift_percentage = self._cluster.get(
-            WCAttrs.current_position_lift_percentage.name
+        return self._zcl_percentage_to_ha_position(
+            self._cluster.get(WCAttrs.current_position_lift_percentage.name)
         )
-        if lift_percentage is None:
-            return None
-        # ZCL 0=open / 100=closed → HA 0=closed / 100=open
-        return 100 - lift_percentage
 
     @property
     def current_cover_tilt_position(self) -> int | None:
@@ -356,12 +352,9 @@ class Cover(BaseCover, ZclPlatformEntity):
         """
         if not self.supported_features & CoverEntityFeature.OPEN_TILT:
             return None
-        tilt_percentage = self._cluster.get(
-            WCAttrs.current_position_tilt_percentage.name
+        return self._zcl_percentage_to_ha_position(
+            self._cluster.get(WCAttrs.current_position_tilt_percentage.name)
         )
-        if tilt_percentage is None:
-            return None
-        return 100 - tilt_percentage
 
     @property
     def _previous_cover_position(self) -> int | None:
@@ -459,16 +452,20 @@ class Cover(BaseCover, ZclPlatformEntity):
             self._tilt_position_history,
         )
 
-        # Clear transition if the cover axis is not moving, else update the timer
-        if self._lift_state not in (CoverState.OPENING, CoverState.CLOSING):
+        # Clear transition if the cover axis is not moving, else update the timer.
+        # An axis with an unknown position (state None) keeps a running transition
+        # until its timer runs out: the direction shows once a position is reported.
+        if self._lift_state in (CoverState.OPENING, CoverState.CLOSING):
+            if is_lift_update:
+                self._start_lift_transition(is_position_update=True)
+        elif self._lift_state is not None or self._lift_transition_timer is None:
             self._clear_lift_transition()
-        elif is_lift_update:
-            self._start_lift_transition(is_position_update=True)
 
-        if self._tilt_state not in (CoverState.OPENING, CoverState.CLOSING):
+        if self._tilt_state in (CoverState.OPENING, CoverState.CLOSING):
+            if is_tilt_update:
+                self._start_tilt_transition(is_position_update=True)
+        elif self._tilt_state is not None or self._tilt_transition_timer is None:
             self._clear_tilt_transition()
-        elif is_tilt_update:
-            self._start_tilt_transition(is_position_update=True)
 
         # Keep the last direction if either axis is still moving
         if (
@@ -686,7 +683,6 @@ class Cover(BaseCover, ZclPlatformEntity):
 
     async def async_set_cover_position(self, position: int) -> None:
         """Move the cover to a specific position."""
-        assert self.current_cover_position is not None
         target_position = position
 
         self._set_lift_transition_target(target_position)
@@ -697,17 +693,17 @@ class Cover(BaseCover, ZclPlatformEntity):
             self._clear_lift_transition()
             raise ZHAException(f"Failed to set cover position: {res[1]}")
 
-        if target_position != self.current_cover_position:
+        current_position = self.current_cover_position
+        if current_position is not None and target_position != current_position:
             self.async_update_state(
                 CoverState.CLOSING
-                if target_position < self.current_cover_position
+                if target_position < current_position
                 else CoverState.OPENING
             )
         self._start_lift_transition()
 
     async def async_set_cover_tilt_position(self, tilt_position: int) -> None:
         """Move the cover tilt to a specific position."""
-        assert self.current_cover_tilt_position is not None
         target_position = tilt_position
 
         self._set_tilt_transition_target(target_position)
@@ -718,10 +714,14 @@ class Cover(BaseCover, ZclPlatformEntity):
             self._clear_tilt_transition()
             raise ZHAException(f"Failed to set cover tilt position: {res[1]}")
 
-        if target_position != self.current_cover_tilt_position:
+        current_tilt_position = self.current_cover_tilt_position
+        if (
+            current_tilt_position is not None
+            and target_position != current_tilt_position
+        ):
             self.async_update_state(
                 CoverState.CLOSING
-                if target_position < self.current_cover_tilt_position
+                if target_position < current_tilt_position
                 else CoverState.OPENING
             )
         self._start_tilt_transition()
@@ -744,6 +744,18 @@ class Cover(BaseCover, ZclPlatformEntity):
         This is handled by async_stop_cover because there is no tilt specific command for Zigbee covers.
         """
         await self.async_stop_cover()
+
+    @staticmethod
+    def _zcl_percentage_to_ha_position(percentage: int | None) -> int | None:
+        """Convert a ZCL position percentage to the HA position range.
+
+        In HA None is unknown, 0 is closed, 100 is fully open.
+        In ZCL 0 is fully open, 100 is fully closed; a value above 100 means the
+        position is unknown (0xFF is the attribute's default).
+        """
+        if percentage is None or not 0 <= percentage <= 100:
+            return None
+        return 100 - percentage
 
     @staticmethod
     def _ha_position_to_zcl(position: int) -> int:
