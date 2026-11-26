@@ -1,5 +1,8 @@
 """Test zha alarm control panel."""
 
+import asyncio
+from collections.abc import AsyncGenerator
+import contextlib
 import logging
 from unittest.mock import AsyncMock, call, patch, sentinel
 
@@ -11,8 +14,15 @@ import zigpy.zcl.foundation as zcl_f
 from tests.common import join_zigpy_device, zigpy_device_from_json
 from zha.application import Platform
 from zha.application.gateway import Gateway
-from zha.application.platforms.alarm_control_panel import AlarmControlPanel
-from zha.application.platforms.alarm_control_panel.const import AlarmState
+from zha.application.helpers import ZHAData
+from zha.application.platforms.alarm_control_panel import (
+    ALARM_STATE_TO_PANEL_STATUS,
+    AlarmControlPanel,
+)
+from zha.application.platforms.alarm_control_panel.const import (
+    IAS_ACE_STATE_MAP,
+    AlarmState,
+)
 from zha.zigbee.device import Device
 
 _LOGGER = logging.getLogger(__name__)
@@ -242,3 +252,119 @@ async def reset_alarm_panel(
         security.IasAce.AlarmStatus.No_Alarm,
     )
     cluster.client_command.reset_mock()
+
+
+KEYPAD_JSON = "tests/data/devices/frient-a-s-kepzb-110-0x00020005.json"
+
+
+@contextlib.asynccontextmanager
+async def _gateway(zha_data: ZHAData, app) -> AsyncGenerator[Gateway]:
+    """Start a gateway on an existing zigpy application, then shut it down."""
+    with (
+        patch("bellows.zigbee.application.ControllerApplication.new", return_value=app),
+        patch("bellows.zigbee.application.ControllerApplication", return_value=app),
+    ):
+        gateway = await Gateway.async_from_config(zha_data)
+        await gateway.async_initialize()
+        await gateway.async_block_till_done()
+        await gateway.async_initialize_devices_and_entities()
+    try:
+        yield gateway
+    finally:
+        await gateway.async_block_till_done()
+        await gateway.shutdown()
+        await asyncio.sleep(0)
+
+
+def _get_alarm_entity(
+    zha_device: Device, zigpy_device: ZigbeeDevice
+) -> AlarmControlPanel:
+    return zha_device.platform_entities[
+        (
+            Platform.ALARM_CONTROL_PANEL,
+            f"{zigpy_device.ieee}-44-{security.IasAce.cluster_id}",
+        )
+    ]
+
+
+@patch(
+    "zigpy.zcl.clusters.security.IasAce.client_command",
+    new=AsyncMock(return_value=[sentinel.data, zcl_f.Status.SUCCESS]),
+)
+async def test_alarm_control_panel_armed_state_survives_restart(
+    zha_data: ZHAData,
+    zigpy_app_controller,
+) -> None:
+    """An armed panel must not come back disarmed after a ZHA restart."""
+    async with _gateway(zha_data, zigpy_app_controller) as zha_gateway:
+        zigpy_device = await zigpy_device_from_json(
+            zha_gateway.application_controller, KEYPAD_JSON
+        )
+        zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
+        entity = _get_alarm_entity(zha_device, zigpy_device)
+        await entity.async_alarm_arm_away("4321")
+        await zha_gateway.async_block_till_done()
+        assert entity.state.alarm_state == AlarmState.ARMED_AWAY
+        armed_state = entity.state.alarm_state
+
+    # Restart: a new gateway on the same zigpy application builds new zha devices and
+    # entities, as after a restart.
+    async with _gateway(zha_data, zigpy_app_controller) as zha_gateway:
+        zha_device = zha_gateway.get_device(zigpy_device.ieee)
+        entity = _get_alarm_entity(zha_device, zigpy_device)
+
+        # Nothing outside the zha entity holds the panel state
+        assert entity.state.alarm_state == AlarmState.DISARMED
+
+        # The consumer (Home Assistant) hands the last known state back after a
+        # restart, as it does for locks, selects, lights and covers.
+        entity.restore_external_state_attributes(state=armed_state)
+        assert entity.state.alarm_state == AlarmState.ARMED_AWAY
+
+        # The keypad asking for the panel status gets the restored state, too.
+        cluster = zigpy_device.endpoints[44].out_clusters[security.IasAce.cluster_id]
+        cluster.client_command.reset_mock()
+        cluster.listener_event("cluster_command", 7, 0x07, [])
+        await zha_gateway.async_block_till_done()
+        assert cluster.client_command.call_args.args[1] == (
+            security.IasAce.PanelStatus.Armed_Away
+        )
+
+
+async def test_alarm_control_panel_restore_ignores_unknown_states(
+    zha_gateway: Gateway,
+) -> None:
+    """Restore maps states to panel statuses; others leave the panel untouched."""
+    zigpy_device = await zigpy_device_from_json(
+        zha_gateway.application_controller, KEYPAD_JSON
+    )
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
+    entity = _get_alarm_entity(zha_device, zigpy_device)
+
+    entity.restore_external_state_attributes(state=AlarmState.TRIGGERED)
+    assert entity.state.alarm_state == AlarmState.TRIGGERED
+    assert entity.alarm_status == security.IasAce.AlarmStatus.Emergency
+
+    for state in (
+        "unavailable",
+        "unknown",
+        AlarmState.ARMING,
+        AlarmState.PENDING,
+        None,
+    ):
+        entity.restore_external_state_attributes(state=state)
+        assert entity.state.alarm_state == AlarmState.TRIGGERED
+
+    # Every restorable state round-trips through the panel status it restores
+    for alarm_state, panel_status in ALARM_STATE_TO_PANEL_STATUS.items():
+        assert IAS_ACE_STATE_MAP[panel_status] == alarm_state
+
+    # A known alarm cause is kept when the triggered state is restored again
+    entity.alarm_status = security.IasAce.AlarmStatus.Fire
+    entity.restore_external_state_attributes(state=AlarmState.TRIGGERED)
+    assert entity.alarm_status == security.IasAce.AlarmStatus.Fire
+
+    # Restoring an armed or disarmed state clears the alarm status
+    entity.restore_external_state_attributes(state=AlarmState.ARMED_AWAY)
+    assert entity.state.alarm_state == AlarmState.ARMED_AWAY
+    assert entity.alarm_status == security.IasAce.AlarmStatus.No_Alarm
