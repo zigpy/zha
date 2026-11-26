@@ -44,6 +44,7 @@ from zha.application.platforms import PlatformEntity
 from zha.application.platforms.climate import (
     HVAC_MODE_2_SYSTEM,
     SEQ_OF_OPERATION,
+    MoesThermostat,
     Thermostat as ThermostatEntity,
     ZehnderThermostat,
 )
@@ -2085,3 +2086,87 @@ async def test_thermostat_quirkv2_local_temperature_calibration_config_overwrite
     assert local_temperature_calibration_entity.state.native_max_value == 5.0
     assert local_temperature_calibration_entity.state.native_step == 0.1
     assert local_temperature_calibration_entity._multiplier == 0.1
+
+
+@pytest.mark.parametrize(
+    ("endpoints", "manuf", "quirk", "preset_attr", "preset_mode", "none_attr"),
+    [
+        (
+            CLIMATE_MOES,
+            MANUF_MOES,
+            zhaquirks.tuya.ts0601_trv.MoesHY368_Type1,
+            5,
+            PRESET_BOOST,
+            2,
+        ),
+        (
+            CLIMATE_BECA,
+            MANUF_BECA,
+            zhaquirks.tuya.ts0601_trv.MoesHY368_Type1new,
+            4,
+            PRESET_ECO,
+            2,
+        ),
+        (
+            CLIMATE_ZONNSMART,
+            MANUF_ZONNSMART,
+            zhaquirks.tuya.ts0601_trv.ZonnsmartTV01_ZG,
+            0,
+            PRESET_SCHEDULE,
+            1,
+        ),
+    ],
+)
+async def test_preset_from_attribute_cache(
+    zha_gateway: Gateway,
+    endpoints: dict[int, dict[str, Any]],
+    manuf: str,
+    quirk: type[CustomDevice],
+    preset_attr: int,
+    preset_mode: str,
+    none_attr: int,
+) -> None:
+    """The preset is taken from the cached operation_preset, as after a restart."""
+    zigpy_device = create_mock_zigpy_device(
+        zha_gateway, endpoints, manufacturer=manuf, quirk=quirk
+    )
+    zigpy_device.node_desc.mac_capability_flags |= 0b_0000_0100
+    thrm_cluster = zigpy_device.endpoints[1].thermostat
+    thrm_cluster.PLUGGED_ATTR_READS = ZCL_ATTR_PLUG
+    # zigpy restores the attribute cache from its database before ZHA builds
+    # the entities
+    thrm_cluster.update_attribute(
+        thrm_cluster.AttributeDefs.operation_preset.id, preset_attr
+    )
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
+    entity: ThermostatEntity = get_entity(
+        zha_device, platform=Platform.CLIMATE, entity_type=ThermostatEntity
+    )
+
+    assert entity.state.preset_mode == preset_mode
+
+    # Leaving the preset writes the device's "none" value
+    thrm_cluster.write_attributes.reset_mock()
+    await entity.async_set_preset_mode(PRESET_NONE)
+    await zha_gateway.async_block_till_done()
+    assert thrm_cluster.write_attributes.call_args_list == [
+        call(
+            {"operation_preset": none_attr},
+            manufacturer=zha_device.manufacturer_code,
+        )
+    ]
+    assert entity.state.preset_mode == PRESET_NONE
+
+
+async def test_preset_without_operation_preset_attribute(
+    zha_gateway: Gateway,
+) -> None:
+    """A thermostat matched by manufacturer without the attribute starts at none."""
+    device_climate = await device_climate_mock(
+        zha_gateway, CLIMATE_MOES, manuf=MANUF_MOES
+    )
+    entity: ThermostatEntity = get_entity(
+        device_climate, platform=Platform.CLIMATE, entity_type=MoesThermostat
+    )
+
+    assert entity.state.preset_mode == PRESET_NONE
