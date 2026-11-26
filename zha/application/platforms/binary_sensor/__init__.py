@@ -28,6 +28,7 @@ from zha.application.platforms import (
     BaseEntityState,
     ClusterConfig,
     ClusterMatch,
+    DeviceValueEntity,
     EntityCategory,
     PlatformEntity,
     PlatformFeatureGroup,
@@ -47,7 +48,9 @@ from zha.application.platforms.legacy_quirks import AQARA_OPPLE_CLUSTER
 from zha.quirks import DANFOSS_ALLY_THERMOSTAT
 
 if TYPE_CHECKING:
-    from zha.zigbee.device import Device
+    from zigpy.store import StoredValue
+
+    from zha.zigbee.device import BaseDevice, Device
     from zha.zigbee.endpoint import Endpoint
 
 _LOGGER = logging.getLogger(__name__)
@@ -59,6 +62,13 @@ class BinarySensorState(BaseEntityState):
 
     is_on: bool
     attribute_name: str
+
+
+@dataclasses.dataclass(frozen=True, kw_only=True)
+class DeviceValueBinarySensorState(BaseEntityState):
+    """State for device value binary sensor entities."""
+
+    is_on: bool
 
 
 class BaseBinarySensor(PlatformEntity, ABC):
@@ -173,6 +183,66 @@ class BinarySensor(BaseBinarySensor, ZclPlatformEntity):
     @staticmethod
     def parse(value: bool | int) -> bool:
         """Parse the raw attribute into a bool state."""
+        return bool(value)
+
+
+class DeviceValueBinarySensor(BaseBinarySensor, DeviceValueEntity):
+    """Binary sensor showing a device value, kept in the device's store.
+
+    It takes the options of `BinarySensor`: the value is on by truth, or by what
+    `value_converter` returns. An absent value is off, as an absent attribute is.
+    """
+
+    _attr_device_class: BinarySensorDeviceClass | None = None
+    _value_converter: Callable[[Any], Any] | None = None
+
+    def __init__(
+        self,
+        device: BaseDevice,
+        *,
+        value: StoredValue[Any],
+        value_converter: Callable[[Any], Any] | None = None,
+        device_class: BinarySensorDeviceClass | None = None,
+        **kwargs: Any,
+    ) -> None:
+        """Init this binary sensor."""
+        if value_converter is not None:
+            self._value_converter = value_converter
+        if device_class is not None:
+            self._attr_device_class = validate_device_class(
+                BinarySensorDeviceClass,
+                device_class,
+                Platform.BINARY_SENSOR.value,
+                _LOGGER,
+            )
+
+        super().__init__(device, value=value, **kwargs)
+
+    @property
+    def state(self) -> DeviceValueBinarySensorState:
+        """Return the state of the binary sensor."""
+        return DeviceValueBinarySensorState(
+            **super().state.__dict__,
+            is_on=self.is_on,
+        )
+
+    @property
+    def is_on(self) -> bool:
+        """Return True if the binary sensor is on."""
+        value = self._get_value()
+
+        if value is None:
+            return False
+
+        # The store is untyped at rest, so the converter can meet a value it does
+        # not expect
+        if self._value_converter is not None:
+            try:
+                return bool(self._value_converter(value))
+            except (ArithmeticError, LookupError, TypeError, ValueError):
+                self.debug("Cannot show value %r", value, exc_info=True)
+                return False
+
         return bool(value)
 
 

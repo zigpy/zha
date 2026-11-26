@@ -13,7 +13,8 @@ from enum import StrEnum
 from functools import cached_property
 import logging
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, Final, final
+from typing import TYPE_CHECKING, Any, Final, cast, final
+import warnings
 
 from zigpy.profiles.zha import PROFILE_ID as ZHA_PROFILE_ID
 from zigpy.profiles.zll import PROFILE_ID as ZLL_PROFILE_ID
@@ -29,15 +30,23 @@ from zha.application.const import UniqueIdMigration
 from zha.const import STATE_CHANGED
 from zha.debounce import Debouncer
 from zha.event import EventBase
+from zha.exceptions import ZHAException
 from zha.mixins import LogMixin
 from zha.zigbee.store import (
     ENTITY_STATE_NAMESPACE,
+    DeviceValueWriter,
     entity_state_key,
+    get_device_store,
     get_store_namespace,
 )
 
 if TYPE_CHECKING:
-    from zigpy.store import StoreNamespace
+    from zigpy.store import (
+        StoredValue,
+        StoreNamespace,
+        StoreValueDeletedEvent,
+        StoreValueUpdatedEvent,
+    )
 
     from zha.zigbee.child_device import ChildDevice
     from zha.zigbee.device import BaseDevice, Device
@@ -853,6 +862,94 @@ class PlatformEntity(BaseEntity):
             namespace[key] = record
 
         self._stored_state_fields = frozenset(owned)
+
+
+class DeviceValueEntity(PlatformEntity):
+    """Platform entity showing a device value, kept in the device's store.
+
+    A device value is state that is not a ZCL attribute, such as a Tuya datapoint or
+    a setting only the host keeps. The entity is bound to the device only, so it
+    needs no endpoint or cluster, and follows the value through the store.
+    """
+
+    # Set by the writable platforms: writes the value to the device (see
+    # `DeviceValueWriter`). Without one, a written value is only kept in the store.
+    _writer: DeviceValueWriter[Any] | None = None
+
+    def __init__(
+        self,
+        device: BaseDevice,
+        *,
+        value: StoredValue[Any],
+        **kwargs: Any,
+    ) -> None:
+        """Initialize the device value entity."""
+        self._value = value
+        super().__init__(device, **kwargs)
+
+    def on_add(self) -> None:
+        """Run when entity is added."""
+        super().on_add()
+        store = get_device_store(self._device.device)
+
+        if store is not None:
+            self._on_remove_callbacks.append(
+                store.on_change(self._value, self._handle_value_changed)
+            )
+
+    # TODO: remove once HA Core's `websocket_get_groupable_devices` no longer reads
+    # `entity.endpoint` for every entity of a groupable device
+    @property
+    def endpoint(self) -> Endpoint:
+        """Return the device's first endpoint, for code that expects every entity on one.
+
+        A device value has no endpoint. Home Assistant's list of groupable devices
+        reads the endpoint of each entity of a device, and fails without one.
+        """
+        warnings.warn(
+            f"`{type(self).__name__}.endpoint` is deprecated, device-bound entities"
+            " have no endpoint",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        endpoints = cast("Device", self._device).endpoints
+        return endpoints[min(ep_id for ep_id in endpoints if ep_id != 0)]
+
+    def _handle_value_changed(
+        self, event: StoreValueUpdatedEvent | StoreValueDeletedEvent
+    ) -> None:
+        """Handle the value being set or deleted."""
+        self.maybe_emit_state_changed_event()
+
+    def _get_value(self) -> Any:
+        """Return the value, or `None` if it is absent or cannot be decoded."""
+        store = get_device_store(self._device.device)
+
+        if store is None:
+            return None
+
+        return store.get(self._value)
+
+    async def _async_write_value(self, value: Any) -> None:
+        """Write the value.
+
+        With a writer, the writer sends it to the device and sets it in the store, and
+        its errors propagate. Without one, the value is a setting only the host keeps
+        and is set in the store here. Either way, the store's change callback updates
+        the entity's state.
+        """
+        if self._writer is not None:
+            await self._writer(self._device.device, value)
+            return
+
+        store = get_device_store(self._device.device)
+
+        if store is None:
+            raise ZHAException(
+                f"Cannot write {self._value.key}: the device has no store"
+            )
+
+        store[self._value] = value
 
 
 class ZclPlatformEntity(PlatformEntity):

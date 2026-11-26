@@ -30,6 +30,7 @@ from zha.application.platforms import (
     BaseEntityState,
     ClusterConfig,
     ClusterMatch,
+    DeviceValueEntity,
     EntityCategory,
     GroupEntity,
     PlatformFeatureGroup,
@@ -48,8 +49,11 @@ from zha.quirks import DANFOSS_ALLY_THERMOSTAT, TUYA_PLUG_ONOFF
 from zha.zigbee.group import Group
 
 if TYPE_CHECKING:
-    from zha.zigbee.device import Device
+    from zigpy.store import StoredValue
+
+    from zha.zigbee.device import BaseDevice, Device
     from zha.zigbee.endpoint import Endpoint
+    from zha.zigbee.store import DeviceValueWriter
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -68,6 +72,16 @@ class ConfigurableAttributeSwitchState(SwitchState):
     inverted: bool
     attribute_name: str
     invert_attribute_name: str | None
+    force_inverted: bool
+    off_value: int
+    on_value: int
+
+
+@dataclass(frozen=True, kw_only=True)
+class DeviceValueSwitchState(SwitchState):
+    """State for device value switch entities."""
+
+    inverted: bool
     force_inverted: bool
     off_value: int
     on_value: int
@@ -559,6 +573,91 @@ class ConfigurableAttributeSwitch(ZclPlatformEntity):
 
         self.debug("read values=%s", results)
         self.maybe_emit_state_changed_event()
+
+
+class DeviceValueSwitch(DeviceValueEntity, BaseSwitch):
+    """Switch showing and setting a device value, kept in the device's store.
+
+    It takes the options of `ConfigurableAttributeSwitch`, except that an inversion
+    can only be forced: an inverting attribute would be a second value.
+    """
+
+    _attr_entity_category = EntityCategory.CONFIG
+    _force_inverted: bool = False
+    _off_value: int = 0
+    _on_value: int = 1
+
+    def __init__(
+        self,
+        device: BaseDevice,
+        *,
+        value: StoredValue[Any],
+        writer: DeviceValueWriter[Any] | None = None,
+        force_inverted: bool = False,
+        off_value: int = 0,
+        on_value: int = 1,
+        **kwargs: Any,
+    ) -> None:
+        """Init this switch."""
+        if writer is not None:
+            self._writer = writer
+        self._force_inverted = force_inverted
+        self._off_value = off_value
+        self._on_value = on_value
+
+        super().__init__(device, value=value, **kwargs)
+
+    @property
+    def state(self) -> DeviceValueSwitchState:
+        """Return the state of the switch."""
+        return DeviceValueSwitchState(
+            **super().state.__dict__,
+            inverted=self.inverted,
+            force_inverted=self._force_inverted,
+            off_value=self._off_value,
+            on_value=self._on_value,
+        )
+
+    @property
+    def inverted(self) -> bool:
+        """Return True if the switch is inverted."""
+        return self._force_inverted
+
+    @property
+    def is_on(self) -> bool:
+        """Return if the switch is on.
+
+        As for an attribute, an absent value is off and `on_value` 1 compares by
+        truth, so a stored `true` is on. The store is untyped at rest, so a value that
+        is not an int (or a bool) is off too.
+        """
+        value = self._get_value()
+
+        if not isinstance(value, int):
+            if value is not None:
+                self.debug("Cannot show value %r", value)
+            is_on = False
+        elif self._on_value != 1:
+            is_on = value == self._on_value
+        else:
+            is_on = bool(value)
+
+        return (not is_on) if self.inverted else is_on
+
+    async def async_turn_on_off(self, state: bool) -> None:
+        """Turn the entity on or off."""
+        if self.inverted:
+            state = not state
+
+        await self._async_write_value(self._on_value if state else self._off_value)
+
+    async def async_turn_on(self) -> None:
+        """Turn the entity on."""
+        await self.async_turn_on_off(True)
+
+    async def async_turn_off(self) -> None:
+        """Turn the entity off."""
+        await self.async_turn_on_off(False)
 
 
 @register_entity(TUYA_MANUFACTURER_CLUSTER)
