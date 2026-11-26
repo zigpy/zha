@@ -2684,31 +2684,29 @@ async def test_turn_on_color_command_failure_keeps_color(
     assert (entity.state.color_temp, entity.state.xy_color) == color_before
 
 
-def enable_enhanced_light_transition(zha_gateway: Gateway) -> None:
-    """Enable the enhanced light transition option."""
-    zha_gateway.config.config.light_options.enable_enhanced_light_transition = True
-
-
 @patch(
     "zigpy.zcl.clusters.general.OnOff.request",
     new=AsyncMock(return_value=SUCCESS),
 )
 @pytest.mark.parametrize(
-    ("level_results", "expected_requests"),
+    ("level_results", "expected_requests", "expected_on"),
     [
-        # the initial low-brightness move_to_level_with_on_off fails
-        ([FAILURE], 1),
-        # the color is set, but the final move_to_level fails
-        ([SUCCESS, FAILURE], 2),
+        # the initial low-brightness move_to_level_with_on_off fails: still off
+        ([FAILURE], 1, False),
+        # the light is on at the low level and has its color, but the final
+        # move_to_level fails: on, at the wrong brightness
+        ([SUCCESS, FAILURE], 2, True),
     ],
 )
 async def test_enhanced_turn_on_level_command_failure(
     zha_gateway: Gateway,
     level_results: list[list],
     expected_requests: int,
+    expected_on: bool,
 ) -> None:
     """Test a failed level command during an enhanced turn on releases the flag."""
-    enable_enhanced_light_transition(zha_gateway)
+    # the test configuration (make_zha_data) enables enhanced light transitions
+    assert zha_gateway.config.config.light_options.enable_enhanced_light_transition
     device_light_1 = await device_light_1_mock(zha_gateway)
     entity = get_entity(device_light_1, platform=Platform.LIGHT)
     assert bool(entity.state.on) is False
@@ -2725,6 +2723,7 @@ async def test_enhanced_turn_on_level_command_failure(
         await zha_gateway.async_block_till_done()
 
     assert level_request.await_count == expected_requests
+    assert bool(entity.state.on) is expected_on
     assert not entity.is_transitioning
 
 
