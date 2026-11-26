@@ -11,6 +11,7 @@ from typing import Any
 from unittest.mock import AsyncMock, call, patch, sentinel
 
 import pytest
+from zhaquirks.builder import QuirkBuilder
 from zigpy.profiles import zha
 from zigpy.zcl.clusters import general, lighting
 import zigpy.zcl.foundation as zcl_f
@@ -32,7 +33,9 @@ from tests.common import (
 from zha.application import Platform
 from zha.application.gateway import Gateway
 from zha.application.platforms import GroupEntity, PlatformEntity
+from zha.application.platforms.light import MinTransitionLight
 from zha.application.platforms.light.const import FLASH_EFFECTS, ColorMode, FlashMode
+from zha.quirks import DeviceRegistry
 from zha.zigbee.device import Device
 from zha.zigbee.group import Group, GroupMemberReference
 
@@ -2479,6 +2482,71 @@ async def test_group_state_ignores_unavailable_members(zha_gateway: Gateway) -> 
     await asyncio.sleep(0.1)
     await zha_gateway.async_block_till_done()
     assert bool(entity.state.on) is True
+
+
+@pytest.mark.parametrize(
+    ("manufacturer", "friendly_manufacturer", "min_transition"),
+    [
+        # A sengled member keeps its minimum transition time, also when renamed
+        ("sengled", "Sengled", MinTransitionLight._DEFAULT_MIN_TRANSITION_TIME),
+        # A friendly name of "sengled" doesn't give another member one
+        ("FakeManufacturer", "sengled", 0),
+    ],
+)
+async def test_group_min_transition_uses_reported_manufacturer(
+    zha_gateway: Gateway,
+    manufacturer: str,
+    friendly_manufacturer: str,
+    min_transition: float,
+) -> None:
+    """Test a light group's minimum transition time follows the reported manufacturer."""
+    registry = DeviceRegistry()
+    (
+        QuirkBuilder(manufacturer, "FakeModel")
+        .friendly_name(manufacturer=friendly_manufacturer, model="Friendly light")
+        .add_to_registry(registry)
+    )
+
+    coordinator = await coordinator_mock(zha_gateway)
+    zha_gateway.coordinator_zha_device = coordinator
+    coordinator._zha_gateway = zha_gateway
+
+    zigpy_device = create_mock_zigpy_device(
+        zha_gateway,
+        {
+            1: {
+                SIG_EP_INPUT: [
+                    general.OnOff.cluster_id,
+                    general.LevelControl.cluster_id,
+                    general.Groups.cluster_id,
+                ],
+                SIG_EP_OUTPUT: [],
+                SIG_EP_TYPE: zha.DeviceType.DIMMABLE_LIGHT,
+                SIG_EP_PROFILE: zha.PROFILE_ID,
+            }
+        },
+        ieee=IEEE_GROUPABLE_DEVICE2,
+        manufacturer=manufacturer,
+        nwk=0xC79E,
+        registry=registry,
+    )
+    member = await join_zigpy_device(zha_gateway, zigpy_device)
+    assert member.friendly_manufacturer == friendly_manufacturer
+    assert member.manufacturer == manufacturer
+
+    other_member = await device_light_1_mock(zha_gateway)
+
+    zha_group: Group = await zha_gateway.async_create_zigpy_group(
+        "Test Group",
+        [
+            GroupMemberReference(ieee=member.ieee, endpoint_id=1),
+            GroupMemberReference(ieee=other_member.ieee, endpoint_id=1),
+        ],
+    )
+    await zha_gateway.async_block_till_done()
+
+    entity = get_group_entity(zha_group, platform=Platform.LIGHT)
+    assert min_transition == entity._DEFAULT_MIN_TRANSITION_TIME
 
 
 @patch(
