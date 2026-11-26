@@ -923,12 +923,31 @@ class Thermostat(BaseThermostat, ZclPlatformEntity):
         is_away = self.preset_mode == Preset.AWAY
 
         if self.hvac_mode == HVACMode.HEAT_COOL:
+            # The cooling setpoint must stay above the heating setpoint by the
+            # deadband for every write, else the thermostat rejects the write
+            # (ZCL R8 6.3.2.2.2.2): when the heating setpoint goes up, raise the
+            # cooling setpoint first
+            current_low = (
+                self._unoccupied_heating_setpoint
+                if is_away
+                else self._occupied_heating_setpoint
+            )
+            cooling_first = (
+                target_temp_low is not None
+                and current_low is not None
+                and int(target_temp_low * ZCL_TEMP) > current_low
+            )
+            if target_temp_high is not None and cooling_first:
+                await self._async_set_cooling_setpoint(
+                    temperature=int(target_temp_high * ZCL_TEMP),
+                    is_away=is_away,
+                )
             if target_temp_low is not None:
                 await self._async_set_heating_setpoint(
                     temperature=int(target_temp_low * ZCL_TEMP),
                     is_away=is_away,
                 )
-            if target_temp_high is not None:
+            if target_temp_high is not None and not cooling_first:
                 await self._async_set_cooling_setpoint(
                     temperature=int(target_temp_high * ZCL_TEMP),
                     is_away=is_away,
