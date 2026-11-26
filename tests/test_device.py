@@ -1787,6 +1787,92 @@ async def test_join_binding_reporting(zha_gateway: Gateway) -> None:
     ]
 
 
+async def test_philips_contact_cluster_binding_reporting(
+    zha_gateway: Gateway,
+) -> None:
+    """Test that the Hue contact sensor's contact cluster is bound and reports."""
+
+    zigpy_dev = create_mock_zigpy_device(
+        zha_gateway,
+        {
+            2: {
+                SIG_EP_INPUT: [
+                    general.Basic.cluster_id,
+                    general.PowerConfiguration.cluster_id,
+                    general.Identify.cluster_id,
+                    0xFC06,
+                ],
+                SIG_EP_OUTPUT: [
+                    general.Basic.cluster_id,
+                    general.Identify.cluster_id,
+                    general.OnOff.cluster_id,
+                    general.Ota.cluster_id,
+                ],
+                SIG_EP_TYPE: zigpy.profiles.zha.DeviceType.IAS_ZONE,
+                SIG_EP_PROFILE: zigpy.profiles.zha.PROFILE_ID,
+            }
+        },
+        manufacturer="Signify Netherlands B.V.",
+        model="SOC001",
+    )
+
+    contact_cluster = zigpy_dev.endpoints[2].in_clusters[0xFC06]
+    assert contact_cluster.ep_attribute == "philips_contact_cluster"
+
+    await join_zigpy_device(zha_gateway, zigpy_dev)
+
+    assert contact_cluster.bind.mock_calls == [call()]
+    assert contact_cluster.configure_reporting_multiple.mock_calls == [
+        call(
+            {
+                contact_cluster.AttributeDefs.contact: ReportingConfig(0, 900, 1),
+                contact_cluster.AttributeDefs.tamper: ReportingConfig(0, 900, 1),
+            }
+        )
+    ]
+
+
+async def test_philips_contact_cluster_without_quirk(
+    zha_gateway: Gateway,
+) -> None:
+    """Test that an unquirked Hue contact sensor is still configured."""
+
+    zigpy_dev = create_mock_zigpy_device(
+        zha_gateway,
+        {
+            2: {
+                SIG_EP_INPUT: [
+                    general.Basic.cluster_id,
+                    general.PowerConfiguration.cluster_id,
+                    general.Identify.cluster_id,
+                    0xFC06,
+                ],
+                SIG_EP_OUTPUT: [
+                    general.Basic.cluster_id,
+                    general.Identify.cluster_id,
+                    general.OnOff.cluster_id,
+                    general.Ota.cluster_id,
+                ],
+                SIG_EP_TYPE: zigpy.profiles.zha.DeviceType.IAS_ZONE,
+                SIG_EP_PROFILE: zigpy.profiles.zha.PROFILE_ID,
+            }
+        },
+        manufacturer="Signify Netherlands B.V.",
+        model="SOC001",
+        registry=DeviceRegistry(),
+    )
+
+    contact_cluster = zigpy_dev.endpoints[2].in_clusters[0xFC06]
+    power_cluster = zigpy_dev.endpoints[2].power
+
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
+
+    assert zha_device.available
+    assert contact_cluster.bind.mock_calls == [call()]
+    assert contact_cluster.configure_reporting_multiple.mock_calls == []
+    assert power_cluster.bind.mock_calls == [call()]
+
+
 async def test_endpoint_none_profile(
     zha_gateway: Gateway,
     caplog: pytest.LogCaptureFixture,
