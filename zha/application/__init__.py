@@ -22,6 +22,7 @@ class Platform(StrEnum):
     SENSOR = "sensor"
     SIREN = "siren"
     SWITCH = "switch"
+    TEXT = "text"
     VALVE = "valve"
     VIRTUAL = "virtual"
     UPDATE = "update"
@@ -45,3 +46,4 @@ class EntityPlatform(StrEnum):
     SENSOR = "sensor"
     SELECT = "select"
     SWITCH = "switch"
+    TEXT = "text"
