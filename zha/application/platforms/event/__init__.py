@@ -4,19 +4,26 @@ from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
 import dataclasses
+import math
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, Final
 
-from zigpy.types.named import EUI64
+from zigpy.types.named import EUI64, Bool
 
 from zha.application import Platform
 from zha.application.const import ZHA_EVENT
 from zha.application.platforms import BaseEntityState, PlatformEntity, ZclPlatformEntity
 from zha.application.platforms.event.const import (
+    ATTR_DEGREES,
+    ATTR_DIRECTION,
     ATTR_PRESS_COUNT,
+    ATTR_PRESSED,
+    ATTR_STEPS,
     ButtonEventType,
     DoorbellEventType,
     EventDeviceClass,
+    RotaryDirection,
+    RotaryEventType,
 )
 
 if TYPE_CHECKING:
@@ -305,3 +312,261 @@ class ZhaEventButton(BaseEvent, ZclPlatformEntity):
 
         self._held = match.event_type == ButtonEventType.LONG_PRESS_START
         self._trigger_event(match.event_type, dict(match.event_attributes))
+
+
+# The rotary event data that reports movement, which only `rotation` carries
+_ROTARY_AMOUNTS: Final = (ATTR_STEPS, ATTR_DEGREES)
+
+
+def _normalize_rotary_attribute(name: str, value: Any) -> Any:
+    """Return a rotary event data value as a plain value, if it is valid.
+
+    Raises `ValueError` for an invalid `steps`, `degrees` or `pressed`. Integral
+    floats are accepted as `steps`. Integer types such as enums and zigpy's
+    integers are turned into plain integers, and zigpy's valid `Bool`s into booleans.
+    """
+    if name == ATTR_STEPS:
+        if (
+            isinstance(value, float)
+            and math.isfinite(value)
+            and value.is_integer()
+            and value > 0
+        ):
+            return int(value)
+
+        if isinstance(value, int) and not isinstance(value, bool) and value > 0:
+            return int(value)
+
+        expected = "a positive integer"
+    elif name == ATTR_DEGREES:
+        if (
+            isinstance(value, int | float)
+            and not isinstance(value, bool)
+            and math.isfinite(value)
+            and value > 0
+        ):
+            return int(value) if isinstance(value, int) else float(value)
+
+        expected = "a positive number"
+    elif name == ATTR_PRESSED:
+        if isinstance(value, bool):
+            return value
+
+        # Parsed ZCL booleans are zigpy's `Bool` enum, whose 0xFF is the invalid value
+        if isinstance(value, Bool) and value in (Bool.false, Bool.true):
+            return value == Bool.true
+
+        expected = "a boolean"
+    else:
+        return value
+
+    raise ValueError(f"Invalid {name} {value!r}: it must be {expected}")
+
+
+def _validate_event_data_path(name: str, path: Any) -> None:
+    """Validate the path to an event data value, raising `ValueError` if invalid."""
+    if isinstance(path, str | bytes) or not isinstance(path, Sequence) or not path:
+        raise ValueError(
+            f"Event data {name} needs a non-empty sequence of keys and indexes,"
+            f" not {path!r}"
+        )
+
+    for key in path:
+        # A `ValueError`, as for every other invalid match
+        if not isinstance(key, str | int) or isinstance(key, bool):
+            raise ValueError(  # noqa: TRY004
+                f"Invalid key {key!r} in the path of event data {name}"
+            )
+
+
+def _get_event_data_value(data: Mapping[str, Any], path: Sequence[str | int]) -> Any:
+    """Return the value at a path of keys and sequence indexes in `zha_event` data."""
+    value: Any = data
+    for key in path:
+        # Keys index mappings and indexes index lists, never strings or bytes
+        if isinstance(key, str):
+            if isinstance(value, Mapping) and key in value:
+                value = value[key]
+                continue
+        elif isinstance(value, list | tuple) and -len(value) <= key < len(value):
+            value = value[key]
+            continue
+
+        raise ValueError(f"zha_event data {data} has no value at {list(path)}")
+
+    return value
+
+
+@dataclasses.dataclass(frozen=True, kw_only=True)
+class ZhaEventRotaryMatch:
+    """A rotary event type fired when the device sends a matching `zha_event`.
+
+    `event_data` is matched like the data of a ZHA device automation trigger, as in
+    `ZhaEventMatch`. Devices report each direction with its own command or
+    parameter, so the direction is a constant of the match. Event data can be
+    constant (`event_attributes`) or taken from the `zha_event`
+    (`event_attributes_from_data`, the path of keys and indexes to the value).
+    """
+
+    # A standard `RotaryEventType`, or an integration-specific event type
+    event_type: str
+    event_data: Mapping[str, Any]
+
+    # Required for `rotation` and `rotation_start`. A `rotation_end` without one
+    # gets the direction of the turn it ends, if the entity fired one before.
+    direction: RotaryDirection | None = None
+
+    event_attributes: Mapping[str, Any] = dataclasses.field(
+        default_factory=lambda: MappingProxyType({})
+    )
+    event_attributes_from_data: Mapping[str, Sequence[str | int]] = dataclasses.field(
+        default_factory=lambda: MappingProxyType({})
+    )
+
+    def __post_init__(self) -> None:
+        """Validate the match."""
+        if not isinstance(self.event_type, str) or not self.event_type:
+            raise ValueError(f"Invalid event type {self.event_type!r}")
+
+        if not self.event_data:
+            raise ValueError(f"Event type {self.event_type} matches every zha_event")
+
+        if self.direction is not None and self.direction not in tuple(RotaryDirection):
+            raise ValueError(
+                f"Invalid direction {self.direction!r} for {self.event_type}"
+            )
+
+        if self.direction is None and self.event_type in (
+            RotaryEventType.ROTATION,
+            RotaryEventType.ROTATION_START,
+        ):
+            raise ValueError(f"Event type {self.event_type} needs a direction")
+
+        names = [*self.event_attributes, *self.event_attributes_from_data]
+
+        if ATTR_DIRECTION in names:
+            raise ValueError(
+                f"Set the direction of {self.event_type} with `direction`, not as"
+                " event data"
+            )
+
+        if len(names) != len(set(names)):
+            raise ValueError(
+                f"Event type {self.event_type} sets the same event data twice"
+            )
+
+        # A report with movement is a `rotation`, even if it starts or ends a turn
+        if self.event_type != RotaryEventType.ROTATION and any(
+            name in _ROTARY_AMOUNTS for name in names
+        ):
+            raise ValueError(
+                f"Only '{RotaryEventType.ROTATION}' reports an amount, not"
+                f" '{self.event_type}'"
+            )
+
+        # The match is frozen: store the constant event data as plain values
+        object.__setattr__(
+            self,
+            "event_attributes",
+            MappingProxyType(
+                {
+                    name: _normalize_rotary_attribute(name, value)
+                    for name, value in self.event_attributes.items()
+                }
+            ),
+        )
+
+        for name, path in self.event_attributes_from_data.items():
+            _validate_event_data_path(name, path)
+
+
+class ZhaEventRotary(BaseEvent, ZclPlatformEntity):
+    """Rotary event entity firing standard event types for the device's `zha_event`s.
+
+    Dials and knobs report turns as cluster commands, which ZHA relays as
+    `zha_event`s. This entity maps them to the rotary event types like
+    `ZhaEventButton` maps presses: the first match for a `zha_event` fires, so one
+    event from the device fires at most one event type. The only state it keeps is
+    the direction of the current turn, for a `rotation_end` that doesn't carry one.
+    A report with no movement (`steps` or `degrees` of 0) fires nothing.
+    """
+
+    def __init__(
+        self,
+        endpoint: Endpoint,
+        device: Device,
+        *,
+        event_matches: Sequence[ZhaEventRotaryMatch],
+        **kwargs: Any,
+    ) -> None:
+        """Initialize the event entity."""
+        self._event_matches: tuple[ZhaEventRotaryMatch, ...] = tuple(event_matches)
+        self._attr_event_types = list(
+            dict.fromkeys(match.event_type for match in event_matches)
+        )
+        self._direction: RotaryDirection | None = None
+
+        super().__init__(endpoint=endpoint, device=device, **kwargs)
+
+        if not self._event_matches:
+            raise ValueError(f"Rotary event entity {self.unique_id} has no events")
+
+        if not {RotaryEventType.ROTATION, RotaryEventType.ROTATION_START} & set(
+            self.event_types
+        ):
+            raise ValueError(
+                f"Rotary event entity {self.unique_id} supports neither"
+                f" '{RotaryEventType.ROTATION}' nor"
+                f" '{RotaryEventType.ROTATION_START}'"
+            )
+
+    def on_add(self) -> None:
+        """Listen to the `zha_event`s of the device."""
+        super().on_add()
+        self._on_remove_callbacks.append(
+            self.device.on_event(ZHA_EVENT, self._handle_zha_event)
+        )
+
+    def _handle_zha_event(self, event: ZHAEvent) -> None:
+        """Fire the event type of the first match for a `zha_event`."""
+        # `emit()` keeps the `zha_event` flowing to the device's other listeners
+        # either way. Catching here logs the error with this entity and the event
+        try:
+            self._fire_first_match(event)
+        except Exception:  # pylint: disable=broad-except
+            self.error("Failed to handle zha_event %s", event.data, exc_info=True)
+
+    def _fire_first_match(self, event: ZHAEvent) -> None:
+        """Fire the event type of the first match for a `zha_event`."""
+        for match in self._event_matches:
+            if _event_data_matches(match.event_data, event.data):
+                break
+        else:
+            return
+
+        event_attributes = dict(match.event_attributes)
+        for name, path in match.event_attributes_from_data.items():
+            value = _get_event_data_value(event.data, path)
+
+            # The device reported no movement
+            if name in _ROTARY_AMOUNTS and value == 0 and not isinstance(value, bool):
+                return
+
+            event_attributes[name] = _normalize_rotary_attribute(name, value)
+
+        # Only the standard types follow the turn: an integration-specific type
+        # neither starts nor ends one
+        direction = match.direction
+        if match.event_type == RotaryEventType.ROTATION_END:
+            direction = direction or self._direction
+            self._direction = None
+        elif match.event_type in (
+            RotaryEventType.ROTATION,
+            RotaryEventType.ROTATION_START,
+        ):
+            self._direction = direction
+
+        if direction is not None:
+            event_attributes = {ATTR_DIRECTION: str(direction), **event_attributes}
+
+        self._trigger_event(match.event_type, event_attributes)

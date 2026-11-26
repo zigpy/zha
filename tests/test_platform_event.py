@@ -1,5 +1,7 @@
 """Test the ZHA event platform."""
 
+import enum
+import re
 from typing import Any
 
 import pytest
@@ -26,12 +28,20 @@ from zha.application.platforms.event import (
     TriggeredEvent,
     ZhaEventButton,
     ZhaEventMatch,
+    ZhaEventRotary,
+    ZhaEventRotaryMatch,
     _event_data_matches,
 )
 from zha.application.platforms.event.const import (
+    ATTR_DEGREES,
+    ATTR_DIRECTION,
     ATTR_PRESS_COUNT,
+    ATTR_PRESSED,
+    ATTR_STEPS,
     ButtonEventType,
     EventDeviceClass,
+    RotaryDirection,
+    RotaryEventType,
 )
 from zha.zigbee.device import Device
 
@@ -734,3 +744,638 @@ def test_zha_event_match_invalid() -> None:
             event_data={"command": "release"},
             while_held=True,
         )
+
+
+# A knob reporting each detent with a step, and a turn's start and stop
+STEP_UP = {"command": "step", "params": {"step_mode": 0}}
+STEP_DOWN = {"command": "step", "params": {"step_mode": 1}}
+MOVE_CW = {"command": "move", "params": {"move_mode": 0}}
+MOVE_CCW = {"command": "move", "params": {"move_mode": 1}}
+TURN_STOP = {"command": "stop"}
+
+
+def create_event_rotary(
+    zha_device: Device, event_matches: list[ZhaEventRotaryMatch]
+) -> ZhaEventRotary:
+    """Create a `zha_event` rotary entity on the first endpoint of a device."""
+    endpoint = zha_device.endpoints[1]
+    entity = ZhaEventRotary(
+        endpoint=endpoint,
+        device=zha_device,
+        cluster=endpoint.zigpy_endpoint.out_clusters[general.OnOff.cluster_id],
+        event_matches=event_matches,
+        unique_id=f"{zha_device.ieee}-{endpoint.id}",
+        force_create=True,
+        unique_id_suffix="rotary",
+        translation_key="rotary",
+        fallback_name="Rotary",
+    )
+    entity.on_add()
+    return entity
+
+
+def fired_events(entity: BaseEvent) -> list[tuple[str, dict[str, Any]]]:
+    """Collect the event types and data an entity fires from now on."""
+    events: list[tuple[str, dict[str, Any]]] = []
+    entity.on_event(
+        EntityEventTriggeredEvent.event,
+        lambda event: events.append(
+            (event.triggered.event_type, event.triggered.event_attributes)
+        ),
+    )
+    return events
+
+
+async def test_zha_event_rotary(zha_device: Device) -> None:
+    """Test a rotary event entity firing for the steps of a knob."""
+    entity = create_event_rotary(
+        zha_device,
+        [
+            ZhaEventRotaryMatch(
+                event_type=RotaryEventType.ROTATION,
+                event_data=STEP_UP,
+                direction=RotaryDirection.CLOCKWISE,
+                event_attributes={ATTR_STEPS: 1},
+            ),
+            ZhaEventRotaryMatch(
+                event_type=RotaryEventType.ROTATION,
+                event_data=STEP_DOWN,
+                direction=RotaryDirection.COUNTER_CLOCKWISE,
+                # A constant integral float is passed on as an integer too
+                event_attributes={ATTR_STEPS: 1.0},
+            ),
+        ],
+    )
+    # Home Assistant has no rotary device class yet
+    assert entity.device_class is None
+    assert entity.event_types == ["rotation"]
+    assert entity.unique_id == f"{zha_device.ieee}-1-rotary"
+    assert entity.state.event_types == ["rotation"]
+
+    events = fired_events(entity)
+
+    emit_zha_event(zha_device, {**STEP_UP, "params": {"step_mode": 0, "x": 2}})
+    emit_zha_event(zha_device, STEP_DOWN)
+    emit_zha_event(zha_device, {"command": "toggle"})
+
+    assert events == [
+        ("rotation", {ATTR_DIRECTION: "clockwise", ATTR_STEPS: 1}),
+        ("rotation", {ATTR_DIRECTION: "counter_clockwise", ATTR_STEPS: 1}),
+    ]
+    assert type(events[1][1][ATTR_STEPS]) is int
+
+
+async def test_zha_event_rotary_start_and_end(zha_device: Device) -> None:
+    """Test that a stop without a direction gets the direction of its turn."""
+    entity = create_event_rotary(
+        zha_device,
+        [
+            ZhaEventRotaryMatch(
+                event_type=RotaryEventType.ROTATION_START,
+                event_data=MOVE_CW,
+                direction=RotaryDirection.CLOCKWISE,
+            ),
+            ZhaEventRotaryMatch(
+                event_type=RotaryEventType.ROTATION_START,
+                event_data=MOVE_CCW,
+                direction=RotaryDirection.COUNTER_CLOCKWISE,
+            ),
+            ZhaEventRotaryMatch(
+                event_type=RotaryEventType.ROTATION_END, event_data=TURN_STOP
+            ),
+        ],
+    )
+    assert entity.event_types == ["rotation_start", "rotation_end"]
+    events = fired_events(entity)
+
+    # A stop before any turn has no direction
+    emit_zha_event(zha_device, TURN_STOP)
+    emit_zha_event(zha_device, MOVE_CW)
+    emit_zha_event(zha_device, TURN_STOP)
+    emit_zha_event(zha_device, MOVE_CCW)
+    emit_zha_event(zha_device, TURN_STOP)
+    # The direction is only kept until the turn ends
+    emit_zha_event(zha_device, TURN_STOP)
+
+    assert events == [
+        ("rotation_end", {}),
+        ("rotation_start", {ATTR_DIRECTION: "clockwise"}),
+        ("rotation_end", {ATTR_DIRECTION: "clockwise"}),
+        ("rotation_start", {ATTR_DIRECTION: "counter_clockwise"}),
+        ("rotation_end", {ATTR_DIRECTION: "counter_clockwise"}),
+        ("rotation_end", {}),
+    ]
+
+
+async def test_zha_event_rotary_end_with_direction(zha_device: Device) -> None:
+    """Test that a stop reporting its own direction keeps it."""
+    entity = create_event_rotary(
+        zha_device,
+        [
+            ZhaEventRotaryMatch(
+                event_type=RotaryEventType.ROTATION,
+                event_data=STEP_UP,
+                direction=RotaryDirection.CLOCKWISE,
+            ),
+            ZhaEventRotaryMatch(
+                event_type=RotaryEventType.ROTATION_END,
+                event_data={"command": "stop", "params": {"direction": 1}},
+                direction=RotaryDirection.COUNTER_CLOCKWISE,
+            ),
+        ],
+    )
+    events = fired_events(entity)
+
+    emit_zha_event(zha_device, STEP_UP)
+    emit_zha_event(zha_device, {"command": "stop", "params": {"direction": 1}})
+
+    assert events == [
+        ("rotation", {ATTR_DIRECTION: "clockwise"}),
+        ("rotation_end", {ATTR_DIRECTION: "counter_clockwise"}),
+    ]
+
+
+async def test_zha_event_rotary_data_from_event(zha_device: Device) -> None:
+    """Test event data taken from the `zha_event`, and reports without movement."""
+    entity = create_event_rotary(
+        zha_device,
+        [
+            ZhaEventRotaryMatch(
+                event_type=RotaryEventType.ROTATION,
+                event_data={"command": "turned", "params": {"direction": 0}},
+                direction=RotaryDirection.CLOCKWISE,
+                event_attributes={ATTR_PRESSED: False},
+                event_attributes_from_data={
+                    ATTR_STEPS: ("params", "clicks"),
+                    "step_size": ("args", 1),
+                },
+            ),
+            ZhaEventRotaryMatch(
+                event_type=RotaryEventType.ROTATION,
+                event_data={"command": "angle"},
+                direction=RotaryDirection.COUNTER_CLOCKWISE,
+                event_attributes_from_data={ATTR_DEGREES: ("params", "degrees")},
+            ),
+        ],
+    )
+    events = fired_events(entity)
+
+    emit_zha_event(
+        zha_device,
+        {
+            "command": "turned",
+            "params": {"direction": 0, "clicks": 3},
+            "args": [0, 13],
+        },
+    )
+    # A report without movement fires nothing
+    emit_zha_event(
+        zha_device,
+        {"command": "turned", "params": {"direction": 0, "clicks": 0}, "args": [0, 0]},
+    )
+    emit_zha_event(zha_device, {"command": "angle", "params": {"degrees": 12.5}})
+    emit_zha_event(zha_device, {"command": "angle", "params": {"degrees": 0.0}})
+
+    assert events == [
+        (
+            "rotation",
+            {
+                ATTR_DIRECTION: "clockwise",
+                ATTR_PRESSED: False,
+                ATTR_STEPS: 3,
+                "step_size": 13,
+            },
+        ),
+        ("rotation", {ATTR_DIRECTION: "counter_clockwise", ATTR_DEGREES: 12.5}),
+    ]
+
+
+async def test_zha_event_rotary_zigpy_types(
+    zha_device: Device, caplog: pytest.LogCaptureFixture
+) -> None:
+    """Test that zigpy types and enums are passed on as plain numbers and booleans."""
+
+    class Angle(enum.IntEnum):
+        """An angle reported as an enum."""
+
+        QUARTER = 90
+
+    entity = create_event_rotary(
+        zha_device,
+        [
+            ZhaEventRotaryMatch(
+                event_type=RotaryEventType.ROTATION,
+                event_data={"command": "turned"},
+                direction=RotaryDirection.CLOCKWISE,
+                event_attributes_from_data={
+                    ATTR_STEPS: ("params", "clicks"),
+                    ATTR_PRESSED: ("params", "pressed"),
+                },
+            ),
+            ZhaEventRotaryMatch(
+                event_type=RotaryEventType.ROTATION,
+                event_data={"command": "angle"},
+                direction=RotaryDirection.COUNTER_CLOCKWISE,
+                event_attributes_from_data={ATTR_DEGREES: ("params", "degrees")},
+            ),
+            ZhaEventRotaryMatch(
+                event_type=RotaryEventType.ROTATION,
+                event_data={"command": "quarter"},
+                direction=RotaryDirection.CLOCKWISE,
+                event_attributes={ATTR_DEGREES: Angle.QUARTER},
+            ),
+        ],
+    )
+    events = fired_events(entity)
+
+    for clicks, pressed in (
+        (zigpy.types.uint8_t(2), zigpy.types.Bool.true),
+        (zigpy.types.uint8_t(1), zigpy.types.Bool.false),
+    ):
+        emit_zha_event(
+            zha_device,
+            {"command": "turned", "params": {"clicks": clicks, "pressed": pressed}},
+        )
+
+    # The invalid ZCL boolean is no boolean
+    emit_zha_event(
+        zha_device,
+        {
+            "command": "turned",
+            "params": {
+                "clicks": zigpy.types.uint8_t(1),
+                "pressed": zigpy.types.Bool(0xFF),
+            },
+        },
+    )
+    assert "Invalid pressed <Bool.undefined_0xff: 255>" in caplog.text
+
+    emit_zha_event(
+        zha_device,
+        {"command": "angle", "params": {"degrees": zigpy.types.uint16_t(15)}},
+    )
+    emit_zha_event(zha_device, {"command": "quarter"})
+
+    assert events == [
+        ("rotation", {ATTR_DIRECTION: "clockwise", ATTR_STEPS: 2, ATTR_PRESSED: True}),
+        ("rotation", {ATTR_DIRECTION: "clockwise", ATTR_STEPS: 1, ATTR_PRESSED: False}),
+        ("rotation", {ATTR_DIRECTION: "counter_clockwise", ATTR_DEGREES: 15}),
+        ("rotation", {ATTR_DIRECTION: "clockwise", ATTR_DEGREES: 90}),
+    ]
+
+    # Plain values, not zigpy types or enums that only compare equal
+    assert [
+        {name: type(value) for name, value in attributes.items()}
+        for _, attributes in events
+    ] == [
+        {ATTR_DIRECTION: str, ATTR_STEPS: int, ATTR_PRESSED: bool},
+        {ATTR_DIRECTION: str, ATTR_STEPS: int, ATTR_PRESSED: bool},
+        {ATTR_DIRECTION: str, ATTR_DEGREES: int},
+        {ATTR_DIRECTION: str, ATTR_DEGREES: int},
+    ]
+
+
+@pytest.mark.parametrize(
+    ("data", "error"),
+    [
+        # The value is missing
+        (
+            {"command": "turned", "params": {}},
+            "has no value at \\['params', 'clicks'\\]",
+        ),
+        ({"command": "turned", "params": [3]}, "has no value at"),
+        ({"command": "turned"}, "has no value at"),
+        # Indexes only index lists, keys only mappings
+        ({"command": "turned", "params": "clicks"}, "has no value at"),
+        # The value is invalid
+        ({"command": "turned", "params": {"clicks": -2}}, "Invalid steps -2"),
+        ({"command": "turned", "params": {"clicks": 1.5}}, "Invalid steps 1.5"),
+        ({"command": "turned", "params": {"clicks": True}}, "Invalid steps True"),
+    ],
+)
+async def test_zha_event_rotary_invalid_data(
+    zha_device: Device,
+    caplog: pytest.LogCaptureFixture,
+    data: dict[str, Any],
+    error: str,
+) -> None:
+    """Test that invalid event data is logged and fires nothing."""
+    entity = create_event_rotary(
+        zha_device,
+        [
+            ZhaEventRotaryMatch(
+                event_type=RotaryEventType.ROTATION,
+                event_data={"command": "turned"},
+                direction=RotaryDirection.CLOCKWISE,
+                event_attributes_from_data={ATTR_STEPS: ("params", "clicks")},
+            ),
+        ],
+    )
+    events = fired_events(entity)
+
+    zha_events: list[Any] = []
+    zha_device.on_all_events(zha_events.append)
+
+    emit_zha_event(zha_device, data)
+
+    assert events == []
+    assert len(zha_events) == 1
+    assert "Failed to handle zha_event" in caplog.text
+    assert re.search(error, caplog.text)
+
+
+async def test_zha_event_rotary_first_match_fires(zha_device: Device) -> None:
+    """Test that only the first match for a `zha_event` fires."""
+    entity = create_event_rotary(
+        zha_device,
+        [
+            ZhaEventRotaryMatch(
+                event_type=RotaryEventType.ROTATION,
+                event_data={"command": "step", "params": {"step_mode": 0}},
+                direction=RotaryDirection.CLOCKWISE,
+                event_attributes={ATTR_PRESSED: True},
+            ),
+            ZhaEventRotaryMatch(
+                event_type=RotaryEventType.ROTATION,
+                event_data={"command": "step"},
+                direction=RotaryDirection.COUNTER_CLOCKWISE,
+            ),
+        ],
+    )
+    events = fired_events(entity)
+
+    emit_zha_event(zha_device, STEP_UP)
+    emit_zha_event(zha_device, STEP_DOWN)
+
+    assert events == [
+        ("rotation", {ATTR_DIRECTION: "clockwise", ATTR_PRESSED: True}),
+        ("rotation", {ATTR_DIRECTION: "counter_clockwise"}),
+    ]
+
+
+async def test_zha_event_rotary_ignores_other_devices(
+    zha_gateway: Gateway, zha_device: Device
+) -> None:
+    """Test that a rotary entity only listens to the `zha_event`s of its device."""
+    other_device = await join_zigpy_device(
+        zha_gateway,
+        create_mock_zigpy_device(
+            zha_gateway,
+            {
+                1: {
+                    SIG_EP_INPUT: [general.Basic.cluster_id],
+                    SIG_EP_OUTPUT: [general.OnOff.cluster_id],
+                    SIG_EP_TYPE: zha.DeviceType.NON_COLOR_CONTROLLER,
+                    SIG_EP_PROFILE: zha.PROFILE_ID,
+                }
+            },
+            ieee="01:2d:6f:00:0a:90:69:e8",
+        ),
+    )
+    entity = create_event_rotary(
+        zha_device,
+        [
+            ZhaEventRotaryMatch(
+                event_type=RotaryEventType.ROTATION,
+                event_data=STEP_UP,
+                direction=RotaryDirection.CLOCKWISE,
+            )
+        ],
+    )
+    events = fired_events(entity)
+
+    emit_zha_event(other_device, STEP_UP)
+    assert events == []
+
+    emit_zha_event(zha_device, STEP_UP)
+    assert events == [("rotation", {ATTR_DIRECTION: "clockwise"})]
+
+
+async def test_zha_event_rotary_trigger_error_keeps_zha_event(
+    zha_device: Device,
+    caplog: pytest.LogCaptureFixture,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Test that an error while firing an event is logged by the entity."""
+    entity = create_event_rotary(
+        zha_device,
+        [
+            ZhaEventRotaryMatch(
+                event_type=RotaryEventType.ROTATION,
+                event_data=STEP_UP,
+                direction=RotaryDirection.CLOCKWISE,
+            )
+        ],
+    )
+
+    def fail(*args: Any, **kwargs: Any) -> None:
+        raise RuntimeError("trigger failed")
+
+    monkeypatch.setattr(entity, "_trigger_event", fail)
+
+    zha_events: list[Any] = []
+    zha_device.on_all_events(zha_events.append)
+
+    emit_zha_event(zha_device, STEP_UP)
+
+    assert len(zha_events) == 1
+    assert "Failed to handle zha_event" in caplog.text
+    assert "trigger failed" in caplog.text
+
+
+@pytest.mark.parametrize(
+    ("event_matches", "error"),
+    [
+        ([], "has no events"),
+        (
+            [
+                ZhaEventRotaryMatch(
+                    event_type=RotaryEventType.ROTATION_END, event_data=TURN_STOP
+                )
+            ],
+            "supports neither 'rotation' nor 'rotation_start'",
+        ),
+    ],
+)
+async def test_zha_event_rotary_invalid(
+    zha_device: Device, event_matches: list[ZhaEventRotaryMatch], error: str
+) -> None:
+    """Test that invalid event matches are rejected when creating the entity."""
+    with pytest.raises(ValueError, match=error):
+        create_event_rotary(zha_device, event_matches)
+
+
+@pytest.mark.parametrize(
+    ("kwargs", "error"),
+    [
+        ({"event_type": ""}, "Invalid event type ''"),
+        ({"direction": "left"}, "Invalid direction 'left' for rotation"),
+        ({"direction": ""}, "Invalid direction '' for rotation"),
+        (
+            {"event_type": RotaryEventType.ROTATION, "event_data": {}},
+            "matches every zha_event",
+        ),
+        (
+            {"event_type": RotaryEventType.ROTATION, "direction": None},
+            "rotation needs a direction",
+        ),
+        (
+            {"event_type": RotaryEventType.ROTATION_START, "direction": None},
+            "rotation_start needs a direction",
+        ),
+        (
+            {"event_attributes": {ATTR_DIRECTION: "clockwise"}},
+            "Set the direction of rotation with `direction`",
+        ),
+        (
+            {"event_attributes_from_data": {ATTR_DIRECTION: ("params", "direction")}},
+            "Set the direction of rotation with `direction`",
+        ),
+        (
+            {
+                "event_attributes": {ATTR_STEPS: 1},
+                "event_attributes_from_data": {ATTR_STEPS: ("params", "clicks")},
+            },
+            "sets the same event data twice",
+        ),
+        (
+            {
+                "event_type": RotaryEventType.ROTATION_START,
+                "event_attributes": {ATTR_STEPS: 1},
+            },
+            "Only 'rotation' reports an amount, not 'rotation_start'",
+        ),
+        (
+            {
+                "event_type": RotaryEventType.ROTATION_END,
+                "event_attributes_from_data": {ATTR_DEGREES: ("params", "angle")},
+            },
+            "Only 'rotation' reports an amount, not 'rotation_end'",
+        ),
+        ({"event_attributes": {ATTR_STEPS: 0}}, "Invalid steps 0"),
+        ({"event_attributes": {ATTR_STEPS: True}}, "Invalid steps True"),
+        ({"event_attributes": {ATTR_DEGREES: -5}}, "Invalid degrees -5"),
+        ({"event_attributes": {ATTR_PRESSED: 1}}, "Invalid pressed 1"),
+        ({"event_attributes": {ATTR_DEGREES: float("inf")}}, "Invalid degrees inf"),
+        ({"event_attributes": {ATTR_STEPS: 1.5}}, "Invalid steps 1.5"),
+        (
+            {"event_type": "knob_turned", "event_attributes": {ATTR_STEPS: 1}},
+            "Only 'rotation' reports an amount, not 'knob_turned'",
+        ),
+        (
+            {"event_attributes_from_data": {ATTR_STEPS: ()}},
+            "Event data steps needs a non-empty sequence",
+        ),
+        (
+            {"event_attributes_from_data": {ATTR_STEPS: "clicks"}},
+            "Event data steps needs a non-empty sequence",
+        ),
+        (
+            {"event_attributes_from_data": {ATTR_STEPS: ("params", None)}},
+            "Invalid key None in the path of event data steps",
+        ),
+        (
+            {"event_attributes_from_data": {ATTR_STEPS: ("args", True)}},
+            "Invalid key True in the path of event data steps",
+        ),
+    ],
+)
+def test_zha_event_rotary_match_invalid(kwargs: dict[str, Any], error: str) -> None:
+    """Test that invalid rotary event matches are rejected."""
+    with pytest.raises(ValueError, match=error):
+        ZhaEventRotaryMatch(
+            **{
+                "event_type": RotaryEventType.ROTATION,
+                "event_data": STEP_UP,
+                "direction": RotaryDirection.CLOCKWISE,
+                **kwargs,
+            }
+        )
+
+
+async def test_zha_event_rotary_steps_then_stop(zha_device: Device) -> None:
+    """Test a stop after steps, an interrupted turn and reports that change nothing."""
+    entity = create_event_rotary(
+        zha_device,
+        [
+            ZhaEventRotaryMatch(
+                event_type=RotaryEventType.ROTATION,
+                event_data={"command": "step", "params": {"step_mode": 0}},
+                direction=RotaryDirection.CLOCKWISE,
+                event_attributes_from_data={ATTR_STEPS: ("params", "clicks")},
+            ),
+            ZhaEventRotaryMatch(
+                event_type=RotaryEventType.ROTATION,
+                event_data={"command": "step", "params": {"step_mode": 1}},
+                direction=RotaryDirection.COUNTER_CLOCKWISE,
+                event_attributes_from_data={ATTR_STEPS: ("params", "clicks")},
+            ),
+            ZhaEventRotaryMatch(
+                event_type=RotaryEventType.ROTATION_END, event_data=TURN_STOP
+            ),
+        ],
+    )
+    events = fired_events(entity)
+
+    def step(mode: int, clicks: Any) -> None:
+        emit_zha_event(
+            zha_device,
+            {"command": "step", "params": {"step_mode": mode, "clicks": clicks}},
+        )
+
+    step(0, 2)
+    # Neither a report without movement nor an invalid report changes the turn
+    step(1, 0)
+    step(1, -1)
+    emit_zha_event(zha_device, TURN_STOP)
+    # A turn that changes direction ends in the direction it last turned
+    step(0, 1)
+    step(1, 3.0)
+    emit_zha_event(zha_device, TURN_STOP)
+
+    assert events == [
+        ("rotation", {ATTR_DIRECTION: "clockwise", ATTR_STEPS: 2}),
+        ("rotation_end", {ATTR_DIRECTION: "clockwise"}),
+        ("rotation", {ATTR_DIRECTION: "clockwise", ATTR_STEPS: 1}),
+        # An integral float is passed on as an integer
+        ("rotation", {ATTR_DIRECTION: "counter_clockwise", ATTR_STEPS: 3}),
+        ("rotation_end", {ATTR_DIRECTION: "counter_clockwise"}),
+    ]
+    assert type(events[3][1][ATTR_STEPS]) is int
+
+
+async def test_zha_event_rotary_extra_event_type(zha_device: Device) -> None:
+    """Test an integration-specific event type next to the standard ones."""
+    entity = create_event_rotary(
+        zha_device,
+        [
+            ZhaEventRotaryMatch(
+                event_type="rotation",
+                event_data=STEP_UP,
+                direction="clockwise",
+            ),
+            ZhaEventRotaryMatch(
+                event_type="knob_stop",
+                event_data=TURN_STOP,
+                event_attributes_from_data={"speed": ("args", 0)},
+            ),
+            ZhaEventRotaryMatch(
+                event_type=RotaryEventType.ROTATION_END,
+                event_data={"command": "released"},
+            ),
+        ],
+    )
+    assert entity.event_types == ["rotation", "knob_stop", "rotation_end"]
+    events = fired_events(entity)
+
+    emit_zha_event(zha_device, STEP_UP)
+    # The extra type neither ends the turn nor gets its direction
+    emit_zha_event(zha_device, {**TURN_STOP, "args": [7]})
+    emit_zha_event(zha_device, {"command": "released"})
+
+    assert events == [
+        ("rotation", {ATTR_DIRECTION: "clockwise"}),
+        ("knob_stop", {"speed": 7}),
+        ("rotation_end", {ATTR_DIRECTION: "clockwise"}),
+    ]
+    assert all(type(data.get(ATTR_DIRECTION, "")) is str for _, data in events)
