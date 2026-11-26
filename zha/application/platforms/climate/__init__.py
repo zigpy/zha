@@ -23,6 +23,8 @@ from zigpy.zcl.clusters.hvac import (
     SystemMode,
     Thermostat as ThermostatCluster,
 )
+from zigpy.zcl.clusters.measurement import RelativeHumidity
+from zigpy.zcl.foundation import DataType
 
 from zha.application import Platform
 from zha.application.helpers import write_attributes_safe
@@ -68,6 +70,7 @@ class ClimateState(BaseEntityState):
     """State for climate entities."""
 
     current_temperature: float | None
+    current_humidity: float | None
     outdoor_temperature: float | None
     target_temperature: float | None
     target_temperature_high: float | None
@@ -109,6 +112,7 @@ class BaseThermostat(PlatformEntity, ABC):
         return ClimateState(
             **super().state.__dict__,
             current_temperature=self.current_temperature,
+            current_humidity=self.current_humidity,
             outdoor_temperature=self.outdoor_temperature,
             target_temperature=self.target_temperature,
             target_temperature_high=self.target_temperature_high,
@@ -129,6 +133,11 @@ class BaseThermostat(PlatformEntity, ABC):
     @abstractmethod
     def current_temperature(self) -> float | None:
         """Return the current temperature."""
+
+    @property
+    @abstractmethod
+    def current_humidity(self) -> float | None:
+        """Return the current humidity."""
 
     @property
     @abstractmethod
@@ -394,6 +403,11 @@ class Thermostat(BaseThermostat, ZclPlatformEntity):
         self._fan_cluster = endpoint.zigpy_endpoint.in_clusters.get(
             FanCluster.cluster_id
         )
+        # Not part of the cluster match: the humidity sensor entity owns this
+        # cluster and its reporting, the thermostat only reads its value
+        self._humidity_cluster = endpoint.zigpy_endpoint.in_clusters.get(
+            RelativeHumidity.cluster_id
+        )
 
         self._supported_features = ClimateEntityFeature(0)
         self.recompute_capabilities()
@@ -553,6 +567,8 @@ class Thermostat(BaseThermostat, ZclPlatformEntity):
         clusters = [self._cluster]
         if self._fan_cluster is not None:
             clusters.append(self._fan_cluster)
+        if self._humidity_cluster is not None:
+            clusters.append(self._humidity_cluster)
         for cluster in clusters:
             for event_type in (
                 AttributeReadEvent,
@@ -595,6 +611,21 @@ class Thermostat(BaseThermostat, ZclPlatformEntity):
         if self._local_temperature is None:
             return None
         return self._local_temperature / ZCL_TEMP
+
+    @property
+    def current_humidity(self) -> float | None:
+        """Return the current humidity."""
+        if self._humidity_cluster is None:
+            return None
+        attr_def = RelativeHumidity.AttributeDefs.measured_value
+        humidity = self._humidity_cluster.get(attr_def.name)
+        # 0xFFFF (the uint16 non-value) means the measurement is invalid
+        if (
+            humidity is None
+            or humidity == DataType.from_type_id(attr_def.zcl_type).non_value
+        ):
+            return None
+        return humidity / 100
 
     @property
     def outdoor_temperature(self):

@@ -509,6 +509,7 @@
         "child_device_id": null,
         "group_id": null,
         "current_temperature": 32.4,
+        "current_humidity": null,
         "outdoor_temperature": null,
         "target_temperature": 15.5,
         "target_temperature_high": null,
