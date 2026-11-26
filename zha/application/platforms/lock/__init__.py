@@ -17,7 +17,7 @@ from zigpy.zcl.clusters.closures import (
     DoorLock as DoorLockCluster,
     LockState as ZclLockState,
 )
-from zigpy.zcl.foundation import Status
+from zigpy.zcl.foundation import DefaultResponse, Status
 
 from zha.application import Platform
 from zha.application.helpers import safe_read
@@ -31,10 +31,12 @@ from zha.application.platforms import (
     register_entity,
 )
 from zha.application.platforms.lock.const import (
+    RESPONSE_STATUS_REASONS,
     STATE_LOCKED,
     STATE_UNLOCKED,
     VALUE_TO_STATE,
 )
+from zha.exceptions import ZHAException
 
 if TYPE_CHECKING:
     from zha.zigbee.device import Device
@@ -134,12 +136,26 @@ class DoorLock(BaseLock, ZclPlatformEntity):
             return False
         return self._state == STATE_LOCKED
 
+    def _raise_on_failure(self, command: str, result: Any) -> None:
+        """Raise if the lock did not accept a command.
+
+        The lock answers with the command's own response, whose first field is the
+        status, or with a Default Response when it rejects the command outright.
+        """
+        if isinstance(result, DefaultResponse):
+            if result.status is not Status.SUCCESS:
+                raise ZHAException(f"Failed to {command}: {result.status.name}")
+            return
+
+        status = int(result[0])
+        if status != Status.SUCCESS:
+            reason = RESPONSE_STATUS_REASONS.get(status, f"status 0x{status:02X}")
+            raise ZHAException(f"Failed to {command}: {reason}")
+
     async def async_lock(self) -> None:
         """Lock the lock."""
         result = await self._cluster.lock_door()
-        if result[0] is not Status.SUCCESS:
-            self.error("Error with lock_door: %s", result)
-            return
+        self._raise_on_failure("lock", result)
 
         self._state = STATE_LOCKED
         self.maybe_emit_state_changed_event()
@@ -147,40 +163,42 @@ class DoorLock(BaseLock, ZclPlatformEntity):
     async def async_unlock(self) -> None:
         """Unlock the lock."""
         result = await self._cluster.unlock_door()
-        if result[0] is not Status.SUCCESS:
-            self.error("Error with unlock_door: %s", result)
-            return
+        self._raise_on_failure("unlock", result)
 
         self._state = STATE_UNLOCKED
         self.maybe_emit_state_changed_event()
 
     async def async_set_lock_user_code(self, code_slot: int, user_code: str) -> None:
         """Set the user_code to index X on the lock."""
-        await self._cluster.set_pin_code(
+        result = await self._cluster.set_pin_code(
             code_slot - 1,  # start code slots at 1, Zigbee internals use 0
             DoorLockCluster.UserStatus.Enabled,
             DoorLockCluster.UserType.Unrestricted,
             user_code,
         )
+        self._raise_on_failure(f"set user code at slot {code_slot}", result)
         self.debug("User code at slot %s set", code_slot)
 
     async def async_enable_lock_user_code(self, code_slot: int) -> None:
         """Enable user_code at index X on the lock."""
-        await self._cluster.set_user_status(
+        result = await self._cluster.set_user_status(
             code_slot - 1, DoorLockCluster.UserStatus.Enabled
         )
+        self._raise_on_failure(f"enable user code at slot {code_slot}", result)
         self.debug("User code at slot %s enabled", code_slot)
 
     async def async_disable_lock_user_code(self, code_slot: int) -> None:
         """Disable user_code at index X on the lock."""
-        await self._cluster.set_user_status(
+        result = await self._cluster.set_user_status(
             code_slot - 1, DoorLockCluster.UserStatus.Disabled
         )
+        self._raise_on_failure(f"disable user code at slot {code_slot}", result)
         self.debug("User code at slot %s disabled", code_slot)
 
     async def async_clear_lock_user_code(self, code_slot: int) -> None:
         """Clear the user_code at index X on the lock."""
-        await self._cluster.clear_pin_code(code_slot - 1)
+        result = await self._cluster.clear_pin_code(code_slot - 1)
+        self._raise_on_failure(f"clear user code at slot {code_slot}", result)
         self.debug("User code at slot %s cleared", code_slot)
 
     def handle_attribute_updated(
