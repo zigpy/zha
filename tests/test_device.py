@@ -28,6 +28,7 @@ from zigpy.zcl.foundation import (
     GeneralCommand,
     Status,
     WriteAttributesResponse,
+    WriteAttributesStatusRecord,
 )
 from zigpy.zcl.helpers import ReportingConfig
 import zigpy.zdo.types as zdo_t
@@ -674,6 +675,29 @@ async def test_write_zigbee_attribute(
     )
 
     cluster.write_attributes.reset_mock()
+
+    cluster.write_attributes.return_value = [
+        [
+            WriteAttributesStatusRecord(
+                status=Status.UNSUPPORTED_ATTRIBUTE,
+                attrid=general.OnOff.AttributeDefs.start_up_on_off.id,
+            )
+        ]
+    ]
+    with pytest.raises(
+        ZHAException,
+        match="Failed to set attribute:.*status: "
+        r"<Status.UNSUPPORTED_ATTRIBUTE: 134>",
+    ):
+        await zha_device.write_zigbee_attribute(
+            3,
+            general.OnOff.cluster_id,
+            general.OnOff.AttributeDefs.start_up_on_off.id,
+            general.OnOff.StartUpOnOff.PreviousValue,
+        )
+    cluster.write_attributes.reset_mock()
+    cluster.write_attributes.side_effect = None
+
     cluster.write_attributes.side_effect = ZigbeeException
     m1 = "Failed to set attribute: value: <StartUpOnOff.PreviousValue: 255> "
     m2 = "attribute: 16387 cluster_id: 6 endpoint_id: 3"
@@ -733,7 +757,6 @@ async def test_issue_cluster_command(
         )
 
         assert cluster.request.await_count == 1
-
     # A failing Default Response is still reported
     with (
         patch(
@@ -757,6 +780,43 @@ async def test_issue_cluster_command(
             None,
             {},
         )
+
+
+@pytest.mark.parametrize(
+    ("args", "params"),
+    [
+        ([], None),
+        (None, {}),
+    ],
+)
+async def test_issue_cluster_command_forwards_manufacturer(
+    zha_gateway: Gateway,
+    args: list | None,
+    params: dict | None,
+) -> None:
+    """Explicit manufacturer codes must reach zigpy's cluster command."""
+    zigpy_dev = zigpy_device(zha_gateway, with_basic_cluster=True)
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
+    cluster = zigpy_dev.endpoints[3].on_off
+
+    default_response = GENERAL_COMMANDS[GeneralCommand.Default_Response].schema
+    with patch(
+        "zigpy.zcl.Cluster.request",
+        return_value=default_response(
+            command_id=general.OnOff.ServerCommandDefs.on.id,
+            status=Status.SUCCESS,
+        ),
+    ):
+        await zha_device.issue_cluster_command(
+            3,
+            general.OnOff.cluster_id,
+            general.OnOff.ServerCommandDefs.on.id,
+            CLUSTER_COMMAND_SERVER,
+            args,
+            params,
+            manufacturer=0,
+        )
+        assert cluster.request.await_args.kwargs["manufacturer"] == 0
 
 
 async def test_issue_cluster_command_specific_response(
