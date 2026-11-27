@@ -31,6 +31,7 @@ from zigpy.typing import UNDEFINED, UndefinedType
 import zigpy.zcl
 from zigpy.zcl.clusters import Cluster
 from zigpy.zcl.clusters.general import Basic, Groups, Identify, Ota
+from zigpy.zcl.clusters.hvac import Thermostat
 from zigpy.zcl.foundation import (
     Status as ZclStatus,
     WriteAttributesStatusRecord,
@@ -108,6 +109,11 @@ from zha.zigbee.cluster_config import (
     initialize_cluster_configs,
 )
 from zha.zigbee.endpoint import Endpoint
+from zha.zigbee.weekly_schedule import (
+    WEEKLY_SCHEDULE_PROVIDERS,
+    WeeklyScheduleProvider,
+    ZclWeeklySchedule,
+)
 
 if TYPE_CHECKING:
     from zha.application.gateway import Gateway
@@ -1279,6 +1285,8 @@ class BaseDevice[ZigpyDeviceT: ZigpyBaseDevice](LogMixin, EventBase):
 class ZigbeeDevice(BaseDevice[ZigpyDevice]):
     """ZHA Zigbee device object."""
 
+    supports_cluster_command_response = True
+
     # Authoring surface for hand-written quirks; `None` marks the unquirked fallback.
     _device_match: DeviceMatch | None = None
     _zigpy_device_cls: ReplacingZigpyDeviceFactory | None = None
@@ -1303,6 +1311,7 @@ class ZigbeeDevice(BaseDevice[ZigpyDevice]):
     ) -> None:
         """Initialize the Zigbee device."""
         self._endpoints: dict[int, Endpoint] = {}
+        self._weekly_schedules: dict[int, WeeklyScheduleProvider] = {}
         super().__init__(zigpy_device, _gateway)
 
     def _init_from_zigpy_device(self, zigpy_device: ZigpyDevice) -> None:
@@ -1735,6 +1744,17 @@ class ZigbeeDevice(BaseDevice[ZigpyDevice]):
                 f"{ATTR_ENDPOINT_ID}: {endpoint_id}"
             ) from exc
 
+    def weekly_schedule(self, endpoint_id: int) -> WeeklyScheduleProvider | None:
+        """Return the endpoint's schedule provider if a quirk exposes one."""
+        if (provider := self._weekly_schedules.get(endpoint_id)) is not None:
+            return provider
+        for feature in sorted(self.exposes_features):
+            if (provider_cls := WEEKLY_SCHEDULE_PROVIDERS.get(feature)) is not None:
+                provider = provider_cls(self, endpoint_id)
+                self._weekly_schedules[endpoint_id] = provider
+                return provider
+        return None
+
     async def issue_cluster_command(
         self,
         endpoint_id: int,
@@ -1745,63 +1765,92 @@ class ZigbeeDevice(BaseDevice[ZigpyDevice]):
         params: dict[str, Any] | None,
         cluster_type: str = CLUSTER_TYPE_IN,
         manufacturer: int | None = None,
-    ) -> None:
+        *,
+        return_response: bool = False,
+    ) -> Any:
         """Issue a command against specified zigbee cluster on this device."""
-        try:
-            cluster: Cluster = self.async_get_cluster(
-                endpoint_id, cluster_id, cluster_type
+        schedule = (
+            self.weekly_schedule(endpoint_id)
+            if (
+                cluster_id == Thermostat.cluster_id
+                and cluster_type == CLUSTER_TYPE_IN
+                and command_type == CLUSTER_COMMAND_SERVER
+                and command in (0x01, 0x02, 0x03)
             )
-        except KeyError as exc:
-            raise ValueError(
-                f"Cluster {cluster_id} not found on endpoint {endpoint_id} while"
-                f" issuing command {command} with args {args}"
-            ) from exc
-        commands: dict[int, ZCLCommandDef] = (
-            cluster.server_commands
-            if command_type == CLUSTER_COMMAND_SERVER
-            else cluster.client_commands
+            else None
         )
-        if args is not None:
-            self.warning(
-                (
-                    "args [%s] are deprecated and should be passed with the params key."
-                    " The parameter names are: %s"
-                ),
-                args,
-                [field.name for field in commands[command].schema.fields],
-            )
-            response = await getattr(cluster, commands[command].name)(*args)
-        else:
-            assert params is not None
-            response = await getattr(cluster, commands[command].name)(
-                **convert_to_zcl_values(params, commands[command].schema)
-            )
-        self.debug(
-            "Issued cluster command: %s %s %s %s %s %s %s %s",
-            f"{ATTR_CLUSTER_ID}: [{cluster_id}]",
-            f"{ATTR_CLUSTER_TYPE}: [{cluster_type}]",
-            f"{ATTR_ENDPOINT_ID}: [{endpoint_id}]",
-            f"{ATTR_COMMAND}: [{command}]",
-            f"{ATTR_COMMAND_TYPE}: [{command_type}]",
-            f"{ATTR_ARGS}: [{args}]",
-            f"{ATTR_PARAMS}: [{params}]",
-            f"{ATTR_MANUFACTURER}: [{manufacturer}]",
-        )
-        if response is None:
-            return  # client commands don't return a response
-        if isinstance(response, Exception):
-            raise ZHAException("Failed to issue cluster command") from response
+        if not isinstance(schedule, ZclWeeklySchedule):
+            schedule = None
+        async with schedule.lock if schedule is not None else contextlib.nullcontext():
+            try:
+                cluster: Cluster = self.async_get_cluster(
+                    endpoint_id, cluster_id, cluster_type
+                )
+            except KeyError as exc:
+                raise ValueError(
+                    f"Cluster {cluster_id} not found on endpoint {endpoint_id} while"
+                    f" issuing command {command} with args {args}"
+                ) from exc
+            if schedule is not None:
+                schedule.bind_cluster(cluster)
+                if command == 0x03:
+                    schedule.invalidate()
+                elif command == 0x01:
+                    day_bitmap = (
+                        args[1]
+                        if args is not None and len(args) > 1
+                        else (params or {}).get("day_of_week_for_sequence")
+                    )
+                    schedule.invalidate(
+                        day_bitmap
+                        if isinstance(day_bitmap, int)
+                        and not isinstance(day_bitmap, bool)
+                        and 0 < day_bitmap <= 0xFF
+                        else None
+                    )
 
-        # Depending on the command, the reply is either a Default Response
-        # (`command_id`, `status`) or the cluster-specific response defined for that
-        # command, whose fields differ per command. A field named `status` means the
-        # same thing in either kind of reply -- but its position does not carry over:
-        # indexing blindly into the response reads an unrelated field (e.g. a Groups
-        # `add_response`'s `group_id`) and reports it as a status. Many cluster-specific
-        # responses, such as `get_membership_response`, have no `status` field at all.
-        status = getattr(response, "status", None)
-        if status is not None and status != ZclStatus.SUCCESS:
-            raise ZHAException(f"Failed to issue cluster command with status: {status}")
+            commands: dict[int, ZCLCommandDef] = (
+                cluster.server_commands
+                if command_type == CLUSTER_COMMAND_SERVER
+                else cluster.client_commands
+            )
+            if args is not None:
+                self.warning(
+                    (
+                        "args [%s] are deprecated and should be passed with the params key."
+                        " The parameter names are: %s"
+                    ),
+                    args,
+                    [field.name for field in commands[command].schema.fields],
+                )
+                response = await getattr(cluster, commands[command].name)(*args)
+            else:
+                assert params is not None
+                response = await getattr(cluster, commands[command].name)(
+                    **convert_to_zcl_values(params, commands[command].schema)
+                )
+            self.debug(
+                "Issued cluster command: %s %s %s %s %s %s %s %s",
+                f"{ATTR_CLUSTER_ID}: [{cluster_id}]",
+                f"{ATTR_CLUSTER_TYPE}: [{cluster_type}]",
+                f"{ATTR_ENDPOINT_ID}: [{endpoint_id}]",
+                f"{ATTR_COMMAND}: [{command}]",
+                f"{ATTR_COMMAND_TYPE}: [{command_type}]",
+                f"{ATTR_ARGS}: [{args}]",
+                f"{ATTR_PARAMS}: [{params}]",
+                f"{ATTR_MANUFACTURER}: [{manufacturer}]",
+            )
+            if response is None:
+                return None
+            if isinstance(response, Exception):
+                raise ZHAException("Failed to issue cluster command") from response
+
+            status = getattr(response, "status", None)
+            if status is not None and status != ZclStatus.SUCCESS:
+                raise ZHAException(
+                    f"Failed to issue cluster command with status: {status}"
+                )
+            return response if return_response else None
 
     async def async_add_to_group(self, group_id: int) -> None:
         """Add this device to the provided zigbee group."""
