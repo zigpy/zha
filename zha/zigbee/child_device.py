@@ -116,13 +116,16 @@ CHILD_DEVICE_ALLOWLIST: Final[tuple[ChildDeviceMatch, ...]] = (
         manufacturers=frozenset({"LUMI", "Aqara"}),
         models=frozenset(
             {
+                "lumi.ctrl_ln2.aq1",
                 "lumi.relay.c2acn01",
                 "lumi.switch.acn047",
                 "lumi.switch.agl006",
                 "lumi.switch.aeu001",
                 "lumi.switch.agl010",
+                "lumi.switch.b2nacn02",
                 "lumi.switch.b2naus01",
                 "lumi.switch.l2aeu1",
+                "lumi.switch.n2aeu1",
                 "lumi.switch.n3acn3",
             }
         ),
@@ -148,6 +151,9 @@ CHILD_DEVICE_ALLOWLIST: Final[tuple[ChildDeviceMatch, ...]] = (
     ),
     ChildDeviceMatch(
         manufacturers=frozenset({"HOBEIAN"}), models=frozenset({"ZG-301Z-2CH"})
+    ),
+    ChildDeviceMatch(
+        manufacturers=frozenset({"NodOn"}), models=frozenset({"SIN-4-2-20"})
     ),
     ChildDeviceMatch(
         manufacturers=frozenset({"SDevices"}),
