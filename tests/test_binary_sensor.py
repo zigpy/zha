@@ -3,11 +3,12 @@
 import asyncio
 from collections.abc import Awaitable, Callable
 from typing import Any
-from unittest.mock import call
+from unittest.mock import AsyncMock, call
 
 import pytest
 from zhaquirks.builder import QuirkBuilder
 from zhaquirks.device import CustomZigpyDevice
+import zigpy.exceptions
 from zigpy.profiles import zha
 import zigpy.profiles.zha
 from zigpy.typing import UNDEFINED
@@ -378,3 +379,32 @@ async def test_onoff_client_binary_sensor_on_with_timed_off(
     cluster.handle_message(hdr, [])
     await zha_gateway.async_block_till_done()
     assert entity.is_on is False
+
+
+@pytest.mark.parametrize(
+    "write_error",
+    [
+        TimeoutError(),
+        zigpy.exceptions.DeliveryError("Failed to deliver packet"),
+    ],
+)
+async def test_ias_zone_enroll_response_sent_when_cie_addr_write_fails(
+    zha_gateway: Gateway,
+    write_error: Exception,
+) -> None:
+    """Test the pro-active enroll response is sent even if writing cie_addr fails."""
+    zigpy_device = create_mock_zigpy_device(zha_gateway, DEVICE_IAS)
+    cluster = zigpy_device.endpoints[1].ias_zone
+    cluster.write_attributes = AsyncMock(side_effect=write_error)
+    cluster.enroll_response = AsyncMock()
+
+    await join_zigpy_device(zha_gateway, zigpy_device)
+    await zha_gateway.async_block_till_done(wait_background_tasks=True)
+
+    cluster.write_attributes.assert_awaited_once_with(
+        {"cie_addr": zha_gateway.application_controller.state.node_info.ieee},
+        manufacturer=UNDEFINED,
+    )
+    assert cluster.enroll_response.mock_calls == [
+        call(enroll_response_code=security.IasZone.EnrollResponse.Success, zone_id=0)
+    ]
