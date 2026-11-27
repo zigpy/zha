@@ -134,6 +134,9 @@ CHILD_DEVICE_ALLOWLIST: Final[tuple[ChildDeviceMatch, ...]] = (
         manufacturers=frozenset({"Aurora"}), models=frozenset({"DoubleSocket50AU"})
     ),
     ChildDeviceMatch(
+        manufacturers=frozenset({"Candeo"}), models=frozenset({"C-ZB-SM205-2G"})
+    ),
+    ChildDeviceMatch(
         manufacturers=frozenset({"EcoDim BV"}),
         models=frozenset({"Eco-Dim.05 Zigbee", "EcoDim-Zigbee 3.0"}),
     ),
