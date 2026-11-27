@@ -157,7 +157,7 @@ class IasZoneEnrollment(VirtualEntity):
             self.debug(
                 "wrote cie_addr: %s to '%s' cluster", str(ieee), cluster.ep_attribute
             )
-        except ZHAException as ex:
+        except (ZHAException, zigpy.exceptions.ZigbeeException, TimeoutError) as ex:
             self.debug(
                 "Failed to write cie_addr to '%s' cluster: %s",
                 cluster.ep_attribute,
