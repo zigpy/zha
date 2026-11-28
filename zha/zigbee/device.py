@@ -779,18 +779,22 @@ class BaseDevice[ZigpyDeviceT: ZigpyBaseDevice](LogMixin, EventBase):
 
     def _update_available(self, available: bool, *, was_available: bool) -> None:
         """Update device availability, comparing against `was_available`."""
+        self.available = available
+        # Compare the resulting availability, which also requires the device to be on
+        # the network: a device that left stays unavailable even when it was seen
+        # recently, so it must not be re-initialized
+        is_available = self.available
+        availability_changed = was_available ^ is_available
         self.debug(
             (
                 "Update device availability -  device available: %s - new availability:"
                 " %s - changed: %s"
             ),
             was_available,
-            available,
-            was_available ^ available,
+            is_available,
+            availability_changed,
         )
-        availability_changed = was_available ^ available
-        self.available = available
-        if availability_changed and available:
+        if availability_changed and is_available:
             # reinit cluster handlers then signal entities
             self.debug(
                 "Device availability changed and device became available,"
@@ -802,7 +806,7 @@ class BaseDevice[ZigpyDeviceT: ZigpyBaseDevice](LogMixin, EventBase):
                 eager_start=True,
             )
             return
-        if availability_changed and not available:
+        if availability_changed and not is_available:
             self.debug("Device availability changed and device became unavailable")
             for entity in self.platform_entities.values():
                 entity.maybe_emit_state_changed_event()
