@@ -403,6 +403,8 @@ class BaseDevice[ZigpyDeviceT: ZigpyBaseDevice](LogMixin, EventBase):
         self._discovered_entities.clear()
         self._child_devices.clear()
         self._child_device_primary_entities.clear()
+        # The update entity whose changes `async_initialize` listens to
+        self._firmware_update_entity: PlatformEntity | None = None
 
         self._zigpy_device: ZigpyDeviceT = zigpy_device
 
@@ -1076,6 +1078,13 @@ class BaseDevice[ZigpyDeviceT: ZigpyBaseDevice](LogMixin, EventBase):
 
             assert isinstance(entity, BaseFirmwareUpdateEntity)
             self._firmware_version = entity.installed_version
+
+            # A re-initialization (e.g. when the device becomes available again)
+            # keeps the entity, which then already has the listener
+            if entity is self._firmware_update_entity:
+                break
+
+            self._firmware_update_entity = entity
 
             def entity_update_listener(event: EntityStateChangedEvent) -> None:
                 """Listen to firmware update entity changes."""
