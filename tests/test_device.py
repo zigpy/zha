@@ -275,6 +275,46 @@ async def test_on_network_emits_entity_availability(
         assert any(diff.get("available") is True for diff in diffs[entity.unique_id])
 
 
+async def test_check_available_does_not_reinitialize_device_off_network(
+    zha_gateway: Gateway,
+) -> None:
+    """Test a device that left the network isn't re-initialized by every check."""
+    zigpy_dev = zigpy_device_mains(zha_gateway, with_basic_cluster=True)
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
+    on_off_cluster = zigpy_dev.endpoints[3].on_off
+
+    # we want to test the device availability handling alone
+    zha_gateway.global_updater.stop()
+
+    # The device leaves the network right after it was last seen
+    zigpy_dev.last_seen = time.time()
+    zha_gateway.device_left(zigpy_dev)
+    await zha_gateway.async_block_till_done()
+    assert zha_device.available is False
+
+    on_off_cluster.read_attributes.reset_mock()
+
+    with patch.object(
+        zha_device, "async_initialize", wraps=zha_device.async_initialize
+    ) as async_initialize:
+        # Its last message is still recent for the next availability checks
+        for _ in range(3):
+            await zha_device._check_available()
+            await zha_gateway.async_block_till_done()
+
+        # It stays unavailable, and is not re-initialized while it is gone
+        assert zha_device.available is False
+        assert on_off_cluster.read_attributes.await_count == 0
+        assert async_initialize.await_count == 0
+
+        # Once it is back on the network, it is re-initialized once
+        zha_gateway.handle_message(zigpy_dev, 0x0104, 0x0006, 3, 1, b"")
+        await zha_gateway.async_block_till_done()
+
+        assert zha_device.available is True
+        assert async_initialize.await_count == 1
+
+
 async def test_check_available_unsuccessful(
     zha_gateway: Gateway,
 ) -> None:
