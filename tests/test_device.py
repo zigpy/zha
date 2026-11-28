@@ -1172,6 +1172,41 @@ async def test_device_firmware_version_syncing(zha_gateway: Gateway) -> None:
     ]
 
 
+async def test_device_firmware_version_listener_not_duplicated(
+    zha_gateway: Gateway,
+) -> None:
+    """Test re-initializing a device keeps a single firmware version listener."""
+    zigpy_dev = await zigpy_device_from_json(
+        zha_gateway.application_controller,
+        "tests/data/devices/philips-sml001-0x42006bb7.json",
+    )
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
+    update_entity = get_entity(zha_device, platform=Platform.UPDATE)
+    num_listeners = len(update_entity._listeners[STATE_CHANGED])
+
+    # The device becomes unavailable and available again a few times, and is
+    # re-initialized each time
+    for _ in range(3):
+        zha_device.update_available(False)
+        zha_device.update_available(True)
+        await zha_gateway.async_block_till_done()
+
+    assert len(update_entity._listeners[STATE_CHANGED]) == num_listeners
+
+    with patch.object(
+        zha_device,
+        "async_update_firmware_version",
+        wraps=zha_device.async_update_firmware_version,
+    ) as async_update_firmware_version:
+        update_entity._cluster.update_attribute(
+            Ota.AttributeDefs.current_file_version.id,
+            zigpy.types.uint32_t(0xABCD1234),
+        )
+
+    assert zha_device.firmware_version == "0xabcd1234"
+    assert async_update_firmware_version.mock_calls == [call("0xabcd1234")]
+
+
 async def test_quirks_v2_device_renaming(zha_gateway: Gateway) -> None:
     """Test quirks v2 device renaming."""
     registry = DeviceRegistry()
